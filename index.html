@@ -16,28 +16,19 @@
       margin: 0;
     }
 
-    .typewriter {
+    .title {
       font-size: 3rem;
-      white-space: nowrap;
-      overflow: hidden;
-      border-right: 2px solid #111;
-      width: 0;
-      animation: typing 2s steps(8), blink .75s step-end infinite;
+      margin-bottom: 1rem;
     }
 
     .slogan {
       font-size: 1rem;
-      margin-top: 1rem;
+      margin-bottom: 2rem;
       white-space: nowrap;
       overflow: hidden;
       border-right: 1px solid #555;
       width: 0;
-      animation: typing-slogan 3s steps(5) 2.2s forwards, blink .75s step-end infinite;
-    }
-
-    @keyframes typing {
-      from { width: 0 }
-      to { width: 8ch }
+      animation: typing-slogan 3s steps(5) 1.5s forwards, blink .75s step-end infinite;
     }
 
     @keyframes typing-slogan {
@@ -49,10 +40,29 @@
       from, to { border-color: transparent }
       50% { border-color: #111 }
     }
+
+    .loading {
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    .dots::after {
+      content: '';
+      animation: dots 1.5s steps(4, end) infinite;
+    }
+
+    @keyframes dots {
+      0% { content: ''; }
+      25% { content: '.'; }
+      50% { content: '..'; }
+      75% { content: '...'; }
+      100% { content: ''; }
+    }
   </style>
 </head>
 <body>
-  <div class="typewriter">unátomo</div>
+  <div class="title">unátomo</div>
   <div class="slogan">Your Process. Our Insight.</div>
+  <div class="loading">under construction<span class="dots"></span></div>
 </body>
 </html>
