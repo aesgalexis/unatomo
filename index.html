@@ -16,16 +16,12 @@
       margin: 0;
     }
 
-    .title,
-    .slogan {
-      white-space: nowrap;
-      overflow: hidden;
-    }
-
     .title {
       font-size: 3rem;
-      border-right: 2px solid #111;
+      white-space: nowrap;
+      overflow: hidden;
       width: 0;
+      border-right: 2px solid #111;
       animation: typing-title 2s steps(7) forwards;
     }
 
@@ -33,19 +29,26 @@
       border-right: none;
     }
 
-    .slogan {
+    .slogan-wrapper {
       font-size: 1rem;
       margin-top: 1rem;
-      border-right: none;
+      white-space: nowrap;
+      overflow: hidden;
       width: 0;
+      position: relative;
     }
 
-    .slogan.typing {
-      border-right: 1px solid #555;
+    .slogan-wrapper.typing {
       animation: typing-slogan 3s steps(28) forwards;
     }
 
-    .slogan.blink {
+    .slogan-wrapper.blink::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      width: 1px;
+      height: 100%;
+      background-color: #111;
       animation: blink .75s step-end infinite;
     }
 
@@ -78,8 +81,8 @@
     }
 
     @keyframes blink {
-      from, to { border-color: transparent }
-      50% { border-color: #111 }
+      from, to { background-color: transparent }
+      50% { background-color: #111 }
     }
 
     @keyframes dots {
@@ -93,12 +96,12 @@
 </head>
 <body>
   <div class="title" id="title">unátomo</div>
-  <div class="slogan" id="slogan">Your Process. Our Insight.</div>
+  <div class="slogan-wrapper" id="slogan">Your Process. Our Insight.</div>
   <div class="loading">under construction</div>
   <div class="dots"></div>
 
   <script>
-    // Quitar cursor de "unátomo"
+    // Quitar el cursor de "unátomo"
     setTimeout(() => {
       document.getElementById('title').classList.add('done');
     }, 2000);
@@ -108,7 +111,7 @@
       document.getElementById('slogan').classList.add('typing');
     }, 2200);
 
-    // Activar parpadeo del cursor del eslogan después
+    // Activar parpadeo del cursor del eslogan
     setTimeout(() => {
       document.getElementById('slogan').classList.add('blink');
     }, 5200);
