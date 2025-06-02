@@ -1,0 +1,58 @@
+/* Reset mínimo */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Georgia, serif;
+  font-size: 18px;
+  line-height: 1.7;
+  background-color: #fdfdfd;
+  color: #111;
+  padding: 40px 20px;
+}
+
+main {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+h1 {
+  font-size: 3em;
+  font-weight: normal;
+  margin-bottom: 0.2em;
+}
+
+h2 {
+  font-size: 1.5em;
+  font-weight: normal;
+  color: #555;
+  margin-top: 1.2em;
+  margin-bottom: 0.6em;
+}
+
+p {
+  margin-bottom: 1.5em;
+  color: #333;
+}
+
+a {
+  color: inherit;
+  text-decoration: underline dotted;
+  transition: all 0.2s ease-in-out;
+}
+
+a:hover {
+  text-decoration: underline solid;
+}
+
+footer {
+  margin-top: 4em;
+  font-size: 0.9em;
+  color: #888;
+  border-top: 1px solid #eee;
+  padding-top: 1.5em;
+  text-align: center;
+}
