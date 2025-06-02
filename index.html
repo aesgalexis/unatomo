@@ -58,18 +58,6 @@
       margin-top: 1.5rem;
     }
 
-    .dots {
-      font-size: 1.2rem;
-      color: #999;
-      margin-top: 0.2rem;
-      height: 1em;
-    }
-
-    .dots::after {
-      content: '';
-      animation: dots 1.5s steps(4, end) infinite;
-    }
-
     @keyframes typing-title {
       from { width: 0 }
       to { width: 7ch }
@@ -84,21 +72,12 @@
       from, to { background-color: transparent }
       50% { background-color: #111 }
     }
-
-    @keyframes dots {
-      0% { content: ''; }
-      25% { content: '.'; }
-      50% { content: '..'; }
-      75% { content: '...'; }
-      100% { content: ''; }
-    }
   </style>
 </head>
 <body>
   <div class="title" id="title">unátomo</div>
   <div class="slogan-wrapper" id="slogan">Your Process. Our Insight.</div>
   <div class="loading">under construction</div>
-  <div class="dots"></div>
 
   <script>
     // Quitar el cursor de "unátomo"
