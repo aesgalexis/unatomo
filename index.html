@@ -16,10 +16,14 @@
       margin: 0;
     }
 
-    .title {
-      font-size: 3rem;
+    .title,
+    .slogan {
       white-space: nowrap;
       overflow: hidden;
+    }
+
+    .title {
+      font-size: 3rem;
       border-right: 2px solid #111;
       width: 0;
       animation: typing-title 2s steps(7) forwards;
@@ -32,11 +36,17 @@
     .slogan {
       font-size: 1rem;
       margin-top: 1rem;
-      white-space: nowrap;
-      overflow: hidden;
-      border-right: 1px solid #555;
+      border-right: none;
       width: 0;
-      animation: typing-slogan 3s steps(5) 2.2s forwards, blink .75s step-end infinite 5.2s;
+    }
+
+    .slogan.typing {
+      border-right: 1px solid #555;
+      animation: typing-slogan 3s steps(5) forwards;
+    }
+
+    .slogan.blink {
+      animation: blink .75s step-end infinite;
     }
 
     .loading {
@@ -83,15 +93,25 @@
 </head>
 <body>
   <div class="title" id="title">unátomo</div>
-  <div class="slogan">Your Process. Our Insight.</div>
+  <div class="slogan" id="slogan">Your Process. Our Insight.</div>
   <div class="loading">under construction</div>
   <div class="dots"></div>
 
   <script>
-    // Quitar el cursor de "unátomo" después de 2 segundos
+    // 1. Elimina el cursor de unátomo después de escribirlo
     setTimeout(() => {
       document.getElementById('title').classList.add('done');
     }, 2000);
+
+    // 2. Empieza a escribir el eslogan
+    setTimeout(() => {
+      document.getElementById('slogan').classList.add('typing');
+    }, 2200);
+
+    // 3. Activa el parpadeo del cursor del eslogan cuando termina de escribirse
+    setTimeout(() => {
+      document.getElementById('slogan').classList.add('blink');
+    }, 5200);
   </script>
 </body>
 </html>
