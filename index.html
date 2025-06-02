@@ -1,14 +1,58 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
   <title>unátomo</title>
-  <link rel="stylesheet" href="assets/css/main.css" />
+  <style>
+    body {
+      background-color: #ffffff;
+      color: #111;
+      font-family: 'Courier New', monospace;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .typewriter {
+      font-size: 3rem;
+      white-space: nowrap;
+      overflow: hidden;
+      border-right: 2px solid #111;
+      width: 0;
+      animation: typing 2s steps(8), blink .75s step-end infinite;
+    }
+
+    .slogan {
+      font-size: 1rem;
+      margin-top: 1rem;
+      white-space: nowrap;
+      overflow: hidden;
+      border-right: 1px solid #555;
+      width: 0;
+      animation: typing-slogan 3s steps(5) 2.2s forwards, blink .75s step-end infinite;
+    }
+
+    @keyframes typing {
+      from { width: 0 }
+      to { width: 8ch }
+    }
+
+    @keyframes typing-slogan {
+      from { width: 0 }
+      to { width: 28ch }
+    }
+
+    @keyframes blink {
+      from, to { border-color: transparent }
+      50% { border-color: #111 }
+    }
+  </style>
 </head>
 <body>
-  <main>
-    <h1>Under construction</h1>
-  </main>
+  <div class="typewriter">unátomo</div>
+  <div class="slogan">Your Process. Our Insight.</div>
 </body>
 </html>
