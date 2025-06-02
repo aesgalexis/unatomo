@@ -56,6 +56,12 @@
       font-size: 0.9rem;
       color: #666;
       margin-top: 1.5rem;
+      opacity: 0;
+      transition: opacity 1s ease-in;
+    }
+
+    .loading.visible {
+      opacity: 1;
     }
 
     @keyframes typing-title {
@@ -77,7 +83,7 @@
 <body>
   <div class="title" id="title">unátomo</div>
   <div class="slogan-wrapper" id="slogan">Your Process. Our Insight.</div>
-  <div class="loading">under construction</div>
+  <div class="loading" id="loading">under construction</div>
 
   <script>
     // Quitar el cursor de "unátomo"
@@ -94,6 +100,11 @@
     setTimeout(() => {
       document.getElementById('slogan').classList.add('blink');
     }, 5200);
+
+    // Mostrar "under construction" con fade-in
+    setTimeout(() => {
+      document.getElementById('loading').classList.add('visible');
+    }, 5300);
   </script>
 </body>
 </html>
