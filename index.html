@@ -22,7 +22,11 @@
       overflow: hidden;
       border-right: 2px solid #111;
       width: 0;
-      animation: typing-title 2s steps(7) forwards, blink .75s step-end infinite;
+      animation: typing-title 2s steps(7) forwards;
+    }
+
+    .title.done {
+      border-right: none;
     }
 
     .slogan {
@@ -78,9 +82,16 @@
   </style>
 </head>
 <body>
-  <div class="title">unátomo</div>
+  <div class="title" id="title">unátomo</div>
   <div class="slogan">Your Process. Our Insight.</div>
   <div class="loading">under construction</div>
   <div class="dots"></div>
+
+  <script>
+    // Quita el cursor parpadeante de "unátomo" después de la animación
+    setTimeout(() => {
+      document.getElementById('title').classList.add('done');
+    }, 2000); // coincide con duración de typing-title
+  </script>
 </body>
 </html>
