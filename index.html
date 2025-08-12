@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Átomo 3D (simulado) con 10 botones</title>
+  <title>Átomo 3D estático con rotación por arrastre (1024×876)</title>
   <style>
     :root{
-      --w: 800px;
-      --h: 600px;
+      --w: 1024px;
+      --h: 876px;
       --bg1: #0b1020;
       --bg2: #0f1a38;
       --accent: #6be0ff;
@@ -22,10 +22,12 @@
       background: radial-gradient(120% 120% at 100% 0%, var(--bg2) 0%, var(--bg1) 60%);
       box-shadow: 0 10px 30px rgba(0,0,0,.5), inset 0 0 60px rgba(255,255,255,.04);
       border:1px solid rgba(255,255,255,.08);
+      user-select:none;
+      touch-action:none; /* para que el gesto táctil no haga scroll */
     }
 
     /* Centro / núcleo */
-    .nucleus{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:110px;height:110px;border-radius:50%;
+    .nucleus{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:120px;height:120px;border-radius:50%;
       background: radial-gradient(circle at 35% 30%, #e0faff 0%, #87d7ff 35%, #1a71a8 70%, #0b3861 100%);
       box-shadow: var(--glow), inset 0 0 20px rgba(255,255,255,.25);
     }
@@ -34,14 +36,7 @@
       filter: blur(10px);opacity:.8;pointer-events:none;
     }
 
-    /* Contenedor de la "escena" */
-    .scene{position:absolute;inset:0;perspective:900px;}
-
-    /* Grupo con ligera rotación 3D para simular profundidad */
-    .atom{position:absolute;left:50%;top:50%;width:100%;height:100%;transform-style:preserve-3d;transform:translate(-50%,-50%) rotateX(15deg);
-    }
-
-    /* SVG de órbitas */
+    /* Órbitas dibujadas con SVG (solo guía visual, no animadas) */
     svg{position:absolute;inset:0;filter: drop-shadow(0 0 6px rgba(107,224,255,.15));}
     .orbit-path{fill:none;stroke:var(--orbit);stroke-width:2}
 
@@ -51,69 +46,88 @@
       background: rgba(13,30,50,.55);backdrop-filter: blur(4px);
       color:#eaf6ff;font-weight:600;letter-spacing:.2px;
       box-shadow: 0 6px 20px rgba(0,0,0,.5), 0 0 10px rgba(107,224,255,.25);
-      cursor:pointer;transition:transform .15s ease, box-shadow .2s ease, background .2s ease;
+      cursor:pointer;transition:transform .1s ease, box-shadow .2s ease, background .2s ease;
       user-select:none;white-space:nowrap;
     }
     .orbit-btn:hover{transform:translate(-50%,-50%) scale(1.06);background: rgba(23,50,80,.7);box-shadow: 0 8px 26px rgba(0,0,0,.6), 0 0 16px rgba(107,224,255,.35)}
     .orbit-btn:active{transform:translate(-50%,-50%) scale(0.98)}
 
-    /* Indicador de electrones (opcional) */
-    .electron{position:absolute;width:10px;height:10px;border-radius:50%;background:#aef;box-shadow:0 0 10px rgba(174,234,255,.8);pointer-events:none}
+    .hint{position:absolute;left:50%;top:16px;transform:translateX(-50%);font-size:14px;color:#c8d7e6;opacity:.85;background:rgba(0,0,0,.25);padding:.35rem .6rem;border-radius:999px;border:1px solid rgba(255,255,255,.1)}
 
-    /* Marca 800×600 */
     .badge{position:absolute;right:10px;bottom:10px;font-size:12px;color:#9fb3c7;opacity:.7}
   </style>
 </head>
 <body>
-  <div class="frame" aria-label="Átomo con órbitas y 10 botones">
-    <div class="scene">
-      <div class="atom" id="atom">
-        <!-- Núcleo -->
-        <div class="nucleus" aria-hidden="true"></div>
-        <!-- Órbitas en SVG para guías visuales -->
-        <svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-          <!-- Tres elipses con distintas inclinaciones -->
-          <g transform="translate(400,300)">
-            <ellipse class="orbit-path" rx="260" ry="140" transform="rotate(0)"></ellipse>
-            <ellipse class="orbit-path" rx="220" ry="110" transform="rotate(60)"></ellipse>
-            <ellipse class="orbit-path" rx="180" ry="90"  transform="rotate(-60)"></ellipse>
-          </g>
-        </svg>
-      </div>
-    </div>
-    <div class="badge">800×600</div>
+  <div class="frame" id="frame" aria-label="Átomo estático con órbitas y 10 botones; arrastra para rotar">
+    <div class="hint">Arrastra para rotar (click/drag o táctil)</div>
+    <!-- Núcleo -->
+    <div class="nucleus" aria-hidden="true"></div>
+
+    <!-- SVG base para mostrar tres elipses en la orientación actual -->
+    <svg viewBox="0 0 1024 876" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <g id="orbits-layer"></g>
+    </svg>
+
+    <div class="badge">1024×876</div>
   </div>
 
   <script>
-    // Parámetros de las 3 órbitas (semi-ejes y tilts)
+    // Tamaño fijo del marco
+    const SIZE = { w: 1024, h: 876 };
+    const center = { x: SIZE.w/2, y: SIZE.h/2 };
+
+    // Definición de órbitas (semi-ejes y rotación propia sobre Z)
     const orbits = [
-      { a:260, b:140, tilt: 0,   speed: 0.12 },
-      { a:220, b:110, tilt: 60,  speed: -0.18 },
-      { a:180, b: 90, tilt:-60,  speed: 0.24 },
+      { a:300, b:160, tiltZ:   0 },
+      { a:250, b:125, tiltZ:  60 },
+      { a:205, b:100, tiltZ: -60 },
     ];
 
-    // Crear 10 botones repartidos por las órbitas
-    const total = 10;
-    const center = { x: 400, y: 300 };
-    const frame = document.querySelector('.frame');
-
-    const buttons = [];
-
-    // Distribución: 4 en órbita 0, 3 en órbita 1, 3 en órbita 2
+    // Distribución de 10 botones: 4,3,3
     const distribution = [4,3,3];
+
+    // Estado de rotación global (control por usuario)
+    let yaw = 0;   // rotación alrededor del eje Y (izq-der)
+    let pitch = 0; // rotación alrededor del eje X (arriba-abajo)
+
+    // Matrices de rotación sencillas
+    const toRad = d => d * Math.PI / 180;
+
+    function rotZ(p, deg){
+      const r = toRad(deg), c = Math.cos(r), s = Math.sin(r);
+      return { x: p.x*c - p.y*s, y: p.x*s + p.y*c, z: p.z };
+    }
+    function rotY(p, deg){
+      const r = toRad(deg), c = Math.cos(r), s = Math.sin(r);
+      return { x:  p.x*c + p.z*s, y: p.y, z: -p.x*s + p.z*c };
+    }
+    function rotX(p, deg){
+      const r = toRad(deg), c = Math.cos(r), s = Math.sin(r);
+      return { x: p.x, y: p.y*c - p.z*s, z: p.y*s + p.z*c };
+    }
+
+    // Proyección en perspectiva (focal simple)
+    const F = 900; // distancia focal
+    function project(p){
+      const s = F / (F - p.z); // evita división por cero si z≈F
+      return { x: center.x + p.x * s, y: center.y + p.y * s, scale: s };
+    }
+
+    // Crear botones
+    const frame = document.getElementById('frame');
+    const buttons = [];
     let labelIndex = 1;
+
     distribution.forEach((count, orbitIndex) => {
       for(let i=0;i<count;i++){
         const btn = document.createElement('button');
         btn.className = 'orbit-btn';
-        btn.textContent = `boton ${labelIndex}`; // Etiqueta según tu ejemplo
+        btn.textContent = `boton ${labelIndex}`;
         btn.dataset.orbit = orbitIndex;
-        // Fase inicial equiespaciada en esa órbita
-        const base = (i / count) * Math.PI * 2;
-        btn.dataset.phase = String(base);
-        btn.addEventListener('click', () => {
-          console.log(`Has hecho clic en boton ${labelIndex}`);
-          alert(`Has pulsado: boton ${btn.textContent.replace('boton ','')}`);
+        btn.dataset.phase = String((i / count) * Math.PI * 2); // fase inicial equiespaciada
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          alert(`Has pulsado: ${btn.textContent}`);
         });
         frame.appendChild(btn);
         buttons.push(btn);
@@ -121,64 +135,87 @@
       }
     });
 
-    // (Opcional) pequeños electrones visuales acompañando algunas posiciones (decorativo)
-    const electrons = Array.from({length: 6}, () => {
-      const e = document.createElement('div');
-      e.className = 'electron';
-      frame.appendChild(e);
-      return e;
-    });
+    // Dibujo de las órbitas en el SVG, re-trazadas según yaw/pitch
+    const orbitsLayer = document.getElementById('orbits-layer');
 
-    // Utilidades matemáticas
-    const toRad = deg => deg * Math.PI / 180;
-    
-    function rotate(x, y, deg){
-      const r = toRad(deg); const cs = Math.cos(r), sn = Math.sin(r);
-      return { x: x*cs - y*sn, y: x*sn + y*cs };
-    }
+    function render(){
+      // 1) Redibujar paths de órbitas (aproximación con N puntos proyectados)
+      const N = 128;
+      orbitsLayer.innerHTML = '';
+      orbits.forEach(({a,b,tiltZ}) => {
+        let d = '';
+        for(let i=0;i<=N;i++){
+          const t = (i/N) * Math.PI * 2;
+          // punto elíptico local en plano Z=0
+          let p = { x: a*Math.cos(t), y: b*Math.sin(t), z: 0 };
+          // rotación propia del plano de la elipse
+          p = rotZ(p, tiltZ);
+          // aplicar rotación global del usuario
+          p = rotX(rotY(p, yaw), pitch);
+          // proyectar
+          const q = project(p);
+          d += (i===0? 'M':'L') + q.x.toFixed(2) + ' ' + q.y.toFixed(2) + ' ';
+        }
+        const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+        path.setAttribute('d', d.trim());
+        path.setAttribute('class','orbit-path');
+        orbitsLayer.appendChild(path);
+      });
 
-    let t0 = null;
-    function animate(ts){
-      if(!t0) t0 = ts;
-      const dt = (ts - t0) / 1000; // segundos desde el inicio
-
-      // Actualiza posición de cada botón según su órbita y fase
+      // 2) Posicionar botones en sus respectivas órbitas
       for(const btn of buttons){
         const k = +btn.dataset.orbit;
         const base = +btn.dataset.phase;
-        const {a,b,tilt,speed} = orbits[k];
-        const ang = base + dt * speed; // ángulo en radianes
-        // Punto elíptico antes de inclinación
-        let x = a * Math.cos(ang);
-        let y = b * Math.sin(ang);
-        // Rotar elipse en 2D por su tilt
-        const p = rotate(x,y,tilt);
-        // Proyección ligera 3D: comprimir y según perspectiva (truco simple)
-        const depth = Math.sin(ang + toRad(tilt))*0.15; // [-0.15, 0.15]
-        const scale = 1 - depth*0.35;
-        btn.style.left = (center.x + p.x) + 'px';
-        btn.style.top  = (center.y + p.y*0.92) + 'px';
-        btn.style.zIndex = String(1000 + Math.round((1-depth)*100));
-        btn.style.transform = `translate(-50%,-50%) scale(${scale})`;
+        const {a,b,tiltZ} = orbits[k];
+        let p = { x: a*Math.cos(base), y: b*Math.sin(base), z: 0 };
+        p = rotZ(p, tiltZ);
+        p = rotX(rotY(p, yaw), pitch);
+        const q = project(p);
+        btn.style.left = q.x + 'px';
+        btn.style.top  = q.y + 'px';
+        // Escala sutil por perspectiva (mantener legible)
+        const scl = Math.max(0.85, Math.min(1.15, q.scale));
+        btn.style.transform = `translate(-50%,-50%) scale(${scl})`;
+        // Profundidad para z-index
+        btn.style.zIndex = String(1000 + Math.round(q.scale*100));
       }
-
-      // Mueve electrones decorativos aprovechando distintas órbitas
-      electrons.forEach((e, i) => {
-        const k = i % orbits.length;
-        const {a,b,tilt,speed} = orbits[k];
-        const ang = dt * (speed*1.6 + 0.4*i);
-        let x = a * Math.cos(ang);
-        let y = b * Math.sin(ang);
-        const p = rotate(x,y,tilt);
-        e.style.left = (center.x + p.x) + 'px';
-        e.style.top  = (center.y + p.y*0.92) + 'px';
-        e.style.zIndex = String(900 + (i%3));
-      });
-
-      requestAnimationFrame(animate);
     }
 
-    requestAnimationFrame(animate);
+    // Control por ratón / táctil para rotar (sin animación cuando no hay interacción)
+    let dragging = false;
+    let last = { x: 0, y: 0 };
+
+    function onDown(x,y){ dragging = true; last.x = x; last.y = y; }
+    function onMove(x,y){
+      if(!dragging) return;
+      const dx = x - last.x;
+      const dy = y - last.y;
+      last.x = x; last.y = y;
+      // sensibilidad de rotación
+      yaw   += dx * 0.25; // grados por píxel horizontal
+      pitch += dy * 0.25; // grados por píxel vertical
+      // limitar pitch para evitar giros extremos
+      pitch = Math.max(-89, Math.min(89, pitch));
+      render();
+    }
+    function onUp(){ dragging = false; }
+
+    // Eventos de puntero
+    frame.addEventListener('mousedown', (e)=> onDown(e.clientX, e.clientY));
+    window.addEventListener('mousemove', (e)=> onMove(e.clientX, e.clientY));
+    window.addEventListener('mouseup', onUp);
+
+    // Táctil
+    frame.addEventListener('touchstart', (e)=>{
+      const t = e.touches[0]; onDown(t.clientX, t.clientY);
+    }, {passive:true});
+    window.addEventListener('touchmove', (e)=>{
+      const t = e.touches[0]; onMove(t.clientX, t.clientY);
+    }, {passive:true});
+    window.addEventListener('touchend', onUp);
+
+    // Render inicial (estático)
+    render();
   </script>
 </body>
 </html>
