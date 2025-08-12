@@ -1,110 +1,184 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>unátomo</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Átomo 3D (simulado) con 10 botones</title>
   <style>
-    body {
-      background-color: #ffffff;
-      color: #111;
-      font-family: 'Courier New', monospace;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
+    :root{
+      --w: 800px;
+      --h: 600px;
+      --bg1: #0b1020;
+      --bg2: #0f1a38;
+      --accent: #6be0ff;
+      --orbit: rgba(255,255,255,.18);
+      --glow: 0 0 30px rgba(107,224,255,.45), 0 0 60px rgba(107,224,255,.25);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;display:grid;place-items:center;background:#070b18;color:#e9eef7;font-family:system-ui,Segoe UI,Roboto,Inter,Arial}
+
+    .frame{
+      width:var(--w);height:var(--h);position:relative;border-radius:20px;overflow:hidden;
+      background: radial-gradient(120% 120% at 100% 0%, var(--bg2) 0%, var(--bg1) 60%);
+      box-shadow: 0 10px 30px rgba(0,0,0,.5), inset 0 0 60px rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
     }
 
-    .title {
-      font-size: 3rem;
-      white-space: nowrap;
-      overflow: hidden;
-      width: 0;
-      border-right: 2px solid #111;
-      animation: typing-title 2s steps(7) forwards;
+    /* Centro / núcleo */
+    .nucleus{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:110px;height:110px;border-radius:50%;
+      background: radial-gradient(circle at 35% 30%, #e0faff 0%, #87d7ff 35%, #1a71a8 70%, #0b3861 100%);
+      box-shadow: var(--glow), inset 0 0 20px rgba(255,255,255,.25);
+    }
+    .nucleus::after{content:"";position:absolute;inset:-30px;border-radius:50%;
+      background: radial-gradient(circle, rgba(107,224,255,.2), transparent 60%);
+      filter: blur(10px);opacity:.8;pointer-events:none;
     }
 
-    .title.done {
-      border-right: none;
+    /* Contenedor de la "escena" */
+    .scene{position:absolute;inset:0;perspective:900px;}
+
+    /* Grupo con ligera rotación 3D para simular profundidad */
+    .atom{position:absolute;left:50%;top:50%;width:100%;height:100%;transform-style:preserve-3d;transform:translate(-50%,-50%) rotateX(15deg);
     }
 
-    .slogan-wrapper {
-      font-size: 1rem;
-      margin-top: 1rem;
-      white-space: nowrap;
-      overflow: hidden;
-      width: 0;
-      position: relative;
-    }
+    /* SVG de órbitas */
+    svg{position:absolute;inset:0;filter: drop-shadow(0 0 6px rgba(107,224,255,.15));}
+    .orbit-path{fill:none;stroke:var(--orbit);stroke-width:2}
 
-    .slogan-wrapper.typing {
-      animation: typing-slogan 3s steps(28) forwards;
+    /* Botones */
+    .orbit-btn{position:absolute;transform:translate(-50%,-50%);
+      padding:.45rem .7rem;border-radius:999px;border:1px solid rgba(255,255,255,.25);
+      background: rgba(13,30,50,.55);backdrop-filter: blur(4px);
+      color:#eaf6ff;font-weight:600;letter-spacing:.2px;
+      box-shadow: 0 6px 20px rgba(0,0,0,.5), 0 0 10px rgba(107,224,255,.25);
+      cursor:pointer;transition:transform .15s ease, box-shadow .2s ease, background .2s ease;
+      user-select:none;white-space:nowrap;
     }
+    .orbit-btn:hover{transform:translate(-50%,-50%) scale(1.06);background: rgba(23,50,80,.7);box-shadow: 0 8px 26px rgba(0,0,0,.6), 0 0 16px rgba(107,224,255,.35)}
+    .orbit-btn:active{transform:translate(-50%,-50%) scale(0.98)}
 
-    .slogan-wrapper.blink::after {
-      content: '';
-      position: absolute;
-      right: 0;
-      width: 1px;
-      height: 100%;
-      background-color: #111;
-      animation: blink .75s step-end infinite;
-    }
+    /* Indicador de electrones (opcional) */
+    .electron{position:absolute;width:10px;height:10px;border-radius:50%;background:#aef;box-shadow:0 0 10px rgba(174,234,255,.8);pointer-events:none}
 
-    .loading {
-      font-size: 0.9rem;
-      color: #666;
-      margin-top: 1.5rem;
-      opacity: 0;
-      transition: opacity 1s ease-in;
-    }
-
-    .loading.visible {
-      opacity: 1;
-    }
-
-    @keyframes typing-title {
-      from { width: 0 }
-      to { width: 7ch }
-    }
-
-    @keyframes typing-slogan {
-      from { width: 0 }
-      to { width: 28ch }
-    }
-
-    @keyframes blink {
-      from, to { background-color: transparent }
-      50% { background-color: #111 }
-    }
+    /* Marca 800×600 */
+    .badge{position:absolute;right:10px;bottom:10px;font-size:12px;color:#9fb3c7;opacity:.7}
   </style>
 </head>
 <body>
-  <div class="title" id="title">unátomo</div>
-  <div class="slogan-wrapper" id="slogan">Your Process. Our Insight.</div>
-  <div class="loading" id="loading">under construction</div>
+  <div class="frame" aria-label="Átomo con órbitas y 10 botones">
+    <div class="scene">
+      <div class="atom" id="atom">
+        <!-- Núcleo -->
+        <div class="nucleus" aria-hidden="true"></div>
+        <!-- Órbitas en SVG para guías visuales -->
+        <svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <!-- Tres elipses con distintas inclinaciones -->
+          <g transform="translate(400,300)">
+            <ellipse class="orbit-path" rx="260" ry="140" transform="rotate(0)"></ellipse>
+            <ellipse class="orbit-path" rx="220" ry="110" transform="rotate(60)"></ellipse>
+            <ellipse class="orbit-path" rx="180" ry="90"  transform="rotate(-60)"></ellipse>
+          </g>
+        </svg>
+      </div>
+    </div>
+    <div class="badge">800×600</div>
+  </div>
 
   <script>
-    // Quitar el cursor de "unátomo"
-    setTimeout(() => {
-      document.getElementById('title').classList.add('done');
-    }, 2000);
+    // Parámetros de las 3 órbitas (semi-ejes y tilts)
+    const orbits = [
+      { a:260, b:140, tilt: 0,   speed: 0.12 },
+      { a:220, b:110, tilt: 60,  speed: -0.18 },
+      { a:180, b: 90, tilt:-60,  speed: 0.24 },
+    ];
 
-    // Escribir el eslogan
-    setTimeout(() => {
-      document.getElementById('slogan').classList.add('typing');
-    }, 2200);
+    // Crear 10 botones repartidos por las órbitas
+    const total = 10;
+    const center = { x: 400, y: 300 };
+    const frame = document.querySelector('.frame');
 
-    // Activar parpadeo del cursor del eslogan
-    setTimeout(() => {
-      document.getElementById('slogan').classList.add('blink');
-    }, 5200);
+    const buttons = [];
 
-    // Mostrar "under construction" con fade-in
-    setTimeout(() => {
-      document.getElementById('loading').classList.add('visible');
-    }, 5300);
+    // Distribución: 4 en órbita 0, 3 en órbita 1, 3 en órbita 2
+    const distribution = [4,3,3];
+    let labelIndex = 1;
+    distribution.forEach((count, orbitIndex) => {
+      for(let i=0;i<count;i++){
+        const btn = document.createElement('button');
+        btn.className = 'orbit-btn';
+        btn.textContent = `boton ${labelIndex}`; // Etiqueta según tu ejemplo
+        btn.dataset.orbit = orbitIndex;
+        // Fase inicial equiespaciada en esa órbita
+        const base = (i / count) * Math.PI * 2;
+        btn.dataset.phase = String(base);
+        btn.addEventListener('click', () => {
+          console.log(`Has hecho clic en boton ${labelIndex}`);
+          alert(`Has pulsado: boton ${btn.textContent.replace('boton ','')}`);
+        });
+        frame.appendChild(btn);
+        buttons.push(btn);
+        labelIndex++;
+      }
+    });
+
+    // (Opcional) pequeños electrones visuales acompañando algunas posiciones (decorativo)
+    const electrons = Array.from({length: 6}, () => {
+      const e = document.createElement('div');
+      e.className = 'electron';
+      frame.appendChild(e);
+      return e;
+    });
+
+    // Utilidades matemáticas
+    const toRad = deg => deg * Math.PI / 180;
+    
+    function rotate(x, y, deg){
+      const r = toRad(deg); const cs = Math.cos(r), sn = Math.sin(r);
+      return { x: x*cs - y*sn, y: x*sn + y*cs };
+    }
+
+    let t0 = null;
+    function animate(ts){
+      if(!t0) t0 = ts;
+      const dt = (ts - t0) / 1000; // segundos desde el inicio
+
+      // Actualiza posición de cada botón según su órbita y fase
+      for(const btn of buttons){
+        const k = +btn.dataset.orbit;
+        const base = +btn.dataset.phase;
+        const {a,b,tilt,speed} = orbits[k];
+        const ang = base + dt * speed; // ángulo en radianes
+        // Punto elíptico antes de inclinación
+        let x = a * Math.cos(ang);
+        let y = b * Math.sin(ang);
+        // Rotar elipse en 2D por su tilt
+        const p = rotate(x,y,tilt);
+        // Proyección ligera 3D: comprimir y según perspectiva (truco simple)
+        const depth = Math.sin(ang + toRad(tilt))*0.15; // [-0.15, 0.15]
+        const scale = 1 - depth*0.35;
+        btn.style.left = (center.x + p.x) + 'px';
+        btn.style.top  = (center.y + p.y*0.92) + 'px';
+        btn.style.zIndex = String(1000 + Math.round((1-depth)*100));
+        btn.style.transform = `translate(-50%,-50%) scale(${scale})`;
+      }
+
+      // Mueve electrones decorativos aprovechando distintas órbitas
+      electrons.forEach((e, i) => {
+        const k = i % orbits.length;
+        const {a,b,tilt,speed} = orbits[k];
+        const ang = dt * (speed*1.6 + 0.4*i);
+        let x = a * Math.cos(ang);
+        let y = b * Math.sin(ang);
+        const p = rotate(x,y,tilt);
+        e.style.left = (center.x + p.x) + 'px';
+        e.style.top  = (center.y + p.y*0.92) + 'px';
+        e.style.zIndex = String(900 + (i%3));
+      });
+
+      requestAnimationFrame(animate);
+    }
+
+    requestAnimationFrame(animate);
   </script>
 </body>
 </html>
