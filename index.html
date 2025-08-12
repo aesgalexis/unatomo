@@ -1,221 +1,110 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Átomo 3D estático con rotación por arrastre (1024×876)</title>
+  <meta charset="UTF-8">
+  <title>unátomo</title>
   <style>
-    :root{
-      --w: 1024px;
-      --h: 876px;
-      --bg1: #0b1020;
-      --bg2: #0f1a38;
-      --accent: #6be0ff;
-      --orbit: rgba(255,255,255,.18);
-      --glow: 0 0 30px rgba(107,224,255,.45), 0 0 60px rgba(107,224,255,.25);
-    }
-    *{box-sizing:border-box}
-    body{margin:0;min-height:100vh;display:grid;place-items:center;background:#070b18;color:#e9eef7;font-family:system-ui,Segoe UI,Roboto,Inter,Arial}
-
-    .frame{
-      width:var(--w);height:var(--h);position:relative;border-radius:20px;overflow:hidden;
-      background: radial-gradient(120% 120% at 100% 0%, var(--bg2) 0%, var(--bg1) 60%);
-      box-shadow: 0 10px 30px rgba(0,0,0,.5), inset 0 0 60px rgba(255,255,255,.04);
-      border:1px solid rgba(255,255,255,.08);
-      user-select:none;
-      touch-action:none; /* para que el gesto táctil no haga scroll */
+    body {
+      background-color: #ffffff;
+      color: #111;
+      font-family: 'Courier New', monospace;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
     }
 
-    /* Centro / núcleo */
-    .nucleus{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:120px;height:120px;border-radius:50%;
-      background: radial-gradient(circle at 35% 30%, #e0faff 0%, #87d7ff 35%, #1a71a8 70%, #0b3861 100%);
-      box-shadow: var(--glow), inset 0 0 20px rgba(255,255,255,.25);
+    .title {
+      font-size: 3rem;
+      white-space: nowrap;
+      overflow: hidden;
+      width: 0;
+      border-right: 2px solid #111;
+      animation: typing-title 2s steps(7) forwards;
     }
-    .nucleus::after{content:"";position:absolute;inset:-30px;border-radius:50%;
-      background: radial-gradient(circle, rgba(107,224,255,.2), transparent 60%);
-      filter: blur(10px);opacity:.8;pointer-events:none;
+
+    .title.done {
+      border-right: none;
     }
 
-    /* Órbitas dibujadas con SVG (solo guía visual, no animadas) */
-    svg{position:absolute;inset:0;filter: drop-shadow(0 0 6px rgba(107,224,255,.15));}
-    .orbit-path{fill:none;stroke:var(--orbit);stroke-width:2}
-
-    /* Botones */
-    .orbit-btn{position:absolute;transform:translate(-50%,-50%);
-      padding:.45rem .7rem;border-radius:999px;border:1px solid rgba(255,255,255,.25);
-      background: rgba(13,30,50,.55);backdrop-filter: blur(4px);
-      color:#eaf6ff;font-weight:600;letter-spacing:.2px;
-      box-shadow: 0 6px 20px rgba(0,0,0,.5), 0 0 10px rgba(107,224,255,.25);
-      cursor:pointer;transition:transform .1s ease, box-shadow .2s ease, background .2s ease;
-      user-select:none;white-space:nowrap;
+    .slogan-wrapper {
+      font-size: 1rem;
+      margin-top: 1rem;
+      white-space: nowrap;
+      overflow: hidden;
+      width: 0;
+      position: relative;
     }
-    .orbit-btn:hover{transform:translate(-50%,-50%) scale(1.06);background: rgba(23,50,80,.7);box-shadow: 0 8px 26px rgba(0,0,0,.6), 0 0 16px rgba(107,224,255,.35)}
-    .orbit-btn:active{transform:translate(-50%,-50%) scale(0.98)}
 
-    .hint{position:absolute;left:50%;top:16px;transform:translateX(-50%);font-size:14px;color:#c8d7e6;opacity:.85;background:rgba(0,0,0,.25);padding:.35rem .6rem;border-radius:999px;border:1px solid rgba(255,255,255,.1)}
+    .slogan-wrapper.typing {
+      animation: typing-slogan 3s steps(28) forwards;
+    }
 
-    .badge{position:absolute;right:10px;bottom:10px;font-size:12px;color:#9fb3c7;opacity:.7}
+    .slogan-wrapper.blink::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      width: 1px;
+      height: 100%;
+      background-color: #111;
+      animation: blink .75s step-end infinite;
+    }
+
+    .loading {
+      font-size: 0.9rem;
+      color: #666;
+      margin-top: 1.5rem;
+      opacity: 0;
+      transition: opacity 1s ease-in;
+    }
+
+    .loading.visible {
+      opacity: 1;
+    }
+
+    @keyframes typing-title {
+      from { width: 0 }
+      to { width: 7ch }
+    }
+
+    @keyframes typing-slogan {
+      from { width: 0 }
+      to { width: 28ch }
+    }
+
+    @keyframes blink {
+      from, to { background-color: transparent }
+      50% { background-color: #111 }
+    }
   </style>
 </head>
 <body>
-  <div class="frame" id="frame" aria-label="Átomo estático con órbitas y 10 botones; arrastra para rotar">
-    <div class="hint">Arrastra para rotar (click/drag o táctil)</div>
-    <!-- Núcleo -->
-    <div class="nucleus" aria-hidden="true"></div>
-
-    <!-- SVG base para mostrar tres elipses en la orientación actual -->
-    <svg viewBox="0 0 1024 876" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-      <g id="orbits-layer"></g>
-    </svg>
-
-    <div class="badge">1024×876</div>
-  </div>
+  <div class="title" id="title">unátomo</div>
+  <div class="slogan-wrapper" id="slogan">Your Process. Our Insight.</div>
+  <div class="loading" id="loading">under construction</div>
 
   <script>
-    // Tamaño fijo del marco
-    const SIZE = { w: 1024, h: 876 };
-    const center = { x: SIZE.w/2, y: SIZE.h/2 };
+    // Quitar el cursor de "unátomo"
+    setTimeout(() => {
+      document.getElementById('title').classList.add('done');
+    }, 2000);
 
-    // Definición de órbitas (semi-ejes y rotación propia sobre Z)
-    const orbits = [
-      { a:300, b:160, tiltZ:   0 },
-      { a:250, b:125, tiltZ:  60 },
-      { a:205, b:100, tiltZ: -60 },
-    ];
+    // Escribir el eslogan
+    setTimeout(() => {
+      document.getElementById('slogan').classList.add('typing');
+    }, 2200);
 
-    // Distribución de 10 botones: 4,3,3
-    const distribution = [4,3,3];
+    // Activar parpadeo del cursor del eslogan
+    setTimeout(() => {
+      document.getElementById('slogan').classList.add('blink');
+    }, 5200);
 
-    // Estado de rotación global (control por usuario)
-    let yaw = 0;   // rotación alrededor del eje Y (izq-der)
-    let pitch = 0; // rotación alrededor del eje X (arriba-abajo)
-
-    // Matrices de rotación sencillas
-    const toRad = d => d * Math.PI / 180;
-
-    function rotZ(p, deg){
-      const r = toRad(deg), c = Math.cos(r), s = Math.sin(r);
-      return { x: p.x*c - p.y*s, y: p.x*s + p.y*c, z: p.z };
-    }
-    function rotY(p, deg){
-      const r = toRad(deg), c = Math.cos(r), s = Math.sin(r);
-      return { x:  p.x*c + p.z*s, y: p.y, z: -p.x*s + p.z*c };
-    }
-    function rotX(p, deg){
-      const r = toRad(deg), c = Math.cos(r), s = Math.sin(r);
-      return { x: p.x, y: p.y*c - p.z*s, z: p.y*s + p.z*c };
-    }
-
-    // Proyección en perspectiva (focal simple)
-    const F = 900; // distancia focal
-    function project(p){
-      const s = F / (F - p.z); // evita división por cero si z≈F
-      return { x: center.x + p.x * s, y: center.y + p.y * s, scale: s };
-    }
-
-    // Crear botones
-    const frame = document.getElementById('frame');
-    const buttons = [];
-    let labelIndex = 1;
-
-    distribution.forEach((count, orbitIndex) => {
-      for(let i=0;i<count;i++){
-        const btn = document.createElement('button');
-        btn.className = 'orbit-btn';
-        btn.textContent = `boton ${labelIndex}`;
-        btn.dataset.orbit = orbitIndex;
-        btn.dataset.phase = String((i / count) * Math.PI * 2); // fase inicial equiespaciada
-        btn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          alert(`Has pulsado: ${btn.textContent}`);
-        });
-        frame.appendChild(btn);
-        buttons.push(btn);
-        labelIndex++;
-      }
-    });
-
-    // Dibujo de las órbitas en el SVG, re-trazadas según yaw/pitch
-    const orbitsLayer = document.getElementById('orbits-layer');
-
-    function render(){
-      // 1) Redibujar paths de órbitas (aproximación con N puntos proyectados)
-      const N = 128;
-      orbitsLayer.innerHTML = '';
-      orbits.forEach(({a,b,tiltZ}) => {
-        let d = '';
-        for(let i=0;i<=N;i++){
-          const t = (i/N) * Math.PI * 2;
-          // punto elíptico local en plano Z=0
-          let p = { x: a*Math.cos(t), y: b*Math.sin(t), z: 0 };
-          // rotación propia del plano de la elipse
-          p = rotZ(p, tiltZ);
-          // aplicar rotación global del usuario
-          p = rotX(rotY(p, yaw), pitch);
-          // proyectar
-          const q = project(p);
-          d += (i===0? 'M':'L') + q.x.toFixed(2) + ' ' + q.y.toFixed(2) + ' ';
-        }
-        const path = document.createElementNS('http://www.w3.org/2000/svg','path');
-        path.setAttribute('d', d.trim());
-        path.setAttribute('class','orbit-path');
-        orbitsLayer.appendChild(path);
-      });
-
-      // 2) Posicionar botones en sus respectivas órbitas
-      for(const btn of buttons){
-        const k = +btn.dataset.orbit;
-        const base = +btn.dataset.phase;
-        const {a,b,tiltZ} = orbits[k];
-        let p = { x: a*Math.cos(base), y: b*Math.sin(base), z: 0 };
-        p = rotZ(p, tiltZ);
-        p = rotX(rotY(p, yaw), pitch);
-        const q = project(p);
-        btn.style.left = q.x + 'px';
-        btn.style.top  = q.y + 'px';
-        // Escala sutil por perspectiva (mantener legible)
-        const scl = Math.max(0.85, Math.min(1.15, q.scale));
-        btn.style.transform = `translate(-50%,-50%) scale(${scl})`;
-        // Profundidad para z-index
-        btn.style.zIndex = String(1000 + Math.round(q.scale*100));
-      }
-    }
-
-    // Control por ratón / táctil para rotar (sin animación cuando no hay interacción)
-    let dragging = false;
-    let last = { x: 0, y: 0 };
-
-    function onDown(x,y){ dragging = true; last.x = x; last.y = y; }
-    function onMove(x,y){
-      if(!dragging) return;
-      const dx = x - last.x;
-      const dy = y - last.y;
-      last.x = x; last.y = y;
-      // sensibilidad de rotación
-      yaw   += dx * 0.25; // grados por píxel horizontal
-      pitch += dy * 0.25; // grados por píxel vertical
-      // limitar pitch para evitar giros extremos
-      pitch = Math.max(-89, Math.min(89, pitch));
-      render();
-    }
-    function onUp(){ dragging = false; }
-
-    // Eventos de puntero
-    frame.addEventListener('mousedown', (e)=> onDown(e.clientX, e.clientY));
-    window.addEventListener('mousemove', (e)=> onMove(e.clientX, e.clientY));
-    window.addEventListener('mouseup', onUp);
-
-    // Táctil
-    frame.addEventListener('touchstart', (e)=>{
-      const t = e.touches[0]; onDown(t.clientX, t.clientY);
-    }, {passive:true});
-    window.addEventListener('touchmove', (e)=>{
-      const t = e.touches[0]; onMove(t.clientX, t.clientY);
-    }, {passive:true});
-    window.addEventListener('touchend', onUp);
-
-    // Render inicial (estático)
-    render();
+    // Mostrar "under construction" con fade-in
+    setTimeout(() => {
+      document.getElementById('loading').classList.add('visible');
+    }, 5300);
   </script>
 </body>
 </html>
