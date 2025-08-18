@@ -53,8 +53,9 @@ function renderItem(it, inAlt = false) {
   const item = document.createElement("div");
   item.className = `item${inAlt ? " in-alt" : ""}`;
   item.dataset.id = String(it.id);
+  item.setAttribute("draggable", "true"); // <-- el contenedor es draggable
   item.innerHTML = `
-    <div class="grab" draggable="true">◳</div>
+    <div class="grab">◳</div>
     <button class="btn"></button>
     <div class="tools">
       <button class="tbtn up" title="Subir">↑</button>
