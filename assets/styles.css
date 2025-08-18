@@ -295,16 +295,19 @@ footer {
   background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
 }
 
-#listA:empty::before {
-  content: "Create something";
-  color: var(--muted);
+/* Estilo común para el texto fantasma, con color difuso/tenue */
+#listA:empty::before,
+#listB:empty::before {
+  color: rgb(148 163 184 / 0.28); /* gris azulado suave */
   font-size: 13px;
   letter-spacing: .2px;
 }
 
+/* Mensaje por marco */
+#listA:empty::before {
+  content: "Create something";
+}
 #listB:empty::before {
   content: "Drag something";
-  color: var(--muted);
-  font-size: 13px;
-  letter-spacing: .2px;
 }
+
