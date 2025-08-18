@@ -231,6 +231,43 @@ main { padding:16px 20px; }
 #frameB.frame.alt h2 {
   font-size:14px; color: var(--muted); margin:0 0 8px;
 }
+/* LANDING (pista de aterrizaje, encima de Main) */
+#frameL.frame.landing {
+  background:
+    linear-gradient(180deg, rgba(56,189,248,0.06), rgba(99,102,241,0.06)),
+    linear-gradient(180deg, var(--panel), var(--panel-2));
+  border: 1px solid transparent;
+  border-radius: 14px;
+  position: relative;
+  padding: 12px;
+  margin-bottom: 14px;
+  box-shadow:
+    inset 0 0 0 1px rgba(56,189,248,0.2),
+    0 10px 22px rgba(56,189,248,0.10);
+}
+#frameL.frame.landing h2 {
+  font-size: 14px;
+  color: var(--text);
+  margin: 0 0 8px;
+  letter-spacing: .2px;
+}
+
+/* Empty state específico para Landing */
+#listL:empty {
+  min-height: 72px;
+  display: grid;
+  place-items: center;
+  border: 1px dashed var(--outline);
+  border-radius: 12px;
+  padding: 10px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+}
+#listL:empty::before {
+  content: "Waiting for re-entry";
+  color: rgb(148 163 184 / 0.28);
+  font-size: 13px;
+  letter-spacing: .2px;
+}
 
 /* Listas */
 .list { display:flex; flex-direction:column; gap:8px; }
