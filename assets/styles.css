@@ -98,21 +98,27 @@ body {
   filter: brightness(1.1);
   transform: translateY(-1px);
 }
-/* Historial: gris por defecto, verde suave al hover */
+/* Historial: gris por defecto, verde suave al hover (alineado y más discreto) */
 .hist-item {
-  padding:6px 10px;
-  border-radius:8px;
+  display: flex;
+  align-items: center;
+  padding: 6px 12px 6px 16px; /* + aire a la izquierda */
+  border-radius: 8px;
   background: linear-gradient(180deg, #1f2937, #111827);
-  border:1px solid #374151;
-  font-size:13px;
-  cursor:pointer;
+  border: 1px solid #374151;
+  font-size: 12px;           /* antes 13px */
+  line-height: 1.25;         /* más compacto y legible */
+  text-align: left;
+  letter-spacing: 0.1px;
+  cursor: pointer;
   transition: background .15s ease, border-color .15s ease, transform .08s ease;
 }
 .hist-item:hover {
   background: linear-gradient(180deg, #065f46, #064e3b);
-  border-color:#047857;
+  border-color: #047857;
   transform: translateY(-1px);
 }
+
 
 /* App contenedor */
 .app {
