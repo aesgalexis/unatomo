@@ -22,7 +22,6 @@ const HISTORY_MAX = 16; // debe coincidir con state.js
 const clearHistoryBtn = document.getElementById("clearHistoryBtn");
 
 // Elementos raíz
-const listL = document.getElementById("listL");           // <-- NUEVO
 const listA = document.getElementById("listA");
 const listB = document.getElementById("listB");
 const histList = document.getElementById("histList");
@@ -40,7 +39,6 @@ const histTitle  = document.querySelector(".historial h2");
 
 export function render() {
   // Limpiar
-  listL && (listL.innerHTML = "");   // <-- NUEVO (aunque no pintamos nada aún)
   listA.innerHTML = "";
   listB.innerHTML = "";
   histList.innerHTML = "";
@@ -48,7 +46,6 @@ export function render() {
   // Items por marco
   const itemsA = state.items.filter((x) => x.where === "A");
   const itemsB = state.items.filter((x) => x.where === "B");
-  // (A futuro) items que "aterrizan" se pintarían en listL
 
   // Pintar
   for (const it of itemsA) listA.appendChild(renderItem(it));
@@ -73,7 +70,7 @@ export function render() {
     const note = document.createElement("div");
     const hasNote = !!(h.note && h.note.trim());
     note.className = "hist-note" + (hasNote ? "" : " empty");
-    note.textContent = hasNote ? h.note : "(sin nota)";
+    note.textContent = hasNote ? h.note : "(empty)";
 
     panel.append(meta, note);
 
@@ -104,7 +101,7 @@ export function render() {
   // Total abajo (suma de ambos)
   countEl.textContent = String(itemsA.length + itemsB.length);
 
-  // Activar DnD SOLO en A y B (Landing NO tiene DnD)
+  // Activar DnD
   enableDragAndDrop({ listA, listB, onDrop: onDragDrop });
 }
 
@@ -120,7 +117,6 @@ function renderItem(it, inAlt = false) {
       <button class="tbtn up" title="Subir">↑</button>
       <button class="tbtn down" title="Bajar">↓</button>
       <button class="tbtn rename" title="Renombrar">✎</button>
-      <button class="tbtn orbit" title="Send to orbit">🛰</button> <!-- NUEVO -->
       <button class="tbtn done" title="Marcar como resuelto">✔</button>
     </div>
     <div class="panel${it.open ? " open" : ""}">
@@ -131,34 +127,35 @@ function renderItem(it, inAlt = false) {
   const btn = item.querySelector(".btn");
   const panel = item.querySelector(".panel");
   const textarea = item.querySelector("textarea");
+
+  // Mostrar nombre + sello temporal si existe
   btn.textContent = labelWithStamp(it);
+
   textarea.value = it.note || "";
 
   // Abrir/cerrar panel de notas con exclusión por lista
   btn.addEventListener("click", () => {
     const container = item.parentElement; // listA o listB
     const willOpen = !panel.classList.contains("open");
+
+    // Cierra cualquier otro panel abierto en la misma lista y actualiza estado
     closePanelsIn(container, ".panel", panel, (p) => {
       const otherItem = p.closest(".item");
       if (otherItem) updateItem(Number(otherItem.dataset.id), { open: false });
     });
+
     panel.classList.toggle("open", willOpen);
     updateItem(it.id, { open: willOpen });
   });
 
-  // Renombrar
+  // Renombrar (✎)
   item.querySelector(".rename").addEventListener("click", () => {
-    const nuevo = prompt("Renombrar Attomic Button:", btn.textContent.trim());
-    if (nuevo == null) return;
+    const nuevo = prompt("Rename Attomic Button:", btn.textContent.trim());
+    if (nuevo == null) return; // cancelado
     const nombre = nuevo.trim();
-    if (!nombre) return;
+    if (!nombre) return;       // vacío -> no cambiamos
     updateItem(it.id, { label: nombre });
     render();
-  });
-
-  // 🛰 Orbit (placeholder)
-  item.querySelector(".orbit").addEventListener("click", () => {
-    alert("Orbit (coming soon): aquí programaremos la órbita y retorno automático.");
   });
 
   // Editar nota
@@ -171,6 +168,7 @@ function renderItem(it, inAlt = false) {
     moveBy(it.id, -1);
     render();
   });
+
   item.querySelector(".down").addEventListener("click", () => {
     moveBy(it.id, 1);
     render();
@@ -194,8 +192,11 @@ function onDragDrop({ id, where, index }) {
   const capacity = where === "A" ? MAX_A : MAX_B;
 
   if (destItemsExcludingSelf.length >= capacity) {
+    // No permitir rebasar el límite al mover desde la otra lista
+    // (Si era reordenar dentro de la misma, destItemsExcludingSelf será n-1 y permitirá moverse)
     return;
   }
+
   moveItem(numId, where, Number(index));
   render();
 }
@@ -215,7 +216,7 @@ export function bindGlobalHandlers() {
     render();
   });
 
-  // Borrar historial
+  // Borrar historial (usando clearHistory del estado)
   clearHistoryBtn?.addEventListener("click", (e) => {
     e.preventDefault();
     if (!confirm("Clear history?")) return;
@@ -254,6 +255,10 @@ export function bindGlobalHandlers() {
 }
 
 /* ================== Helpers ================== */
+
+// Cierra todos los paneles de un contenedor, excepto 'exceptEl'.
+// selector: ".panel" o ".hist-panel" según el caso.
+// onClose(panel) opcional para sincronizar estado.
 function closePanelsIn(container, selector, exceptEl, onClose) {
   if (!container) return;
   container.querySelectorAll(`${selector}.open`).forEach((p) => {
@@ -262,12 +267,15 @@ function closePanelsIn(container, selector, exceptEl, onClose) {
     onClose?.(p);
   });
 }
+
+// Asegura que como máximo haya un panel abierto en 'container'.
 function enforceSingleOpen(container, selector = ".panel") {
   if (!container) return;
   const openPanels = Array.from(container.querySelectorAll(`${selector}.open`));
   if (openPanels.length <= 1) return;
   openPanels.slice(1).forEach((p) => p.classList.remove("open"));
 }
+
 function formatDate(iso) {
   if (!iso) return "";
   try {
@@ -277,11 +285,13 @@ function formatDate(iso) {
     return "";
   }
 }
+
 // Texto del botón: nombre + sello temporal (si existe)
 function labelWithStamp(it) {
   if (!it?.createdAt) return it.label || "";
   return `${it.label} — ${formatStamp(it.createdAt)}`;
 }
+
 function formatStamp(iso) {
   try {
     const d = new Date(iso);
