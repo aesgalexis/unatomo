@@ -456,3 +456,6 @@ footer {
   font-style: italic;
   color: rgb(148 163 184 / 0.45); /* ajusta a 0.35 si lo quieres más sutil */
 }
+.tools { display:flex; gap:4px; align-items:center; } /* centrar verticalmente */
+.tbtn { line-height: 1; }                             /* evita alto extra por tipografías */
+.tbtn.orbit { font-size:12px; font-weight:700; }      /* hace “»»” nítido y compacto */
