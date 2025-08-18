@@ -39,7 +39,6 @@ header { display:flex; justify-content:space-between; align-items:center; paddin
 .controls input { padding:8px 10px; border-radius:10px; border:1px solid var(--outline); background:#0b1224; color:var(--text); }
 .controls button, .import-label { border:none; border-radius:10px; padding:8px 12px; font-weight:600; cursor:pointer; background:#172036; color:var(--text); border:1px solid #1b2540; }
 .controls #addBtn { background:linear-gradient(180deg,var(--accent),var(--accent-2)); color:#001018; border:none; }
-.controls #resolveBtn { background:linear-gradient(180deg,#10b981,#059669); color:#02130f; border:none; }
 .controls #clearAll { background:linear-gradient(180deg,#ef4444,#dc2626); color:#220202; border:none; }
 .import-label { display:inline-flex; align-items:center; gap:6px; }
 .import-label input { display:none; }
