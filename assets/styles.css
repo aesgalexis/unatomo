@@ -274,7 +274,7 @@ main { padding:16px 20px; }
   background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
 }
 #listL:empty::before {
-  content: "Waiting for re-entry";
+  content: "Waiting for something to re-entry";
   color: rgb(148 163 184 / 0.28);
   font-size: 13px;
   letter-spacing: .2px;
