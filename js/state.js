@@ -37,31 +37,32 @@ function load() {
             : `Attomic Button ${id}`,
         note: typeof it?.note === "string" ? it.note : "",
         open: !!it?.open,
-        createdAt:
-          typeof it?.createdAt === "string" ? it.createdAt : null,
+        createdAt: typeof it?.createdAt === "string" ? it.createdAt : null,
       };
     });
 
     // --- Normalización de historial (migración string -> objeto) ---
     const historyRaw = Array.isArray(parsed.history) ? parsed.history : [];
-    const history = historyRaw.map((h) => {
-      if (typeof h === "string") {
-        return { label: h, note: "", at: null };
-      }
-      return {
-        label:
-          typeof h?.label === "string" && h.label.trim()
-            ? h.label
-            : "(sin etiqueta)",
-        note: typeof h?.note === "string" ? h.note : "",
-        at: typeof h?.at === "string" ? h.at : null,
-      };
-    }).slice(0, HISTORY_MAX); // cap
+    const history = historyRaw
+      .map((h) => {
+        if (typeof h === "string") {
+          return { label: h, note: "", at: null };
+        }
+        return {
+          label:
+            typeof h?.label === "string" && h.label.trim()
+              ? h.label
+              : "(sin etiqueta)",
+          note: typeof h?.note === "string" ? h.note : "",
+          at: typeof h?.at === "string" ? h.at : null,
+        };
+      })
+      .slice(0, HISTORY_MAX); // cap
 
     // --- Normalización de órbita ---
     const orbitRaw = Array.isArray(parsed.orbit) ? parsed.orbit : [];
-    const orbit = orbitRaw.map((o) => {
-      return {
+    const orbit = orbitRaw
+      .map((o) => ({
         id: Number.isFinite(+o?.id) ? +o.id : null,
         label:
           typeof o?.label === "string" && o.label.trim()
@@ -71,17 +72,19 @@ function load() {
         createdAt: typeof o?.createdAt === "string" ? o.createdAt : null,
         returnAt: typeof o?.returnAt === "string" ? o.returnAt : null,
         fromWhere: o?.fromWhere === "B" ? "B" : "A", // por defecto A
-      };
-    }).filter(o => o.id != null && o.returnAt);
+      }))
+      .filter((o) => o.id != null && o.returnAt);
 
-    // idSeq consistente (>= max id + 1)
+    // idSeq consistente (>= max id + 1) considerando items y órbita
     let idSeq = Number.isInteger(parsed.idSeq) ? parsed.idSeq : base.idSeq;
-    const maxId = items.reduce((m, it) => Math.max(m, it.id), 0);
+    const maxItemsId = items.reduce((m, it) => Math.max(m, it.id), 0);
+    const maxOrbitId = orbit.reduce((m, o) => Math.max(m, o.id || 0), 0);
+    const maxId = Math.max(maxItemsId, maxOrbitId);
     if (!Number.isInteger(idSeq) || idSeq <= maxId) idSeq = maxId + 1;
 
     // Construimos estado temporal y aterrizamos si hay orbits vencidos
-    let tmp = { items, history, orbit, idSeq };
-    tmp = landDueOrbitsIn(tmp);
+    const tmp = { items, history, orbit, idSeq };
+    landDueOrbitsIn(tmp); // <- muta tmp; NO reasignar al número que devuelve
 
     return tmp;
   } catch {
