@@ -1,7 +1,7 @@
 // Modelo + persistencia + import/export
 
 const STORAGE_KEY = "buttons-v1";
-const HISTORY_MAX = 32;
+const HISTORY_MAX = 16;
 
 export const makeEmptyState = () => ({
   items: [], // { id, label, note, open, where: 'A'|'B' }
