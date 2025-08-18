@@ -25,6 +25,7 @@ const clearHistoryBtn = document.getElementById("clearHistoryBtn");
 
 // Elementos raíz
 const listL = document.getElementById("listL"); // Landing
+const frameL = document.getElementById("frameL"); // <-- NUEVO
 const listA = document.getElementById("listA");
 const listB = document.getElementById("listB");
 const histList = document.getElementById("histList");
