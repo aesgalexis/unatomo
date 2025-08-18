@@ -1,4 +1,6 @@
 // Drag & Drop entre marcos con placeholder y zonas ampliadas (lista + marco)
+// Soporta arrastrar DESDE Landing, pero NO permite soltar en Landing.
+
 let dropCallback = null;
 let draggingId = null;
 let placeholder = null;
@@ -37,20 +39,16 @@ function getDragAfterElement(container, y) {
   return closest.element;
 }
 
-function bindZone(zoneEl, listEl, whereKey) {
-  // Para facilitar el drop en listas vacías
-  if (!listEl.style.minHeight) listEl.style.minHeight = "32px";
-
-  if (zoneEl.dataset.dndBound === "1") return;
-  zoneEl.dataset.dndBound = "1";
+/* --------- Solo fuente de arrastre (dragstart/dragend) --------- */
+function bindDragSource(zoneEl) {
+  if (!zoneEl || zoneEl.dataset.dndSrcBound === "1") return;
+  zoneEl.dataset.dndSrcBound = "1";
 
   zoneEl.addEventListener("dragstart", (e) => {
     const item = e.target.closest(".item");
     if (!item) return;
     draggingId = item.dataset.id;
-    try {
-      e.dataTransfer.setData("text/plain", draggingId);
-    } catch {}
+    try { e.dataTransfer.setData("text/plain", draggingId); } catch {}
     e.dataTransfer.effectAllowed = "move";
     item.classList.add("dragging");
   });
@@ -61,6 +59,15 @@ function bindZone(zoneEl, listEl, whereKey) {
     draggingId = null;
     removePlaceholder();
   });
+}
+
+/* --------- Zona de drop (enter/over/drop) --------- */
+function bindDropZone(zoneEl, listEl, whereKey) {
+  if (!zoneEl || zoneEl.dataset.dndDropBound === "1") return;
+  zoneEl.dataset.dndDropBound = "1";
+
+  // Para facilitar el drop en listas vacías
+  if (!listEl.style.minHeight) listEl.style.minHeight = "32px";
 
   zoneEl.addEventListener("dragenter", (e) => {
     e.preventDefault();
@@ -109,16 +116,29 @@ function bindZone(zoneEl, listEl, whereKey) {
   });
 }
 
-export function enableDragAndDrop({ listA, listB, onDrop }) {
+/* --------- API --------- */
+export function enableDragAndDrop({ listL, listA, listB, onDrop }) {
   dropCallback = onDrop; // actualizar callback en cada render
 
-  // Zonas de drop: tanto la lista como el marco que la contiene
-  const frameA = listA.closest(".frame") || listA;
-  const frameB = listB.closest(".frame") || listB;
+  // Zonas de drop: listas + marcos contenedores (A y B solamente)
+  const frameA = listA?.closest(".frame") || listA;
+  const frameB = listB?.closest(".frame") || listB;
 
-  bindZone(listA, listA, "A");
-  if (frameA !== listA) bindZone(frameA, listA, "A");
+  // Fuentes de arrastre (se puede empezar a arrastrar desde L, A, B)
+  if (listL) bindDragSource(listL);
+  if (listA) bindDragSource(listA);
+  if (listB) bindDragSource(listB);
 
-  bindZone(listB, listB, "B");
-  if (frameB !== listB) bindZone(frameB, listB, "B");
+  // Habilitar DROP en A y B
+  if (listA) {
+    bindDropZone(listA, listA, "A");
+    if (frameA && frameA !== listA) bindDropZone(frameA, listA, "A");
+  }
+  if (listB) {
+    bindDropZone(listB, listB, "B");
+    if (frameB && frameB !== listB) bindDropZone(frameB, listB, "B");
+  }
+
+  // IMPORTANTE: NO se llama bindDropZone para Landing (listL)
+  // => Se puede arrastrar DESDE L, pero no soltar EN L.
 }
