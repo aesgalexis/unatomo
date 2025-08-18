@@ -36,12 +36,38 @@ export function render() {
   for (const it of itemsB) listB.appendChild(renderItem(it, true));
 
   // Historial
+    // Historial (desplegable). Muestra todos, pero el contenedor fuerza scroll.
   for (const h of state.history) {
-    const el = document.createElement("div");
-    el.className = "hist-item";
-    el.textContent = h.label;
-    histList.appendChild(el);
+    const card = document.createElement("div");
+    card.className = "hist-card";
+
+    const head = document.createElement("div");
+    head.className = "hist-item";
+    head.textContent = h.label || "(sin etiqueta)";
+
+    const panel = document.createElement("div");
+    panel.className = "hist-panel";
+
+    const meta = document.createElement("div");
+    meta.className = "hist-meta";
+    meta.textContent = formatDate(h.at);
+
+    const note = document.createElement("div");
+    const hasNote = !!(h.note && h.note.trim());
+    note.className = "hist-note" + (hasNote ? "" : " empty");
+    note.textContent = hasNote ? h.note : "(sin nota)";
+
+    panel.append(meta, note);
+
+    // Click para desplegar/plegar
+    head.addEventListener("click", () => {
+      panel.classList.toggle("open");
+    });
+
+    card.append(head, panel);
+    histList.appendChild(card);
   }
+
 
   countEl.textContent = state.items.length;
 
