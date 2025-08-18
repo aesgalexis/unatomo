@@ -9,15 +9,13 @@ export function enableDragAndDrop({ listA, listB, onDrop }) {
       e.dataTransfer.effectAllowed = "move";
     });
 
-    list.addEventListener("dragover", (e) => {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = "move";
-      const after = getDragAfterElement(list, e.clientY);
-      const draggingId = e.dataTransfer.getData("text/plain");
-      if (!draggingId) return;
-      const el = list.querySelector(`.item[data-id="${draggingId}"]`) || document.querySelector(`.item[data-id="${draggingId}"]`).cloneNode(true);
-      // Previsualización: opcional — aquí no insertamos para evitar parpadeos
-    });
+    list.addEventListener("dragstart", (e) => {
+  // Permite iniciar el drag desde .grab o desde cualquier punto dentro del .item
+  const item = e.target.closest(".item");
+  if (!item) return;
+  e.dataTransfer.setData("text/plain", item.dataset.id);
+  e.dataTransfer.effectAllowed = "move";
+});
 
     list.addEventListener("drop", (e) => {
       e.preventDefault();
