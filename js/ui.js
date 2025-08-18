@@ -95,6 +95,7 @@ function renderItem(it, inAlt = false) {
   const btn = item.querySelector(".btn");
   const panel = item.querySelector(".panel");
   const textarea = item.querySelector("textarea");
+  const clearAllBtn = document.getElementById("clearAll"); // <- NUEVO
   btn.textContent = it.label;
   textarea.value = it.note || "";
 
