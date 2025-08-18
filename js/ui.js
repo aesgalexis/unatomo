@@ -91,16 +91,10 @@ function renderItem(it, inAlt = false) {
 }
 
 function onDragDrop({ id, where, index }) {
-  // Re-uso de update simple: cambiamos contenedor y posición aproximada.
-  // Para un control fino usaremos state.moveItem más adelante si lo añadimos.
-  // Aquí optamos por re-render completo tras un cambio simple.
-  const num = Number(id);
-  const it = state.items.find((x) => x.id === num);
-  if (!it) return;
-  it.where = where;
-  save();
+  moveItem(Number(id), where, index);
   render();
 }
+
 
 export function bindGlobalHandlers() {
   addBtn.addEventListener("click", () => {
