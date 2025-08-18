@@ -80,7 +80,7 @@ export function addItem(label, where = "A") {
   const id = nextId();
   state.items.push({
     id,
-    label: label || `Sample proton ${id}`, // <- NUEVO
+    label: label || `Sample Attomic Button ${id}`, // <- NUEVO
     note: "",
     open: false,
     where,
@@ -180,12 +180,12 @@ export function exportJson() {
 export function importJson(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onerror = () => reject(new Error("No se pudo leer el archivo"));
+    reader.onerror = () => reject(new Error("The file could not be read"));
     reader.onload = () => {
       try {
         const parsed = JSON.parse(String(reader.result));
         if (!parsed || !Array.isArray(parsed.items))
-          throw new Error("Formato inválido");
+          throw new Error("Invalid format");
         state = parsed; // reemplazo total
         // Re-normalizamos inmediatamente (capará items/historial, incluyendo HISTORY_MAX)
         state = (function normalize(s) {
