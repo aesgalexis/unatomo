@@ -1,4 +1,15 @@
-import { state, save, addItem, removeItem, updateItem, moveBy, resolveItem, exportJson, importJson, moveItem } from "./state.js";
+import {
+  state,
+  save,
+  addItem,
+  removeItem,
+  updateItem,
+  moveBy,
+  resolveItem,
+  exportJson,
+  importJson,
+  moveItem, // <- necesario para fijar orden en drop
+} from "./state.js";
 import { enableDragAndDrop } from "./dragdrop.js";
 
 // Elementos raíz
@@ -6,8 +17,6 @@ const listA = document.getElementById("listA");
 const listB = document.getElementById("listB");
 const histList = document.getElementById("histList");
 const addBtn = document.getElementById("addBtn");
-const resolveBtn = document.getElementById("resolveBtn");
-const clearAllBtn = document.getElementById("clearAll");
 const input = document.getElementById("labelInput");
 const countEl = document.getElementById("count");
 const exportBtn = document.getElementById("exportBtn");
@@ -36,7 +45,7 @@ export function render() {
 
   countEl.textContent = state.items.length;
 
-  // Activar DnD tras montar DOM
+  // Activar DnD (listeners solo se atan una vez; el callback se actualiza cada render)
   enableDragAndDrop({ listA, listB, onDrop: onDragDrop });
 }
 
@@ -91,10 +100,10 @@ function renderItem(it, inAlt = false) {
 }
 
 function onDragDrop({ id, where, index }) {
-  moveItem(Number(id), where, index);
+  // Mover el ítem a 'where' e insertar en el índice indicado
+  moveItem(Number(id), where, Number(index));
   render();
 }
-
 
 export function bindGlobalHandlers() {
   addBtn.addEventListener("click", () => {
@@ -107,20 +116,6 @@ export function bindGlobalHandlers() {
 
   input.addEventListener("keydown", (e) => {
     if (e.key === "Enter") addBtn.click();
-  });
-
-  resolveBtn.addEventListener("click", () => {
-    // Mover automáticamente los que tienen nota a B
-    const withNote = state.items.filter((x) => x.where === "A" && (x.note?.trim()?.length || 0) > 0);
-    for (const it of withNote) it.where = "B";
-    save();
-    render();
-  });
-
-  clearAllBtn.addEventListener("click", () => {
-    if (!confirm("¿Vaciar todo?")) return;
-    localStorage.removeItem("buttons-v1");
-    location.reload();
   });
 
   exportBtn.addEventListener("click", () => exportJson());
