@@ -1,110 +1,49 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>unátomo</title>
-  <style>
-    body {
-      background-color: #ffffff;
-      color: #111;
-      font-family: 'Courier New', monospace;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Botones reordenables — básico</title>
+    <link rel="stylesheet" href="assets/styles.css" />
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="historial">
+        <h2>Historial de resueltos</h2>
+        <div class="hist-list" id="histList"></div>
+      </aside>
 
-    .title {
-      font-size: 3rem;
-      white-space: nowrap;
-      overflow: hidden;
-      width: 0;
-      border-right: 2px solid #111;
-      animation: typing-title 2s steps(7) forwards;
-    }
+      <div class="app">
+        <header>
+          <h1>Botones reordenables</h1>
+          <div class="controls">
+            <input id="labelInput" type="text" placeholder="Texto del botón (opcional)" />
+            <button id="addBtn">+ Crear</button>
+            <button id="resolveBtn">✔ Resolver con nota</button>
+            <button id="clearAll">Vaciar</button>
+            <button id="exportBtn">Exportar</button>
+            <label class="import-label">
+              Importar <input id="importInput" type="file" accept="application/json" hidden />
+            </label>
+          </div>
+        </header>
 
-    .title.done {
-      border-right: none;
-    }
+        <main>
+          <section class="frame" id="frameA">
+            <h2>Marco superior</h2>
+            <div class="list" id="listA"></div>
+          </section>
+          <section class="frame alt" id="frameB">
+            <h2>Marco inferior (recepción)</h2>
+            <div class="list" id="listB"></div>
+          </section>
+        </main>
+        <footer>
+          <span>Total: <span id="count">0</span></span>
+        </footer>
+      </div>
+    </div>
 
-    .slogan-wrapper {
-      font-size: 1rem;
-      margin-top: 1rem;
-      white-space: nowrap;
-      overflow: hidden;
-      width: 0;
-      position: relative;
-    }
-
-    .slogan-wrapper.typing {
-      animation: typing-slogan 3s steps(28) forwards;
-    }
-
-    .slogan-wrapper.blink::after {
-      content: '';
-      position: absolute;
-      right: 0;
-      width: 1px;
-      height: 100%;
-      background-color: #111;
-      animation: blink .75s step-end infinite;
-    }
-
-    .loading {
-      font-size: 0.9rem;
-      color: #666;
-      margin-top: 1.5rem;
-      opacity: 0;
-      transition: opacity 1s ease-in;
-    }
-
-    .loading.visible {
-      opacity: 1;
-    }
-
-    @keyframes typing-title {
-      from { width: 0 }
-      to { width: 7ch }
-    }
-
-    @keyframes typing-slogan {
-      from { width: 0 }
-      to { width: 28ch }
-    }
-
-    @keyframes blink {
-      from, to { background-color: transparent }
-      50% { background-color: #111 }
-    }
-  </style>
-</head>
-<body>
-  <div class="title" id="title">unátomo</div>
-  <div class="slogan-wrapper" id="slogan">Your Process. Our Insight.</div>
-  <div class="loading" id="loading">under construction</div>
-
-  <script>
-    // Quitar el cursor de "unátomo"
-    setTimeout(() => {
-      document.getElementById('title').classList.add('done');
-    }, 2000);
-
-    // Escribir el eslogan
-    setTimeout(() => {
-      document.getElementById('slogan').classList.add('typing');
-    }, 2200);
-
-    // Activar parpadeo del cursor del eslogan
-    setTimeout(() => {
-      document.getElementById('slogan').classList.add('blink');
-    }, 5200);
-
-    // Mostrar "under construction" con fade-in
-    setTimeout(() => {
-      document.getElementById('loading').classList.add('visible');
-    }, 5300);
-  </script>
-</body>
+    <script type="module" src="./js/main.js"></script>
+  </body>
 </html>
