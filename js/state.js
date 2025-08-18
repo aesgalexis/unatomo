@@ -82,10 +82,15 @@ export function moveBy(id, delta) {
 export function resolveItem(id) {
   const it = state.items.find((x) => x.id === id);
   if (!it) return;
-  state.history.unshift({ label: it.label, at: new Date().toISOString() });
-  removeItem(id);
+  state.history.unshift({
+    label: it.label,
+    note: (it.note || "").trim(),
+    at: new Date().toISOString(),
+  });
+  removeItem(id); // ya hace save() internamente
   save();
 }
+
 
 export function clearAll() {
   state = makeEmptyState();
