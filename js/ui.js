@@ -39,6 +39,7 @@ const clearAllBtn = document.getElementById("clearAll");
 const frameATitle = document.querySelector("#frameA h2");
 const frameBTitle = document.querySelector("#frameB h2");
 const histTitle  = document.querySelector(".historial h2");
+const frameL = document.querySelector("#frameL"); // <-- NUEVO (para glow violeta)
 
 // Timer de aterrizaje periódico
 let orbitTimer = null;
@@ -99,6 +100,9 @@ export function render() {
   if (frameBTitle) frameBTitle.textContent = `Side (${itemsB.length}/${MAX_B})`;
   if (histTitle)  histTitle.textContent  = `History (${state.history.length}/${HISTORY_MAX})`;
 
+  // Estado visual de Landing (glow violeta si contiene elementos)
+  if (frameL) frameL.classList.toggle("has-items", itemsL.length > 0); // <-- NUEVO
+
   // Desactivar/activar +Crear según límite A
   if (addBtn) addBtn.disabled = itemsA.length >= MAX_A;
 
@@ -111,8 +115,8 @@ export function render() {
   // Total abajo (suma de Main + Side; Landing no suma)
   countEl.textContent = String(itemsA.length + itemsB.length);
 
-  // Activar DnD SOLO en A y B
-  enableDragAndDrop({ listA, listB, onDrop: onDragDrop });
+  // Activar DnD: A y B aceptan drop; L solo permite iniciar drag (dragdrop.js lo maneja)
+  enableDragAndDrop({ listA, listB, listL, onDrop: onDragDrop }); // <-- PASO listL
 }
 
 function renderItem(it, inAlt = false) {
@@ -165,7 +169,7 @@ function renderItem(it, inAlt = false) {
     render();
   });
 
-  // ⬇️ listener actualizado al nuevo selector .orbit-btn
+  // Enviar a órbita (≫)
   item.querySelector(".orbit-btn").addEventListener("click", () => {
     const raw = prompt("¿En cuántos minutos debe volver este Attomic Button?", "5");
     if (raw == null) return; // cancelado
