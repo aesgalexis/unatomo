@@ -157,7 +157,6 @@ header {
   transition: transform .08s ease, box-shadow .12s ease, filter .12s ease;
 }
 
-
 .controls #addBtn {
   background: linear-gradient(180deg, var(--accent), var(--accent-3));
   color:#001018; border:none;
@@ -296,9 +295,28 @@ main { padding:16px 20px; }
   padding:6px;
 }
 
-/* Historial: panel cerrado por defecto */
-.hist-panel { display: none; }
+/* Historial: panel cerrado por defecto + tamaños más pequeños */
+.hist-panel {
+  display: none;
+  font-size: 12px;        /* tamaño base del contenido */
+  line-height: 1.35;
+  padding: 8px 10px;      /* menos padding */
+  border-radius: 8px;
+}
 .hist-panel.open { display: block; }
+.hist-panel .hist-meta {
+  font-size: 11px;        /* fecha/hora un poco más pequeña */
+  color: var(--muted);
+  opacity: 0.85;
+  margin-bottom: 6px;
+}
+.hist-panel .hist-note {
+  font-size: 12px;        /* cuerpo de la nota */
+}
+.hist-panel .hist-note.empty {
+  font-style: italic;
+  opacity: 0.6;           /* “(sin nota)” más tenue */
+}
 
 /* Dragging feedback sutil */
 .item.dragging {
@@ -321,7 +339,12 @@ footer {
   .historial { order: 2; }
   .app { order: 1; }
   .item { grid-template-columns: 36px 1fr 120px; }
+
+  /* Historial aún más compacto en móvil */
+  .hist-panel { font-size: 11.5px; }
+  .hist-panel .hist-meta { font-size: 10.5px; }
 }
+
 /* Empty states para los marcos */
 .list:empty {
   min-height: 80px;
@@ -348,6 +371,7 @@ footer {
 #listB:empty::before {
   content: "Drag something";
 }
+
 /* Placeholder del textarea: tenue e itálico */
 .panel textarea::placeholder {
   font-style: italic;
