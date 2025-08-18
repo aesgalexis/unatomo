@@ -348,4 +348,8 @@ footer {
 #listB:empty::before {
   content: "Drag something";
 }
-
+/* Placeholder del textarea: tenue e itálico */
+.panel textarea::placeholder {
+  font-style: italic;
+  color: rgb(148 163 184 / 0.45); /* ajusta a 0.35 si lo quieres más sutil */
+}
