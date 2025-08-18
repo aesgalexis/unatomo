@@ -134,12 +134,23 @@ header {
   padding:8px 10px; border-radius:10px; border:1px solid var(--outline);
   background: var(--panel-2); color: var(--text);
 }
-.controls button, .import-label {
-  border:none; border-radius:10px; padding:8px 12px; font-weight:600; cursor:pointer;
-  background:#18223a; color:var(--text); border:1px solid #223052;
+.controls button,
+.import-label {
+  display: inline-flex;           /* mismita caja para ambos */
+  align-items: center;
+  gap: 6px;
+  line-height: 1;                 /* evita que el label “crezca” */
+  border: none;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-weight: 600;
+  cursor: pointer;
+  background: #18223a;
+  color: var(--text);
+  border: 1px solid #223052;
   transition: transform .08s ease, box-shadow .12s ease, filter .12s ease;
 }
-.import-label { display:inline-flex; align-items:center; gap:6px; }
+
 
 .controls #addBtn {
   background: linear-gradient(180deg, var(--accent), var(--accent-3));
