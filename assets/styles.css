@@ -50,14 +50,21 @@ body {
   padding: 24px;
 }
 
-/* Layout principal (ahora 3 columnas: Historial | App | Orbit) */
+/* Layout principal — 3 columnas con centro flexible */
 .layout {
   display: grid;
-  grid-template-columns: 260px minmax(560px, auto) 260px; /* centro nunca baja de 560px */
+  grid-template-columns: 260px minmax(640px, 1fr) 260px; /* centro crece con 1fr */
   gap: 16px;
   width: 100%;
-  max-width: 1200px;
+  max-width: 1400px; /* ya lo subiste; ajusta si quieres más ancho */
   align-items: start;
+}
+
+/* Evita que el contenido interno “empuje” el ancho de la columna */
+.app,
+.historial,
+.orbit {
+  min-width: 0;
 }
 
 /* =========================
