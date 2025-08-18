@@ -5,7 +5,7 @@ const STORAGE_KEY = "buttons-v1";
 const HISTORY_MAX = 16;
 
 export const makeEmptyState = () => ({
-  items: [],   // { id, label, note, open, where: 'A'|'B' }
+  items: [],   // { id, label, note, open, where: 'A'|'B', createdAt? }
   history: [], // { label, note, at }
   idSeq: 1,
 });
@@ -34,6 +34,7 @@ function load() {
             : `Attomic Button ${id}`,
         note: typeof it?.note === "string" ? it.note : "",
         open: !!it?.open,
+        createdAt: typeof it?.createdAt === "string" ? it.createdAt : null, // <- NUEVO
       };
     });
 
@@ -79,10 +80,11 @@ export function addItem(label, where = "A") {
   const id = nextId();
   state.items.push({
     id,
-    label: label || `Botón ${id}`,
+    label: label || `Attomic Button ${id}`, // <- NUEVO
     note: "",
     open: false,
     where,
+    createdAt: new Date().toISOString(),     // <- NUEVO
   });
   save();
   return id;
