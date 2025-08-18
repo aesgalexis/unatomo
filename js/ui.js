@@ -127,7 +127,7 @@ function renderItem(it, inAlt = false) {
       <button class="tbtn up" title="Subir">↑</button>
       <button class="tbtn down" title="Bajar">↓</button>
       <button class="tbtn rename" title="Renombrar">✎</button>
-      <button class="tbtn orbit" title="Send to orbit">&raquo;&raquo;</button>
+      <button class="tbtn orbit" title="Send to orbit">→</button>
       <button class="tbtn done" title="Marcar como resuelto">✔</button>
     </div>
     <div class="panel${it.open ? " open" : ""}">
