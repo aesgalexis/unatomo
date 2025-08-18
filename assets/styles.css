@@ -81,8 +81,23 @@ body {
   overflow: visible;
   padding-right: 0;
 }
-
-
+/* Enlace Clear bajo el título del historial */
+.hist-clear {
+  display: inline-block;
+  margin: 6px 0 10px;
+  font-size: 12px;
+  color: var(--muted);
+  text-decoration: underline;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: filter .12s ease, transform .08s ease;
+}
+.hist-clear:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
 /* Historial: gris por defecto, verde suave al hover */
 .hist-item {
   padding:6px 10px;
