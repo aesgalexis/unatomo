@@ -139,6 +139,8 @@ header {
   background:#18223a; color:var(--text); border:1px solid #223052;
   transition: transform .08s ease, box-shadow .12s ease, filter .12s ease;
 }
+.import-label { display:inline-flex; align-items:center; gap:6px; }
+
 .controls #addBtn {
   background: linear-gradient(180deg, var(--accent), var(--accent-3));
   color:#001018; border:none;
