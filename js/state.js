@@ -31,7 +31,7 @@ function load() {
         label:
           typeof it?.label === "string" && it.label.trim()
             ? it.label
-            : `Botón ${id}`,
+            : `Attomic Button ${id}`,
         note: typeof it?.note === "string" ? it.note : "",
         open: !!it?.open,
       };
