@@ -37,7 +37,7 @@ export function render() {
   for (const it of itemsA) listA.appendChild(renderItem(it));
   for (const it of itemsB) listB.appendChild(renderItem(it, true));
 
-  // Historial (desplegable). Muestra todos, el contenedor fuerza scroll vía CSS.
+  // Historial (desplegable). El contenedor fuerza scroll vía CSS.
   for (const h of state.history) {
     const card = document.createElement("div");
     card.className = "hist-card";
@@ -60,14 +60,21 @@ export function render() {
 
     panel.append(meta, note);
 
-    // Click para desplegar/plegar
+    // Click para desplegar/plegar con exclusión mutua dentro del historial
     head.addEventListener("click", () => {
-      panel.classList.toggle("open");
+      const willOpen = !panel.classList.contains("open");
+      closePanelsIn(histList, ".hist-panel", panel); // cierra otros del historial
+      panel.classList.toggle("open", willOpen);
     });
 
     card.append(head, panel);
     histList.appendChild(card);
   }
+
+  // Asegura como máximo un panel abierto por marco al renderizar
+  enforceSingleOpen(listA, ".panel");
+  enforceSingleOpen(listB, ".panel");
+  enforceSingleOpen(histList, ".hist-panel");
 
   countEl.textContent = state.items.length;
 
@@ -79,7 +86,7 @@ function renderItem(it, inAlt = false) {
   const item = document.createElement("div");
   item.className = `item${inAlt ? " in-alt" : ""}`;
   item.dataset.id = String(it.id);
-  item.setAttribute("draggable", "true"); // <-- el contenedor es draggable
+  item.setAttribute("draggable", "true"); // el contenedor es draggable
   item.innerHTML = `
     <div class="grab">◳</div>
     <button class="btn"></button>
@@ -98,11 +105,19 @@ function renderItem(it, inAlt = false) {
   btn.textContent = it.label;
   textarea.value = it.note || "";
 
-  // Abrir/cerrar panel de notas
+  // Abrir/cerrar panel de notas con exclusión por lista (A o B)
   btn.addEventListener("click", () => {
-    const open = !panel.classList.contains("open");
-    panel.classList.toggle("open", open);
-    updateItem(it.id, { open });
+    const container = item.parentElement; // listA o listB
+    const willOpen = !panel.classList.contains("open");
+
+    // Cierra cualquier otro panel abierto en la misma lista y actualiza estado
+    closePanelsIn(container, ".panel", panel, (p) => {
+      const otherItem = p.closest(".item");
+      if (otherItem) updateItem(Number(otherItem.dataset.id), { open: false });
+    });
+
+    panel.classList.toggle("open", willOpen);
+    updateItem(it.id, { open: willOpen });
   });
 
   // Renombrar (✎)
@@ -180,6 +195,29 @@ export function bindGlobalHandlers() {
     clearAll();
     render();
   });
+}
+
+/* ================== Helpers ================== */
+
+// Cierra todos los paneles de un contenedor, excepto 'exceptEl'.
+// selector: ".panel" o ".hist-panel" según el caso.
+// onClose(panel) opcional para sincronizar estado.
+function closePanelsIn(container, selector, exceptEl, onClose) {
+  if (!container) return;
+  container.querySelectorAll(`${selector}.open`).forEach((p) => {
+    if (p === exceptEl) return;
+    p.classList.remove("open");
+    onClose?.(p);
+  });
+}
+
+// Asegura que como máximo haya un panel abierto en 'container' (con el selector dado).
+function enforceSingleOpen(container, selector = ".panel") {
+  if (!container) return;
+  const openPanels = Array.from(container.querySelectorAll(`${selector}.open`));
+  if (openPanels.length <= 1) return;
+  // Deja abierto solo el primero
+  openPanels.slice(1).forEach((p) => p.classList.remove("open"));
 }
 
 function formatDate(iso) {
