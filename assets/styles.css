@@ -286,14 +286,9 @@ main { padding:16px 20px; }
 
 /* === Items (tarjetas) === */
 .item {
-  display: grid;
-  grid-template-columns: 40px 1fr max-content; /* antes: 40px 1fr 136px */
-  align-items: center;                          /* centra verticalmente */
-  gap: 6px;
-  padding: 8px;
-  border: 1px solid var(--outline);
-  border-radius: 12px;
-  background: var(--panel-2);
+  display:grid; grid-template-columns:40px 1fr 136px; gap:6px;
+  padding:8px; border:1px solid var(--outline);
+  border-radius:12px; background: var(--panel-2);
   transition: box-shadow .12s ease, transform .08s ease, border-color .12s ease, filter .12s ease;
 }
 
@@ -332,23 +327,12 @@ main { padding:16px 20px; }
   border:1px solid #1b2540; border-radius:8px;
   background: linear-gradient(180deg, #1f2a44, #172036);
   color:var(--text); padding:8px; cursor:pointer; text-align:left;
-
-  /* control de una línea con elipsis */
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  min-width: 0; /* permite que el 1fr reduzca correctamente */
 }
 #frameA .btn { border-color: rgba(56,189,248,0.25); }
 #frameA .btn:hover { filter: brightness(1.05); }
 
 /* Herramientas */
-.tools {
-  display:flex;
-  gap:4px;
-  flex-wrap: nowrap;   /* evita salto a nueva línea */
-  white-space: nowrap; /* defensivo */
-}
+.tools { display:flex; gap:4px; }
 .tbtn {
   background:#0a0f20; border:1px solid var(--outline);
   border-radius:8px; padding:4px 6px; color:var(--text);
@@ -437,7 +421,7 @@ footer {
   .app { order: 1; }
   .historial { order: 2; }
   .orbit { order: 3; }
-  .item { grid-template-columns: 36px 1fr max-content; } /* antes: 36px 1fr 120px */
+  .item { grid-template-columns: 36px 1fr 120px; }
 
   /* Historial aún más compacto en móvil */
   .hist-panel { font-size: 11.5px; }
