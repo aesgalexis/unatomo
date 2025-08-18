@@ -8,10 +8,14 @@ import {
   resolveItem,
   exportJson,
   importJson,
-  moveItem, // <- necesario para fijar orden en drop
-  clearAll   // <- NUEVO
+  moveItem, // para fijar orden en drop
+  clearAll
 } from "./state.js";
 import { enableDragAndDrop } from "./dragdrop.js";
+
+// Límites por marco
+const MAX_A = 8;
+const MAX_B = 16;
 
 // Elementos raíz
 const listA = document.getElementById("listA");
@@ -22,7 +26,11 @@ const input = document.getElementById("labelInput");
 const countEl = document.getElementById("count");
 const exportBtn = document.getElementById("exportBtn");
 const importInput = document.getElementById("importInput");
-const clearAllBtn = document.getElementById("clearAll"); // <- NUEVO
+const clearAllBtn = document.getElementById("clearAll");
+
+// Títulos de marcos
+const frameATitle = document.querySelector("#frameA h2");
+const frameBTitle = document.querySelector("#frameB h2");
 
 export function render() {
   // Limpiar
@@ -30,10 +38,11 @@ export function render() {
   listB.innerHTML = "";
   histList.innerHTML = "";
 
-  // Items
+  // Items por marco
   const itemsA = state.items.filter((x) => x.where === "A");
   const itemsB = state.items.filter((x) => x.where === "B");
 
+  // Pintar
   for (const it of itemsA) listA.appendChild(renderItem(it));
   for (const it of itemsB) listB.appendChild(renderItem(it, true));
 
@@ -60,10 +69,10 @@ export function render() {
 
     panel.append(meta, note);
 
-    // Click para desplegar/plegar con exclusión mutua dentro del historial
+    // Exclusión mutua dentro del historial
     head.addEventListener("click", () => {
       const willOpen = !panel.classList.contains("open");
-      closePanelsIn(histList, ".hist-panel", panel); // cierra otros del historial
+      closePanelsIn(histList, ".hist-panel", panel);
       panel.classList.toggle("open", willOpen);
     });
 
@@ -71,14 +80,22 @@ export function render() {
     histList.appendChild(card);
   }
 
-  // Asegura como máximo un panel abierto por marco al renderizar
+  // Contadores por marco en el título
+  if (frameATitle) frameATitle.textContent = `Marco superior (${itemsA.length}/${MAX_A})`;
+  if (frameBTitle) frameBTitle.textContent = `Marco inferior (recepción) (${itemsB.length}/${MAX_B})`;
+
+  // Desactivar/activar +Crear según límite A
+  if (addBtn) addBtn.disabled = itemsA.length >= MAX_A;
+
+  // Asegurar un panel abierto como máximo por zona
   enforceSingleOpen(listA, ".panel");
   enforceSingleOpen(listB, ".panel");
   enforceSingleOpen(histList, ".hist-panel");
 
-  countEl.textContent = state.items.length;
+  // Total abajo (suma de ambos)
+  countEl.textContent = String(itemsA.length + itemsB.length);
 
-  // Activar DnD (listeners solo se atan una vez; el callback se actualiza cada render)
+  // Activar DnD
   enableDragAndDrop({ listA, listB, onDrop: onDragDrop });
 }
 
@@ -86,7 +103,7 @@ function renderItem(it, inAlt = false) {
   const item = document.createElement("div");
   item.className = `item${inAlt ? " in-alt" : ""}`;
   item.dataset.id = String(it.id);
-  item.setAttribute("draggable", "true"); // el contenedor es draggable
+  item.setAttribute("draggable", "true");
   item.innerHTML = `
     <div class="grab">◳</div>
     <button class="btn"></button>
@@ -105,7 +122,7 @@ function renderItem(it, inAlt = false) {
   btn.textContent = it.label;
   textarea.value = it.note || "";
 
-  // Abrir/cerrar panel de notas con exclusión por lista (A o B)
+  // Abrir/cerrar panel de notas con exclusión por lista
   btn.addEventListener("click", () => {
     const container = item.parentElement; // listA o listB
     const willOpen = !panel.classList.contains("open");
@@ -127,7 +144,7 @@ function renderItem(it, inAlt = false) {
     const nombre = nuevo.trim();
     if (!nombre) return;       // vacío -> no cambiamos
     updateItem(it.id, { label: nombre });
-    render(); // refresca texto y conserva estado
+    render();
   });
 
   // Editar nota
@@ -156,13 +173,32 @@ function renderItem(it, inAlt = false) {
 }
 
 function onDragDrop({ id, where, index }) {
-  // Mover el ítem a 'where' e insertar en el índice indicado
-  moveItem(Number(id), where, Number(index));
+  // Capacidad actual del destino (excluyendo el propio ítem si ya está ahí)
+  const numId = Number(id);
+  const moving = state.items.find((x) => x.id === numId);
+  const destItemsExcludingSelf = state.items.filter(
+    (x) => x.where === where && x.id !== numId
+  );
+  const capacity = where === "A" ? MAX_A : MAX_B;
+
+  if (destItemsExcludingSelf.length >= capacity) {
+    // No permitir rebasar el límite al mover desde la otra lista
+    // (Si era reordenar dentro de la misma, destItemsExcludingSelf será n-1 y permitirá moverse)
+    return;
+  }
+
+  moveItem(numId, where, Number(index));
   render();
 }
 
 export function bindGlobalHandlers() {
   addBtn.addEventListener("click", () => {
+    // Respetar límite en A al crear
+    const countA = state.items.filter((x) => x.where === "A").length;
+    if (countA >= MAX_A) {
+      alert(`Marco superior lleno (${countA}/${MAX_A}).`);
+      return;
+    }
     const label = input.value.trim();
     addItem(label);
     input.value = "";
@@ -189,7 +225,6 @@ export function bindGlobalHandlers() {
     }
   });
 
-  // Vaciar todo
   clearAllBtn?.addEventListener("click", () => {
     if (!confirm("¿Vaciar todo?")) return;
     clearAll();
@@ -211,12 +246,11 @@ function closePanelsIn(container, selector, exceptEl, onClose) {
   });
 }
 
-// Asegura que como máximo haya un panel abierto en 'container' (con el selector dado).
+// Asegura que como máximo haya un panel abierto en 'container'.
 function enforceSingleOpen(container, selector = ".panel") {
   if (!container) return;
   const openPanels = Array.from(container.querySelectorAll(`${selector}.open`));
   if (openPanels.length <= 1) return;
-  // Deja abierto solo el primero
   openPanels.slice(1).forEach((p) => p.classList.remove("open"));
 }
 
@@ -224,7 +258,7 @@ function formatDate(iso) {
   if (!iso) return "";
   try {
     const d = new Date(iso);
-    return d.toLocaleString(); // usa la configuración local del navegador
+    return d.toLocaleString();
   } catch {
     return "";
   }
