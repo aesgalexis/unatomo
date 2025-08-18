@@ -10,14 +10,14 @@ import {
   importJson,
   moveItem, // para fijar orden en drop
   clearAll,
-  clearHistory, // <- NUEVO
+  clearHistory,
 } from "./state.js";
 import { enableDragAndDrop } from "./dragdrop.js";
 
 // Límites por marco
 const MAX_A = 8;
 const MAX_B = 16;
-const HISTORY_MAX = 16; // <- NUEVO (debe coincidir con state.js)
+const HISTORY_MAX = 16; // debe coincidir con state.js
 
 const clearHistoryBtn = document.getElementById("clearHistoryBtn");
 
@@ -35,7 +35,7 @@ const clearAllBtn = document.getElementById("clearAll");
 // Títulos de marcos
 const frameATitle = document.querySelector("#frameA h2");
 const frameBTitle = document.querySelector("#frameB h2");
-const histTitle  = document.querySelector(".historial h2"); // <- NUEVO
+const histTitle  = document.querySelector(".historial h2");
 
 export function render() {
   // Limpiar
@@ -88,7 +88,7 @@ export function render() {
   // Contadores por marco en el título
   if (frameATitle) frameATitle.textContent = `Main (${itemsA.length}/${MAX_A})`;
   if (frameBTitle) frameBTitle.textContent = `Side (${itemsB.length}/${MAX_B})`;
-  if (histTitle)  histTitle.textContent  = `History (${state.history.length}/${HISTORY_MAX})`; // <- NUEVO
+  if (histTitle)  histTitle.textContent  = `History (${state.history.length}/${HISTORY_MAX})`;
 
   // Desactivar/activar +Crear según límite A
   if (addBtn) addBtn.disabled = itemsA.length >= MAX_A;
@@ -125,7 +125,10 @@ function renderItem(it, inAlt = false) {
   const btn = item.querySelector(".btn");
   const panel = item.querySelector(".panel");
   const textarea = item.querySelector("textarea");
-  btn.textContent = it.label;
+
+  // Mostrar nombre + sello temporal si existe
+  btn.textContent = labelWithStamp(it);
+
   textarea.value = it.note || "";
 
   // Abrir/cerrar panel de notas con exclusión por lista
@@ -145,7 +148,7 @@ function renderItem(it, inAlt = false) {
 
   // Renombrar (✎)
   item.querySelector(".rename").addEventListener("click", () => {
-    const nuevo = prompt("Renombrar botón:", btn.textContent.trim());
+    const nuevo = prompt("Renombrar Attomic Button:", btn.textContent.trim());
     if (nuevo == null) return; // cancelado
     const nombre = nuevo.trim();
     if (!nombre) return;       // vacío -> no cambiamos
@@ -181,7 +184,6 @@ function renderItem(it, inAlt = false) {
 function onDragDrop({ id, where, index }) {
   // Capacidad actual del destino (excluyendo el propio ítem si ya está ahí)
   const numId = Number(id);
-  const moving = state.items.find((x) => x.id === numId);
   const destItemsExcludingSelf = state.items.filter(
     (x) => x.where === where && x.id !== numId
   );
@@ -277,6 +279,26 @@ function formatDate(iso) {
   try {
     const d = new Date(iso);
     return d.toLocaleString();
+  } catch {
+    return "";
+  }
+}
+
+// Texto del botón: nombre + sello temporal (si existe)
+function labelWithStamp(it) {
+  if (!it?.createdAt) return it.label || "";
+  return `${it.label} — ${formatStamp(it.createdAt)}`;
+}
+
+function formatStamp(iso) {
+  try {
+    const d = new Date(iso);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    const hh = String(d.getHours()).padStart(2, "0");
+    const mm = String(d.getMinutes()).padStart(2, "0");
+    return `${y}-${m}-${day} ${hh}:${mm}`;
   } catch {
     return "";
   }
