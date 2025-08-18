@@ -150,7 +150,7 @@ function renderItem(it, inAlt = false) {
 
   // Renombrar (✎)
   item.querySelector(".rename").addEventListener("click", () => {
-    const nuevo = prompt("Renombrar Attomic Button:", btn.textContent.trim());
+    const nuevo = prompt("Rename Attomic Button:", btn.textContent.trim());
     if (nuevo == null) return; // cancelado
     const nombre = nuevo.trim();
     if (!nombre) return;       // vacío -> no cambiamos
