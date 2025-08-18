@@ -284,3 +284,27 @@ footer {
   .app { order: 1; }
   .item { grid-template-columns: 36px 1fr 120px; }
 }
+/* Empty states para los marcos */
+.list:empty {
+  min-height: 80px;
+  display: grid;
+  place-items: center;
+  border: 1px dashed var(--outline);
+  border-radius: 12px;
+  padding: 12px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+}
+
+#listA:empty::before {
+  content: "Create something";
+  color: var(--muted);
+  font-size: 13px;
+  letter-spacing: .2px;
+}
+
+#listB:empty::before {
+  content: "Drag something";
+  color: var(--muted);
+  font-size: 13px;
+  letter-spacing: .2px;
+}
