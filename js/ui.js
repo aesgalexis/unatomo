@@ -81,8 +81,8 @@ export function render() {
   }
 
   // Contadores por marco en el título
-  if (frameATitle) frameATitle.textContent = `Marco superior (${itemsA.length}/${MAX_A})`;
-  if (frameBTitle) frameBTitle.textContent = `Marco inferior (recepción) (${itemsB.length}/${MAX_B})`;
+  if (frameATitle) frameATitle.textContent = `Main (${itemsA.length}/${MAX_A})`;
+  if (frameBTitle) frameBTitle.textContent = `Side (${itemsB.length}/${MAX_B})`;
 
   // Desactivar/activar +Crear según límite A
   if (addBtn) addBtn.disabled = itemsA.length >= MAX_A;
