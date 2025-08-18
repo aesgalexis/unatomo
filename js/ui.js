@@ -240,7 +240,7 @@ export function bindGlobalHandlers() {
 
   // Vaciar todo
   clearAllBtn?.addEventListener("click", () => {
-    if (!confirm("¿Vaciar todo?")) return;
+    if (!confirm("¿Clear all?")) return;
     clearAll();
     render();
   });
