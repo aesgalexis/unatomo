@@ -52,7 +52,7 @@ function load() {
       };
     });
 
-    // Limitar historial a HISTORY_MAX (mantiene orden actual: más nuevo primero)
+    // Limitar historial a HISTORY_MAX (más nuevo primero)
     const historyLimited = history.slice(0, HISTORY_MAX);
 
     // idSeq consistente (>= max id + 1)
@@ -149,6 +149,12 @@ export function resolveItem(id) {
 
 export function clearAll() {
   state = makeEmptyState();
+  save();
+}
+
+// (opcional) Limpiar solo el historial
+export function clearHistory() {
+  state.history = [];
   save();
 }
 
