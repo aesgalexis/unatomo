@@ -72,12 +72,16 @@ body {
   font-size: 14px; margin:0 0 10px; color: var(--muted);
 }
 
+/* Historial: sin scroll forzado, que crezca y scrollee la página */
 .hist-list {
-  display:flex; flex-direction:column; gap:8px;
-  max-height: 640px; /* fuerza scroll si hay muchos */
-  overflow-y: auto;
-  padding-right: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  /* sin max-height, sin overflow */
+  overflow: visible;
+  padding-right: 0;
 }
+
 
 /* Historial: gris por defecto, verde suave al hover */
 .hist-item {
