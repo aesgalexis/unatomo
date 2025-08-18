@@ -5,12 +5,15 @@ const STORAGE_KEY = "buttons-v1";
 const HISTORY_MAX = 16;
 
 export const makeEmptyState = () => ({
-  items: [],   // { id, label, note, open, where: 'A'|'B', createdAt? }
+  items: [],   // { id, label, note, open, where: 'A'|'B'|'L', createdAt? }
   history: [], // { label, note, at }
+  orbit: [],   // [{ id, label, note, createdAt?, returnAt, fromWhere }]
   idSeq: 1,
 });
 
 export let state = load();
+
+/* ================= Normalización & carga ================= */
 
 function load() {
   try {
@@ -24,17 +27,18 @@ function load() {
     const itemsRaw = Array.isArray(parsed.items) ? parsed.items : [];
     const items = itemsRaw.map((it, idx) => {
       const id = Number.isFinite(+it?.id) ? +it.id : idx + 1;
-      const where = it?.where === "B" ? "B" : "A";
+      const where = it?.where === "B" ? "B" : it?.where === "L" ? "L" : "A";
       return {
         id,
         where,
         label:
           typeof it?.label === "string" && it.label.trim()
             ? it.label
-            : `Proton ${id}`,
+            : `Attomic Button ${id}`,
         note: typeof it?.note === "string" ? it.note : "",
         open: !!it?.open,
-        createdAt: typeof it?.createdAt === "string" ? it.createdAt : null, // <- NUEVO
+        createdAt:
+          typeof it?.createdAt === "string" ? it.createdAt : null,
       };
     });
 
@@ -52,17 +56,34 @@ function load() {
         note: typeof h?.note === "string" ? h.note : "",
         at: typeof h?.at === "string" ? h.at : null,
       };
-    });
+    }).slice(0, HISTORY_MAX); // cap
 
-    // Limitar historial a HISTORY_MAX (más nuevo primero)
-    const historyLimited = history.slice(0, HISTORY_MAX);
+    // --- Normalización de órbita ---
+    const orbitRaw = Array.isArray(parsed.orbit) ? parsed.orbit : [];
+    const orbit = orbitRaw.map((o) => {
+      return {
+        id: Number.isFinite(+o?.id) ? +o.id : null,
+        label:
+          typeof o?.label === "string" && o.label.trim()
+            ? o.label
+            : "(sin etiqueta)",
+        note: typeof o?.note === "string" ? o.note : "",
+        createdAt: typeof o?.createdAt === "string" ? o.createdAt : null,
+        returnAt: typeof o?.returnAt === "string" ? o.returnAt : null,
+        fromWhere: o?.fromWhere === "B" ? "B" : "A", // por defecto A
+      };
+    }).filter(o => o.id != null && o.returnAt);
 
     // idSeq consistente (>= max id + 1)
     let idSeq = Number.isInteger(parsed.idSeq) ? parsed.idSeq : base.idSeq;
     const maxId = items.reduce((m, it) => Math.max(m, it.id), 0);
     if (!Number.isInteger(idSeq) || idSeq <= maxId) idSeq = maxId + 1;
 
-    return { items, history: historyLimited, idSeq };
+    // Construimos estado temporal y aterrizamos si hay orbits vencidos
+    let tmp = { items, history, orbit, idSeq };
+    tmp = landDueOrbitsIn(tmp);
+
+    return tmp;
   } catch {
     return makeEmptyState();
   }
@@ -76,15 +97,17 @@ export function nextId() {
   return state.idSeq++;
 }
 
+/* ================= Mutaciones de items ================= */
+
 export function addItem(label, where = "A") {
   const id = nextId();
   state.items.push({
     id,
-    label: label || `Sample Attomic Button ${id}`, // <- NUEVO
+    label: label || `Attomic Button ${id}`,
     note: "",
     open: false,
     where,
-    createdAt: new Date().toISOString(),     // <- NUEVO
+    createdAt: new Date().toISOString(),
   });
   save();
   return id;
@@ -105,14 +128,14 @@ export function moveItem(id, where, index) {
   const existing = state.items.find((x) => x.id === id);
   if (!existing) return;
 
-  // Construimos el destino con el orden actual (sin el elemento que movemos)
+  // destino actual sin el elemento movido
   const dest = state.items.filter((x) => x.where === where && x.id !== id);
   const clamped = Math.max(0, Math.min(index ?? dest.length, dest.length));
   const updated = { ...existing, where };
 
   dest.splice(clamped, 0, updated);
 
-  // El resto (excluyendo el que movemos)
+  // resto
   const others = state.items.filter((x) => !(x.id === id || x.where === where));
   state.items = [...others, ...dest];
   save();
@@ -142,7 +165,6 @@ export function resolveItem(id) {
     note: (it.note || "").trim(),
     at: new Date().toISOString(),
   });
-  // Limitar a HISTORY_MAX: FIFO (elimina los más antiguos)
   if (state.history.length > HISTORY_MAX) {
     state.history = state.history.slice(0, HISTORY_MAX);
   }
@@ -155,13 +177,80 @@ export function clearAll() {
   save();
 }
 
-// Limpiar solo el historial (útil para el botón "Clear")
+// Limpiar solo el historial
 export function clearHistory() {
   state.history = [];
   save();
 }
 
-// Exportar/Importar
+/* ================= Órbita ================= */
+
+/**
+ * Envía a órbita un item por N minutos. El item desaparece de items
+ * (no entra en historial). Se persistirá en state.orbit con returnAt.
+ */
+export function sendToOrbit(id, minutes = 1) {
+  const it = state.items.find((x) => x.id === id);
+  if (!it) return false;
+
+  const ms = Math.max(1, Number(minutes)) * 60_000;
+  const returnAt = new Date(Date.now() + ms).toISOString();
+
+  // guardar snapshot mínimo para reconstruir
+  state.orbit.unshift({
+    id: it.id,
+    label: it.label,
+    note: it.note || "",
+    createdAt: it.createdAt || null,
+    returnAt,
+    fromWhere: it.where || "A",
+  });
+
+  // quitar del tablero sin pasar por history
+  removeItem(id); // también hace save()
+  save();
+  return true;
+}
+
+/**
+ * Aterriza todas las órbitas vencidas (returnAt <= ahora) en 'L' (Landing).
+ * Devuelve el número de aterrizados.
+ */
+export function landDueOrbits(now = new Date()) {
+  const changed = landDueOrbitsIn(state, now);
+  if (changed) save();
+  return changed;
+}
+
+// Helper puro para usar en load() e importJson() sin depender del singleton
+function landDueOrbitsIn(s, now = new Date()) {
+  const nowMs = now instanceof Date ? +now : Date.parse(now);
+  const due = [];
+  const keep = [];
+
+  (s.orbit || []).forEach((o) => {
+    const t = Date.parse(o.returnAt);
+    if (Number.isFinite(t) && t <= nowMs) due.push(o);
+    else keep.push(o);
+  });
+
+  if (due.length) {
+    const landed = due.map((o) => ({
+      id: o.id,
+      label: o.label,
+      note: o.note || "",
+      open: false,
+      where: "L", // siempre aterrizan en Landing
+      createdAt: o.createdAt || null,
+    }));
+    s.items = [...s.items, ...landed];
+  }
+  s.orbit = keep;
+  return due.length;
+}
+
+/* ================= Exportar/Importar ================= */
+
 export function exportJson() {
   const blob = new Blob([JSON.stringify(state, null, 2)], {
     type: "application/json",
@@ -180,18 +269,15 @@ export function exportJson() {
 export function importJson(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onerror = () => reject(new Error("The file could not be read"));
+    reader.onerror = () => reject(new Error("No se pudo leer el archivo"));
     reader.onload = () => {
       try {
         const parsed = JSON.parse(String(reader.result));
         if (!parsed || !Array.isArray(parsed.items))
-          throw new Error("Invalid format");
-        state = parsed; // reemplazo total
-        // Re-normalizamos inmediatamente (capará items/historial, incluyendo HISTORY_MAX)
-        state = (function normalize(s) {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
-          return load();
-        })(state);
+          throw new Error("Formato inválido");
+        // Guardamos tal cual y re-normalizamos (incluye órbita + aterrizaje vencidos)
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+        state = load();
         save();
         resolve();
       } catch (e) {
