@@ -44,6 +44,9 @@ const frameL = document.querySelector("#frameL"); // <-- NUEVO (para glow violet
 // Timer de aterrizaje periódico
 let orbitTimer = null;
 
+// Activar DnD: Landing solo como fuente (no drop), A y B full DnD
+enableDragAndDrop({ listL, listA, listB, onDrop: onDragDrop });
+
 export function render() {
   // Limpiar
   if (listL) listL.innerHTML = "";
