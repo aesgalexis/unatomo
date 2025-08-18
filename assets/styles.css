@@ -61,3 +61,53 @@ main { padding:16px 20px; }
 .panel textarea { width:100%; min-height:60px; border-radius:8px; border:1px solid var(--outline); background:#0a0f20; color:var(--text); padding:6px; }
 
 footer { padding:10px 16px; border-top:1px solid var(--outline); font-size:12px; color:var(--muted); display:flex; justify-content:space-between; }
+
+/* Historial: gris por defecto, verde al hover, panel desplegable y scroll */
+.hist-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  /* Altura aprox. para ~20 cabeceras; si hay paneles abiertos, aparecerá scroll */
+  max-height: 640px; /* ~20 x 32px */
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.hist-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Por defecto: gris */
+.hist-item {
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #1f2937, #111827);
+  border: 1px solid #374151;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background .15s ease, border-color .15s ease;
+}
+
+/* Hover: verde */
+.hist-item:hover {
+  background: linear-gradient(180deg, #065f46, #064e3b);
+  border-color: #047857;
+}
+
+/* Panel que se despliega al hacer click en el item */
+.hist-panel {
+  display: none;
+  padding: 8px;
+  border: 1px dashed var(--hist-border);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.02);
+  font-size: 12px;
+}
+
+.hist-panel.open { display: block; }
+.hist-meta { color: var(--muted); font-size: 11px; margin-bottom: 4px; }
+.hist-note { white-space: pre-wrap; }
+.hist-note.empty { color: var(--muted); font-style: italic; }
+
