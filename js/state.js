@@ -80,7 +80,7 @@ export function addItem(label, where = "A") {
   const id = nextId();
   state.items.push({
     id,
-    label: label || `Attomic Button ${id}`, // <- NUEVO
+    label: label || `Sample proton ${id}`, // <- NUEVO
     note: "",
     open: false,
     where,
