@@ -119,7 +119,9 @@ function renderItem(it, inAlt = false) {
       <button class="tbtn rename" title="Renombrar">✎</button>
       <button class="tbtn done" title="Marcar como resuelto">✔</button>
     </div>
-    <div class="panel${it.open ? " open" : ""}"><textarea></textarea></div>
+    <div class="panel${it.open ? " open" : ""}">
+      <textarea placeholder="Write something.."></textarea>
+    </div>
   `;
 
   const btn = item.querySelector(".btn");
