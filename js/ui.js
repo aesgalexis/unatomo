@@ -160,3 +160,12 @@ export function bindGlobalHandlers() {
     }
   });
 }
+function formatDate(iso) {
+  if (!iso) return "";
+  try {
+    const d = new Date(iso);
+    return d.toLocaleString(); // usa la configuración local del navegador
+  } catch {
+    return "";
+  }
+}
