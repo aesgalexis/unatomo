@@ -30,7 +30,7 @@
   --card-sub-1: #0f172a;
   --card-sub-2: #0d1426;
 
-  /* Historial */
+  /* Historial / Orbit */
   --hist-bg: #0e1424;
   --hist-border: #2a3753;
 }
@@ -50,17 +50,19 @@ body {
   padding: 24px;
 }
 
-/* Layout principal */
+/* Layout principal (ahora 3 columnas: Historial | App | Orbit) */
 .layout {
   display: grid;
-  grid-template-columns: 260px 1fr;
+  grid-template-columns: 260px 1fr 260px; /* <- antes 2 columnas */
   gap: 16px;
   width: 100%;
   max-width: 1100px;
   align-items: start;
 }
 
-/* Historial */
+/* =========================
+   Historial (columna izquierda)
+   ========================= */
 .historial {
   background: var(--hist-bg);
   border: 1px solid var(--hist-border);
@@ -77,10 +79,10 @@ body {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  /* sin max-height, sin overflow */
   overflow: visible;
   padding-right: 0;
 }
+
 /* Enlace Clear bajo el título del historial */
 .hist-clear {
   display: inline-block;
@@ -98,6 +100,7 @@ body {
   filter: brightness(1.1);
   transform: translateY(-1px);
 }
+
 /* Historial: gris por defecto, verde suave al hover (alineado y más discreto) */
 .hist-item {
   display: flex;
@@ -106,8 +109,8 @@ body {
   border-radius: 8px;
   background: linear-gradient(180deg, #1f2937, #111827);
   border: 1px solid #374151;
-  font-size: 12px;           /* antes 13px */
-  line-height: 1.25;         /* más compacto y legible */
+  font-size: 12px;
+  line-height: 1.25;
   text-align: left;
   letter-spacing: 0.1px;
   cursor: pointer;
@@ -119,8 +122,27 @@ body {
   transform: translateY(-1px);
 }
 
+/* Panel del historial */
+.hist-panel {
+  display: none;
+  font-size: 12px;
+  line-height: 1.35;
+  padding: 8px 10px;
+  border-radius: 8px;
+}
+.hist-panel.open { display: block; }
+.hist-panel .hist-meta {
+  font-size: 11px;
+  color: var(--muted);
+  opacity: 0.85;
+  margin-bottom: 6px;
+}
+.hist-panel .hist-note { font-size: 12px; }
+.hist-panel .hist-note.empty { font-style: italic; opacity: 0.6; }
 
-/* App contenedor */
+/* =========================
+   App (columna central)
+   ========================= */
 .app {
   background: rgba(255,255,255,0.02);
   border: 1px solid var(--outline);
@@ -142,10 +164,10 @@ header {
 }
 .controls button,
 .import-label {
-  display: inline-flex;           /* mismita caja para ambos */
+  display: inline-flex;
   align-items: center;
   gap: 6px;
-  line-height: 1;                 /* evita que el label “crezca” */
+  line-height: 1;
   border: none;
   border-radius: 10px;
   padding: 8px 12px;
@@ -156,7 +178,6 @@ header {
   border: 1px solid #223052;
   transition: transform .08s ease, box-shadow .12s ease, filter .12s ease;
 }
-
 .controls #addBtn {
   background: linear-gradient(180deg, var(--accent), var(--accent-3));
   color:#001018; border:none;
@@ -215,8 +236,6 @@ main { padding:16px 20px; }
 .list { display:flex; flex-direction:column; gap:8px; }
 
 /* === Items (tarjetas) === */
-
-/* Por defecto (se aplica a ambos; luego afinamos por marco) */
 .item {
   display:grid; grid-template-columns:40px 1fr 136px; gap:6px;
   padding:8px; border:1px solid var(--outline);
@@ -261,9 +280,7 @@ main { padding:16px 20px; }
   color:var(--text); padding:8px; cursor:pointer; text-align:left;
 }
 #frameA .btn { border-color: rgba(56,189,248,0.25); }
-#frameA .btn:hover {
-  filter: brightness(1.05);
-}
+#frameA .btn:hover { filter: brightness(1.05); }
 
 /* Herramientas */
 .tools { display:flex; gap:4px; }
@@ -295,29 +312,6 @@ main { padding:16px 20px; }
   padding:6px;
 }
 
-/* Historial: panel cerrado por defecto + tamaños más pequeños */
-.hist-panel {
-  display: none;
-  font-size: 12px;        /* tamaño base del contenido */
-  line-height: 1.35;
-  padding: 8px 10px;      /* menos padding */
-  border-radius: 8px;
-}
-.hist-panel.open { display: block; }
-.hist-panel .hist-meta {
-  font-size: 11px;        /* fecha/hora un poco más pequeña */
-  color: var(--muted);
-  opacity: 0.85;
-  margin-bottom: 6px;
-}
-.hist-panel .hist-note {
-  font-size: 12px;        /* cuerpo de la nota */
-}
-.hist-panel .hist-note.empty {
-  font-style: italic;
-  opacity: 0.6;           /* “(sin nota)” más tenue */
-}
-
 /* Dragging feedback sutil */
 .item.dragging {
   opacity: .88;
@@ -326,18 +320,58 @@ main { padding:16px 20px; }
   filter: saturate(1.05);
 }
 
+/* =========================
+   Orbit (columna derecha)
+   ========================= */
+.orbit {
+  background: var(--hist-bg);
+  border: 1px solid var(--hist-border);
+  border-radius: 14px;
+  padding: 12px;
+  min-height: 200px;
+}
+.orbit h2 {
+  font-size: 14px;
+  margin: 0 0 10px;
+  color: var(--muted);
+}
+.orbit-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow: visible;
+  padding-right: 0;
+}
+/* Estado vacío opcional para Orbit */
+.orbit-list:empty {
+  min-height: 80px;
+  display: grid;
+  place-items: center;
+  border: 1px dashed var(--outline);
+  border-radius: 12px;
+  padding: 12px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+}
+.orbit-list:empty::before {
+  content: "Nothing in orbit (yet)";
+  color: rgb(148 163 184 / 0.28);
+  font-size: 13px;
+  letter-spacing: .2px;
+}
+
 /* Footer */
 footer {
   padding:10px 16px; border-top:1px solid var(--outline);
-  font-size:12px; color:var(--muted);
+  font-size:12px; color: var(--muted);
   display:flex; justify-content:space-between;
 }
 
 /* Pequeños ajustes responsive */
 @media (max-width: 900px) {
   .layout { grid-template-columns: 1fr; }
-  .historial { order: 2; }
   .app { order: 1; }
+  .historial { order: 2; }
+  .orbit { order: 3; }
   .item { grid-template-columns: 36px 1fr 120px; }
 
   /* Historial aún más compacto en móvil */
@@ -359,18 +393,14 @@ footer {
 /* Estilo común para el texto fantasma, con color difuso/tenue */
 #listA:empty::before,
 #listB:empty::before {
-  color: rgb(148 163 184 / 0.28); /* gris azulado suave */
+  color: rgb(148 163 184 / 0.28);
   font-size: 13px;
   letter-spacing: .2px;
 }
 
 /* Mensaje por marco */
-#listA:empty::before {
-  content: "Create something";
-}
-#listB:empty::before {
-  content: "Drag something";
-}
+#listA:empty::before { content: "Create something"; }
+#listB:empty::before { content: "Drag something"; }
 
 /* Placeholder del textarea: tenue e itálico */
 .panel textarea::placeholder {
