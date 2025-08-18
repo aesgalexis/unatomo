@@ -16,6 +16,7 @@ import { enableDragAndDrop } from "./dragdrop.js";
 // Límites por marco
 const MAX_A = 8;
 const MAX_B = 16;
+const clearHistoryBtn = document.getElementById("clearHistoryBtn");
 
 // Elementos raíz
 const listA = document.getElementById("listA");
@@ -203,6 +204,13 @@ export function bindGlobalHandlers() {
     addItem(label);
     input.value = "";
     input.focus();
+    render();
+      // Borrar historial
+  clearHistoryBtn?.addEventListener("click", (e) => {
+    e.preventDefault();
+    if (!confirm("Clear history?")) return;
+    state.history = [];
+    save();
     render();
   });
 
