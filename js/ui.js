@@ -25,7 +25,7 @@ const clearHistoryBtn = document.getElementById("clearHistoryBtn");
 
 // Elementos raíz
 const listL = document.getElementById("listL"); // Landing
-const frameL = document.getElementById("frameL"); // <-- NUEVO
+const frameL = document.getElementById("frameL"); // para el glow violeta
 const listA = document.getElementById("listA");
 const listB = document.getElementById("listB");
 const histList = document.getElementById("histList");
@@ -40,13 +40,9 @@ const clearAllBtn = document.getElementById("clearAll");
 const frameATitle = document.querySelector("#frameA h2");
 const frameBTitle = document.querySelector("#frameB h2");
 const histTitle  = document.querySelector(".historial h2");
-const frameL = document.querySelector("#frameL"); // <-- NUEVO (para glow violeta)
 
 // Timer de aterrizaje periódico
 let orbitTimer = null;
-
-// Activar DnD: Landing solo como fuente (no drop), A y B full DnD
-enableDragAndDrop({ listL, listA, listB, onDrop: onDragDrop });
 
 export function render() {
   // Limpiar
@@ -56,13 +52,12 @@ export function render() {
   histList.innerHTML = "";
 
   // Items por marco
-const itemsL = state.items.filter((x) => x.where === "L");
-const itemsA = state.items.filter((x) => x.where === "A");
-const itemsB = state.items.filter((x) => x.where === "B");
+  const itemsL = state.items.filter((x) => x.where === "L");
+  const itemsA = state.items.filter((x) => x.where === "A");
+  const itemsB = state.items.filter((x) => x.where === "B");
 
-// <-- NUEVO: marcar glow en Landing si tiene elementos
-if (frameL) frameL.classList.toggle("has-items", itemsL.length > 0);
-
+  // Glow violeta en Landing si contiene elementos
+  if (frameL) frameL.classList.toggle("has-items", itemsL.length > 0);
 
   // Pintar
   for (const it of itemsL) listL?.appendChild(renderItem(it, true)); // estilo discreto
@@ -108,9 +103,6 @@ if (frameL) frameL.classList.toggle("has-items", itemsL.length > 0);
   if (frameBTitle) frameBTitle.textContent = `Side (${itemsB.length}/${MAX_B})`;
   if (histTitle)  histTitle.textContent  = `History (${state.history.length}/${HISTORY_MAX})`;
 
-  // Estado visual de Landing (glow violeta si contiene elementos)
-  if (frameL) frameL.classList.toggle("has-items", itemsL.length > 0); // <-- NUEVO
-
   // Desactivar/activar +Crear según límite A
   if (addBtn) addBtn.disabled = itemsA.length >= MAX_A;
 
@@ -123,8 +115,8 @@ if (frameL) frameL.classList.toggle("has-items", itemsL.length > 0);
   // Total abajo (suma de Main + Side; Landing no suma)
   countEl.textContent = String(itemsA.length + itemsB.length);
 
-  // Activar DnD: A y B aceptan drop; L solo permite iniciar drag (dragdrop.js lo maneja)
-  enableDragAndDrop({ listA, listB, listL, onDrop: onDragDrop }); // <-- PASO listL
+  // Activar DnD: A y B aceptan drop; L solo permite iniciar drag
+  enableDragAndDrop({ listA, listB, listL, onDrop: onDragDrop });
 }
 
 function renderItem(it, inAlt = false) {
@@ -139,7 +131,6 @@ function renderItem(it, inAlt = false) {
       <button class="tbtn up" title="Subir">↑</button>
       <button class="tbtn down" title="Bajar">↓</button>
       <button class="tbtn rename" title="Renombrar">✎</button>
-      <!-- ⬇️ renombrado: orbit -> orbit-btn y cambiamos icono a ≫ -->
       <button class="tbtn orbit-btn" title="Send to orbit" aria-label="Send to orbit">≫</button>
       <button class="tbtn done" title="Marcar como resuelto">✔</button>
     </div>
