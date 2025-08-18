@@ -52,12 +52,15 @@ function load() {
       };
     });
 
+    // Limitar historial a HISTORY_MAX (mantiene orden actual: más nuevo primero)
+    const historyLimited = history.slice(0, HISTORY_MAX);
+
     // idSeq consistente (>= max id + 1)
     let idSeq = Number.isInteger(parsed.idSeq) ? parsed.idSeq : base.idSeq;
     const maxId = items.reduce((m, it) => Math.max(m, it.id), 0);
     if (!Number.isInteger(idSeq) || idSeq <= maxId) idSeq = maxId + 1;
 
-    return { items, history, idSeq };
+    return { items, history: historyLimited, idSeq };
   } catch {
     return makeEmptyState();
   }
@@ -130,11 +133,16 @@ export function moveBy(id, delta) {
 export function resolveItem(id) {
   const it = state.items.find((x) => x.id === id);
   if (!it) return;
+  if (!Array.isArray(state.history)) state.history = [];
   state.history.unshift({
     label: it.label,
     note: (it.note || "").trim(),
     at: new Date().toISOString(),
   });
+  // Limitar a HISTORY_MAX: FIFO (elimina los más antiguos)
+  if (state.history.length > HISTORY_MAX) {
+    state.history = state.history.slice(0, HISTORY_MAX);
+  }
   removeItem(id); // ya hace save()
   save();
 }
@@ -170,7 +178,7 @@ export function importJson(file) {
         if (!parsed || !Array.isArray(parsed.items))
           throw new Error("Formato inválido");
         state = parsed; // reemplazo total
-        // Re-normalizamos inmediatamente por si viene con formato viejo
+        // Re-normalizamos inmediatamente (capará items/historial, incluyendo HISTORY_MAX)
         state = (function normalize(s) {
           localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
           return load();
