@@ -21,7 +21,8 @@ export function enableDragAndDrop({ listA, listB, onDrop }) {
       e.preventDefault();
       const id = e.dataTransfer.getData("text/plain");
       const after = getDragAfterElement(list, e.clientY);
-      const index = after ? [...list.querySelectorAll(".item")].indexOf(after) : list.children.length;
+      const index = after ? [...list.querySelectorAll(".item")].indexOf(after)
+                    : [...list.querySelectorAll(".item")].length;
       const where = list.id === "listA" ? "A" : "B";
       onDrop?.({ id, where, index });
     });
