@@ -22,6 +22,7 @@ const input = document.getElementById("labelInput");
 const countEl = document.getElementById("count");
 const exportBtn = document.getElementById("exportBtn");
 const importInput = document.getElementById("importInput");
+const clearAllBtn = document.getElementById("clearAll"); // <- NUEVO
 
 export function render() {
   // Limpiar
@@ -36,8 +37,7 @@ export function render() {
   for (const it of itemsA) listA.appendChild(renderItem(it));
   for (const it of itemsB) listB.appendChild(renderItem(it, true));
 
-  // Historial
-    // Historial (desplegable). Muestra todos, pero el contenedor fuerza scroll.
+  // Historial (desplegable). Muestra todos, el contenedor fuerza scroll vía CSS.
   for (const h of state.history) {
     const card = document.createElement("div");
     card.className = "hist-card";
@@ -69,7 +69,6 @@ export function render() {
     histList.appendChild(card);
   }
 
-
   countEl.textContent = state.items.length;
 
   // Activar DnD (listeners solo se atan una vez; el callback se actualiza cada render)
@@ -87,6 +86,7 @@ function renderItem(it, inAlt = false) {
     <div class="tools">
       <button class="tbtn up" title="Subir">↑</button>
       <button class="tbtn down" title="Bajar">↓</button>
+      <button class="tbtn rename" title="Renombrar">✎</button>
       <button class="tbtn done" title="Marcar como resuelto">✔</button>
     </div>
     <div class="panel${it.open ? " open" : ""}"><textarea></textarea></div>
@@ -95,21 +95,32 @@ function renderItem(it, inAlt = false) {
   const btn = item.querySelector(".btn");
   const panel = item.querySelector(".panel");
   const textarea = item.querySelector("textarea");
-  const clearAllBtn = document.getElementById("clearAll"); // <- NUEVO
   btn.textContent = it.label;
   textarea.value = it.note || "";
 
-  // Eventos
+  // Abrir/cerrar panel de notas
   btn.addEventListener("click", () => {
     const open = !panel.classList.contains("open");
     panel.classList.toggle("open", open);
     updateItem(it.id, { open });
   });
 
+  // Renombrar (✎)
+  item.querySelector(".rename").addEventListener("click", () => {
+    const nuevo = prompt("Renombrar botón:", btn.textContent.trim());
+    if (nuevo == null) return; // cancelado
+    const nombre = nuevo.trim();
+    if (!nombre) return;       // vacío -> no cambiamos
+    updateItem(it.id, { label: nombre });
+    render(); // refresca texto y conserva estado
+  });
+
+  // Editar nota
   textarea.addEventListener("input", () => {
     updateItem(it.id, { note: textarea.value });
   });
 
+  // Subir/Bajar
   item.querySelector(".up").addEventListener("click", () => {
     moveBy(it.id, -1);
     render();
@@ -120,6 +131,7 @@ function renderItem(it, inAlt = false) {
     render();
   });
 
+  // Marcar como resuelto
   item.querySelector(".done").addEventListener("click", () => {
     resolveItem(it.id);
     render();
@@ -161,7 +173,15 @@ export function bindGlobalHandlers() {
       importInput.value = ""; // reset
     }
   });
+
+  // Vaciar todo
+  clearAllBtn?.addEventListener("click", () => {
+    if (!confirm("¿Vaciar todo?")) return;
+    clearAll();
+    render();
+  });
 }
+
 function formatDate(iso) {
   if (!iso) return "";
   try {
