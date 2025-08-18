@@ -22,7 +22,7 @@ function removePlaceholder() {
 }
 
 function getDragAfterElement(container, y) {
-  // Excluye el que arrastras y el placeholder
+  // Excluye el que arrastras
   const els = [...container.querySelectorAll(".item")].filter(
     (el) => !el.classList.contains("dragging")
   );
@@ -38,7 +38,7 @@ function getDragAfterElement(container, y) {
 }
 
 function bindZone(zoneEl, listEl, whereKey) {
-  // Asegura que la lista vacía sea fácil de acertar sin tocar el CSS global
+  // Para facilitar el drop en listas vacías
   if (!listEl.style.minHeight) listEl.style.minHeight = "32px";
 
   if (zoneEl.dataset.dndBound === "1") return;
@@ -48,7 +48,9 @@ function bindZone(zoneEl, listEl, whereKey) {
     const item = e.target.closest(".item");
     if (!item) return;
     draggingId = item.dataset.id;
-    try { e.dataTransfer.setData("text/plain", draggingId); } catch {}
+    try {
+      e.dataTransfer.setData("text/plain", draggingId);
+    } catch {}
     e.dataTransfer.effectAllowed = "move";
     item.classList.add("dragging");
   });
@@ -80,7 +82,8 @@ function bindZone(zoneEl, listEl, whereKey) {
 
   zoneEl.addEventListener("drop", (e) => {
     e.preventDefault();
-    const id = (e.dataTransfer && e.dataTransfer.getData("text/plain")) || draggingId;
+    const id =
+      (e.dataTransfer && e.dataTransfer.getData("text/plain")) || draggingId;
     if (!id) return;
 
     const ph = ensurePlaceholder();
@@ -88,11 +91,10 @@ function bindZone(zoneEl, listEl, whereKey) {
       (el) => !el.classList.contains("dragging")
     );
 
-    // Índice destino: posición del placeholder entre los .item visibles
+    // Índice destino = número de .item antes del placeholder
     let index = children.length;
     if (ph && listEl.contains(ph)) {
       const all = [...listEl.children];
-      // contar solo .item antes del placeholder
       index = 0;
       for (let i = 0; i < all.length; i++) {
         if (all[i] === ph) break;
@@ -114,7 +116,6 @@ export function enableDragAndDrop({ listA, listB, onDrop }) {
   const frameA = listA.closest(".frame") || listA;
   const frameB = listB.closest(".frame") || listB;
 
-  // Vincula eventos a ambas zonas (marco + lista) para cada contenedor
   bindZone(listA, listA, "A");
   if (frameA !== listA) bindZone(frameA, listA, "A");
 
