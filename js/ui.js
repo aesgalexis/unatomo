@@ -1,4 +1,4 @@
-import { state, save, addItem, removeItem, updateItem, moveBy, resolveItem, exportJson, importJson } from "./state.js";
+import { state, save, addItem, removeItem, updateItem, moveBy, resolveItem, exportJson, importJson, moveItem } from "./state.js";
 import { enableDragAndDrop } from "./dragdrop.js";
 
 // Elementos raíz
