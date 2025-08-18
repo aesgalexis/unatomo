@@ -9,13 +9,16 @@ import {
   exportJson,
   importJson,
   moveItem, // para fijar orden en drop
-  clearAll
+  clearAll,
+  clearHistory, // <- NUEVO
 } from "./state.js";
 import { enableDragAndDrop } from "./dragdrop.js";
 
 // Límites por marco
 const MAX_A = 8;
 const MAX_B = 16;
+const HISTORY_MAX = 16; // <- NUEVO (debe coincidir con state.js)
+
 const clearHistoryBtn = document.getElementById("clearHistoryBtn");
 
 // Elementos raíz
@@ -32,6 +35,7 @@ const clearAllBtn = document.getElementById("clearAll");
 // Títulos de marcos
 const frameATitle = document.querySelector("#frameA h2");
 const frameBTitle = document.querySelector("#frameB h2");
+const histTitle  = document.querySelector(".historial h2"); // <- NUEVO
 
 export function render() {
   // Limpiar
@@ -47,7 +51,7 @@ export function render() {
   for (const it of itemsA) listA.appendChild(renderItem(it));
   for (const it of itemsB) listB.appendChild(renderItem(it, true));
 
-  // Historial (desplegable). El contenedor fuerza scroll vía CSS.
+  // Historial (desplegable)
   for (const h of state.history) {
     const card = document.createElement("div");
     card.className = "hist-card";
@@ -84,6 +88,7 @@ export function render() {
   // Contadores por marco en el título
   if (frameATitle) frameATitle.textContent = `Main (${itemsA.length}/${MAX_A})`;
   if (frameBTitle) frameBTitle.textContent = `Side (${itemsB.length}/${MAX_B})`;
+  if (histTitle)  histTitle.textContent  = `History (${state.history.length}/${HISTORY_MAX})`; // <- NUEVO
 
   // Desactivar/activar +Crear según límite A
   if (addBtn) addBtn.disabled = itemsA.length >= MAX_A;
@@ -205,14 +210,13 @@ export function bindGlobalHandlers() {
     input.value = "";
     input.focus();
     render();
-  }); // <-- ¡este cierre faltaba!
+  });
 
-  // Borrar historial
+  // Borrar historial (usando clearHistory del estado)
   clearHistoryBtn?.addEventListener("click", (e) => {
     e.preventDefault();
     if (!confirm("Clear history?")) return;
-    state.history = [];
-    save();
+    clearHistory();
     render();
   });
 
