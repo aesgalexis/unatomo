@@ -127,7 +127,8 @@ function renderItem(it, inAlt = false) {
       <button class="tbtn up" title="Subir">↑</button>
       <button class="tbtn down" title="Bajar">↓</button>
       <button class="tbtn rename" title="Renombrar">✎</button>
-      <button class="tbtn orbit" title="Send to orbit">→</button>
+      <!-- ⬇️ renombrado: orbit -> orbit-btn y cambiamos icono a ≫ -->
+      <button class="tbtn orbit-btn" title="Send to orbit" aria-label="Send to orbit">≫</button>
       <button class="tbtn done" title="Marcar como resuelto">✔</button>
     </div>
     <div class="panel${it.open ? " open" : ""}">
@@ -164,8 +165,8 @@ function renderItem(it, inAlt = false) {
     render();
   });
 
-  // >> Enviar a órbita
-  item.querySelector(".orbit").addEventListener("click", () => {
+  // ⬇️ listener actualizado al nuevo selector .orbit-btn
+  item.querySelector(".orbit-btn").addEventListener("click", () => {
     const raw = prompt("¿En cuántos minutos debe volver este Attomic Button?", "5");
     if (raw == null) return; // cancelado
     const minutes = Number(raw);
@@ -182,7 +183,7 @@ function renderItem(it, inAlt = false) {
     updateItem(it.id, { note: textarea.value });
   });
 
-  // Subir/Bajar (no meaningful en Landing, pero permitido)
+  // Subir/Bajar
   item.querySelector(".up").addEventListener("click", () => {
     moveBy(it.id, -1);
     render();
