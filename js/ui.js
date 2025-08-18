@@ -11,6 +11,8 @@ import {
   moveItem, // para fijar orden en drop
   clearAll,
   clearHistory,
+  sendToOrbit,   // <-- NUEVO
+  landDueOrbits, // <-- NUEVO
 } from "./state.js";
 import { enableDragAndDrop } from "./dragdrop.js";
 
@@ -22,6 +24,7 @@ const HISTORY_MAX = 16; // debe coincidir con state.js
 const clearHistoryBtn = document.getElementById("clearHistoryBtn");
 
 // Elementos raíz
+const listL = document.getElementById("listL"); // Landing
 const listA = document.getElementById("listA");
 const listB = document.getElementById("listB");
 const histList = document.getElementById("histList");
@@ -37,17 +40,23 @@ const frameATitle = document.querySelector("#frameA h2");
 const frameBTitle = document.querySelector("#frameB h2");
 const histTitle  = document.querySelector(".historial h2");
 
+// Timer de aterrizaje periódico
+let orbitTimer = null;
+
 export function render() {
   // Limpiar
+  if (listL) listL.innerHTML = "";
   listA.innerHTML = "";
   listB.innerHTML = "";
   histList.innerHTML = "";
 
   // Items por marco
+  const itemsL = state.items.filter((x) => x.where === "L");
   const itemsA = state.items.filter((x) => x.where === "A");
   const itemsB = state.items.filter((x) => x.where === "B");
 
   // Pintar
+  for (const it of itemsL) listL?.appendChild(renderItem(it, true)); // estilo discreto
   for (const it of itemsA) listA.appendChild(renderItem(it));
   for (const it of itemsB) listB.appendChild(renderItem(it, true));
 
@@ -70,7 +79,7 @@ export function render() {
     const note = document.createElement("div");
     const hasNote = !!(h.note && h.note.trim());
     note.className = "hist-note" + (hasNote ? "" : " empty");
-    note.textContent = hasNote ? h.note : "(empty)";
+    note.textContent = hasNote ? h.note : "(sin nota)";
 
     panel.append(meta, note);
 
@@ -93,15 +102,16 @@ export function render() {
   // Desactivar/activar +Crear según límite A
   if (addBtn) addBtn.disabled = itemsA.length >= MAX_A;
 
-  // Asegurar un panel abierto como máximo por zona
+  // Exclusión: un panel abierto por zona
+  enforceSingleOpen(listL, ".panel");
   enforceSingleOpen(listA, ".panel");
   enforceSingleOpen(listB, ".panel");
   enforceSingleOpen(histList, ".hist-panel");
 
-  // Total abajo (suma de ambos)
+  // Total abajo (suma de Main + Side; Landing no suma)
   countEl.textContent = String(itemsA.length + itemsB.length);
 
-  // Activar DnD
+  // Activar DnD SOLO en A y B
   enableDragAndDrop({ listA, listB, onDrop: onDragDrop });
 }
 
@@ -117,6 +127,7 @@ function renderItem(it, inAlt = false) {
       <button class="tbtn up" title="Subir">↑</button>
       <button class="tbtn down" title="Bajar">↓</button>
       <button class="tbtn rename" title="Renombrar">✎</button>
+      <button class="tbtn orbit" title="Send to orbit">🛰</button>
       <button class="tbtn done" title="Marcar como resuelto">✔</button>
     </div>
     <div class="panel${it.open ? " open" : ""}">
@@ -128,33 +139,41 @@ function renderItem(it, inAlt = false) {
   const panel = item.querySelector(".panel");
   const textarea = item.querySelector("textarea");
 
-  // Mostrar nombre + sello temporal si existe
   btn.textContent = labelWithStamp(it);
-
   textarea.value = it.note || "";
 
   // Abrir/cerrar panel de notas con exclusión por lista
   btn.addEventListener("click", () => {
-    const container = item.parentElement; // listA o listB
+    const container = item.parentElement; // listL, listA o listB
     const willOpen = !panel.classList.contains("open");
-
-    // Cierra cualquier otro panel abierto en la misma lista y actualiza estado
     closePanelsIn(container, ".panel", panel, (p) => {
       const otherItem = p.closest(".item");
       if (otherItem) updateItem(Number(otherItem.dataset.id), { open: false });
     });
-
     panel.classList.toggle("open", willOpen);
     updateItem(it.id, { open: willOpen });
   });
 
-  // Renombrar (✎)
+  // Renombrar
   item.querySelector(".rename").addEventListener("click", () => {
-    const nuevo = prompt("Rename Attomic Button:", btn.textContent.trim());
-    if (nuevo == null) return; // cancelado
+    const nuevo = prompt("Renombrar Attomic Button:", btn.textContent.trim());
+    if (nuevo == null) return;
     const nombre = nuevo.trim();
-    if (!nombre) return;       // vacío -> no cambiamos
+    if (!nombre) return;
     updateItem(it.id, { label: nombre });
+    render();
+  });
+
+  // 🛰 Enviar a órbita
+  item.querySelector(".orbit").addEventListener("click", () => {
+    const raw = prompt("¿En cuántos minutos debe volver este Attomic Button?", "5");
+    if (raw == null) return; // cancelado
+    const minutes = Number(raw);
+    if (!Number.isFinite(minutes) || minutes <= 0) {
+      alert("Introduce un número de minutos válido (> 0).");
+      return;
+    }
+    sendToOrbit(it.id, minutes);
     render();
   });
 
@@ -163,12 +182,11 @@ function renderItem(it, inAlt = false) {
     updateItem(it.id, { note: textarea.value });
   });
 
-  // Subir/Bajar
+  // Subir/Bajar (no meaningful en Landing, pero permitido)
   item.querySelector(".up").addEventListener("click", () => {
     moveBy(it.id, -1);
     render();
   });
-
   item.querySelector(".down").addEventListener("click", () => {
     moveBy(it.id, 1);
     render();
@@ -192,11 +210,8 @@ function onDragDrop({ id, where, index }) {
   const capacity = where === "A" ? MAX_A : MAX_B;
 
   if (destItemsExcludingSelf.length >= capacity) {
-    // No permitir rebasar el límite al mover desde la otra lista
-    // (Si era reordenar dentro de la misma, destItemsExcludingSelf será n-1 y permitirá moverse)
     return;
   }
-
   moveItem(numId, where, Number(index));
   render();
 }
@@ -216,7 +231,7 @@ export function bindGlobalHandlers() {
     render();
   });
 
-  // Borrar historial (usando clearHistory del estado)
+  // Borrar historial
   clearHistoryBtn?.addEventListener("click", (e) => {
     e.preventDefault();
     if (!confirm("Clear history?")) return;
@@ -237,7 +252,7 @@ export function bindGlobalHandlers() {
     const file = importInput.files?.[0];
     if (!file) return;
     try {
-      await importJson(file);
+      await importJson(file); // esto ya aterriza vencidos
       render();
     } catch (e) {
       alert("No se pudo importar: " + e.message);
@@ -252,13 +267,20 @@ export function bindGlobalHandlers() {
     clearAll();
     render();
   });
+
+  // Aterrizaje inmediato al arrancar (por si hay pendientes)
+  if (landDueOrbits() > 0) render();
+
+  // Timer de comprobación periódica (cada 15s)
+  if (orbitTimer) clearInterval(orbitTimer);
+  orbitTimer = setInterval(() => {
+    if (landDueOrbits() > 0) render();
+  }, 15000);
 }
 
 /* ================== Helpers ================== */
 
 // Cierra todos los paneles de un contenedor, excepto 'exceptEl'.
-// selector: ".panel" o ".hist-panel" según el caso.
-// onClose(panel) opcional para sincronizar estado.
 function closePanelsIn(container, selector, exceptEl, onClose) {
   if (!container) return;
   container.querySelectorAll(`${selector}.open`).forEach((p) => {
