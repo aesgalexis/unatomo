@@ -56,9 +56,13 @@ export function render() {
   histList.innerHTML = "";
 
   // Items por marco
-  const itemsL = state.items.filter((x) => x.where === "L");
-  const itemsA = state.items.filter((x) => x.where === "A");
-  const itemsB = state.items.filter((x) => x.where === "B");
+const itemsL = state.items.filter((x) => x.where === "L");
+const itemsA = state.items.filter((x) => x.where === "A");
+const itemsB = state.items.filter((x) => x.where === "B");
+
+// <-- NUEVO: marcar glow en Landing si tiene elementos
+if (frameL) frameL.classList.toggle("has-items", itemsL.length > 0);
+
 
   // Pintar
   for (const it of itemsL) listL?.appendChild(renderItem(it, true)); // estilo discreto
