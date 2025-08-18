@@ -9,6 +9,7 @@ import {
   exportJson,
   importJson,
   moveItem, // <- necesario para fijar orden en drop
+  clearAll   // <- NUEVO
 } from "./state.js";
 import { enableDragAndDrop } from "./dragdrop.js";
 
