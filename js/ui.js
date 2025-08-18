@@ -193,8 +193,8 @@ function onDragDrop({ id, where, index }) {
 }
 
 export function bindGlobalHandlers() {
+  // Crear en Main respetando límite
   addBtn.addEventListener("click", () => {
-    // Respetar límite en A al crear
     const countA = state.items.filter((x) => x.where === "A").length;
     if (countA >= MAX_A) {
       alert(`Marco superior lleno (${countA}/${MAX_A}).`);
@@ -205,7 +205,9 @@ export function bindGlobalHandlers() {
     input.value = "";
     input.focus();
     render();
-      // Borrar historial
+  }); // <-- ¡este cierre faltaba!
+
+  // Borrar historial
   clearHistoryBtn?.addEventListener("click", (e) => {
     e.preventDefault();
     if (!confirm("Clear history?")) return;
@@ -214,12 +216,15 @@ export function bindGlobalHandlers() {
     render();
   });
 
+  // Enter para crear
   input.addEventListener("keydown", (e) => {
     if (e.key === "Enter") addBtn.click();
   });
 
+  // Exportar
   exportBtn.addEventListener("click", () => exportJson());
 
+  // Importar
   importInput.addEventListener("change", async () => {
     const file = importInput.files?.[0];
     if (!file) return;
@@ -233,6 +238,7 @@ export function bindGlobalHandlers() {
     }
   });
 
+  // Vaciar todo
   clearAllBtn?.addEventListener("click", () => {
     if (!confirm("¿Vaciar todo?")) return;
     clearAll();
