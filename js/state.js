@@ -1,12 +1,11 @@
 // Modelo + persistencia + import/export
 
 const STORAGE_KEY = "buttons-v1";
-const HISTORY_MAX = 16; // debe coincidir con state.js
-const histTitle = document.querySelector(".historial h2");
-
+// IMPORTANTE: si cambias este valor, refleja el mismo en ui.js
+const HISTORY_MAX = 16;
 
 export const makeEmptyState = () => ({
-  items: [], // { id, label, note, open, where: 'A'|'B' }
+  items: [],   // { id, label, note, open, where: 'A'|'B' }
   history: [], // { label, note, at }
   idSeq: 1,
 });
@@ -111,7 +110,7 @@ export function moveItem(id, where, index) {
 
   dest.splice(clamped, 0, updated);
 
-  // El resto (excluyendo el que movemos, por si acaso)
+  // El resto (excluyendo el que movemos)
   const others = state.items.filter((x) => !(x.id === id || x.where === where));
   state.items = [...others, ...dest];
   save();
@@ -154,7 +153,7 @@ export function clearAll() {
   save();
 }
 
-// (opcional) Limpiar solo el historial
+// Limpiar solo el historial (útil para el botón "Clear")
 export function clearHistory() {
   state.history = [];
   save();
