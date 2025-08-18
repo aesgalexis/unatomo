@@ -1,7 +1,9 @@
 // Modelo + persistencia + import/export
 
 const STORAGE_KEY = "buttons-v1";
-const HISTORY_MAX = 16;
+const HISTORY_MAX = 16; // debe coincidir con state.js
+const histTitle = document.querySelector(".historial h2");
+
 
 export const makeEmptyState = () => ({
   items: [], // { id, label, note, open, where: 'A'|'B' }
