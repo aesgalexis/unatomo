@@ -189,17 +189,17 @@ export function clearHistory() {
 /* ================= Órbita ================= */
 
 /**
- * Envía a órbita un item por N minutos. El item desaparece de items
+ * Envía a órbita un item por N días. El item desaparece de items
  * (no entra en historial). Se persistirá en state.orbit con returnAt.
  */
-export function sendToOrbit(id, minutes = 1) {
+export function sendToOrbit(id, days = 1) {
   const it = state.items.find((x) => x.id === id);
   if (!it) return false;
 
-  const ms = Math.max(1, Number(minutes)) * 60_000;
+  const d = Math.max(1, Math.min(365, Number(days))); // clamp 1–365
+  const ms = d * 24 * 60 * 60 * 1000; // días -> ms
   const returnAt = new Date(Date.now() + ms).toISOString();
 
-  // guardar snapshot mínimo para reconstruir
   state.orbit.unshift({
     id: it.id,
     label: it.label,
@@ -209,11 +209,11 @@ export function sendToOrbit(id, minutes = 1) {
     fromWhere: it.where || "A",
   });
 
-  // quitar del tablero sin pasar por history
-  removeItem(id); // también hace save()
+  removeItem(id); // quita del tablero (sin pasar por history) + save()
   save();
   return true;
 }
+
 
 /**
  * Aterriza todas las órbitas vencidas (returnAt <= ahora) en 'L' (Landing).
