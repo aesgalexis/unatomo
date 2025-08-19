@@ -501,4 +501,15 @@ footer {
 }
 /* Evita que la barra tape el contenido */
 body { padding-bottom: calc(24px + 44px); }
+/* ===== Safe space para la barra de estado fija ===== */
+:root { --safe-bottom: 75px; }
 
+/* Crea “aire” extra al final de cada columna */
+.app,
+.historial,
+.orbit {
+  margin-bottom: var(--safe-bottom);
+}
+
+/* (Opcional) si prefieres hacerlo dentro del contenido: */
+/* main { padding-bottom: var(--safe-bottom); } */
