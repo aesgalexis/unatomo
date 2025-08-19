@@ -128,11 +128,11 @@ function renderItem(it, inAlt = false) {
     <div class="grab">◳</div>
     <button class="btn"></button>
     <div class="tools">
-      <button class="tbtn up" title="Subir">↑</button>
-      <button class="tbtn down" title="Bajar">↓</button>
-      <button class="tbtn rename" title="Renombrar">✎</button>
+      <button class="tbtn up" title="Up">↑</button>
+      <button class="tbtn down" title="Down">↓</button>
+      <button class="tbtn rename" title="Rename">✎</button>
       <button class="tbtn orbit-btn" title="Send to orbit" aria-label="Send to orbit">≫</button>
-      <button class="tbtn done" title="Marcar como resuelto">✔</button>
+      <button class="tbtn done" title="Solve">✔</button>
     </div>
     <div class="panel${it.open ? " open" : ""}">
       <textarea placeholder="Write something.."></textarea>
