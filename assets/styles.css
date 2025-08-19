@@ -33,6 +33,9 @@
   /* Historial / Orbit */
   --hist-bg: #0e1424;
   --hist-border: #2a3753;
+
+  /* Safe space para la barra de estado fija */
+  --safe-bottom: 75px;
 }
 
 * { box-sizing: border-box; }
@@ -48,16 +51,8 @@ body {
   align-content: start;
   min-height: 100svh;
   padding: 24px;
-}
-/* Landing con contenido: glow violeta */
-#frameL.frame.landing.has-items {
-  background:
-    linear-gradient(180deg, rgba(139,92,246,0.10), rgba(99,102,241,0.10)),
-    linear-gradient(180deg, var(--subtle-1), var(--subtle-2));
-  border-color: rgba(168,85,247,0.38);
-  box-shadow:
-    inset 0 0 0 1px rgba(168,85,247,0.45),
-    0 12px 28px rgba(139,92,246,0.22);
+  /* evita que la status bar tape el contenido */
+  padding-bottom: calc(24px + 44px);
 }
 
 /* Layout principal — 3 columnas con centro flexible */
@@ -75,6 +70,8 @@ body {
 .historial,
 .orbit {
   min-width: 0;
+  /* aire extra al final para no quedar oculto tras la status bar */
+  margin-bottom: var(--safe-bottom);
 }
 
 /* =========================
@@ -248,9 +245,21 @@ main { padding:16px 20px; }
 #frameB.frame.alt h2 {
   font-size:14px; color: var(--muted); margin:0 0 8px;
 }
-/* LANDING (pista de aterrizaje, encima de Main) — discreto y compacto */
-/* Landing con contenido: glow violeta */
-#frameL.has-items {
+
+/* LANDING (pista de aterrizaje) — discreto y compacto */
+#frameL.frame.landing {
+  background: linear-gradient(180deg, var(--subtle-1), var(--subtle-2));
+  border: 1px solid var(--outline-2);
+  border-radius: 14px;
+  position: relative;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  box-shadow: none;
+  opacity: .96;
+}
+
+/* Glow violeta cuando hay elementos */
+#frameL.has-items{
   background:
     linear-gradient(180deg, rgba(139,92,246,0.10), rgba(99,102,241,0.10)),
     linear-gradient(180deg, var(--subtle-1), var(--subtle-2));
@@ -258,17 +267,6 @@ main { padding:16px 20px; }
   box-shadow:
     inset 0 0 0 1px rgba(168,85,247,0.45),
     0 12px 28px rgba(139,92,246,0.22);
-}
-
-#frameL.frame.landing {
-  background: linear-gradient(180deg, var(--subtle-1), var(--subtle-2));
-  border: 1px solid var(--outline-2);
-  border-radius: 14px;
-  position: relative;
-  padding: 10px 12px;       /* más compacto */
-  margin-bottom: 12px;      /* un pelín menos que Main */
-  box-shadow: none;         /* sin glow */
-  opacity: .96;
 }
 
 /* Título de Landing, como Side (muted) */
@@ -280,13 +278,11 @@ main { padding:16px 20px; }
 }
 
 /* No aplicar efectos en hover a Landing */
-#frameL.frame.landing:hover {
-  box-shadow: none;
-}
+#frameL.frame.landing:hover { box-shadow: none; }
 
 /* Empty state específico para Landing — más bajo */
 #listL:empty {
-  min-height: 48px;         /* antes 72px */
+  min-height: 48px;
   display: grid;
   place-items: center;
   border: 1px dashed var(--outline);
@@ -300,7 +296,6 @@ main { padding:16px 20px; }
   font-size: 13px;
   letter-spacing: .2px;
 }
-
 
 /* Listas */
 .list { display:flex; flex-direction:column; gap:8px; }
@@ -353,11 +348,11 @@ main { padding:16px 20px; }
 #frameA .btn:hover { filter: brightness(1.05); }
 
 /* Herramientas */
-.tools { display:flex; gap:4px; }
+.tools { display:flex; gap:4px; align-items:center; }
 .tbtn {
   background:#0a0f20; border:1px solid var(--outline);
   border-radius:8px; padding:4px 6px; color:var(--text);
-  font-size:13px; cursor:pointer;
+  font-size:13px; cursor:pointer; line-height:1;
   transition: transform .08s ease, filter .12s ease, border-color .12s ease;
 }
 .tbtn:hover {
@@ -436,51 +431,6 @@ footer {
   display:flex; justify-content:space-between;
 }
 
-/* Pequeños ajustes responsive */
-@media (max-width: 900px) {
-  .layout { grid-template-columns: 1fr; }
-  .app { order: 1; }
-  .historial { order: 2; }
-  .orbit { order: 3; }
-  .item { grid-template-columns: 36px 1fr 120px; }
-
-  /* Historial aún más compacto en móvil */
-  .hist-panel { font-size: 11.5px; }
-  .hist-panel .hist-meta { font-size: 10.5px; }
-}
-
-/* Empty states para los marcos */
-.list:empty {
-  min-height: 80px;
-  display: grid;
-  place-items: center;
-  border: 1px dashed var(--outline);
-  border-radius: 12px;
-  padding: 12px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-}
-
-/* Estilo común para el texto fantasma, con color difuso/tenue */
-#listA:empty::before,
-#listB:empty::before {
-  color: rgb(148 163 184 / 0.28);
-  font-size: 13px;
-  letter-spacing: .2px;
-}
-
-/* Mensaje por marco */
-#listA:empty::before { content: "Create something"; }
-#listB:empty::before { content: "Drag something"; }
-
-/* Placeholder del textarea: tenue e itálico */
-.panel textarea::placeholder {
-  font-style: italic;
-  color: rgb(148 163 184 / 0.45); /* ajusta a 0.35 si lo quieres más sutil */
-}
-.tools { display:flex; gap:4px; align-items:center; } /* centrar verticalmente */
-.tbtn { line-height: 1; }                             /* evita alto extra por tipografías */
-.tbtn.orbit { font-size:12px; font-weight:700; }      /* hace “»»” nítido y compacto */
-
 /* ===== Status bar ===== */
 .statusbar {
   position: fixed;
@@ -499,17 +449,41 @@ footer {
   color: var(--muted);
   letter-spacing: .2px;
 }
-/* Evita que la barra tape el contenido */
-body { padding-bottom: calc(24px + 44px); }
-/* ===== Safe space para la barra de estado fija ===== */
-:root { --safe-bottom: 75px; }
 
-/* Crea “aire” extra al final de cada columna */
-.app,
-.historial,
-.orbit {
-  margin-bottom: var(--safe-bottom);
+/* Pequeños ajustes responsive */
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+  .app { order: 1; }
+  .historial { order: 2; }
+  .orbit { order: 3; }
+  .item { grid-template-columns: 36px 1fr 120px; }
+
+  /* Historial aún más compacto en móvil */
+  .hist-panel { font-size: 11.5px; }
+  .hist-panel .hist-meta { font-size: 10.5px; }
 }
 
-/* (Opcional) si prefieres hacerlo dentro del contenido: */
-/* main { padding-bottom: var(--safe-bottom); } */
+/* Empty states genéricos para A/B */
+.list:empty {
+  min-height: 80px;
+  display: grid;
+  place-items: center;
+  border: 1px dashed var(--outline);
+  border-radius: 12px;
+  padding: 12px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+}
+#listA:empty::before,
+#listB:empty::before {
+  color: rgb(148 163 184 / 0.28);
+  font-size: 13px;
+  letter-spacing: .2px;
+}
+#listA:empty::before { content: "Create something"; }
+#listB:empty::before { content: "Drag something"; }
+
+/* Placeholder del textarea: tenue e itálico */
+.panel textarea::placeholder {
+  font-style: italic;
+  color: rgb(148 163 184 / 0.45);
+}
