@@ -176,13 +176,25 @@ function renderItem(it, inAlt = false) {
       <button class="tbtn done" title="Solve">✔</button>
     </div>
     <div class="panel${it.open ? " open" : ""}">
-      <textarea placeholder="Write something.."></textarea>
+      <textarea
+        placeholder="Write something.."
+        spellcheck="false"
+        autocorrect="off"
+        autocapitalize="off"
+        autocomplete="off"
+      ></textarea>
     </div>
   `;
 
   const btn = item.querySelector(".btn");
   const panel = item.querySelector(".panel");
   const textarea = item.querySelector("textarea");
+
+  // (Cinturón y tirantes por si el innerHTML fuese manipulado)
+  textarea.spellcheck = false;
+  textarea.setAttribute("autocorrect", "off");
+  textarea.setAttribute("autocapitalize", "off");
+  textarea.autocomplete = "off";
 
   btn.textContent = labelWithStamp(it);
   textarea.value = it.note || "";
@@ -209,7 +221,7 @@ function renderItem(it, inAlt = false) {
     render();
   });
 
-  // Enviar a órbita (≫) — días 1..365 (Orbit es infinito; sin chequeo de cupo)
+  // Enviar a órbita (≫) — días 1..365 (Orbit infinito; sin chequeo de cupo)
   item.querySelector(".orbit-btn").addEventListener("click", () => {
     const raw = prompt("How many days must it orbit before returning? (1–365)", "3");
     if (raw == null) return;
@@ -259,6 +271,14 @@ function onDragDrop({ id, where, index }) {
 }
 
 export function bindGlobalHandlers() {
+  // Desactivar corrector y ayudas en el input superior
+  if (input) {
+    input.spellcheck = false;
+    input.setAttribute("autocorrect", "off");
+    input.setAttribute("autocapitalize", "off");
+    input.autocomplete = "off";
+  }
+
   // Crear en Main respetando límite
   addBtn.addEventListener("click", () => {
     const countA = state.items.filter((x) => x.where === "A").length;
