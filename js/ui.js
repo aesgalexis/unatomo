@@ -169,17 +169,18 @@ function renderItem(it, inAlt = false) {
   });
 
   // Enviar a órbita (≫)
-  item.querySelector(".orbit-btn").addEventListener("click", () => {
-    const raw = prompt("¿En cuántos minutos debe volver este Attomic Button?", "5");
-    if (raw == null) return; // cancelado
-    const minutes = Number(raw);
-    if (!Number.isFinite(minutes) || minutes <= 0) {
-      alert("Introduce un número de minutos válido (> 0).");
-      return;
-    }
-    sendToOrbit(it.id, minutes);
-    render();
-  });
+item.querySelector(".orbit-btn").addEventListener("click", () => {
+  const raw = prompt("¿En cuántos días debe volver este Attomic Button? (1–365)", "3");
+  if (raw == null) return; // cancelado
+  const days = Number(raw);
+  if (!Number.isFinite(days) || days < 1 || days > 365) {
+    alert("Introduce un número de días entre 1 y 365.");
+    return;
+  }
+  sendToOrbit(it.id, days);
+  render();
+});
+
 
   // Editar nota
   textarea.addEventListener("input", () => {
