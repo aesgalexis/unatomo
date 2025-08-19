@@ -79,7 +79,7 @@ export function render() {
       const d = daysRemaining(o.returnAt);
       const row = document.createElement("div");
       row.className = "hist-item"; // reutilizamos estilo
-      row.textContent = `${d} ${d === 1 ? "day" : "days"}`;
+      row.textContent = `Re-entering in ${d} ${d === 1 ? "day" : "days"}`;
       orbitList.appendChild(row);
     }
 
@@ -281,7 +281,7 @@ export function bindGlobalHandlers() {
       await importJson(file); // incluye aterrizaje de vencidos
       render();
     } catch (e) {
-      alert("No se pudo importar: " + e.message);
+      alert("Error importing: " + e.message);
     } finally {
       importInput.value = "";
     }
