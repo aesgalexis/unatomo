@@ -5,5 +5,5 @@ window.addEventListener("DOMContentLoaded", () => {
   render();
 });
 <script>
-  window.PRESENCE_WS_URL = "wss://tu-dominio.com/presence";
+  window.PRESENCE_WS_URL = "wss://unatomo.com/presence";
 </script>
