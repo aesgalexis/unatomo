@@ -170,11 +170,11 @@ function renderItem(it, inAlt = false) {
 
   // Enviar a órbita (≫)
 item.querySelector(".orbit-btn").addEventListener("click", () => {
-  const raw = prompt("¿En cuántos días debe volver este Attomic Button? (1–365)", "3");
+  const raw = prompt("How many days must it orbit before returning? (1–365)", "3");
   if (raw == null) return; // cancelado
   const days = Number(raw);
   if (!Number.isFinite(days) || days < 1 || days > 365) {
-    alert("Introduce un número de días entre 1 y 365.");
+    alert("Enter a number of days between 1 y 365.");
     return;
   }
   sendToOrbit(it.id, days);
