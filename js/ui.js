@@ -11,8 +11,8 @@ import {
   moveItem, // para fijar orden en drop
   clearAll,
   clearHistory,
-  sendToOrbit,   // <-- NUEVO
-  landDueOrbits, // <-- NUEVO
+  sendToOrbit,   // NUEVO
+  landDueOrbits, // NUEVO
 } from "./state.js";
 import { enableDragAndDrop } from "./dragdrop.js";
 
@@ -24,8 +24,8 @@ const HISTORY_MAX = 16; // debe coincidir con state.js
 const clearHistoryBtn = document.getElementById("clearHistoryBtn");
 
 // Elementos raíz
-const listL = document.getElementById("listL"); // Landing
-const frameL = document.getElementById("frameL"); // para el glow violeta
+const listL = document.getElementById("listL");      // Landing
+const frameL = document.getElementById("frameL");    // Glow violeta
 const listA = document.getElementById("listA");
 const listB = document.getElementById("listB");
 const histList = document.getElementById("histList");
@@ -36,20 +36,25 @@ const exportBtn = document.getElementById("exportBtn");
 const importInput = document.getElementById("importInput");
 const clearAllBtn = document.getElementById("clearAll");
 
+// Orbit (columna derecha)
+const orbitList = document.getElementById("orbitList");
+const orbitTitle = document.getElementById("orbitTitle");
+
 // Títulos de marcos
 const frameATitle = document.querySelector("#frameA h2");
 const frameBTitle = document.querySelector("#frameB h2");
 const histTitle  = document.querySelector(".historial h2");
 
-// Timer de aterrizaje periódico
+// Timer de aterrizaje / refresco
 let orbitTimer = null;
 
 export function render() {
-  // Limpiar
+  // Limpiar listas
   if (listL) listL.innerHTML = "";
   listA.innerHTML = "";
   listB.innerHTML = "";
   histList.innerHTML = "";
+  if (orbitList) orbitList.innerHTML = "";
 
   // Items por marco
   const itemsL = state.items.filter((x) => x.where === "L");
@@ -59,12 +64,33 @@ export function render() {
   // Glow violeta en Landing si contiene elementos
   if (frameL) frameL.classList.toggle("has-items", itemsL.length > 0);
 
-  // Pintar
-  for (const it of itemsL) listL?.appendChild(renderItem(it, true)); // estilo discreto
+  // Pintar Landing/Main/Side
+  for (const it of itemsL) listL?.appendChild(renderItem(it, true));
   for (const it of itemsA) listA.appendChild(renderItem(it));
   for (const it of itemsB) listB.appendChild(renderItem(it, true));
 
-  // Historial (desplegable)
+  // ===== ORBIT: render solo días restantes =====
+  if (orbitList) {
+    const orbits = (state.orbit || [])
+      .slice()
+      .sort((a, b) => new Date(a.returnAt) - new Date(b.returnAt));
+
+    for (const o of orbits) {
+      const d = daysRemaining(o.returnAt);
+      const row = document.createElement("div");
+      row.className = "hist-item"; // reutilizamos estilo
+      row.textContent = `${d} ${d === 1 ? "day" : "days"}`;
+      orbitList.appendChild(row);
+    }
+
+    // Título con contador
+    if (orbitTitle) {
+      const n = orbits.length;
+      orbitTitle.textContent = `Orbit${n ? ` (${n})` : ""}`;
+    }
+  }
+
+  // ===== Historial (desplegable) =====
   for (const h of state.history) {
     const card = document.createElement("div");
     card.className = "hist-card";
@@ -87,7 +113,6 @@ export function render() {
 
     panel.append(meta, note);
 
-    // Exclusión mutua dentro del historial
     head.addEventListener("click", () => {
       const willOpen = !panel.classList.contains("open");
       closePanelsIn(histList, ".hist-panel", panel);
@@ -112,10 +137,10 @@ export function render() {
   enforceSingleOpen(listB, ".panel");
   enforceSingleOpen(histList, ".hist-panel");
 
-  // Total abajo (suma de Main + Side; Landing no suma)
+  // Total (Main + Side; Landing no suma)
   countEl.textContent = String(itemsA.length + itemsB.length);
 
-  // Activar DnD: A y B aceptan drop; L solo permite iniciar drag
+  // DnD: A y B aceptan drop; L solo inicia drag (dragdrop.js lo maneja)
   enableDragAndDrop({ listA, listB, listL, onDrop: onDragDrop });
 }
 
@@ -146,9 +171,9 @@ function renderItem(it, inAlt = false) {
   btn.textContent = labelWithStamp(it);
   textarea.value = it.note || "";
 
-  // Abrir/cerrar panel de notas con exclusión por lista
+  // Abrir/cerrar panel de notas
   btn.addEventListener("click", () => {
-    const container = item.parentElement; // listL, listA o listB
+    const container = item.parentElement;
     const willOpen = !panel.classList.contains("open");
     closePanelsIn(container, ".panel", panel, (p) => {
       const otherItem = p.closest(".item");
@@ -168,19 +193,18 @@ function renderItem(it, inAlt = false) {
     render();
   });
 
-  // Enviar a órbita (≫)
-item.querySelector(".orbit-btn").addEventListener("click", () => {
-  const raw = prompt("How many days must it orbit before returning? (1–365)", "3");
-  if (raw == null) return; // cancelado
-  const days = Number(raw);
-  if (!Number.isFinite(days) || days < 1 || days > 365) {
-    alert("Enter a number of days between 1 y 365.");
-    return;
-  }
-  sendToOrbit(it.id, days);
-  render();
-});
-
+  // Enviar a órbita (≫) — días 1..365
+  item.querySelector(".orbit-btn").addEventListener("click", () => {
+    const raw = prompt("How many days must it orbit before returning? (1–365)", "3");
+    if (raw == null) return;
+    const days = Number(raw);
+    if (!Number.isFinite(days) || days < 1 || days > 365) {
+      alert("Enter a number of days between 1 y 365.");
+      return;
+    }
+    sendToOrbit(it.id, days);
+    render();
+  });
 
   // Editar nota
   textarea.addEventListener("input", () => {
@@ -207,16 +231,13 @@ item.querySelector(".orbit-btn").addEventListener("click", () => {
 }
 
 function onDragDrop({ id, where, index }) {
-  // Capacidad actual del destino (excluyendo el propio ítem si ya está ahí)
   const numId = Number(id);
   const destItemsExcludingSelf = state.items.filter(
     (x) => x.where === where && x.id !== numId
   );
   const capacity = where === "A" ? MAX_A : MAX_B;
+  if (destItemsExcludingSelf.length >= capacity) return;
 
-  if (destItemsExcludingSelf.length >= capacity) {
-    return;
-  }
   moveItem(numId, where, Number(index));
   render();
 }
@@ -257,12 +278,12 @@ export function bindGlobalHandlers() {
     const file = importInput.files?.[0];
     if (!file) return;
     try {
-      await importJson(file); // esto ya aterriza vencidos
+      await importJson(file); // incluye aterrizaje de vencidos
       render();
     } catch (e) {
       alert("No se pudo importar: " + e.message);
     } finally {
-      importInput.value = ""; // reset
+      importInput.value = "";
     }
   });
 
@@ -273,17 +294,31 @@ export function bindGlobalHandlers() {
     render();
   });
 
-  // Aterrizaje inmediato al arrancar (por si hay pendientes)
-  if (landDueOrbits() > 0) render();
+  // Aterrizaje inmediato al arrancar
+  landDueOrbits();
+  render();
 
-  // Timer de comprobación periódica (cada 15s)
+  // Timer: comprobar aterrizajes y refrescar contador de días
   if (orbitTimer) clearInterval(orbitTimer);
   orbitTimer = setInterval(() => {
-    if (landDueOrbits() > 0) render();
-  }, 15000);
+    const landed = landDueOrbits();
+    // re-render si aterrizó algo o si hay orbits activos (para refrescar días)
+    if (landed > 0 || (state.orbit && state.orbit.length > 0)) {
+      render();
+    }
+  }, 60_000); // cada minuto es suficiente para “días restantes”
 }
 
 /* ================== Helpers ================== */
+
+// días restantes (ceil), mínimo 0
+function daysRemaining(iso) {
+  const t = Date.parse(iso);
+  if (!Number.isFinite(t)) return 0;
+  const ms = t - Date.now();
+  const d = Math.ceil(ms / 86_400_000);
+  return Math.max(0, d);
+}
 
 // Cierra todos los paneles de un contenedor, excepto 'exceptEl'.
 function closePanelsIn(container, selector, exceptEl, onClose) {
@@ -313,7 +348,6 @@ function formatDate(iso) {
   }
 }
 
-// Texto del botón: nombre + sello temporal (si existe)
 function labelWithStamp(it) {
   if (!it?.createdAt) return it.label || "";
   return `${it.label} — ${formatStamp(it.createdAt)}`;
