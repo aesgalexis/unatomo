@@ -4,6 +4,4 @@ window.addEventListener("DOMContentLoaded", () => {
   bindGlobalHandlers();
   render();
 });
-<script>
-  window.PRESENCE_WS_URL = "wss://unatomo.com/presence";
-</script>
+
