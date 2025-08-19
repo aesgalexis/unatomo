@@ -19,12 +19,11 @@ import { enableDragAndDrop } from "./dragdrop.js";
 // Límites por marco
 const MAX_A = 8;
 const MAX_B = 16;
-// Mantengo HISTORY_MAX por compatibilidad, pero ya NO limita almacenamiento
-const HISTORY_MAX = 16;
 
-// NUEVO: límites visibles/cupo
-const SHARED_CAPACITY = 64;       // Orbit + Landing comparten cupo
-const HISTORY_VISIBLE_MAX = 32;   // mostramos hasta 32 en History
+// Visibilidad / cupos de UI
+const LANDING_MAX = 62;           // Landing: contador independiente
+const ORBIT_VISIBLE_MAX = 32;     // Orbit: infinito pero mostramos 32
+const HISTORY_VISIBLE_MAX = 32;   // History: infinito pero mostramos 32
 
 const clearHistoryBtn = document.getElementById("clearHistoryBtn");
 
@@ -49,10 +48,7 @@ const orbitTitle = document.getElementById("orbitTitle");
 const frameATitle = document.querySelector("#frameA h2");
 const frameBTitle = document.querySelector("#frameB h2");
 const histTitle  = document.querySelector(".historial h2");
-const landingTitle = document.querySelector("#frameL h2"); // NUEVO
-
-// ===== NUEVO: status bar (contador online) =====
-const onlineCountEl = document.getElementById("onlineCount");
+const landingTitle = document.querySelector("#frameL h2");
 
 // Timer de aterrizaje / refresco
 let orbitTimer = null;
@@ -70,14 +66,13 @@ export function render() {
   const itemsA = state.items.filter((x) => x.where === "A");
   const itemsB = state.items.filter((x) => x.where === "B");
 
-  // Orbit ordenado por retorno
+  // Orbit ordenado por retorno (total ilimitado)
   const orbitsAll = (state.orbit || [])
     .slice()
     .sort((a, b) => Date.parse(a.returnAt) - Date.parse(b.returnAt));
 
   const orbitCount = orbitsAll.length;
   const landingCount = itemsL.length;
-  const landingCap = Math.max(0, SHARED_CAPACITY - orbitCount);
 
   // Glow violeta en Landing si contiene elementos
   if (frameL) frameL.classList.toggle("has-items", landingCount > 0);
@@ -87,9 +82,9 @@ export function render() {
   for (const it of itemsA) listA.appendChild(renderItem(it));
   for (const it of itemsB) listB.appendChild(renderItem(it, true));
 
-  // ===== ORBIT: mostrar hasta 64 y título (N/64) =====
+  // ===== ORBIT: mostrar hasta 32 y título (N/∞) =====
   if (orbitList) {
-    const toShow = orbitsAll.slice(0, SHARED_CAPACITY);
+    const toShow = orbitsAll.slice(0, ORBIT_VISIBLE_MAX);
     for (const o of toShow) {
       const d = daysRemaining(o.returnAt);
       const row = document.createElement("div");
@@ -98,7 +93,7 @@ export function render() {
       orbitList.appendChild(row);
     }
     if (orbitTitle) {
-      orbitTitle.textContent = `Orbit (${orbitCount}/${SHARED_CAPACITY})`;
+      orbitTitle.textContent = `Orbit (${orbitCount}/∞)`;
     }
   }
 
@@ -146,7 +141,7 @@ export function render() {
     histTitle.textContent  = `History (${vis}/${historyTotal})`;
   }
   if (landingTitle) {
-    landingTitle.textContent = `Landing (${landingCount}/${landingCap})`;
+    landingTitle.textContent = `Landing (${landingCount}/${LANDING_MAX})`;
   }
 
   // Desactivar/activar +Crear según límite A
@@ -214,7 +209,7 @@ function renderItem(it, inAlt = false) {
     render();
   });
 
-  // Enviar a órbita (≫) — días 1..365 con cupo compartido 64
+  // Enviar a órbita (≫) — días 1..365 (Orbit es infinito; sin chequeo de cupo)
   item.querySelector(".orbit-btn").addEventListener("click", () => {
     const raw = prompt("How many days must it orbit before returning? (1–365)", "3");
     if (raw == null) return;
@@ -223,11 +218,7 @@ function renderItem(it, inAlt = false) {
       alert("Enter a number of days between 1 y 365.");
       return;
     }
-    const ok = sendToOrbit(it.id, days);
-    if (!ok) {
-      alert("Orbit+Landing are full (64). Free some space before orbiting more items.");
-      return;
-    }
+    sendToOrbit(it.id, days);
     render();
   });
 
@@ -256,13 +247,14 @@ function renderItem(it, inAlt = false) {
 }
 
 function onDragDrop({ id, where, index }) {
-  const num = Number(id);
-    const destItemsExcludingSelf = state.items.filter(
+  const numId = Number(id);
+  const destItemsExcludingSelf = state.items.filter(
     (x) => x.where === where && x.id !== numId
   );
   const capacity = where === "A" ? MAX_A : MAX_B;
   if (destItemsExcludingSelf.length >= capacity) return;
-  moveItem(num, where, index);
+
+  moveItem(numId, where, Number(index));
   render();
 }
 
@@ -330,10 +322,6 @@ export function bindGlobalHandlers() {
       render(); // refresca “Re-entering in X days”
     }
   }, 60_000); // cada minuto
-
-  // ===== NUEVO: presencia online (WS opcional + fallback local) =====
-  const stopPresence = setupOnlinePresence();
-  window.addEventListener("beforeunload", () => stopPresence());
 }
 
 /* ================== Helpers ================== */
@@ -392,94 +380,4 @@ function formatStamp(iso) {
   } catch {
     return "";
   }
-}
-
-/* ===== NUEVO: Online users (WS opcional + fallback local) ===== */
-function setupOnlinePresence() {
-  if (!onlineCountEl) return () => {};
-
-  let usingWS = false;
-  let stopLocal = startLocalPresence(updateCount);
-
-  // Si defines window.PRESENCE_WS_URL (wss://tu-servidor/presence),
-  // intentará usar conteo “global” desde el backend.
-  const wsUrl = window.PRESENCE_WS_URL || null;
-  let ws = null;
-
-  if (wsUrl) {
-    try {
-      ws = new WebSocket(wsUrl);
-      ws.onopen = () => {
-        ws.send(JSON.stringify({ type: "join" }));
-      };
-      ws.onmessage = (ev) => {
-        try {
-          const msg = JSON.parse(ev.data);
-          if (msg && msg.type === "count" && Number.isFinite(msg.count)) {
-            if (!usingWS) {
-              usingWS = true;
-              // al recibir datos del backend, paramos el contador local
-              stopLocal?.();
-              stopLocal = null;
-            }
-            updateCount(msg.count);
-          }
-        } catch {}
-      };
-      ws.onclose = () => {
-        // vuelve al modo local si se cae el WS
-        if (!stopLocal) stopLocal = startLocalPresence(updateCount);
-        usingWS = false;
-      };
-      ws.onerror = () => {};
-    } catch {
-      // si falla crear el WS, seguimos en local
-    }
-  }
-
-  function updateCount(n) {
-    onlineCountEl.textContent = String(n);
-  }
-
-  // cleanup
-  return () => {
-    try { ws?.close(); } catch {}
-    stopLocal?.();
-  };
-}
-
-// Presencia local: cuenta pestañas abiertas de este origen usando BroadcastChannel
-function startLocalPresence(onCount) {
-  const ch = new BroadcastChannel("unatomo-presence");
-  const id = Math.random().toString(36).slice(2);
-  const peers = new Map(); // id -> lastSeen
-
-  function prune() {
-    const now = Date.now();
-    for (const [k, t] of peers) if (now - t > 10000) peers.delete(k);
-    onCount(peers.size);
-  }
-
-  function ping() {
-    const now = Date.now();
-    peers.set(id, now);
-    ch.postMessage({ t: "ping", id, now });
-    prune();
-  }
-
-  ch.onmessage = (ev) => {
-    const m = ev.data;
-    if (m && m.t === "ping" && m.id) {
-      peers.set(m.id, m.now || Date.now());
-      prune();
-    }
-  };
-
-  const int = setInterval(ping, 3000);
-  ping();
-
-  return () => {
-    clearInterval(int);
-    ch.close();
-  };
 }
