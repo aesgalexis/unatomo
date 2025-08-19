@@ -1,37 +1,18 @@
-// Drag & Drop entre marcos con placeholder y zonas ampliadas (lista + marco)
-// Permite soltar en A y B. En L (Landing) solo deja "arrastrar DESDE", no soltar.
+// Drag & Drop entre marcos (A/B aceptan drop; L solo origen)
+// Reordena "en vivo" moviendo el propio .dragging en dragover.
 
 let dropCallback = null;
 let draggingId = null;
-let placeholder = null;
-
-function ensurePlaceholder() {
-  if (placeholder) return placeholder;
-  const el = document.createElement("div");
-  el.className = "dnd-placeholder";
-  el.style.height = "44px";
-  el.style.border = "1px dashed var(--outline)";
-  el.style.borderRadius = "8px";
-  el.style.margin = "4px 0";
-  el.style.opacity = "0.8";
-  return (placeholder = el);
-}
-
-function removePlaceholder() {
-  if (placeholder && placeholder.parentNode) {
-    placeholder.parentNode.removeChild(placeholder);
-  }
-}
 
 function getDragAfterElement(container, y) {
-  // Excluir el que está arrastrándose
+  // Devuelve el elemento delante del cual deberíamos insertar
   const els = [...container.querySelectorAll(".item")].filter(
-    (el) => !el.classList.contains("dragging")
+    el => !el.classList.contains("dragging")
   );
   let closest = { offset: Number.NEGATIVE_INFINITY, element: null };
   for (const child of els) {
     const box = child.getBoundingClientRect();
-    const offset = y - box.top - box.height / 2;
+    const offset = y - (box.top + box.height / 2);
     if (offset < 0 && offset > closest.offset) {
       closest = { offset, element: child };
     }
@@ -41,94 +22,74 @@ function getDragAfterElement(container, y) {
 
 function bindZone(zoneEl, listEl, whereKey, dropEnabled = true) {
   if (!zoneEl || !listEl) return;
-
-  // Facilidad para soltar en listas vacías
-  if (!listEl.style.minHeight) listEl.style.minHeight = "32px";
-
   if (zoneEl.dataset.dndBound === "1") return;
   zoneEl.dataset.dndBound = "1";
 
-  // --- Arranque / fin del drag: siempre activos para poder iniciar desde cualquier zona
+  if (!listEl.style.minHeight) listEl.style.minHeight = "32px";
+
+  // Iniciar arrastre
   zoneEl.addEventListener("dragstart", (e) => {
     const item = e.target.closest(".item");
     if (!item) return;
     draggingId = item.dataset.id;
-    try {
-      e.dataTransfer.setData("text/plain", draggingId);
-    } catch {}
+    try { e.dataTransfer.setData("text/plain", draggingId); } catch {}
     e.dataTransfer.effectAllowed = "move";
     item.classList.add("dragging");
   });
 
+  // Fin arrastre
   zoneEl.addEventListener("dragend", (e) => {
     const item = e.target.closest(".item");
     if (item) item.classList.remove("dragging");
     draggingId = null;
-    removePlaceholder();
   });
 
-  if (!dropEnabled) return; // ← En Landing NO habilitamos drop
+  if (!dropEnabled) return; // En Landing no aceptamos drop
 
-  // --- Drag dentro de la zona (lista o marco): el placeholder SIEMPRE va en la lista real (listEl)
-  zoneEl.addEventListener("dragenter", (e) => {
-    e.preventDefault();
-    if (!draggingId) return;
-    const ph = ensurePlaceholder();
-    if (!listEl.contains(ph)) listEl.appendChild(ph);
-  });
-
+  // Reordenado "en vivo"
   zoneEl.addEventListener("dragover", (e) => {
     e.preventDefault();
     if (e.dataTransfer) e.dataTransfer.dropEffect = "move";
-    if (!draggingId) return;
 
-    const ph = ensurePlaceholder();
+    const draggingEl = listEl.querySelector(".item.dragging") || document.querySelector(".item.dragging");
+    if (!draggingEl) return;
+
     const after = getDragAfterElement(listEl, e.clientY);
-    if (after) listEl.insertBefore(ph, after);
-    else listEl.appendChild(ph);
+    if (after == null) {
+      listEl.appendChild(draggingEl);
+    } else {
+      listEl.insertBefore(draggingEl, after);
+    }
   });
 
+  // Soltar: calcular índice exacto
   zoneEl.addEventListener("drop", (e) => {
     e.preventDefault();
-    // ID del que arrastramos
-    const id =
-      (e.dataTransfer && e.dataTransfer.getData("text/plain")) || draggingId;
+    const id = (e.dataTransfer && e.dataTransfer.getData("text/plain")) || draggingId;
     if (!id) return;
 
-    // Índice destino = nº de .item (no .dragging) antes del placeholder
-    let index = 0;
-    if (placeholder && listEl.contains(placeholder)) {
-      const nodes = [...listEl.children];
-      for (const n of nodes) {
-        if (n === placeholder) break;
-        if (n.classList && n.classList.contains("item") && !n.classList.contains("dragging")) {
-          index++;
-        }
-      }
-    } else {
-      // Si por lo que sea no hay placeholder, caemos al final
-      index = [...listEl.querySelectorAll(".item")].filter(
-        (el) => !el.classList.contains("dragging")
-      ).length;
-    }
+    const draggingEl = listEl.querySelector(".item.dragging") || document.querySelector(".item.dragging");
+    const items = [...listEl.querySelectorAll(".item")];
 
-    removePlaceholder();
+    // Índice = posición del arrastrado en el DOM (nº de hermanos anteriores)
+    let index = items.indexOf(draggingEl);
+    if (index < 0) index = items.length; // fallback
 
     if (typeof dropCallback === "function") {
       dropCallback({ id, where: whereKey, index });
     }
+    // dragend quitará la clase .dragging
   });
 }
 
 export function enableDragAndDrop({ listL, listA, listB, onDrop }) {
-  dropCallback = onDrop; // actualizar callback en cada render
+  dropCallback = onDrop;
 
-  // Marcos para ampliar drop
   const frameA = listA?.closest?.(".frame") || listA;
   const frameB = listB?.closest?.(".frame") || listB;
   const frameL = listL?.closest?.(".frame") || listL;
 
-  // A y B: arrastrar y soltar (lista + marco)
+  // A y B: arrastrar y soltar (en lista y marco para zona amplia)
   if (listA) {
     bindZone(listA, listA, "A", true);
     if (frameA && frameA !== listA) bindZone(frameA, listA, "A", true);
@@ -138,7 +99,7 @@ export function enableDragAndDrop({ listL, listA, listB, onDrop }) {
     if (frameB && frameB !== listB) bindZone(frameB, listB, "B", true);
   }
 
-  // L (Landing): solo arrastrar DESDE L. (dropEnabled=false)
+  // L (Landing): solo fuente (no drop)
   if (listL) {
     bindZone(listL, listL, "L", false);
     if (frameL && frameL !== listL) bindZone(frameL, listL, "L", false);
