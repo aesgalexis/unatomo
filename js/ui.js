@@ -51,6 +51,9 @@ const frameBTitle = document.querySelector("#frameB h2");
 const histTitle  = document.querySelector(".historial h2");
 const landingTitle = document.querySelector("#frameL h2"); // NUEVO
 
+// ===== NUEVO: status bar (contador online) =====
+const onlineCountEl = document.getElementById("onlineCount");
+
 // Timer de aterrizaje / refresco
 let orbitTimer = null;
 
@@ -328,6 +331,10 @@ export function bindGlobalHandlers() {
       render(); // refresca “Re-entering in X days”
     }
   }, 60_000); // cada minuto
+
+  // ===== NUEVO: presencia online (WS opcional + fallback local) =====
+  const stopPresence = setupOnlinePresence();
+  window.addEventListener("beforeunload", () => stopPresence());
 }
 
 /* ================== Helpers ================== */
@@ -386,4 +393,94 @@ function formatStamp(iso) {
   } catch {
     return "";
   }
+}
+
+/* ===== NUEVO: Online users (WS opcional + fallback local) ===== */
+function setupOnlinePresence() {
+  if (!onlineCountEl) return () => {};
+
+  let usingWS = false;
+  let stopLocal = startLocalPresence(updateCount);
+
+  // Si defines window.PRESENCE_WS_URL (wss://tu-servidor/presence),
+  // intentará usar conteo “global” desde el backend.
+  const wsUrl = window.PRESENCE_WS_URL || null;
+  let ws = null;
+
+  if (wsUrl) {
+    try {
+      ws = new WebSocket(wsUrl);
+      ws.onopen = () => {
+        ws.send(JSON.stringify({ type: "join" }));
+      };
+      ws.onmessage = (ev) => {
+        try {
+          const msg = JSON.parse(ev.data);
+          if (msg && msg.type === "count" && Number.isFinite(msg.count)) {
+            if (!usingWS) {
+              usingWS = true;
+              // al recibir datos del backend, paramos el contador local
+              stopLocal?.();
+              stopLocal = null;
+            }
+            updateCount(msg.count);
+          }
+        } catch {}
+      };
+      ws.onclose = () => {
+        // vuelve al modo local si se cae el WS
+        if (!stopLocal) stopLocal = startLocalPresence(updateCount);
+        usingWS = false;
+      };
+      ws.onerror = () => {};
+    } catch {
+      // si falla crear el WS, seguimos en local
+    }
+  }
+
+  function updateCount(n) {
+    onlineCountEl.textContent = String(n);
+  }
+
+  // cleanup
+  return () => {
+    try { ws?.close(); } catch {}
+    stopLocal?.();
+  };
+}
+
+// Presencia local: cuenta pestañas abiertas de este origen usando BroadcastChannel
+function startLocalPresence(onCount) {
+  const ch = new BroadcastChannel("unatomo-presence");
+  const id = Math.random().toString(36).slice(2);
+  const peers = new Map(); // id -> lastSeen
+
+  function prune() {
+    const now = Date.now();
+    for (const [k, t] of peers) if (now - t > 10000) peers.delete(k);
+    onCount(peers.size);
+  }
+
+  function ping() {
+    const now = Date.now();
+    peers.set(id, now);
+    ch.postMessage({ t: "ping", id, now });
+    prune();
+  }
+
+  ch.onmessage = (ev) => {
+    const m = ev.data;
+    if (m && m.t === "ping" && m.id) {
+      peers.set(m.id, m.now || Date.now());
+      prune();
+    }
+  };
+
+  const int = setInterval(ping, 3000);
+  ping();
+
+  return () => {
+    clearInterval(int);
+    ch.close();
+  };
 }
