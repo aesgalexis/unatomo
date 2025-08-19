@@ -19,7 +19,12 @@ import { enableDragAndDrop } from "./dragdrop.js";
 // Límites por marco
 const MAX_A = 8;
 const MAX_B = 16;
-const HISTORY_MAX = 16; // debe coincidir con state.js
+// Mantengo HISTORY_MAX por compatibilidad, pero ya NO limita almacenamiento
+const HISTORY_MAX = 16;
+
+// NUEVO: límites visibles/cupo
+const SHARED_CAPACITY = 64;       // Orbit + Landing comparten cupo
+const HISTORY_VISIBLE_MAX = 32;   // mostramos hasta 32 en History
 
 const clearHistoryBtn = document.getElementById("clearHistoryBtn");
 
@@ -44,6 +49,7 @@ const orbitTitle = document.getElementById("orbitTitle");
 const frameATitle = document.querySelector("#frameA h2");
 const frameBTitle = document.querySelector("#frameB h2");
 const histTitle  = document.querySelector(".historial h2");
+const landingTitle = document.querySelector("#frameL h2"); // NUEVO
 
 // Timer de aterrizaje / refresco
 let orbitTimer = null;
@@ -61,38 +67,43 @@ export function render() {
   const itemsA = state.items.filter((x) => x.where === "A");
   const itemsB = state.items.filter((x) => x.where === "B");
 
+  // Orbit ordenado por retorno
+  const orbitsAll = (state.orbit || [])
+    .slice()
+    .sort((a, b) => Date.parse(a.returnAt) - Date.parse(b.returnAt));
+
+  const orbitCount = orbitsAll.length;
+  const landingCount = itemsL.length;
+  const landingCap = Math.max(0, SHARED_CAPACITY - orbitCount);
+
   // Glow violeta en Landing si contiene elementos
-  if (frameL) frameL.classList.toggle("has-items", itemsL.length > 0);
+  if (frameL) frameL.classList.toggle("has-items", landingCount > 0);
 
   // Pintar Landing/Main/Side
   for (const it of itemsL) listL?.appendChild(renderItem(it, true));
   for (const it of itemsA) listA.appendChild(renderItem(it));
   for (const it of itemsB) listB.appendChild(renderItem(it, true));
 
-  // ===== ORBIT: máx. 16 visibles y título (N/∞) =====
+  // ===== ORBIT: mostrar hasta 64 y título (N/64) =====
   if (orbitList) {
-    const allOrbits = (state.orbit || [])
-      .slice()
-      .sort((a, b) => Date.parse(a.returnAt) - Date.parse(b.returnAt));
-
-    const visibleOrbits = allOrbits.slice(0, 16);
-
-    orbitList.innerHTML = "";
-    for (const o of visibleOrbits) {
+    const toShow = orbitsAll.slice(0, SHARED_CAPACITY);
+    for (const o of toShow) {
       const d = daysRemaining(o.returnAt);
       const row = document.createElement("div");
       row.className = "hist-item"; // reutilizamos estilo
       row.textContent = `Re-entering in ${d} ${d === 1 ? "day" : "days"}`;
       orbitList.appendChild(row);
     }
-
     if (orbitTitle) {
-      orbitTitle.textContent = `Orbit (${visibleOrbits.length}/∞)`;
+      orbitTitle.textContent = `Orbit (${orbitCount}/${SHARED_CAPACITY})`;
     }
   }
 
-  // ===== Historial (desplegable) =====
-  for (const h of state.history) {
+  // ===== Historial (desplegable) — visible 32, total ilimitado =====
+  const historyTotal = state.history.length;
+  const historyVisible = state.history.slice(0, HISTORY_VISIBLE_MAX);
+
+  for (const h of historyVisible) {
     const card = document.createElement("div");
     card.className = "hist-card";
 
@@ -127,7 +138,13 @@ export function render() {
   // Contadores por marco en el título
   if (frameATitle) frameATitle.textContent = `Main (${itemsA.length}/${MAX_A})`;
   if (frameBTitle) frameBTitle.textContent = `Side (${itemsB.length}/${MAX_B})`;
-  if (histTitle)  histTitle.textContent  = `History (${state.history.length}/${HISTORY_MAX})`;
+  if (histTitle) {
+    const vis = Math.min(historyTotal, HISTORY_VISIBLE_MAX);
+    histTitle.textContent  = `History (${vis}/${historyTotal})`;
+  }
+  if (landingTitle) {
+    landingTitle.textContent = `Landing (${landingCount}/${landingCap})`;
+  }
 
   // Desactivar/activar +Crear según límite A
   if (addBtn) addBtn.disabled = itemsA.length >= MAX_A;
@@ -194,7 +211,7 @@ function renderItem(it, inAlt = false) {
     render();
   });
 
-  // Enviar a órbita (≫) — días 1..365
+  // Enviar a órbita (≫) — días 1..365 con cupo compartido 64
   item.querySelector(".orbit-btn").addEventListener("click", () => {
     const raw = prompt("How many days must it orbit before returning? (1–365)", "3");
     if (raw == null) return;
@@ -203,7 +220,11 @@ function renderItem(it, inAlt = false) {
       alert("Enter a number of days between 1 y 365.");
       return;
     }
-    sendToOrbit(it.id, days);
+    const ok = sendToOrbit(it.id, days);
+    if (!ok) {
+      alert("Orbit+Landing are full (64). Free some space before orbiting more items.");
+      return;
+    }
     render();
   });
 
