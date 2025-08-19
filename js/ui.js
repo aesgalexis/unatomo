@@ -69,13 +69,16 @@ export function render() {
   for (const it of itemsA) listA.appendChild(renderItem(it));
   for (const it of itemsB) listB.appendChild(renderItem(it, true));
 
-  // ===== ORBIT: render solo días restantes =====
+  // ===== ORBIT: máx. 16 visibles y título (N/∞) =====
   if (orbitList) {
-    const orbits = (state.orbit || [])
+    const allOrbits = (state.orbit || [])
       .slice()
-      .sort((a, b) => new Date(a.returnAt) - new Date(b.returnAt));
+      .sort((a, b) => Date.parse(a.returnAt) - Date.parse(b.returnAt));
 
-    for (const o of orbits) {
+    const visibleOrbits = allOrbits.slice(0, 16);
+
+    orbitList.innerHTML = "";
+    for (const o of visibleOrbits) {
       const d = daysRemaining(o.returnAt);
       const row = document.createElement("div");
       row.className = "hist-item"; // reutilizamos estilo
@@ -83,10 +86,8 @@ export function render() {
       orbitList.appendChild(row);
     }
 
-    // Título con contador
     if (orbitTitle) {
-      const n = orbits.length;
-      orbitTitle.textContent = `Orbit${n ? ` (${n})` : ""}`;
+      orbitTitle.textContent = `Orbit (${visibleOrbits.length}/∞)`;
     }
   }
 
@@ -302,11 +303,10 @@ export function bindGlobalHandlers() {
   if (orbitTimer) clearInterval(orbitTimer);
   orbitTimer = setInterval(() => {
     const landed = landDueOrbits();
-    // re-render si aterrizó algo o si hay orbits activos (para refrescar días)
     if (landed > 0 || (state.orbit && state.orbit.length > 0)) {
-      render();
+      render(); // refresca “Re-entering in X days”
     }
-  }, 60_000); // cada minuto es suficiente para “días restantes”
+  }, 60_000); // cada minuto
 }
 
 /* ================== Helpers ================== */
