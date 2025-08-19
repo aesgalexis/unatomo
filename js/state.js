@@ -1,8 +1,11 @@
 // Modelo + persistencia + import/export
 
 const STORAGE_KEY = "buttons-v1";
-// IMPORTANTE: si cambias este valor, refleja el mismo en ui.js
+// IMPORTANTE: mantenemos HISTORY_MAX por compat, pero ya NO limita almacenamiento
 const HISTORY_MAX = 16;
+
+// NUEVO: cupo compartido Orbit + Landing
+const SHARED_CAPACITY = 64;
 
 export const makeEmptyState = () => ({
   items: [],   // { id, label, note, open, where: 'A'|'B'|'L', createdAt? }
@@ -41,23 +44,21 @@ function load() {
       };
     });
 
-    // --- Normalización de historial (migración string -> objeto) ---
+    // --- Normalización de historial (sin cap de almacenamiento) ---
     const historyRaw = Array.isArray(parsed.history) ? parsed.history : [];
-    const history = historyRaw
-      .map((h) => {
-        if (typeof h === "string") {
-          return { label: h, note: "", at: null };
-        }
-        return {
-          label:
-            typeof h?.label === "string" && h.label.trim()
-              ? h.label
-              : "(sin etiqueta)",
-          note: typeof h?.note === "string" ? h.note : "",
-          at: typeof h?.at === "string" ? h.at : null,
-        };
-      })
-      .slice(0, HISTORY_MAX); // cap
+    const history = historyRaw.map((h) => {
+      if (typeof h === "string") {
+        return { label: h, note: "", at: null };
+      }
+      return {
+        label:
+          typeof h?.label === "string" && h.label.trim()
+            ? h.label
+            : "(sin etiqueta)",
+        note: typeof h?.note === "string" ? h.note : "",
+        at: typeof h?.at === "string" ? h.at : null,
+      };
+    });
 
     // --- Normalización de órbita ---
     const orbitRaw = Array.isArray(parsed.orbit) ? parsed.orbit : [];
@@ -84,7 +85,7 @@ function load() {
 
     // Construimos estado temporal y aterrizamos si hay orbits vencidos
     const tmp = { items, history, orbit, idSeq };
-    landDueOrbitsIn(tmp); // <- muta tmp; NO reasignar al número que devuelve
+    landDueOrbitsIn(tmp);
 
     return tmp;
   } catch {
@@ -168,9 +169,7 @@ export function resolveItem(id) {
     note: (it.note || "").trim(),
     at: new Date().toISOString(),
   });
-  if (state.history.length > HISTORY_MAX) {
-    state.history = state.history.slice(0, HISTORY_MAX);
-  }
+  // SIN recorte: el historial es ilimitado (la UI muestra 32)
   removeItem(id); // ya hace save()
   save();
 }
@@ -191,15 +190,24 @@ export function clearHistory() {
 /**
  * Envía a órbita un item por N días. El item desaparece de items
  * (no entra en historial). Se persistirá en state.orbit con returnAt.
+ * Respeta cupo compartido Orbit + Landing (64).
  */
 export function sendToOrbit(id, days = 1) {
   const it = state.items.find((x) => x.id === id);
   if (!it) return false;
 
+  // Cupo compartido: Orbit + Landing <= 64
+  const landingCount = state.items.filter(x => x.where === "L").length;
+  const orbitCount = (state.orbit || []).length;
+  if (orbitCount + landingCount >= SHARED_CAPACITY) {
+    return false;
+  }
+
   const d = Math.max(1, Math.min(365, Number(days))); // clamp 1–365
   const ms = d * 24 * 60 * 60 * 1000; // días -> ms
   const returnAt = new Date(Date.now() + ms).toISOString();
 
+  state.orbit = state.orbit || [];
   state.orbit.unshift({
     id: it.id,
     label: it.label,
@@ -213,7 +221,6 @@ export function sendToOrbit(id, days = 1) {
   save();
   return true;
 }
-
 
 /**
  * Aterriza todas las órbitas vencidas (returnAt <= ahora) en 'L' (Landing).
