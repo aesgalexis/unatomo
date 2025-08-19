@@ -256,14 +256,13 @@ function renderItem(it, inAlt = false) {
 }
 
 function onDragDrop({ id, where, index }) {
-  const numId = Number(id);
-  const destItemsExcludingSelf = state.items.filter(
+  const num = Number(id);
+    const destItemsExcludingSelf = state.items.filter(
     (x) => x.where === where && x.id !== numId
   );
   const capacity = where === "A" ? MAX_A : MAX_B;
   if (destItemsExcludingSelf.length >= capacity) return;
-
-  moveItem(numId, where, Number(index));
+  moveItem(num, where, index);
   render();
 }
 
