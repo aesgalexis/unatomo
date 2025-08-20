@@ -135,6 +135,12 @@ body {
   border-color: #047857;
   transform: translateY(-1px);
 }
+/* Hover violeta solo dentro del panel Orbit */
+.orbit .hist-item:hover {
+  background: linear-gradient(180deg, #6d28d9, #4c1d95);
+  border-color: #8b5cf6;
+  transform: translateY(-1px);
+}
 
 /* Panel del historial */
 .hist-panel {
