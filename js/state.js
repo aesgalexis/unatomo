@@ -92,6 +92,20 @@ function load() {
     return makeEmptyState();
   }
 }
+// Aplaza la fecha de reentrada de un elemento en órbita en N días (1..365)
+export function delayOrbit(id, addDays) {
+  const o = state.orbit.find((x) => x.id === id);
+  if (!o) return false;
+
+  const d = Math.max(1, Math.min(365, Number(addDays)));
+  const baseMs = Number.isFinite(Date.parse(o.returnAt))
+    ? Date.parse(o.returnAt)
+    : Date.now();
+  o.returnAt = new Date(baseMs + d * 86_400_000).toISOString();
+
+  save();
+  return true;
+}
 
 export function save() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
