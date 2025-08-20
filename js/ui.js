@@ -385,7 +385,7 @@ function formatDate(iso) {
 
 function labelWithStamp(it) {
   if (!it?.createdAt) return it.label || "";
-  return `${it.label} — ${formatStamp(it.createdAt)}`;
+  return `${it.label} | ${formatStamp(it.createdAt)}`;
 }
 
 function formatStamp(iso) {
