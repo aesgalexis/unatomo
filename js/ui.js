@@ -119,7 +119,7 @@ export function render() {
     const note = document.createElement("div");
     const hasNote = !!(h.note && h.note.trim());
     note.className = "hist-note" + (hasNote ? "" : " empty");
-    note.textContent = hasNote ? h.note : "(sin nota)";
+    note.textContent = hasNote ? h.note : "(empty)";
 
     panel.append(meta, note);
 
