@@ -13,6 +13,7 @@ import {
   clearHistory,
   sendToOrbit,   // NUEVO
   landDueOrbits, // NUEVO
+  delayOrbit,    // <-- NUEVO
 } from "./state.js";
 import { enableDragAndDrop } from "./dragdrop.js";
 
@@ -82,16 +83,69 @@ export function render() {
   for (const it of itemsA) listA.appendChild(renderItem(it));
   for (const it of itemsB) listB.appendChild(renderItem(it, true));
 
-  // ===== ORBIT: mostrar hasta 32 y título (N/∞) =====
+  // ===== ORBIT: mostrar hasta 32 con panel de "delay" y título (N/∞) =====
   if (orbitList) {
     const toShow = orbitsAll.slice(0, ORBIT_VISIBLE_MAX);
+    orbitList.innerHTML = "";
+
     for (const o of toShow) {
       const d = daysRemaining(o.returnAt);
-      const row = document.createElement("div");
-      row.className = "hist-item"; // reutilizamos estilo
-      row.textContent = `Re-entering in ${d} ${d === 1 ? "day" : "days"}`;
-      orbitList.appendChild(row);
+
+      const card  = document.createElement("div");
+      card.className = "hist-card";
+
+      const head  = document.createElement("div");
+      head.className = "hist-item";
+      head.textContent = `Re-entering in ${d} ${d === 1 ? "day" : "days"}`;
+
+      const panel = document.createElement("div");
+      panel.className = "hist-panel";
+      panel.innerHTML = `
+        <div class="hist-meta">Due: ${formatDate(o.returnAt)}</div>
+        <div class="orbit-delay-actions" style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+          <button class="tbtn qd" data-d="1">+1d</button>
+          <button class="tbtn qd" data-d="3">+3d</button>
+          <button class="tbtn qd" data-d="7">+7d</button>
+          <button class="tbtn qd" data-d="30">+30d</button>
+          <span style="margin-left:8px;">Delay</span>
+          <input type="number" min="1" max="365" value="3" class="delay-input"
+                 style="width:64px; padding:4px 6px; border-radius:8px; border:1px solid var(--outline); background:#0a0f20; color:var(--text);" />
+          <span>days</span>
+          <button class="tbtn apply-delay">Apply</button>
+        </div>
+      `;
+
+      // Toggle exclusivo dentro del panel de Orbit (como History)
+      head.addEventListener("click", () => {
+        const willOpen = !panel.classList.contains("open");
+        closePanelsIn(orbitList, ".hist-panel", panel);
+        panel.classList.toggle("open", willOpen);
+      });
+
+      // Botones rápidos +Nd
+      panel.querySelectorAll(".qd").forEach((b) => {
+        b.addEventListener("click", () => {
+          const add = Number(b.dataset.d);
+          delayOrbit(o.id, add);
+          render();
+        });
+      });
+
+      // Aplazar con input personalizado
+      panel.querySelector(".apply-delay").addEventListener("click", () => {
+        const n = Number(panel.querySelector(".delay-input").value);
+        if (!Number.isFinite(n) || n < 1 || n > 365) {
+          alert("Enter a number of days between 1 and 365.");
+          return;
+        }
+        delayOrbit(o.id, n);
+        render();
+      });
+
+      card.append(head, panel);
+      orbitList.appendChild(card);
     }
+
     if (orbitTitle) {
       orbitTitle.textContent = `Orbit (${orbitCount}/∞)`;
     }
@@ -152,6 +206,7 @@ export function render() {
   enforceSingleOpen(listA, ".panel");
   enforceSingleOpen(listB, ".panel");
   enforceSingleOpen(histList, ".hist-panel");
+  enforceSingleOpen(orbitList, ".hist-panel"); // <-- NUEVO (Orbit)
 
   // Total (Main + Side; Landing no suma)
   countEl.textContent = String(itemsA.length + itemsB.length);
