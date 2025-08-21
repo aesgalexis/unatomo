@@ -493,3 +493,14 @@ footer {
   font-style: italic;
   color: rgb(148 163 184 / 0.45);
 }
+
+/* === Fondo sólido en toda la página (sin banda azul) === */
+html, body {
+  background: var(--bg) !important;
+  background-image: none !important; /* anula el radial-gradient */
+}
+
+/* (opcional) iguala la barra de estado al mismo color */
+.statusbar {
+  background: var(--bg) !important;
+}
