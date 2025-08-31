@@ -522,3 +522,38 @@ html, body {
   color: orange;
   font-weight: 600;
 }
+
+/* Scrollbar oscuro SOLO dentro del textarea de cada AB */
+.item .panel textarea {
+  /* ya tienes fondo oscuro, reforzamos el modo */
+  background: #0a0f20;
+  color-scheme: dark;           /* Pista para controles/scroll en navegadores modernos */
+  scrollbar-width: thin;        /* Firefox */
+  scrollbar-color: #334155 transparent; /* thumb / track (Firefox) */
+}
+
+/* Chromium/WebKit (Chrome, Edge, Safari) */
+.item .panel textarea::-webkit-scrollbar {
+  width: 10px;                  /* grosor vertical */
+  height: 10px;                 /* grosor horizontal (si aparece) */
+}
+
+.item .panel textarea::-webkit-scrollbar-track {
+  background: transparent;      /* sin fondo blanco */
+}
+
+.item .panel textarea::-webkit-scrollbar-thumb {
+  background: #334155;          /* tailwind slate-700 aprox */
+  border-radius: 8px;
+  border: 2px solid transparent;/* separa del track (simula padding) */
+  background-clip: content-box;
+}
+
+.item .panel textarea::-webkit-scrollbar-thumb:hover {
+  background: #475569;          /* slate-600 */
+}
+
+.item .panel textarea::-webkit-scrollbar-corner {
+  background: transparent;      /* evita “cuadradito” claro en la esquina */
+}
+
