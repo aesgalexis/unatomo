@@ -451,14 +451,15 @@ footer {
 /* ===== Status bar ===== */
 .statusbar {
   position: fixed;
-  left: 0; right: 0; bottom: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   height: 44px;
   display: flex;
   align-items: center;
-  /* antes: justify-content: space-between; */
-  justify-content: center;            /* ← centra el contenido */
+  justify-content: space-between;
   padding: 0 16px;
-  background: var(--bg) !important;   /* ya lo tenías */
+  background: rgba(17, 24, 39, 0.85);
   backdrop-filter: blur(8px);
   border-top: 1px solid var(--outline);
   z-index: 1000;
@@ -468,9 +469,9 @@ footer {
 .statusbar .status-left {
   font-size: 12.5px;
   color: var(--muted);
-  letter-spacing: .2px;
-  text-align: center;                 /* opcional, por si el texto salta de línea */
+  letter-spacing: 0.2px;
 }
+
 
 
 /* Pequeños ajustes responsive */
