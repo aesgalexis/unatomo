@@ -224,7 +224,7 @@ export function render() {
       panel.className = "hist-panel";
       panel.innerHTML = `
         <div class="hist-meta">Due: ${formatDate(o.returnAt)}</div>
-        <button class="tbtn delay-btn">Delay…</button>
+        <button class="tbtn -btn">Delay…</button>
       `;
 
       // Toggle exclusivo (como History)
@@ -313,8 +313,8 @@ export function render() {
   enforceSingleOpen(histList, ".hist-panel");
   enforceSingleOpen(orbitList, ".hist-panel");
 
-// === Total con elemento químico ===
-const total = itemsA.length + itemsB.length;
+// Total incluyendo Landing
+const total = itemsA.length + itemsB.length + itemsL.length;
 countEl.textContent = `${total}`;
 
 const elementName = ELEMENTS[total] || "";
