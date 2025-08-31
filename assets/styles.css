@@ -439,12 +439,16 @@ main { padding:16px 20px; }
   letter-spacing: .2px;
 }
 
-/* Footer */
-footer {
-  padding:10px 16px; border-top:1px solid var(--outline);
-  font-size:12px; color: var(--muted);
-  display:flex; justify-content:space-between;
+/* Solo el footer DENTRO de .app */
+.app > footer {
+  padding:10px 16px;
+  border-top:1px solid var(--outline);
+  font-size:12px;
+  color: var(--muted);
+  display:flex;
+  justify-content:space-between;
 }
+
 
 /* ===== Status bar ===== */
 .statusbar {
@@ -546,25 +550,32 @@ html, body {
 }
   font-weight: 600;
 }
-/* Pie de sitio, centrado y en gris tenue */
+/* Pie de sitio, fuera del marco principal */
 .site-footnote {
+  display: block;
+  /* si quieres que el ancho siga el de .layout, descomenta estas dos líneas: */
+  /* max-width: 1400px;
+     margin-inline: auto; */
+
   width: 100%;
   text-align: center;
   color: var(--muted);
   font-size: 12.5px;
   letter-spacing: .2px;
   opacity: 0.9;
-  margin-top: 10px;
-  /* espacio para que no quede pegado a la status bar */
-  padding-bottom: 8px;
+
+  border: none;               /* sin línea superior */
+  margin-top: 12px;
+  margin-bottom: var(--safe-bottom);  /* evita quedar detrás de la status bar */
+  padding: 0 16px;
 }
 
-/* Un pelín más de aire en móvil */
 @media (max-width: 900px) {
   .site-footnote {
     font-size: 12px;
-    margin-top: 12px;
-    padding-bottom: 10px;
+    margin-top: 14px;
+    margin-bottom: calc(var(--safe-bottom) + 4px);
   }
 }
+
 
