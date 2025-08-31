@@ -265,6 +265,24 @@ function landDueOrbitsIn(s, now = new Date()) {
 
 /* ================= Exportar/Importar ================= */
 
+function slugifyForFile(name) {
+  // a) normaliza tildes → "unátomo" -> "unatomo"
+  const noDiacritics = name
+    .toString()
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+
+  // b) minúsculas + reemplaza todo lo que no sea a-z/0-9 por guiones
+  const slug = noDiacritics
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 32); // límite razonable
+
+  return slug || "export";
+}
+
 export function exportJson() {
   const blob = new Blob([JSON.stringify(state, null, 2)], {
     type: "application/json",
@@ -272,8 +290,15 @@ export function exportJson() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
+
+  // Usa el título guardado por la UI; fallback a 'unatomo'
+  const rawTitle = localStorage.getItem("app-title") || "unatomo";
+  const base = slugifyForFile(rawTitle);
+
+  // Misma marca temporal que venías usando
   const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
-  a.download = `unatomo-${stamp}.json`;
+  a.download = `${base}-${stamp}.json`;
+
   document.body.appendChild(a);
   a.click();
   a.remove();
@@ -301,3 +326,4 @@ export function importJson(file) {
     reader.readAsText(file);
   });
 }
+
