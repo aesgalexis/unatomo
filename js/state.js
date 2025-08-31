@@ -4,9 +4,6 @@ const STORAGE_KEY = "buttons-v1";
 // IMPORTANTE: mantenemos HISTORY_MAX por compat, pero ya NO limita almacenamiento
 const HISTORY_MAX = 16;
 
-// NUEVO: cupo compartido Orbit + Landing
-const SHARED_CAPACITY = 64;
-
 export const makeEmptyState = () => ({
   items: [],   // { id, label, note, open, where: 'A'|'B'|'L', createdAt? }
   history: [], // { label, note, at }
@@ -209,13 +206,6 @@ export function clearHistory() {
 export function sendToOrbit(id, days = 1) {
   const it = state.items.find((x) => x.id === id);
   if (!it) return false;
-
-  // Cupo compartido: Orbit + Landing <= 64
-  const landingCount = state.items.filter(x => x.where === "L").length;
-  const orbitCount = (state.orbit || []).length;
-  if (orbitCount + landingCount >= SHARED_CAPACITY) {
-    return false;
-  }
 
   const d = Math.max(1, Math.min(365, Number(days))); // clamp 1–365
   const ms = d * 24 * 60 * 60 * 1000; // días -> ms
