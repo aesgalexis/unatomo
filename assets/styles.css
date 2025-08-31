@@ -399,6 +399,12 @@ main { padding:16px 20px; }
   outline-offset: 2px;
   filter: saturate(1.05);
 }
+/* Cuando no se puede arrastrar desde Landing porque A y B están llenos */
+.item.no-drag .grab {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 
 /* =========================
    Orbit (columna derecha)
