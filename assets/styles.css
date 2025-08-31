@@ -551,32 +551,4 @@ html, body {
 }
   font-weight: 600;
 }
-/* Pie de sitio, fuera del marco principal */
-.site-footnote {
-  display: block;
-  /* si quieres que el ancho siga el de .layout, descomenta estas dos líneas: */
-  /* max-width: 1400px;
-     margin-inline: auto; */
-
-  width: 100%;
-  text-align: center;
-  color: var(--muted);
-  font-size: 12.5px;
-  letter-spacing: .2px;
-  opacity: 0.9;
-
-  border: none;               /* sin línea superior */
-  margin-top: 12px;
-  margin-bottom: var(--safe-bottom);  /* evita quedar detrás de la status bar */
-  padding: 0 16px;
-}
-
-@media (max-width: 900px) {
-  .site-footnote {
-    font-size: 12px;
-    margin-top: 14px;
-    margin-bottom: calc(var(--safe-bottom) + 4px);
-  }
-}
-
 
