@@ -448,6 +448,7 @@ footer {
   justify-content:space-between;
 }
 
+
 /* ===== Status bar ===== */
 .statusbar {
   position: fixed;
@@ -457,23 +458,21 @@ footer {
   height: 44px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;   /* ← centra el único hijo */
   padding: 0 16px;
   background: rgba(17, 24, 39, 0.85);
   backdrop-filter: blur(8px);
   border-top: 1px solid var(--outline);
   z-index: 1000;
   pointer-events: auto;
-  text-align: center;
 }
 
 .statusbar .status-left {
   font-size: 12.5px;
   color: var(--muted);
   letter-spacing: 0.2px;
+  text-align: center;         /* por si el texto ocupa 2 líneas */
 }
-
-
 
 /* Pequeños ajustes responsive */
 @media (max-width: 900px) {
