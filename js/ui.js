@@ -16,6 +16,7 @@ import {
   delayOrbit,    // NUEVO (asegúrate de tenerlo en state.js)
 } from "./state.js";
 import { enableDragAndDrop } from "./dragdrop.js";
+
 // === Tabla periódica: número atómico → nombre ===
 const ELEMENTS = {
   1: "Hydrogen",
@@ -189,6 +190,9 @@ export function render() {
   const itemsA = state.items.filter((x) => x.where === "A");
   const itemsB = state.items.filter((x) => x.where === "B");
 
+  // ¿A y B llenos?
+  const isABFull = (itemsA.length >= MAX_A) && (itemsB.length >= MAX_B);
+
   // Orbit ordenado por retorno (total ilimitado)
   const orbitsAll = (state.orbit || [])
     .slice()
@@ -200,8 +204,11 @@ export function render() {
   // Glow violeta en Landing si contiene elementos
   if (frameL) frameL.classList.toggle("has-items", landingCount > 0);
 
-  // Pintar Landing/Main/Side
-  for (const it of itemsL) listL?.appendChild(renderItem(it, true));
+  // Pintar Landing/Main/Side (Landing: sin drag si A y B están llenos)
+  for (const it of itemsL) {
+    const node = renderItem(it, true, !isABFull); // allowDrag = !isABFull
+    listL?.appendChild(node);
+  }
   for (const it of itemsA) listA.appendChild(renderItem(it));
   for (const it of itemsB) listB.appendChild(renderItem(it, true));
 
@@ -313,34 +320,33 @@ export function render() {
   enforceSingleOpen(histList, ".hist-panel");
   enforceSingleOpen(orbitList, ".hist-panel");
 
-// === Total con elemento químico ===
-// Ahora el total incluye también Landing (L)
-const total = itemsA.length + itemsB.length + itemsL.length;
+  // === Total con elemento químico ===
+  // Ahora el total incluye también Landing (L)
+  const total = itemsA.length + itemsB.length + itemsL.length;
 
-// Mostramos el número total siempre
-countEl.textContent = `${total}`;
+  // Mostramos el número total siempre
+  countEl.textContent = `${total}`;
 
-// Buscamos el elemento químico correspondiente si está en rango 1..118
-const elementName = ELEMENTS[total] || "";
+  // Buscamos el elemento químico correspondiente si está en rango 1..118
+  const elementName = ELEMENTS[total] || "";
 
-if (elementName) {
-  // Si hay elemento, mostramos el nombre en naranja
-  countEl.innerHTML = `${total} <span class="element-name">(${elementName})</span>`;
-} else {
-  // Si no hay elemento (por encima de 118 o 0), mostramos solo el número
-  countEl.textContent = total;
-}
-
+  if (elementName) {
+    // Si hay elemento, mostramos el nombre en naranja
+    countEl.innerHTML = `${total} <span class="element-name">(${elementName})</span>`;
+  } else {
+    // Si no hay elemento (por encima de 118 o 0), mostramos solo el número
+    countEl.textContent = total;
+  }
 
   // DnD: A y B aceptan drop; L solo inicia drag (dragdrop.js lo maneja)
   enableDragAndDrop({ listA, listB, listL, onDrop: onDragDrop });
 }
 
-function renderItem(it, inAlt = false) {
+function renderItem(it, inAlt = false, allowDrag = true) {
   const item = document.createElement("div");
   item.className = `item${inAlt ? " in-alt" : ""}`;
   item.dataset.id = String(it.id);
-  item.setAttribute("draggable", "true");
+  item.setAttribute("draggable", allowDrag ? "true" : "false");
   item.innerHTML = `
     <div class="grab">◳</div>
     <button class="btn"></button>
@@ -453,31 +459,32 @@ export function bindGlobalHandlers() {
     input.setAttribute("autocapitalize", "off");
     input.autocomplete = "off";
   }
-// Renombrar título con prompt (máx. 10 chars) + persistencia
-if (appTitleEl) {
-  // Cargar título guardado si existe
-  const savedTitle = localStorage.getItem("app-title");
-  if (savedTitle && savedTitle.trim()) {
-    appTitleEl.textContent = savedTitle;
-  }
 
-  appTitleEl.addEventListener("click", () => {
-    const current = appTitleEl.textContent.trim();
-    const input = prompt("Rename title (max 10 characters):", current);
-    if (input == null) return; // Cancelado
-    const name = input.trim();
-    if (!name) {
-      alert("Please enter a non-empty title.");
-      return;
+  // Renombrar título con prompt (máx. 10 chars) + persistencia
+  if (appTitleEl) {
+    // Cargar título guardado si existe
+    const savedTitle = localStorage.getItem("app-title");
+    if (savedTitle && savedTitle.trim()) {
+      appTitleEl.textContent = savedTitle;
     }
-    if (name.length > 10) {
-      alert("Title must be 10 characters or fewer.");
-      return;
-    }
-    appTitleEl.textContent = name;
-    localStorage.setItem("app-title", name);
-  });
-}
+
+    appTitleEl.addEventListener("click", () => {
+      const current = appTitleEl.textContent.trim();
+      const input = prompt("Rename title (max 10 characters):", current);
+      if (input == null) return; // Cancelado
+      const name = input.trim();
+      if (!name) {
+        alert("Please enter a non-empty title.");
+        return;
+      }
+      if (name.length > 10) {
+        alert("Title must be 10 characters or fewer.");
+        return;
+      }
+      appTitleEl.textContent = name;
+      localStorage.setItem("app-title", name);
+    });
+  }
 
   // Crear en Main respetando límite
   addBtn.addEventListener("click", () => {
@@ -525,20 +532,20 @@ if (appTitleEl) {
 
   // Vaciar todo
   clearAllBtn?.addEventListener("click", () => {
-  if (!confirm("¿Clear all?")) return;
+    if (!confirm("¿Clear all?")) return;
 
-  // Limpia estado (items, history, orbit)
-  clearAll();
+    // Limpia estado (items, history, orbit)
+    clearAll();
 
-  // Resetea el título guardado y el texto visible
-  localStorage.removeItem("app-title");
-  if (appTitleEl) appTitleEl.textContent = "unátomo";
+    // Resetea el título guardado y el texto visible
+    localStorage.removeItem("app-title");
+    if (appTitleEl) appTitleEl.textContent = "unátomo";
 
-  // (opcional) también el <title> de la pestaña:
-  // document.title = "unátomo";
+    // (opcional) también el <title> de la pestaña:
+    // document.title = "unátomo";
 
-  render();
-});
+    render();
+  });
 
   // Aterrizaje inmediato al arrancar
   landDueOrbits();
