@@ -191,8 +191,18 @@ export function render() {
   enforceSingleOpen(histList, ".hist-panel");
   enforceSingleOpen(orbitList, ".hist-panel");
 
-  // Total (Main + Side; Landing no suma)
-  countEl.textContent = String(itemsA.length + itemsB.length);
+// === Total con elemento químico ===
+const total = itemsA.length + itemsB.length;
+countEl.textContent = `${total}`;
+
+const elementName = ELEMENTS[total] || "";
+if (elementName) {
+  // Si hay elemento, mostramos el nombre en naranja
+  countEl.innerHTML = `${total} <span class="element-name">(${elementName})</span>`;
+} else {
+  // Si no hay elemento (por encima de 118 o 0), solo mostramos el número
+  countEl.textContent = total;
+}
 
   // DnD: A y B aceptan drop; L solo inicia drag (dragdrop.js lo maneja)
   enableDragAndDrop({ listA, listB, listL, onDrop: onDragDrop });
