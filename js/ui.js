@@ -171,6 +171,7 @@ const frameATitle = document.querySelector("#frameA h2");
 const frameBTitle = document.querySelector("#frameB h2");
 const histTitle  = document.querySelector(".historial h2");
 const landingTitle = document.querySelector("#frameL h2");
+const appTitleEl = document.querySelector(".app header h1");
 
 // Timer de aterrizaje / refresco
 let orbitTimer = null;
