@@ -25,7 +25,6 @@ const MAX_B = 16;
 const LANDING_MAX = 62;           // Landing: contador independiente
 const ORBIT_VISIBLE_MAX = 32;     // Orbit: infinito pero mostramos 32
 const HISTORY_VISIBLE_MAX = 32;   // History: infinito pero mostramos 32
-const siteTitleEl = document.getElementById("siteTitle");
 
 const clearHistoryBtn = document.getElementById("clearHistoryBtn");
 
@@ -330,51 +329,6 @@ export function bindGlobalHandlers() {
     input.focus();
     render();
   });
-// === TÍTULO EDITABLE ===
-const TITLE_KEY = "siteTitleText";
-const orbitTitleEl = document.getElementById("orbitTitle");
-
-// Cargar título guardado
-const savedTitle = localStorage.getItem(TITLE_KEY);
-if (savedTitle) {
-  siteTitleEl.textContent = savedTitle;
-  document.title = savedTitle;
-  if (orbitTitleEl) orbitTitleEl.textContent = savedTitle;
-}
-
-// Normaliza texto (sin saltos ni espacios múltiples)
-function cleanTitle(text) {
-  return (text || "").replace(/\s+/g, " ").trim();
-}
-
-// Guardar cambios
-function commitTitle() {
-  const clean = cleanTitle(siteTitleEl.textContent);
-  siteTitleEl.textContent = clean || "unátomo";
-  localStorage.setItem(TITLE_KEY, siteTitleEl.textContent);
-  document.title = siteTitleEl.textContent;
-  if (orbitTitleEl) orbitTitleEl.textContent = siteTitleEl.textContent;
-}
-
-// Bloquea saltos de línea y confirma con Enter
-siteTitleEl.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") {
-    e.preventDefault();
-    siteTitleEl.blur(); // Dispara blur → commit
-  }
-});
-
-// Guarda cambios al perder el foco
-siteTitleEl.addEventListener("blur", commitTitle);
-
-// Selecciona todo el texto al hacer foco
-siteTitleEl.addEventListener("focus", () => {
-  const range = document.createRange();
-  range.selectNodeContents(siteTitleEl);
-  const sel = window.getSelection();
-  sel.removeAllRanges();
-  sel.addRange(range);
-});
 
   // Borrar historial
   clearHistoryBtn?.addEventListener("click", (e) => {
