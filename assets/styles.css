@@ -528,6 +528,7 @@ html, body {
   /* Scrollbar oscuro solo para textareas dentro de los AB */
 .item .panel textarea::-webkit-scrollbar {
   width: 8px;
+  background: #0a0f20;
 }
 
 .item .panel textarea::-webkit-scrollbar-track {
