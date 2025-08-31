@@ -529,4 +529,8 @@ html, body {
 }
 .element-name {
   color: orange;
+/* Hacer el título clicable */
+.app header h1 {
+  cursor: pointer;
+}
 
