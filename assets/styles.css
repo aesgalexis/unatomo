@@ -509,3 +509,7 @@ html, body {
   min-height: 80px;
   padding: 12px;
 }
+.element-name {
+  color: orange;
+  font-weight: 600;
+}
