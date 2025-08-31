@@ -460,31 +460,49 @@ export function bindGlobalHandlers() {
     input.autocomplete = "off";
   }
 
-  // Renombrar título con prompt (máx. 10 chars) + persistencia
-  if (appTitleEl) {
-    // Cargar título guardado si existe
-    const savedTitle = localStorage.getItem("app-title");
-    if (savedTitle && savedTitle.trim()) {
-      appTitleEl.textContent = savedTitle;
-    }
+// Renombrar título con prompt (máx. 10 chars) + persistencia + cursor pointer
+if (appTitleEl) {
+  // Fuerza cursor "pointer" incluso si alguna regla CSS lo pisa
+  appTitleEl.style.cursor = "pointer";
+  appTitleEl.setAttribute("role", "button");
+  appTitleEl.setAttribute("title", "Click para renombrar");
+  appTitleEl.tabIndex = 0;
 
-    appTitleEl.addEventListener("click", () => {
-      const current = appTitleEl.textContent.trim();
-      const input = prompt("Rename title (max 10 characters):", current);
-      if (input == null) return; // Cancelado
-      const name = input.trim();
-      if (!name) {
-        alert("Please enter a non-empty title.");
-        return;
-      }
-      if (name.length > 10) {
-        alert("Title must be 10 characters or fewer.");
-        return;
-      }
-      appTitleEl.textContent = name;
-      localStorage.setItem("app-title", name);
-    });
+  // Cargar título guardado si existe
+  const savedTitle = localStorage.getItem("app-title");
+  if (savedTitle && savedTitle.trim()) {
+    appTitleEl.textContent = savedTitle;
   }
+
+  const rename = () => {
+    const current = appTitleEl.textContent.trim();
+    const input = prompt("Rename title (max 10 characters):", current);
+    if (input == null) return; // cancelado
+    const name = input.trim();
+    if (!name) {
+      alert("Please enter a non-empty title.");
+      return;
+    }
+    if (name.length > 10) {
+      alert("Title must be 10 characters or fewer.");
+      return;
+    }
+    appTitleEl.textContent = name;
+    localStorage.setItem("app-title", name);
+    // Opcional: reflejar también en la pestaña
+    // document.title = name;
+  };
+
+  // Click y teclado (Enter/Espacio)
+  appTitleEl.addEventListener("click", rename);
+  appTitleEl.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      rename();
+    }
+  });
+}
+
 
   // Crear en Main respetando límite
   addBtn.addEventListener("click", () => {
