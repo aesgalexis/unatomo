@@ -519,6 +519,6 @@ html, body {
   padding: 12px;
 }
 .element-name {
-  color: orange;
+  color: var(--accent);
   font-weight: 600;
 }
