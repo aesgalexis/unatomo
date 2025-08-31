@@ -373,6 +373,19 @@ function renderItem(it, inAlt = false) {
   btn.textContent = labelWithStamp(it);
   textarea.value = it.note || "";
 
+  // Autoajustar altura del textarea dinámicamente
+const resizeTextarea = () => {
+  textarea.style.height = "auto"; // resetea primero
+  const maxHeight = 120;          // altura máxima antes de mostrar scroll
+  const newHeight = Math.min(textarea.scrollHeight, maxHeight);
+  textarea.style.height = newHeight + "px";
+  textarea.style.overflowY = textarea.scrollHeight > maxHeight ? "auto" : "hidden";
+};
+
+// Ejecutar al cargar y al escribir
+resizeTextarea();
+textarea.addEventListener("input", resizeTextarea);
+
   // Abrir/cerrar panel de notas
   btn.addEventListener("click", () => {
     const container = item.parentElement;
