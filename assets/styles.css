@@ -464,6 +464,7 @@ footer {
   border-top: 1px solid var(--outline);
   z-index: 1000;
   pointer-events: auto;
+  text-align: center;
 }
 
 .statusbar .status-left {
@@ -529,31 +530,4 @@ html, body {
 }
 .element-name {
   color: orange;
-
-  /* Scrollbar oscuro solo para textareas dentro de los AB */
-.item .panel textarea::-webkit-scrollbar {
-  width: 8px;
-  background: #0a0f20;
-}
-
-.item .panel textarea::-webkit-scrollbar-track {
-  background: #0f172a; /* fondo oscuro, ya acorde a tu paleta */
-}
-
-.item .panel textarea::-webkit-scrollbar-thumb {
-  background: #334155; /* gris oscuro para el thumb */
-  border-radius: 6px;
-}
-
-.item .panel textarea::-webkit-scrollbar-thumb:hover {
-  background: #475569; /* un gris un poco más claro al hover */
-}
-
-/* Firefox */
-.item .panel textarea {
-  scrollbar-width: thin;
-  scrollbar-color: #334155 #0f172a;
-}
-  font-weight: 600;
-}
 
