@@ -266,39 +266,56 @@ function landDueOrbitsIn(s, now = new Date()) {
 /* ================= Exportar/Importar ================= */
 
 function slugifyForFile(name) {
-  // a) normaliza tildes → "unátomo" -> "unatomo"
   const noDiacritics = name
     .toString()
     .trim()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "");
-
-  // b) minúsculas + reemplaza todo lo que no sea a-z/0-9 por guiones
   const slug = noDiacritics
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
-    .slice(0, 32); // límite razonable
-
+    .slice(0, 32);
   return slug || "export";
 }
 
-export function exportJson() {
-  const blob = new Blob([JSON.stringify(state, null, 2)], {
-    type: "application/json",
-  });
+export async function exportJson() {
+  const rawTitle = localStorage.getItem("app-title") || "unatomo";
+  const base = slugifyForFile(rawTitle);
+  const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
+  const filename = `${base}-${stamp}.json`;
+  const data = JSON.stringify(state, null, 2);
+  const blob = new Blob([data], { type: "application/json" });
+
+  // Opción B: Forzar diálogo con File System Access API (Chromium + https/localhost)
+  if (window.showSaveFilePicker && window.isSecureContext) {
+    try {
+      const handle = await window.showSaveFilePicker({
+        suggestedName: filename,
+        types: [
+          {
+            description: "JSON",
+            accept: { "application/json": [".json"] },
+          },
+        ],
+        excludeAcceptAllOption: false, // permite elegir cualquier tipo si el usuario quiere
+      });
+      const writable = await handle.createWritable();
+      await writable.write(blob);
+      await writable.close();
+      return;
+    } catch (err) {
+      // Si el usuario cancela, no hacemos nada. Para otros errores, caemos al método clásico.
+      if (err && err.name === "AbortError") return;
+      console.warn("showSaveFilePicker falló, usando fallback:", err);
+    }
+  }
+
+  // Fallback (Safari/Firefox o sin https): descarga directa (respetará el nombre sugerido)
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-
-  // Usa el título guardado por la UI; fallback a 'unatomo'
-  const rawTitle = localStorage.getItem("app-title") || "unatomo";
-  const base = slugifyForFile(rawTitle);
-
-  // Misma marca temporal que venías usando
-  const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
-  a.download = `${base}-${stamp}.json`;
-
+  a.download = filename;
   document.body.appendChild(a);
   a.click();
   a.remove();
@@ -314,7 +331,6 @@ export function importJson(file) {
         const parsed = JSON.parse(String(reader.result));
         if (!parsed || !Array.isArray(parsed.items))
           throw new Error("Formato inválido");
-        // Guardamos tal cual y re-normalizamos (incluye órbita + aterrizaje vencidos)
         localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
         state = load();
         save();
@@ -326,4 +342,3 @@ export function importJson(file) {
     reader.readAsText(file);
   });
 }
-
