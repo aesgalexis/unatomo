@@ -283,7 +283,7 @@ export function exportJson() {
   const a = document.createElement("a");
   a.href = url;
   const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
-  a.download = `botones-${stamp}.json`;
+  a.download = `unatomo-${stamp}.json`;
   document.body.appendChild(a);
   a.click();
   a.remove();
