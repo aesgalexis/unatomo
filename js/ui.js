@@ -453,6 +453,31 @@ export function bindGlobalHandlers() {
     input.setAttribute("autocapitalize", "off");
     input.autocomplete = "off";
   }
+// Renombrar título con prompt (máx. 10 chars) + persistencia
+if (appTitleEl) {
+  // Cargar título guardado si existe
+  const savedTitle = localStorage.getItem("app-title");
+  if (savedTitle && savedTitle.trim()) {
+    appTitleEl.textContent = savedTitle;
+  }
+
+  appTitleEl.addEventListener("click", () => {
+    const current = appTitleEl.textContent.trim();
+    const input = prompt("Rename title (max 10 characters):", current);
+    if (input == null) return; // Cancelado
+    const name = input.trim();
+    if (!name) {
+      alert("Please enter a non-empty title.");
+      return;
+    }
+    if (name.length > 10) {
+      alert("Title must be 10 characters or fewer.");
+      return;
+    }
+    appTitleEl.textContent = name;
+    localStorage.setItem("app-title", name);
+  });
+}
 
   // Crear en Main respetando límite
   addBtn.addEventListener("click", () => {
