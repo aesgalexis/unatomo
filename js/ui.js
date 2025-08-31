@@ -22,7 +22,7 @@ const MAX_A = 8;
 const MAX_B = 16;
 
 // Visibilidad / cupos de UI
-const LANDING_MAX = 62;           // Landing: contador independiente
+const LANDING_MAX = 94;           // Landing: contador independiente
 const ORBIT_VISIBLE_MAX = 32;     // Orbit: infinito pero mostramos 32
 const HISTORY_VISIBLE_MAX = 32;   // History: infinito pero mostramos 32
 
@@ -191,8 +191,8 @@ export function render() {
   enforceSingleOpen(histList, ".hist-panel");
   enforceSingleOpen(orbitList, ".hist-panel");
 
-  // Total (Main + Side; Landing no suma)
-  countEl.textContent = String(itemsA.length + itemsB.length);
+// Total (Main + Side + Landing)
+countEl.textContent = String(itemsA.length + itemsB.length + itemsL.length);
 
   // DnD: A y B aceptan drop; L solo inicia drag (dragdrop.js lo maneja)
   enableDragAndDrop({ listA, listB, listL, onDrop: onDragDrop });
