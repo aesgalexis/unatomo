@@ -509,3 +509,12 @@ html, body {
   min-height: 80px;
   padding: 12px;
 }
+#siteTitle[contenteditable="true"] {
+  cursor: text;
+  outline: none;
+  transition: box-shadow .12s ease;
+}
+
+#siteTitle[contenteditable="true"]:focus {
+  box-shadow: 0 2px 0 0 var(--accent);
+}
