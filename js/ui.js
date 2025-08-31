@@ -525,10 +525,20 @@ if (appTitleEl) {
 
   // Vaciar todo
   clearAllBtn?.addEventListener("click", () => {
-    if (!confirm("¿Clear all?")) return;
-    clearAll();
-    render();
-  });
+  if (!confirm("¿Clear all?")) return;
+
+  // Limpia estado (items, history, orbit)
+  clearAll();
+
+  // Resetea el título guardado y el texto visible
+  localStorage.removeItem("app-title");
+  if (appTitleEl) appTitleEl.textContent = "unátomo";
+
+  // (opcional) también el <title> de la pestaña:
+  // document.title = "unátomo";
+
+  render();
+});
 
   // Aterrizaje inmediato al arrancar
   landDueOrbits();
