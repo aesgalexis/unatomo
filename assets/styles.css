@@ -546,4 +546,25 @@ html, body {
 }
   font-weight: 600;
 }
+/* Pie de sitio, centrado y en gris tenue */
+.site-footnote {
+  width: 100%;
+  text-align: center;
+  color: var(--muted);
+  font-size: 12.5px;
+  letter-spacing: .2px;
+  opacity: 0.9;
+  margin-top: 10px;
+  /* espacio para que no quede pegado a la status bar */
+  padding-bottom: 8px;
+}
+
+/* Un pelín más de aire en móvil */
+@media (max-width: 900px) {
+  .site-footnote {
+    font-size: 12px;
+    margin-top: 12px;
+    padding-bottom: 10px;
+  }
+}
 
