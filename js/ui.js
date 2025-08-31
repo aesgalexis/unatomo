@@ -25,6 +25,7 @@ const MAX_B = 16;
 const LANDING_MAX = 62;           // Landing: contador independiente
 const ORBIT_VISIBLE_MAX = 32;     // Orbit: infinito pero mostramos 32
 const HISTORY_VISIBLE_MAX = 32;   // History: infinito pero mostramos 32
+const siteTitleEl = document.getElementById("siteTitle");
 
 const clearHistoryBtn = document.getElementById("clearHistoryBtn");
 
