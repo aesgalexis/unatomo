@@ -89,6 +89,7 @@ function load() {
     return makeEmptyState();
   }
 }
+
 // Aplaza la fecha de reentrada de un elemento en órbita en N días (1..365)
 export function delayOrbit(id, addDays) {
   const o = state.orbit.find((x) => x.id === id);
@@ -201,7 +202,6 @@ export function clearHistory() {
 /**
  * Envía a órbita un item por N días. El item desaparece de items
  * (no entra en historial). Se persistirá en state.orbit con returnAt.
- * Respeta cupo compartido Orbit + Landing (64).
  */
 export function sendToOrbit(id, days = 1) {
   const it = state.items.find((x) => x.id === id);
@@ -280,38 +280,40 @@ function slugifyForFile(name) {
 }
 
 export async function exportJson() {
-  const rawTitle = localStorage.getItem("app-title") || "unatomo";
-  const base = slugifyForFile(rawTitle);
+  // Título que viaja en el payload (y sirve para sugerir el nombre del archivo)
+  const appTitle = localStorage.getItem("app-title") || "unátomo";
+
+  // Payload con título incluido
+  const payload = { ...state, appTitle };
+
+  const base = slugifyForFile(appTitle);
   const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
   const filename = `${base}-${stamp}.json`;
-  const data = JSON.stringify(state, null, 2);
-  const blob = new Blob([data], { type: "application/json" });
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {
+    type: "application/json",
+  });
 
-  // Opción B: Forzar diálogo con File System Access API (Chromium + https/localhost)
+  // Chromium + https/localhost: fuerza diálogo de guardado
   if (window.showSaveFilePicker && window.isSecureContext) {
     try {
       const handle = await window.showSaveFilePicker({
         suggestedName: filename,
         types: [
-          {
-            description: "JSON",
-            accept: { "application/json": [".json"] },
-          },
+          { description: "JSON", accept: { "application/json": [".json"] } },
         ],
-        excludeAcceptAllOption: false, // permite elegir cualquier tipo si el usuario quiere
+        excludeAcceptAllOption: false,
       });
       const writable = await handle.createWritable();
       await writable.write(blob);
       await writable.close();
       return;
     } catch (err) {
-      // Si el usuario cancela, no hacemos nada. Para otros errores, caemos al método clásico.
-      if (err && err.name === "AbortError") return;
+      if (err && err.name === "AbortError") return; // cancelado por el usuario
       console.warn("showSaveFilePicker falló, usando fallback:", err);
     }
   }
 
-  // Fallback (Safari/Firefox o sin https): descarga directa (respetará el nombre sugerido)
+  // Fallback universal
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -331,6 +333,13 @@ export function importJson(file) {
         const parsed = JSON.parse(String(reader.result));
         if (!parsed || !Array.isArray(parsed.items))
           throw new Error("Formato inválido");
+
+        // Si viene título en el archivo, persístelo para que la UI lo use
+        if (typeof parsed.appTitle === "string" && parsed.appTitle.trim()) {
+          localStorage.setItem("app-title", parsed.appTitle.trim());
+        }
+
+        // Guarda el estado tal cual (load ignorará claves extra como appTitle)
         localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
         state = load();
         save();
