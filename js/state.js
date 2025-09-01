@@ -287,22 +287,25 @@ function slugifyForFile(name) {
     .slice(0, 32);
   return slug || "export";
 }
-async function notifyExportIncrement() {
-  try {
-    const value = await incrementGlobalExportCounter(); // total actualizado
-    // Avisar a la UI (ui.js escucha este evento)
-    window.dispatchEvent(new CustomEvent("global-export-count", { detail: { value } }));
-  } catch (e) {
-    console.warn("No se pudo incrementar el contador global de exportaciones:", e);
-  }
-}
 
 export async function exportJson() {
-  // Título que viaja en el payload (y sirve para sugerir el nombre del archivo)
-  const appTitle = localStorage.getItem("app-title") || "unátomo";
+  // 1) Incrementa contador global y toma el total actualizado
+  let newTotal = null;
+  try {
+    newTotal = await incrementGlobalExportCounter(); // debe devolver el total global tras el +1
+  } catch (e) {
+    console.warn("incrementGlobalExportCounter falló:", e);
+  }
 
-  // Payload con título incluido
-  const payload = { ...state, appTitle };
+  // 2) Fija Atom No. en el estado si el incremento fue exitoso
+  if (Number.isInteger(newTotal) && newTotal > 0) {
+    state.atomNumber = newTotal;
+    save(); // persistimos atomNumber en localStorage
+  }
+
+  // 3) Construye payload y archivo
+  const appTitle = localStorage.getItem("app-title") || "unátomo";
+  const payload = { ...state, appTitle }; // incluye atomNumber si lo acabamos de fijar
 
   const base = slugifyForFile(appTitle);
   const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
@@ -310,24 +313,22 @@ export async function exportJson() {
   const blob = new Blob([JSON.stringify(payload, null, 2)], {
     type: "application/json",
   });
-// 1) Pide el nuevo número global (esto ya lo tenías con notify/increment)
-const newTotal = await incrementGlobalExportCounter();
 
-// 2) Fija el Atom No. del estado para este export
-state.atomNumber = newTotal;
-save();
+  // Helper para notificar a la UI
+  const notifyUI = () => {
+    if (Number.isInteger(newTotal)) {
+      window.dispatchEvent(
+        new CustomEvent("global-export-count", { detail: { value: newTotal } })
+      );
+    }
+    if (Number.isInteger(state.atomNumber)) {
+      window.dispatchEvent(
+        new CustomEvent("atom-number-changed", { detail: { value: state.atomNumber } })
+      );
+    }
+  };
 
-// 3) Construye el payload con el título + atomNumber incluido
-const appTitle = localStorage.getItem("app-title") || "unátomo";
-const payload = { ...state, appTitle }; // ⬅️ 'state' ya contiene atomNumber
-
-// 4) (resto de tu export: blob, saveFilePicker/fallback...)
-
-// 5) Notifica a la UI (exports y atom number para refrescar la barra)
-window.dispatchEvent(new CustomEvent("global-export-count", { detail: { value: newTotal } }));
-window.dispatchEvent(new CustomEvent("atom-number-changed", { detail: { value: newTotal } }));
-
-  // Chromium + https/localhost: fuerza diálogo de guardado
+  // 4) Guardado (save file picker o fallback)
   if (window.showSaveFilePicker && window.isSecureContext) {
     try {
       const handle = await window.showSaveFilePicker({
@@ -338,14 +339,12 @@ window.dispatchEvent(new CustomEvent("atom-number-changed", { detail: { value: n
       const writable = await handle.createWritable();
       await writable.write(blob);
       await writable.close();
-
-      // ✅ Incrementa contador global y notifica a la UI
-      await notifyExportIncrement();
+      notifyUI();
       return;
     } catch (err) {
       if (err && err.name === "AbortError") return; // cancelado por el usuario
       console.warn("showSaveFilePicker falló, usando fallback:", err);
-      // seguimos al fallback abajo
+      // seguimos al fallback
     }
   }
 
@@ -358,10 +357,9 @@ window.dispatchEvent(new CustomEvent("atom-number-changed", { detail: { value: n
   a.click();
   a.remove();
   URL.revokeObjectURL(url);
-
-  // ✅ Incrementa contador global y notifica a la UI también en fallback
-  await notifyExportIncrement();
+  notifyUI();
 }
+
 
 
 export function importJson(file) {
