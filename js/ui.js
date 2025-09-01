@@ -18,6 +18,33 @@ import {
 import { enableDragAndDrop } from "./dragdrop.js";
 import { getGlobalExportCount } from "./analytics.js";
 
+// === Hook contador global de exportaciones (sin tocar index.html) ===
+window.addEventListener("DOMContentLoaded", () => {
+  const statusLeftEl = document.querySelector(".statusbar .status-left");
+  if (!statusLeftEl) return;
+
+  // Guarda el texto original una vez, para no concatenarlo repetido
+  if (!statusLeftEl.dataset.baseText) {
+    statusLeftEl.dataset.baseText = statusLeftEl.textContent.trim();
+  }
+
+  function setExportsCount(n) {
+    const base = statusLeftEl.dataset.baseText || statusLeftEl.textContent.trim();
+    statusLeftEl.textContent = `${base} · Exports: ${n}`;
+  }
+
+  // Poblado inicial
+  getGlobalExportCount()
+    .then((n) => { if (typeof n === "number") setExportsCount(n); })
+    .catch(() => { /* silencioso */ });
+
+  // Actualización en vivo tras cada export (evento emitido desde state.js)
+  window.addEventListener("global-export-count", (e) => {
+    const n = e.detail?.value;
+    if (typeof n === "number") setExportsCount(n);
+  });
+});
+
 // === Tabla periódica: número atómico → nombre ===
 const ELEMENTS = {
   1: "Hydrogen",
@@ -174,9 +201,6 @@ const frameBTitle = document.querySelector("#frameB h2");
 const histTitle  = document.querySelector(".historial h2");
 const landingTitle = document.querySelector("#frameL h2");
 const appTitleEl = document.querySelector(".app header h1");
-
-// ⬇️ Status bar counter (opcional)
-const exportCounterEl = document.getElementById("exportCounter");
 
 // Timer de aterrizaje / refresco
 let orbitTimer = null;
@@ -590,20 +614,6 @@ export function bindGlobalHandlers() {
     }
   }, 60_000); // cada minuto
 
-  // ⬇️ Inicializar / escuchar contador global de exportaciones
-  refreshExportCounter(); // pinta el valor al inicio
-  window.addEventListener("global-export-count", (e) => {
-    const v = e.detail?.value;
-    if (!exportCounterEl) return;
-    if (typeof v === "number") {
-      exportCounterEl.textContent = v.toLocaleString();
-    } else {
-      // Si no llegó valor, consulta al backend
-      refreshExportCounter();
-    }
-  });
-}
-
 /* ================== Helpers ================== */
 
 // días restantes (ceil), mínimo 0
@@ -659,16 +669,5 @@ function formatStamp(iso) {
     return `${y}-${m}-${day} ${hh}:${mm}`;
   } catch {
     return "";
-  }
-}
-
-// ⬇️ Refresca el contador global de exportaciones
-async function refreshExportCounter() {
-  if (!exportCounterEl) return;
-  try {
-    const n = await getGlobalExportCount();
-    exportCounterEl.textContent = n ? n.toLocaleString() : "0";
-  } catch {
-    exportCounterEl.textContent = "0";
   }
 }
