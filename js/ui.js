@@ -13,7 +13,7 @@ import {
   clearHistory,
   sendToOrbit,   // NUEVO
   landDueOrbits, // NUEVO
-  delayOrbit,    // NUEVO (asegúrate de tenerlo en state.js)
+  delayOrbit,    // NUEVO
 } from "./state.js";
 import { enableDragAndDrop } from "./dragdrop.js";
 import { getGlobalExportCount } from "./analytics.js";
@@ -55,15 +55,15 @@ const MAX_A = 8;
 const MAX_B = 16;
 
 // Visibilidad / cupos de UI
-const LANDING_MAX = 94;           // Landing: contador independiente
-const ORBIT_VISIBLE_MAX = 32;     // Orbit: infinito pero mostramos 32
-const HISTORY_VISIBLE_MAX = 32;   // History: infinito pero mostramos 32
+const LANDING_MAX = 94;
+const ORBIT_VISIBLE_MAX = 32;
+const HISTORY_VISIBLE_MAX = 32;
 
 const clearHistoryBtn = document.getElementById("clearHistoryBtn");
 
 // Elementos raíz
-const listL = document.getElementById("listL");      // Landing
-const frameL = document.getElementById("frameL");    // Glow violeta
+const listL = document.getElementById("listL");
+const frameL = document.getElementById("frameL");
 const listA = document.getElementById("listA");
 const listB = document.getElementById("listB");
 const histList = document.getElementById("histList");
@@ -115,15 +115,15 @@ export function render() {
   // Glow violeta en Landing si contiene elementos
   if (frameL) frameL.classList.toggle("has-items", landingCount > 0);
 
-  // Pintar Landing/Main/Side (Landing: sin drag si A y B están llenos)
+  // Pintar Landing/Main/Side
   for (const it of itemsL) {
-    const node = renderItem(it, true, !isABFull); // allowDrag = !isABFull
+    const node = renderItem(it, true, !isABFull);
     listL?.appendChild(node);
   }
   for (const it of itemsA) listA.appendChild(renderItem(it));
   for (const it of itemsB) listB.appendChild(renderItem(it, true));
 
-  // ===== ORBIT: mostrar hasta 32, panel minimal con prompt =====
+  // ===== ORBIT (mostrar hasta 32) =====
   if (orbitList) {
     const toShow = orbitsAll.slice(0, ORBIT_VISIBLE_MAX);
     orbitList.innerHTML = "";
@@ -145,14 +145,12 @@ export function render() {
         <button class="tbtn delay-btn">Delay…</button>
       `;
 
-      // Toggle exclusivo (como History)
       head.addEventListener("click", () => {
         const willOpen = !panel.classList.contains("open");
         closePanelsIn(orbitList, ".hist-panel", panel);
         panel.classList.toggle("open", willOpen);
       });
 
-      // Botón Delay -> mismo prompt que al crear órbita
       panel.querySelector(".delay-btn").addEventListener("click", () => {
         const raw = prompt("Delay re-entry by how many days? (1–365)", "3");
         if (raw == null) return;
@@ -174,7 +172,7 @@ export function render() {
     }
   }
 
-  // ===== Historial (desplegable) — visible 32, total ilimitado =====
+  // ===== Historial (visible 32) =====
   const historyTotal = state.history.length;
   const historyVisible = state.history.slice(0, HISTORY_VISIBLE_MAX);
 
@@ -241,7 +239,7 @@ export function render() {
     countEl.textContent = total;
   }
 
-  // DnD: A y B aceptan drop; L solo inicia drag (dragdrop.js lo maneja)
+  // DnD
   enableDragAndDrop({ listA, listB, listL, onDrop: onDragDrop });
 }
 
@@ -322,7 +320,6 @@ function renderItem(it, inAlt = false, allowDrag = true) {
   textarea.addEventListener("input", () => {
     updateItem(it.id, { note: textarea.value });
   });
-  // Si aún existiese una función updateLinks (antiguo autolink), llámala sin romper
   textarea.addEventListener("paste", () => {
     setTimeout(() => {
       if (typeof window.updateLinks === "function") {
@@ -371,14 +368,13 @@ export function bindGlobalHandlers() {
     input.autocomplete = "off";
   }
 
-  // Renombrar título con prompt (máx. 10 chars) + persistencia + cursor pointer
+  // Renombrar título con prompt (máx. 10 chars)
   if (appTitleEl) {
     appTitleEl.style.cursor = "pointer";
     appTitleEl.setAttribute("role", "button");
     appTitleEl.setAttribute("title", "Click to rename");
     appTitleEl.tabIndex = 0;
 
-    // Cargar título guardado si existe
     const savedTitle = localStorage.getItem("app-title");
     if (savedTitle && savedTitle.trim()) {
       appTitleEl.textContent = savedTitle;
@@ -387,7 +383,7 @@ export function bindGlobalHandlers() {
     const rename = () => {
       const current = appTitleEl.textContent.trim();
       const input = prompt("Rename title (max 10 characters):", current);
-      if (input == null) return; // cancelado
+      if (input == null) return;
       const name = input.trim();
       if (!name) {
         alert("Please enter a non-empty title.");
@@ -399,7 +395,6 @@ export function bindGlobalHandlers() {
       }
       appTitleEl.textContent = name;
       localStorage.setItem("app-title", name);
-      // document.title = name; // opcional
     };
 
     appTitleEl.addEventListener("click", rename);
@@ -446,13 +441,13 @@ export function bindGlobalHandlers() {
     const file = importInput.files?.[0];
     if (!file) return;
     try {
-      await importJson(file); // incluye aterrizaje de vencidos y ahora setea app-title si existe
+      await importJson(file);
 
-      // 🔁 Refresca el título visible con el título importado (si venía en el JSON)
+      // Título importado
       const importedTitle = localStorage.getItem("app-title") || "unátomo";
       if (appTitleEl) appTitleEl.textContent = importedTitle;
 
-      // 🔁 Refresca el Atom No. (si el JSON traía atomNumber lo usa; si no, queda "?")
+      // Atom No.: si vino en el JSON se reflejará; si no, queda "?"
       refreshAtomNumber();
 
       render();
@@ -467,16 +462,12 @@ export function bindGlobalHandlers() {
   clearAllBtn?.addEventListener("click", () => {
     if (!confirm("¿Clear all?")) return;
 
-    // Limpia estado (items, history, orbit)
     clearAll();
-
-    // Resetea el título guardado y el texto visible
     localStorage.removeItem("app-title");
     if (appTitleEl) appTitleEl.textContent = "unátomo";
-
     render();
 
-    // Vuelve a "?"
+    // Volver a "?"
     refreshAtomNumber();
   });
 
@@ -484,18 +475,18 @@ export function bindGlobalHandlers() {
   landDueOrbits();
   render();
 
-  // Timer: comprobar aterrizajes y refrescar contador de días
+  // Timer: aterrizajes y refresco de días
   if (orbitTimer) clearInterval(orbitTimer);
   orbitTimer = setInterval(() => {
     const landed = landDueOrbits();
     if (landed > 0 || (state.orbit && state.orbit.length > 0)) {
-      render(); // refresca “Re-entering in X days”
+      render();
     }
-  }, 60_000); // cada minuto
+  }, 60_000);
 
-  // ⬇️ Inicializar / escuchar contador global de exportaciones
-  refreshExportCounter(); // pinta Exports al inicio
-  refreshAtomNumber();    // pinta Atom No. al inicio ("?" si aún no hay número)
+  // Status bar: Exports y Atom No.
+  refreshExportCounter(); // Exports al inicio
+  refreshAtomNumber();    // Atom No. al inicio ("?" si no existe)
 
   window.addEventListener("global-export-count", (e) => {
     const n = e.detail?.value;
@@ -504,7 +495,7 @@ export function bindGlobalHandlers() {
     }
   });
 
-  // ⬇️ Actualiza Atom No. cuando state.js lo fije tras un export
+  // UI reacciona cuando state.js fija el número tras el primer export
   window.addEventListener("atom-number-changed", (e) => {
     const v = e.detail?.value;
     if (atomNoEl) {
@@ -516,7 +507,6 @@ export function bindGlobalHandlers() {
 
 /* ================== Helpers ================== */
 
-// días restantes (ceil), mínimo 0
 function daysRemaining(iso) {
   const t = Date.parse(iso);
   if (!Number.isFinite(t)) return 0;
@@ -525,7 +515,6 @@ function daysRemaining(iso) {
   return Math.max(0, d);
 }
 
-// Cierra todos los paneles de un contenedor, excepto 'exceptEl'.
 function closePanelsIn(container, selector, exceptEl, onClose) {
   if (!container) return;
   container.querySelectorAll(`${selector}.open`).forEach((p) => {
@@ -535,7 +524,6 @@ function closePanelsIn(container, selector, exceptEl, onClose) {
   });
 }
 
-// Asegura que como máximo haya un panel abierto en 'container'.
 function enforceSingleOpen(container, selector = ".panel") {
   if (!container) return;
   const openPanels = Array.from(container.querySelectorAll(`${selector}.open`));
@@ -572,7 +560,7 @@ function formatStamp(iso) {
   }
 }
 
-// Refresca el contador global de exportaciones
+// Exports (global)
 async function refreshExportCounter() {
   if (!exportCounterEl) return;
   try {
@@ -583,9 +571,9 @@ async function refreshExportCounter() {
   }
 }
 
-// Refresca el Atom No.:
+// Atom No.:
 // - Si hay state.atomNumber (>0), lo muestra.
-// - Si no, muestra "?" (no adelantamos exports+1 hasta que se exporte de verdad).
+// - Si no, muestra "?" (no adelantamos exports+1 hasta el primer export real).
 function refreshAtomNumber() {
   if (!atomNoEl) return;
   const n = state?.atomNumber;
