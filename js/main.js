@@ -1,3 +1,4 @@
+import "./firebase.js";
 import { render, bindGlobalHandlers } from "./ui.js";
 
 window.addEventListener("DOMContentLoaded", () => {
