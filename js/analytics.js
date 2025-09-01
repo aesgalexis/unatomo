@@ -1,7 +1,5 @@
 // js/analytics.js
-// Carga Firebase desde CDN (sin bundler) y expone helpers para el contador global
-
-// ⚠️ Tu config (está bien que el apiKey esté público; no es secreto)
+// --- Config de tu proyecto Firebase (la misma que ya creaste) ---
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyBwSla3hdkIIB9gmVfvv7c_0j90IDiCqVU",
   authDomain: "unatomo-f5537.firebaseapp.com",
@@ -9,90 +7,100 @@ const FIREBASE_CONFIG = {
   storageBucket: "unatomo-f5537.firebasestorage.app",
   messagingSenderId: "369796455601",
   appId: "1:369796455601:web:4a1c876d330a78584bd690",
-  measurementId: "G-DLBTXQBYXC"
+  measurementId: "G-DLBTXQBYXC",
 };
 
-// Si quieres App Check reCAPTCHA v3 en producción, pon aquí tu Site Key:
-const RECAPTCHA_V3_SITE_KEY = "6LfGMLorAAAAAGW3LUS1XRvgx6wdQ7eFMkGQ5Rrq"; // pública
-// Para desarrollo con App Check en modo "Aplicar", puedes habilitar el debug token en index.html:
-//   <script>self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;</script>
+// reCAPTCHA v3 (site key pública para App Check)
+// OJO: la "clave secreta" NUNCA va en el frontend.
+const RECAPTCHA_SITE_KEY = "6LfGMLorAAAAAGW3LUS1XRvgx6wdQ7eFMkGQ5Rrq";
 
-let _app = null;
-let _db = null;
-let _fs = null; // módulo de firestore dinámico
+// Doc que vamos a usar en Firestore
+const DOC_PATH = ["metrics", "exports"];
 
-async function initFirebase() {
-  if (_db) return _db;
+// Caché del init para no inicializar 2 veces
+let _fb = null;
 
-  // Import dinámico desde CDN (versiona si quieres)
-  const [appMod, fsMod, appCheckMod] = await Promise.all([
+// Inicializa Firebase + Firestore (+ App Check opcional)
+async function ensureFirebase() {
+  if (_fb) return _fb;
+
+  const [{ initializeApp }, fs, appCheckMod] = await Promise.all([
     import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"),
     import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"),
-    // App Check es opcional: si falla, seguimos sin él
-    import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check.js").catch(() => ({})),
+    // App Check es opcional; si falla seguimos sin él
+    import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check.js").catch(
+      () => ({})
+    ),
   ]);
 
-  _app = appMod.initializeApp(FIREBASE_CONFIG);
-  _fs = fsMod;
+  const app = initializeApp(FIREBASE_CONFIG);
 
-  // App Check (opcional). Si en Firebase tienes "Aplicar", necesitas esto funcionando.
+  // App Check con reCAPTCHA v3 (opcional pero recomendado)
   try {
     if (appCheckMod && appCheckMod.initializeAppCheck) {
-      appCheckMod.initializeAppCheck(_app, {
-        provider: new appCheckMod.ReCaptchaV3Provider(RECAPTCHA_V3_SITE_KEY),
+      // Activa modo debug si pusiste self.FIREBASE_APPCHECK_DEBUG_TOKEN = true en index
+      if (window.FIREBASE_APPCHECK_DEBUG_TOKEN) {
+        self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+      }
+      appCheckMod.initializeAppCheck(app, {
+        provider: new appCheckMod.ReCaptchaV3Provider(RECAPTCHA_SITE_KEY),
         isTokenAutoRefreshEnabled: true,
       });
     }
   } catch (e) {
-    console.warn("App Check no inicializado (continuamos):", e);
+    console.warn("App Check init falló (continuamos sin él):", e);
   }
 
-  _db = fsMod.getFirestore(_app);
-  return _db;
+  const db = fs.getFirestore(app);
+  _fb = { app, db, fs };
+  return _fb;
 }
 
-/**
- * Lee el total global del doc fijo metrics/exports
- * Devuelve número (0 si no existe o hay error)
- */
+// === API pública que usa tu UI/estado ===
+
+// Lee el total global (0 si no existe)
 export async function getGlobalExportCount() {
   try {
-    const db = await initFirebase();
-    const ref = _fs.doc(db, "metrics", "exports");
-    const snap = await _fs.getDoc(ref);
-    return snap.exists() ? (snap.data().total || 0) : 0;
+    const { db, fs } = await ensureFirebase();
+    const ref = fs.doc(db, ...DOC_PATH);
+    const snap = await fs.getDoc(ref);
+    if (!snap.exists()) return 0;
+    const n = Number(snap.data()?.total);
+    return Number.isFinite(n) ? n : 0;
   } catch (e) {
-    console.warn("getGlobalExportCount falló:", e);
-    return 0;
+    console.warn("getGlobalExportCount() falló:", e);
+    return 0; // fallback silencioso
   }
 }
 
-/**
- * Incrementa el total global (transacción) y emite evento para la UI
- * Devuelve el nuevo total o null si falla
- */
+// Incrementa el contador global en +1 (transacción)
+// y emite el evento 'global-export-count' con el nuevo valor.
 export async function incrementGlobalExportCounter() {
   try {
-    const db = await initFirebase();
-    const ref = _fs.doc(db, "metrics", "exports");
+    const { db, fs } = await ensureFirebase();
+    const ref = fs.doc(db, ...DOC_PATH);
 
-    const newTotal = await _fs.runTransaction(db, async (tx) => {
+    const newTotal = await fs.runTransaction(db, async (tx) => {
       const snap = await tx.get(ref);
-      if (!snap.exists()) {
-        tx.set(ref, { total: 1, updatedAt: _fs.serverTimestamp() });
-        return 1;
+      const prev = snap.exists() ? Number(snap.data()?.total) : 0;
+      const next = (Number.isFinite(prev) ? prev : 0) + 1;
+
+      if (snap.exists()) {
+        tx.update(ref, { total: next, updatedAt: fs.serverTimestamp() });
+      } else {
+        tx.set(ref, { total: next, updatedAt: fs.serverTimestamp() });
       }
-      const current = typeof snap.data().total === "number" ? snap.data().total : 0;
-      const next = current + 1;
-      tx.update(ref, { total: next, updatedAt: _fs.serverTimestamp() });
       return next;
     });
 
-    // Notifica a la UI (ui.js escucha este evento)
-    window.dispatchEvent(new CustomEvent("global-export-count", { detail: { value: newTotal } }));
+    // Notifica a la UI (ui.js ya escucha este evento)
+    window.dispatchEvent(
+      new CustomEvent("global-export-count", { detail: { value: newTotal } })
+    );
+
     return newTotal;
   } catch (e) {
-    console.warn("incrementGlobalExportCounter falló:", e);
-    return null;
+    console.warn("incrementGlobalExportCounter() falló:", e);
+    return null; // no rompas la UI si hay fallo de red/reglas
   }
 }
