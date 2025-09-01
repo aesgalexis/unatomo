@@ -4,4 +4,3 @@ window.addEventListener("DOMContentLoaded", () => {
   bindGlobalHandlers();
   render();
 });
-
