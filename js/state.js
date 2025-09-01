@@ -82,14 +82,15 @@ function load() {
     const maxOrbitId = orbit.reduce((m, o) => Math.max(m, o.id || 0), 0);
     const maxId = Math.max(maxItemsId, maxOrbitId);
     if (!Number.isInteger(idSeq) || idSeq <= maxId) idSeq = maxId + 1;
-    
+
+    // === Atom No. normalizado ===
     const atomNumber =
-    Number.isInteger(parsed.atomNumber) && parsed.atomNumber > 0
-    ? parsed.atomNumber
-    : null;
-    
+      Number.isInteger(parsed.atomNumber) && parsed.atomNumber > 0
+        ? parsed.atomNumber
+        : null;
+
     // Construimos estado temporal y aterrizamos si hay orbits vencidos
-    const tmp = { items, history, orbit, idSeq };
+    const tmp = { items, history, orbit, idSeq, atomNumber };
     landDueOrbitsIn(tmp);
 
     return tmp;
