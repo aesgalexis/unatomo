@@ -1,9 +1,8 @@
 // Modelo + persistencia + import/export
-
 import { incrementGlobalExportCounter } from "./analytics.js";
 
 const STORAGE_KEY = "buttons-v1";
-// IMPORTANTE: mantenemos HISTORY_MAX por compat, pero ya NO limita almacenamiento
+// Se mantiene por compat (no limita almacenamiento)
 const HISTORY_MAX = 16;
 
 export const makeEmptyState = () => ({
@@ -11,7 +10,7 @@ export const makeEmptyState = () => ({
   history: [], // { label, note, at }
   orbit: [],   // [{ id, label, note, createdAt?, returnAt, fromWhere }]
   idSeq: 1,
-  atomNumber: null,
+  atomNumber: null, // Número de átomo fijo tras 1ª export
 });
 
 export let state = load();
@@ -26,37 +25,28 @@ function load() {
 
     const parsed = JSON.parse(raw);
 
-    // ...tu normalización de items, history, orbit...
+    // --- Normalización de items ---
+    const itemsRaw = Array.isArray(parsed.items) ? parsed.items : [];
+    const items = itemsRaw.map((it, idx) => {
+      const id = Number.isFinite(+it?.id) ? +it.id : idx + 1;
+      const where = it?.where === "B" ? "B" : it?.where === "L" ? "L" : "A";
+      return {
+        id,
+        where,
+        label:
+          typeof it?.label === "string" && it.label.trim()
+            ? it.label
+            : `Attomic Button ${id}`,
+        note: typeof it?.note === "string" ? it.note : "",
+        open: !!it?.open,
+        createdAt: typeof it?.createdAt === "string" ? it.createdAt : null,
+      };
+    });
 
-    // idSeq consistente...
-    let idSeq = Number.isInteger(parsed.idSeq) ? parsed.idSeq : base.idSeq;
-    const maxItemsId = items.reduce((m, it) => Math.max(m, it.id), 0);
-    const maxOrbitId = orbit.reduce((m, o) => Math.max(m, o.id || 0), 0);
-    const maxId = Math.max(maxItemsId, maxOrbitId);
-    if (!Number.isInteger(idSeq) || idSeq <= maxId) idSeq = maxId + 1;
-
-    // 👇 Recupera atomNumber si existía (viene en JSON o localStorage)
-    const atomNumber =
-      Number.isInteger(parsed.atomNumber) && parsed.atomNumber > 0
-        ? parsed.atomNumber
-        : null;
-
-    // Construimos estado temporal y aterrizamos órbitas vencidas
-    const tmp = { items, history, orbit, idSeq, atomNumber }; // 👈 IMPORTANTE
-    landDueOrbitsIn(tmp);
-
-    return tmp;
-  } catch {
-    return makeEmptyState();
-  }
-}
-
-    // --- Normalización de historial (sin cap de almacenamiento) ---
+    // --- Normalización de historial ---
     const historyRaw = Array.isArray(parsed.history) ? parsed.history : [];
     const history = historyRaw.map((h) => {
-      if (typeof h === "string") {
-        return { label: h, note: "", at: null };
-      }
+      if (typeof h === "string") return { label: h, note: "", at: null };
       return {
         label:
           typeof h?.label === "string" && h.label.trim()
@@ -79,24 +69,24 @@ function load() {
         note: typeof o?.note === "string" ? o.note : "",
         createdAt: typeof o?.createdAt === "string" ? o.createdAt : null,
         returnAt: typeof o?.returnAt === "string" ? o.returnAt : null,
-        fromWhere: o?.fromWhere === "B" ? "B" : "A", // por defecto A
+        fromWhere: o?.fromWhere === "B" ? "B" : "A",
       }))
       .filter((o) => o.id != null && o.returnAt);
 
-    // idSeq consistente (>= max id + 1) considerando items y órbita
+    // --- idSeq consistente ---
     let idSeq = Number.isInteger(parsed.idSeq) ? parsed.idSeq : base.idSeq;
     const maxItemsId = items.reduce((m, it) => Math.max(m, it.id), 0);
     const maxOrbitId = orbit.reduce((m, o) => Math.max(m, o.id || 0), 0);
     const maxId = Math.max(maxItemsId, maxOrbitId);
     if (!Number.isInteger(idSeq) || idSeq <= maxId) idSeq = maxId + 1;
 
-    // === Atom No. normalizado ===
+    // --- Atom No. normalizado ---
     const atomNumber =
       Number.isInteger(parsed.atomNumber) && parsed.atomNumber > 0
         ? parsed.atomNumber
         : null;
 
-    // Construimos estado temporal y aterrizamos si hay orbits vencidos
+    // Construye estado y aterriza orbits vencidos
     const tmp = { items, history, orbit, idSeq, atomNumber };
     landDueOrbitsIn(tmp);
 
@@ -106,7 +96,8 @@ function load() {
   }
 }
 
-// Aplaza la fecha de reentrada de un elemento en órbita en N días (1..365)
+/* ================= Órbita helpers ================= */
+
 export function delayOrbit(id, addDays) {
   const o = state.orbit.find((x) => x.id === id);
   if (!o) return false;
@@ -160,14 +151,12 @@ export function moveItem(id, where, index) {
   const existing = state.items.find((x) => x.id === id);
   if (!existing) return;
 
-  // destino actual sin el elemento movido
   const dest = state.items.filter((x) => x.where === where && x.id !== id);
   const clamped = Math.max(0, Math.min(index ?? dest.length, dest.length));
   const updated = { ...existing, where };
 
   dest.splice(clamped, 0, updated);
 
-  // resto
   const others = state.items.filter((x) => !(x.id === id || x.where === where));
   state.items = [...others, ...dest];
   save();
@@ -197,7 +186,6 @@ export function resolveItem(id) {
     note: (it.note || "").trim(),
     at: new Date().toISOString(),
   });
-  // SIN recorte: el historial es ilimitado (la UI muestra 32)
   removeItem(id); // ya hace save()
   save();
 }
@@ -207,7 +195,6 @@ export function clearAll() {
   save();
 }
 
-// Limpiar solo el historial
 export function clearHistory() {
   state.history = [];
   save();
@@ -215,16 +202,12 @@ export function clearHistory() {
 
 /* ================= Órbita ================= */
 
-/**
- * Envía a órbita un item por N días. El item desaparece de items
- * (no entra en historial). Se persistirá en state.orbit con returnAt.
- */
 export function sendToOrbit(id, days = 1) {
   const it = state.items.find((x) => x.id === id);
   if (!it) return false;
 
-  const d = Math.max(1, Math.min(365, Number(days))); // clamp 1–365
-  const ms = d * 24 * 60 * 60 * 1000; // días -> ms
+  const d = Math.max(1, Math.min(365, Number(days)));
+  const ms = d * 24 * 60 * 60 * 1000;
   const returnAt = new Date(Date.now() + ms).toISOString();
 
   state.orbit = state.orbit || [];
@@ -237,22 +220,17 @@ export function sendToOrbit(id, days = 1) {
     fromWhere: it.where || "A",
   });
 
-  removeItem(id); // quita del tablero (sin pasar por history) + save()
+  removeItem(id); // quita del tablero (sin pasar por history)
   save();
   return true;
 }
 
-/**
- * Aterriza todas las órbitas vencidas (returnAt <= ahora) en 'L' (Landing).
- * Devuelve el número de aterrizados.
- */
 export function landDueOrbits(now = new Date()) {
   const changed = landDueOrbitsIn(state, now);
   if (changed) save();
   return changed;
 }
 
-// Helper puro para usar en load() e importJson() sin depender del singleton
 function landDueOrbitsIn(s, now = new Date()) {
   const nowMs = now instanceof Date ? +now : Date.parse(now);
   const due = [];
@@ -270,7 +248,7 @@ function landDueOrbitsIn(s, now = new Date()) {
       label: o.label,
       note: o.note || "",
       open: false,
-      where: "L", // siempre aterrizan en Landing
+      where: "L",
       createdAt: o.createdAt || null,
     }));
     s.items = [...s.items, ...landed];
@@ -298,14 +276,14 @@ function slugifyForFile(name) {
 export async function exportJson() {
   const appTitle = localStorage.getItem("app-title") || "unátomo";
 
-  // Si el átomo aún no tiene número, lo asignamos incrementando el global
+  // Solo incrementa si aún no hay atomNumber
   if (!Number.isInteger(state.atomNumber) || state.atomNumber <= 0) {
     try {
-      const newTotal = await incrementGlobalExportCounter(); // debe devolver el total actualizado
-      state.atomNumber = newTotal; // fijamos el número de átomo
+      const newTotal = await incrementGlobalExportCounter(); // total global actualizado
+      state.atomNumber = newTotal; // fija número de átomo
       save();
 
-      // Avisamos a la UI para refrescar el contador global y el Atom No.
+      // Notifica a la UI
       window.dispatchEvent(
         new CustomEvent("global-export-count", { detail: { value: newTotal } })
       );
@@ -314,15 +292,14 @@ export async function exportJson() {
       );
     } catch (e) {
       console.warn("No se pudo asignar atomNumber (no se incrementa):", e);
-      // Continuamos exportando sin número (seguirá mostrando "?")
+      // Continuar exportando sin número (seguirá mostrando "?")
     }
   }
-  // Si ya tenía atomNumber, NO incrementamos y seguimos exportando tal cual.
 
-  // Payload con título incluido (lleva atomNumber dentro del state)
+  // Payload con título incluido (lleva atomNumber en state)
   const payload = { ...state, appTitle };
 
-  // Nombre de archivo
+  // Nombre archivo
   const base = slugifyForFile(appTitle);
   const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
   const filename = `${base}-${stamp}.json`;
@@ -332,7 +309,7 @@ export async function exportJson() {
     type: "application/json",
   });
 
-  // Guardado con File System Access API si existe
+  // Guardado con File System Access API
   if (window.showSaveFilePicker && window.isSecureContext) {
     try {
       const handle = await window.showSaveFilePicker({
@@ -345,7 +322,7 @@ export async function exportJson() {
       await writable.close();
       return;
     } catch (err) {
-      if (err && err.name === "AbortError") return; // cancelado por el usuario
+      if (err && err.name === "AbortError") return; // cancelado
       console.warn("showSaveFilePicker falló, usando fallback:", err);
     }
   }
@@ -361,55 +338,6 @@ export async function exportJson() {
   URL.revokeObjectURL(url);
 }
 
-
-  // Helper para notificar a la UI
-  const notifyUI = () => {
-    if (Number.isInteger(newTotal)) {
-      window.dispatchEvent(
-        new CustomEvent("global-export-count", { detail: { value: newTotal } })
-      );
-    }
-    if (Number.isInteger(state.atomNumber)) {
-      window.dispatchEvent(
-        new CustomEvent("atom-number-changed", { detail: { value: state.atomNumber } })
-      );
-    }
-  };
-
-  // 4) Guardado (save file picker o fallback)
-  if (window.showSaveFilePicker && window.isSecureContext) {
-    try {
-      const handle = await window.showSaveFilePicker({
-        suggestedName: filename,
-        types: [{ description: "JSON", accept: { "application/json": [".json"] } }],
-        excludeAcceptAllOption: false,
-      });
-      const writable = await handle.createWritable();
-      await writable.write(blob);
-      await writable.close();
-      notifyUI();
-      return;
-    } catch (err) {
-      if (err && err.name === "AbortError") return; // cancelado por el usuario
-      console.warn("showSaveFilePicker falló, usando fallback:", err);
-      // seguimos al fallback
-    }
-  }
-
-  // Fallback universal (descarga directa)
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
-  notifyUI();
-}
-
-
-
 export function importJson(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -420,12 +348,12 @@ export function importJson(file) {
         if (!parsed || !Array.isArray(parsed.items))
           throw new Error("Formato inválido");
 
-        // Si viene título en el archivo, persístelo para que la UI lo use
+        // Si viene título, guardarlo para la UI
         if (typeof parsed.appTitle === "string" && parsed.appTitle.trim()) {
           localStorage.setItem("app-title", parsed.appTitle.trim());
         }
 
-        // Guarda el estado tal cual (load ignorará claves extra como appTitle)
+        // Guardar todo el estado (con atomNumber si viene)
         localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
         state = load();
         save();
