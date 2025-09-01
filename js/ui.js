@@ -175,6 +175,9 @@ const histTitle  = document.querySelector(".historial h2");
 const landingTitle = document.querySelector("#frameL h2");
 const appTitleEl = document.querySelector(".app header h1");
 
+// ⬇️ Status bar counter (opcional)
+const exportCounterEl = document.getElementById("exportCounter");
+
 // Timer de aterrizaje / refresco
 let orbitTimer = null;
 
@@ -416,12 +419,17 @@ function renderItem(it, inAlt = false, allowDrag = true) {
     render();
   });
 
-  // Editar nota + autolink en vivo
+  // Editar nota
   textarea.addEventListener("input", () => {
     updateItem(it.id, { note: textarea.value });
   });
+  // Si aún existiese una función updateLinks (antiguo autolink), llámala sin romper
   textarea.addEventListener("paste", () => {
-    setTimeout(updateLinks, 0);
+    setTimeout(() => {
+      if (typeof window.updateLinks === "function") {
+        try { window.updateLinks(); } catch {}
+      }
+    }, 0);
   });
 
   // Subir/Bajar
@@ -536,23 +544,22 @@ export function bindGlobalHandlers() {
 
   // Importar
   importInput.addEventListener("change", async () => {
-  const file = importInput.files?.[0];
-  if (!file) return;
-  try {
-    await importJson(file); // incluye aterrizaje de vencidos y ahora setea app-title si existe
+    const file = importInput.files?.[0];
+    if (!file) return;
+    try {
+      await importJson(file); // incluye aterrizaje de vencidos y ahora setea app-title si existe
 
-    // 🔁 Refresca el título visible con el título importado (si venía en el JSON)
-    const importedTitle = localStorage.getItem("app-title") || "unátomo";
-    if (appTitleEl) appTitleEl.textContent = importedTitle;
+      // 🔁 Refresca el título visible con el título importado (si venía en el JSON)
+      const importedTitle = localStorage.getItem("app-title") || "unátomo";
+      if (appTitleEl) appTitleEl.textContent = importedTitle;
 
-    render();
-  } catch (e) {
-    alert("Error importing: " + e.message);
-  } finally {
-    importInput.value = "";
-  }
-});
-
+      render();
+    } catch (e) {
+      alert("Error importing: " + e.message);
+    } finally {
+      importInput.value = "";
+    }
+  });
 
   // Vaciar todo
   clearAllBtn?.addEventListener("click", () => {
@@ -582,6 +589,19 @@ export function bindGlobalHandlers() {
       render(); // refresca “Re-entering in X days”
     }
   }, 60_000); // cada minuto
+
+  // ⬇️ Inicializar / escuchar contador global de exportaciones
+  refreshExportCounter(); // pinta el valor al inicio
+  window.addEventListener("global-export-count", (e) => {
+    const v = e.detail?.value;
+    if (!exportCounterEl) return;
+    if (typeof v === "number") {
+      exportCounterEl.textContent = v.toLocaleString();
+    } else {
+      // Si no llegó valor, consulta al backend
+      refreshExportCounter();
+    }
+  });
 }
 
 /* ================== Helpers ================== */
@@ -642,3 +662,13 @@ function formatStamp(iso) {
   }
 }
 
+// ⬇️ Refresca el contador global de exportaciones
+async function refreshExportCounter() {
+  if (!exportCounterEl) return;
+  try {
+    const n = await getGlobalExportCount();
+    exportCounterEl.textContent = n ? n.toLocaleString() : "0";
+  } catch {
+    exportCounterEl.textContent = "0";
+  }
+}
