@@ -296,30 +296,71 @@ function slugifyForFile(name) {
 }
 
 export async function exportJson() {
-  // 1) Incrementa contador global y toma el total actualizado
-  let newTotal = null;
-  try {
-    newTotal = await incrementGlobalExportCounter(); // debe devolver el total global tras el +1
-  } catch (e) {
-    console.warn("incrementGlobalExportCounter falló:", e);
-  }
-
-  // 2) Fija Atom No. en el estado si el incremento fue exitoso
-  if (Number.isInteger(newTotal) && newTotal > 0) {
-    state.atomNumber = newTotal;
-    save(); // persistimos atomNumber en localStorage
-  }
-
-  // 3) Construye payload y archivo
   const appTitle = localStorage.getItem("app-title") || "unátomo";
-  const payload = { ...state, appTitle }; // incluye atomNumber si lo acabamos de fijar
 
+  // Si el átomo aún no tiene número, lo asignamos incrementando el global
+  if (!Number.isInteger(state.atomNumber) || state.atomNumber <= 0) {
+    try {
+      const newTotal = await incrementGlobalExportCounter(); // debe devolver el total actualizado
+      state.atomNumber = newTotal; // fijamos el número de átomo
+      save();
+
+      // Avisamos a la UI para refrescar el contador global y el Atom No.
+      window.dispatchEvent(
+        new CustomEvent("global-export-count", { detail: { value: newTotal } })
+      );
+      window.dispatchEvent(
+        new CustomEvent("atom-number-changed", { detail: { value: newTotal } })
+      );
+    } catch (e) {
+      console.warn("No se pudo asignar atomNumber (no se incrementa):", e);
+      // Continuamos exportando sin número (seguirá mostrando "?")
+    }
+  }
+  // Si ya tenía atomNumber, NO incrementamos y seguimos exportando tal cual.
+
+  // Payload con título incluido (lleva atomNumber dentro del state)
+  const payload = { ...state, appTitle };
+
+  // Nombre de archivo
   const base = slugifyForFile(appTitle);
   const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
   const filename = `${base}-${stamp}.json`;
+
+  // Blob
   const blob = new Blob([JSON.stringify(payload, null, 2)], {
     type: "application/json",
   });
+
+  // Guardado con File System Access API si existe
+  if (window.showSaveFilePicker && window.isSecureContext) {
+    try {
+      const handle = await window.showSaveFilePicker({
+        suggestedName: filename,
+        types: [{ description: "JSON", accept: { "application/json": [".json"] } }],
+        excludeAcceptAllOption: false,
+      });
+      const writable = await handle.createWritable();
+      await writable.write(blob);
+      await writable.close();
+      return;
+    } catch (err) {
+      if (err && err.name === "AbortError") return; // cancelado por el usuario
+      console.warn("showSaveFilePicker falló, usando fallback:", err);
+    }
+  }
+
+  // Fallback descarga directa
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
 
   // Helper para notificar a la UI
   const notifyUI = () => {
