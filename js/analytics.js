@@ -1,27 +1,27 @@
-// js/analytics.js
-// Contador global con CountAPI (https://api.countapi.xyz)
-// Namespace y key están "namespaced" para tu dominio.
-
-const BASE = "https://api.countapi.xyz";
-const NAMESPACE = "unatomo_com";   // ajusta si quieres
-const KEY = "exports_total";       // contador global de exportaciones
+// analytics.js
+const API = "https://tu-backend.com/api/exports"; // ajusta a tu endpoint
 
 export async function incrementGlobalExportCounter() {
+  // Debe devolver el total actualizado (number)
   try {
-    const res = await fetch(`${BASE}/hit/${NAMESPACE}/${KEY}`);
-    const data = await res.json();
-    return (typeof data.value === "number") ? data.value : null;
-  } catch {
-    return null;
+    const res = await fetch(`${API}/increment`, { method: "POST" });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json(); // { total: number }
+    return data.total;
+  } catch (e) {
+    console.warn("incrementGlobalExportCounter error:", e);
+    return null; // la UI simplemente no actualizará
   }
 }
 
 export async function getGlobalExportCount() {
   try {
-    const res = await fetch(`${BASE}/get/${NAMESPACE}/${KEY}`);
-    const data = await res.json();
-    return (typeof data.value === "number") ? data.value : 0;
-  } catch {
-    return 0;
+    const res = await fetch(`${API}/count`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json(); // { total: number }
+    return data.total;
+  } catch (e) {
+    console.warn("getGlobalExportCount error:", e);
+    return null;
   }
 }
