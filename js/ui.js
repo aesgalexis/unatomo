@@ -561,17 +561,23 @@ export function bindGlobalHandlers() {
 
   // Importar
   importInput.addEventListener("change", async () => {
-    const file = importInput.files?.[0];
-    if (!file) return;
-    try {
-      await importJson(file); // incluye aterrizaje de vencidos
-      render();
-    } catch (e) {
-      alert("Error importing: " + e.message);
-    } finally {
-      importInput.value = "";
-    }
-  });
+  const file = importInput.files?.[0];
+  if (!file) return;
+  try {
+    await importJson(file); // incluye aterrizaje de vencidos y ahora setea app-title si existe
+
+    // 🔁 Refresca el título visible con el título importado (si venía en el JSON)
+    const importedTitle = localStorage.getItem("app-title") || "unátomo";
+    if (appTitleEl) appTitleEl.textContent = importedTitle;
+
+    render();
+  } catch (e) {
+    alert("Error importing: " + e.message);
+  } finally {
+    importInput.value = "";
+  }
+});
+
 
   // Vaciar todo
   clearAllBtn?.addEventListener("click", () => {
