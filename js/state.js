@@ -26,23 +26,30 @@ function load() {
 
     const parsed = JSON.parse(raw);
 
-    // --- Normalización de items ---
-    const itemsRaw = Array.isArray(parsed.items) ? parsed.items : [];
-    const items = itemsRaw.map((it, idx) => {
-      const id = Number.isFinite(+it?.id) ? +it.id : idx + 1;
-      const where = it?.where === "B" ? "B" : it?.where === "L" ? "L" : "A";
-      return {
-        id,
-        where,
-        label:
-          typeof it?.label === "string" && it.label.trim()
-            ? it.label
-            : `Attomic Button ${id}`,
-        note: typeof it?.note === "string" ? it.note : "",
-        open: !!it?.open,
-        createdAt: typeof it?.createdAt === "string" ? it.createdAt : null,
-      };
-    });
+    // ...tu normalización de items, history, orbit...
+
+    // idSeq consistente...
+    let idSeq = Number.isInteger(parsed.idSeq) ? parsed.idSeq : base.idSeq;
+    const maxItemsId = items.reduce((m, it) => Math.max(m, it.id), 0);
+    const maxOrbitId = orbit.reduce((m, o) => Math.max(m, o.id || 0), 0);
+    const maxId = Math.max(maxItemsId, maxOrbitId);
+    if (!Number.isInteger(idSeq) || idSeq <= maxId) idSeq = maxId + 1;
+
+    // 👇 Recupera atomNumber si existía (viene en JSON o localStorage)
+    const atomNumber =
+      Number.isInteger(parsed.atomNumber) && parsed.atomNumber > 0
+        ? parsed.atomNumber
+        : null;
+
+    // Construimos estado temporal y aterrizamos órbitas vencidas
+    const tmp = { items, history, orbit, idSeq, atomNumber }; // 👈 IMPORTANTE
+    landDueOrbitsIn(tmp);
+
+    return tmp;
+  } catch {
+    return makeEmptyState();
+  }
+}
 
     // --- Normalización de historial (sin cap de almacenamiento) ---
     const historyRaw = Array.isArray(parsed.history) ? parsed.history : [];
