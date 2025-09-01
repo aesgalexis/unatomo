@@ -46,8 +46,9 @@ const ELEMENTS = {
   114: "Flerovium", 115: "Moscovium", 116: "Livermorium", 117: "Tennessine", 118: "Oganesson"
 };
 
-// ⬇️ Status bar counter (opción con <span id="exportCounter">)
+// ⬇️ Status bar elements
 const exportCounterEl = document.getElementById("exportCounter");
+const atomNoEl = document.getElementById("atomNo"); // NUEVO
 
 // Límites por marco
 const MAX_A = 8;
@@ -451,6 +452,9 @@ export function bindGlobalHandlers() {
       const importedTitle = localStorage.getItem("app-title") || "unátomo";
       if (appTitleEl) appTitleEl.textContent = importedTitle;
 
+      // 🔁 Refresca el Atom No. (si el JSON traía atomNumber lo usa; si no, usa exports+1)
+      await refreshAtomNumber();
+
       render();
     } catch (e) {
       alert("Error importing: " + e.message);
@@ -473,6 +477,9 @@ export function bindGlobalHandlers() {
     // document.title = "unátomo"; // opcional
 
     render();
+
+    // Recalcula Atom No. (sin atomNumber en estado, caerá en exports+1)
+    refreshAtomNumber();
   });
 
   // Aterrizaje inmediato al arrancar
@@ -489,11 +496,21 @@ export function bindGlobalHandlers() {
   }, 60_000); // cada minuto
 
   // ⬇️ Inicializar / escuchar contador global de exportaciones
-  refreshExportCounter(); // pinta el valor al inicio
+  refreshExportCounter(); // pinta Exports al inicio
+  refreshAtomNumber();    // pinta Atom No. al inicio
+
   window.addEventListener("global-export-count", (e) => {
     const n = e.detail?.value;
     if (exportCounterEl && typeof n === "number") {
       exportCounterEl.textContent = n.toLocaleString();
+    }
+  });
+
+  // ⬇️ Actualiza Atom No. cuando state.js lo fije tras un export
+  window.addEventListener("atom-number-changed", (e) => {
+    const v = e.detail?.value;
+    if (atomNoEl && typeof v === "number") {
+      atomNoEl.textContent = v.toLocaleString();
     }
   });
 }
@@ -564,5 +581,23 @@ async function refreshExportCounter() {
     exportCounterEl.textContent = typeof n === "number" ? n.toLocaleString() : "0";
   } catch {
     exportCounterEl.textContent = "0";
+  }
+}
+
+// Refresca el Atom No. (usa estado si existe; si no, usa exports+1)
+async function refreshAtomNumber() {
+  if (!atomNoEl) return;
+  try {
+    if (Number.isInteger(state.atomNumber) && state.atomNumber > 0) {
+      atomNoEl.textContent = state.atomNumber.toLocaleString();
+      return;
+    }
+    const total = await getGlobalExportCount();
+    const atom = Number.isFinite(total) ? total + 1 : null;
+    atomNoEl.textContent = atom ? atom.toLocaleString() : "—";
+  } catch {
+    atomNoEl.textContent = Number.isInteger(state.atomNumber)
+      ? state.atomNumber.toLocaleString()
+      : "—";
   }
 }
