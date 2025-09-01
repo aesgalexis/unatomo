@@ -365,12 +365,14 @@ function renderItem(it, inAlt = false, allowDrag = true) {
         autocapitalize="off"
         autocomplete="off"
       ></textarea>
+      <div class="note-links" hidden></div>
     </div>
   `;
 
   const btn = item.querySelector(".btn");
   const panel = item.querySelector(".panel");
   const textarea = item.querySelector("textarea");
+  const linksBox = item.querySelector(".note-links");
 
   textarea.spellcheck = false;
   textarea.setAttribute("autocorrect", "off");
@@ -379,6 +381,29 @@ function renderItem(it, inAlt = false, allowDrag = true) {
 
   btn.textContent = labelWithStamp(it);
   textarea.value = it.note || "";
+
+  // --- auto-link: detectar URLs y mostrarlas como <a target="_blank"> debajo ---
+  const updateLinks = () => {
+    const urls = extractUrls(textarea.value);
+    linksBox.innerHTML = "";
+    if (!urls.length) {
+      linksBox.hidden = true;
+      return;
+    }
+    linksBox.hidden = false;
+    for (const u of urls.slice(0, 20)) {
+      const a = document.createElement("a");
+      const href = u.startsWith("http") ? u : `https://${u}`;
+      a.href = href;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      a.textContent = u;
+      const wrap = document.createElement("div");
+      wrap.appendChild(a);
+      linksBox.appendChild(wrap);
+    }
+  };
+  updateLinks();
 
   // Abrir/cerrar panel de notas
   btn.addEventListener("click", () => {
@@ -415,9 +440,13 @@ function renderItem(it, inAlt = false, allowDrag = true) {
     render();
   });
 
-  // Editar nota
+  // Editar nota + autolink en vivo
   textarea.addEventListener("input", () => {
     updateItem(it.id, { note: textarea.value });
+    updateLinks();
+  });
+  textarea.addEventListener("paste", () => {
+    setTimeout(updateLinks, 0);
   });
 
   // Subir/Bajar
@@ -460,49 +489,45 @@ export function bindGlobalHandlers() {
     input.autocomplete = "off";
   }
 
-// Renombrar título con prompt (máx. 10 chars) + persistencia + cursor pointer
-if (appTitleEl) {
-  // Fuerza cursor "pointer" incluso si alguna regla CSS lo pisa
-  appTitleEl.style.cursor = "pointer";
-  appTitleEl.setAttribute("role", "button");
-  appTitleEl.setAttribute("title", "Click para renombrar");
-  appTitleEl.tabIndex = 0;
+  // Renombrar título con prompt (máx. 10 chars) + persistencia + cursor pointer
+  if (appTitleEl) {
+    appTitleEl.style.cursor = "pointer";
+    appTitleEl.setAttribute("role", "button");
+    appTitleEl.setAttribute("title", "Click para renombrar");
+    appTitleEl.tabIndex = 0;
 
-  // Cargar título guardado si existe
-  const savedTitle = localStorage.getItem("app-title");
-  if (savedTitle && savedTitle.trim()) {
-    appTitleEl.textContent = savedTitle;
+    // Cargar título guardado si existe
+    const savedTitle = localStorage.getItem("app-title");
+    if (savedTitle && savedTitle.trim()) {
+      appTitleEl.textContent = savedTitle;
+    }
+
+    const rename = () => {
+      const current = appTitleEl.textContent.trim();
+      const input = prompt("Rename title (max 10 characters):", current);
+      if (input == null) return; // cancelado
+      const name = input.trim();
+      if (!name) {
+        alert("Please enter a non-empty title.");
+        return;
+      }
+      if (name.length > 10) {
+        alert("Title must be 10 characters or fewer.");
+        return;
+      }
+      appTitleEl.textContent = name;
+      localStorage.setItem("app-title", name);
+      // document.title = name; // opcional
+    };
+
+    appTitleEl.addEventListener("click", rename);
+    appTitleEl.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        rename();
+      }
+    });
   }
-
-  const rename = () => {
-    const current = appTitleEl.textContent.trim();
-    const input = prompt("Rename title (max 10 characters):", current);
-    if (input == null) return; // cancelado
-    const name = input.trim();
-    if (!name) {
-      alert("Please enter a non-empty title.");
-      return;
-    }
-    if (name.length > 10) {
-      alert("Title must be 10 characters or fewer.");
-      return;
-    }
-    appTitleEl.textContent = name;
-    localStorage.setItem("app-title", name);
-    // Opcional: reflejar también en la pestaña
-    // document.title = name;
-  };
-
-  // Click y teclado (Enter/Espacio)
-  appTitleEl.addEventListener("click", rename);
-  appTitleEl.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      rename();
-    }
-  });
-}
-
 
   // Crear en Main respetando límite
   addBtn.addEventListener("click", () => {
@@ -559,8 +584,7 @@ if (appTitleEl) {
     localStorage.removeItem("app-title");
     if (appTitleEl) appTitleEl.textContent = "unátomo";
 
-    // (opcional) también el <title> de la pestaña:
-    // document.title = "unátomo";
+    // document.title = "unátomo"; // opcional
 
     render();
   });
@@ -635,4 +659,30 @@ function formatStamp(iso) {
   } catch {
     return "";
   }
+}
+
+// ==== Auto-link helpers ====
+
+function extractUrls(text) {
+  if (!text) return [];
+  const found = new Set();
+
+  // http/https
+  const reHttp = /\bhttps?:\/\/[^\s<>"')]+/gi;
+  let m;
+  while ((m = reHttp.exec(text))) {
+    found.add(trimTrailingPunct(m[0]));
+  }
+
+  // www.*
+  const reWww = /\bwww\.[a-z0-9.-]+\.[a-z]{2,}(?:[^\s<>"')]*)?/gi;
+  while ((m = reWww.exec(text))) {
+    found.add(trimTrailingPunct(m[0]));
+  }
+
+  return Array.from(found);
+}
+
+function trimTrailingPunct(url) {
+  return url.replace(/[),.;:!?]+$/g, "");
 }
