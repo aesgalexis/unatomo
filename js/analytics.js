@@ -1,27 +1,26 @@
-// analytics.js
-const API = "https://tu-backend.com/api/exports"; // ajusta a tu endpoint
+// js/analytics.js
 
-export async function incrementGlobalExportCounter() {
-  // Debe devolver el total actualizado (number)
-  try {
-    const res = await fetch(`${API}/increment`, { method: "POST" });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json(); // { total: number }
-    return data.total;
-  } catch (e) {
-    console.warn("incrementGlobalExportCounter error:", e);
-    return null; // la UI simplemente no actualizará
-  }
-}
+// Fallback 100% local (no requiere backend)
+// Guarda un contador en localStorage para que la UI no se rompa.
+
+const LS_KEY = "global-export-count-fallback";
 
 export async function getGlobalExportCount() {
   try {
-    const res = await fetch(`${API}/count`);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json(); // { total: number }
-    return data.total;
-  } catch (e) {
-    console.warn("getGlobalExportCount error:", e);
+    const n = Number(localStorage.getItem(LS_KEY) || "0");
+    return Number.isFinite(n) ? n : 0;
+  } catch {
+    return 0;
+  }
+}
+
+export async function incrementGlobalExportCounter() {
+  try {
+    const curr = await getGlobalExportCount();
+    const next = curr + 1;
+    localStorage.setItem(LS_KEY, String(next));
+    return next; // devolvemos el total actualizado
+  } catch {
     return null;
   }
 }
