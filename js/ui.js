@@ -167,6 +167,7 @@ const ELEMENTS = {
   118: "Oganesson"
 };
 
+const exportCounterEl = document.getElementById("exportCounter");
 // Límites por marco
 const MAX_A = 8;
 const MAX_B = 16;
@@ -496,6 +497,18 @@ export function bindGlobalHandlers() {
     input.autocomplete = "off";
   }
 
+  // ...tus otros handlers: título, addBtn, import/export, clearAll, timers...
+
+  // ⬇️ Inicializa y escucha actualizaciones del contador global de exportaciones
+  refreshExportCounter(); // pinta el valor al inicio
+  window.addEventListener("global-export-count", (e) => {
+    const n = e.detail?.value;
+    if (exportCounterEl && typeof n === "number") {
+      exportCounterEl.textContent = n.toLocaleString();
+    }
+  });
+}
+
   // Renombrar título con prompt (máx. 10 chars) + persistencia + cursor pointer
   if (appTitleEl) {
     appTitleEl.style.cursor = "pointer";
@@ -672,3 +685,13 @@ function formatStamp(iso) {
     return "";
   }
 }
+async function refreshExportCounter() {
+  if (!exportCounterEl) return;
+  try {
+    const n = await getGlobalExportCount();
+    exportCounterEl.textContent = typeof n === "number" ? n.toLocaleString() : "0";
+  } catch {
+    exportCounterEl.textContent = "0";
+  }
+}
+
