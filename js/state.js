@@ -82,7 +82,12 @@ function load() {
     const maxOrbitId = orbit.reduce((m, o) => Math.max(m, o.id || 0), 0);
     const maxId = Math.max(maxItemsId, maxOrbitId);
     if (!Number.isInteger(idSeq) || idSeq <= maxId) idSeq = maxId + 1;
-
+    
+    const atomNumber =
+    Number.isInteger(parsed.atomNumber) && parsed.atomNumber > 0
+    ? parsed.atomNumber
+    : null;
+    
     // Construimos estado temporal y aterrizamos si hay orbits vencidos
     const tmp = { items, history, orbit, idSeq };
     landDueOrbitsIn(tmp);
@@ -304,6 +309,22 @@ export async function exportJson() {
   const blob = new Blob([JSON.stringify(payload, null, 2)], {
     type: "application/json",
   });
+// 1) Pide el nuevo número global (esto ya lo tenías con notify/increment)
+const newTotal = await incrementGlobalExportCounter();
+
+// 2) Fija el Atom No. del estado para este export
+state.atomNumber = newTotal;
+save();
+
+// 3) Construye el payload con el título + atomNumber incluido
+const appTitle = localStorage.getItem("app-title") || "unátomo";
+const payload = { ...state, appTitle }; // ⬅️ 'state' ya contiene atomNumber
+
+// 4) (resto de tu export: blob, saveFilePicker/fallback...)
+
+// 5) Notifica a la UI (exports y atom number para refrescar la barra)
+window.dispatchEvent(new CustomEvent("global-export-count", { detail: { value: newTotal } }));
+window.dispatchEvent(new CustomEvent("atom-number-changed", { detail: { value: newTotal } }));
 
   // Chromium + https/localhost: fuerza diálogo de guardado
   if (window.showSaveFilePicker && window.isSecureContext) {
