@@ -613,6 +613,7 @@ export function bindGlobalHandlers() {
       render(); // refresca “Re-entering in X days”
     }
   }, 60_000); // cada minuto
+}
 
 /* ================== Helpers ================== */
 
