@@ -16,6 +16,7 @@ import {
   delayOrbit,    // NUEVO (asegúrate de tenerlo en state.js)
 } from "./state.js";
 import { enableDragAndDrop } from "./dragdrop.js";
+import { getGlobalExportCount } from "./analytics.js";
 
 // === Tabla periódica: número atómico → nombre ===
 const ELEMENTS = {
