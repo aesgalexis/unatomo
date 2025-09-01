@@ -452,8 +452,8 @@ export function bindGlobalHandlers() {
       const importedTitle = localStorage.getItem("app-title") || "unátomo";
       if (appTitleEl) appTitleEl.textContent = importedTitle;
 
-      // 🔁 Refresca el Atom No. (si el JSON traía atomNumber lo usa; si no, usa exports+1)
-      await refreshAtomNumber();
+      // 🔁 Refresca el Atom No. (si el JSON traía atomNumber lo usa; si no, queda "?")
+      refreshAtomNumber();
 
       render();
     } catch (e) {
@@ -474,11 +474,9 @@ export function bindGlobalHandlers() {
     localStorage.removeItem("app-title");
     if (appTitleEl) appTitleEl.textContent = "unátomo";
 
-    // document.title = "unátomo"; // opcional
-
     render();
 
-    // Recalcula Atom No. (sin atomNumber en estado, caerá en exports+1)
+    // Vuelve a "?"
     refreshAtomNumber();
   });
 
@@ -497,7 +495,7 @@ export function bindGlobalHandlers() {
 
   // ⬇️ Inicializar / escuchar contador global de exportaciones
   refreshExportCounter(); // pinta Exports al inicio
-  refreshAtomNumber();    // pinta Atom No. al inicio
+  refreshAtomNumber();    // pinta Atom No. al inicio ("?" si aún no hay número)
 
   window.addEventListener("global-export-count", (e) => {
     const n = e.detail?.value;
@@ -509,8 +507,9 @@ export function bindGlobalHandlers() {
   // ⬇️ Actualiza Atom No. cuando state.js lo fije tras un export
   window.addEventListener("atom-number-changed", (e) => {
     const v = e.detail?.value;
-    if (atomNoEl && typeof v === "number") {
-      atomNoEl.textContent = v.toLocaleString();
+    if (atomNoEl) {
+      atomNoEl.textContent =
+        Number.isInteger(v) && v > 0 ? v.toLocaleString() : "?";
     }
   });
 }
@@ -584,20 +583,12 @@ async function refreshExportCounter() {
   }
 }
 
-// Refresca el Atom No. (usa estado si existe; si no, usa exports+1)
-async function refreshAtomNumber() {
+// Refresca el Atom No.:
+// - Si hay state.atomNumber (>0), lo muestra.
+// - Si no, muestra "?" (no adelantamos exports+1 hasta que se exporte de verdad).
+function refreshAtomNumber() {
   if (!atomNoEl) return;
-  try {
-    if (Number.isInteger(state.atomNumber) && state.atomNumber > 0) {
-      atomNoEl.textContent = state.atomNumber.toLocaleString();
-      return;
-    }
-    const total = await getGlobalExportCount();
-    const atom = Number.isFinite(total) ? total + 1 : null;
-    atomNoEl.textContent = atom ? atom.toLocaleString() : "—";
-  } catch {
-    atomNoEl.textContent = Number.isInteger(state.atomNumber)
-      ? state.atomNumber.toLocaleString()
-      : "—";
-  }
+  const n = state?.atomNumber;
+  atomNoEl.textContent =
+    Number.isInteger(n) && n > 0 ? n.toLocaleString() : "?";
 }
