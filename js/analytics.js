@@ -1,53 +1,35 @@
 // js/analytics.js
-// Si más adelante tienes backend, pon la URL base aquí (o déjala vacía para usar solo localStorage)
-const API_BASE = ""; // ej: "https://api.unatomo.com/exports"
+import { db } from "./firebase.js";
+import {
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  increment,
+  serverTimestamp,
+} from "firebase/firestore";
 
-const STORAGE_KEY = "ua-export-count";
-
-// ----- Helpers de persistencia local -----
-function getLocal() {
-  const n = parseInt(localStorage.getItem(STORAGE_KEY), 10);
-  return Number.isFinite(n) && n >= 0 ? n : 0;
-}
-function setLocal(n) {
-  localStorage.setItem(STORAGE_KEY, String(n));
-  return n;
-}
-
-// ----- Lee el total (remoto si hay, si no fallback local) -----
-export async function getGlobalExportCount() {
-  if (API_BASE) {
-    try {
-      const res = await fetch(`${API_BASE}/count`, { cache: "no-store" });
-      if (res.ok) {
-        const data = await res.json();
-        if (typeof data?.total === "number") {
-          // sincroniza el cache local con el remoto
-          return setLocal(data.total);
-        }
-      }
-    } catch {
-      // silencio: caemos al fallback local
-    }
-  }
-  return getLocal();
-}
-
-// ----- Incrementa (remoto si hay, si no local) -----
+/**
+ * Incrementa el contador global de exportaciones en +1 y devuelve el total actualizado.
+ * Seguro en concurrencia gracias a FieldValue.increment.
+ */
 export async function incrementGlobalExportCounter() {
-  if (API_BASE) {
-    try {
-      const res = await fetch(`${API_BASE}/bump`, { method: "POST" });
-      if (res.ok) {
-        const data = await res.json();
-        if (typeof data?.total === "number") {
-          return setLocal(data.total);
-        }
-      }
-    } catch {
-      // silencio: caemos al fallback local
-    }
-  }
-  // Fallback puramente local
-  return setLocal(getLocal() + 1);
+  const ref = doc(db, "metrics", "exports");
+  // Crea el doc si no existe y aplica increment sobre "total"
+  await setDoc(
+    ref,
+    { total: increment(1), updatedAt: serverTimestamp() },
+    { merge: true }
+  );
+  const snap = await getDoc(ref);
+  return snap.exists() ? (snap.data().total || 0) : 0;
+}
+
+/**
+ * Lee el total actual (sin modificarlo).
+ */
+export async function getGlobalExportCount() {
+  const ref = doc(db, "metrics", "exports");
+  const snap = await getDoc(ref);
+  return snap.exists() ? (snap.data().total || 0) : 0;
 }
