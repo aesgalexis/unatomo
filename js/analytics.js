@@ -1,5 +1,6 @@
-// js/analytics.js
-// --- Config de tu proyecto Firebase (la misma que ya creaste) ---
+// analytics.js — Firestore (contador global) con imports dinámicos
+
+// --- Config Firebase (la tuya) ---
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyBwSla3hdkIIB9gmVfvv7c_0j90IDiCqVU",
   authDomain: "unatomo-f5537.firebaseapp.com",
@@ -10,75 +11,76 @@ const FIREBASE_CONFIG = {
   measurementId: "G-DLBTXQBYXC",
 };
 
-// reCAPTCHA v3 (site key pública para App Check)
-// OJO: la "clave secreta" NUNCA va en el frontend.
-const RECAPTCHA_SITE_KEY = "6LfGMLorAAAAAGW3LUS1XRvgx6wdQ7eFMkGQ5Rrq";
-
-// Doc que vamos a usar en Firestore
+// Documento donde guardamos el total global
 const DOC_PATH = ["metrics", "exports"];
 
-// Caché del init para no inicializar 2 veces
-let _fb = null;
+// reCAPTCHA v3 (App Check) — opcional
+const RECAPTCHA_SITE_KEY = "6LfGMLorAAAAAGW3LUS1XRvgx6wdQ7eFMkGQ5Rrq";
 
-// Inicializa Firebase + Firestore (+ App Check opcional)
+let _initPromise = null;
+
 async function ensureFirebase() {
-  if (_fb) return _fb;
+  if (_initPromise) return _initPromise;
 
-  const [{ initializeApp }, fs, appCheckMod] = await Promise.all([
-    import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"),
-    import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"),
-    // App Check es opcional; si falla seguimos sin él
-    import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check.js").catch(
-      () => ({})
-    ),
-  ]);
+  _initPromise = (async () => {
+    const [appMod, fsMod, appCheckMod] = await Promise.all([
+      import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"),
+      import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"),
+      import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check.js").catch(() => ({})),
+    ]);
 
-  const app = initializeApp(FIREBASE_CONFIG);
+    const app = appMod.initializeApp(FIREBASE_CONFIG);
 
-  // App Check con reCAPTCHA v3 (opcional pero recomendado)
-  try {
-    if (appCheckMod && appCheckMod.initializeAppCheck) {
-      // Activa modo debug si pusiste self.FIREBASE_APPCHECK_DEBUG_TOKEN = true en index
-      if (window.FIREBASE_APPCHECK_DEBUG_TOKEN) {
-        self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+    // App Check (opcional). Si falla, seguimos sin él.
+    try {
+      if (appCheckMod.initializeAppCheck && appCheckMod.ReCaptchaV3Provider) {
+        appCheckMod.initializeAppCheck(app, {
+          provider: new appCheckMod.ReCaptchaV3Provider(RECAPTCHA_SITE_KEY),
+          isTokenAutoRefreshEnabled: true,
+        });
       }
-      appCheckMod.initializeAppCheck(app, {
-        provider: new appCheckMod.ReCaptchaV3Provider(RECAPTCHA_SITE_KEY),
-        isTokenAutoRefreshEnabled: true,
-      });
+    } catch (e) {
+      console.warn("App Check init failed (continuamos sin él):", e);
     }
-  } catch (e) {
-    console.warn("App Check init falló (continuamos sin él):", e);
-  }
 
-  const db = fs.getFirestore(app);
-  _fb = { app, db, fs };
-  return _fb;
+    const db = fsMod.getFirestore(app);
+
+    // Re-exportamos helpers de Firestore que usamos
+    const fs = {
+      doc: fsMod.doc,
+      getDoc: fsMod.getDoc,
+      runTransaction: fsMod.runTransaction,
+      setDoc: fsMod.setDoc,
+      updateDoc: fsMod.updateDoc,
+      serverTimestamp: fsMod.serverTimestamp,
+    };
+
+    return { app, db, fs };
+  })();
+
+  return _initPromise;
 }
 
-// === API pública que usa tu UI/estado ===
-
-// Lee el total global (0 si no existe)
+// Lee el total global (si falla, usa fallback local)
 export async function getGlobalExportCount() {
   try {
     const { db, fs } = await ensureFirebase();
     const ref = fs.doc(db, ...DOC_PATH);
     const snap = await fs.getDoc(ref);
-    if (!snap.exists()) return 0;
-    const n = Number(snap.data()?.total);
-    return Number.isFinite(n) ? n : 0;
+    const v = snap.exists() ? Number(snap.data()?.total) : 0;
+    return Number.isFinite(v) ? v : 0;
   } catch (e) {
-    console.warn("getGlobalExportCount() falló:", e);
-    return 0; // fallback silencioso
+    console.warn("getGlobalExportCount() fallback local:", e);
+    const local = Number(localStorage.getItem("fallback-exports") || "0");
+    return Number.isFinite(local) ? local : 0;
   }
 }
 
-// Incrementa el contador global en +1 (transacción)
-// y emite el evento 'global-export-count' con el nuevo valor.
+// Incrementa el contador global en +1 y devuelve el nuevo total.
+// Si falla red, usa fallback local; también emite el evento 'global-export-count'.
 export async function incrementGlobalExportCounter() {
   try {
     const { db, fs } = await ensureFirebase();
-    // Asegúrate de que DOC_PATH sea por ejemplo: ['metrics', 'exports']
     const ref = fs.doc(db, ...DOC_PATH);
 
     const newTotal = await fs.runTransaction(db, async (tx) => {
@@ -94,29 +96,22 @@ export async function incrementGlobalExportCounter() {
       return next;
     });
 
-    // 👇 Notifica a la UI
-    if (typeof window !== "undefined") {
+    try {
       window.dispatchEvent(
         new CustomEvent("global-export-count", { detail: { value: newTotal } })
       );
-    }
-
-    // 👇 Devuelve el total actualizado (importantísimo para state.js)
-    return newTotal;
-  } catch (err) {
-    console.error("incrementGlobalExportCounter failed:", err);
-    throw err;
-  }
-}
-
-    // Notifica a la UI (ui.js ya escucha este evento)
-    window.dispatchEvent(
-      new CustomEvent("global-export-count", { detail: { value: newTotal } })
-    );
+    } catch {}
 
     return newTotal;
   } catch (e) {
-    console.warn("incrementGlobalExportCounter() falló:", e);
-    return null; // no rompas la UI si hay fallo de red/reglas
+    console.warn("incrementGlobalExportCounter() fallback local:", e);
+    const local = Number(localStorage.getItem("fallback-exports") || "0") + 1;
+    localStorage.setItem("fallback-exports", String(local));
+    try {
+      window.dispatchEvent(
+        new CustomEvent("global-export-count", { detail: { value: local } })
+      );
+    } catch {}
+    return local;
   }
 }
