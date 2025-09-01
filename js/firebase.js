@@ -1,8 +1,8 @@
-// ./js/firebase.js
+// js/firebase.js
 import { initializeApp } from "firebase/app";
 import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
+import { getFirestore } from "firebase/firestore";
 
-// 👇 tu config de Firebase (la que ya pegaste antes)
 const firebaseConfig = {
   apiKey: "AIzaSyBwSla3hdkIIB9gmVfvv7c_0j90IDiCqVU",
   authDomain: "unatomo-f5537.firebaseapp.com",
@@ -15,14 +15,16 @@ const firebaseConfig = {
 
 export const app = initializeApp(firebaseConfig);
 
-// ✅ En desarrollo local, usa token de depuración de App Check
+// En dev local, habilita debug token de App Check
 if (location.hostname === "localhost") {
   // @ts-ignore
   self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
 }
 
-// ✅ Inicializa App Check con reCAPTCHA v3 (usa tu SITE KEY pública)
 initializeAppCheck(app, {
   provider: new ReCaptchaV3Provider("6LfGMLorAAAAAGW3LUS1XRvgx6wdQ7eFMkGQ5Rrq"),
   isTokenAutoRefreshEnabled: true,
 });
+
+// Exporta Firestore
+export const db = getFirestore(app);
