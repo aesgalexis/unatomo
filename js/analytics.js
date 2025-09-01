@@ -78,6 +78,7 @@ export async function getGlobalExportCount() {
 export async function incrementGlobalExportCounter() {
   try {
     const { db, fs } = await ensureFirebase();
+    // Asegúrate de que DOC_PATH sea por ejemplo: ['metrics', 'exports']
     const ref = fs.doc(db, ...DOC_PATH);
 
     const newTotal = await fs.runTransaction(db, async (tx) => {
@@ -92,6 +93,21 @@ export async function incrementGlobalExportCounter() {
       }
       return next;
     });
+
+    // 👇 Notifica a la UI
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent("global-export-count", { detail: { value: newTotal } })
+      );
+    }
+
+    // 👇 Devuelve el total actualizado (importantísimo para state.js)
+    return newTotal;
+  } catch (err) {
+    console.error("incrementGlobalExportCounter failed:", err);
+    throw err;
+  }
+}
 
     // Notifica a la UI (ui.js ya escucha este evento)
     window.dispatchEvent(
