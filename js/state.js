@@ -1,6 +1,6 @@
 // Modelo + persistencia + import/export
 
-import { incrementGlobalExportCounter } from "./analytics.js"; // ⬅️ NUEVO
+import { incrementGlobalExportCounter } from "./analytics.js";
 
 const STORAGE_KEY = "buttons-v1";
 // IMPORTANTE: mantenemos HISTORY_MAX por compat, pero ya NO limita almacenamiento
