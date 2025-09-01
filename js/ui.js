@@ -18,156 +18,37 @@ import {
 import { enableDragAndDrop } from "./dragdrop.js";
 import { getGlobalExportCount } from "./analytics.js";
 
-// === Hook contador global de exportaciones (sin tocar index.html) ===
-window.addEventListener("DOMContentLoaded", () => {
-  const statusLeftEl = document.querySelector(".statusbar .status-left");
-  if (!statusLeftEl) return;
-
-  // Guarda el texto original una vez, para no concatenarlo repetido
-  if (!statusLeftEl.dataset.baseText) {
-    statusLeftEl.dataset.baseText = statusLeftEl.textContent.trim();
-  }
-
-  function setExportsCount(n) {
-    const base = statusLeftEl.dataset.baseText || statusLeftEl.textContent.trim();
-    statusLeftEl.textContent = `${base} · Exports: ${n}`;
-  }
-
-  // Poblado inicial
-  getGlobalExportCount()
-    .then((n) => { if (typeof n === "number") setExportsCount(n); })
-    .catch(() => { /* silencioso */ });
-
-  // Actualización en vivo tras cada export (evento emitido desde state.js)
-  window.addEventListener("global-export-count", (e) => {
-    const n = e.detail?.value;
-    if (typeof n === "number") setExportsCount(n);
-  });
-});
-
 // === Tabla periódica: número atómico → nombre ===
 const ELEMENTS = {
-  1: "Hydrogen",
-  2: "Helium",
-  3: "Lithium",
-  4: "Beryllium",
-  5: "Boron",
-  6: "Carbon",
-  7: "Nitrogen",
-  8: "Oxygen",
-  9: "Fluorine",
-  10: "Neon",
-  11: "Sodium",
-  12: "Magnesium",
-  13: "Aluminum",
-  14: "Silicon",
-  15: "Phosphorus",
-  16: "Sulfur",
-  17: "Chlorine",
-  18: "Argon",
-  19: "Potassium",
-  20: "Calcium",
-  21: "Scandium",
-  22: "Titanium",
-  23: "Vanadium",
-  24: "Chromium",
-  25: "Manganese",
-  26: "Iron",
-  27: "Cobalt",
-  28: "Nickel",
-  29: "Copper",
-  30: "Zinc",
-  31: "Gallium",
-  32: "Germanium",
-  33: "Arsenic",
-  34: "Selenium",
-  35: "Bromine",
-  36: "Krypton",
-  37: "Rubidium",
-  38: "Strontium",
-  39: "Yttrium",
-  40: "Zirconium",
-  41: "Niobium",
-  42: "Molybdenum",
-  43: "Technetium",
-  44: "Ruthenium",
-  45: "Rhodium",
-  46: "Palladium",
-  47: "Silver",
-  48: "Cadmium",
-  49: "Indium",
-  50: "Tin",
-  51: "Antimony",
-  52: "Tellurium",
-  53: "Iodine",
-  54: "Xenon",
-  55: "Cesium",
-  56: "Barium",
-  57: "Lanthanum",
-  58: "Cerium",
-  59: "Praseodymium",
-  60: "Neodymium",
-  61: "Promethium",
-  62: "Samarium",
-  63: "Europium",
-  64: "Gadolinium",
-  65: "Terbium",
-  66: "Dysprosium",
-  67: "Holmium",
-  68: "Erbium",
-  69: "Thulium",
-  70: "Ytterbium",
-  71: "Lutetium",
-  72: "Hafnium",
-  73: "Tantalum",
-  74: "Tungsten",
-  75: "Rhenium",
-  76: "Osmium",
-  77: "Iridium",
-  78: "Platinum",
-  79: "Gold",
-  80: "Mercury",
-  81: "Thallium",
-  82: "Lead",
-  83: "Bismuth",
-  84: "Polonium",
-  85: "Astatine",
-  86: "Radon",
-  87: "Francium",
-  88: "Radium",
-  89: "Actinium",
-  90: "Thorium",
-  91: "Protactinium",
-  92: "Uranium",
-  93: "Neptunium",
-  94: "Plutonium",
-  95: "Americium",
-  96: "Curium",
-  97: "Berkelium",
-  98: "Californium",
-  99: "Einsteinium",
-  100: "Fermium",
-  101: "Mendelevium",
-  102: "Nobelium",
-  103: "Lawrencium",
-  104: "Rutherfordium",
-  105: "Dubnium",
-  106: "Seaborgium",
-  107: "Bohrium",
-  108: "Hassium",
-  109: "Meitnerium",
-  110: "Darmstadtium",
-  111: "Roentgenium",
-  112: "Copernicium",
-  113: "Nihonium",
-  114: "Flerovium",
-  115: "Moscovium",
-  116: "Livermorium",
-  117: "Tennessine",
-  118: "Oganesson"
+  1: "Hydrogen", 2: "Helium", 3: "Lithium", 4: "Beryllium", 5: "Boron",
+  6: "Carbon", 7: "Nitrogen", 8: "Oxygen", 9: "Fluorine", 10: "Neon",
+  11: "Sodium", 12: "Magnesium", 13: "Aluminum", 14: "Silicon", 15: "Phosphorus",
+  16: "Sulfur", 17: "Chlorine", 18: "Argon", 19: "Potassium", 20: "Calcium",
+  21: "Scandium", 22: "Titanium", 23: "Vanadium", 24: "Chromium", 25: "Manganese",
+  26: "Iron", 27: "Cobalt", 28: "Nickel", 29: "Copper", 30: "Zinc",
+  31: "Gallium", 32: "Germanium", 33: "Arsenic", 34: "Selenium", 35: "Bromine",
+  36: "Krypton", 37: "Rubidium", 38: "Strontium", 39: "Yttrium", 40: "Zirconium",
+  41: "Niobium", 42: "Molybdenum", 43: "Technetium", 44: "Ruthenium", 45: "Rhodium",
+  46: "Palladium", 47: "Silver", 48: "Cadmium", 49: "Indium", 50: "Tin",
+  51: "Antimony", 52: "Tellurium", 53: "Iodine", 54: "Xenon", 55: "Cesium",
+  56: "Barium", 57: "Lanthanum", 58: "Cerium", 59: "Praseodymium", 60: "Neodymium",
+  61: "Promethium", 62: "Samarium", 63: "Europium", 64: "Gadolinium", 65: "Terbium",
+  66: "Dysprosium", 67: "Holmium", 68: "Erbium", 69: "Thulium", 70: "Ytterbium",
+  71: "Lutetium", 72: "Hafnium", 73: "Tantalum", 74: "Tungsten", 75: "Rhenium",
+  76: "Osmium", 77: "Iridium", 78: "Platinum", 79: "Gold", 80: "Mercury",
+  81: "Thallium", 82: "Lead", 83: "Bismuth", 84: "Polonium", 85: "Astatine",
+  86: "Radon", 87: "Francium", 88: "Radium", 89: "Actinium", 90: "Thorium",
+  91: "Protactinium", 92: "Uranium", 93: "Neptunium", 94: "Plutonium", 95: "Americium",
+  96: "Curium", 97: "Berkelium", 98: "Californium", 99: "Einsteinium", 100: "Fermium",
+  101: "Mendelevium", 102: "Nobelium", 103: "Lawrencium", 104: "Rutherfordium",
+  105: "Dubnium", 106: "Seaborgium", 107: "Bohrium", 108: "Hassium", 109: "Meitnerium",
+  110: "Darmstadtium", 111: "Roentgenium", 112: "Copernicium", 113: "Nihonium",
+  114: "Flerovium", 115: "Moscovium", 116: "Livermorium", 117: "Tennessine", 118: "Oganesson"
 };
 
+// ⬇️ Status bar counter (opción con <span id="exportCounter">)
 const exportCounterEl = document.getElementById("exportCounter");
+
 // Límites por marco
 const MAX_A = 8;
 const MAX_B = 16;
@@ -350,20 +231,12 @@ export function render() {
   enforceSingleOpen(orbitList, ".hist-panel");
 
   // === Total con elemento químico ===
-  // Ahora el total incluye también Landing (L)
   const total = itemsA.length + itemsB.length + itemsL.length;
-
-  // Mostramos el número total siempre
   countEl.textContent = `${total}`;
-
-  // Buscamos el elemento químico correspondiente si está en rango 1..118
   const elementName = ELEMENTS[total] || "";
-
   if (elementName) {
-    // Si hay elemento, mostramos el nombre en naranja
     countEl.innerHTML = `${total} <span class="element-name">(${elementName})</span>`;
   } else {
-    // Si no hay elemento (por encima de 118 o 0), mostramos solo el número
     countEl.textContent = total;
   }
 
@@ -497,18 +370,6 @@ export function bindGlobalHandlers() {
     input.autocomplete = "off";
   }
 
-  // ...tus otros handlers: título, addBtn, import/export, clearAll, timers...
-
-  // ⬇️ Inicializa y escucha actualizaciones del contador global de exportaciones
-  refreshExportCounter(); // pinta el valor al inicio
-  window.addEventListener("global-export-count", (e) => {
-    const n = e.detail?.value;
-    if (exportCounterEl && typeof n === "number") {
-      exportCounterEl.textContent = n.toLocaleString();
-    }
-  });
-}
-
   // Renombrar título con prompt (máx. 10 chars) + persistencia + cursor pointer
   if (appTitleEl) {
     appTitleEl.style.cursor = "pointer";
@@ -626,6 +487,15 @@ export function bindGlobalHandlers() {
       render(); // refresca “Re-entering in X days”
     }
   }, 60_000); // cada minuto
+
+  // ⬇️ Inicializar / escuchar contador global de exportaciones
+  refreshExportCounter(); // pinta el valor al inicio
+  window.addEventListener("global-export-count", (e) => {
+    const n = e.detail?.value;
+    if (exportCounterEl && typeof n === "number") {
+      exportCounterEl.textContent = n.toLocaleString();
+    }
+  });
 }
 
 /* ================== Helpers ================== */
@@ -685,6 +555,8 @@ function formatStamp(iso) {
     return "";
   }
 }
+
+// Refresca el contador global de exportaciones
 async function refreshExportCounter() {
   if (!exportCounterEl) return;
   try {
@@ -694,4 +566,3 @@ async function refreshExportCounter() {
     exportCounterEl.textContent = "0";
   }
 }
-
