@@ -379,7 +379,7 @@ main { padding:16px 20px; }
 }
 .panel textarea {
   width: 100%;
-  min-height: 120px;   /* antes 60px → ahora el doble */
+  min-height: 150px;   /* antes 60px → ahora el doble */
   border-radius: 8px;
   border: 1px solid var(--outline);
   background: #0a0f20;
