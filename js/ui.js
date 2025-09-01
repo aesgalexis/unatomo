@@ -398,7 +398,7 @@ function renderItem(it, inAlt = false, allowDrag = true) {
 
   // Renombrar
   item.querySelector(".rename").addEventListener("click", () => {
-    const nuevo = prompt("Renombrar Attomic Button:", btn.textContent.trim());
+    const nuevo = prompt("Rename Attomic Button:", btn.textContent.trim());
     if (nuevo == null) return;
     const nombre = nuevo.trim();
     if (!nombre) return;
@@ -476,7 +476,7 @@ export function bindGlobalHandlers() {
   if (appTitleEl) {
     appTitleEl.style.cursor = "pointer";
     appTitleEl.setAttribute("role", "button");
-    appTitleEl.setAttribute("title", "Click para renombrar");
+    appTitleEl.setAttribute("title", "Click to rename");
     appTitleEl.tabIndex = 0;
 
     // Cargar título guardado si existe
