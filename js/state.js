@@ -11,6 +11,7 @@ export const makeEmptyState = () => ({
   history: [], // { label, note, at }
   orbit: [],   // [{ id, label, note, createdAt?, returnAt, fromWhere }]
   idSeq: 1,
+  atomNumber: null,
 });
 
 export let state = load();
