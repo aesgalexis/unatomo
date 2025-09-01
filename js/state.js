@@ -280,6 +280,15 @@ function slugifyForFile(name) {
     .slice(0, 32);
   return slug || "export";
 }
+async function notifyExportIncrement() {
+  try {
+    const value = await incrementGlobalExportCounter(); // total actualizado
+    // Avisar a la UI (ui.js escucha este evento)
+    window.dispatchEvent(new CustomEvent("global-export-count", { detail: { value } }));
+  } catch (e) {
+    console.warn("No se pudo incrementar el contador global de exportaciones:", e);
+  }
+}
 
 export async function exportJson() {
   // Título que viaja en el payload (y sirve para sugerir el nombre del archivo)
@@ -295,53 +304,42 @@ export async function exportJson() {
     type: "application/json",
   });
 
-  let completed = false;
-
   // Chromium + https/localhost: fuerza diálogo de guardado
   if (window.showSaveFilePicker && window.isSecureContext) {
     try {
       const handle = await window.showSaveFilePicker({
         suggestedName: filename,
-        types: [
-          { description: "JSON", accept: { "application/json": [".json"] } },
-        ],
+        types: [{ description: "JSON", accept: { "application/json": [".json"] } }],
         excludeAcceptAllOption: false,
       });
       const writable = await handle.createWritable();
       await writable.write(blob);
       await writable.close();
-      completed = true; // ✅ exportación completada
+
+      // ✅ Incrementa contador global y notifica a la UI
+      await notifyExportIncrement();
+      return;
     } catch (err) {
-      if (err && err.name === "AbortError") return; // cancelado por el usuario: NO contar
+      if (err && err.name === "AbortError") return; // cancelado por el usuario
       console.warn("showSaveFilePicker falló, usando fallback:", err);
+      // seguimos al fallback abajo
     }
   }
 
   // Fallback universal (descarga directa)
-  if (!completed) {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-    completed = true; // asumimos descarga iniciada
-  }
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
 
-  // Si se completó la exportación, incrementa contador global + notifica a la UI
-  if (completed) {
-    try {
-      const value = await incrementGlobalExportCounter();
-      window.dispatchEvent(
-        new CustomEvent("global-export-count", { detail: { value } })
-      );
-    } catch {
-      // silencioso
-    }
-  }
+  // ✅ Incrementa contador global y notifica a la UI también en fallback
+  await notifyExportIncrement();
 }
+
 
 export function importJson(file) {
   return new Promise((resolve, reject) => {
