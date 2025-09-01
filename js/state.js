@@ -1,5 +1,7 @@
 // Modelo + persistencia + import/export
 
+import { incrementGlobalExportCounter } from "./analytics.js"; // ⬅️ NUEVO
+
 const STORAGE_KEY = "buttons-v1";
 // IMPORTANTE: mantenemos HISTORY_MAX por compat, pero ya NO limita almacenamiento
 const HISTORY_MAX = 16;
@@ -293,6 +295,8 @@ export async function exportJson() {
     type: "application/json",
   });
 
+  let completed = false;
+
   // Chromium + https/localhost: fuerza diálogo de guardado
   if (window.showSaveFilePicker && window.isSecureContext) {
     try {
@@ -306,22 +310,37 @@ export async function exportJson() {
       const writable = await handle.createWritable();
       await writable.write(blob);
       await writable.close();
-      return;
+      completed = true; // ✅ exportación completada
     } catch (err) {
-      if (err && err.name === "AbortError") return; // cancelado por el usuario
+      if (err && err.name === "AbortError") return; // cancelado por el usuario: NO contar
       console.warn("showSaveFilePicker falló, usando fallback:", err);
     }
   }
 
-  // Fallback universal
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
+  // Fallback universal (descarga directa)
+  if (!completed) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    completed = true; // asumimos descarga iniciada
+  }
+
+  // Si se completó la exportación, incrementa contador global + notifica a la UI
+  if (completed) {
+    try {
+      const value = await incrementGlobalExportCounter();
+      window.dispatchEvent(
+        new CustomEvent("global-export-count", { detail: { value } })
+      );
+    } catch {
+      // silencioso
+    }
+  }
 }
 
 export function importJson(file) {
