@@ -583,19 +583,19 @@ html, body {
   outline: 2px solid rgba(99,102,241,0.5);
   border-radius: 4px;
 }
-/* estados visuales: "verde activo" y deshabilitado */
-.controls button.is-hot {
-  background: linear-gradient(180deg, var(--accent), var(--accent-3));
-  color: #001018;
-  border: none;
+/* Create activo (is-hot) → verde oscuro acorde al tema */
+#createBtn.is-hot {
+  background: linear-gradient(180deg, #166534, #14532d); /* verdes oscuros */
+  border-color: #22c55e;                                 /* verde medio para el borde */
+  /* Si tu botón usa color de texto claro, no toques el color; si no, añade: color: #fff; */
 }
 
-.controls button:disabled {
-  opacity: .45;
-  filter: grayscale(20%);
-  cursor: not-allowed;
-  pointer-events: none;
+/* (opcional) Create deshabilitado: por si quieres matizarlo un poco */
+#createBtn:disabled {
+  filter: grayscale(10%);
+  opacity: 0.8;                /* ajusta a tu gusto o elimina si ya tienes estilos */
 }
+
 /* Mantén el ancho estable para evitar saltos al cambiar el texto */
 .import-label {
   min-width: 84px;           /* ajusta si tu botón es más ancho */
