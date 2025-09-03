@@ -540,3 +540,13 @@ html, body {
 .app header h1 {
   cursor: pointer !important;
 }
+.createbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(0,0,0,0.1); /* ajusta al estilo que uses */
+}
+.createbar input {
+  flex: 1; /* que el input crezca */
+}
