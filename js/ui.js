@@ -359,15 +359,6 @@ function onDragDrop({ id, where, index }) {
   moveItem(numId, where, Number(index));
   render();
 }
-
-export function bindGlobalHandlers() {
-  // Desactivar corrector y ayudas en el input superior
-  if (input) {
-    input.spellcheck = false;
-    input.setAttribute("autocorrect", "off");
-    input.setAttribute("autocapitalize", "off");
-    input.autocomplete = "off";
-  }
 function updateActionButtons() {
   const hasAtom = Number.isInteger(state?.atomNumber) && state.atomNumber > 0;
 
@@ -377,13 +368,20 @@ function updateActionButtons() {
     createBtn.classList.toggle("is-hot", !hasAtom);
   }
 
-  // Export: solo activo cuando SÍ hay número
-  if (exportBtn) {
-    exportBtn.disabled = !hasAtom;
-    exportBtn.classList.toggle("is-hot", hasAtom);
-  }
+  // Export (solo si SÍ hay atomNumber)
+exportBtn.addEventListener("click", () => {
+  if (exportBtn.disabled) return;
+  exportJson();
+});
 }
-
+export function bindGlobalHandlers() {
+  // Desactivar corrector y ayudas en el input superior
+  if (input) {
+    input.spellcheck = false;
+    input.setAttribute("autocorrect", "off");
+    input.setAttribute("autocapitalize", "off");
+    input.autocomplete = "off";
+  }
   // Renombrar título con prompt (máx. 10 chars)
   if (appTitleEl) {
     appTitleEl.style.cursor = "pointer";
@@ -421,7 +419,11 @@ function updateActionButtons() {
       }
     });
   }
-
+// Create (solo si NO hay atomNumber)
+createBtn?.addEventListener("click", () => {
+  if (createBtn.disabled) return; 
+  exportJson();                
+});
   // Crear en Main respetando límite
   addBtn.addEventListener("click", () => {
     const countA = state.items.filter((x) => x.where === "A").length;
@@ -465,7 +467,7 @@ function updateActionButtons() {
 
       // Atom No.: si vino en el JSON se reflejará; si no, queda "?"
       refreshAtomNumber();
-
+      updateActionButtons(); 
       render();
     } catch (e) {
       alert("Error importing: " + e.message);
@@ -510,8 +512,9 @@ if (clearAllBtn) {
   }, 60_000);
 
   // Status bar: Exports y Atom No.
-  refreshExportCounter(); // Exports al inicio
-  refreshAtomNumber();    // Atom No. al inicio ("?" si no existe)
+  refreshExportCounter(); 
+  refreshAtomNumber();   
+  updateActionButtons();        
 
   window.addEventListener("global-export-count", (e) => {
     const n = e.detail?.value;
@@ -527,6 +530,7 @@ if (clearAllBtn) {
       atomNoEl.textContent =
         Number.isInteger(v) && v > 0 ? v.toLocaleString() : "?";
     }
+    updateActionButtons(); 
   });
 }
 
