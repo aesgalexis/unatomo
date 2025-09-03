@@ -547,13 +547,8 @@ html, body {
   gap: 8px;
   padding: 12px 20px;                  /* aire arriba/abajo y laterales */
   background: rgba(17, 24, 39, 0.45);  /* sutil, en la línea del header */
-  border-top: 1px solid var(--outline);     /* línea superior */
   border-bottom: 1px solid var(--outline);  /* línea inferior */
 }
 
-/* Que el input ocupe todo el ancho disponible */
-.app .createbar #labelInput {
-  flex: 1;
-}
 
 
