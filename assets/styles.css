@@ -602,8 +602,3 @@ html, body {
   justify-content: center;
 }
 
-/* Estado Eject (azules oscuros del sitio) */
-.import-label.eject {
-  background: linear-gradient(180deg, #1e3a8a, #172554); /* azul oscuro */
-  border-color: #3b82f6;                                /* borde azul medio */
-}
