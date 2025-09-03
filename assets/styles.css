@@ -535,7 +535,7 @@ html, body {
 }
 .element-name {
   color: orange;
-
+}
 /* Título clicable: fuerza cursor de enlace */
 .app header h1 {
   cursor: pointer !important;
