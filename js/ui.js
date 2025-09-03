@@ -614,7 +614,7 @@ function setImportMode(hasAtom) {
 // borra unatomo# y resetea el título a su valor por defecto.
 function performEject() {
   // 0) Confirmación propia de Eject (cámbiale el texto cuando quieras)
-  const EJECT_CONFIRM_TEXT = "EJECT: aquí tu texto personalizado…";
+  const EJECT_CONFIRM_TEXT = "Unsaved changes will be lost";
   if (!confirm(EJECT_CONFIRM_TEXT)) return;
 
   // 1) Vaciar como EMPTY (sin usar el click del enlace para evitar su confirm())
