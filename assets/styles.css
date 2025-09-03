@@ -446,14 +446,19 @@ main { padding:16px 20px; }
 }
 
 footer {
-  padding:10px 16px;
-  border-top:1px solid var(--outline);
-  font-size:12px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--outline);
+  font-size: 12px;
   color: var(--muted);
-  display:flex;
-  justify-content:space-between;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr; /* izq | centro | der */
+  align-items: center;
 }
 
+/* coloca cada bloque en su sitio */
+footer > :first-child { justify-self: start; }   /* "Total" a la izquierda */
+footer a.link-soft    { justify-self: center; }  /* "Empty" centrado */
+footer .right         { justify-self: end; }     /* unatomo # a la derecha */
 
 /* ===== Status bar ===== */
 .statusbar {
