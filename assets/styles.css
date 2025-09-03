@@ -509,7 +509,7 @@ footer {
   font-size: 13px;
   letter-spacing: .2px;
 }
-#listA:empty::before { content: "Create something"; }
+#listA:empty::before { content: "Add something"; }
 #listB:empty::before { content: "Drag something"; }
 
 /* Placeholder del textarea: tenue e itálico */
