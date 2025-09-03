@@ -19,8 +19,9 @@
       <div class="app">
        <header>
   <h1>unátomo</h1>
+
+  <!-- Arriba: los botones que ya estaban -->
   <div class="controls">
-    <!-- Botones que se quedan arriba (junto al título) -->
     <button id="clearAll">Erase</button>
     <button id="exportBtn">Export</button>
     <label class="import-label">
@@ -28,13 +29,13 @@
       <input id="importInput" type="file" accept="application/json" hidden />
     </label>
   </div>
-</header>
 
-<!-- Nueva fila con línea propia -->
-<div class="createbar">
-  <input id="labelInput" type="text" placeholder="Title (optional)" />
-  <button id="addBtn">+ Create</button>
-</div>
+  <!-- Nueva fila con input + +Create, dentro de header y con clase controls -->
+  <div class="createbar controls">
+    <input id="labelInput" type="text" placeholder="Title (optional)" />
+    <button id="addBtn">+ Create</button>
+  </div>
+</header>
 
         <main>
           <section class="frame landing" id="frameL">
