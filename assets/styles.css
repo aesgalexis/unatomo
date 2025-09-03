@@ -540,13 +540,16 @@ html, body {
 .app header h1 {
   cursor: pointer !important;
 }
-.createbar {
+/* Fila nueva con input + +Create */
+.app header .createbar {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
-  border-bottom: 1px solid rgba(0,0,0,0.1); /* ajusta al estilo que uses */
+  border-top: 1px solid rgba(0,0,0,0.1); /* línea entre botones de arriba y esta fila */
 }
-.createbar input {
-  flex: 1; /* que el input crezca */
+
+/* Que el input crezca */
+.app header .createbar #labelInput {
+  flex: 1;
 }
