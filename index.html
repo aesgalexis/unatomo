@@ -17,10 +17,8 @@
 
       <!-- Columna central -->
       <div class="app">
-       <header>
+<header>
   <h1>unátomo</h1>
-
-  <!-- Arriba: los botones que ya estaban -->
   <div class="controls">
     <button id="clearAll">Erase</button>
     <button id="exportBtn">Export</button>
@@ -29,13 +27,13 @@
       <input id="importInput" type="file" accept="application/json" hidden />
     </label>
   </div>
-
-  <!-- Nueva fila con input + +Create, dentro de header y con clase controls -->
-  <div class="createbar controls">
-    <input id="labelInput" type="text" placeholder="Title (optional)" />
-    <button id="addBtn">+ Create</button>
-  </div>
 </header>
+
+<!-- NUEVO: igual que antes, pero fuera del header -->
+<div class="createbar controls">
+  <input id="labelInput" type="text" placeholder="Title (optional)" />
+  <button id="addBtn">+ Create</button>
+</div>
 
         <main>
           <section class="frame landing" id="frameL">
