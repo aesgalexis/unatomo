@@ -372,21 +372,10 @@ function updateActionButtons() {
     exportBtn.classList.toggle("is-hot", hasAtom);
   }
 
-  // ← NUEVO: cambiar IMPORT → EJECT y ponerlo rojo sin cambiar tamaño
-  const importLabel = document.querySelector(".import-label");
-  if (importLabel) {
-    importLabel.classList.toggle("danger", hasAtom);
-
-    // Cambia solo el texto, sin recrear el <input> (evita perder listeners)
-    const textNode = [...importLabel.childNodes].find(n => n.nodeType === Node.TEXT_NODE);
-    if (textNode) {
-      textNode.textContent = hasAtom ? "Eject" : "Import";
-    } else {
-      // Fallback por si el HTML cambia en el futuro
-      importLabel.insertBefore(document.createTextNode(hasAtom ? "Eject" : "Import"), importLabel.firstChild);
-    }
-  }
+  // ← Ahora delegamos todo en setImportMode
+  setImportMode(hasAtom);
 }
+
 
 export function bindGlobalHandlers() {
   // Desactivar corrector y ayudas en el input superior
