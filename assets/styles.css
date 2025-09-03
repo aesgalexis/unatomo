@@ -596,14 +596,14 @@ html, body {
   cursor: not-allowed;
   pointer-events: none;
 }
-/* Mantén el tamaño estable aunque cambie el texto */
+/* Mantén el ancho estable para evitar saltos al cambiar el texto */
 .import-label {
-  min-width: 84px;          /* evita que encoja; ajusta si quieres */
-  justify-content: center;  /* centra el texto */
+  min-width: 84px;           /* ajusta si tu botón es más ancho */
+  justify-content: center;
 }
 
-/* Modo EJECT (rojo) */
-.import-label.danger {
-  background: linear-gradient(180deg, #991b1b, #7f1d1d);
-  border-color: #ef4444;
+/* Estado Eject (azules oscuros del sitio) */
+.import-label.eject {
+  background: linear-gradient(180deg, #1e3a8a, #172554); /* azul oscuro */
+  border-color: #3b82f6;                                /* borde azul medio */
 }
