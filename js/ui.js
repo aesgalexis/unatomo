@@ -368,12 +368,13 @@ function updateActionButtons() {
     createBtn.classList.toggle("is-hot", !hasAtom);
   }
 
-  // Export (solo si SÍ hay atomNumber)
-exportBtn.addEventListener("click", () => {
-  if (exportBtn.disabled) return;
-  exportJson();
-});
+  // Export: solo activo cuando SÍ hay número
+  if (exportBtn) {
+    exportBtn.disabled = !hasAtom;
+    exportBtn.classList.toggle("is-hot", hasAtom);
+  }
 }
+
 export function bindGlobalHandlers() {
   // Desactivar corrector y ayudas en el input superior
   if (input) {
@@ -424,6 +425,12 @@ createBtn?.addEventListener("click", () => {
   if (createBtn.disabled) return; 
   exportJson();                
 });
+  // Export
+exportBtn.onclick = () => {
+  if (exportBtn.disabled) return;
+  exportJson();
+};
+
   // Crear en Main respetando límite
   addBtn.addEventListener("click", () => {
     const countA = state.items.filter((x) => x.where === "A").length;
