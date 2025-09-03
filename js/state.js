@@ -361,3 +361,48 @@ export async function exportJson() {
     );
   }
 }
+// === Importar desde JSON (restaura estado, respeta atomNumber si viene) ===
+export function importJson(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("No se pudo leer el archivo"));
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(String(reader.result));
+
+        if (!parsed || !Array.isArray(parsed.items)) {
+          throw new Error("Formato inválido");
+        }
+
+        // Si viene título en el archivo, persístelo para que la UI lo use
+        if (typeof parsed.appTitle === "string" && parsed.appTitle.trim()) {
+          localStorage.setItem("app-title", parsed.appTitle.trim());
+        }
+
+        // Si no trae atomNumber, no lo inventamos (seguirá como null -> "?")
+        if (!Number.isInteger(parsed.atomNumber) || parsed.atomNumber <= 0) {
+          delete parsed.atomNumber;
+        }
+
+        // Guarda el estado tal cual y recarga en memoria
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+        state = load();
+        save();
+
+        // Notificar a la UI para que refresque el Atom No. si venía en el JSON
+        window.dispatchEvent(
+          new CustomEvent("atom-number-changed", {
+            detail: {
+              value: Number.isInteger(state.atomNumber) ? state.atomNumber : null,
+            },
+          })
+        );
+
+        resolve();
+      } catch (e) {
+        reject(e);
+      }
+    };
+    reader.readAsText(file);
+  });
+}
