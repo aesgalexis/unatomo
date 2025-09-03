@@ -364,20 +364,16 @@ function updateActionButtons() {
 
   if (createBtn) {
     createBtn.disabled = hasAtom;
-    // Activo (cuando !hasAtom) → se marca como "is-hot" y lo pintamos verde en CSS
-    createBtn.classList.toggle("is-hot", !hasAtom);
+    createBtn.classList.toggle("is-hot", !hasAtom);   // Create resaltado cuando está disponible
   }
 
   if (exportBtn) {
     exportBtn.disabled = !hasAtom;
-    // Quitar cualquier resalte: que se vea normal aunque esté disponible
-    exportBtn.classList.remove("is-hot");
+    exportBtn.classList.toggle("is-hot", hasAtom);    // Export resaltado cuando está disponible
   }
 
-  setImportMode(hasAtom);
+  setImportMode(hasAtom); // mantiene Import↔Eject
 }
-
-
 
 export function bindGlobalHandlers() {
   // Desactivar corrector y ayudas en el input superior
