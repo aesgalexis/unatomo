@@ -74,7 +74,7 @@ const exportBtn = document.getElementById("exportBtn");
 const importInput = document.getElementById("importInput");
 const clearAllBtn = document.getElementById("clearAll");
 const createBtn = document.getElementById("createBtn");
-
+const importLabel = document.querySelector(".import-label");
 // Orbit (columna derecha)
 const orbitList = document.getElementById("orbitList");
 const orbitTitle = document.getElementById("orbitTitle");
@@ -567,6 +567,70 @@ if (clearAllBtn) {
 }
 
 /* ================== Helpers ================== */
+// ===== Import/Eject support =====
+let ejectClickHandler = null;
+
+function setLabelText(el, text) {
+  const tn = [...el.childNodes].find(n => n.nodeType === Node.TEXT_NODE);
+  if (tn) tn.textContent = text;
+  else el.insertBefore(document.createTextNode(text), el.firstChild);
+}
+
+function setImportMode(hasAtom) {
+  if (!importLabel || !importInput) return;
+
+  // Visual: Import ↔ Eject (clase .eject es el estado azul oscuro)
+  importLabel.classList.toggle('eject', hasAtom);
+  setLabelText(importLabel, hasAtom ? 'Eject' : 'Import');
+
+  // Funcional: en modo Eject se inhibe el file dialog
+  importInput.disabled = !!hasAtom;
+
+  // Click especial en modo Eject
+  if (hasAtom) {
+    if (!ejectClickHandler) {
+      ejectClickHandler = (ev) => {
+        ev.preventDefault();
+        ev.stopPropagation();
+        performEject();
+      };
+    }
+    importLabel.addEventListener('click', ejectClickHandler);
+  } else {
+    if (ejectClickHandler) importLabel.removeEventListener('click', ejectClickHandler);
+  }
+}
+
+// Hace lo del link EMPTY del footer + borra unatomo# y vuelve a Import
+function performEject() {
+  // 1) Reusar el handler de EMPTY (mostrará el mismo confirm)
+  const emptyLink =
+    document.querySelector('[data-action="empty"], a#clearAll, a#empty, a.empty, button#clearAll, button#empty, #clearAll');
+  if (emptyLink) {
+    emptyLink.click(); // ejecuta exactamente lo del footer
+  } else {
+    // Fallback: replica lo esencial del EMPTY si no encontramos el link
+    state.items = [];
+    state.history = [];
+    state.orbit = [];
+    state.idSeq = 1;
+    save();
+    render();
+    try { typeof refreshAtomNumber === "function" && refreshAtomNumber(); } catch {}
+  }
+
+  // 2) Borrar el número de unatomo#
+  if (typeof state === 'object') {
+    state.atomNumber = null;
+    save();
+  }
+  if (typeof refreshAtomNumber === 'function') refreshAtomNumber();
+
+  // 3) Volver a modo Import y refrescar UI
+  setImportMode(false);
+  if (typeof updateActionButtons === 'function') updateActionButtons();
+  if (typeof render === 'function') render();
+}
 
 function daysRemaining(iso) {
   const t = Date.parse(iso);
