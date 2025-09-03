@@ -590,36 +590,36 @@ function setImportMode(hasAtom) {
   }
 }
 
-// Hace lo del link EMPTY del footer + borra unatomo# y vuelve a Import
+// Hace lo del link EMPTY pero con su propio diálogo, además
+// borra unatomo# y resetea el título a su valor por defecto.
 function performEject() {
-  // 1) Reusar el handler de EMPTY (mostrará el mismo confirm)
-  const emptyLink =
-    document.querySelector('[data-action="empty"], a#clearAll, a#empty, a.empty, button#clearAll, button#empty, #clearAll');
-  if (emptyLink) {
-    emptyLink.click(); // ejecuta exactamente lo del footer
-  } else {
-    // Fallback: replica lo esencial del EMPTY si no encontramos el link
-    state.items = [];
-    state.history = [];
-    state.orbit = [];
-    state.idSeq = 1;
-    save();
-    render();
-    try { typeof refreshAtomNumber === "function" && refreshAtomNumber(); } catch {}
-  }
+  // 0) Confirmación propia de Eject (cámbiale el texto cuando quieras)
+  const EJECT_CONFIRM_TEXT = "EJECT: aquí tu texto personalizado…";
+  if (!confirm(EJECT_CONFIRM_TEXT)) return;
 
-  // 2) Borrar el número de unatomo#
-  if (typeof state === 'object') {
-    state.atomNumber = null;
-    save();
-  }
-  if (typeof refreshAtomNumber === 'function') refreshAtomNumber();
+  // 1) Vaciar como EMPTY (sin usar el click del enlace para evitar su confirm())
+  state.items = [];
+  state.history = [];
+  state.orbit = [];
+  state.idSeq = 1;
+  save();
 
-  // 3) Volver a modo Import y refrescar UI
+  // 2) Quitar el número de unatomo#
+  state.atomNumber = null;
+  save();
+
+  // 3) Resetear el título (y persistirlo)
+  const defaultTitle = "unátomo"; // cámbialo si quieres otro por defecto
+  if (appTitleEl) appTitleEl.textContent = defaultTitle;
+  try { localStorage.setItem("app-title", defaultTitle); } catch {}
+
+  // 4) Refrescar UI y volver a modo Import
+  if (typeof refreshAtomNumber === "function") refreshAtomNumber();
   setImportMode(false);
-  if (typeof updateActionButtons === 'function') updateActionButtons();
-  if (typeof render === 'function') render();
+  if (typeof updateActionButtons === "function") updateActionButtons();
+  if (typeof render === "function") render();
 }
+
 
 function daysRemaining(iso) {
   const t = Date.parse(iso);
