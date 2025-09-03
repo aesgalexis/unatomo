@@ -607,4 +607,27 @@ html, body {
   box-shadow: none !important;
   transform: none !important;
 }
+/* Create disponible → verde estilo GitHub "Commit changes" */
+#createBtn.is-hot {
+  background-color: #2da44e;   /* commit green */
+  background-image: none;      /* por si tu tema usa gradiente en .is-hot */
+  border-color: #2a8a49;
+  color: #fff;
+  transition: background-color .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+
+#createBtn.is-hot:hover {
+  background-color: #2c974b;   /* hover */
+  border-color: #2a8a49;
+}
+
+#createBtn.is-hot:active {
+  background-color: #298e46;   /* active/pressed */
+  border-color: #267a40;
+}
+
+#createBtn.is-hot:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(46, 164, 79, 0.35); /* anillo accesible */
+}
 
