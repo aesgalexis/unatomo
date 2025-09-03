@@ -566,29 +566,49 @@ function setLabelText(el, text) {
 }
 
 function setImportMode(hasAtom) {
-  if (!importLabel || !importInput) return;
+  // Asegura que tenemos el label aunque el DOM se haya montado después
+  const label = importLabel || document.querySelector('.import-label');
+  if (!label || !importInput) return;
 
-  // Visual: Import ↔ Eject (clase .eject es el estado azul oscuro)
-  importLabel.classList.toggle('eject', hasAtom);
-  setLabelText(importLabel, hasAtom ? 'Eject' : 'Import');
+  // Visual: Import ↔ Eject
+  label.classList.toggle('eject', hasAtom);
+  setLabelText(label, hasAtom ? 'Eject' : 'Import');
 
-  // Funcional: en modo Eject se inhibe el file dialog
-  importInput.disabled = !!hasAtom;
-
-  // Click especial en modo Eject
   if (hasAtom) {
+    // 1) Evitar que se abra el diálogo de archivos y que se “trague” el click
+    importInput.disabled = true;
+    importInput.style.pointerEvents = 'none';   // ← clave para que el click pase al label
+
+    // 2) Quitar temporalmente el "for" del label para que no re-dirija al input
+    if (label.hasAttribute('for')) {
+      label.dataset.forBackup = label.getAttribute('for') || '';
+      label.removeAttribute('for');
+    }
+
+    // 3) Click especial de Eject
     if (!ejectClickHandler) {
       ejectClickHandler = (ev) => {
         ev.preventDefault();
         ev.stopPropagation();
-        performEject();
+        performEject(); // ← aquí verás tu confirm personalizado
       };
     }
-    importLabel.addEventListener('click', ejectClickHandler);
+    label.addEventListener('click', ejectClickHandler);
   } else {
-    if (ejectClickHandler) importLabel.removeEventListener('click', ejectClickHandler);
+    // Volver a modo Import
+    importInput.disabled = false;
+    importInput.style.pointerEvents = '';
+
+    // Restaurar "for" si lo quitamos
+    if (label.dataset.forBackup !== undefined) {
+      if (label.dataset.forBackup) label.setAttribute('for', label.dataset.forBackup);
+      delete label.dataset.forBackup;
+    }
+
+    if (ejectClickHandler) label.removeEventListener('click', ejectClickHandler);
   }
 }
+
 
 // Hace lo del link EMPTY pero con su propio diálogo, además
 // borra unatomo# y resetea el título a su valor por defecto.
