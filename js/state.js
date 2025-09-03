@@ -276,58 +276,73 @@ function slugifyForFile(name) {
 export async function exportJson() {
   const appTitle = localStorage.getItem("app-title") || "unátomo";
 
-  // Solo incrementa si aún no hay atomNumber
-  if (!Number.isInteger(state.atomNumber) || state.atomNumber <= 0) {
-    try {
-      const newTotal = await incrementGlobalExportCounter(); // total global actualizado
-      state.atomNumber = newTotal; // fija número de átomo
-      save();
-
-      // Notifica a la UI
-      window.dispatchEvent(
-        new CustomEvent("global-export-count", { detail: { value: newTotal } })
-      );
-      window.dispatchEvent(
-        new CustomEvent("atom-number-changed", { detail: { value: newTotal } })
-      );
-    } catch (e) {
-      console.warn("No se pudo asignar atomNumber (no se incrementa):", e);
-      // Continuar exportando sin número (seguirá mostrando "?")
-    }
-  }
-
-  // Payload con título incluido (lleva atomNumber en state)
-  const payload = { ...state, appTitle };
-
-  // Nombre archivo
+  // Nombre sugerido del archivo
   const base = slugifyForFile(appTitle);
   const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
   const filename = `${base}-${stamp}.json`;
 
-  // Blob
-  const blob = new Blob([JSON.stringify(payload, null, 2)], {
-    type: "application/json",
-  });
-
-  // Guardado con File System Access API
+  // ——— Rama con diálogo nativo (solo incrementamos DESPUÉS de que el usuario pulse Guardar) ———
   if (window.showSaveFilePicker && window.isSecureContext) {
     try {
+      // El handle solo se obtiene si el usuario confirma el diálogo (si cancela -> AbortError)
       const handle = await window.showSaveFilePicker({
         suggestedName: filename,
         types: [{ description: "JSON", accept: { "application/json": [".json"] } }],
         excludeAcceptAllOption: false,
       });
+
+      // Asigna Atom No. SOLO si aún no existía
+      let newTotal = null;
+      if (!Number.isInteger(state.atomNumber) || state.atomNumber <= 0) {
+        newTotal = await incrementGlobalExportCounter(); // contador global +1
+        state.atomNumber = newTotal;                     // fija Atom No.
+        save();
+      }
+
+      // Exporta el estado ya con atomNumber dentro
+      const payload = { ...state, appTitle };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], {
+        type: "application/json",
+      });
+
       const writable = await handle.createWritable();
       await writable.write(blob);
       await writable.close();
+
+      // Notifica a la UI (solo si hubo asignación)
+      if (newTotal != null) {
+        window.dispatchEvent(
+          new CustomEvent("global-export-count", { detail: { value: newTotal } })
+        );
+        window.dispatchEvent(
+          new CustomEvent("atom-number-changed", { detail: { value: newTotal } })
+        );
+      }
       return;
     } catch (err) {
-      if (err && err.name === "AbortError") return; // cancelado
+      if (err && err.name === "AbortError") return; // usuario canceló: no incrementamos nada
       console.warn("showSaveFilePicker falló, usando fallback:", err);
+      // Continuamos al fallback de abajo
     }
   }
 
-  // Fallback descarga directa
+  // ——— Fallback (descarga directa). No hay confirmación; asignamos justo antes ———
+  let newTotal = null;
+  if (!Number.isInteger(state.atomNumber) || state.atomNumber <= 0) {
+    try {
+      newTotal = await incrementGlobalExportCounter();
+      state.atomNumber = newTotal;
+      save();
+    } catch (e) {
+      console.warn("No se pudo asignar atomNumber en fallback:", e);
+    }
+  }
+
+  const payload = { ...state, appTitle };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {
+    type: "application/json",
+  });
+
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -336,32 +351,13 @@ export async function exportJson() {
   a.click();
   a.remove();
   URL.revokeObjectURL(url);
-}
 
-export function importJson(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onerror = () => reject(new Error("No se pudo leer el archivo"));
-    reader.onload = () => {
-      try {
-        const parsed = JSON.parse(String(reader.result));
-        if (!parsed || !Array.isArray(parsed.items))
-          throw new Error("Formato inválido");
-
-        // Si viene título, guardarlo para la UI
-        if (typeof parsed.appTitle === "string" && parsed.appTitle.trim()) {
-          localStorage.setItem("app-title", parsed.appTitle.trim());
-        }
-
-        // Guardar todo el estado (con atomNumber si viene)
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
-        state = load();
-        save();
-        resolve();
-      } catch (e) {
-        reject(e);
-      }
-    };
-    reader.readAsText(file);
-  });
+  if (newTotal != null) {
+    window.dispatchEvent(
+      new CustomEvent("global-export-count", { detail: { value: newTotal } })
+    );
+    window.dispatchEvent(
+      new CustomEvent("atom-number-changed", { detail: { value: newTotal } })
+    );
+  }
 }
