@@ -583,4 +583,16 @@ html, body {
   outline: 2px solid rgba(99,102,241,0.5);
   border-radius: 4px;
 }
+/* estados visuales: "verde activo" y deshabilitado */
+.controls button.is-hot {
+  background: linear-gradient(180deg, var(--accent), var(--accent-3));
+  color: #001018;
+  border: none;
+}
 
+.controls button:disabled {
+  opacity: .45;
+  filter: grayscale(20%);
+  cursor: not-allowed;
+  pointer-events: none;
+}
