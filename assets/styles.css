@@ -545,10 +545,16 @@ html, body {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 20px;                  /* aire arriba/abajo y laterales */
-  background: rgba(17, 24, 39, 0.45);  /* sutil, en la línea del header */
-  border-bottom: 1px solid var(--outline);  /* línea inferior */
+  padding: 12px 20px;                 
+  background: rgba(17, 24, 39, 0.45);  
+  border-bottom: 1px solid var(--outline);  
 }
 
-
+/* este bloque se va a la derecha y mantiene el estilo de botones */
+.app .createbar .right {
+  margin-left: auto;          
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 
