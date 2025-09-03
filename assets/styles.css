@@ -596,3 +596,14 @@ html, body {
   cursor: not-allowed;
   pointer-events: none;
 }
+/* Mantén el tamaño estable aunque cambie el texto */
+.import-label {
+  min-width: 84px;          /* evita que encoja; ajusta si quieres */
+  justify-content: center;  /* centra el texto */
+}
+
+/* Modo EJECT (rojo) */
+.import-label.danger {
+  background: linear-gradient(180deg, #991b1b, #7f1d1d);
+  border-color: #ef4444;
+}
