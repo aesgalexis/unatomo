@@ -458,22 +458,32 @@ export function bindGlobalHandlers() {
     }
   });
 
-  // Vaciar todo (enlace del footer)
-  clearAllBtn?.addEventListener("click", (e) => {
-    e.preventDefault();
+// Vaciar todo (enlace del footer)
+const clearAllBtn = document.getElementById("clearAll");
+if (clearAllBtn) {
+  clearAllBtn.addEventListener("click", (e) => {
+    e.preventDefault();   // ← imprescindible en <a href="#">
     e.stopPropagation();
+
     if (!confirm("¿Clear all?")) return;
 
     clearAll();
+
+    // Resetea título y Atom No.
     localStorage.removeItem("app-title");
     if (appTitleEl) appTitleEl.textContent = "unátomo";
+
+    // Si usas atomNumber, lo dejamos sin asignar
+    if (typeof state !== "undefined") {
+      state.atomNumber = null;
+      save?.();
+    }
+
     render();
+    // Si tienes esta helper en tu ui.js, refresca la barra
+    try { typeof refreshAtomNumber === "function" && refreshAtomNumber(); } catch {}
   });
-
-
-    // Volver a "?"
-    refreshAtomNumber();
-  });
+}
 
   // Aterrizaje inmediato al arrancar
   landDueOrbits();
