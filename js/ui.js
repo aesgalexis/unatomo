@@ -368,6 +368,21 @@ export function bindGlobalHandlers() {
     input.setAttribute("autocapitalize", "off");
     input.autocomplete = "off";
   }
+function updateActionButtons() {
+  const hasAtom = Number.isInteger(state?.atomNumber) && state.atomNumber > 0;
+
+  // Create: solo activo cuando NO hay número
+  if (createBtn) {
+    createBtn.disabled = hasAtom;
+    createBtn.classList.toggle("is-hot", !hasAtom);
+  }
+
+  // Export: solo activo cuando SÍ hay número
+  if (exportBtn) {
+    exportBtn.disabled = !hasAtom;
+    exportBtn.classList.toggle("is-hot", hasAtom);
+  }
+}
 
   // Renombrar título con prompt (máx. 10 chars)
   if (appTitleEl) {
