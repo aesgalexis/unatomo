@@ -540,16 +540,19 @@ html, body {
 .app header h1 {
   cursor: pointer !important;
 }
-/* Fila nueva con input + +Create */
-.app header .createbar {
+/* Fila bajo el header: input + +Create (entre dos líneas) */
+.app .createbar {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 12px;
-  border-top: 1px solid rgba(0,0,0,0.1); /* línea entre botones de arriba y esta fila */
+  padding: 12px 20px;                 /* ← aire arriba/abajo y a la izquierda/derecha */
+  background: rgba(17, 24, 39, 0.45); /* sutil, a juego con el header */
+  border-top: 1px solid var(--outline);    /* línea superior (ya hay una al fin del header) */
+  border-bottom: 1px solid var(--outline); /* línea inferior */
 }
 
-/* Que el input crezca */
-.app header .createbar #labelInput {
+/* Que el input ocupe todo el ancho disponible */
+.app .createbar #labelInput {
   flex: 1;
 }
+
