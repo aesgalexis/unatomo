@@ -364,17 +364,19 @@ function updateActionButtons() {
 
   if (createBtn) {
     createBtn.disabled = hasAtom;
+    // Activo (cuando !hasAtom) → se marca como "is-hot" y lo pintamos verde en CSS
     createBtn.classList.toggle("is-hot", !hasAtom);
   }
 
   if (exportBtn) {
     exportBtn.disabled = !hasAtom;
-    exportBtn.classList.toggle("is-hot", hasAtom);
+    // Quitar cualquier resalte: que se vea normal aunque esté disponible
+    exportBtn.classList.remove("is-hot");
   }
 
-  // ← Ahora delegamos todo en setImportMode
   setImportMode(hasAtom);
 }
+
 
 
 export function bindGlobalHandlers() {
