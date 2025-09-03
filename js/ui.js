@@ -459,18 +459,17 @@ export function bindGlobalHandlers() {
   });
 
   // Vaciar todo (enlace del footer)
-const clearAllBtn = document.getElementById("clearAll");
-clearAllBtn?.addEventListener("click", (e) => {
-  e.preventDefault();    // evita que <a href="#"> navegue
-  e.stopPropagation();
+  clearAllBtn?.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!confirm("¿Clear all?")) return;
 
-  if (!confirm("¿Clear all?")) return;
+    clearAll();
+    localStorage.removeItem("app-title");
+    if (appTitleEl) appTitleEl.textContent = "unátomo";
+    render();
+  });
 
-  clearAll();
-  localStorage.removeItem("app-title");
-  if (appTitleEl) appTitleEl.textContent = "unátomo";
-  render();
-});
 
     // Volver a "?"
     refreshAtomNumber();
