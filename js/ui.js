@@ -362,18 +362,17 @@ function onDragDrop({ id, where, index }) {
 function updateActionButtons() {
   const hasAtom = Number.isInteger(state?.atomNumber) && state.atomNumber > 0;
 
-  // Create: solo activo cuando NO hay número
   if (createBtn) {
     createBtn.disabled = hasAtom;
     createBtn.classList.toggle("is-hot", !hasAtom);
   }
 
-  // Export: solo activo cuando SÍ hay número
   if (exportBtn) {
     exportBtn.disabled = !hasAtom;
     exportBtn.classList.toggle("is-hot", hasAtom);
   }
 }
+
 
 export function bindGlobalHandlers() {
   // Desactivar corrector y ayudas en el input superior
@@ -458,8 +457,20 @@ exportBtn.onclick = () => {
     if (e.key === "Enter") addBtn.click();
   });
 
-  // Exportar
-  exportBtn.addEventListener("click", () => exportJson());
+// --- Export (seguro, sin duplicados) ---
+let exporting = false;
+
+if (exportBtn) {
+  exportBtn.onclick = async () => {
+    if (exportBtn.disabled || exporting) return; // respeta el estado y evita doble click
+    exporting = true;
+    try {
+      await exportJson();
+    } finally {
+      exporting = false;
+    }
+  };
+}
 
   // Importar
   importInput.addEventListener("change", async () => {
