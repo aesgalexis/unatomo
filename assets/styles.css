@@ -590,4 +590,21 @@ html, body {
   min-width: 84px;           /* ajusta si tu botón es más ancho */
   justify-content: center;
 }
+/* Solo para Create y Export deshabilitados */
+#exportBtn:disabled,
+#createBtn:disabled {
+  opacity: 0.45 !important;               /* tono apagado “como al principio” */
+  filter: grayscale(35%) saturate(85%);
+  cursor: not-allowed !important;
+  pointer-events: none;                    /* por si acaso */
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+/* Anula cualquier hover/active/focus cuando estén deshabilitados */
+#exportBtn:disabled:is(:hover, :active, :focus),
+#createBtn:disabled:is(:hover, :active, :focus) {
+  box-shadow: none !important;
+  transform: none !important;
+}
 
