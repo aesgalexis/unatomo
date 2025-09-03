@@ -46,7 +46,7 @@ const ELEMENTS = {
   114: "Flerovium", 115: "Moscovium", 116: "Livermorium", 117: "Tennessine", 118: "Oganesson"
 };
 
-// ⬇️ Status bar elements
+// Status bar elements
 const exportCounterEl = document.getElementById("exportCounter");
 const atomNoEl = document.getElementById("atomNo"); // NUEVO
 
@@ -73,6 +73,7 @@ const countEl = document.getElementById("count");
 const exportBtn = document.getElementById("exportBtn");
 const importInput = document.getElementById("importInput");
 const clearAllBtn = document.getElementById("clearAll");
+const createBtn = document.getElementById("createBtn");
 
 // Orbit (columna derecha)
 const orbitList = document.getElementById("orbitList");
