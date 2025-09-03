@@ -462,28 +462,23 @@ export function bindGlobalHandlers() {
 const clearAllBtn = document.getElementById("clearAll");
 if (clearAllBtn) {
   clearAllBtn.addEventListener("click", (e) => {
-    e.preventDefault();   // ← imprescindible en <a href="#">
+    e.preventDefault();
     e.stopPropagation();
-
     if (!confirm("¿Clear all?")) return;
 
-    clearAll();
+    // Limpiar estado sin tocar título ni atomNumber
+    state.items = [];
+    state.history = [];
+    state.orbit = [];
+    state.idSeq = 1;              // opcional: reinicia IDs
 
-    // Resetea título y Atom No.
-    localStorage.removeItem("app-title");
-    if (appTitleEl) appTitleEl.textContent = "unátomo";
-
-    // Si usas atomNumber, lo dejamos sin asignar
-    if (typeof state !== "undefined") {
-      state.atomNumber = null;
-      save?.();
-    }
-
+    save();
     render();
-    // Si tienes esta helper en tu ui.js, refresca la barra
+    // refresca la barra si la tienes
     try { typeof refreshAtomNumber === "function" && refreshAtomNumber(); } catch {}
   });
 }
+
 
   // Aterrizaje inmediato al arrancar
   landDueOrbits();
