@@ -19,7 +19,15 @@
       <div class="app">
 <header>
   <h1>unátomo</h1>
-  <div class="controls">
+  
+</header>
+
+
+<div class="createbar controls">
+  <input id="labelInput" type="text" placeholder="Title (optional)" />
+  <button id="addBtn">+ Add</button>
+</div>
+<div class="controls">
     <button id="clearAll">Erase</button>
     <button id="exportBtn">Export</button>
     <label class="import-label">
@@ -27,14 +35,6 @@
       <input id="importInput" type="file" accept="application/json" hidden />
     </label>
   </div>
-</header>
-
-<!-- NUEVO: igual que antes, pero fuera del header -->
-<div class="createbar controls">
-  <input id="labelInput" type="text" placeholder="Title (optional)" />
-  <button id="addBtn">+ Add</button>
-</div>
-
         <main>
           <section class="frame landing" id="frameL">
             <h2>Landing</h2>
