@@ -260,7 +260,7 @@ function renderItem(it, inAlt = false, allowDrag = true) {
     </div>
     <div class="panel${it.open ? " open" : ""}">
       <textarea
-        placeholder="Write something.."
+        placeholder="Type something.."
         spellcheck="false"
         autocorrect="off"
         autocapitalize="off"
