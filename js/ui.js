@@ -615,7 +615,10 @@ function performEject() {
   // 2) Quitar el número de unatomo#
   state.atomNumber = null;
   save();
-
+  // 2b) Resetear contador de isótopo (saves/exports del archivo)
+  state.isotope = 0;
+  save();
+  
   // 3) Resetear el título (y persistirlo)
   const defaultTitle = "unátomo"; // cámbialo si quieres otro por defecto
   if (appTitleEl) appTitleEl.textContent = defaultTitle;
