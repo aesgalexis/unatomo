@@ -545,6 +545,23 @@ html, body {
 .app header h1 {
   cursor: pointer !important;
 }
+/* 1) El header debe ser el contenedor de referencia */
+.app header {
+  position: relative;
+}
+
+/* 2) Badge de Atom No. en la esquina inferior derecha del header */
+#atomNo {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.5rem;
+  font-size: 0.9rem;          /* igual que el footer (ajusta si tu footer usa otro) */
+  line-height: 1;
+  font-weight: 500;
+  color: var(--meta-fg, inherit); /* si usas var en el footer, reutiliza; si no, inherit */
+  opacity: 0.75;               /* mismo “tono apagado” que el footer */
+  pointer-events: none;        /* que no intercepte clicks (útil para el rename del título) */
+}
 /* Fila bajo el header: input + +Add (entre dos líneas) */
 .app .createbar {
   display: flex;
