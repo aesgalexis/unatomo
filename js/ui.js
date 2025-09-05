@@ -658,7 +658,7 @@ if (typeof refreshAtomNumber === "function") refreshAtomNumber();
 // setImportMode(false);   ← ELIMINADO
 if (typeof updateActionButtons === "function") updateActionButtons();
 if (typeof render === "function") render();
-
+}
 function daysRemaining(iso) {
   const t = Date.parse(iso);
   if (!Number.isFinite(t)) return 0;
