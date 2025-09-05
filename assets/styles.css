@@ -545,30 +545,40 @@ html, body {
 .app header h1 {
   cursor: pointer !important;
 }
-/* El header será el contenedor de referencia */
+/* El header es el contenedor de referencia */
 .app header {
   position: relative;
 }
 
-/* Coloca el número abajo a la derecha y con el mismo aspecto del footer */
-#atomNo {
-  position: absolute;
-  right: 0.75rem;
-  bottom: 0.5rem;
-  font-size: 0.9rem;                /* ajusta si tu footer usa otro */
-  line-height: 1;
-  font-weight: 500;
-  color: var(--meta-fg, inherit);   /* usa la misma variable/color que en el footer */
-  opacity: 0.75;                    /* mismo tono apagado */
-  pointer-events: none;             /* que no estorbe al click del título */
-  white-space: nowrap;
+/* Ajusta este valor si tus controles usan otro padding horizontal */
+:root {
+  --header-pad-x: 1rem;     /* mismo padding que los botones a la derecha */
+  --header-pad-y: 0.5rem;   /* separación inferior */
+  --meta-size: 0.875rem;    /* mismo tamaño que el footer */
+  --meta-fg: #8a94a6;       /* cámbialo por el color exacto de tu footer si es otro */
 }
 
-/* Inserta la etiqueta "unátomo #" justo antes del número */
+/* Badge de Atom No. (texto + número) */
+#atomNo {
+  position: absolute;
+  right: var(--header-pad-x);
+  bottom: var(--header-pad-y);
+
+  /* mismo look que el footer */
+  font-size: var(--meta-size);
+  font-weight: 400;          /* NO en negrita */
+  color: var(--meta-fg);
+  opacity: 0.8;
+  line-height: 1;
+
+  white-space: nowrap;
+  pointer-events: none;      /* que no moleste al click del título */
+}
+
+/* Inserta la etiqueta "unátomo #" delante del número */
 #atomNo::before {
-  content: "unátomo #\00a0";        /* \00a0 = espacio no separable */
-  font-weight: 500;
-  display: inline;
+  content: "unátomo #\00a0"; /* espacio no separable */
+  font-weight: 400;          /* NO en negrita */
 }
 
 /* Fila bajo el header: input + +Add (entre dos líneas) */
