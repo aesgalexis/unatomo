@@ -74,7 +74,9 @@ const exportBtn = document.getElementById("exportBtn");
 const importInput = document.getElementById("importInput");
 const clearAllBtn = document.getElementById("clearAll");
 const createBtn = document.getElementById("createBtn");
-const importLabel = document.querySelector(".import-label");
+const importBtn = document.getElementById("importBtn");
+const ejectBtn  = document.getElementById("ejectBtn");
+
 // Orbit (columna derecha)
 const orbitList = document.getElementById("orbitList");
 const orbitTitle = document.getElementById("orbitTitle");
@@ -362,18 +364,32 @@ function onDragDrop({ id, where, index }) {
 function updateActionButtons() {
   const hasAtom = Number.isInteger(state?.atomNumber) && state.atomNumber > 0;
 
+  // Create: activo solo si NO hay atom
   if (createBtn) {
     createBtn.disabled = hasAtom;
-    createBtn.classList.toggle("is-hot", !hasAtom);   // Create resaltado cuando está disponible
+    createBtn.classList.toggle("is-hot", !hasAtom);
   }
 
+  // Save (antes Export): activo solo si SÍ hay atom
   if (exportBtn) {
     exportBtn.disabled = !hasAtom;
-    exportBtn.classList.toggle("is-hot", hasAtom);    // Export resaltado cuando está disponible
+    exportBtn.classList.toggle("is-hot", hasAtom);
+    exportBtn.textContent = "Save";
   }
 
-  setImportMode(hasAtom); // mantiene Import↔Eject
+  // Import: NO se puede importar si hay atom → deshabilitado
+  if (importBtn) {
+    importBtn.disabled = hasAtom;
+    importBtn.classList.toggle("is-hot", !hasAtom);
+  }
+
+  // Eject: solo disponible si hay atom
+  if (ejectBtn) {
+    ejectBtn.disabled = !hasAtom;
+    ejectBtn.classList.toggle("is-hot", hasAtom);
+  }
 }
+
 
 export function bindGlobalHandlers() {
   // Desactivar corrector y ayudas en el input superior
@@ -425,11 +441,6 @@ createBtn?.addEventListener("click", () => {
   if (createBtn.disabled) return; 
   exportJson();                
 });
-  // Export
-exportBtn.onclick = () => {
-  if (exportBtn.disabled) return;
-  exportJson();
-};
 
   // Crear en Main respetando límite
   addBtn.addEventListener("click", () => {
@@ -554,14 +565,6 @@ if (clearAllBtn) {
 }
 
 /* ================== Helpers ================== */
-// ===== Import/Eject support =====
-let ejectClickHandler = null;
-
-function setLabelText(el, text) {
-  const tn = [...el.childNodes].find(n => n.nodeType === Node.TEXT_NODE);
-  if (tn) tn.textContent = text;
-  else el.insertBefore(document.createTextNode(text), el.firstChild);
-}
 
 function setImportMode(hasAtom) {
   // Asegura que tenemos el label aunque el DOM se haya montado después
