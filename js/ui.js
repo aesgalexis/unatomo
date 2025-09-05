@@ -585,46 +585,6 @@ if (clearAllBtn) {
 
 /* ================== Helpers ================== */
 
-  // Visual: Import ↔ Eject
-  label.classList.toggle('eject', hasAtom);
-  setLabelText(label, hasAtom ? 'Eject' : 'Import');
-
-  if (hasAtom) {
-    // 1) Evitar que se abra el diálogo de archivos y que se “trague” el click
-    importInput.disabled = true;
-    importInput.style.pointerEvents = 'none';   // ← clave para que el click pase al label
-
-    // 2) Quitar temporalmente el "for" del label para que no re-dirija al input
-    if (label.hasAttribute('for')) {
-      label.dataset.forBackup = label.getAttribute('for') || '';
-      label.removeAttribute('for');
-    }
-
-    // 3) Click especial de Eject
-    if (!ejectClickHandler) {
-      ejectClickHandler = (ev) => {
-        ev.preventDefault();
-        ev.stopPropagation();
-        performEject(); // ← aquí verás tu confirm personalizado
-      };
-    }
-    label.addEventListener('click', ejectClickHandler);
-  } else {
-    // Volver a modo Import
-    importInput.disabled = false;
-    importInput.style.pointerEvents = '';
-
-    // Restaurar "for" si lo quitamos
-    if (label.dataset.forBackup !== undefined) {
-      if (label.dataset.forBackup) label.setAttribute('for', label.dataset.forBackup);
-      delete label.dataset.forBackup;
-    }
-
-    if (ejectClickHandler) label.removeEventListener('click', ejectClickHandler);
-  }
-}
-
-
 // Hace lo del link EMPTY pero con su propio diálogo, además
 // borra unatomo# y resetea el título a su valor por defecto.
 function performEject() {
@@ -648,12 +608,12 @@ function performEject() {
   if (appTitleEl) appTitleEl.textContent = defaultTitle;
   try { localStorage.setItem("app-title", defaultTitle); } catch {}
 
-// 4) Refrescar UI
-if (typeof refreshAtomNumber === "function") refreshAtomNumber();
-// setImportMode(false);   ← ELIMINADO
-if (typeof updateActionButtons === "function") updateActionButtons();
-if (typeof render === "function") render();
+  // 4) Refrescar UI
+  if (typeof refreshAtomNumber === "function") refreshAtomNumber();
+  if (typeof updateActionButtons === "function") updateActionButtons();
+  if (typeof render === "function") render();
 }
+
 function daysRemaining(iso) {
   const t = Date.parse(iso);
   if (!Number.isFinite(t)) return 0;
@@ -727,3 +687,4 @@ function refreshAtomNumber() {
   atomNoEl.textContent =
     Number.isInteger(n) && n > 0 ? n.toLocaleString() : "?";
 }
+
