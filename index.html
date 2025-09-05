@@ -27,9 +27,12 @@
   <input id="labelInput" type="text" placeholder="Title (optional)" />
   <button id="addBtn">+ Add</button>
   <div class="controls right">
-    <button id="createBtn">Create</button>
-    <button id="exportBtn">Save</button>
-    <label class="import-label">Load<input id="importInput" type="file" accept="application/json" hidden />
+<input id="importInput" type="file" accept="application/json" style="display:none" />
+<button id="createBtn" class="btn">Create</button>
+<button id="exportBtn" class="btn">Save</button>   <!-- era “Export”, solo cambia el texto -->
+<button id="importBtn" class="btn">Import</button>
+<button id="ejectBtn"  class="btn">Eject</button>
+
     </label>
   </div>
 </div>
