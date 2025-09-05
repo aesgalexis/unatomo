@@ -634,13 +634,11 @@ function performEject() {
   if (appTitleEl) appTitleEl.textContent = defaultTitle;
   try { localStorage.setItem("app-title", defaultTitle); } catch {}
 
-  // 4) Refrescar UI y volver a modo Import
-  if (typeof refreshAtomNumber === "function") refreshAtomNumber();
-  setImportMode(false);
-  if (typeof updateActionButtons === "function") updateActionButtons();
-  if (typeof render === "function") render();
-}
-
+// 4) Refrescar UI
+if (typeof refreshAtomNumber === "function") refreshAtomNumber();
+// setImportMode(false);   ← ELIMINADO
+if (typeof updateActionButtons === "function") updateActionButtons();
+if (typeof render === "function") render();
 
 function daysRemaining(iso) {
   const t = Date.parse(iso);
