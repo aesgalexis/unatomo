@@ -585,11 +585,6 @@ if (clearAllBtn) {
 
 /* ================== Helpers ================== */
 
-function setImportMode(hasAtom) {
-  // Asegura que tenemos el label aunque el DOM se haya montado después
-  const label = importLabel || document.querySelector('.import-label');
-  if (!label || !importInput) return;
-
   // Visual: Import ↔ Eject
   label.classList.toggle('eject', hasAtom);
   setLabelText(label, hasAtom ? 'Eject' : 'Import');
