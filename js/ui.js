@@ -483,6 +483,25 @@ if (exportBtn) {
     }
   };
 }
+  // Botón Import → abre el file dialog del input oculto
+if (importBtn && importInput) {
+  importBtn.addEventListener("click", () => {
+    if (importBtn.disabled) return;
+    importInput.click();
+  });
+}
+
+// Botón Eject → usa tu performEject() con confirm personalizado
+if (ejectBtn) {
+  ejectBtn.addEventListener("click", () => {
+    if (ejectBtn.disabled) return;
+    performEject();
+  });
+}
+
+// Asegura el texto "Save" en el botón de export
+if (exportBtn) exportBtn.textContent = "Save";
+
 
   // Importar
   importInput.addEventListener("change", async () => {
