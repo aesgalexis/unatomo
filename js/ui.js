@@ -48,7 +48,8 @@ const ELEMENTS = {
 
 // Status bar elements
 const exportCounterEl = document.getElementById("exportCounter");
-const atomNoEl = document.getElementById("atomNo"); // NUEVO
+const atomNoEl = document.getElementById("atomNo");
+const isotopeEl = document.getElementById("isotopeNo");
 
 // Límites por marco
 const MAX_A = 8;
@@ -389,7 +390,11 @@ function updateActionButtons() {
     ejectBtn.classList.toggle("is-hot", hasAtom);
   }
 }
-
+function refreshIsotopeNumber() {
+  if (!isotopeEl) return;
+  const n = state?.isotope;
+  isotopeEl.textContent = Number.isInteger(n) && n >= 0 ? n.toLocaleString() : "0";
+}
 
 export function bindGlobalHandlers() {
   // Desactivar corrector y ayudas en el input superior
@@ -478,6 +483,7 @@ if (exportBtn) {
     exporting = true;
     try {
       await exportJson();
+      refreshIsotopeNumber();
     } finally {
       exporting = false;
     }
@@ -516,7 +522,8 @@ if (exportBtn) exportBtn.textContent = "Save";
 
       // Atom No.: si vino en el JSON se reflejará; si no, queda "?"
       refreshAtomNumber();
-      updateActionButtons(); 
+      updateActionButtons();
+      refreshIsotopeNumber();
       render();
     } catch (e) {
       alert("Error importing: " + e.message);
@@ -571,6 +578,12 @@ if (clearAllBtn) {
       exportCounterEl.textContent = n.toLocaleString();
     }
   });
+  window.addEventListener("isotope-changed", (e) => {
+  const v = e.detail?.value;
+  if (isotopeEl) {
+    isotopeEl.textContent = Number.isFinite(v) ? Number(v).toLocaleString() : "0";
+  }
+});
 
   // UI reacciona cuando state.js fija el número tras el primer export
   window.addEventListener("atom-number-changed", (e) => {
@@ -610,6 +623,7 @@ function performEject() {
 
   // 4) Refrescar UI
   if (typeof refreshAtomNumber === "function") refreshAtomNumber();
+  if (typeof refreshIsotopeNumber === "function") refreshIsotopeNumber();
   if (typeof updateActionButtons === "function") updateActionButtons();
   if (typeof render === "function") render();
 }
