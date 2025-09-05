@@ -11,6 +11,7 @@ export const makeEmptyState = () => ({
   orbit: [],   // [{ id, label, note, createdAt?, returnAt, fromWhere }]
   idSeq: 1,
   atomNumber: null, // Número de átomo fijo tras 1ª export
+  isotope: 0,       // NUEVO: contador de saves/exports del archivo actual
 });
 
 export let state = load();
@@ -86,8 +87,14 @@ function load() {
         ? parsed.atomNumber
         : null;
 
+    // --- Isótopo normalizado (>=0) — NUEVO ---
+    const isotope =
+      Number.isInteger(parsed.isotope) && parsed.isotope >= 0
+        ? parsed.isotope
+        : 0;
+
     // Construye estado y aterriza orbits vencidos
-    const tmp = { items, history, orbit, idSeq, atomNumber };
+    const tmp = { items, history, orbit, idSeq, atomNumber, isotope };
     landDueOrbitsIn(tmp);
 
     return tmp;
@@ -296,10 +303,15 @@ export async function exportJson() {
       if (!Number.isInteger(state.atomNumber) || state.atomNumber <= 0) {
         newTotal = await incrementGlobalExportCounter(); // contador global +1
         state.atomNumber = newTotal;                     // fija Atom No.
-        save();
       }
 
-      // Exporta el estado ya con atomNumber dentro
+      // NUEVO: incrementa isótopo SIEMPRE que se exporta
+      if (!Number.isInteger(state.isotope) || state.isotope < 0) state.isotope = 0;
+      state.isotope += 1;
+
+      save();
+
+      // Exporta el estado ya con atomNumber + isotope dentro
       const payload = { ...state, appTitle };
       const blob = new Blob([JSON.stringify(payload, null, 2)], {
         type: "application/json",
@@ -309,7 +321,7 @@ export async function exportJson() {
       await writable.write(blob);
       await writable.close();
 
-      // Notifica a la UI (solo si hubo asignación)
+      // Notifica a la UI
       if (newTotal != null) {
         window.dispatchEvent(
           new CustomEvent("global-export-count", { detail: { value: newTotal } })
@@ -318,6 +330,10 @@ export async function exportJson() {
           new CustomEvent("atom-number-changed", { detail: { value: newTotal } })
         );
       }
+      window.dispatchEvent(
+        new CustomEvent("isotope-changed", { detail: { value: state.isotope } })
+      );
+
       return;
     } catch (err) {
       if (err && err.name === "AbortError") return; // usuario canceló: no incrementamos nada
@@ -332,11 +348,16 @@ export async function exportJson() {
     try {
       newTotal = await incrementGlobalExportCounter();
       state.atomNumber = newTotal;
-      save();
     } catch (e) {
       console.warn("No se pudo asignar atomNumber en fallback:", e);
     }
   }
+
+  // NUEVO: incrementa isótopo SIEMPRE que se exporta
+  if (!Number.isInteger(state.isotope) || state.isotope < 0) state.isotope = 0;
+  state.isotope += 1;
+
+  save();
 
   const payload = { ...state, appTitle };
   const blob = new Blob([JSON.stringify(payload, null, 2)], {
@@ -360,7 +381,11 @@ export async function exportJson() {
       new CustomEvent("atom-number-changed", { detail: { value: newTotal } })
     );
   }
+  window.dispatchEvent(
+    new CustomEvent("isotope-changed", { detail: { value: state.isotope } })
+  );
 }
+
 // === Importar desde JSON (restaura estado, respeta atomNumber si viene) ===
 export function importJson(file) {
   return new Promise((resolve, reject) => {
@@ -384,6 +409,11 @@ export function importJson(file) {
           delete parsed.atomNumber;
         }
 
+        // NUEVO: normaliza isótopo importado (si falta, 0)
+        if (!Number.isInteger(parsed.isotope) || parsed.isotope < 0) {
+          parsed.isotope = 0;
+        }
+
         // Guarda el estado tal cual y recarga en memoria
         localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
         state = load();
@@ -394,6 +424,15 @@ export function importJson(file) {
           new CustomEvent("atom-number-changed", {
             detail: {
               value: Number.isInteger(state.atomNumber) ? state.atomNumber : null,
+            },
+          })
+        );
+
+        // NUEVO: notificar isótopo a la UI
+        window.dispatchEvent(
+          new CustomEvent("isotope-changed", {
+            detail: {
+              value: Number.isInteger(state.isotope) ? state.isotope : 0,
             },
           })
         );
