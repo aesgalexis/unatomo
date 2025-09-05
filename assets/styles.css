@@ -545,42 +545,6 @@ html, body {
 .app header h1 {
   cursor: pointer !important;
 }
-/* El header es el contenedor de referencia */
-.app header {
-  position: relative;
-}
-
-/* Ajusta este valor si tus controles usan otro padding horizontal */
-:root {
-  --header-pad-x: 1rem;     /* mismo padding que los botones a la derecha */
-  --header-pad-y: 0.5rem;   /* separación inferior */
-  --meta-size: 0.875rem;    /* mismo tamaño que el footer */
-  --meta-fg: #8a94a6;       /* cámbialo por el color exacto de tu footer si es otro */
-}
-
-/* Badge de Atom No. (texto + número) */
-#atomNo {
-  position: absolute;
-  right: var(--header-pad-x);
-  bottom: var(--header-pad-y);
-
-  /* mismo look que el footer */
-  font-size: var(--meta-size);
-  font-weight: 400;          /* NO en negrita */
-  color: var(--meta-fg);
-  opacity: 0.8;
-  line-height: 1;
-
-  white-space: nowrap;
-  pointer-events: none;      /* que no moleste al click del título */
-}
-
-/* Inserta la etiqueta "unátomo #" delante del número */
-#atomNo::before {
-  content: "unátomo #\00a0"; /* espacio no separable */
-  font-weight: 400;          /* NO en negrita */
-}
-
 /* Fila bajo el header: input + +Add (entre dos líneas) */
 .app .createbar {
   display: flex;
