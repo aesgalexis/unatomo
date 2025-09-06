@@ -1,8 +1,3 @@
-  <button id="visualizeAtom"
-  style="position:fixed;right:12px;bottom:12px;z-index:9999;padding:8px 12px;border-radius:10px;border:1px solid #334155;background:#18223a;color:#e5e7eb;font-weight:600;cursor:pointer">
-  Visualize
-</button>
-
 <script>
 (function(){
   const SELECTORS = {
