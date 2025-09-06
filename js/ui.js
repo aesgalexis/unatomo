@@ -394,7 +394,7 @@ function updateActionButtons() {
   }
 
   // Visualize: solo si hay ≥1 AB en A/B/L
-  {
+  
   const vBtns = document.querySelectorAll('#visualizeAtom'); // maneja duplicados
   const hasAB = Array.isArray(state.items) && state.items.some(x => x.where === 'A' || x.where === 'B' || x.where === 'L');
   const off = !hasAB;
