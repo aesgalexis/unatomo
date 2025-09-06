@@ -243,24 +243,13 @@ export function render() {
   } else {
     countEl.textContent = total;
   }
-  if (visualizeBtn) {
-  const hasAB = total > 0;
-  const off = !hasAB;
-
-  // estado funcional
-  visualizeBtn.disabled = off;
-
-  // estado visual
-  visualizeBtn.title = hasAB ? "" : "Nothing to visualize, add something";
-  visualizeBtn.classList.toggle('disabled', off);
-  visualizeBtn.classList.toggle('is-disabled', off);
-  visualizeBtn.setAttribute('aria-disabled', off ? 'true' : 'false');
-  }
 
   // DnD
   enableDragAndDrop({ listA, listB, listL, onDrop: onDragDrop });
   }
-
+  // Mantener los botones sincronizados con el contenido
+  updateActionButtons();
+  }
 function renderItem(it, inAlt = false, allowDrag = true) {
   const item = document.createElement("div");
   item.className = `item${inAlt ? " in-alt" : ""}`;
@@ -392,18 +381,34 @@ function updateActionButtons() {
     exportBtn.textContent = "Save";
   }
 
-  // Import: NO se puede importar si hay atom → deshabilitado
+  // Import: NO si hay atom
   if (importBtn) {
     importBtn.disabled = hasAtom;
     importBtn.classList.toggle("is-hot", !hasAtom);
   }
 
-  // Eject: solo disponible si hay atom
+  // Eject: solo si hay atom
   if (ejectBtn) {
     ejectBtn.disabled = !hasAtom;
     ejectBtn.classList.toggle("is-hot", hasAtom);
   }
+
+  // Visualize: solo si hay ≥1 AB en A/B/L
+  if (visualizeBtn) {
+    const hasAB = Array.isArray(state.items) && state.items.length > 0;
+    const off = !hasAB;
+
+    // estado funcional
+    visualizeBtn.disabled = off;
+
+    // estado visual (igual que otros botones desactivados)
+    visualizeBtn.classList.toggle('disabled', off);
+    visualizeBtn.classList.toggle('is-disabled', off);
+    visualizeBtn.setAttribute('aria-disabled', off ? 'true' : 'false');
+    visualizeBtn.title = hasAB ? "" : "Nothing to visualize, add something";
+  }
 }
+
 function refreshIsotopeNumber() {
   if (!isotopeEl) return;
   const n = state?.isotope;
