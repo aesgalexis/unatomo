@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Átomo — 3 electrones en órbitas definidas</title>
+  <title>Átomo — 3 electrones en sus órbitas (5–7 s, eje corregido)</title>
   <style>
     html,body{height:100%;margin:0;background:#0b1020;color:#e5e7eb;font-family:system-ui,Segoe UI,Inter,Arial}
     canvas{display:block;width:100%;height:100%}
@@ -15,7 +15,7 @@
   </style>
 </head>
 <body>
-  <div class="tip">Izq: rotar átomo (inercia) · Der sobre anillo: mover esa órbita (inercia) · Rueda: zoom · R: reset · Z=protones</div>
+  <div class="tip">Izq: rotar átomo (inercia) · Rueda: zoom · R: reset · Z=protones. Periodos: 5s, 6s, 7s. (FIX: electrones pegados al anillo)</div>
   <div class="hud">
     <label>Z (protones): <input id="zInput" type="number" min="1" max="118" value="10"></label>
     <button id="applyZ">Aplicar</button>
@@ -24,7 +24,7 @@
   <script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
   <script>
   (function(){
-    // === Escena/cámara/renderer ===
+    // === Escena / cámara / renderer ===
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x0b1020);
 
@@ -44,9 +44,8 @@
     const atom = new THREE.Group(); // rotación global del átomo
     scene.add(atom);
 
-    const nucleus = new THREE.Group(); // sólo protones (sin esfera hueca)
+    const nucleus = new THREE.Group(); // sólo protones
     atom.add(nucleus);
-
     const glow = new THREE.PointLight(0x7dd3fc, 0.7, 50); nucleus.add(glow);
 
     // === Materiales ===
@@ -72,40 +71,53 @@
       }
     }
 
-    // === Órbitas + 1 electrón por anillo ===
-    const orbits = []; // {pivot, ring, holder, electron, angVel, electronSpeed, precessSpeed, wobblePhase}
+    // === Órbitas con ROTATOR (eje Z) para seguir exactamente el anillo ===
+    const orbits = []; // {pivot, ring, rotator, holder, electron, omega, precessSpeed, wobblePhase}
 
-    function createOrbit(radius){
+    function createOrbit(radius, periodSec){
       const pivot = new THREE.Object3D();
-      pivot.rotation.x = Math.random()*Math.PI;
-      pivot.rotation.y = Math.random()*Math.PI;
+      // Plano del anillo aleatorio
+      pivot.rotation.set(Math.random()*Math.PI, Math.random()*Math.PI, Math.random()*Math.PI);
 
+      // Anillo (por defecto en plano XY) → círculo alrededor del eje Z local
       const ring = new THREE.Mesh(new THREE.TorusGeometry(radius, Math.max(0.012*radius,0.035), 12, 180), ringMat.clone());
       pivot.add(ring);
 
-      // Un único electrón en este anillo
-      const holder = new THREE.Object3D(); holder.position.x = radius; // en +X del anillo
+      // ROTATOR centrado: rotaremos sobre Z para recorrer el anillo
+      const rotator = new THREE.Object3D();
+      pivot.add(rotator);
+
+      // Holder desplazado a +X (en el plano del anillo)
+      const holder = new THREE.Object3D();
+      holder.position.x = radius;
+      rotator.add(holder);
+
       const electron = new THREE.Mesh(new THREE.SphereGeometry(0.14,24,24), electronMat.clone());
-      holder.add(electron); pivot.add(holder);
+      holder.add(electron);
 
       atom.add(pivot);
+
+      const omega = (Math.PI*2) / periodSec; // rad/s → 1 vuelta cada periodSec
+      // Fase inicial aleatoria rotando el rotator en Z
+      rotator.rotation.z = Math.random()*Math.PI*2;
+
       return {
         pivot,
         ring,
+        rotator,
         holder,
         electron,
-        angVel: 0, // inercia al empujar el anillo (botón derecho si más adelante se reactiva)
-        electronSpeed: 0.6 + Math.random()*0.8, // velocidad de traslación del electrón
-        precessSpeed: (Math.random()*0.6-0.3)*0.12, // precesión lenta
+        omega,
+        precessSpeed: (Math.random()*0.6-0.3)*0.10, // sutil
         wobblePhase: Math.random()*Math.PI*2
       };
     }
 
-    // Tres anillos grandes
+    // Tres anillos amplios con periodos 5s, 6s y 7s
     const BASE=3.2, GAP=1.6;
-    orbits.push(createOrbit(BASE + 0*GAP));
-    orbits.push(createOrbit(BASE + 1*GAP));
-    orbits.push(createOrbit(BASE + 2*GAP));
+    orbits.push(createOrbit(BASE + 0*GAP, 5.0));
+    orbits.push(createOrbit(BASE + 1*GAP, 6.0));
+    orbits.push(createOrbit(BASE + 2*GAP, 7.0));
 
     // === Entrada Z ===
     setAtomicNumber(10);
@@ -132,7 +144,7 @@
       if(e.key.toLowerCase()==='r'){
         camera.position.set(0,7,20); camera.lookAt(0,0,0); camDist=20;
         atom.rotation.set(0,0,0); atomVelX=0; atomVelY=0;
-        orbits.forEach(o=>{ o.pivot.rotation.set(0,0,0); o.angVel=0; o.holder.rotation.y = 0; });
+        orbits.forEach((o)=>{ o.pivot.rotation.set(0,0,0); o.rotator.rotation.set(0,0,0); });
       }
     });
 
@@ -148,16 +160,15 @@
       // Inercia átomo global
       if(!draggingAtom){ atom.rotation.x += atomVelX*dt; atom.rotation.y += atomVelY*dt; atomVelX *= FRICTION; atomVelY *= FRICTION; if(Math.abs(atomVelX)<1e-4) atomVelX=0; if(Math.abs(atomVelY)<1e-4) atomVelY=0; }
 
-      // Cada electrón recorre su órbita (giramos su holder en Y)
+      // Cada electrón recorre su anillo rotando el ROTATOR en Z (coincide con el plano del toro)
       for(const o of orbits){
-        // movimiento visual propio del anillo para que no parezcan bloque
+        // sutiles variaciones del plano del anillo
         o.pivot.rotation.y += o.precessSpeed * dt;
-        const wob = 0.07 * Math.sin(t*0.6 + o.wobblePhase);
+        const wob = 0.05 * Math.sin(t*0.6 + o.wobblePhase);
         o.pivot.rotation.x += (wob - o.pivot.rotation.x) * 0.02;
         o.pivot.rotation.z += (wob*0.6 - o.pivot.rotation.z) * 0.02;
 
-        // avance del electrón
-        o.holder.rotation.y += o.electronSpeed * dt;
+        o.rotator.rotation.z += o.omega * dt; // 5s/6s/7s por vuelta
       }
 
       renderer.render(scene, camera);
