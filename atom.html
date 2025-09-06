@@ -3,32 +3,78 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Átomo — protons click + panel</title>
+  <title>Átomo ligado a tus ABs (index.html)</title>
   <style>
     html,body{height:100%;margin:0;background:#0b1020;color:#e5e7eb;font-family:system-ui,Segoe UI,Inter,Arial}
-    canvas{display:block;width:100%;height:100%;cursor:default}
-    .tip{position:fixed;left:12px;top:12px;font-size:12px;opacity:.85;background:rgba(17,24,39,.55);border:1px solid #263247;padding:8px 10px;border-radius:10px;z-index:10}
+    canvas{display:block;width:100%;height:100%}
+    .tip{position:fixed;left:12px;top:12px;font-size:12px;opacity:.9;background:rgba(17,24,39,.55);border:1px solid #263247;padding:8px 10px;border-radius:10px;z-index:10}
     .hud{position:fixed;right:12px;top:12px;display:flex;gap:8px;align-items:center;background:rgba(17,24,39,.55);border:1px solid #263247;padding:8px 10px;border-radius:10px;z-index:10}
-    .hud input{width:64px;background:#0f172a;color:#e5e7eb;border:1px solid #334155;border-radius:8px;padding:6px 8px;font-size:13px}
     .hud button{background:#18223a;color:#e5e7eb;border:1px solid #334155;border-radius:8px;padding:6px 10px;cursor:pointer;font-weight:600}
     .hud button:hover{filter:brightness(1.06)}
-    /* Panel flotante 400x400 anclado al protón */
+    .hud .counts{font-size:12px;opacity:.85}
     .panel{position:fixed;width:400px;height:400px;background:rgba(0,0,0,.35);border:1px solid #263247;border-radius:12px;backdrop-filter:blur(2px);z-index:20;box-shadow:0 10px 30px rgba(0,0,0,.35);overflow:hidden}
     .panel header{display:flex;justify-content:space-between;align-items:center;font-size:12px;padding:8px 10px;background:rgba(15,23,42,.4)}
     .panel header .close{cursor:pointer;padding:2px 8px;border:1px solid #334155;border-radius:8px}
   </style>
 </head>
 <body>
-  <div class="tip">Izq: rotar átomo (inercia) · Rueda: zoom · R: reset · Z=protones. Haz <b>clic</b> en un protón: el núcleo se detiene y aparece un panel 400×400 anclado al protón. (Órbitas y electrones siguen.)</div>
+  <div class="tip">Este átomo <b>lee tus ABs de index.html</b> sin tocar tu código. Colores por ubicación: <b>main</b> = rojo, <b>side</b> = gris, <b>landing</b> = blanco. 3 electrones (5s/6s/7s).</div>
   <div class="hud">
-    <label>Z (protones): <input id="zInput" type="number" min="1" max="118" value="10"></label>
-    <button id="applyZ">Aplicar</button>
+    <button id="reloadBtn" title="Volver a leer index.html">Releer ABs</button>
+    <span class="counts" id="counts">—</span>
   </div>
 
+  <!-- Three r149, estable con <script src> -->
   <script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
   <script>
   (function(){
-    // === Escena / cámara / renderer ===
+    // =================== INTEGRACIÓN ABs ===================
+    const SELECTORS = {
+      ab: ['.AB', '.ab', '[data-ab]', '[data-type="ab"]'],
+      containers: {
+        main: ['#main', '.main', '[data-area="main"]', 'main'],
+        side: ['#side', '.side', '.sidebar', '[data-area="side"]', 'aside'],
+        landing: ['#landing', '.landing', '[data-area="landing"]']
+      }
+    };
+
+    function classifyAB(el){
+      const C = SELECTORS.containers;
+      for(const sel of C.main){ if(el.closest(sel)) return 'main'; }
+      for(const sel of C.side){ if(el.closest(sel)) return 'side'; }
+      for(const sel of C.landing){ if(el.closest(sel)) return 'landing'; }
+      return 'main';
+    }
+
+    async function fetchIndexHTML(){
+      const candidates = ['/index.html', '/'];
+      for(const url of candidates){
+        try{
+          const res = await fetch(url, {cache:'no-store'});
+          if(res.ok){ return await res.text(); }
+        }catch(_){/*ignore*/}
+      }
+      return '';
+    }
+
+    function parseABs(html){
+      if(!html) return {total:0, groups:{main:[],side:[],landing:[]}};
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+      const nodes = new Set();
+      for(const sel of SELECTORS.ab){ doc.querySelectorAll(sel).forEach(el => nodes.add(el)); }
+      const groups = { main:[], side:[], landing:[] };
+      for(const el of nodes){ groups[classifyAB(el)].push(el); }
+      const total = groups.main.length + groups.side.length + groups.landing.length;
+      return { total, groups };
+    }
+
+    async function readABs(){
+      const html = await fetchIndexHTML();
+      const { total, groups } = parseABs(html);
+      return { total, groups };
+    }
+
+    // =================== ESCENA THREE ===================
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x0b1020);
 
@@ -40,33 +86,28 @@
     renderer.setSize(innerWidth, innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    // Luces
     scene.add(new THREE.AmbientLight(0xffffff, 0.35));
     const dir = new THREE.DirectionalLight(0xffffff, 1.0); dir.position.set(5,7,3); scene.add(dir);
 
-    // === Grupos ===
-    const atom = new THREE.Group(); // rotación global del átomo
-    scene.add(atom);
-
-    const nucleus = new THREE.Group(); // sólo protones
-    atom.add(nucleus);
+    const atom = new THREE.Group(); scene.add(atom);
+    const nucleus = new THREE.Group(); atom.add(nucleus);
     const glow = new THREE.PointLight(0x7dd3fc, 0.7, 50); nucleus.add(glow);
 
-    // === Materiales ===
-    const protonMat = new THREE.MeshPhongMaterial({ color: 0xff6b6b, emissive: 0x4d1a1a, emissiveIntensity: 0.35 });
-    const ringMat   = new THREE.MeshBasicMaterial({ color: 0x8b5cf6, wireframe:true, transparent:true, opacity:0.35 }); // color inicial
+    const ringMat = new THREE.MeshBasicMaterial({ color: 0x8b5cf6, wireframe:true, transparent:true, opacity:0.35 }); // color inicial
     const electronMat = new THREE.MeshPhongMaterial({ color: 0x22d3ee, emissive: 0x0ea5e9, emissiveIntensity: 0.85 });
 
-    // === Núcleo: cluster de Z protones ===
+    // protons + colors
     let protons = [];
-    function setAtomicNumber(Z){
-      // eliminar protones previos (dejamos glow)
+    function setNucleusFromColors(colors){
+      // limpia protones (deja glow)
       while(nucleus.children.length>1){ const obj = nucleus.children[1]; nucleus.remove(obj); obj.geometry?.dispose?.(); obj.material?.dispose?.(); }
       protons = [];
-      const rp = 0.18; // radio protón
-      const R  = 0.7 + Math.cbrt(Z)*0.27; // radio visual del núcleo
+      const Z = Math.max(1, Math.min(118, colors.length || 1));
+      const R  = 0.7 + Math.cbrt(Z)*0.27;
       for(let i=0;i<Z;i++){
-        const p = new THREE.Mesh(new THREE.SphereGeometry(rp, 16, 16), protonMat.clone());
+        const color = colors[i] || 0xff6b6b; // default rojo
+        const mat = new THREE.MeshPhongMaterial({ color, emissive: (color===0xffffff?0x222222: (color===0x9aa4b2?0x1a1f2b:0x4d1a1a)), emissiveIntensity: 0.35 });
+        const p = new THREE.Mesh(new THREE.SphereGeometry(0.18, 16, 16), mat);
         p.userData.isProton = true;
         if(Z===1){ p.position.set(0,0,0); }
         else {
@@ -79,159 +120,112 @@
       }
     }
 
-    // === Órbitas con ROTATOR (seguros) ===
-    const orbits = []; // {pivot, ring, rotator, holder, electron, omega, precessSpeed, wobblePhase}
-
+    // orbits + 3 electrons (periodos 5/6/7 s)
+    const orbits = [];
     function createOrbit(radius, periodSec){
       const pivot = new THREE.Object3D();
       pivot.rotation.set(Math.random()*Math.PI, Math.random()*Math.PI, Math.random()*Math.PI);
-
       const ring = new THREE.Mesh(new THREE.TorusGeometry(radius, Math.max(0.012*radius,0.035), 12, 180), ringMat.clone());
       pivot.add(ring);
-
-      const rotator = new THREE.Object3D();
-      pivot.add(rotator);
-
+      const rotator = new THREE.Object3D(); pivot.add(rotator);
       const holder = new THREE.Object3D(); holder.position.x = radius; rotator.add(holder);
       const electron = new THREE.Mesh(new THREE.SphereGeometry(0.14,24,24), electronMat.clone()); holder.add(electron);
-
       atom.add(pivot);
-
-      const omega = (Math.PI*2) / periodSec;
-      rotator.rotation.z = Math.random()*Math.PI*2; // fase inicial
-
+      const omega = (Math.PI*2)/periodSec; rotator.rotation.z = Math.random()*Math.PI*2;
       return { pivot, ring, rotator, holder, electron, omega, precessSpeed:(Math.random()*0.6-0.3)*0.10, wobblePhase:Math.random()*Math.PI*2 };
     }
-
-    // Radios y periodos
-    const BASE=6.4, GAP=1.6; // mantenemos la grande como base actual
+    const BASE=6.4, GAP=1.6;
     orbits.push(createOrbit(BASE + 0*GAP, 5.0));
     orbits.push(createOrbit(BASE + 1*GAP, 6.0));
     orbits.push(createOrbit(BASE + 2*GAP, 7.0));
 
-    // === Entrada Z ===
-    setAtomicNumber(10);
-    document.getElementById('applyZ').addEventListener('click', ()=>{
-      let Z = parseInt(document.getElementById('zInput').value,10);
-      if(!Number.isFinite(Z)) return; Z=Math.max(1, Math.min(118, Z));
-      document.getElementById('zInput').value = Z;
-      setAtomicNumber(Z);
-    });
-
-    // === Raycaster sobre protones para cursor/acción ===
+    // ====== Raycaster: cursor y panel sobre protones ======
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
     let hoverProton = null;
-
-    function ndcFromClient(e){
-      const rect = renderer.domElement.getBoundingClientRect();
-      mouse.x = ((e.clientX-rect.left)/rect.width)*2 - 1;
-      mouse.y = -((e.clientY-rect.top)/rect.height)*2 + 1;
-    }
-
-    function hitTestProtons(){
-      raycaster.setFromCamera(mouse, camera);
-      return raycaster.intersectObjects(protons, false);
-    }
+    function ndcFromClient(e){ const r=renderer.domElement.getBoundingClientRect(); mouse.x=((e.clientX-r.left)/r.width)*2-1; mouse.y=-((e.clientY-r.top)/r.height)*2+1; }
+    function hitProtons(){ raycaster.setFromCamera(mouse,camera); return raycaster.intersectObjects(protons,false); }
 
     renderer.domElement.addEventListener('mousemove', (e)=>{
       ndcFromClient(e);
-      const hits = hitTestProtons();
+      const hits = hitProtons();
       hoverProton = (hits && hits[0]) ? hits[0].object : null;
       renderer.domElement.style.cursor = hoverProton ? 'pointer' : 'default';
     }, {passive:true});
 
-    // === Panel 400x400 anclado al protón clicado ===
-    let panelEl = null; let panelTarget = null; let nucleusPaused = false;
-
-    function projectToScreen(obj){
-      const v = new THREE.Vector3(); obj.getWorldPosition(v); v.project(camera);
-      const x = (v.x*0.5+0.5)*innerWidth; const y = (-v.y*0.5+0.5)*innerHeight; return {x,y};
-    }
-
-    function clampPanelPos(x,y){
-      const w = 400, h = 400; return { x: Math.max(0, Math.min(x, innerWidth - w)), y: Math.max(0, Math.min(y, innerHeight - h)) };
-    }
-
+    // panel
+    let panelEl=null, panelTarget=null, nucleusPaused=false;
+    function projectToScreen(obj){ const v=new THREE.Vector3(); obj.getWorldPosition(v); v.project(camera); return {x:(v.x*0.5+0.5)*innerWidth, y:(-v.y*0.5+0.5)*innerHeight}; }
+    function clampPanelPos(x,y){ const w=400,h=400; return {x:Math.max(0,Math.min(x,innerWidth-w)), y:Math.max(0,Math.min(y,innerHeight-h))}; }
     function showPanelAt(obj){
-      const p = projectToScreen(obj); const c = clampPanelPos(p.x, p.y);
+      const p=projectToScreen(obj), c=clampPanelPos(p.x,p.y);
       if(panelEl){ panelEl.remove(); panelEl=null; }
-      panelEl = document.createElement('div'); panelEl.className='panel'; panelEl.style.left=c.x+'px'; panelEl.style.top=c.y+'px';
-      panelEl.innerHTML = '<header>Protón seleccionado <span class="close">×</span></header><div style="padding:10px;font-size:12px;color:#cbd5e1">Contenido libre aquí…</div>';
+      panelEl=document.createElement('div'); panelEl.className='panel'; panelEl.style.left=c.x+'px'; panelEl.style.top=c.y+'px';
+      panelEl.innerHTML='<header>Protón seleccionado <span class="close">×</span></header><div style="padding:10px;font-size:12px;color:#cbd5e1">Contenido libre aquí…</div>';
       document.body.appendChild(panelEl);
       panelEl.querySelector('.close').addEventListener('click', ()=>{ panelEl.remove(); panelEl=null; panelTarget=null; nucleusPaused=false; });
-      panelTarget = obj; // seguir anclado al protón
+      panelTarget=obj; nucleusPaused=true;
     }
 
     renderer.domElement.addEventListener('mousedown', (e)=>{
-      if(e.button!==0) return; // sólo clic izquierdo
-      ndcFromClient(e);
-      const hits = hitTestProtons();
-      if(hits.length){
-        // Clic en protón → detener núcleo y abrir panel
-        nucleusPaused = true;
-        showPanelAt(hits[0].object);
-        return; // no iniciar rotación de átomo
-      }
-      // si no hay protón, empezar rotación de átomo (abajo)
+      if(e.button!==0) return; // solo izquierdo
+      ndcFromClient(e); const hits=hitProtons();
+      if(hits.length){ showPanelAt(hits[0].object); return; }
       draggingAtom=true; lastX=e.clientX; lastY=e.clientY; atomVelX=0; atomVelY=0;
     });
 
-    // === Controles: rotación global con inercia ===
+    // ====== Rotación global con inercia / zoom / reset ======
     let draggingAtom=false, lastX=0,lastY=0; let atomVelX=0, atomVelY=0; const FRICTION=0.965;
     window.addEventListener('mouseup', ()=>{ draggingAtom=false; });
-    window.addEventListener('mousemove', (e)=>{
-      if(!draggingAtom) return; const dx=e.clientX-lastX, dy=e.clientY-lastY; lastX=e.clientX; lastY=e.clientY; const k=0.005; atom.rotation.y += dx*k; atom.rotation.x += dy*k; atomVelY = dx*k*60; atomVelX = dy*k*60; }, {passive:true});
+    window.addEventListener('mousemove', (e)=>{ if(!draggingAtom) return; const dx=e.clientX-lastX,dy=e.clientY-lastY; lastX=e.clientX; lastY=e.clientY; const k=0.005; atom.rotation.y+=dx*k; atom.rotation.x+=dy*k; atomVelY=dx*k*60; atomVelX=dy*k*60; }, {passive:true});
+    let camDist=camera.position.length();
+    renderer.domElement.addEventListener('wheel', e=>{ e.preventDefault(); camDist*=(1+Math.sign(e.deltaY)*0.08); camDist=Math.max(5,Math.min(70,camDist)); const dirV=camera.position.clone().normalize(); camera.position.copy(dirV.multiplyScalar(camDist)); camera.lookAt(0,0,0); }, {passive:false});
+    window.addEventListener('keydown', e=>{ if(e.key.toLowerCase()==='r'){ camera.position.set(0,7,20); camera.lookAt(0,0,0); camDist=20; atom.rotation.set(0,0,0); atomVelX=0; atomVelY=0; orbits.forEach(o=>{ o.pivot.rotation.set(0,0,0); o.rotator.rotation.set(0,0,0); }); nucleusPaused=false; if(panelEl){ panelEl.remove(); panelEl=null; panelTarget=null; } } });
 
-    // Zoom
-    let camDist = camera.position.length();
-    renderer.domElement.addEventListener('wheel', e=>{ e.preventDefault(); camDist *= (1 + Math.sign(e.deltaY)*0.08); camDist = Math.max(5, Math.min(70, camDist)); const dirV = camera.position.clone().normalize(); camera.position.copy(dirV.multiplyScalar(camDist)); camera.lookAt(0,0,0); }, {passive:false});
+    // ====== Animación ======
+    const countsEl = document.getElementById('counts');
+    async function applyABs(){
+      const { total, groups } = await readABs();
+      // colores: main=rojo, side=gris, landing=blanco
+      const colors=[];
+      for(const _ of groups.main)   colors.push(0xff6b6b);
+      for(const _ of groups.side)   colors.push(0x9aa4b2);
+      for(const _ of groups.landing)colors.push(0xffffff);
+      if(colors.length===0){ colors.push(0xff6b6b); }
+      setNucleusFromColors(colors);
+      countsEl.textContent = `Z=${colors.length} · main:${groups.main.length} · side:${groups.side.length} · landing:${groups.landing.length}`;
+    }
 
-    // Reset
-    window.addEventListener('keydown', e=>{
-      if(e.key.toLowerCase()==='r'){
-        camera.position.set(0,7,20); camera.lookAt(0,0,0); camDist=20;
-        atom.rotation.set(0,0,0); atomVelX=0; atomVelY=0;
-        orbits.forEach((o)=>{ o.pivot.rotation.set(0,0,0); o.rotator.rotation.set(0,0,0); });
-        nucleusPaused = false; if(panelEl){ panelEl.remove(); panelEl=null; panelTarget=null; }
-      }
-    });
+    document.getElementById('reloadBtn').addEventListener('click', applyABs);
+    applyABs();
 
-    // === Animación ===
     const clock = new THREE.Clock();
     function animate(){
       const dt = clock.getDelta();
       const t = performance.now()*0.001;
 
-      // Núcleo (se puede pausar al clicar un protón)
       if(!nucleusPaused){ nucleus.rotation.y += dt*0.2; nucleus.rotation.x += dt*0.1; }
       glow.intensity = 0.5 + 0.15*Math.sin(t*1.1);
 
-      // Inercia átomo global
-      if(!draggingAtom){ atom.rotation.x += atomVelX*dt; atom.rotation.y += atomVelY*dt; atomVelX *= FRICTION; atomVelY *= FRICTION; if(Math.abs(atomVelX)<1e-4) atomVelX=0; if(Math.abs(atomVelY)<1e-4) atomVelY=0; }
+      if(!draggingAtom){ atom.rotation.x += atomVelX*dt; atom.rotation.y += atomVelY*dt; atomVelX*=FRICTION; atomVelY*=FRICTION; if(Math.abs(atomVelX)<1e-4) atomVelX=0; if(Math.abs(atomVelY)<1e-4) atomVelY=0; }
 
-      // Órbitas + electrones (siguen siempre)
       for(const o of orbits){
         o.pivot.rotation.y += o.precessSpeed * dt;
         const wob = 0.05 * Math.sin(t*0.6 + o.wobblePhase);
         o.pivot.rotation.x += (wob - o.pivot.rotation.x) * 0.02;
         o.pivot.rotation.z += (wob*0.6 - o.pivot.rotation.z) * 0.02;
-        o.rotator.rotation.z += o.omega * dt;
+        o.rotator.rotation.z += o.omega * dt; // 5/6/7s por vuelta
       }
 
-      // Reposicionar panel si está abierto (lo anclamos al protón)
-      if(panelEl && panelTarget){
-        const pos = projectToScreen(panelTarget); const c = clampPanelPos(pos.x, pos.y);
-        panelEl.style.left = c.x + 'px'; panelEl.style.top = c.y + 'px';
-      }
+      if(panelEl && panelTarget){ const pos=projectToScreen(panelTarget), c=clampPanelPos(pos.x,pos.y); panelEl.style.left=c.x+'px'; panelEl.style.top=c.y+'px'; }
 
       renderer.render(scene, camera);
       requestAnimationFrame(animate);
     }
     animate();
 
-    // Resize
-    window.addEventListener('resize', ()=>{ camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
+    // ====== Resize ======
+    window.addEventListener('resize', ()=>{ camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
   })();
   </script>
 </body>
