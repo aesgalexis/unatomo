@@ -1,87 +1,227 @@
 <!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Átomo — órbitas ampliadas y velocidades variadas</title>
-<style>
-html,body{height:100%;margin:0;background:#0b1020;color:#e5e7eb;font-family:system-ui,Segoe UI,Inter,Arial}
-canvas{display:block;width:100%;height:100%}
-.tip{position:fixed;left:12px;top:12px;font-size:12px;opacity:.85;background:rgba(17,24,39,.55);border:1px solid #263247;padding:8px 10px;border-radius:10px}
-.hud{position:fixed;right:12px;top:12px;display:flex;gap:8px;align-items:center;background:rgba(17,24,39,.55);border:1px solid #263247;padding:8px 10px;border-radius:10px}
-.hud input{width:64px;background:#0f172a;color:#e5e7eb;border:1px solid #334155;border-radius:8px;padding:6px 8px;font-size:13px}
-.hud button{background:#18223a;color:#e5e7eb;border:1px solid #334155;border-radius:8px;padding:6px 10px;cursor:pointer;font-weight:600}
-.hud button:hover{filter:brightness(1.06)}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Átomo — órbitas ampliadas y velocidades variadas</title>
+  <style>
+    html,body{height:100%;margin:0;background:#0b1020;color:#e5e7eb;font-family:system-ui,Segoe UI,Inter,Arial}
+    canvas{display:block;width:100%;height:100%}
+    .tip{position:fixed;left:12px;top:12px;font-size:12px;opacity:.85;background:rgba(17,24,39,.55);border:1px solid #263247;padding:8px 10px;border-radius:10px}
+    .hud{position:fixed;right:12px;top:12px;display:flex;gap:8px;align-items:center;background:rgba(17,24,39,.55);border:1px solid #263247;padding:8px 10px;border-radius:10px}
+    .hud input{width:64px;background:#0f172a;color:#e5e7eb;border:1px solid #334155;border-radius:8px;padding:6px 8px;font-size:13px}
+    .hud button{background:#18223a;color:#e5e7eb;border:1px solid #334155;border-radius:8px;padding:6px 10px;cursor:pointer;font-weight:600}
+    .hud button:hover{filter:brightness(1.06)}
+  </style>
 </head>
 <body>
-<div class="tip">Izq: rotar átomo (inercia) · Der sobre anillo: mover esa órbita (inercia) · Rueda: zoom · R: reset · Z=protones</div>
-<div class="hud">
-<label>Z (protones): <input id="zInput" type="number" min="1" max="118" value="10"></label>
-<button id="applyZ">Aplicar</button>
-</div>
+  <div class="tip">Izq: rotar átomo (inercia) · Der sobre anillo: mover esa órbita (inercia) · Rueda: zoom · R: reset · Z=protones</div>
+  <div class="hud">
+    <label>Z (protones): <input id="zInput" type="number" min="1" max="118" value="10"></label>
+    <button id="applyZ">Aplicar</button>
+  </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
+  <script>
+  (function(){
+    // === Escena/cámara/renderer ===
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0b1020);
 
-<script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
-<script>
-(function(){
-// === Escena/cámara/renderer ===
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x0b1020);
+    const camera = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 2000);
+    camera.position.set(0, 7, 20);
 
+    const renderer = new THREE.WebGLRenderer({antialias:true});
+    renderer.setPixelRatio(Math.min(devicePixelRatio||1, 2));
+    renderer.setSize(innerWidth, innerHeight);
+    document.body.appendChild(renderer.domElement);
 
-const camera = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 2000);
-camera.position.set(0, 7, 20);
+    // Luces
+    scene.add(new THREE.AmbientLight(0xffffff, 0.35));
+    const dir = new THREE.DirectionalLight(0xffffff, 1.0); dir.position.set(5,7,3); scene.add(dir);
 
+    // === Grupos ===
+    const atom = new THREE.Group(); // rotación global del átomo
+    scene.add(atom);
 
-const renderer = new THREE.WebGLRenderer({antialias:true});
-renderer.setPixelRatio(Math.min(devicePixelRatio||1, 2));
-renderer.setSize(innerWidth, innerHeight);
-document.body.appendChild(renderer.domElement);
+    const nucleus = new THREE.Group(); // sólo protones (sin nada dentro)
+    atom.add(nucleus);
 
+    const glow = new THREE.PointLight(0x7dd3fc, 0.7, 50); nucleus.add(glow);
 
-// Luces
-scene.add(new THREE.AmbientLight(0xffffff, 0.35));
-const dir = new THREE.DirectionalLight(0xffffff, 1.0); dir.position.set(5,7,3); scene.add(dir);
+    // Órbitas
+    const orbits = []; // {pivot, ring, holders[], angVel, electronBaseSpeed, precessSpeed, wobblePhase}
 
+    // === Materiales ===
+    const protonMat = new THREE.MeshPhongMaterial({ color: 0xff6b6b, emissive: 0x4d1a1a, emissiveIntensity: 0.35 });
+    const ringMat   = new THREE.MeshBasicMaterial({ color: 0x8b5cf6, wireframe:true, transparent:true, opacity:0.35 });
+    const electronMat = new THREE.MeshPhongMaterial({ color: 0x22d3ee, emissive: 0x0ea5e9, emissiveIntensity: 0.85 });
 
-// === Grupos ===
-const atom = new THREE.Group(); // rotación global del átomo
-scene.add(atom);
+    // === Núcleo: cluster de Z protones ===
+    function setAtomicNumber(Z){
+      while(nucleus.children.length>1){ const obj = nucleus.children[1]; nucleus.remove(obj); obj.geometry?.dispose?.(); obj.material?.dispose?.(); }
+      const rp = 0.18; // radio protón
+      const R  = 0.7 + Math.cbrt(Z)*0.27; // radio visual del núcleo
+      for(let i=0;i<Z;i++){
+        const p = new THREE.Mesh(new THREE.SphereGeometry(rp, 16, 16), protonMat.clone());
+        if(Z===1){ p.position.set(0,0,0); }
+        else {
+          const phi = Math.acos(1 - 2*(i+0.5)/Z);
+          const theta = Math.PI * (1 + Math.sqrt(5)) * (i+0.5);
+          const r = R * (0.85 + Math.random()*0.1);
+          p.position.set(r*Math.sin(phi)*Math.cos(theta), r*Math.cos(phi), r*Math.sin(phi)*Math.sin(theta));
+        }
+        nucleus.add(p);
+      }
+    }
 
+    // === Anillos + electrones ===
+    function createOrbit(radius, electronsCount){
+      const pivot = new THREE.Object3D();
+      pivot.rotation.x = Math.random()*Math.PI;
+      pivot.rotation.y = Math.random()*Math.PI;
 
-const nucleus = new THREE.Group(); // sólo protones (sin nada dentro)
-atom.add(nucleus);
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(radius, Math.max(0.012*radius,0.035), 12, 180), ringMat.clone());
+      pivot.add(ring);
 
+      const holders = [];
+      for(let i=0;i<electronsCount;i++){
+        const holder = new THREE.Object3D(); holder.position.x = radius;
+        holder.rotation.y = (i/electronsCount)*Math.PI*2;
+        const e = new THREE.Mesh(new THREE.SphereGeometry(0.12,24,24), electronMat.clone());
+        holder.add(e); pivot.add(holder); holders.push(holder);
+        // Velocidad ligeramente diferente por electrón
+        holder.userData.spin = (0.5 + Math.random()*1.0); // rad/s
+      }
 
-const glow = new THREE.PointLight(0x7dd3fc, 0.7, 50); nucleus.add(glow);
+      atom.add(pivot);
+      return {
+        pivot,
+        ring,
+        holders,
+        angVel: 0,
+        electronBaseSpeed: 0.6 + Math.random()*0.6, // distinta por anillo
+        precessSpeed: (Math.random()*0.6-0.3)*0.15, // precesión lenta en Y (+/-)
+        wobblePhase: Math.random()*Math.PI*2
+      };
+    }
 
+    // Órbitas más grandes: BASE y GAP aumentados
+    const BASE=3.2, GAP=1.6, config=[2,8,8];
+    for(let i=0;i<config.length;i++){
+      orbits.push(createOrbit(BASE + i*GAP, config[i]));
+    }
 
-// Órbitas
-const orbits = []; // {pivot, ring, holders[], angVel, electronBaseSpeed, precessSpeed, wobblePhase}
+    // === Entrada Z ===
+    setAtomicNumber(10);
+    document.getElementById('applyZ').addEventListener('click', ()=>{
+      let Z = parseInt(document.getElementById('zInput').value,10);
+      if(!Number.isFinite(Z)) return; Z=Math.max(1, Math.min(118, Z));
+      document.getElementById('zInput').value = Z;
+      setAtomicNumber(Z);
+    });
 
+    // === Controles ===
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
 
-// === Materiales ===
-const protonMat = new THREE.MeshPhongMaterial({ color: 0xff6b6b, emissive: 0x4d1a1a, emissiveIntensity: 0.35 });
-const ringMat = new THREE.MeshBasicMaterial({ color: 0x8b5cf6, wireframe:true, transparent:true, opacity:0.35 });
-const electronMat = new THREE.MeshPhongMaterial({ color: 0x22d3ee, emissive: 0x0ea5e9, emissiveIntensity: 0.85 });
+    let draggingAtom=false, draggingOrbit=false, activeOrbit=null;
+    let lastX=0,lastY=0; let atomVelX=0, atomVelY=0; const FRICTION=0.965;
 
+    function getIntersectedOrbit(clientX, clientY){
+      const rect = renderer.domElement.getBoundingClientRect();
+      mouse.x = ((clientX-rect.left)/rect.width)*2 - 1;
+      mouse.y = -((clientY-rect.top)/rect.height)*2 + 1;
+      raycaster.setFromCamera(mouse, camera);
+      const meshes = orbits.map(o=>o.ring);
+      const hits = raycaster.intersectObjects(meshes, false);
+      if(hits.length){
+        const mesh = hits[0].object;
+        return orbits.find(o=>o.ring===mesh) || null;
+      }
+      return null;
+    }
 
-// === Núcleo: cluster de Z protones ===
-function setAtomicNumber(Z){
-while(nucleus.children.length>1){ const obj = nucleus.children[1]; nucleus.remove(obj); obj.geometry?.dispose?.(); obj.material?.dispose?.(); }
-const rp = 0.18; // radio protón
-const R = 0.7 + Math.cbrt(Z)*0.27; // radio visual del núcleo
-for(let i=0;i<Z;i++){
-const p = new THREE.Mesh(new THREE.SphereGeometry(rp, 16, 16), protonMat.clone());
-if(Z===1){ p.position.set(0,0,0); }
-else {
-const phi = Math.acos(1 - 2*(i+0.5)/Z);
-const theta = Math.PI * (1 + Math.sqrt(5)) * (i+0.5);
-const r = R * (0.85 + Math.random()*0.1);
-p.position.set(r*Math.sin(phi)*Math.cos(theta), r*Math.cos(phi), r*Math.sin(phi)*Math.sin(theta));
-}
-nucleus.add(p);
-}
-}
+    renderer.domElement.addEventListener('contextmenu', e=> e.preventDefault());
+
+    renderer.domElement.addEventListener('mousedown', (e)=>{
+      lastX=e.clientX; lastY=e.clientY;
+      if(e.button===2){ // botón derecho: órbita individual
+        const o = getIntersectedOrbit(e.clientX, e.clientY);
+        if(o){ draggingOrbit=true; activeOrbit=o; activeOrbit.angVel = 0; }
+      } else if(e.button===0){ // izquierdo: átomo entero
+        draggingAtom=true; atomVelX=0; atomVelY=0;
+      }
+    });
+
+    window.addEventListener('mouseup', ()=>{ draggingAtom=false; draggingOrbit=false; activeOrbit=null; });
+
+    window.addEventListener('mousemove', (e)=>{
+      const dx=e.clientX-lastX, dy=e.clientY-lastY; lastX=e.clientX; lastY=e.clientY;
+      if(draggingAtom){
+        const k=0.005; atom.rotation.y += dx*k; atom.rotation.x += dy*k;
+        atomVelY = dx*k*60; atomVelX = dy*k*60;
+      } else if(draggingOrbit && activeOrbit){
+        const k=0.01;
+        activeOrbit.pivot.rotation.y += dx*k;
+        activeOrbit.pivot.rotation.x += dy*k*0.15;
+        activeOrbit.angVel = dx*k*60;
+      }
+    }, {passive:true});
+
+    // Zoom
+    let camDist = camera.position.length();
+    renderer.domElement.addEventListener('wheel', e=>{
+      e.preventDefault();
+      camDist *= (1 + Math.sign(e.deltaY)*0.08);
+      camDist = Math.max(5, Math.min(70, camDist));
+      const dirV = camera.position.clone().normalize();
+      camera.position.copy(dirV.multiplyScalar(camDist));
+      camera.lookAt(0,0,0);
+    }, {passive:false});
+
+    // Reset
+    window.addEventListener('keydown', e=>{
+      if(e.key.toLowerCase()==='r'){
+        camera.position.set(0,7,20); camera.lookAt(0,0,0); camDist=20;
+        atom.rotation.set(0,0,0); atomVelX=0; atomVelY=0;
+        orbits.forEach((o,i)=>{ o.pivot.rotation.set(0,0,0); o.angVel=0; });
+      }
+    });
+
+    // === Animación ===
+    const clock = new THREE.Clock();
+    function animate(){
+      const dt = clock.getDelta();
+
+      // Núcleo vivo
+      nucleus.rotation.y += dt*0.25; nucleus.rotation.x += dt*0.12; glow.intensity = 0.5 + 0.15*Math.sin(performance.now()*0.0015);
+
+      // Inercia átomo global
+      if(!draggingAtom){ atom.rotation.x += atomVelX*dt; atom.rotation.y += atomVelY*dt; atomVelX *= FRICTION; atomVelY *= FRICTION; if(Math.abs(atomVelX)<1e-4) atomVelX=0; if(Math.abs(atomVelY)<1e-4) atomVelY=0; }
+
+      // Inercia por órbita + velocidades diferenciadas + wobble y precesión
+      const t = performance.now()*0.001;
+      for(const o of orbits){
+        if(!(draggingOrbit && activeOrbit===o)){ o.pivot.rotation.y += o.angVel*dt; o.angVel *= FRICTION; if(Math.abs(o.angVel)<1e-4) o.angVel=0; }
+        // Precesión lenta en Y (cada anillo distinto)
+        o.pivot.rotation.y += o.precessSpeed * dt;
+        // Wobble suave en X/Z para romper bloque
+        const wob = 0.08; const w = wob * Math.sin(t*0.6 + o.wobblePhase);
+        o.pivot.rotation.x += (w - o.pivot.rotation.x) * 0.02;
+        o.pivot.rotation.z += (w*0.6 - o.pivot.rotation.z) * 0.02;
+        // Giro de electrones: base por anillo + variación por electrón
+        for(const h of o.holders){ h.rotation.y += (o.electronBaseSpeed + h.userData.spin*0.2) * dt; }
+      }
+
+      renderer.render(scene, camera);
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    // Resize
+    window.addEventListener('resize', ()=>{ camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
+  })();
+  </script>
+</body>
 </html>
