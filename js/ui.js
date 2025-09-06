@@ -246,7 +246,7 @@ export function render() {
 
   // DnD
   enableDragAndDrop({ listA, listB, listL, onDrop: onDragDrop });
-  }
+  
   // Mantener los botones sincronizados con el contenido
   updateActionButtons();
   }
