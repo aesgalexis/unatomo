@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Átomo 3D</title>
+  <style>
+    html,body {margin:0; padding:0; height:100%; background:#0b1020; overflow:hidden;}
+    canvas {display:block; width:100%; height:100%}
+    .tip {position:fixed; top:10px; left:10px; color:#ccc; background:rgba(0,0,0,0.4); padding:8px 12px; border-radius:6px; font-family:sans-serif; font-size:13px}
+  </style>
+</head>
+<body>
+  <div class="tip">Arrastra para girar · Rueda para acercar · Pulsa R para resetear</div>
+  <script>
+    // === CARGA CLÁSICA (no módulos) para máxima compatibilidad ===
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lil-gui@0.19/dist/lil-gui.umd.min.js"></script>
+  <script>
+    // Comprobación rápida de WebGL
+    try{ const _t = new THREE.WebGLRenderer(); _t.dispose(); }catch(e){
+      const div = document.createElement('div');
+      div.className = 'nowebgl';
+      div.innerHTML = '<div class="card"><h1>Tu navegador no soporta WebGL</h1><p>Prueba con una versión más reciente de Chrome, Edge, Firefox o Safari.</p></div>';
+      document.body.appendChild(div);
+      throw new Error('WebGL not available');
+    }
+
+    // === Escena básica ===
+    const root = document.getElementById('app');
+    const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    renderer.setSize(innerWidth, innerHeight);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    root.appendChild(renderer.domElement);
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(getComputedStyle(document.documentElement).getPropertyValue('--bg').trim()||'#0b1020');
+
+    const camera = new THREE.PerspectiveCamera(55, innerWidth/innerHeight, 0.1, 2000);
+    camera.position.set(8, 6, 10);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = .08;
+    controls.target.set(0,0,0);
+
+    // Luz
+    const dir = new THREE.DirectionalLight(0xffffff, 1.0);
+    dir.position.set(5,7,3);
+    scene.add(dir);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.25));
+
+    // === Núcleo ===
+    const nucleusGeom = new THREE.IcosahedronGeometry(1.4, 4);
+    const nucleusMat = new THREE.MeshStandardMaterial({
+      color: 0x8893ff,
+      metalness: 0.25,
+      roughness: 0.35,
+      emissive: 0x1a1f5a,
+      emissiveIntensity: 0.35,
+      transparent: true,
+      opacity: 0.9
+    });
+    const nucleus = new THREE.Mesh(nucleusGeom, nucleusMat);
+    nucleus.name = 'nucleus';
+    scene.add(nucleus);
+
+    const nucleusGlow = new THREE.PointLight(0x7dd3fc, 0.36, 30);
+    scene.add(nucleusGlow);
+
+    // === Órbitas y electrones ===
+    const group = new THREE.Group();
+    scene.add(group);
+
+    const rings = []; // {mesh, radius}
+    const electrons = []; // {mesh, ringIndex, angle, speed}
+
+    const ringMatBase = new THREE.MeshBasicMaterial({ color: 0x8b5cf6, transparent:true, opacity:0.35, wireframe:true });
+    const electronMatBase = new THREE.MeshStandardMaterial({ color: 0x22d3ee, emissive:0x0ea5e9, emissiveIntensity:.7, roughness:.2, metalness:.1 });
+
+    function makeRing(radius){
+      const g = new THREE.TorusGeometry(radius, 0.015*radius, 12, 180);
+      const m = new THREE.Mesh(g, ringMatBase.clone());
+      m.rotation.x = Math.random()*Math.PI;
+      m.rotation.y = Math.random()*Math.PI;
+      group.add(m);
+      rings.push({ mesh: m, radius });
+    }
+
+    function makeElectron(ringIndex){
+      const sphere = new THREE.Mesh(new THREE.SphereGeometry(0.12, 24, 24), electronMatBase.clone());
+      const angle = Math.random()*Math.PI*2;
+      const speed = (Math.random()*0.6+0.4) * 0.6; // rad/s base
+      electrons.push({ mesh: sphere, ringIndex, angle, speed });
+      group.add(sphere);
+    }
+
+    const params = {
+      rings: 3,
+      electronsPerRing: [2, 8, 8],
+      ringGap: 1.2,
+      electronSpeed: 1.0,
+      wobble: 0.15,
+      autoRotate: true,
+      trails: false
+    };
+
+    function rebuild(){
+      for(const e of electrons){ group.remove(e.mesh); e.mesh.geometry.dispose(); e.mesh.material.dispose(); }
+      for(const r of rings){ group.remove(r.mesh); r.mesh.geometry.dispose(); r.mesh.material.dispose(); }
+      electrons.length = 0; rings.length = 0;
+
+      const base = 2.3;
+      for(let i=0;i<params.rings;i++){
+        const radius = base + i*params.ringGap;
+        makeRing(radius);
+        const count = (params.electronsPerRing[i] ?? 0) | 0;
+        for(let j=0;j<count;j++) makeElectron(i);
+      }
+    }
+    rebuild();
+
+    // === GUI (lil-gui UMD) ===
+    const gui = new lil.GUI({ title: 'Átomo' });
+    const f1 = gui.addFolder('Órbitas');
+    f1.add(params, 'rings', 1, 7, 1).name('Nº anillos').onChange(v=>{
+      if(params.electronsPerRing.length < v){
+        while(params.electronsPerRing.length < v) params.electronsPerRing.push(2);
+      } else {
+        params.electronsPerRing.length = v;
+      }
+      rebuild();
+      rebuildRingControllers();
+    });
+    f1.add(params, 'ringGap', 0.6, 2.0, 0.05).name('Separación').onChange(rebuild);
+
+    const f2 = gui.addFolder('Electrones');
+    f2.add(params, 'electronSpeed', 0, 3, 0.01).name('Velocidad');
+    f2.add(params, 'wobble', 0, 0.6, 0.005).name('Inclinación viva');
+    f2.add(params, 'trails').name('Estelas (beta)').onChange(toggleTrails);
+
+    const f3 = gui.addFolder('Escena');
+    f3.add(params, 'autoRotate').name('Auto-rotar');
+
+    function rebuildRingControllers(){
+      // lil-gui UMD no expone .controllers igual; recreamos el folder entero
+      gui.removeFolder(f1);
+      const nf1 = gui.addFolder('Órbitas');
+      nf1.add(params, 'rings', 1, 7, 1).name('Nº anillos').onChange(v=>{
+        if(params.electronsPerRing.length < v){
+          while(params.electronsPerRing.length < v) params.electronsPerRing.push(2);
+        } else { params.electronsPerRing.length = v; }
+        rebuild();
+        rebuildRingControllers();
+      });
+      nf1.add(params, 'ringGap', 0.6, 2.0, 0.05).name('Separación').onChange(rebuild);
+      rings.forEach((_,i)=>{
+        nf1.add(params.electronsPerRing, i, 0, 16, 1).name(`e- anillo ${i+1}`).onChange(rebuild);
+      });
+    }
+
+    let trails = [];
+    function toggleTrails(){
+      for(const t of trails){ group.remove(t); t.geometry.dispose(); t.material.dispose(); }
+      trails.length = 0;
+      if(!params.trails) return;
+      for(let i=0;i<electrons.length;i++){
+        const g = new THREE.BufferGeometry();
+        const N = 60;
+        const pos = new Float32Array(N*3);
+        g.setAttribute('position', new THREE.BufferAttribute(pos,3));
+        const m = new THREE.LineBasicMaterial({ color: 0x38bdf8, transparent:true, opacity:.35 });
+        const line = new THREE.Line(g, m);
+        group.add(line);
+        trails.push(line);
+      }
+    }
+
+    const clock = new THREE.Clock();
+    function update(dt){
+      nucleus.rotation.y += dt*0.15;
+      nucleus.rotation.x += dt*0.08;
+      nucleusGlow.intensity = 0.3 + 0.1*Math.sin(performance.now()*0.0015);
+
+      if(params.autoRotate){ group.rotation.y += dt*0.25; }
+
+      rings.forEach((r,i)=>{
+        const t = performance.now()*0.0004 + i*0.7;
+        r.mesh.rotation.x += (Math.sin(t)*params.wobble - r.mesh.rotation.x) * 0.02;
+        r.mesh.rotation.z += (Math.cos(t*1.2)*params.wobble - r.mesh.rotation.z) * 0.02;
+      });
+
+      electrons.forEach((e,idx)=>{
+        const ring = rings[e.ringIndex];
+        if(!ring) return;
+        const radius = ring.radius;
+        e.angle += e.speed * params.electronSpeed * dt;
+        const m = ring.mesh.matrixWorld;
+        const x = Math.cos(e.angle)*radius;
+        const y = 0;
+        const z = Math.sin(e.angle)*radius;
+        const p = new THREE.Vector3(x,y,z).applyMatrix4(m);
+        e.mesh.position.copy(p);
+
+        if(params.trails){
+          const line = trails[idx];
+          if(line){
+            const attr = line.geometry.attributes.position;
+            const arr = attr.array;
+            for(let i=0;i<arr.length-3;i++) arr[i] = arr[i+3];
+            arr[arr.length-3]=p.x; arr[arr.length-2]=p.y; arr[arr.length-1]=p.z;
+            attr.needsUpdate = true;
+          }
+        }
+      });
+    }
+
+    function render(){
+      const dt = clock.getDelta();
+      controls.update();
+      update(dt);
+      renderer.render(scene, camera);
+      requestAnimationFrame(render);
+    }
+    render();
+
+    addEventListener('resize', ()=>{
+      camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix();
+      renderer.setSize(innerWidth, innerHeight);
+    });
+
+    function resetView(){
+      camera.position.set(8,6,10);
+      controls.target.set(0,0,0);
+      controls.update();
+    }
+    document.getElementById('resetBtn').addEventListener('click', resetView);
+    addEventListener('keydown', (e)=>{ if(e.key.toLowerCase()==='r') resetView(); });
+
+    document.getElementById('exportPNG').addEventListener('click', (e)=>{
+      e.preventDefault();
+      const url = renderer.domElement.toDataURL('image/png');
+      const a = document.createElement('a');
+      a.href = url; a.download = 'atom.png'; a.click();
+    });
+  </script>
+</body>
+</html>
