@@ -124,72 +124,68 @@
   }
 
   function showPanelFor(proton){
-    var pos=projectToScreen(proton), c=clampPos(pos.x,pos.y);
-    if(panelEl){ panelEl.remove(); panelEl=null; }
-    panelEl=document.createElement('div');
-    panelEl.style.cssText='position:fixed;width:400px;height:400px;background:rgba(0,0,0,.35);border:1px solid #263247;border-radius:12px;backdrop-filter:blur(2px);z-index:20;box-shadow:0 10px 30px rgba(0,0,0,.35);overflow:hidden;left:'+c.x+'px;top:'+c.y+'px;';
+  var pos=projectToScreen(proton), c=clampPos(pos.x,pos.y);
+  closePanel(); // cierra si había uno
 
-    var payload = proton.userData && proton.userData.payload ? proton.userData.payload : {title:'AB', body:'', isDefault:false, ts:Date.now()};
-    var title = payload.title || 'AB';
-    if (payload.isDefault) title += ' — ' + formatTs(payload.ts);
+  panelEl=document.createElement('div');
+  panelEl.style.cssText=[
+    'position:fixed',
+    'width:500px','height:500px',
+    'background:rgba(0,0,0,.35)',
+    'border:1px solid #263247','border-radius:12px',
+    'backdrop-filter:blur(2px)','z-index:20',
+    'box-shadow:0 10px 30px rgba(0,0,0,.35)',
+    'overflow:hidden',
+    'left:'+c.x+'px','top:'+c.y+'px'
+  ].join(';');
 
-    panelEl.innerHTML = ''
-      + '<header style="display:flex;justify-content:space-between;align-items:center;font-size:12px;padding:8px 10px;background:rgba(15,23,42,.4)">'+
-        '<div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:340px">'+ title +'</div>'+
-        '<span class="close" style="cursor:pointer;padding:2px 8px;border:1px solid #334155;border-radius:8px">×</span>'+
-      '</header>'+
-      '<div id="panelContent" style="padding:10px;font-size:12px;color:#cbd5e1;white-space:pre-wrap;overflow:hidden;height:calc(400px - 38px);line-height:1.35"></div>';
+  var payload = (proton.userData && proton.userData.payload) ? proton.userData.payload : {title:'AB', body:''};
+  var title = payload.title || 'AB';         // título EXACTO
+  var body  = (payload.body || '').trim();   // contenido del textarea que mandamos desde index
 
-    document.body.appendChild(panelEl);
+  panelEl.innerHTML = ''
+    + '<header style="display:flex;justify-content:space-between;align-items:center;height:42px;line-height:42px;font-size:12px;padding:0 10px;background:rgba(15,23,42,.4)">' 
+      + '<div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:440px">'
+        + title
+      + '</div>'
+      + '<span class="close" style="cursor:pointer;padding:2px 8px;border:1px solid #334155;border-radius:8px;margin-left:8px">×</span>'
+    + '</header>'
+    + '<div id="panelContent" style="padding:10px;font-size:12px;color:#cbd5e1;white-space:pre-wrap;overflow:hidden;height:calc(500px - 42px);line-height:1.35"></div>';
 
-    var cont = document.getElementById('panelContent');
-    var full = (payload.body || '').trim();
+  document.body.appendChild(panelEl);
 
-    // Ajuste sin scroll: recorta hasta que quepa
-    function fits(){ return cont.scrollHeight <= cont.clientHeight + 1; }
-    function setTxt(t){ cont.textContent = t; }
-    // Empezamos con el texto completo
-    setTxt(full);
-    if (!fits()){
-      // Búsqueda decreciente: recortamos por bloques para no hacer miles de pasos
-      var t = full;
-      var min = 0, max = t.length, iter=0;
-      // Aproximación binaria sobre longitud
-      while (min < max && iter < 30){
-        iter++;
-        var mid = Math.floor((min + max) / 2);
-        setTxt(t.slice(0, mid) + '…');
-        if (fits()) min = mid + 1; else max = mid - 1;
-      }
-      // Ajuste fino
-      var best = Math.max(0, max - 2);
-      setTxt(t.slice(0, best) + (best < t.length ? '…' : ''));
-      while (!fits() && best > 0){
-        best--;
-        setTxt(t.slice(0, best) + '…');
-      }
+  var cont = document.getElementById('panelContent');
+
+  // Ajuste sin scroll: recortar con “…” hasta que quepa
+  function fits(){ return cont.scrollHeight <= cont.clientHeight + 1; }
+  function setTxt(t){ cont.textContent = t; }
+
+  setTxt(body);
+  if (!fits()){
+    var t = body, min = 0, max = t.length, iter=0;
+    // Búsqueda binaria por longitud
+    while (min < max && iter < 30){
+      iter++;
+      var mid = Math.floor((min + max) / 2);
+      setTxt(t.slice(0, mid) + '…');
+      if (fits()) min = mid + 1; else max = mid - 1;
     }
-
-    panelEl.querySelector('.close').addEventListener('click', function(){
-      panelEl.remove(); panelEl=null; panelTarget=null; nucleusPaused=false;
-    });
-
-    panelTarget = proton; nucleusPaused = true;
+    var best = Math.max(0, max - 2);
+    setTxt(t.slice(0, best) + (best < t.length ? '…' : ''));
+    // Ajuste fino
+    while (!fits() && best > 0){
+      best--;
+      setTxt(t.slice(0, best) + '…');
+    }
   }
 
-  renderer.domElement.addEventListener('mousedown', function(e){
-    if(e.button!==0) return;
-    var r=renderer.domElement.getBoundingClientRect();
-    mouse.x=((e.clientX-r.left)/r.width)*2-1; mouse.y=-((e.clientY-r.top)/r.height)*2+1;
-    var hits = hitProtons();
-    if(hits.length){ showPanelFor(hits[0].object); return; }
-    draggingAtom=true; lastX=e.clientX; lastY=e.clientY; atomVelX=0; atomVelY=0;
-  });
-  function closePanel(){
-    if(panelEl){ panelEl.remove(); panelEl=null; }
-    panelTarget = null;
-    nucleusPaused = false;
-  }
+  // Cierre con “×”
+  panelEl.querySelector('.close').addEventListener('click', closePanel);
+
+  panelTarget = proton; 
+  nucleusPaused = true;
+}
+
 
   // ===== Rotación/zoom/reset =====
   var draggingAtom=false, lastX=0,lastY=0; var atomVelX=0, atomVelY=0; var FRICTION=0.965;
