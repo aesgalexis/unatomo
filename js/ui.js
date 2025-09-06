@@ -394,20 +394,22 @@ function updateActionButtons() {
   }
 
   // Visualize: solo si hay ≥1 AB en A/B/L
-  if (visualizeBtn) {
-    const hasAB = Array.isArray(state.items) && state.items.length > 0;
-    const off = !hasAB;
+  {
+  const vBtns = document.querySelectorAll('#visualizeAtom'); // maneja duplicados
+  const hasAB = Array.isArray(state.items) && state.items.some(x => x.where === 'A' || x.where === 'B' || x.where === 'L');
+  const off = !hasAB;
 
+  vBtns.forEach(btn => {
+    if (!btn) return;
     // estado funcional
-    visualizeBtn.disabled = off;
-
-    // estado visual (igual que otros botones desactivados)
-    visualizeBtn.classList.toggle('disabled', off);
-    visualizeBtn.classList.toggle('is-disabled', off);
-    visualizeBtn.setAttribute('aria-disabled', off ? 'true' : 'false');
-    visualizeBtn.title = hasAB ? "" : "Nothing to visualize, add something";
+    btn.disabled = off;
+    // estado visual
+    btn.classList.toggle('disabled', off);
+    btn.classList.toggle('is-disabled', off);
+    btn.setAttribute('aria-disabled', off ? 'true' : 'false');
+    btn.title = hasAB ? '' : 'Nothing to visualize, add something';
+    });
   }
-}
 
 function refreshIsotopeNumber() {
   if (!isotopeEl) return;
