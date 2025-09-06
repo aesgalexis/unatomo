@@ -200,16 +200,32 @@
   nucleusPaused = true;
 }
 
-  // Cierre con “×”
-  panelEl.querySelector('.close').addEventListener('click', closePanel);
-
-  panelTarget = proton; 
-  nucleusPaused = true;
-}
-
-
   // ===== Rotación/zoom/reset =====
   var draggingAtom=false, lastX=0,lastY=0; var atomVelX=0, atomVelY=0; var FRICTION=0.965;
+
+  renderer.domElement.addEventListener('mousedown', function(e){
+  if(e.button !== 0) return; // solo botón izquierdo
+  ndc(e); // actualiza mouse.x/y en NDC
+
+  var hits = hitProtons();
+  if(hits.length){
+    // Abrir/sustituir panel para el protón clicado
+    showPanelFor(hits[0].object);
+    return;
+  }
+
+  // Si hay panel abierto y haces clic en el canvas (fuera del panel), ciérralo
+  if(panelEl){
+    closePanel();
+    return;
+  }
+
+  // Si no hay panel y no has clicado un protón → rotación con inercia
+  draggingAtom = true;
+  lastX = e.clientX; lastY = e.clientY;
+  atomVelX = 0; atomVelY = 0;
+});
+  
   window.addEventListener('mouseup', function(){ draggingAtom=false; });
   window.addEventListener('mousemove', function(e){ if(!draggingAtom) return; var dx=e.clientX-lastX, dy=e.clientY-lastY; lastX=e.clientX; lastY=e.clientY; var k=0.005; atom.rotation.y+=dx*k; atom.rotation.x+=dy*k; atomVelY=dx*k*60; atomVelX=dy*k*60; }, {passive:true});
   var camDist=camera.position.length();
