@@ -4,8 +4,46 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>unátomo</title>
-<button id="visualizeAtom" style="position:fixed;right:12px;bottom:12px;z-index:9999;padding:8px 12px;border-radius:10px;border:1px solid #334155;background:#18223a;color:#e5e7eb;font-weight:600;cursor:pointer">Visualize</button>    <link rel="stylesheet" href="assets/styles.css" />
-  </head>
+<!-- Botón en cualquier sitio del DOM -->
+<button id="visualizeAtom" style="position:fixed;right:12px;bottom:12px;z-index:9999;padding:8px 12px;border-radius:10px;border:1px solid #334155;background:#18223a;color:#e5e7eb;font-weight:600;cursor:pointer">Visualize</button>
+
+
+<!-- Script recolector: clasifica ABs por main/side/landing y guarda su texto -->
+<script>
+(function(){
+const SELECTORS = {
+ab: ['.AB', '.ab', '[data-ab]', '[data-type="ab"]'],
+containers: {
+main: ['#main', '.main', '[data-area="main"]', 'main'],
+side: ['#side', '.side', '.sidebar', '[data-area="side"]', 'aside'],
+landing: ['#landing', '.landing', '[data-area="landing"]']
+}
+};
+function classify(el){
+for(const s of SELECTORS.containers.main) if(el.closest(s)) return 'main';
+for(const s of SELECTORS.containers.side) if(el.closest(s)) return 'side';
+for(const s of SELECTORS.containers.landing) if(el.closest(s)) return 'landing';
+return 'main';
+}
+function collectABs(){
+const nodes = new Set();
+for(const sel of SELECTORS.ab){ document.querySelectorAll(sel).forEach(n=>nodes.add(n)); }
+const arr = [];
+nodes.forEach((el)=>{
+const where = classify(el);
+const text = (el.innerText || el.textContent || '').trim().replace(/\s+/g,' ').slice(0, 1200); // muestra en panel
+arr.push({ where, text });
+});
+return arr;
+}
+document.getElementById('visualizeAtom')?.addEventListener('click', ()=>{
+const ab = collectABs();
+const data = { ab, ts: Date.now() };
+try{ sessionStorage.setItem('atomABData', JSON.stringify(data)); }catch(_){ /* storage lleno o bloqueado */ }
+location.href = '/atom.html';
+});
+})();
+</script>  </head>
   <body>
     <div class="layout">
       <!-- Columna izquierda -->
