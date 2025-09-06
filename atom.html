@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Átomo — órbitas ampliadas y velocidades variadas</title>
+  <title>Átomo — electrones recorriendo órbitas</title>
   <style>
     html,body{height:100%;margin:0;background:#0b1020;color:#e5e7eb;font-family:system-ui,Segoe UI,Inter,Arial}
     canvas{display:block;width:100%;height:100%}
@@ -50,7 +50,7 @@
     const glow = new THREE.PointLight(0x7dd3fc, 0.7, 50); nucleus.add(glow);
 
     // Órbitas
-    const orbits = []; // {pivot, ring, holders[], angVel, electronBaseSpeed, precessSpeed, wobblePhase}
+    const orbits = []; // {pivot, ring, electrons[], radius, angVel, electronBaseSpeed, precessSpeed, wobblePhase}
 
     // === Materiales ===
     const protonMat = new THREE.MeshPhongMaterial({ color: 0xff6b6b, emissive: 0x4d1a1a, emissiveIntensity: 0.35 });
@@ -75,7 +75,7 @@
       }
     }
 
-    // === Anillos + electrones ===
+    // === Anillos + electrones (electrones se mueven a lo largo de la órbita) ===
     function createOrbit(radius, electronsCount){
       const pivot = new THREE.Object3D();
       pivot.rotation.x = Math.random()*Math.PI;
@@ -84,30 +84,34 @@
       const ring = new THREE.Mesh(new THREE.TorusGeometry(radius, Math.max(0.012*radius,0.035), 12, 180), ringMat.clone());
       pivot.add(ring);
 
-      const holders = [];
+      const electrons = [];
       for(let i=0;i<electronsCount;i++){
-        const holder = new THREE.Object3D(); holder.position.x = radius;
-        holder.rotation.y = (i/electronsCount)*Math.PI*2;
         const e = new THREE.Mesh(new THREE.SphereGeometry(0.12,24,24), electronMat.clone());
-        holder.add(e); pivot.add(holder); holders.push(holder);
-        // Velocidad ligeramente diferente por electrón
-        holder.userData.spin = (0.5 + Math.random()*1.0); // rad/s
+        // arrancamos en fase repartida
+        const angle = (i/electronsCount)*Math.PI*2;
+        e.userData.angle = angle;
+        e.userData.dspeed = (Math.random()*0.6 - 0.3) * 0.6; // variación por electrón
+        // posición inicial en el plano local del anillo
+        e.position.set(radius*Math.cos(angle), 0, radius*Math.sin(angle));
+        pivot.add(e);
+        electrons.push(e);
       }
 
       atom.add(pivot);
       return {
         pivot,
         ring,
-        holders,
+        electrons,
+        radius,
         angVel: 0,
-        electronBaseSpeed: 0.6 + Math.random()*0.6, // distinta por anillo
-        precessSpeed: (Math.random()*0.6-0.3)*0.15, // precesión lenta en Y (+/-)
+        electronBaseSpeed: 0.8 + Math.random()*0.7, // distinta por anillo
+        precessSpeed: (Math.random()*0.6-0.3)*0.15,
         wobblePhase: Math.random()*Math.PI*2
       };
     }
 
-    // Órbitas más grandes: BASE y GAP aumentados
-    const BASE=3.2, GAP=1.6, config=[2,8,8];
+    // Órbitas más grandes
+    const BASE=3.2, GAP=1.8, config=[2,8,8];
     for(let i=0;i<config.length;i++){
       orbits.push(createOrbit(BASE + i*GAP, config[i]));
     }
@@ -200,18 +204,21 @@
       // Inercia átomo global
       if(!draggingAtom){ atom.rotation.x += atomVelX*dt; atom.rotation.y += atomVelY*dt; atomVelX *= FRICTION; atomVelY *= FRICTION; if(Math.abs(atomVelX)<1e-4) atomVelX=0; if(Math.abs(atomVelY)<1e-4) atomVelY=0; }
 
-      // Inercia por órbita + velocidades diferenciadas + wobble y precesión
+      // Órbitas: inercia + precesión + wobble + movimiento de electrones a lo largo del anillo
       const t = performance.now()*0.001;
       for(const o of orbits){
         if(!(draggingOrbit && activeOrbit===o)){ o.pivot.rotation.y += o.angVel*dt; o.angVel *= FRICTION; if(Math.abs(o.angVel)<1e-4) o.angVel=0; }
-        // Precesión lenta en Y (cada anillo distinto)
         o.pivot.rotation.y += o.precessSpeed * dt;
-        // Wobble suave en X/Z para romper bloque
         const wob = 0.08; const w = wob * Math.sin(t*0.6 + o.wobblePhase);
         o.pivot.rotation.x += (w - o.pivot.rotation.x) * 0.02;
         o.pivot.rotation.z += (w*0.6 - o.pivot.rotation.z) * 0.02;
-        // Giro de electrones: base por anillo + variación por electrón
-        for(const h of o.holders){ h.rotation.y += (o.electronBaseSpeed + h.userData.spin*0.2) * dt; }
+
+        // Electrones recorren la órbita (posición local en el plano del anillo)
+        for(const e of o.electrons){
+          e.userData.angle += (o.electronBaseSpeed + e.userData.dspeed) * dt;
+          const a = e.userData.angle;
+          e.position.set(o.radius*Math.cos(a), 0, o.radius*Math.sin(a));
+        }
       }
 
       renderer.render(scene, camera);
