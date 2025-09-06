@@ -3,171 +3,171 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Átomo — unatomo</title>
+  <title>Átomo — demo sólida</title>
   <style>
-    :root{ --bg:#0b1020; --text:#e5e7eb; --muted:#94a3b8; }
-    html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,Segoe UI,Inter,Roboto,Arial}
+    html,body{height:100%;margin:0;background:#0b1020;color:#e5e7eb;font-family:system-ui,Segoe UI,Inter,Arial}
     #app{position:fixed;inset:0}
     canvas{display:block;width:100%;height:100%}
-    .tip{position:fixed;right:14px;top:14px;z-index:10;font-size:12.5px;color:var(--muted);background:rgba(17,24,39,.55);border:1px solid #223052;padding:8px 10px;border-radius:12px}
-    .hud{position:fixed;left:16px;bottom:16px;z-index:10;display:flex;gap:8px;align-items:center;background:rgba(17,24,39,.6);backdrop-filter:blur(8px);border:1px solid #223052;padding:8px 10px;border-radius:12px}
-    .hud a{color:var(--muted);text-decoration:none;font-size:12px}
-    .hud a:hover{text-decoration:underline}
-    .fab{position:fixed;right:16px;bottom:16px;z-index:11;border:1px solid #223052;background:#18223a;color:var(--text);border-radius:999px;padding:10px 12px;font-weight:600;cursor:pointer}
-    .fab:hover{filter:brightness(1.06);transform:translateY(-1px)}
-    .nowebgl{position:fixed;inset:0;display:grid;place-items:center;padding:24px;text-align:center}
-    .nowebgl .card{max-width:680px;background:linear-gradient(180deg,#0a0f20,#0b1224);border:1px solid #263247;border-radius:16px;padding:18px}
+    .tip{position:fixed;right:12px;top:12px;font-size:12px;opacity:.8;background:rgba(17,24,39,.55);border:1px solid #263247;padding:8px 10px;border-radius:10px}
+    .fab{position:fixed;right:12px;bottom:12px;border:1px solid #263247;background:#18223a;color:#e5e7eb;border-radius:999px;padding:8px 12px;cursor:pointer}
   </style>
 </head>
 <body>
   <div id="app"></div>
-  <div class="tip">Arrastra para <b>girar</b>, rueda para <b>acercar</b>. Pulsa <b>R</b> para recentrar.</div>
-  <button class="fab" id="resetBtn" title="Recentrar (R)">Recentrar</button>
-  <div class="hud">
-    <a href="./">← volver</a>
-    <span style="opacity:.45">·</span>
-    <a href="#" id="exportPNG">capturar PNG</a>
-  </div>
+  <div class="tip">Arrastra para girar · Rueda para zoom · R para reset</div>
+  <button class="fab" id="resetBtn">Recentrar</button>
 
-  <!-- Carga clásica (sin módulos) -->
-  <script>
-    // Si WebGL no está disponible, mostramos un aviso y paramos
-    try{ const _t = document.createElement('canvas').getContext('webgl'); if(!_t) throw 0; }catch(e){
-      const div = document.createElement('div');
-      div.className = 'nowebgl';
-      div.innerHTML = '<div class="card"><h1>Tu navegador no soporta WebGL</h1><p>Prueba con una versión más reciente de Chrome, Edge, Firefox o Safari.</p></div>';
-      document.body.appendChild(div);
-      throw new Error('WebGL not available');
-    }
-  </script>
+  <!-- THREE r149 (última estable con <script src>) -->
   <script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
-  
   <script>
-    // === Escena básica ===
-    const root = document.getElementById('app') || document.body; // fallback si falta #app
-    const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
-    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-    renderer.setSize(innerWidth, innerHeight);
+  (function(){
+    // --- Setup básico ---
+    const root = document.getElementById('app') || document.body;
+    const renderer = new THREE.WebGLRenderer({antialias:true});
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
     root.appendChild(renderer.domElement);
 
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(getComputedStyle(document.documentElement).getPropertyValue('--bg').trim()||'#0b1020');
+    const scene  = new THREE.Scene();
+    scene.background = new THREE.Color(0x0b1020);
 
-    const camera = new THREE.PerspectiveCamera(55, innerWidth/innerHeight, 0.1, 2000);
-    camera.position.set(8, 6, 10);
+    const camera = new THREE.PerspectiveCamera(55, window.innerWidth/window.innerHeight, 0.1, 2000);
+    let camDist = 14;  // distancia inicial
+    camera.position.set(8, 6, camDist);
+    camera.lookAt(0,0,0);
 
-    // Controles propios (drag para rotar, rueda para zoom)
-    let isDown=false, lastX=0,lastY=0; let rotY=0, rotX=0; let distance=14;
-    const target = new THREE.Vector3(0,0,0);
-    function updateCamera(){
-      const phi = THREE.MathUtils.degToRad(30+rotX);
-      const theta = THREE.MathUtils.degToRad(40+rotY);
-      camera.position.set(
-        target.x + distance*Math.sin(phi)*Math.cos(theta),
-        target.y + distance*Math.cos(phi),
-        target.z + distance*Math.sin(phi)*Math.sin(theta)
-      );
-      camera.lookAt(target);
-    }
-    updateCamera();
-    renderer.domElement.addEventListener('mousedown', (e)=>{ isDown=true; lastX=e.clientX; lastY=e.clientY; });
-    addEventListener('mouseup', ()=>{ isDown=false; });
-    addEventListener('mousemove', (e)=>{
-      if(!isDown) return;
-      const dx=e.clientX-lastX, dy=e.clientY-lastY; lastX=e.clientX; lastY=e.clientY;
-      rotY += dx*0.25; rotX += dy*0.25; rotX=Math.max(-85, Math.min(85, rotX));
-      updateCamera();
-    });
-    renderer.domElement.addEventListener('wheel',(e)=>{ e.preventDefault(); distance *= (1 + Math.sign(e.deltaY)*0.08); distance=Math.max(4, Math.min(40, distance)); updateCamera(); }, {passive:false});
-    controls.enableDamping = true;
-    controls.dampingFactor = .08;
-    controls.target.set(0,0,0);
+    // Luces sencillas (Phong es muy tolerante)
+    scene.add(new THREE.AmbientLight(0xffffff, 0.35));
+    const dir = new THREE.DirectionalLight(0xffffff, 1.0);
+    dir.position.set(5,7,3);
+    scene.add(dir);
 
-    // Luces
-    const dir = new THREE.DirectionalLight(0xffffff, 1.0); dir.position.set(5,7,3); scene.add(dir);
-    scene.add(new THREE.AmbientLight(0xffffff, 0.25));
+    // --- Grupo raíz del átomo (lo giramos con el ratón) ---
+    const atom = new THREE.Group();
+    scene.add(atom);
 
     // Núcleo
     const nucleus = new THREE.Mesh(
-      new THREE.IcosahedronGeometry(1.4, 3),
-      new THREE.MeshStandardMaterial({ color: 0x8893ff, metalness: 0.25, roughness: 0.35, emissive: 0x1a1f5a, emissiveIntensity: 0.35, transparent: true, opacity: 0.9 })
+      new THREE.SphereGeometry(1.2, 32, 32),
+      new THREE.MeshPhongMaterial({ color: 0x8893ff, shininess: 60, emissive: 0x1a1f5a, emissiveIntensity: 0.35 })
     );
-    scene.add(nucleus);
-    const nucleusGlow = new THREE.PointLight(0x7dd3fc, 0.36, 30); scene.add(nucleusGlow);
+    atom.add(nucleus);
 
-    // Grupo del átomo
-    const group = new THREE.Group(); scene.add(group);
+    // Pequeño glow
+    const glow = new THREE.PointLight(0x7dd3fc, 0.6, 40);
+    atom.add(glow);
 
-    // Materiales
-    const ringMat = new THREE.MeshBasicMaterial({ color: 0x8b5cf6, transparent:true, opacity:0.35, wireframe:true });
-    const electronMat = new THREE.MeshStandardMaterial({ color: 0x22d3ee, emissive:0x0ea5e9, emissiveIntensity:.7, roughness:.2, metalness:.1 });
+    // --- Órbitas y electrones usando pivotes (sólido y simple) ---
+    const RINGS = 3;
+    const GAP   = 1.2;
+    const BASE  = 2.3;
+    const electrons = []; // {pivot, sphere, speed}
 
-    const rings = []; const electrons = [];
+    function addRing(radius, electronsCount){
+      // Un torus finito como órbita
+      const ring = new THREE.Mesh(
+        new THREE.TorusGeometry(radius, Math.max(0.015*radius, 0.03), 12, 180),
+        new THREE.MeshBasicMaterial({ color: 0x8b5cf6, wireframe:true, transparent:true, opacity:0.35 })
+      );
 
-    function makeRing(radius){
-      const g = new THREE.TorusGeometry(radius, 0.015*radius, 12, 180);
-      const m = new THREE.Mesh(g, ringMat.clone());
-      m.rotation.x = Math.random()*Math.PI;
-      m.rotation.y = Math.random()*Math.PI;
-      group.add(m);
-      rings.push({ mesh: m, radius });
-    }
-    function makeElectron(ringIndex){
-      const sphere = new THREE.Mesh(new THREE.SphereGeometry(0.12, 24, 24), electronMat.clone());
-      const angle = Math.random()*Math.PI*2;
-      const speed = (Math.random()*0.6+0.4) * 0.6; // rad/s base
-      electrons.push({ mesh: sphere, ringIndex, angle, speed });
-      group.add(sphere);
-    }
+      // Pivot independiente por anillo (lo rotamos para orbitar)
+      const pivot = new THREE.Object3D();
 
-    // Construcción fija (sin GUI por ahora)
-    const ringsCount = 3; const electronsPerRing = [2,8,8]; const ringGap = 1.2;
-    (function build(){
-      const base = 2.3;
-      for(let i=0;i<ringsCount;i++){
-        const radius = base + i*ringGap;
-        makeRing(radius);
-        const count = electronsPerRing[i] || 0;
-        for(let j=0;j<count;j++) makeElectron(i);
+      // Orientación aleatoria del plano del anillo
+      pivot.rotation.x = Math.random()*Math.PI;
+      pivot.rotation.y = Math.random()*Math.PI;
+
+      pivot.add(ring);
+      atom.add(pivot);
+
+      // Electrones de este anillo
+      for(let i=0;i<electronsCount;i++){
+        const e = new THREE.Mesh(
+          new THREE.SphereGeometry(0.12, 24, 24),
+          new THREE.MeshPhongMaterial({ color: 0x22d3ee, emissive: 0x0ea5e9, emissiveIntensity: 0.8 })
+        );
+        // Posición inicial sobre +X del anillo y desfase angular para repartirlos
+        const holder = new THREE.Object3D();
+        holder.position.x = radius;
+        const phase = (i/electronsCount)*Math.PI*2;
+        holder.rotation.y = phase;
+        pivot.add(holder);
+        holder.add(e);
+
+        electrons.push({
+          pivot, holder, sphere:e,
+          speed: (0.4 + Math.random()*0.6) * 0.8  // rad/s
+        });
       }
-    })();
 
-    // Animación
-    const clock = new THREE.Clock();
-    function update(dt){
-      nucleus.rotation.y += dt*0.15;
-      nucleus.rotation.x += dt*0.08;
-      nucleusGlow.intensity = 0.3 + 0.1*Math.sin(performance.now()*0.0015);
-      group.rotation.y += dt*0.25;
-      rings.forEach((r,i)=>{
-        const t = performance.now()*0.0004 + i*0.7;
-        r.mesh.rotation.x += (Math.sin(t)*0.12 - r.mesh.rotation.x) * 0.02;
-        r.mesh.rotation.z += (Math.cos(t*1.2)*0.12 - r.mesh.rotation.z) * 0.02;
-      });
-      electrons.forEach((e)=>{
-        const ring = rings[e.ringIndex]; if(!ring) return;
-        const radius = ring.radius; e.angle += e.speed * dt;
-        const m = ring.mesh.matrixWorld;
-        const x = Math.cos(e.angle)*radius; const y = 0; const z = Math.sin(e.angle)*radius;
-        const p = new THREE.Vector3(x,y,z).applyMatrix4(m);
-        e.mesh.position.copy(p);
-      });
+      return pivot;
     }
-    function render(){
-      const dt = clock.getDelta();
-      
-      update(dt);
-      renderer.render(scene, camera);
-      requestAnimationFrame(render);
-    }
-    render();
 
-    // Resize + reset + export
-    addEventListener('resize', ()=>{ camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
-    function resetView(){ rotX=0; rotY=0; distance=14; updateCamera(); }
+    // Construcción del átomo
+    const electronsPerRing = [2, 8, 8]; // editable
+    for(let i=0;i<RINGS;i++){
+      const radius = BASE + i*GAP;
+      addRing(radius, electronsPerRing[i] || 0);
+    }
+
+    // --- Controles de ratón (rotación grupo) + zoom rueda ---
+    let isDown=false, lastX=0, lastY=0;
+    renderer.domElement.addEventListener('mousedown', e => { isDown=true; lastX=e.clientX; lastY=e.clientY; });
+    window.addEventListener('mouseup',   ()=> { isDown=false; });
+    window.addEventListener('mousemove', e => {
+      if(!isDown) return;
+      const dx = e.clientX-lastX, dy = e.clientY-lastY; lastX=e.clientX; lastY=e.clientY;
+      atom.rotation.y += dx*0.005;
+      atom.rotation.x += dy*0.005;
+    }, {passive:true});
+    renderer.domElement.addEventListener('wheel', e => {
+      e.preventDefault();
+      camDist *= (1 + Math.sign(e.deltaY)*0.08);
+      camDist = Math.max(4, Math.min(40, camDist));
+      // Actualiza cámara manteniendo dirección hacia el origen
+      const dirVec = new THREE.Vector3().subVectors(camera.position, new THREE.Vector3(0,0,0)).normalize();
+      camera.position.copy(dirVec.multiplyScalar(camDist));
+      camera.lookAt(0,0,0);
+    }, {passive:false});
+
+    // Reset
+    function resetView(){
+      atom.rotation.set(0,0,0);
+      camDist = 14;
+      camera.position.set(8,6,camDist);
+      camera.lookAt(0,0,0);
+    }
     document.getElementById('resetBtn').addEventListener('click', resetView);
-    addEventListener('keydown', (e)=>{ if(e.key.toLowerCase()==='r') resetView(); });
-    document.getElementById('exportPNG').addEventListener('click', (e)=>{ e.preventDefault(); const url = renderer.domElement.toDataURL('image/png'); const a = document.createElement('a'); a.href = url; a.download = 'atom.png'; a.click(); });
+    window.addEventListener('keydown', e => { if(e.key.toLowerCase()==='r') resetView(); });
+
+    // --- Animación ---
+    const clock = new THREE.Clock();
+    function animate(){
+      const dt = clock.getDelta();
+
+      // Giro lento del núcleo y parpadeo de luz
+      nucleus.rotation.y += dt*0.25;
+      nucleus.rotation.x += dt*0.12;
+      glow.intensity = 0.45 + 0.15*Math.sin(performance.now()*0.0015);
+
+      // Orbitar electrones (giramos el holder sobre su pivot)
+      for(const e of electrons){
+        e.holder.rotation.y += e.speed * dt;
+      }
+
+      renderer.render(scene, camera);
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    // Resize
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+  })();
   </script>
 </body>
 </html>
