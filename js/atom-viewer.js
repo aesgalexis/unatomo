@@ -126,6 +126,13 @@
   function showPanelFor(proton){
   var pos=projectToScreen(proton), c=clampPos(pos.x,pos.y);
   closePanel(); // cierra si había uno
+    
+  // Cierra si haces click en cualquier sitio que NO sea el panel
+  document.addEventListener('mousedown', function(e){
+  if(!panelEl) return;
+  if(panelEl.contains(e.target)) return; // clic dentro del panel → no cerrar aquí (la “×” ya cierra)
+  closePanel();
+  }, true); // captura para que cierre antes de que otros manejadores actúen
 
   panelEl=document.createElement('div');
   panelEl.style.cssText=[
