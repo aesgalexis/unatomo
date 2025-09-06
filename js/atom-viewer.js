@@ -185,6 +185,11 @@
     if(hits.length){ showPanelFor(hits[0].object); return; }
     draggingAtom=true; lastX=e.clientX; lastY=e.clientY; atomVelX=0; atomVelY=0;
   });
+  function closePanel(){
+    if(panelEl){ panelEl.remove(); panelEl=null; }
+    panelTarget = null;
+    nucleusPaused = false;
+  }
 
   // ===== Rotación/zoom/reset =====
   var draggingAtom=false, lastX=0,lastY=0; var atomVelX=0, atomVelY=0; var FRICTION=0.965;
