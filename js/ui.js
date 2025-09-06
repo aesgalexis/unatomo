@@ -246,8 +246,18 @@ export function render() {
   if (visualizeBtn) {
   const hasAB = total > 0;
   visualizeBtn.disabled = !hasAB;
-  visualizeBtn.title = hasAB ? "" : "Crea al menos 1 AB para visualizar";
+  visualizeBtn.title = hasAB ? "" : "Nothing to visualize, add something";
   }
+  const off = !hasAB;
+
+  // estado funcional
+  visualizeBtn.disabled = off;
+
+  // estado visual
+  visualizeBtn.classList.toggle('disabled', off);
+  visualizeBtn.classList.toggle('is-disabled', off);
+  visualizeBtn.setAttribute('aria-disabled', off ? 'true' : 'false');
+
   // DnD
   enableDragAndDrop({ listA, listB, listL, onDrop: onDragDrop });
   }
