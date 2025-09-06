@@ -3,13 +3,8 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>unátomo</title>
-    
+    <title>unátomo</title>    
     <link rel="stylesheet" href="assets/styles.css" />
-      <button id="visualizeAtom"
-  style="position:fixed;right:12px;bottom:12px;z-index:9999;padding:8px 12px;border-radius:10px;border:1px solid #334155;background:#18223a;color:#e5e7eb;font-weight:600;cursor:pointer">
-  Visualize
-</button>
   </head>
   <body>
     <div class="layout">
@@ -84,6 +79,17 @@
     </div>
     <script type="module" src="./js/main.js"></script>
     <script defer src="/js/visualize.js"></script>
+<!-- Botón fijo en pantalla -->
+<button id="visualizeAtom"
+  style="position:fixed;right:12px;bottom:12px;z-index:9999;padding:8px 12px;border-radius:10px;border:1px solid #334155;background:#18223a;color:#e5e7eb;font-weight:600;cursor:pointer">
+  Visualize
+</button>
+
+<!-- Tu bundle existente -->
+<script type="module" src="./js/main.js"></script>
+
+<!-- Visualize: ruta RELATIVA -->
+<script defer src="./js/visualize.js"></script>
 
 </body>
 </html>
