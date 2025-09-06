@@ -77,6 +77,7 @@ const clearAllBtn = document.getElementById("clearAll");
 const createBtn = document.getElementById("createBtn");
 const importBtn = document.getElementById("importBtn");
 const ejectBtn  = document.getElementById("ejectBtn");
+const visualizeBtn = document.getElementById("visualizeAtom");
 
 // Orbit (columna derecha)
 const orbitList = document.getElementById("orbitList");
@@ -242,10 +243,14 @@ export function render() {
   } else {
     countEl.textContent = total;
   }
-
+  if (visualizeBtn) {
+  const hasAB = total > 0;
+  visualizeBtn.disabled = !hasAB;
+  visualizeBtn.title = hasAB ? "" : "Crea al menos 1 AB para visualizar";
+  }
   // DnD
   enableDragAndDrop({ listA, listB, listL, onDrop: onDragDrop });
-}
+  }
 
 function renderItem(it, inAlt = false, allowDrag = true) {
   const item = document.createElement("div");
