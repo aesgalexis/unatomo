@@ -50,7 +50,7 @@
 
     // === Materiales ===
     const protonMat = new THREE.MeshPhongMaterial({ color: 0xff6b6b, emissive: 0x4d1a1a, emissiveIntensity: 0.35 });
-    const ringMat   = new THREE.MeshBasicMaterial({ color: 0x8b5cf6, wireframe:true, transparent:true, opacity:0.35 });
+    const ringMat   = new THREE.MeshBasicMaterial({ color: 0x9aa4b2, wireframe:true, transparent:true, opacity:0.55 });
     const electronMat = new THREE.MeshPhongMaterial({ color: 0x22d3ee, emissive: 0x0ea5e9, emissiveIntensity: 0.85 });
 
     // === Núcleo: cluster de Z protones ===
@@ -114,7 +114,7 @@
     }
 
     // Tres anillos amplios con periodos 5s, 6s y 7s
-    const BASE=3.2, GAP=1.6;
+    const BASE=6.4, GAP=1.6;
     orbits.push(createOrbit(BASE + 0*GAP, 5.0));
     orbits.push(createOrbit(BASE + 1*GAP, 6.0));
     orbits.push(createOrbit(BASE + 2*GAP, 7.0));
