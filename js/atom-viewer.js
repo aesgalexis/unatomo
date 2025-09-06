@@ -102,6 +102,20 @@
   var hoverProton = null;
   var panelEl = null, panelTarget = null, nucleusPaused = false;
 
+  // Cerrar panel reutilizable
+  function closePanel(){
+  if(panelEl){ panelEl.remove(); panelEl = null; }
+  panelTarget = null;
+  nucleusPaused = false;
+  }
+
+  // Cerrar si se hace click fuera del panel (listener único)
+  document.addEventListener('mousedown', function(e){
+  if(!panelEl) return;
+  if(panelEl.contains(e.target)) return; // clic dentro → lo gestiona la “×”
+  closePanel();
+  }, true);
+
   function ndc(e){ var r=renderer.domElement.getBoundingClientRect(); mouse.x=((e.clientX-r.left)/r.width)*2-1; mouse.y=-((e.clientY-r.top)/r.height)*2+1; }
   function hitProtons(){ raycaster.setFromCamera(mouse,camera); return raycaster.intersectObjects(protons,false); }
   renderer.domElement.addEventListener('mousemove', function(e){
@@ -112,7 +126,13 @@
   }, {passive:true});
 
   function projectToScreen(obj){ var v=new THREE.Vector3(); obj.getWorldPosition(v); v.project(camera); return { x:(v.x*0.5+0.5)*innerWidth, y:(-v.y*0.5+0.5)*innerHeight }; }
-  function clampPos(x,y){ var w=400,h=400; return {x:Math.max(0,Math.min(x,innerWidth-w)), y:Math.max(0,Math.min(y,innerHeight-h))}; }
+  function clampPos(x,y){
+    var w=500, h=500;
+    return {
+      x: Math.max(0, Math.min(x, innerWidth  - w)),
+      y: Math.max(0, Math.min(y, innerHeight - h))
+    };
+  }
 
   function formatTs(ts){
     try {
@@ -124,18 +144,11 @@
   }
 
   function showPanelFor(proton){
-  var pos=projectToScreen(proton), c=clampPos(pos.x,pos.y);
+  var pos = projectToScreen(proton), c = clampPos(pos.x, pos.y);
   closePanel(); // cierra si había uno
-    
-  // Cierra si haces click en cualquier sitio que NO sea el panel
-  document.addEventListener('mousedown', function(e){
-  if(!panelEl) return;
-  if(panelEl.contains(e.target)) return; // clic dentro del panel → no cerrar aquí (la “×” ya cierra)
-  closePanel();
-  }, true); // captura para que cierre antes de que otros manejadores actúen
 
-  panelEl=document.createElement('div');
-  panelEl.style.cssText=[
+  panelEl = document.createElement('div');
+  panelEl.style.cssText = [
     'position:fixed',
     'width:500px','height:500px',
     'background:rgba(0,0,0,.35)',
@@ -147,44 +160,45 @@
   ].join(';');
 
   var payload = (proton.userData && proton.userData.payload) ? proton.userData.payload : {title:'AB', body:''};
-  var title = payload.title || 'AB';         // título EXACTO
-  var body  = (payload.body || '').trim();   // contenido del textarea que mandamos desde index
+  var title = payload.title || 'AB';       // TÍTULO EXACTO del AB
+  var body  = (payload.body || '').trim(); // textarea del AB
 
-  panelEl.innerHTML = ''
-    + '<header style="display:flex;justify-content:space-between;align-items:center;height:42px;line-height:42px;font-size:12px;padding:0 10px;background:rgba(15,23,42,.4)">' 
-      + '<div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:440px">'
-        + title
-      + '</div>'
-      + '<span class="close" style="cursor:pointer;padding:2px 8px;border:1px solid #334155;border-radius:8px;margin-left:8px">×</span>'
-    + '</header>'
-    + '<div id="panelContent" style="padding:10px;font-size:12px;color:#cbd5e1;white-space:pre-wrap;overflow:hidden;height:calc(500px - 42px);line-height:1.35"></div>';
+  panelEl.innerHTML =
+    '<header style="display:flex;justify-content:space-between;align-items:center;height:42px;line-height:42px;font-size:12px;padding:0 10px;background:rgba(15,23,42,.4)">'+
+      '<div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:440px">'+ title +'</div>'+
+      '<span class="close" style="cursor:pointer;padding:2px 8px;border:1px solid #334155;border-radius:8px;margin-left:8px">×</span>'+
+    '</header>'+
+    '<div id="panelContent" style="padding:10px;font-size:12px;color:#cbd5e1;white-space:pre-wrap;overflow:hidden;height:calc(500px - 42px);line-height:1.35"></div>';
 
   document.body.appendChild(panelEl);
 
   var cont = document.getElementById('panelContent');
 
-  // Ajuste sin scroll: recortar con “…” hasta que quepa
+  // Ajuste sin scroll (recorte con “…” hasta que quepa)
   function fits(){ return cont.scrollHeight <= cont.clientHeight + 1; }
   function setTxt(t){ cont.textContent = t; }
 
   setTxt(body);
-  if (!fits()){
-    var t = body, min = 0, max = t.length, iter=0;
-    // Búsqueda binaria por longitud
-    while (min < max && iter < 30){
+  if(!fits()){
+    var t = body, min = 0, max = t.length, iter = 0;
+    while(min < max && iter < 30){
       iter++;
-      var mid = Math.floor((min + max) / 2);
+      var mid = Math.floor((min + max)/2);
       setTxt(t.slice(0, mid) + '…');
-      if (fits()) min = mid + 1; else max = mid - 1;
+      if(fits()) min = mid + 1; else max = mid - 1;
     }
     var best = Math.max(0, max - 2);
     setTxt(t.slice(0, best) + (best < t.length ? '…' : ''));
-    // Ajuste fino
-    while (!fits() && best > 0){
+    while(!fits() && best > 0){
       best--;
       setTxt(t.slice(0, best) + '…');
     }
   }
+
+  panelEl.querySelector('.close').addEventListener('click', closePanel);
+  panelTarget = proton;
+  nucleusPaused = true;
+}
 
   // Cierre con “×”
   panelEl.querySelector('.close').addEventListener('click', closePanel);
