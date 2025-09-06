@@ -164,11 +164,11 @@
   var body  = (payload.body || '').trim(); // textarea del AB
 
   panelEl.innerHTML =
-    '<header style="display:flex;justify-content:space-between;align-items:center;height:42px;line-height:42px;font-size:12px;padding:0 10px;background:rgba(15,23,42,.4)">'+
-      '<div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:440px">'+ title +'</div>'+
-      '<span class="close" style="cursor:pointer;padding:2px 8px;border:1px solid #334155;border-radius:8px;margin-left:8px">×</span>'+
-    '</header>'+
-    '<div id="panelContent" style="padding:10px;font-size:12px;color:#cbd5e1;white-space:pre-wrap;overflow:hidden;height:calc(500px - 42px);line-height:1.35"></div>';
+  '<header style="display:flex;align-items:center;justify-content:space-between;height:36px;padding:0 10px;background:rgba(15,23,42,.4)">'+
+    '<div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:320px">'+ title +'</div>'+
+    '<button class="close" aria-label="Cerrar" style="all:unset;display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border:1px solid #334155;border-radius:8px;cursor:pointer;font-size:16px;line-height:1;">×</button>'+
+  '</header>'+
+  '<div id="panelContent" style="padding:10px;font-size:12px;color:#cbd5e1;white-space:pre-wrap;overflow:hidden;height:calc(400px - 36px);line-height:1.35"></div>';
 
   document.body.appendChild(panelEl);
 
