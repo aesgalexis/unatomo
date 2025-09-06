@@ -150,7 +150,7 @@
   panelEl = document.createElement('div');
   panelEl.style.cssText = [
     'position:fixed',
-    'width:500px','height:500px',
+    'width:400px','height:400px',
     'background:rgba(0,0,0,.35)',
     'border:1px solid #263247','border-radius:12px',
     'backdrop-filter:blur(2px)','z-index:20',
