@@ -6,7 +6,7 @@
   var abList = (abData && Array.isArray(abData.ab)) ? abData.ab : [];
   var abTs = (abData && abData.ts) ? abData.ts : Date.now();
 
-  var COLOR = { main: 0xff6b6b, side: 0x9aa4b2, landing: 0xffffff };
+  var COLOR = {main: 0xff6b6b, side: 0x9aa4b2, landing: 0xffffff,A: 0xff6b6b, B: 0x9aa4b2, L: 0xffffff};
   var infos = [];
   for (var i=0; i<Math.min(abList.length,118); i++){
     var ab = abList[i] || {};
