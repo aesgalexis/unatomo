@@ -1,7 +1,3 @@
-<!--
-Archivo 2/2: /js/atom-viewer.js
-Guárdalo como /js/atom-viewer.js (crea la carpeta js si no existe)
--->
 "use strict";
 (function(){
 // ==== Util: lee ABs del index guardados por el botón Visualize ====
