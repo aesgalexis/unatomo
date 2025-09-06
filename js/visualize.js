@@ -17,16 +17,18 @@
   }
 
   function getTitle(el){
-    // Intenta varias fuentes de título
-    const tEl = el.querySelector('[data-title], .ab-title, .title, h3, h4') ||
-                el.querySelector('input[type="text"]');
-    let title = '';
-    if (tEl) title = (tEl.value || tEl.innerText || tEl.textContent || '').trim();
-    if (!title) title = (el.getAttribute('data-title') || '').trim();
+  // 1) Título real del AB: el texto del botón .btn (ya viene con timestamp si aplica)
+  const btn = el.querySelector('.btn');
+  if (btn) return (btn.textContent || '').trim();
 
-    if (!title) title = 'Atomic Button'; // fallback por defecto
-    return title;
-  }
+  // 2) Fallbacks por si algún AB no tiene .btn renderizado
+  const tEl = el.querySelector('[data-title], .ab-title, .title, h3, h4, input[type="text"]');
+  let title = '';
+  if (tEl) title = (tEl.value || tEl.innerText || tEl.textContent || '').trim();
+  if (!title) title = (el.getAttribute('data-title') || '').trim();
+  if (!title) title = 'Atomic Button';
+  return title;
+}
 
   function getBody(el){
     // Preferimos textarea si existe:
