@@ -41,7 +41,7 @@
     }
   </script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.149.0/examples/js/controls/OrbitControls.js"></script>
+  
   <script>
     // === Escena básica ===
     const root = document.getElementById('app') || document.body; // fallback si falta #app
@@ -56,7 +56,29 @@
     const camera = new THREE.PerspectiveCamera(55, innerWidth/innerHeight, 0.1, 2000);
     camera.position.set(8, 6, 10);
 
-    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    // Controles propios (drag para rotar, rueda para zoom)
+    let isDown=false, lastX=0,lastY=0; let rotY=0, rotX=0; let distance=14;
+    const target = new THREE.Vector3(0,0,0);
+    function updateCamera(){
+      const phi = THREE.MathUtils.degToRad(30+rotX);
+      const theta = THREE.MathUtils.degToRad(40+rotY);
+      camera.position.set(
+        target.x + distance*Math.sin(phi)*Math.cos(theta),
+        target.y + distance*Math.cos(phi),
+        target.z + distance*Math.sin(phi)*Math.sin(theta)
+      );
+      camera.lookAt(target);
+    }
+    updateCamera();
+    renderer.domElement.addEventListener('mousedown', (e)=>{ isDown=true; lastX=e.clientX; lastY=e.clientY; });
+    addEventListener('mouseup', ()=>{ isDown=false; });
+    addEventListener('mousemove', (e)=>{
+      if(!isDown) return;
+      const dx=e.clientX-lastX, dy=e.clientY-lastY; lastX=e.clientX; lastY=e.clientY;
+      rotY += dx*0.25; rotX += dy*0.25; rotX=Math.max(-85, Math.min(85, rotX));
+      updateCamera();
+    });
+    renderer.domElement.addEventListener('wheel',(e)=>{ e.preventDefault(); distance *= (1 + Math.sign(e.deltaY)*0.08); distance=Math.max(4, Math.min(40, distance)); updateCamera(); }, {passive:false});
     controls.enableDamping = true;
     controls.dampingFactor = .08;
     controls.target.set(0,0,0);
@@ -133,7 +155,7 @@
     }
     function render(){
       const dt = clock.getDelta();
-      controls.update();
+      
       update(dt);
       renderer.render(scene, camera);
       requestAnimationFrame(render);
@@ -142,7 +164,7 @@
 
     // Resize + reset + export
     addEventListener('resize', ()=>{ camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
-    function resetView(){ camera.position.set(8,6,10); controls.target.set(0,0,0); controls.update(); }
+    function resetView(){ rotX=0; rotY=0; distance=14; updateCamera(); }
     document.getElementById('resetBtn').addEventListener('click', resetView);
     addEventListener('keydown', (e)=>{ if(e.key.toLowerCase()==='r') resetView(); });
     document.getElementById('exportPNG').addEventListener('click', (e)=>{ e.preventDefault(); const url = renderer.domElement.toDataURL('image/png'); const a = document.createElement('a'); a.href = url; a.download = 'atom.png'; a.click(); });
