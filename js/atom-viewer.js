@@ -146,6 +146,26 @@
   function showPanelFor(proton){
   var pos = projectToScreen(proton), c = clampPos(pos.x, pos.y);
   closePanel(); // cierra si había uno
+  renderer.domElement.addEventListener('mousedown', function(e){
+  if(e.button !== 0) return; // solo click izquierdo
+  ndc(e); // actualiza mouse.x, mouse.y en NDC
+
+  var hits = hitProtons();
+  if(hits.length){
+    // abrir/sustituir panel para el protón clicado
+    showPanelFor(hits[0].object);
+    return;
+  }
+
+  // si hay panel abierto y clicas en el canvas (pero no en el panel), ciérralo
+  if(panelEl){
+    closePanel();
+    return;
+  }
+
+  // si no hay panel y no has clicado un protón → empezar rotación con inercia
+  draggingAtom = true; lastX = e.clientX; lastY = e.clientY; atomVelX = 0; atomVelY = 0;
+});
 
   panelEl = document.createElement('div');
   panelEl.style.cssText = [
