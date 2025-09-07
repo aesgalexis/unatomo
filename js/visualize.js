@@ -62,7 +62,10 @@
     if (!btn) return;
     btn.addEventListener('click', () => {
       const ab = collectABs();
-      const data = { ab, ts: Date.now(), siteTitle: document.title };
+      const nameFromStorage = (localStorage.getItem('app-title') || '').trim();
+      const siteTitle = nameFromStorage || (document.querySelector('#appTitle, .app-title, [data-app-title]')?.textContent?.trim() || document.title);
+      const data = { ab, ts: Date.now(), siteTitle };
+
       try { sessionStorage.setItem('atomABData', JSON.stringify(data)); } catch(_) {}
       // misma pestaña para conservar sessionStorage
       location.href = 'atom.html';
