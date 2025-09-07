@@ -634,7 +634,8 @@ html, body {
 #createBtn:disabled,
 #importBtn:disabled,
 #exportBtn:disabled,
-#ejectBtn:disabled {
+#ejectBtn:disabled,
+#visualizeBtn:disabled {
   opacity: 0.45 !important;
   filter: grayscale(35%) saturate(85%);
   cursor: not-allowed !important;
