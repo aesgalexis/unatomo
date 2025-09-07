@@ -30,7 +30,7 @@
   // ===== THREE =====
   var scene = new THREE.Scene(); scene.ground = new THREE.Color(0x0b1020);
   var camera = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 2000); camera.position.set(0,0,20);
-  var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  var renderer = new THREE.WebGLRenderer({antialias:true});
   renderer.setClearColor(0x000000, 0);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
   renderer.setSize(innerWidth, innerHeight);
