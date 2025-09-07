@@ -5,7 +5,6 @@
 }
 body { color: #111; background: #f6f8fa; } 
 
-
 *, *::before, *::after { box-sizing: border-box; }
 html, body { height: 100%; margin: 0; }
 html { overflow: hidden; }
@@ -23,25 +22,17 @@ canvas {
   right: 0;
   bottom: 0;
   height: var(--statusbar-h);
-
-  
   padding: 0 12px calc(env(safe-area-inset-bottom));
-
   display: flex;
   align-items: center;
   gap: 8px;
-
-  /* Aspecto sobrio; puedes adaptar colores a tu tema */
   background: rgba(0, 0, 0, 0.6);
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(6px);
-
-  /* Evita seleccionar texto sin querer */
   user-select: none;
   -webkit-user-select: none;
 }
 
-/* Texto de la izquierda (opcional) */
 .status-left {
   font-size: 12px;
   line-height: 1;
