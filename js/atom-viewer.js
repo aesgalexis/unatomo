@@ -22,7 +22,10 @@
 
   // ===== UI =====
   var uiRoot = document.getElementById('ui-root') || document.body;
-  var siteTitleText = ((abData && abData.siteTitle) ? abData.siteTitle : 'unátomo') + ' (Visualized)';
+  
+  var siteTitle = (abData && abData.siteTitle && String(abData.siteTitle).trim()) || (localStorage.getItem('app-title') || '').trim() || 'unátomo';
+  var siteTitleText = siteTitle + ' (Visualized)';
+
 
   uiRoot.insertAdjacentHTML('beforeend',
   '<div class="tip" style="position:fixed;left:12px;top:12px;font-size:12px;opacity:.9;background:rgba(17,24,39,.55);border:1px solid #263247;padding:8px 10px;border-radius:10px;z-index:10">'
