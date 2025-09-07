@@ -24,11 +24,11 @@
   var uiRoot = document.getElementById('ui-root') || document.body;
   uiRoot.insertAdjacentHTML('beforeend',
     '<div class="tip" style="position:fixed;left:12px;top:12px;font-size:12px;opacity:.9;background:rgba(17,24,39,.55);border:1px solid #263247;padding:8px 10px;border-radius:10px;z-index:10">Lee ABs desde <b>sessionStorage</b>. Colores: <b>main</b> rojo, <b>side</b> gris, <b>landing</b> blanco. Clic en protón → panel con el texto del AB.</div>'+
-    '<div class="hud" style="position:fixed;right:12px;top:12px;display:flex;gap:8px;align-items:center;background:rgba(17,24,39,.55);border:1px solid #263247;padding:8px 10px;border-radius:10px;z-index:10"><button id="backBtn" style="background:#18223a;color:#e5e7eb;border:1px solid #334155;border-radius:8px;padding:6px 10px;cursor:pointer;font-weight:600">← Back</button><span class="counts" id="counts" style="font-size:12px;opacity:.85">—</span></div>'
+    '<div class="hud" style="position:fixed;right:12px;top:12px;display:flex;gap:8px;align-items:center;background:rgba(17,24,39,.55);border:1px solid #263247;padding:8px 10px;border-radius:10px;z-index:10"><button id="backBtn" style="background:#18223a;color:#e5e7eb;border:1px solid #334155;border-radius:8px;padding:6px 10px;cursor:pointer;font-weight:600">← Back</button></div>'
   );
 
   // ===== THREE =====
-  var scene = new THREE.Scene(); scene.background = new THREE.Color(0x0b1020);
+  var scene = new THREE.Scene(); scene.ground = new THREE.Color(0x0b1020);
   var camera = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 2000); camera.position.set(0,0,20);
   var renderer = new THREE.WebGLRenderer({antialias:true});
   renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
@@ -151,9 +151,9 @@
   panelEl.style.cssText = [
     'position:fixed',
     'width:400px','height:400px',
-    'background:rgba(0,0,0,.35)',
+    'ground:rgba(0,0,0,.35)',
     'border:1px solid #263247','border-radius:12px',
-    'backdrop-filter:blur(2px)','z-index:20',
+    'drop-filter:blur(2px)','z-index:20',
     'box-shadow:0 10px 30px rgba(0,0,0,.35)',
     'overflow:hidden',
     'left:'+c.x+'px','top:'+c.y+'px'
