@@ -5,7 +5,20 @@
   var abData = null; try { abData = stored ? JSON.parse(stored) : null; } catch(e) { abData = null; }
   var abList = (abData && Array.isArray(abData.ab)) ? abData.ab : [];
   var abTs = (abData && abData.ts) ? abData.ts : Date.now();
+  
+  (function(){
+  var el = document.getElementById('exportCounter');
+  if (!el) return;
 
+  var v = abData && Number(abData.exportTotal);
+  if (Number.isFinite(v)) {
+    el.textContent = v.toLocaleString('es-ES');
+  } else {
+    
+    var fallback = Number(localStorage.getItem('fallback-exports') || '');
+    el.textContent = Number.isFinite(fallback) ? fallback.toLocaleString('es-ES') : '—';
+  }
+})();
   var COLOR = {main: 0xff6b6b, side: 0x9aa4b2, landing: 0xffffff,A: 0xff6b6b, B: 0x9aa4b2, L: 0xffffff};
   var infos = [];
   for (var i=0; i<Math.min(abList.length,118); i++){
