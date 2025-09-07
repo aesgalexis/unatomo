@@ -631,17 +631,12 @@ html, body {
   outline: none;
   box-shadow: 0 0 0 3px rgba(46, 164, 79, 0.35); /* anillo accesible */
 }
-/* Botones de la barra cuando están deshabilitados */
-#createBtn:disabled,
-#importBtn:disabled,
-#exportBtn:disabled,
-#ejectBtn:disabled,
-#visualizeAtom:disabled {
-  opacity: 0.45 !important;
-  filter: grayscale(35%) saturate(85%);
-  cursor: not-allowed !important;
-  pointer-events: none;
-  box-shadow: none !important;
-  transform: none !important;
+.controls .btn:disabled {
+opacity: 0.45 !important;
+filter: grayscale(35%) saturate(85%);
+cursor: not-allowed !important;
+pointer-events: none;
+box-shadow: none !important;
+transform: none !important;
 }
 
