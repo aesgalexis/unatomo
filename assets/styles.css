@@ -635,7 +635,7 @@ html, body {
 #importBtn:disabled,
 #exportBtn:disabled,
 #ejectBtn:disabled,
-#visualizeBtn:disabled {
+#visualizeatom:disabled {
   opacity: 0.45 !important;
   filter: grayscale(35%) saturate(85%);
   cursor: not-allowed !important;
