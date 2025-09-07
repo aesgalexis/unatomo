@@ -593,7 +593,7 @@ html, body {
 
 #exportBtn:disabled,
 #createBtn:disabled,
-#visualizeatom:disabled {
+#visualizeAtom:disabled {
   opacity: 0.45 !important;               
   filter: grayscale(35%) saturate(85%);
   cursor: not-allowed !important;
@@ -636,7 +636,7 @@ html, body {
 #importBtn:disabled,
 #exportBtn:disabled,
 #ejectBtn:disabled,
-#visualizeatom:disabled {
+#visualizeAtom:disabled {
   opacity: 0.45 !important;
   filter: grayscale(35%) saturate(85%);
   cursor: not-allowed !important;
