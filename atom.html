@@ -5,9 +5,21 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Unatomo visualizer</title>
 <style>
-html,body{height:100%;margin:0;background:#0b1020;color:#e5e7eb;font-family:system-ui,Segoe UI,Inter,Arial}
-canvas { display:block; width:100%; height:calc(100% - 44px); }
+  :root { --statusbar-h: 44px; }
+  html, body { height: 100%; margin: 0; }
+  *, *::before, *::after { box-sizing: border-box; }
+  .statusbar {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    height: var(--statusbar-h);
+  }
+  canvas {
+    display: block;
+    width: 100%;
+    height: calc(100dvh - var(--statusbar-h));
+  }
 </style>
+
   <link rel="stylesheet" href="assets/styles.css" />
 </head>
 <body>
