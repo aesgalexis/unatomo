@@ -54,7 +54,9 @@ body {
   /* evita que la status bar tape el contenido */
   padding-bottom: calc(24px + 44px);
 }
-
+body.is-atomviewer {
+  padding-top: 0;
+}
 /* Layout principal — 3 columnas con centro flexible */
 .layout {
   display: grid;
