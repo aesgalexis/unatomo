@@ -65,6 +65,9 @@
       const nameFromStorage = (localStorage.getItem('app-title') || '').trim();
       const siteTitle = nameFromStorage || (document.querySelector('#appTitle, .app-title, [data-app-title]')?.textContent?.trim() || document.title);
       const data = { ab, ts: Date.now(), siteTitle };
+      const exportCounterText = (document.getElementById('exportCounter')?.textContent || '');
+      const exportTotalParsed = parseInt(exportCounterText.replace(/\D+/g, ''), 10);
+      data.exportTotal = Number.isFinite(exportTotalParsed) ? exportTotalParsed : undefined;
 
       try { sessionStorage.setItem('atomABData', JSON.stringify(data)); } catch(_) {}
       // misma pestaña para conservar sessionStorage
