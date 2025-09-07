@@ -1,1 +1,57 @@
 
+/* styles-atom.css — minimal para atom.html */
+:root {
+  /* Ajusta si tu barra mide otra cosa */
+  --statusbar-h: 44px;
+}
+
+/* Reset básico para evitar scroll por márgenes y sumas raras */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+
+/* atom.html es pantalla completa: sin scroll */
+html { overflow: hidden; }
+
+/* Canvas ocupa todo menos la barra inferior */
+canvas {
+  display: block;
+  width: 100%;
+  /* Fallback */
+  height: calc(100vh - var(--statusbar-h));
+  /* Preferido: viewport dinámico + notch safe-area */
+  height: calc(100dvh - var(--statusbar-h) - env(safe-area-inset-bottom));
+}
+
+/* Status bar fija al fondo */
+.statusbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--statusbar-h);
+
+  /* Espacio para notches en iOS */
+  padding: 0 12px calc(env(safe-area-inset-bottom));
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  /* Aspecto sobrio; puedes adaptar colores a tu tema */
+  background: rgba(0, 0, 0, 0.6);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(6px);
+
+  /* Evita seleccionar texto sin querer */
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Texto de la izquierda (opcional) */
+.status-left {
+  font-size: 12px;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
