@@ -526,7 +526,9 @@ footer .right         { justify-self: end; }     /* unatomo # a la derecha */
 /* === Fondo sólido en toda la página (sin banda azul) === */
 html, body {
   background: var(--bg) !important;
-  background-image: none !important; /* anula el radial-gradient */
+  background: rgba(17, 24, 39, 0.66) !important; /
+  backdrop-filter: blur(8px);
+  background-image: none !important;
 }
 
 /* (opcional) iguala la barra de estado al mismo color */
