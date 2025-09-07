@@ -62,7 +62,7 @@
     if (!btn) return;
     btn.addEventListener('click', () => {
       const ab = collectABs();
-      const data = { ab, ts: Date.now() }; // guardamos ts para la marca temporal
+      const data = { ab, ts: Date.now(), siteTitle: document.title };
       try { sessionStorage.setItem('atomABData', JSON.stringify(data)); } catch(_) {}
       // misma pestaña para conservar sessionStorage
       location.href = 'atom.html';
