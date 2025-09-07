@@ -1,42 +1,45 @@
+/* styles-atom.css — solo layout; colores heredan del tema */
 :root{
-  --statusbar-bg: rgba(255,255,255,0.75);
+  --statusbar-bg: rgba(255,255,255,0.75); /* puedes cambiarlo si tu index usa otro */
   --statusbar-fg: #111;
   --statusbar-h: 44px;
 }
-body { color: #111; background: #f6f8fa; } 
 
 *, *::before, *::after { box-sizing: border-box; }
 html, body { height: 100%; margin: 0; }
 html { overflow: hidden; }
 
-canvas {
+/* Colores base como en index (ajústalos si en index son otros) */
+body { color: #111; background: #f6f8fa; }
+
+canvas{
   display: block;
   width: 100%;
+  /* Fallback */
   height: calc(100vh - var(--statusbar-h));
+  /* Preferido en móviles y con notch */
   height: calc(100dvh - var(--statusbar-h) - env(safe-area-inset-bottom));
 }
 
-.statusbar {
+/* Barra fija, sin forzar negro, usando variables */
+.statusbar{
   position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  left: 0; right: 0; bottom: 0;
   height: var(--statusbar-h);
   padding: 0 12px calc(env(safe-area-inset-bottom));
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(0, 0, 0, 0.6);
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex; align-items: center; gap: 8px;
+
+  background: var(--statusbar-bg);
+  color: var(--statusbar-fg);
+
+  /* Si en index usas blur, puedes mantenerlo */
   backdrop-filter: blur(6px);
-  user-select: none;
-  -webkit-user-select: none;
+
+  user-select: none; -webkit-user-select: none;
+  z-index: 10; /* por encima del canvas */
 }
 
-.status-left {
-  font-size: 12px;
-  line-height: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.status-left{
+  font-size: 12px; line-height: 1;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
