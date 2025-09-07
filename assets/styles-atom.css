@@ -21,23 +21,25 @@ canvas{
   height: calc(100dvh - var(--statusbar-h) - env(safe-area-inset-bottom));
 }
 
-/* Barra fija, sin forzar negro, usando variables */
-.statusbar{
-  position: fixed;
-  left: 0; right: 0; bottom: 0;
-  height: var(--statusbar-h);
-  padding: 0 12px calc(env(safe-area-inset-bottom));
-  display: flex; align-items: center; gap: 8px;
-
-  background: var(--statusbar-bg);
-  color: var(--statusbar-fg);
-
-  /* Si en index usas blur, puedes mantenerlo */
-  backdrop-filter: blur(6px);
-
-  user-select: none; -webkit-user-select: none;
-  z-index: 10; /* por encima del canvas */
+.statusbar {
+   position: fixed;
+   left: 0;
+   right: 0;
+   bottom: 0;
+   height: var(--statusbar-h);
+   padding: 0 12px calc(env(safe-area-inset-bottom));
+   display: flex;
+   align-items: center;
+   gap: 8px;
+   background: var(--statusbar-bg);
+   color: var(--statusbar-fg);
+   z-index: 10;
+   border-top: 1px solid rgba(255, 255, 255, 0.08);
+   backdrop-filter: blur(6px);
+   user-select: none;
+   -webkit-user-select: none;
 }
+
 
 .status-left{
   font-size: 12px; line-height: 1;
