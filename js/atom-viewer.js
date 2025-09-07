@@ -152,7 +152,7 @@
   panelEl.style.cssText = [
     'position:fixed',
     'width:400px','height:400px',
-    'ground:rgba(0,0,0,.55)',
+    'background:rgba(0,0,0,.55)',
     'border:1px solid #263247','border-radius:12px',
     'drop-filter:blur(2px)','z-index:20',
     'box-shadow:0 10px 30px rgba(0,0,0,.35)',
