@@ -532,6 +532,8 @@ html, body {
 /* (opcional) iguala la barra de estado al mismo color */
 .statusbar {
   background: var(--bg) !important;
+  background: rgba(17, 24, 39, 0.66) !important; /
+  backdrop-filter: blur(8px);
 }
 /* Match Landing placeholder size with Main/Side */
 #listL:empty {
