@@ -1,40 +1,94 @@
 /*
-unatomo core – estilos iniciales
-- Sidebar fijo de 384px con logo 384x384 arriba a la izquierda
-- Menú debajo del logo; enlaces naranja en hover
-- Área de contenido a la derecha, max-width sugerido: 960px
-- Estética minimalista tipo Svbtle; tipografía del sistema
-*/
-
-
-:root {
---sidebar-w: 384px;
---space-1: 6px;
---space-2: 12px;
---space-3: 18px;
---space-4: 24px;
---space-6: 36px;
---space-8: 48px;
---content-max: 960px;
---radius: 12px;
-
-
-/* Colores (modo claro) */
---bg: #ffffff;
---fg: #111111;
---muted: #6b7280; /* gris */
---border: #e5e7eb;
---accent: #f97316; /* naranja */
+height: auto; /* mantiene proporción si cambias el SVG */
 }
 
 
-@media (prefers-color-scheme: dark) {
-:root {
---bg: #0b0b0c;
---fg: #e5e7eb;
---muted: #9ca3af;
---border: #1f2937;
---accent: #fb923c;
+.menu {
+margin-top: var(--space-4);
+display: grid;
+gap: var(--space-2);
 }
+
+
+.menu a {
+display: inline-block;
+text-decoration: none;
+color: var(--fg);
+font-weight: 600;
+padding: 8px 10px;
+border-radius: var(--radius);
+transition: transform 120ms ease, color 120ms ease, background 120ms ease;
 }
+
+
+.menu a:hover,
+.menu a:focus-visible {
+color: var(--accent); /* naranja al hover */
+outline: none;
+background: color-mix(in oklab, var(--accent) 10%, transparent);
+}
+
+
+.menu a.is-active {
+background: color-mix(in oklab, var(--accent) 14%, transparent);
+}
+
+
+/* Content */
+.content {
+margin-left: var(--sidebar-w);
+padding: var(--space-8) var(--space-6);
+min-height: 100dvh;
+display: block;
+}
+
+
+.content > .section {
+display: none;
+max-width: var(--content-max);
+}
+
+
+.content > .section.is-active {
+display: block;
+}
+
+
+h1, h2, h3 {
+line-height: 1.2;
+margin: 0 0 var(--space-3) 0;
+}
+
+
+h1 { font-size: clamp(28px, 3.2vw, 44px); }
+h2 { font-size: clamp(22px, 2.4vw, 32px); margin-top: var(--space-6); }
+
+
+p { margin: 0 0 var(--space-3) 0; color: var(--fg); }
+
+
+/* Pequeños detalles tipo Svbtle */
+.section p + p { color: var(--muted); }
+
+
+/* Responsivo básico: en móviles el sidebar ocupa el top */
+@media (max-width: 900px) {
+:root { --sidebar-w: 100%; }
+.sidebar {
+position: sticky;
+top: 0;
+width: 100%;
+border-right: none;
+border-bottom: 1px solid var(--border);
+}
+.brand img {
+width: clamp(160px, 50vw, 320px);
+height: auto;
+}
+.menu { grid-auto-flow: column; gap: var(--space-3); overflow-x: auto; }
+.content { margin-left: 0; padding-top: var(--space-6); }
+}
+
+
+/* Accesibilidad: estado de foco visible */
 :focus-visible { outline: 2px dashed var(--accent); outline-offset: 3px; }
