@@ -123,46 +123,37 @@ p { margin: 0 0 var(--space-3) 0; color: var(--fg); }
 
 :focus-visible { outline: 2px dashed var(--accent); outline-offset: 3px; }
 
-/* Atom background layer */
+/* === Fondo átono animado (iframe con el átomo) === */
 .atom-bg {
   position: fixed;
   inset: 0;
-  z-index: 0;           /* fondo */
-  pointer-events: none; /* no bloquea clicks/scroll */
-  opacity: 0.15;        /* ~15% */
+  z-index: 0;             /* fondo del todo */
+  pointer-events: none;
+  opacity: 0.25;          /* súbelo/bájalo 0.2–0.35 a gusto */
 }
 .atom-bg iframe {
   width: 100%;
   height: 100%;
   border: 0;
 }
-/* NUEVO: tinte uniforme sobre el átomo para igualar tonos */
+
+/* === Tinte uniforme por encima del átomo, debajo de la UI === */
 .atom-tint {
   position: fixed;
   inset: 0;
-  z-index: 1;             /* por encima del átomo, por debajo de la UI */
+  z-index: 1;
   pointer-events: none;
-  /* mismo color que el sidebar, con leve transparencia para que se intuya el átomo */
-  background: color-mix(in oklab, var(--bg) 92%, transparent);
-  /* Si quieres que quede idéntico-idéntico al sidebar (sin ver átomo),
-     cambia la línea de arriba por: background: var(--bg); */
-}
-
-/* Fondo animado (más al fondo) */
-.atom-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: .25; }
-.atom-bg iframe { width: 100%; height: 100%; border: 0; }
-
-/* Tinte uniforme por ENCIMA del átomo, debajo de la UI */
-.atom-tint {
+  /* MISMO tono que el sidebar pero semitransparente para que asome el átomo */
   background: color-mix(in oklab, var(--bg) 90%, transparent);
-  /* iguala exactamente el color del sidebar */
-  background: var(--bg);
+  /* si quieres más átomo, baja 90→88; si quieres menos, sube 90→92 */
 }
 
-/* UI por encima (sidebar + contenido) */
-.sidebar { position: fixed; inset: 0 auto 0 0; z-index: 2; }  /* ya lo tenías fixed */
+/* === UI por encima === */
+.sidebar { position: fixed; inset: 0 auto 0 0; z-index: 2; }
 .content { position: relative; z-index: 2; margin-left: var(--sidebar-w); }
 
+/* Outline teclado (si lo quieres fuera) */
+:focus-visible { outline: none !important; }
 
 /* Quita el outline naranja que aparece al primer foco */
 :focus-visible { outline: none !important; }
