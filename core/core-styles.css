@@ -136,7 +136,21 @@ p { margin: 0 0 var(--space-3) 0; color: var(--fg); }
   height: 100%;
   border: 0;
 }
+/* NUEVO: tinte uniforme sobre el átomo para igualar tonos */
+.atom-tint {
+  position: fixed;
+  inset: 0;
+  z-index: 1;             /* por encima del átomo, por debajo de la UI */
+  pointer-events: none;
+  /* mismo color que el sidebar, con leve transparencia para que se intuya el átomo */
+  background: color-mix(in oklab, var(--bg) 92%, transparent);
+  /* Si quieres que quede idéntico-idéntico al sidebar (sin ver átomo),
+     cambia la línea de arriba por: background: var(--bg); */
+}
 
+/* Asegura que la UI queda por encima de tint+bg */
+.sidebar { position: relative; z-index: 2; }
+.content { position: relative; z-index: 2; }
 /* Asegura que el layout quede por encima del fondo animado */
 .sidebar { z-index: 1; }
 .content { position: relative; z-index: 1; }
