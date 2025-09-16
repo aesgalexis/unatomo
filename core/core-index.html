@@ -1,94 +1,93 @@
 <!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>unatomo core</title>
-<!-- PRELOAD points to the same file name/path used by the <img> -->
-<link rel="preload" href="./unatomocore-logo-v1.5.svg" as="image" />
-<link rel="stylesheet" href="./core-styles.css" />
-<meta name="color-scheme" content="light dark" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>unatomo core</title>
+  <!-- PRELOAD points to the same file name/path used by the <img> -->
+  <link rel="preload" href="./unatomocore-logo-v1.5.svg" as="image" />
+  <link rel="stylesheet" href="./core-styles.css" />
+  <meta name="color-scheme" content="light dark" />
 </head>
 <body>
-<!-- Sidebar (384px) -->
-<aside class="sidebar" role="navigation" aria-label="Navegación principal">
-<a class="brand" href="#home" data-section="home" aria-current="page">
-<!-- LOGO in the SAME DIRECTORY -->
-<img src="./unatomocore-logo-v1.5.svg" alt="unatomo core logo" width="384" height="384" />
-</a>
+  <!-- Sidebar (384px) -->
+  <aside class="sidebar" role="navigation" aria-label="Navegación principal">
+    <a class="brand" href="#home" data-section="home" aria-current="page">
+      <!-- LOGO in the SAME DIRECTORY -->
+      <img src="./unatomocore-logo-v1.5.svg" alt="unatomo core logo" width="384" height="384" />
+    </a>
 
+    <nav class="menu">
+      <a href="#enlace-1" data-section="enlace-1">Enlace 1</a>
+      <a href="#enlace-2" data-section="enlace-2">Enlace 2</a>
+      <a href="#enlace-3" data-section="enlace-3">Enlace 3</a>
+    </nav>
+  </aside>
 
-<nav class="menu">
-<a href="#enlace-1" data-section="enlace-1">Enlace 1</a>
-<a href="#enlace-2" data-section="enlace-2">Enlace 2</a>
-<a href="#enlace-3" data-section="enlace-3">Enlace 3</a>
-</nav>
-</aside>
+  <!-- Content area (responsive; suggested max width 960px) -->
+  <main id="app" class="content" tabindex="-1">
+    <section id="section-home" data-section="home" class="section is-active">
+      <h1>Bienvenido al núcleo</h1>
+      <p>Un átomo tiene un núcleo. Nosotros también: <strong>unatomo core</strong>.</p>
+      <p>Esta área mostrará contenido diferente según el enlace seleccionado en la izquierda. Diseño minimalista inspirado en Svbtle.</p>
+    </section>
 
+    <section id="section-enlace-1" data-section="enlace-1" class="section">
+      <h2>Enlace 1</h2>
+      <p>Contenido de ejemplo para el Enlace 1. Aquí podrías colocar un resumen de servicios, una propuesta de valor o lo que decidas.</p>
+    </section>
 
-<!-- Content area (responsive; suggested max width 960px) -->
-<main id="app" class="content" tabindex="-1">
-<section id="section-home" data-section="home" class="section is-active">
-<h1>Bienvenido al núcleo</h1>
-<p>Un átomo tiene un núcleo. Nosotros también: <strong>unatomo core</strong>.</p>
-<p>Esta área mostrará contenido diferente según el enlace seleccionado en la izquierda. Diseño minimalista inspirado en Svbtle.</p>
-</section>
+    <section id="section-enlace-2" data-section="enlace-2" class="section">
+      <h2>Enlace 2</h2>
+      <p>Contenido de ejemplo para el Enlace 2. Texto sobrio, aireado y tipografía limpia.</p>
+    </section>
 
+    <section id="section-enlace-3" data-section="enlace-3" class="section">
+      <h2>Enlace 3</h2>
+      <p>Contenido de ejemplo para el Enlace 3. Pseudo-estático pero con vida: cambios instantáneos sin recargar.</p>
+    </section>
+  </main>
 
-<section id="section-enlace-1" data-section="enlace-1" class="section">
-<h2>Enlace 1</h2>
-<p>Contenido de ejemplo para el Enlace 1. Aquí podrías colocar un resumen de servicios, una propuesta de valor o lo que decidas.</p>
-</section>
+  <script>
+    // SPA mínima sin dependencias: cambia secciones según el enlace clicado
+    (function () {
+      const links = document.querySelectorAll('.menu a, .brand');
+      const sections = document.querySelectorAll('.section');
+      const app = document.getElementById('app');
 
+      function activate(sectionKey) {
+        sections.forEach(s => s.classList.toggle('is-active', s.dataset.section === sectionKey));
+        // Enlaces activos (ARIA + estilo)
+        links.forEach(a => {
+          const isActive = a.dataset.section === sectionKey;
+          a.setAttribute('aria-current', isActive ? 'page' : 'false');
+          a.classList.toggle('is-active', isActive);
+        });
+        // Mover foco al contenido para accesibilidad
+        app && app.focus({ preventScroll: true });
+      }
 
-<section id="section-enlace-2" data-section="enlace-2" class="section">
-<h2>Enlace 2</h2>
-<p>Contenido de ejemplo para el Enlace 2. Texto sobrio, aireado y tipografía limpia.</p>
-</section>
+      function handleClick(e) {
+        const key = this.dataset.section;
+        if (!key) return;
+        e.preventDefault();
+        history.pushState({ key }, '', `#${key}`);
+        activate(key);
+      }
 
+      links.forEach(a => a.addEventListener('click', handleClick));
 
-<section id="section-enlace-3" data-section="enlace-3" class="section">
-<h2>Enlace 3</h2>
-<p>Contenido de ejemplo para el Enlace 3. Pseudo-estático pero con vida: cambios instantáneos sin recargar.</p>
-</section>
-</main>
+      // Cargar estado inicial desde hash
+      const initialKey = (location.hash || '#home').slice(1);
+      const valid = Array.from(sections).some(s => s.dataset.section === initialKey);
+      activate(valid ? initialKey : 'home');
 
-
-<script>
-// SPA mínima sin dependencias: cambia secciones según el enlace clicado
-(function () {
-const links = document.querySelectorAll('.menu a, .brand');
-const sections = document.querySelectorAll('.section');
-const app = document.getElementById('app');
-
-
-function activate(sectionKey) {
-sections.forEach(s => s.classList.toggle('is-active', s.dataset.section === sectionKey));
-// Enlaces activos (ARIA + estilo)
-links.forEach(a => {
-const isActive = a.dataset.section === sectionKey;
-a.setAttribute('aria-current', isActive ? 'page' : 'false');
-a.classList.toggle('is-active', isActive);
-});
-// Mover foco al contenido para accesibilidad
-app && app.focus({ preventScroll: true });
-}
-
-
-function handleClick(e) {
-const key = this.dataset.section;
-if (!key) return;
-e.preventDefault();
-history.pushState({ key }, '', `#${key}`);
-activate(key);
-}
-
-
-links.forEach(a => a.addEventListener('click', handleClick));
-
-
-// Cargar estado inicial desde hash
-const initialKey = (location.hash || '#home').slice(1);
-const valid = Array.from(sections).some(s => s.dataset.section === initialKey);
-activate(valid ? initialKey : 'home');
+      // Soporta navegación del navegador (atrás/adelante)
+      window.addEventListener('popstate', () => {
+        const key = (location.hash || '#home').slice(1);
+        activate(key);
+      });
+    })();
+  </script>
+</body>
 </html>
