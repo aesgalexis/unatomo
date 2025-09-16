@@ -92,22 +92,25 @@
       });
     })();
   </script>
-  <script>
+ <script>
   (function () {
     var ifr = document.getElementById('atom-bg');
     if (!ifr) return;
+
     ifr.addEventListener('load', function () {
+      console.log('[atom-bg] iframe loaded');
       try {
         var doc = ifr.contentDocument || ifr.contentWindow.document;
         var style = doc.createElement('style');
-        style.textContent = `
-          .tip, .hud, .statusbar { display: none !important; }
-          html, body { background: transparent !important; }
-        `;
+        style.textContent = '.tip, .hud, .statusbar{display:none!important} html,body{background:transparent!important}';
         doc.head.appendChild(style);
       } catch (e) {
-        // mismo origen esperado; si no, ignoramos
+        console.warn('[atom-bg] no CSS inject (cross-origin?)', e);
       }
+    });
+
+    ifr.addEventListener('error', function () {
+      console.error('[atom-bg] iframe failed to load');
     });
   })();
 </script>
