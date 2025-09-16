@@ -1,4 +1,7 @@
 /*
+width: 384px;
+height: 384px;
+max-width: 100%;
 height: auto; /* mantiene proporción si cambias el SVG */
 }
 
@@ -49,15 +52,10 @@ max-width: var(--content-max);
 }
 
 
-.content > .section.is-active {
-display: block;
-}
+.content > .section.is-active { display: block; }
 
 
-h1, h2, h3 {
-line-height: 1.2;
-margin: 0 0 var(--space-3) 0;
-}
+h1, h2, h3 { line-height: 1.2; margin: 0 0 var(--space-3) 0; }
 
 
 h1 { font-size: clamp(28px, 3.2vw, 44px); }
@@ -81,10 +79,7 @@ width: 100%;
 border-right: none;
 border-bottom: 1px solid var(--border);
 }
-.brand img {
-width: clamp(160px, 50vw, 320px);
-height: auto;
-}
+.brand img { width: clamp(160px, 50vw, 320px); height: auto; }
 .menu { grid-auto-flow: column; gap: var(--space-3); overflow-x: auto; }
 .content { margin-left: 0; padding-top: var(--space-6); }
 }
