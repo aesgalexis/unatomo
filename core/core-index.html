@@ -1,0 +1,83 @@
+<!doctype html>
+</aside>
+
+
+<!-- Content area (responsive; suggested max width 960px) -->
+<main id="app" class="content" tabindex="-1">
+<section id="section-home" data-section="home" class="section is-active">
+<h1>Bienvenido al núcleo</h1>
+<p>Un átomo tiene un núcleo. Nosotros también: <strong>unatomo core</strong>.</p>
+<p>Esta área mostrará contenido diferente según el enlace seleccionado en la izquierda. Diseño minimalista inspirado en Svbtle.</p>
+</section>
+
+
+<section id="section-enlace-1" data-section="enlace-1" class="section">
+<h2>Enlace 1</h2>
+<p>Contenido de ejemplo para el Enlace 1. Aquí podrías colocar un resumen de servicios, una propuesta de valor o lo que decidas.</p>
+</section>
+
+
+<section id="section-enlace-2" data-section="enlace-2" class="section">
+<h2>Enlace 2</h2>
+<p>Contenido de ejemplo para el Enlace 2. Texto sobrio, aireado y tipografía limpia.</p>
+</section>
+
+
+<section id="section-enlace-3" data-section="enlace-3" class="section">
+<h2>Enlace 3</h2>
+<p>Contenido de ejemplo para el Enlace 3. Pseudo-estático pero con vida: cambios instantáneos sin recargar.</p>
+</section>
+</main>
+
+
+<script>
+// SPA mínima sin dependencias: cambia secciones según el enlace clicado
+(function () {
+const links = document.querySelectorAll('.menu a, .brand');
+const sections = document.querySelectorAll('.section');
+const app = document.getElementById('app');
+
+
+function activate(sectionKey) {
+sections.forEach(s => s.classList.toggle('is-active', s.dataset.section === sectionKey));
+// Enlaces activos (ARIA + estilo)
+links.forEach(a => {
+const isActive = a.dataset.section === sectionKey;
+a.setAttribute('aria-current', isActive ? 'page' : 'false');
+a.classList.toggle('is-active', isActive);
+});
+// Mover foco al contenido para accesibilidad
+app.focus({ preventScroll: true });
+}
+
+
+function handleClick(e) {
+const key = this.dataset.section;
+if (!key) return;
+e.preventDefault();
+history.pushState({ key }, '', `#${key}`);
+activate(key);
+}
+
+
+links.forEach(a => a.addEventListener('click', handleClick));
+
+
+// Cargar estado inicial desde hash
+const initialKey = (location.hash || '#home').slice(1);
+if ([...sections].some(s => s.dataset.section === initialKey)) {
+activate(initialKey);
+} else {
+activate('home');
+}
+
+
+// Soporta navegación del navegador (atrás/adelante)
+window.addEventListener('popstate', (e) => {
+const key = (location.hash || '#home').slice(1);
+activate(key);
+});
+})();
+</script>
+</body>
+</html>
