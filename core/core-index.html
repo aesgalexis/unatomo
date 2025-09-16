@@ -1,4 +1,24 @@
 <!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>unatomo core</title>
+<link rel="preload" href="./logo-unatomocore-v1.5.svg" as="image" />
+<link rel="stylesheet" href="./core-styles.css" />
+<meta name="color-scheme" content="light dark">
+</head>
+<body>
+<!-- Sidebar (384px) -->
+<aside class="sidebar" role="navigation" aria-label="Navegación principal">
+<a class="brand" href="#home" data-section="home" aria-current="page">
+<img src="./assets/unatomocore-logo-v1.5.svg" alt="unatomo core logo" width="384" height="384" />
+</a>
+
+
+<nav class="menu">
+<a href="#enlace-1" data-section="enlace-1">Enlace 1</a>
+<a href="#enlace-2" data-section="enlace-2">Enlace 2</a>
 <a href="#enlace-3" data-section="enlace-3">Enlace 3</a>
 </nav>
 </aside>
@@ -66,20 +86,4 @@ links.forEach(a => a.addEventListener('click', handleClick));
 
 
 // Cargar estado inicial desde hash
-const initialKey = (location.hash || '#home').slice(1);
-if ([...sections].some(s => s.dataset.section === initialKey)) {
-activate(initialKey);
-} else {
-activate('home');
-}
-
-
-// Soporta navegación del navegador (atrás/adelante)
-window.addEventListener('popstate', (e) => {
-const key = (location.hash || '#home').slice(1);
-activate(key);
-});
-})();
-</script>
-</body>
 </html>
