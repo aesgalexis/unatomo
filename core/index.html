@@ -91,5 +91,25 @@
       });
     })();
   </script>
+  <script>
+  (function () {
+    var ifr = document.getElementById('atom-bg');
+    if (!ifr) return;
+    ifr.addEventListener('load', function () {
+      try {
+        var doc = ifr.contentDocument || ifr.contentWindow.document;
+        var style = doc.createElement('style');
+        style.textContent = `
+          .tip, .hud, .statusbar { display: none !important; }
+          html, body { background: transparent !important; }
+        `;
+        doc.head.appendChild(style);
+      } catch (e) {
+        // mismo origen esperado; si no, ignoramos
+      }
+    });
+  })();
+</script>
+
 </body>
 </html>
