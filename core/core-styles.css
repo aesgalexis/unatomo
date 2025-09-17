@@ -9,43 +9,62 @@
   --content-max: 960px;
   --radius: 12px;
 
-  /* PALeta común (idéntica en light y dark para el menú) */
-  --accent: #22c55e;            /* verde vivo - menú/submenú */
-  --menu-hover-bg: #d1fae5;     /* verde 100 fijo */
-  --menu-active-bg: #a7f3d0;    /* verde 200 fijo */
-  --submenu-divider: #e5e7eb;   /* línea neutra fija */
-
-  /* Light */
+  /* LIGHT */
   --bg: #ffffff;
   --fg: #111111;
   --muted: #6b7280;
   --border: #e5e7eb;
 
-  /* Resaltado SIEMPRE amarillo */
-  --hl: #fde047;
+  /* Menú top-level en GRIS (light) */
+  --menu-hover-bg: #f3f4f6;   /* gray-100 */
+  --menu-active-bg: #e5e7eb;  /* gray-200 */
+
+  /* Submenús (color en hover/activo) */
+  --accent: #22c55e;          /* verde: submenús en light */
+  --submenu-divider: #e5e7eb;  /* línea neutra */
+
+  /* Resaltado en contenido (SIEMPRE amarillo; más oscuro en dark abajo) */
+  --hl: #fde047;              /* yellow-300 */
 
   /* Mapa */
-  --map-allowed: #3b82f6; /* azul permitidos */
+  --map-allowed: #3b82f6;     /* azul permitidos */
 }
 
-/* Dark: solo cambia fondo/fg/border. El acento y colores de menú NO cambian. */
 :root[data-theme="dark"] {
   --bg: #0b0b0c;
   --fg: #e5e7eb;
   --muted: #9ca3af;
   --border: #1f2937;
 
-  /* Mantengo los mismos: --accent, --menu-hover-bg, --menu-active-bg, --submenu-divider */
-  --map-allowed: #60a5fa; /* opcional: azul algo más claro en dark */
+  /* Menú top-level en GRIS (dark) */
+  --menu-hover-bg: #374151;   /* gray-700 */
+  --menu-active-bg: #4b5563;  /* gray-600 */
+
+  /* Submenús (color en hover/activo) */
+  --accent: #60a5fa;          /* azul: submenús en dark */
+  --submenu-divider: var(--border);
+
+  /* Amarillo más oscuro en dark para mejor contraste */
+  --hl: #a16207;              /* amber-700 aprox */
+
+  --map-allowed: #60a5fa;     /* opcional: azul algo más claro en dark */
 }
 
-/* Preferencia SO si no hay elección manual (mismos colores de menú) */
+/* Preferencia del SO si no hay elección manual */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme]) {
     --bg: #0b0b0c;
     --fg: #e5e7eb;
     --muted: #9ca3af;
     --border: #1f2937;
+
+    --menu-hover-bg: #374151;
+    --menu-active-bg: #4b5563;
+
+    --accent: #60a5fa;
+    --submenu-divider: var(--border);
+
+    --hl: #a16207;
     --map-allowed: #60a5fa;
   }
 }
@@ -150,7 +169,7 @@ body > :not(.sidebar):not(.content){
   gap: 8px;
 }
 
-/* Top-level */
+/* Top-level (GRIS en ambos modos) */
 .menu .menu-item > a {
   display: inline-block;
   text-decoration: none;
@@ -165,10 +184,10 @@ body > :not(.sidebar):not(.content){
 .menu .menu-item > a:focus-visible {
   color: var(--fg);
   outline: none;
-  background: var(--menu-hover-bg);    /* fijo en ambos temas */
+  background: var(--menu-hover-bg);    /* gris */
 }
 .menu .menu-item > a.is-active {
-  background: var(--menu-active-bg);   /* fijo en ambos temas */
+  background: var(--menu-active-bg);   /* gris */
   color: var(--fg);
 }
 
@@ -189,8 +208,8 @@ body > :not(.sidebar):not(.content){
   display: none;
   margin: 0;
   padding-left: 12px;
-  border-left: 1px solid var(--submenu-divider); /* línea neutra fija */
-  gap: 6px;
+  border-left: 1px solid var(--submenu-divider); /* neutra */
+  gap: 4px; /* más juntos */
 }
 .menu .menu-item.is-open > .submenu { display: grid; }
 
@@ -200,7 +219,7 @@ body > :not(.sidebar):not(.content){
   text-decoration: none;
   color: var(--fg);
   font-weight: 400;
-  padding: 4px 0;
+  padding: 2px 0;           /* más compacto */
   border-radius: 0;
   font-size: 0.96em;
   transition: color 120ms ease, opacity 120ms ease;
@@ -208,7 +227,7 @@ body > :not(.sidebar):not(.content){
 .submenu a:hover,
 .submenu a:focus-visible{
   outline: none;
-  color: var(--accent);
+  color: var(--accent);     /* verde (light) / azul (dark) */
 }
 .submenu a.is-sub-active{ color: var(--accent); }
 
@@ -234,18 +253,18 @@ h3 { font-size: clamp(18px, 2vw, 24px); margin-top: var(--space-3); }
 p { margin: 0 0 var(--space-3) 0; color: var(--fg); }
 .section p + p { color: var(--muted); }
 
-/* Resaltado amarillo sin alterar el tamaño del título
-   - Mantiene display de bloque y márgenes del h2/h3
-   - Limita el fondo al ancho del texto con fit-content
-   - Sin padding vertical para no afectar la altura de línea */
+/* Resaltado del título (amarillo). No cambia tamaño:
+   - sigue siendo bloque (mantiene márgenes)
+   - fit-content para que el fondo no ocupe toda la línea
+   - sin padding vertical */
 h2[id], h3[id] { scroll-margin-top: 24px; }
 h2.is-highlighted,
 h3.is-highlighted{
-  display: block;                 /* sigue siendo bloque (no colapsa márgenes) */
-  width: fit-content;             /* fondo solo tras el texto */
+  display: inline-block;
+  width: fit-content;
   background: var(--hl);
-  border-radius: 0;               /* cuadrado */
-  padding: 0 .2em;                /* solo horizontal, mantiene altura de línea */
+  border-radius: 0;          /* cuadrado */
+  padding: 0 .2em;           /* solo horizontal */
   -webkit-box-decoration-break: clone;
   box-decoration-break: clone;
 }
