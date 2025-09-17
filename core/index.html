@@ -9,6 +9,59 @@
   <meta name="color-scheme" content="light dark" />
 </head>
 <body>
+<!-- Botón de tema (flotante arriba-derecha) -->
+<button id="themeToggle"
+        class="theme-toggle"
+        type="button"
+        aria-label="Cambiar tema"
+        title="Cambiar tema">
+  <span class="icon" aria-hidden="true">🌙</span>
+</button>
+
+<script>
+(() => {
+  const STORAGE_KEY = 'ui-theme'; // 'light' | 'dark'
+  const metaColor = document.querySelector('meta[name="color-scheme"]');
+
+  // 1) Preferencia guardada o del sistema
+  const saved = localStorage.getItem(STORAGE_KEY);
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const initial = (saved === 'light' || saved === 'dark') ? saved : (prefersDark ? 'dark' : 'light');
+
+  applyTheme(initial);
+
+  // 2) Escucha cambios del SO si el usuario no ha fijado manualmente
+  const mq = window.matchMedia('(prefers-color-scheme: dark)');
+  mq.addEventListener?.('change', (e) => {
+    const hasManual = localStorage.getItem(STORAGE_KEY);
+    if (hasManual) return; // respetar elección manual
+    applyTheme(e.matches ? 'dark' : 'light');
+  });
+
+  // 3) Botón toggle
+  const btn = document.getElementById('themeToggle');
+  btn?.addEventListener('click', () => {
+    const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
+    localStorage.setItem(STORAGE_KEY, next);
+  });
+
+  function applyTheme(mode) {
+    document.documentElement.dataset.theme = mode; // <html data-theme="dark|light">
+    // Icono accesible
+    const icon = mode === 'dark' ? '☀️' : '🌙';
+    const label = mode === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro';
+    const el = document.querySelector('#themeToggle .icon');
+    if (el) el.textContent = icon;
+    if (btn) {
+      btn.setAttribute('aria-label', label);
+      btn.setAttribute('title', label);
+    }
+    // Hints para navegadores que respetan color-scheme
+    if (metaColor) metaColor.setAttribute('content', mode === 'dark' ? 'dark light' : 'light dark');
+  }
+})();
+</script>
 
 
   <div class="atom-tint" aria-hidden="true"></div>
