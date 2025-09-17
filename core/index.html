@@ -24,29 +24,23 @@
 <script>
 (() => {
   const STORAGE_KEY = 'ui-theme'; // 'light' | 'dark'
-  const btn = document.getElementById('themeToggle');          // <-- mover arriba
+  const btn = document.getElementById('themeToggle');
   const metaColor = document.querySelector('meta[name="color-scheme"]');
 
-  // 1) Preferencia guardada o del sistema
+  // Preferencia: guardada o blanco por defecto
   const saved = localStorage.getItem(STORAGE_KEY);
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const initial = (saved === 'light' || saved === 'dark') 
-  ? saved 
-  : 'light';
-
+  const initial = (saved === 'light' || saved === 'dark') ? saved : 'light';
   applyTheme(initial);
 
-  // 2) Escucha cambios del SO si el usuario no ha fijado manualmente
   const mq = window.matchMedia('(prefers-color-scheme: dark)');
   const onChange = (e) => {
     const hasManual = localStorage.getItem(STORAGE_KEY);
-    if (hasManual) return; // respetar elección manual
+    if (hasManual) return;
     applyTheme(e.matches ? 'dark' : 'light');
   };
   if (mq.addEventListener) mq.addEventListener('change', onChange);
-  else if (mq.addListener) mq.addListener(onChange); // Safari
+  else if (mq.addListener) mq.addListener(onChange);
 
-  // 3) Botón toggle
   btn?.addEventListener('click', () => {
     const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
     applyTheme(next);
@@ -54,23 +48,24 @@
   });
 
   function applyTheme(mode) {
-    document.documentElement.dataset.theme = mode; // <html data-theme="dark|light">
+    document.documentElement.dataset.theme = mode;
 
-    // Icono + accesibilidad
-    const el = btn?.querySelector('.icon');
-    const icon = mode === 'dark' ? '☀️' : '🌙';
+    const icon  = mode === 'dark' ? '☀️' : '🌙';
+    const text  = mode === 'dark' ? 'Light' : 'Dark'; // etiqueta visible
     const label = mode === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro';
-    if (el) el.textContent = icon;
+
+    btn?.querySelector('.icon')?.replaceChildren(document.createTextNode(icon));
+    btn?.querySelector('.label')?.replaceChildren(document.createTextNode(text));
     if (btn) {
       btn.setAttribute('aria-label', label);
       btn.setAttribute('title', label);
     }
 
-    // Hint para UI nativa (scrollbars, etc.)
     if (metaColor) metaColor.setAttribute('content', mode === 'dark' ? 'dark light' : 'light dark');
   }
 })();
 </script>
+
 
 
 
