@@ -19,13 +19,13 @@
   --menu-hover-bg: #f3f4f6;   /* gray-100 */
   --menu-active-bg: #e5e7eb;  /* gray-200 */
 
-  /* Submenú: MISMOS grises en ambos modos (invertidos: oscuro -> claro en hover) */
+  /* Submenú: MISMOS grises en ambos modos (oscuro por defecto -> claro en hover/activo) */
   --submenu-fg: #64748b;         /* slate-500 (por defecto) */
   --submenu-fg-strong: #94a3b8;  /* slate-400 (hover/activo) */
   --submenu-divider: #e5e7eb;     /* línea neutra */
 
-  /* Resaltado contenido */
-  --hl: #fde047;               /* amarillo (light) */
+  /* Resaltado contenido (amarillo; se oscurece en dark en el bloque de abajo) */
+  --hl: #fde047;               /* yellow-300 */
 
   /* Mapa */
   --map-allowed: #3b82f6;
@@ -41,7 +41,7 @@
   --menu-hover-bg: #374151;   /* gray-700 */
   --menu-active-bg: #4b5563;  /* gray-600 */
 
-  /* Submenú: mismos grises (NO se sobreescriben) */
+  /* Submenú: mismos grises (no se sobreescriben fg/strong) */
   --submenu-divider: var(--border);
 
   /* Amarillo más oscuro en dark para mejor contraste */
@@ -254,25 +254,24 @@ h3 { font-size: clamp(18px, 2vw, 24px); margin-top: var(--space-3); }
 p { margin: 0 0 var(--space-3) 0; color: var(--fg); }
 .section p + p { color: var(--muted); }
 
-/* Resaltado del título:
-   - Fondo amarillo directo detrás del texto (cubre todo el alto de línea)
-   - Sin cambiar display ni métricas (no hay saltos ni movimientos)
-   - Multi-línea OK con box-decoration-break (según soporte)
-*/
+/* === Resaltado de títulos SIN cambios de tamaño ni ancho === */
+/* El h2/h3 mantiene display: block y sus márgenes; el fondo lo pone un span interno */
 h2[id], h3[id] { scroll-margin-top: 24px; }
-h2.is-highlighted,
-h3.is-highlighted{
-  background: var(--hl);
-  color: inherit;
-  /* mantener métricas originales */
-  font-size: inherit;
-  font-weight: inherit;
-  line-height: inherit;
-  /* sin padding para no alterar la altura de línea */
-  padding: 0;
-  border-radius: 3px;
+
+/* Envuelve el texto del título cuando hay que resaltarlo */
+.hl-wrap {
+  display: inline;                /* sólo ocupa el ancho del texto */
+  background: var(--hl);          /* amarillo (más oscuro en dark por var) */
+  border-radius: 2px;             /* leve suavizado */
+  padding: 0 .15em;               /* sólo horizontal, no altera altura de línea */
   -webkit-box-decoration-break: clone;
-  box-decoration-break: clone;
+  box-decoration-break: clone;    /* multilínea */
+}
+
+/* Por si hubiese reglas anteriores de fondo en el h2/h3 */
+h2.is-highlighted, h3.is-highlighted {
+  background: transparent !important;
+  text-decoration: none !important;
 }
 
 /* === Mapa Acción === */
