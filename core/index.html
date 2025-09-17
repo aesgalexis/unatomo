@@ -173,6 +173,9 @@
   const brand = document.querySelector('.brand');
   const menuItems = [...document.querySelectorAll('.menu .menu-item')];
 
+  // Estado: cuál submenu está abierto (null => ninguno)
+  let openKey = null;
+
   // Utilidad: slug para IDs
   const slug = (t) => t.toLowerCase()
                       .trim()
@@ -181,20 +184,27 @@
                       .replace(/-+/g,'-')
                       .slice(0,64);
 
-  // Activa sección + estado visual en menú
+  // Aplica la sección activa (no toca el estado abierto/cerrado)
   function activate(sectionKey) {
     sections.forEach(s => s.classList.toggle('is-active', s.dataset.section === sectionKey));
-    // top-level links
     menuItems.forEach(mi => {
       const a = mi.querySelector('a[data-section]');
       const isActive = a.dataset.section === sectionKey;
       a.classList.toggle('is-active', isActive);
-      mi.classList.toggle('is-open', isActive); // abre el submenu del activo
     });
     app && app.focus({ preventScroll: true });
   }
 
-  // Construir submenus desde h2/h3 de cada sección
+  // Visual del abierto/cerrado (solo cero o uno a la vez)
+  function updateOpenVisual() {
+    menuItems.forEach(mi => mi.classList.toggle('is-open', mi.dataset.key === openKey));
+  }
+  function setOpen(nextKey) {
+    openKey = nextKey;
+    updateOpenVisual();
+  }
+
+  // Construye submenus desde h2/h3
   function buildSubmenus() {
     menuItems.forEach(mi => {
       const key = mi.dataset.key;
@@ -209,58 +219,72 @@
         if (!h.id) {
           const base = slug(h.textContent || `sub-${idx+1}`);
           let id = base, n = 1;
-          while (document.getElementById(id)) { id = `${base}-${n++}`; }
+          while (document.getElementById(id)) id = `${base}-${n++}`;
           h.id = id;
         }
+
         const a = document.createElement('a');
         a.href = `#${key}`;
         a.dataset.section = key;
         a.dataset.target = h.id;
         a.textContent = h.textContent.trim();
+
         a.addEventListener('click', (e) => {
           e.preventDefault();
-          // activar sección
+          // activa sección si no lo está
           if (!section.classList.contains('is-active')) {
             history.pushState({ key }, '', `#${key}`);
             activate(key);
           }
-          // limpiar resaltados previos
+          // subitem activo en el submenu
+          box.querySelectorAll('a').forEach(x => x.classList.toggle('is-sub-active', x === a));
+          // quita resaltados previos y resalta el h2/h3 destino
           document.querySelectorAll('.is-highlighted').forEach(x => x.classList.remove('is-highlighted'));
-          // scroll + highlight
           h.classList.add('is-highlighted');
           h.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          // marcar el subitem activo visualmente
-          box.querySelectorAll('a').forEach(x => x.classList.toggle('is-sub-active', x === a));
+
+          // mantiene abierto este submenu
+          setOpen(key);
         });
+
         box.appendChild(a);
       });
-
-      // si no hay subtítulos, mantenemos caret igualmente (submenu vacío)
     });
   }
 
-  // Click en top-level: activar sección y abrir su submenu
+  // Click en top-level: navegar y abrir/cerrar (toggle en segundo clic)
   function wireTopLevel() {
     menuItems.forEach(mi => {
       const a = mi.querySelector('a[data-section]');
+      const key = a.dataset.section;
+
       a.addEventListener('click', (e) => {
-        const key = a.dataset.section;
         e.preventDefault();
+
+        const isAlreadyActive = document.querySelector(`.section.is-active`)?.dataset.section === key;
+        const willClose = openKey === key; // si ya está abierto y clicas, cerramos
+
+        // Navega/activa siempre a la sección del botón
         history.pushState({ key }, '', `#${key}`);
         activate(key);
+
+        // Toggle del submenu: si estaba abierto => cerrar (openKey=null),
+        // si no lo estaba => abrir este y cerrar los demás.
+        setOpen(willClose ? null : key);
       });
     });
   }
 
-  // Logo: ir a Welcome
+  // Logo: ir a Welcome y abrir su submenu
   brand.addEventListener('click', (e) => {
     e.preventDefault();
     const key = 'home';
     history.pushState({ key }, '', `#${key}`);
     activate(key);
+    setOpen('home');
   });
 
-  // Arranque: home si hash inválido
+  // Arranque: home si hash inválido; submenu: solo Welcome abierto
   const initialKey = 'home';
   const fromHash = (location.hash || `#${initialKey}`).slice(1);
   const valid = sections.some(s => s.dataset.section === fromHash);
@@ -270,11 +294,13 @@
   buildSubmenus();
   wireTopLevel();
   activate(startKey);
+  setOpen('home'); // todos colapsados excepto Welcome
 
-  // Navegación por back/forward
+  // Back/forward: sincroniza sección y (opcional) abre su submenu
   window.addEventListener('popstate', () => {
     const key = (location.hash || '#home').slice(1);
     activate(key);
+    setOpen(key); // si prefieres no abrirlo en back/forward, usa: setOpen(null);
   });
 })();
 </script>
