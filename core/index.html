@@ -279,6 +279,8 @@
 })();
 </script>
 
+
+  
   <script type="module">
 import { geoMercator, geoPath } from "https://esm.sh/d3-geo@3";
 import { feature } from "https://esm.sh/topojson-client@3";
@@ -335,10 +337,8 @@ function drawMap(topo) {
   const path = geoPath(proj, null);
 
   // Enfocar Europa con un bbox aproximado
-  const europeBBox = {
-    type: "Polygon",
-    coordinates: [[[-25,32],[40,32],[40,72],[-25,72],[-25,32]]]
-  };
+  const europeBBox = { type:"Polygon", coordinates:[[[-25,32],[40,32],[40,72],[-25,72],[-25,32]]] };
+
   proj.fitExtent([[PAD, PAD], [W - PAD, H - PAD]], europeBBox);
 
   const countries = feature(topo, topo.objects.countries).features;
