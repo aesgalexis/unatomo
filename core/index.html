@@ -172,6 +172,14 @@
   const sections = [...document.querySelectorAll('.section')];
   const brand = document.querySelector('.brand');
   const menuItems = [...document.querySelectorAll('.menu .menu-item')];
+let __kbdNav = false;
+window.addEventListener('keydown', (e) => {
+  const keys = ['Tab','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Home','End','PageUp','PageDown'];
+  if (keys.includes(e.key)) __kbdNav = true;
+});
+['mousedown','pointerdown','touchstart'].forEach(ev =>
+  window.addEventListener(ev, () => { __kbdNav = false; })
+);
 
   // Estado: cuál submenu está abierto (null => ninguno)
   let openKey = null;
