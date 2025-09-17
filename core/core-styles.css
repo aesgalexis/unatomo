@@ -290,5 +290,11 @@ h2[id], h3[id] { scroll-margin-top: 24px; }
     padding-top: var(--space-6);
   }
 }
+/* El contenedor principal no necesita anillo de foco visual */
+#app:focus,
+#app:focus-visible{
+  outline: none;
+}
 
 :focus-visible { outline: 2px dashed var(--accent); outline-offset: 3px; }
+
