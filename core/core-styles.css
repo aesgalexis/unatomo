@@ -15,17 +15,17 @@
   --muted: #6b7280;
   --border: #e5e7eb;
 
-  /* Menú top-level en GRIS (común, con variantes por tema más abajo) */
+  /* Menú top-level (gris) */
   --menu-hover-bg: #f3f4f6;   /* gray-100 */
   --menu-active-bg: #e5e7eb;  /* gray-200 */
 
-  /* Submenú: MISMO gris claro legible en ambos modos */
-  --submenu-fg: #94a3b8;      /* slate-400: legible en light y dark */
-  --submenu-fg-strong: #64748b; /* slate-500 en hover/activo */
-  --submenu-divider: #e5e7eb;  /* línea neutra */
+  /* Submenú: MISMOS grises en ambos modos (invertidos: oscuro -> claro en hover) */
+  --submenu-fg: #64748b;         /* slate-500 (por defecto) */
+  --submenu-fg-strong: #94a3b8;  /* slate-400 (hover/activo) */
+  --submenu-divider: #e5e7eb;     /* línea neutra */
 
-  /* Marcado contenido (amarillo; se oscurece en dark más abajo) */
-  --hl: #fde047;              /* yellow-300 */
+  /* Resaltado contenido */
+  --hl: #fde047;               /* amarillo (light) */
 
   /* Mapa */
   --map-allowed: #3b82f6;
@@ -37,17 +37,15 @@
   --muted: #9ca3af;
   --border: #1f2937;
 
-  /* Menú top-level gris en dark (más oscuros para contraste con texto claro) */
+  /* Menú top-level gris en dark */
   --menu-hover-bg: #374151;   /* gray-700 */
   --menu-active-bg: #4b5563;  /* gray-600 */
 
-  /* Submenú: MISMO gris claro (no cambia) */
-  --submenu-fg: #94a3b8;
-  --submenu-fg-strong: #cbd5e1; /* un pelín más claro para destacar en dark */
+  /* Submenú: mismos grises (NO se sobreescriben) */
   --submenu-divider: var(--border);
 
-  /* Amarillo más oscuro en dark para mejor contraste con texto claro */
-  --hl: #a16207;              /* amber-700 aprox */
+  /* Amarillo más oscuro en dark para mejor contraste */
+  --hl: #a16207;
 
   --map-allowed: #60a5fa;
 }
@@ -63,8 +61,6 @@
     --menu-hover-bg: #374151;
     --menu-active-bg: #4b5563;
 
-    --submenu-fg: #94a3b8;
-    --submenu-fg-strong: #cbd5e1;
     --submenu-divider: var(--border);
 
     --hl: #a16207;
@@ -216,11 +212,11 @@ body > :not(.sidebar):not(.content){
 }
 .menu .menu-item.is-open > .submenu { display: grid; }
 
-/* Subitems: MISMO gris claro en ambos modos; más fuerte en hover/activo */
+/* Subitems: gris oscuro por defecto -> gris claro en hover/activo */
 .submenu a{
   display: block;
   text-decoration: none;
-  color: var(--submenu-fg);        /* gris claro fijo */
+  color: var(--submenu-fg);        /* slate-500 */
   font-weight: 400;
   padding: 2px 0;                  /* compacto */
   border-radius: 0;
@@ -230,7 +226,7 @@ body > :not(.sidebar):not(.content){
 .submenu a:hover,
 .submenu a:focus-visible{
   outline: none;
-  color: var(--submenu-fg-strong); /* gris un poco más fuerte */
+  color: var(--submenu-fg-strong); /* slate-400 */
 }
 .submenu a.is-sub-active{
   color: var(--submenu-fg-strong);
@@ -258,19 +254,25 @@ h3 { font-size: clamp(18px, 2vw, 24px); margin-top: var(--space-3); }
 p { margin: 0 0 var(--space-3) 0; color: var(--fg); }
 .section p + p { color: var(--muted); }
 
-/* Marcado del título SIN cambios de tamaño, sin saltos:
-   subrayado grueso “tipo marcador” detrás del texto.
-   - No altera display, márgenes ni ancho
-   - Funciona en multilínea
+/* Resaltado del título:
+   - Fondo amarillo directo detrás del texto (cubre todo el alto de línea)
+   - Sin cambiar display ni métricas (no hay saltos ni movimientos)
+   - Multi-línea OK con box-decoration-break (según soporte)
 */
 h2[id], h3[id] { scroll-margin-top: 24px; }
 h2.is-highlighted,
 h3.is-highlighted{
-  text-decoration-line: underline;
-  text-decoration-color: var(--hl);
-  text-decoration-thickness: 0.55em;
-  text-underline-offset: -0.35em;
-  text-decoration-skip-ink: none;
+  background: var(--hl);
+  color: inherit;
+  /* mantener métricas originales */
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  /* sin padding para no alterar la altura de línea */
+  padding: 0;
+  border-radius: 3px;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
 }
 
 /* === Mapa Acción === */
