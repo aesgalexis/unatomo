@@ -9,12 +9,12 @@
   <meta name="color-scheme" content="light dark" />
 </head>
 <body>
+
+<!-- Botón tema (pill) -->
 <button id="themeToggle" class="theme-toggle" type="button" aria-label="Cambiar tema" title="Cambiar tema">
   <span class="icon" aria-hidden="true">🌙</span>
   <span class="label">Light</span>
 </button>
-
-
 
 <script>
 (() => {
@@ -61,157 +61,209 @@
 })();
 </script>
 
+<div class="atom-tint" aria-hidden="true"></div>
 
-
-
-  <div class="atom-tint" aria-hidden="true"></div>
-  <aside class="sidebar" role="navigation" aria-label="Navegación principal">
-  <!-- Logo como botón de colapso -->
-  <a class="brand"
-     href="#"
-     role="button"
-     aria-controls="sidebar-menu"
-     aria-expanded="true"
-     id="sidebarToggle">
+<aside class="sidebar" role="navigation" aria-label="Navegación principal">
+  <!-- Logo: ir a Welcome -->
+  <a class="brand" href="#home" data-section="home">
     <img src="./logo-unatomo-v1.5.svg" alt="unatomo core logo" width="384" height="384" />
   </a>
 
+  <!-- Menú con contenedores .menu-item; los submenus se rellenan por JS -->
   <nav class="menu" id="sidebar-menu">
-    <a href="#home"       data-section="home"      aria-current="page">Welcome</a>
-    <a href="#enlace-1"   data-section="enlace-1">Enlace 1</a>
-    <a href="#enlace-2"   data-section="enlace-2">Enlace 2</a>
-    <a href="#enlace-3"   data-section="enlace-3">Enlace 3</a>
-    <a href="#enlace-4"   data-section="enlace-4">Enlace 4</a>
-    <a href="#enlace-5"   data-section="enlace-5">Enlace 5</a>
+    <div class="menu-item" data-key="home">
+      <a href="#home" data-section="home" aria-current="page">Welcome</a>
+      <div class="submenu"></div>
+    </div>
+
+    <div class="menu-item" data-key="enlace-1">
+      <a href="#enlace-1" data-section="enlace-1">Enlace 1</a>
+      <div class="submenu"></div>
+    </div>
+
+    <div class="menu-item" data-key="enlace-2">
+      <a href="#enlace-2" data-section="enlace-2">Enlace 2</a>
+      <div class="submenu"></div>
+    </div>
+
+    <div class="menu-item" data-key="enlace-3">
+      <a href="#enlace-3" data-section="enlace-3">Enlace 3</a>
+      <div class="submenu"></div>
+    </div>
+
+    <div class="menu-item" data-key="enlace-4">
+      <a href="#enlace-4" data-section="enlace-4">Enlace 4</a>
+      <div class="submenu"></div>
+    </div>
+
+    <div class="menu-item" data-key="enlace-5">
+      <a href="#enlace-5" data-section="enlace-5">Enlace 5</a>
+      <div class="submenu"></div>
+    </div>
   </nav>
 </aside>
 
-
- <main id="app" class="content" tabindex="-1">
+<main id="app" class="content" tabindex="-1">
   <section id="section-home" data-section="home" class="section is-active">
     <h1>Welcome</h1>
+
+    <!-- Ejemplo de subtítulos (h2/h3) que aparecerán en el submenu -->
+    <h2>Overview</h2>
     <p><strong>Your process, our insight.</strong></p>
     <p>We are a company specializing in high-level solutions and consulting for industrial laundry environments.</p>
+
+    <h2>Capabilities</h2>
+    <p>Auditorías técnicas, optimización de procesos, formación, integración de maquinaria y software.</p>
+
+    <h3>Methodology</h3>
+    <p>Enfoque pragmático con métricas claras y mejoras iterativas.</p>
   </section>
 
   <section id="section-enlace-1" data-section="enlace-1" class="section">
-    <h2>Enlace 1</h2>
+    <h1>Enlace 1</h1>
+    <h2>Subtítulo 1.1</h2>
     <p>Contenido de ejemplo para el Enlace 1.</p>
+    <h2>Subtítulo 1.2</h2>
+    <p>Más contenido.</p>
   </section>
 
   <section id="section-enlace-2" data-section="enlace-2" class="section">
-    <h2>Enlace 2</h2>
+    <h1>Enlace 2</h1>
+    <h2>Introducción</h2>
     <p>Contenido de ejemplo para el Enlace 2.</p>
   </section>
 
   <section id="section-enlace-3" data-section="enlace-3" class="section">
-    <h2>Enlace 3</h2>
+    <h1>Enlace 3</h1>
+    <h2>Resumen</h2>
     <p>Contenido de ejemplo para el Enlace 3.</p>
   </section>
 
   <section id="section-enlace-4" data-section="enlace-4" class="section">
-    <h2>Enlace 4</h2>
+    <h1>Enlace 4</h1>
+    <h2>Notas</h2>
     <p>Contenido de ejemplo para el Enlace 4.</p>
   </section>
 
   <section id="section-enlace-5" data-section="enlace-5" class="section">
-    <h2>Enlace 5</h2>
+    <h1>Enlace 5</h1>
+    <h2>Detalles</h2>
     <p>Contenido de ejemplo para el Enlace 5.</p>
   </section>
 </main>
 
-
-  <script>
+<script>
 (function () {
-  const links = document.querySelectorAll('.menu a'); // solo items del menú
-  const sections = document.querySelectorAll('.section');
   const app = document.getElementById('app');
-  const sidebar = document.querySelector('.sidebar');
-  const menu = document.getElementById('sidebar-menu');
-  const toggleBtn = document.getElementById('sidebarToggle');
+  const sections = [...document.querySelectorAll('.section')];
+  const brand = document.querySelector('.brand');
+  const menuItems = [...document.querySelectorAll('.menu .menu-item')];
 
+  // Utilidad: slug para IDs
+  const slug = (t) => t.toLowerCase()
+                      .trim()
+                      .replace(/[^\p{L}\p{N}\s-]/gu,'')
+                      .replace(/\s+/g,'-')
+                      .replace(/-+/g,'-')
+                      .slice(0,64);
+
+  // Activa sección + estado visual en menú
   function activate(sectionKey) {
     sections.forEach(s => s.classList.toggle('is-active', s.dataset.section === sectionKey));
-    links.forEach(a => {
+    // top-level links
+    menuItems.forEach(mi => {
+      const a = mi.querySelector('a[data-section]');
       const isActive = a.dataset.section === sectionKey;
-      a.setAttribute('aria-current', isActive ? 'page' : 'false');
       a.classList.toggle('is-active', isActive);
-      // Cuando está colapsado, solo el activo queda visible por CSS
-      // (no necesitamos tocar estilos aquí)
+      mi.classList.toggle('is-open', isActive); // abre el submenu del activo
     });
     app && app.focus({ preventScroll: true });
   }
 
-  function setCollapsed(collapsed) {
-    sidebar.classList.toggle('is-collapsed', collapsed);
-    // ¡IMPORTANTE! No ocultamos el nav con hidden; dejamos que el CSS
-    // muestre solo el enlace activo.
-    toggleBtn.setAttribute('aria-expanded', String(!collapsed));
-  }
-const active = document.querySelector('.menu a.is-active');
-if (active) {
-  if (collapsed) {
-    active.setAttribute('aria-label', (active.textContent.trim() + ', mostrar menú'));
-    active.setAttribute('aria-expanded', 'false');
-    active.setAttribute('role', 'button');
-  } else {
-    active.removeAttribute('role');
-    active.removeAttribute('aria-expanded');
-    active.removeAttribute('aria-label');
-  }
-}
-  function handleClick(e) {
-    const key = this.dataset.section;
-    if (!key) return;
+  // Construir submenus desde h2/h3 de cada sección
+  function buildSubmenus() {
+    menuItems.forEach(mi => {
+      const key = mi.dataset.key;
+      const section = sections.find(s => s.dataset.section === key);
+      const box = mi.querySelector('.submenu');
+      if (!box || !section) return;
 
-    const collapsed = sidebar.classList.contains('is-collapsed');
-    const isActive = this.classList.contains('is-active');
+      box.innerHTML = '';
+      const heads = [...section.querySelectorAll('h2, h3')];
 
-    if (collapsed) {
-      // Si está colapsado y clicas el ACTIVO => reabrir menú, no navegar
-      if (isActive) {
+      heads.forEach((h, idx) => {
+        if (!h.id) {
+          const base = slug(h.textContent || `sub-${idx+1}`);
+          let id = base, n = 1;
+          while (document.getElementById(id)) { id = `${base}-${n++}`; }
+          h.id = id;
+        }
+        const a = document.createElement('a');
+        a.href = `#${key}`;
+        a.dataset.section = key;
+        a.dataset.target = h.id;
+        a.textContent = h.textContent.trim();
+        a.addEventListener('click', (e) => {
+          e.preventDefault();
+          // activar sección
+          if (!section.classList.contains('is-active')) {
+            history.pushState({ key }, '', `#${key}`);
+            activate(key);
+          }
+          // limpiar resaltados previos
+          document.querySelectorAll('.is-highlighted').forEach(x => x.classList.remove('is-highlighted'));
+          // scroll + highlight
+          h.classList.add('is-highlighted');
+          h.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          // marcar el subitem activo visualmente
+          box.querySelectorAll('a').forEach(x => x.classList.toggle('is-sub-active', x === a));
+        });
+        box.appendChild(a);
+      });
+
+      // si no hay subtítulos, mantenemos caret igualmente (submenu vacío)
+    });
+  }
+
+  // Click en top-level: activar sección y abrir su submenu
+  function wireTopLevel() {
+    menuItems.forEach(mi => {
+      const a = mi.querySelector('a[data-section]');
+      a.addEventListener('click', (e) => {
+        const key = a.dataset.section;
         e.preventDefault();
-        setCollapsed(false);
-        return;
-      }
-      // Si clicas otro link mientras está colapsado => expandir y navegar
-      setCollapsed(false);
-      // seguimos para navegar…
-    }
+        history.pushState({ key }, '', `#${key}`);
+        activate(key);
+      });
+    });
+  }
 
+  // Logo: ir a Welcome
+  brand.addEventListener('click', (e) => {
     e.preventDefault();
+    const key = 'home';
     history.pushState({ key }, '', `#${key}`);
     activate(key);
-  }
+  });
 
-  links.forEach(a => a.addEventListener('click', handleClick));
-
-  // Arranque: siempre “home” si no hay hash válido
+  // Arranque: home si hash inválido
   const initialKey = 'home';
   const fromHash = (location.hash || `#${initialKey}`).slice(1);
-  const valid = Array.from(sections).some(s => s.dataset.section === fromHash);
+  const valid = sections.some(s => s.dataset.section === fromHash);
   const startKey = valid ? fromHash : initialKey;
   if (startKey !== fromHash) history.replaceState({ key: initialKey }, '', `#${initialKey}`);
+
+  buildSubmenus();
+  wireTopLevel();
   activate(startKey);
 
+  // Navegación por back/forward
   window.addEventListener('popstate', () => {
     const key = (location.hash || '#home').slice(1);
     activate(key);
   });
-
-  // Colapsar / expandir menú con el logo (sigue funcionando)
-  toggleBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    const collapsed = !sidebar.classList.contains('is-collapsed');
-    setCollapsed(collapsed);
-  });
-
-  // Estado inicial: expandido
-  setCollapsed(false);
 })();
 </script>
-
-
 
 </body>
 </html>
