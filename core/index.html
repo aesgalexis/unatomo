@@ -21,6 +21,7 @@
 <script>
 (() => {
   const STORAGE_KEY = 'ui-theme'; // 'light' | 'dark'
+  const btn = document.getElementById('themeToggle');          // <-- mover arriba
   const metaColor = document.querySelector('meta[name="color-scheme"]');
 
   // 1) Preferencia guardada o del sistema
@@ -32,14 +33,15 @@
 
   // 2) Escucha cambios del SO si el usuario no ha fijado manualmente
   const mq = window.matchMedia('(prefers-color-scheme: dark)');
-  mq.addEventListener?.('change', (e) => {
+  const onChange = (e) => {
     const hasManual = localStorage.getItem(STORAGE_KEY);
     if (hasManual) return; // respetar elección manual
     applyTheme(e.matches ? 'dark' : 'light');
-  });
+  };
+  if (mq.addEventListener) mq.addEventListener('change', onChange);
+  else if (mq.addListener) mq.addListener(onChange); // Safari
 
   // 3) Botón toggle
-  const btn = document.getElementById('themeToggle');
   btn?.addEventListener('click', () => {
     const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
     applyTheme(next);
@@ -48,20 +50,23 @@
 
   function applyTheme(mode) {
     document.documentElement.dataset.theme = mode; // <html data-theme="dark|light">
-    // Icono accesible
+
+    // Icono + accesibilidad
+    const el = btn?.querySelector('.icon');
     const icon = mode === 'dark' ? '☀️' : '🌙';
     const label = mode === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro';
-    const el = document.querySelector('#themeToggle .icon');
     if (el) el.textContent = icon;
     if (btn) {
       btn.setAttribute('aria-label', label);
       btn.setAttribute('title', label);
     }
-    // Hints para navegadores que respetan color-scheme
+
+    // Hint para UI nativa (scrollbars, etc.)
     if (metaColor) metaColor.setAttribute('content', mode === 'dark' ? 'dark light' : 'light dark');
   }
 })();
 </script>
+
 
 
   <div class="atom-tint" aria-hidden="true"></div>
