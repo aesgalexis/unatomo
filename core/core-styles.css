@@ -53,6 +53,11 @@ body {
   color: var(--fg);
   line-height: 1.6;
   text-rendering: optimizeLegibility;
+
+  /* === Layout global: grid (sidebar | contenido) === */
+  display: grid;
+  grid-template-columns: var(--sidebar-w) 1fr;
+  grid-auto-rows: auto;
 }
 
 /* === Botón Dark/Light (pill) ======================================= */
@@ -93,24 +98,28 @@ body {
   .theme-toggle .label{ font-size: 13px; }
 }
 
-/* === Layout ========================================================= */
+/* === Sidebar (en flujo, sin scroll propio) ========================= */
 .sidebar {
-  position: fixed;
-  inset: 0 auto 0 0;
+  position: static;                 /* antes: fixed */
+  inset: auto;
   width: var(--sidebar-w);
   border-right: 1px solid var(--border);
   padding: var(--space-4) var(--space-3);
-  overflow-y: auto;
+  overflow: visible;                /* antes: overflow-y:auto */
   background: var(--bg);
 }
 
-.brand { display: block; width: 100%; }
+/* Logo: derecha, mitad de tamaño, con mismos márgenes (usa padding del sidebar) */
+.brand {
+  display: flex;
+  justify-content: flex-end;        /* alinea a la derecha */
+  width: 100%;
+}
 .brand img {
   display: block;
-  width: 384px;
-  height: 384px;
+  width: 192px;                     /* mitad que 384px */
   max-width: 100%;
-  height: auto;
+  height: auto;                     /* elimina alto fijo */
 }
 
 /* === Menú con submenus ============================================= */
@@ -173,19 +182,17 @@ body {
   display: grid;
 }
 
-/* Subitems: sin negrita, aspecto de listado, resaltado tipo marcador */
+/* Subitems: sin negrita, listado, resaltado marcador */
 .submenu a{
   display: block;
   text-decoration: none;
   color: var(--fg);
-  font-weight: 400;           /* <- SIN negrita */
+  font-weight: 400;           /* SIN negrita */
   padding: 6px 10px;
   border-radius: 6px;
   font-size: 0.96em;
   transition: background 120ms ease;
 }
-
-/* Hover/activo: amarillito marcador (no cambiamos el color del texto) */
 .submenu a:hover,
 .submenu a:focus-visible{
   outline: none;
@@ -195,24 +202,9 @@ body {
   background: color-mix(in oklab, var(--hl) 85%, transparent);
 }
 
-/* Caret de los top-level (sin cambios, lo recuerdo aquí) */
-.menu .menu-item > a::after{
-  content: "▸";
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  opacity: .85;
-  transition: transform 160ms ease, opacity 160ms ease;
-}
-.menu .menu-item.is-open > a::after{
-  content: "▾";
-}
-
-
 /* Contenido */
 .content {
-  margin-left: var(--sidebar-w);
+  margin-left: 0;                   /* antes: var(--sidebar-w) */
   padding: var(--space-8) var(--space-6);
   min-height: 100dvh;
   display: block;
@@ -241,24 +233,6 @@ h2[id], h3[id] { scroll-margin-top: 24px; }
   padding: 2px 4px;
 }
 
-/* Responsive */
-@media (max-width: 900px) {
-  :root { --sidebar-w: 100%; }
-  .sidebar {
-    position: sticky;
-    top: 0;
-    width: 100%;
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-  }
-  .brand img { width: clamp(160px, 50vw, 320px); height: auto; }
-  /* Menú vertical también en móvil (para submenus) */
-  .menu { grid-auto-flow: row; gap: var(--space-2); overflow: visible; }
-  .content { margin-left: 0; padding-top: var(--space-6); }
-}
-
-:focus-visible { outline: 2px dashed var(--accent); outline-offset: 3px; }
-
 /* === Mapa Acción ==================================================== */
 .map {
   width: 100%;
@@ -280,3 +254,34 @@ h2[id], h3[id] { scroll-margin-top: 24px; }
   stroke: #3b82f6;
 }
 
+/* === Responsive ===================================================== */
+@media (max-width: 900px) {
+  :root { --sidebar-w: 100%; }
+
+  body{
+    display: block;                 /* columna única */
+  }
+
+  .sidebar {
+    position: sticky;               /* header sticky */
+    top: 0;
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* Logo: mitad también en móvil, alineado a la derecha */
+  .brand img { width: clamp(96px, 25vw, 160px); height: auto; } /* ~mitad del anterior clamp */
+
+  .menu {
+    grid-auto-flow: row;
+    gap: var(--space-2);
+    overflow: visible;
+  }
+  .content {
+    margin-left: 0;
+    padding-top: var(--space-6);
+  }
+}
+
+:focus-visible { outline: 2px dashed var(--accent); outline-offset: 3px; }
