@@ -172,25 +172,43 @@ body {
 .menu .menu-item.is-open > .submenu {
   display: grid;
 }
+
+/* Subitems: sin negrita, aspecto de listado, resaltado tipo marcador */
 .submenu a{
   display: block;
   text-decoration: none;
   color: var(--fg);
-  font-weight: 500;
+  font-weight: 400;           /* <- SIN negrita */
   padding: 6px 10px;
-  border-radius: 8px;
+  border-radius: 6px;
   font-size: 0.96em;
-  transition: color 120ms ease, background 120ms ease;
+  transition: background 120ms ease;
 }
+
+/* Hover/activo: amarillito marcador (no cambiamos el color del texto) */
 .submenu a:hover,
 .submenu a:focus-visible{
-  color: var(--accent);
   outline: none;
-  background: color-mix(in oklab, var(--accent) 8%, transparent);
+  background: color-mix(in oklab, var(--hl) 70%, transparent);
 }
 .submenu a.is-sub-active{
-  background: color-mix(in oklab, var(--accent) 14%, transparent);
+  background: color-mix(in oklab, var(--hl) 85%, transparent);
 }
+
+/* Caret de los top-level (sin cambios, lo recuerdo aquí) */
+.menu .menu-item > a::after{
+  content: "▸";
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: .85;
+  transition: transform 160ms ease, opacity 160ms ease;
+}
+.menu .menu-item.is-open > a::after{
+  content: "▾";
+}
+
 
 /* Contenido */
 .content {
