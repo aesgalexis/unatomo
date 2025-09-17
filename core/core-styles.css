@@ -14,35 +14,33 @@
   --fg: #111111;
   --muted: #6b7280;
   --border: #e5e7eb;
-  --accent: #22c55e;      /* verde vivo */
+  --accent: #22c55e;      /* verde vivo - menú/submenú */
 
-  /* Resaltado SIEMPRE amarillo (light y dark) */
+  /* Resaltado SIEMPRE amarillo */
   --hl: #fde047;
 
   /* Mapa */
   --map-allowed: #3b82f6; /* azul permitidos */
 }
 
-/* DARK cuando el usuario pulsa el toggle */
+/* DARK (paleta del menú igual que en light) */
 :root[data-theme="dark"] {
   --bg: #0b0b0c;
   --fg: #e5e7eb;
   --muted: #9ca3af;
   --border: #1f2937;
-  --accent: #fb923c;      /* naranja vivo */
-
-  --map-allowed: #60a5fa; /* azul algo más claro en dark */
+  --accent: #22c55e;      /* <- mismo verde que en light */
+  --map-allowed: #60a5fa; /* opcional: azul un poco más claro en dark */
 }
 
-/* Preferencia del sistema SOLO si el usuario no ha elegido manualmente */
+/* Preferencia SO si no hay elección manual */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme]) {
     --bg: #0b0b0c;
     --fg: #e5e7eb;
     --muted: #9ca3af;
     --border: #1f2937;
-    --accent: #fb923c;
-
+    --accent: #22c55e;
     --map-allowed: #60a5fa;
   }
 }
@@ -58,22 +56,22 @@ body {
   line-height: 1.6;
   text-rendering: optimizeLegibility;
 
-  /* === Layout global: grid (sidebar | contenido) === */
+  /* Layout: grid (sidebar | contenido) */
   display: grid;
   grid-template-columns: var(--sidebar-w) 1fr;
   grid-auto-rows: auto;
 }
 
-/* Fuerza posiciones: sidebar col 1, contenido col 2 en la fila 1 */
+/* Forzar posiciones en la primera fila */
 .sidebar { grid-column: 1; grid-row: 1; }
 .content { grid-column: 2; grid-row: 1; }
 
-/* Cualquier otro hijo directo del <body> no debe desplazar la fila 1 */
+/* Otros hijos del body ocupan filas aparte */
 body > :not(.sidebar):not(.content){
-  grid-column: 1 / -1;   /* que ocupen fila completa propia */
+  grid-column: 1 / -1;
 }
 
-/* === Botón Dark/Light (pill) ======================================= */
+/* === Botón Dark/Light (pill) === */
 .theme-toggle{
   position: fixed;
   inset-block-start: max(12px, env(safe-area-inset-top));
@@ -83,7 +81,7 @@ body > :not(.sidebar):not(.content){
   gap: 8px;
   padding: 8px 12px;
   border: 1px solid var(--border);
-  border-radius: 999px; /* pill */
+  border-radius: 999px;
   background: color-mix(in oklab, var(--bg) 92%, transparent);
   color: var(--fg);
   box-shadow: 0 8px 18px rgba(0,0,0,.12);
@@ -110,7 +108,7 @@ body > :not(.sidebar):not(.content){
   .theme-toggle .label{ font-size: 13px; }
 }
 
-/* === Sidebar (en flujo, sin scroll propio) ========================= */
+/* === Sidebar === */
 .sidebar {
   position: static;
   inset: auto;
@@ -121,7 +119,7 @@ body > :not(.sidebar):not(.content){
   background: var(--bg);
 }
 
-/* Logo: derecha, mitad de tamaño */
+/* Logo: derecha, 1/2 tamaño */
 .brand {
   display: flex;
   justify-content: flex-end;
@@ -129,31 +127,31 @@ body > :not(.sidebar):not(.content){
 }
 .brand img {
   display: block;
-  width: 192px;     /* mitad que 384px */
+  width: 192px;
   max-width: 100%;
   height: auto;
 }
 
-/* === Menú con submenus ============================================= */
+/* === Menú + submenús === */
 .menu {
   margin-top: var(--space-4);
   display: grid;
   gap: var(--space-2);
 }
 
-/* Contenedor por item (top-level + submenu) */
+/* Item contenedor */
 .menu .menu-item {
   display: grid;
   gap: 8px;
 }
 
-/* Top-level link (sin bordes añadidos) */
+/* Top-level */
 .menu .menu-item > a {
   display: inline-block;
   text-decoration: none;
   color: var(--fg);
   font-weight: 700;
-  padding: 8px 34px 8px 10px; /* espacio para caret a la derecha */
+  padding: 8px 34px 8px 10px; /* espacio para caret */
   border-radius: var(--radius);
   position: relative;
   transition: transform 120ms ease, color 120ms ease, background 120ms ease;
@@ -179,11 +177,9 @@ body > :not(.sidebar):not(.content){
   opacity: .85;
   transition: transform 160ms ease, opacity 160ms ease;
 }
-.menu .menu-item.is-open > a::after{
-  content: "▾";
-}
+.menu .menu-item.is-open > a::after{ content: "▾"; }
 
-/* Submenu (lista de subtítulos) */
+/* Submenú (lista de subtítulos) */
 .submenu {
   display: none;
   margin: 0;
@@ -191,17 +187,15 @@ body > :not(.sidebar):not(.content){
   border-left: 1px solid var(--border); /* línea neutra */
   gap: 6px;
 }
-.menu .menu-item.is-open > .submenu {
-  display: grid;
-}
+.menu .menu-item.is-open > .submenu { display: grid; }
 
-/* Subitems: color normal; acento SOLO en hover/activo; sin subrayado/fondo */
+/* Subitems: color normal; acento SOLO en hover/activo; sin subrayado ni fondo */
 .submenu a{
   display: block;
   text-decoration: none;
-  color: var(--fg);         /* color normal por defecto */
-  font-weight: 400;         /* sin negrita */
-  padding: 4px 0;           /* sin caja */
+  color: var(--fg);
+  font-weight: 400;
+  padding: 4px 0;
   border-radius: 0;
   font-size: 0.96em;
   transition: color 120ms ease, opacity 120ms ease;
@@ -209,13 +203,11 @@ body > :not(.sidebar):not(.content){
 .submenu a:hover,
 .submenu a:focus-visible{
   outline: none;
-  color: var(--accent);     /* acento en hover */
+  color: var(--accent);
 }
-.submenu a.is-sub-active{
-  color: var(--accent);     /* acento en activo */
-}
+.submenu a.is-sub-active{ color: var(--accent); }
 
-/* Contenido */
+/* === Contenido === */
 .content {
   margin-left: 0;
   padding: var(--space-8) var(--space-6);
@@ -228,7 +220,7 @@ body > :not(.sidebar):not(.content){
 }
 .content > .section.is-active { display: block; }
 
-/* Tipografía / espaciado */
+/* Tipografía */
 h1, h2, h3 { line-height: 1.2; margin: 0 0 var(--space-3) 0; }
 h1 { font-size: clamp(28px, 3.2vw, 44px); }
 h2 { font-size: clamp(22px, 2.4vw, 32px); margin-top: var(--space-6); }
@@ -237,21 +229,26 @@ h3 { font-size: clamp(18px, 2vw, 24px); margin-top: var(--space-3); }
 p { margin: 0 0 var(--space-3) 0; color: var(--fg); }
 .section p + p { color: var(--muted); }
 
-/* Resaltado del subtítulo seleccionado (SIEMPRE amarillo, solo tras el texto) */
+/* Resaltado amarillo sin alterar tamaño del texto (sólo tras el texto) */
 h2[id], h3[id] { scroll-margin-top: 24px; }
 h2.is-highlighted,
 h3.is-highlighted{
-  display: inline-block;           /* limita el fondo al ancho del texto */
   background: var(--hl);
-  border-radius: 0;                /* cuadrado */
-  padding: 2px 4px;                /* efecto “marcador” */
-  box-decoration-break: clone;     /* por si parte en dos líneas */
+  /* clave para que no “crezca”: */
+  display: inline;               /* no cambia la caja del título */
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  padding: 0 .2em;               /* sólo horizontal, no altera altura de línea */
+  border-radius: 0;              /* cuadrado */
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;   /* multi-línea coherente */
 }
 
-/* === Mapa Acción ==================================================== */
+/* === Mapa Acción === */
 .map {
   width: 100%;
-  aspect-ratio: 7 / 5;     /* 700x500 escalable */
+  aspect-ratio: 7 / 5;
   max-width: 100%;
 }
 .map svg {
@@ -269,41 +266,29 @@ h3.is-highlighted{
   stroke: var(--map-allowed);
 }
 
-/* === Responsive ===================================================== */
+/* === Responsive === */
 @media (max-width: 900px) {
   :root { --sidebar-w: 100%; }
 
-  body{
-    display: block;                 /* columna única */
-  }
+  body{ display: block; }          /* columna única */
 
   .sidebar {
-    position: sticky;               /* header sticky */
+    position: sticky;
     top: 0;
     width: 100%;
     border-right: none;
     border-bottom: 1px solid var(--border);
   }
 
-  /* Logo: mitad también en móvil, alineado a la derecha */
   .brand img { width: clamp(96px, 25vw, 160px); height: auto; }
 
-  .menu {
-    grid-auto-flow: row;
-    gap: var(--space-2);
-    overflow: visible;
-  }
-  .content {
-    margin-left: 0;
-    padding-top: var(--space-6);
-  }
+  .menu { grid-auto-flow: row; gap: var(--space-2); overflow: visible; }
+  .content { margin-left: 0; padding-top: var(--space-6); }
 }
 
 /* El contenedor principal no necesita anillo de foco visual */
 #app:focus,
-#app:focus-visible{
-  outline: none;
-}
+#app:focus-visible{ outline: none; }
 
 /* Foco accesible general */
 :focus-visible { outline: 2px dashed var(--accent); outline-offset: 3px; }
