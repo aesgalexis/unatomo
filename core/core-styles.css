@@ -169,39 +169,32 @@ p { margin: 0 0 var(--space-3) 0; color: var(--fg); }
 
 :focus-visible { outline: 2px dashed var(--accent); outline-offset: 3px; }
 
-/* === Botón Dark/Light con capsule =================================== */
 .theme-toggle{
   position: fixed;
-  top: 14px;
-  right: 14px;
-  z-index: 1001;
-  display: inline-grid;
-  grid-auto-flow: column;
+  /* respeta notch y bordes seguros en móviles */
+  inset-block-start: max(12px, env(safe-area-inset-top));
+  inset-inline-end:  max(12px, env(safe-area-inset-right));
+
+  display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 10px;
-  border-radius: 999px;
+  padding: 8px 12px;
+
   border: 1px solid var(--border);
-  background: color-mix(in oklab, var(--bg) 85%, transparent);
+  border-radius: 999px;        /* pill */
+  background: color-mix(in oklab, var(--bg) 92%, transparent);
   color: var(--fg);
   box-shadow: 0 8px 18px rgba(0,0,0,.12);
+
+  white-space: nowrap;         /* que no parta en dos líneas */
+  z-index: 1001;
   cursor: pointer;
-  transition: transform .08s ease, filter .12s ease, box-shadow .12s ease, border-color .12s ease, background .12s ease;
-}
 
-/* “Capsule” decorativa (como tu botón back) */
-.theme-toggle .capsule{
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: color-mix(in oklab, var(--accent) 0%, transparent);
-  pointer-events: none;
-  transition: background .12s ease, opacity .12s ease;
-  opacity: .9;
+  transition: transform .08s ease, filter .12s ease,
+              box-shadow .12s ease, border-color .12s ease, background .12s ease;
 }
-
 .theme-toggle .icon { font-size: 16px; line-height: 1; }
-.theme-toggle .label { font-weight: 600; font-size: 14px; }
+.theme-toggle .label{ font-weight: 600; font-size: 14px; }
 
 .theme-toggle:hover{
   transform: translateY(-1px);
@@ -215,10 +208,12 @@ p { margin: 0 0 var(--space-3) 0; color: var(--fg); }
   outline-offset: 2px;
 }
 
-/* Ajuste en móviles */
-@media (max-width: 900px) {
-  .theme-toggle { top: 10px; right: 10px; }
+/* Ajuste fino en pantallas muy estrechas sin sacrificar el texto */
+@media (max-width: 360px){
+  .theme-toggle{ padding: 6px 10px; gap: 6px; }
+  .theme-toggle .label{ font-size: 13px; }
 }
+
 
 /* === Sidebar colapsable (mostrar solo el activo) ==================== */
 /* En colapsado, el contenedor .menu sigue visible, pero se ocultan todos
