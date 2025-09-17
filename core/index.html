@@ -9,17 +9,8 @@
   <meta name="color-scheme" content="light dark" />
 </head>
 <body>
-  <!-- Atom background (same-origin iframe) -->
-<div class="atom-bg">
-  <iframe
-    id="atom-bg"
-    src="/atom.html"
-    title="unatomo atom background"
-    loading="eager"
-    aria-hidden="true"
-    tabindex="-1"
-  ></iframe>
-</div>
+
+
   <div class="atom-tint" aria-hidden="true"></div>
   <aside class="sidebar" role="navigation" aria-label="Navegación principal">
     <a class="brand" href="#home" data-section="home" aria-current="page">
@@ -92,28 +83,7 @@
       });
     })();
   </script>
- <script>
-  (function () {
-    var ifr = document.getElementById('atom-bg');
-    if (!ifr) return;
 
-    ifr.addEventListener('load', function () {
-      console.log('[atom-bg] iframe loaded');
-      try {
-        var doc = ifr.contentDocument || ifr.contentWindow.document;
-        var style = doc.createElement('style');
-        style.textContent = '.tip, .hud, .statusbar{display:none!important} html,body{background:transparent!important}';
-        doc.head.appendChild(style);
-      } catch (e) {
-        console.warn('[atom-bg] no CSS inject (cross-origin?)', e);
-      }
-    });
-
-    ifr.addEventListener('error', function () {
-      console.error('[atom-bg] iframe failed to load');
-    });
-  })();
-</script>
 
 </body>
 </html>
