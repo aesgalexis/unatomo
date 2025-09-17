@@ -185,19 +185,11 @@
   const sections = [...document.querySelectorAll('.section')];
   const brand = document.querySelector('.brand');
   const menuItems = [...document.querySelectorAll('.menu .menu-item')];
-let __kbdNav = false;
-window.addEventListener('keydown', (e) => {
-  const keys = ['Tab','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Home','End','PageUp','PageDown'];
-  if (keys.includes(e.key)) __kbdNav = true;
-});
-['mousedown','pointerdown','touchstart'].forEach(ev =>
-  window.addEventListener(ev, () => { __kbdNav = false; })
-);
 
-  // Estado: cuál submenu está abierto (null => ninguno)
-  let openKey = null;
+  // Submenú abierto (null = ninguno). Por defecto queremos Welcome abierto.
+  let openKey = 'home';
 
-  // Utilidad: slug para IDs
+  // Utilidad: slug simple si hiciera falta generar ids
   const slug = (t) => t.toLowerCase()
                       .trim()
                       .replace(/[^\p{L}\p{N}\s-]/gu,'')
@@ -205,28 +197,46 @@ window.addEventListener('keydown', (e) => {
                       .replace(/-+/g,'-')
                       .slice(0,64);
 
-  // Aplica la sección activa (no toca el estado abierto/cerrado)
+  // Activa una sección (no gestiona abrir/cerrar submenús)
   function activate(sectionKey) {
     sections.forEach(s => s.classList.toggle('is-active', s.dataset.section === sectionKey));
     menuItems.forEach(mi => {
       const a = mi.querySelector('a[data-section]');
-      const isActive = a.dataset.section === sectionKey;
-      a.classList.toggle('is-active', isActive);
+      a.classList.toggle('is-active', a.dataset.section === sectionKey);
     });
-    if (__kbdNav && app) app.focus({ preventScroll: true });
-
+    if (app) app.focus({ preventScroll: true });
   }
 
-  // Visual del abierto/cerrado (solo cero o uno a la vez)
+  // Poner/quitar clase visual de "abierto" en el menú
   function updateOpenVisual() {
     menuItems.forEach(mi => mi.classList.toggle('is-open', mi.dataset.key === openKey));
   }
-  function setOpen(nextKey) {
-    openKey = nextKey;
-    updateOpenVisual();
+
+  // Reset de un submenú y su contenido: quita el "verde" del subitem
+  // y el marcado amarillo del título dentro de la sección correspondiente.
+  function resetSubmenu(key) {
+    if (!key) return;
+    const mi = document.querySelector(`.menu .menu-item[data-key="${key}"]`);
+    if (mi) mi.querySelectorAll('.submenu a.is-sub-active').forEach(a => a.classList.remove('is-sub-active'));
+    const sec = document.querySelector(`.section[data-section="${key}"]`);
+    if (sec) sec.querySelectorAll('h2.is-highlighted, h3.is-highlighted').forEach(h => h.classList.remove('is-highlighted'));
   }
 
-  // Construye submenus desde h2/h3
+  // Abre un submenú o colapsa todos. Si se cierra el que estaba abierto,
+  // reseteamos sus subitems y resaltados.
+  function setOpen(nextKey) {
+    const prev = openKey;
+    openKey = nextKey;
+    updateOpenVisual();
+
+    // Si hemos cambiado de submenú, resetea el anterior.
+    if (prev && prev !== nextKey) resetSubmenu(prev);
+
+    // Si hemos colapsado (nextKey === null), resetea el que estaba abierto.
+    if (nextKey === null) resetSubmenu(prev);
+  }
+
+  // Construye submenús desde h2/h3 de cada sección
   function buildSubmenus() {
     menuItems.forEach(mi => {
       const key = mi.dataset.key;
@@ -253,19 +263,23 @@ window.addEventListener('keydown', (e) => {
 
         a.addEventListener('click', (e) => {
           e.preventDefault();
-          // activa sección si no lo está
+
+          // Activa la sección si no lo está
           if (!section.classList.contains('is-active')) {
             history.pushState({ key }, '', `#${key}`);
             activate(key);
           }
-          // subitem activo en el submenu
+
+          // Marca este subitem en verde y desmarca el resto (solo dentro de este submenú)
           box.querySelectorAll('a').forEach(x => x.classList.toggle('is-sub-active', x === a));
-          // quita resaltados previos y resalta el h2/h3 destino
-          document.querySelectorAll('.is-highlighted').forEach(x => x.classList.remove('is-highlighted'));
+
+          // Limpia resaltados de esta sección y marca el destino en amarillo
+          section.querySelectorAll('h2.is-highlighted, h3.is-highlighted')
+                 .forEach(x => x.classList.remove('is-highlighted'));
           h.classList.add('is-highlighted');
           h.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-          // mantiene abierto este submenu
+          // Mantén este submenú abierto
           setOpen(key);
         });
 
@@ -274,7 +288,7 @@ window.addEventListener('keydown', (e) => {
     });
   }
 
-  // Click en top-level: navegar y abrir/cerrar (toggle en segundo clic)
+  // Click en top-level: toggle abrir/cerrar, y navegar a su sección
   function wireTopLevel() {
     menuItems.forEach(mi => {
       const a = mi.querySelector('a[data-section]');
@@ -282,22 +296,16 @@ window.addEventListener('keydown', (e) => {
 
       a.addEventListener('click', (e) => {
         e.preventDefault();
+        const willClose = openKey === key; // segundo clic sobre el mismo => colapsa
 
-        const isAlreadyActive = document.querySelector(`.section.is-active`)?.dataset.section === key;
-        const willClose = openKey === key; // si ya está abierto y clicas, cerramos
-
-        // Navega/activa siempre a la sección del botón
         history.pushState({ key }, '', `#${key}`);
         activate(key);
-
-        // Toggle del submenu: si estaba abierto => cerrar (openKey=null),
-        // si no lo estaba => abrir este y cerrar los demás.
-        setOpen(willClose ? null : key);
+        setOpen(willClose ? null : key); // si colapsa, resetea subitems y marcado
       });
     });
   }
 
-  // Logo: ir a Welcome y abrir su submenu
+  // Logo: a "home" y abre solo su submenú (resetea el que estuviera)
   brand.addEventListener('click', (e) => {
     e.preventDefault();
     const key = 'home';
@@ -306,7 +314,7 @@ window.addEventListener('keydown', (e) => {
     setOpen('home');
   });
 
-  // Arranque: home si hash inválido; submenu: solo Welcome abierto
+  // Arranque: ir a hash válido o a home; submenú abierto solo en "home"
   const initialKey = 'home';
   const fromHash = (location.hash || `#${initialKey}`).slice(1);
   const valid = sections.some(s => s.dataset.section === fromHash);
@@ -316,16 +324,17 @@ window.addEventListener('keydown', (e) => {
   buildSubmenus();
   wireTopLevel();
   activate(startKey);
-  setOpen('home'); // todos colapsados excepto Welcome
+  setOpen('home'); // todos colapsados salvo Bienvenidos
 
-  // Back/forward: sincroniza sección y (opcional) abre su submenu
+  // Back/forward: sincroniza sección y abre su submenú
   window.addEventListener('popstate', () => {
     const key = (location.hash || '#home').slice(1);
     activate(key);
-    setOpen(key); // si prefieres no abrirlo en back/forward, usa: setOpen(null);
+    setOpen(key);
   });
 })();
 </script>
+
 
 
   
