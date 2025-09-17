@@ -64,54 +64,53 @@
 <div class="atom-tint" aria-hidden="true"></div>
 
 <aside class="sidebar" role="navigation" aria-label="Navegación principal">
-  <!-- Logo: ir a Welcome -->
+  <!-- Logo: ir a Bienvenidos -->
   <a class="brand" href="#home" data-section="home">
     <img src="./logo-unatomo-v1.5.svg" alt="unatomo core logo" width="384" height="384" />
   </a>
 
   <!-- Menú con contenedores .menu-item; los submenus se rellenan por JS -->
   <nav class="menu" id="sidebar-menu">
-  <div class="menu-item" data-key="home">
-    <a href="#home" data-section="home" aria-current="page">Bienvenidos</a>
-    <div class="submenu"></div>
-  </div>
+    <div class="menu-item" data-key="home">
+      <a href="#home" data-section="home" aria-current="page">Bienvenidos</a>
+      <div class="submenu"></div>
+    </div>
 
-  <div class="menu-item" data-key="servicios-generales">
-    <a href="#servicios-generales" data-section="servicios-generales">Servicios generales</a>
-    <div class="submenu"></div>
-  </div>
+    <div class="menu-item" data-key="servicios-generales">
+      <a href="#servicios-generales" data-section="servicios-generales">Servicios generales</a>
+      <div class="submenu"></div>
+    </div>
 
-  <div class="menu-item" data-key="servicios-especificos">
-    <a href="#servicios-especificos" data-section="servicios-especificos">Servicios específicos</a>
-    <div class="submenu"></div>
-  </div>
+    <div class="menu-item" data-key="servicios-especificos">
+      <a href="#servicios-especificos" data-section="servicios-especificos">Servicios específicos</a>
+      <div class="submenu"></div>
+    </div>
 
-  <div class="menu-item" data-key="otros-servicios">
-    <a href="#otros-servicios" data-section="otros-servicios">Otros servicios</a>
-    <div class="submenu"></div>
-  </div>
+    <div class="menu-item" data-key="otros-servicios">
+      <a href="#otros-servicios" data-section="otros-servicios">Otros servicios</a>
+      <div class="submenu"></div>
+    </div>
 
-  <div class="menu-item" data-key="alcance">
-    <a href="#alcance" data-section="alcance">Alcance</a>
-    <div class="submenu"></div>
-  </div>
+    <div class="menu-item" data-key="alcance">
+      <a href="#alcance" data-section="alcance">Alcance</a>
+      <div class="submenu"></div>
+    </div>
 
-  <div class="menu-item" data-key="cita">
-    <a href="#cita" data-section="cita">Solicitar una cita</a>
-    <div class="submenu"></div>
-  </div>
+    <div class="menu-item" data-key="cita">
+      <a href="#cita" data-section="cita">Solicitar una cita</a>
+      <div class="submenu"></div>
+    </div>
 
-  <div class="menu-item" data-key="contacto">
-    <a href="#contacto" data-section="contacto">Contacto</a>
-    <div class="submenu"></div>
-  </div>
+    <div class="menu-item" data-key="contacto">
+      <a href="#contacto" data-section="contacto">Contacto</a>
+      <div class="submenu"></div>
+    </div>
 
-  <div class="menu-item" data-key="creditos">
-    <a href="#creditos" data-section="creditos">Créditos</a>
-    <div class="submenu"></div>
-  </div>
-</nav>
-
+    <div class="menu-item" data-key="creditos">
+      <a href="#creditos" data-section="creditos">Créditos</a>
+      <div class="submenu"></div>
+    </div>
+  </nav>
 </aside>
 
 <main id="app" class="content" tabindex="-1">
@@ -178,7 +177,6 @@
   </section>
 </main>
 
-
 <script>
 (function () {
   const app = document.getElementById('app');
@@ -186,7 +184,7 @@
   const brand = document.querySelector('.brand');
   const menuItems = [...document.querySelectorAll('.menu .menu-item')];
 
-  // Submenú abierto (null = ninguno). Por defecto queremos Welcome abierto.
+  // Submenú abierto (null = ninguno). Por defecto queremos Bienvenidos abierto.
   let openKey = 'home';
 
   // Utilidad: slug simple si hiciera falta generar ids
@@ -197,7 +195,14 @@
                       .replace(/-+/g,'-')
                       .slice(0,64);
 
-  // Activa una sección (no gestiona abrir/cerrar submenús)
+  // Utilidad: quitar un wrapper .hl-wrap manteniendo su contenido
+  function unwrap(el) {
+    const parent = el.parentNode;
+    while (el.firstChild) parent.insertBefore(el.firstChild, el);
+    parent.removeChild(el);
+  }
+
+  // Activa una sección
   function activate(sectionKey) {
     sections.forEach(s => s.classList.toggle('is-active', s.dataset.section === sectionKey));
     menuItems.forEach(mi => {
@@ -207,32 +212,31 @@
     if (app) app.focus({ preventScroll: true });
   }
 
-  // Poner/quitar clase visual de "abierto" en el menú
+  // Visual de submenú abierto
   function updateOpenVisual() {
     menuItems.forEach(mi => mi.classList.toggle('is-open', mi.dataset.key === openKey));
   }
 
-  // Reset de un submenú y su contenido: quita el "verde" del subitem
-  // y el marcado amarillo del título dentro de la sección correspondiente.
+  // Reset de un submenú y su contenido (quita estado de subitems y resaltados)
   function resetSubmenu(key) {
     if (!key) return;
     const mi = document.querySelector(`.menu .menu-item[data-key="${key}"]`);
     if (mi) mi.querySelectorAll('.submenu a.is-sub-active').forEach(a => a.classList.remove('is-sub-active'));
+
     const sec = document.querySelector(`.section[data-section="${key}"]`);
-    if (sec) sec.querySelectorAll('h2.is-highlighted, h3.is-highlighted').forEach(h => h.classList.remove('is-highlighted'));
+    if (sec) {
+      sec.querySelectorAll('h2.is-highlighted, h3.is-highlighted').forEach(h => h.classList.remove('is-highlighted'));
+      sec.querySelectorAll('.hl-wrap').forEach(unwrap);
+    }
   }
 
-  // Abre un submenú o colapsa todos. Si se cierra el que estaba abierto,
-  // reseteamos sus subitems y resaltados.
+  // Abre/cierra submenús (y resetea cuando corresponde)
   function setOpen(nextKey) {
     const prev = openKey;
     openKey = nextKey;
     updateOpenVisual();
 
-    // Si hemos cambiado de submenú, resetea el anterior.
     if (prev && prev !== nextKey) resetSubmenu(prev);
-
-    // Si hemos colapsado (nextKey === null), resetea el que estaba abierto.
     if (nextKey === null) resetSubmenu(prev);
   }
 
@@ -270,16 +274,23 @@
             activate(key);
           }
 
-          // Marca este subitem en verde y desmarca el resto (solo dentro de este submenú)
+          // Marca este subitem y desmarca el resto dentro de este submenú
           box.querySelectorAll('a').forEach(x => x.classList.toggle('is-sub-active', x === a));
 
-          // Limpia resaltados de esta sección y marca el destino en amarillo
-          section.querySelectorAll('h2.is-highlighted, h3.is-highlighted')
-                 .forEach(x => x.classList.remove('is-highlighted'));
+          // Limpia resaltados previos de ESTE section y aplica nuevo wrapper
+          section.querySelectorAll('.hl-wrap').forEach(unwrap);
+          section.querySelectorAll('h2.is-highlighted, h3.is-highlighted').forEach(x => x.classList.remove('is-highlighted'));
+
+          if (!h.querySelector('.hl-wrap')) {
+            const span = document.createElement('span');
+            span.className = 'hl-wrap';
+            while (h.firstChild) span.appendChild(h.firstChild);
+            h.appendChild(span);
+          }
           h.classList.add('is-highlighted');
           h.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-          // Mantén este submenú abierto
+          // Mantener abierto este submenú
           setOpen(key);
         });
 
@@ -335,17 +346,14 @@
 })();
 </script>
 
-
-
-  
-  <script type="module">
+<!-- MAPA (D3 + TopoJSON) -->
+<script type="module">
 import { geoMercator, geoPath } from "https://esm.sh/d3-geo@3";
 import { feature } from "https://esm.sh/topojson-client@3";
 
 const container = document.getElementById("action-map");
 
-/* Países permitidos (ISO 3166-1 alpha-2) -> azul
-   Ajusta la lista a tu gusto. He puesto Europa amplia por defecto. */
+/* Países permitidos (ISO 3166-1 alpha-2) -> azul */
 const ALLOWED = new Set([
   "ES","PT","FR","DE","IT","GB","IE","BE","NL","LU","CH","AT",
   "DK","NO","SE","FI","PL","CZ","SK","HU","SI","HR","BA","RS","ME","MK","AL",
@@ -365,7 +373,7 @@ const NUM_TO_A2 = {
 };
 
 async function loadTopology() {
-  // 1) Intenta local (recomendado para 100% offline)
+  // 1) Intenta local
   try {
     const r = await fetch("./assets/countries-110m.json", { cache: "force-cache" });
     if (r.ok) return r.json();
@@ -378,6 +386,8 @@ async function loadTopology() {
 }
 
 function drawMap(topo) {
+  if (!container) return;
+
   // Base virtual 700x500; el SVG escalará con CSS (aspect-ratio)
   const W = 700, H = 500, PAD = 12;
 
@@ -406,7 +416,7 @@ function drawMap(topo) {
 
   for (const f of countries) {
     const id = String(f.id).padStart(3, "0");
-    const a2 = NUM_TO_A2[id]; // undefined si no mapeado (no pasa nada)
+    const a2 = NUM_TO_A2[id];
     const p = document.createElementNS(svgNS, "path");
     p.setAttribute("d", path(f));
     p.setAttribute("class", `country${a2 && ALLOWED.has(a2) ? " allowed" : ""}`);
@@ -420,7 +430,6 @@ function drawMap(topo) {
   drawMap(topo);
 })();
 </script>
-
 
 </body>
 </html>
