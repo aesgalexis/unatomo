@@ -132,41 +132,65 @@
 
 
   <script>
-    (function () {
-      const links = document.querySelectorAll('.menu a, .brand');
-      const sections = document.querySelectorAll('.section');
-      const app = document.getElementById('app');
+(function () {
+  const links = document.querySelectorAll('.menu a'); // solo items del menú
+  const sections = document.querySelectorAll('.section');
+  const app = document.getElementById('app');
+  const sidebar = document.querySelector('.sidebar');
+  const menu = document.getElementById('sidebar-menu');
+  const toggleBtn = document.getElementById('sidebarToggle');
 
-      function activate(sectionKey) {
-        sections.forEach(s => s.classList.toggle('is-active', s.dataset.section === sectionKey));
-        links.forEach(a => {
-          const isActive = a.dataset.section === sectionKey;
-          a.setAttribute('aria-current', isActive ? 'page' : 'false');
-          a.classList.toggle('is-active', isActive);
-        });
-        app && app.focus({ preventScroll: true });
-      }
+  function activate(sectionKey) {
+    sections.forEach(s => s.classList.toggle('is-active', s.dataset.section === sectionKey));
+    links.forEach(a => {
+      const isActive = a.dataset.section === sectionKey;
+      a.setAttribute('aria-current', isActive ? 'page' : 'false');
+      a.classList.toggle('is-active', isActive);
+    });
+    app && app.focus({ preventScroll: true });
+  }
 
-      function handleClick(e) {
-        const key = this.dataset.section;
-        if (!key) return;
-        e.preventDefault();
-        history.pushState({ key }, '', `#${key}`);
-        activate(key);
-      }
+  function handleClick(e) {
+    const key = this.dataset.section;
+    if (!key) return;
+    e.preventDefault();
+    history.pushState({ key }, '', `#${key}`);
+    activate(key);
+  }
 
-      links.forEach(a => a.addEventListener('click', handleClick));
+  links.forEach(a => a.addEventListener('click', handleClick));
 
-      const initialKey = (location.hash || '#home').slice(1);
-      const valid = Array.from(sections).some(s => s.dataset.section === initialKey);
-      activate(valid ? initialKey : 'home');
+  // Arranque: siempre "home" si no hay hash o es inválido
+  const initialKey = 'home';
+  const fromHash = (location.hash || `#${initialKey}`).slice(1);
+  const valid = Array.from(sections).some(s => s.dataset.section === fromHash);
+  const startKey = valid ? fromHash : initialKey;
+  if (startKey !== fromHash) history.replaceState({ key: initialKey }, '', `#${initialKey}`);
+  activate(startKey);
 
-      window.addEventListener('popstate', () => {
-        const key = (location.hash || '#home').slice(1);
-        activate(key);
-      });
-    })();
-  </script>
+  window.addEventListener('popstate', () => {
+    const key = (location.hash || '#home').slice(1);
+    activate(key);
+  });
+
+  // Colapsar / expandir menú con el logo
+  function setCollapsed(collapsed) {
+    sidebar.classList.toggle('is-collapsed', collapsed);
+    menu.hidden = collapsed; // accesibilidad
+    toggleBtn.setAttribute('aria-expanded', String(!collapsed));
+  }
+
+  toggleBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    const collapsed = !sidebar.classList.contains('is-collapsed');
+    setCollapsed(collapsed);
+  });
+
+  // Estado inicial: expandido
+  setCollapsed(false);
+})();
+</script>
+
 
 
 </body>
