@@ -188,31 +188,31 @@ body > :not(.sidebar):not(.content){
   display: none;
   margin: 0;
   padding-left: 12px;
-  border-left: 1px solid var(--border); /* línea neutra (sin color de acento) */
+  border-left: 1px solid var(--border); /* línea neutra */
   gap: 6px;
 }
 .menu .menu-item.is-open > .submenu {
   display: grid;
 }
 
-/* Subitems: solo texto en color de acento; sin “botón” */
+/* Subitems: color normal; acento SOLO en hover/activo; sin subrayado/fondo */
 .submenu a{
   display: block;
   text-decoration: none;
-  color: var(--accent);
-  font-weight: 400;        /* SIN negrita */
-  padding: 4px 0;          /* sin caja */
+  color: var(--fg);         /* color normal por defecto */
+  font-weight: 400;         /* sin negrita */
+  padding: 4px 0;           /* sin caja */
   border-radius: 0;
   font-size: 0.96em;
-  transition: text-decoration-color 120ms ease, opacity 120ms ease;
+  transition: color 120ms ease, opacity 120ms ease;
 }
 .submenu a:hover,
 .submenu a:focus-visible{
   outline: none;
-  text-decoration: underline;
+  color: var(--accent);     /* acento en hover */
 }
 .submenu a.is-sub-active{
-  text-decoration: underline;
+  color: var(--accent);     /* acento en activo */
 }
 
 /* Contenido */
@@ -237,12 +237,15 @@ h3 { font-size: clamp(18px, 2vw, 24px); margin-top: var(--space-3); }
 p { margin: 0 0 var(--space-3) 0; color: var(--fg); }
 .section p + p { color: var(--muted); }
 
-/* Resaltado del subtítulo seleccionado (SIEMPRE amarillo) */
+/* Resaltado del subtítulo seleccionado (SIEMPRE amarillo, solo tras el texto) */
 h2[id], h3[id] { scroll-margin-top: 24px; }
-.is-highlighted {
-  background: color-mix(in oklab, var(--hl) 85%, transparent);
-  border-radius: 6px;
-  padding: 2px 4px;
+h2.is-highlighted,
+h3.is-highlighted{
+  display: inline-block;           /* limita el fondo al ancho del texto */
+  background: var(--hl);
+  border-radius: 0;                /* cuadrado */
+  padding: 2px 4px;                /* efecto “marcador” */
+  box-decoration-break: clone;     /* por si parte en dos líneas */
 }
 
 /* === Mapa Acción ==================================================== */
