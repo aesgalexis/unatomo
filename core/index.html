@@ -9,14 +9,17 @@
   <meta name="color-scheme" content="light dark" />
 </head>
 <body>
-<!-- Botón de tema (flotante arriba-derecha) -->
+<!-- Botón de tema (arriba-derecha) -->
 <button id="themeToggle"
         class="theme-toggle"
         type="button"
-        aria-label="Cambiar tema"
+        aria-label="Change Theme"
         title="Cambiar tema">
+  <span class="capsule" aria-hidden="true"></span>
   <span class="icon" aria-hidden="true">🌙</span>
+  <span class="label">Light</span>
 </button>
+
 
 <script>
 (() => {
@@ -73,16 +76,26 @@
 
   <div class="atom-tint" aria-hidden="true"></div>
   <aside class="sidebar" role="navigation" aria-label="Navegación principal">
-    <a class="brand" href="#home" data-section="home" aria-current="page">
-      <img src="./logo-unatomo-v1.5.svg" alt="unatomo core logo" width="384" height="384" />
-    </a>
+  <!-- Logo como botón de colapso -->
+  <a class="brand"
+     href="#"
+     role="button"
+     aria-controls="sidebar-menu"
+     aria-expanded="true"
+     id="sidebarToggle">
+    <img src="./logo-unatomo-v1.5.svg" alt="unatomo core logo" width="384" height="384" />
+  </a>
 
-    <nav class="menu">
-      <a href="#enlace-1" data-section="enlace-1">Enlace 1</a>
-      <a href="#enlace-2" data-section="enlace-2">Enlace 2</a>
-      <a href="#enlace-3" data-section="enlace-3">Enlace 3</a>
-    </nav>
-  </aside>
+  <nav class="menu" id="sidebar-menu">
+    <a href="#home"       data-section="home"      aria-current="page">Welcome</a>
+    <a href="#enlace-1"   data-section="enlace-1">Enlace 1</a>
+    <a href="#enlace-2"   data-section="enlace-2">Enlace 2</a>
+    <a href="#enlace-3"   data-section="enlace-3">Enlace 3</a>
+    <a href="#enlace-4"   data-section="enlace-4">Enlace 4</a>
+    <a href="#enlace-5"   data-section="enlace-5">Enlace 5</a>
+  </nav>
+</aside>
+
 
   <main id="app" class="content" tabindex="-1">
     <section id="section-home" data-section="home" class="section is-active">
