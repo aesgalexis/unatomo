@@ -200,7 +200,8 @@ window.addEventListener('keydown', (e) => {
       const isActive = a.dataset.section === sectionKey;
       a.classList.toggle('is-active', isActive);
     });
-    app && app.focus({ preventScroll: true });
+    if (__kbdNav && app) app.focus({ preventScroll: true });
+
   }
 
   // Visual del abierto/cerrado (solo cero o uno a la vez)
