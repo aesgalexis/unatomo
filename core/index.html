@@ -27,7 +27,9 @@
   // 1) Preferencia guardada o del sistema
   const saved = localStorage.getItem(STORAGE_KEY);
   const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const initial = (saved === 'light' || saved === 'dark') ? saved : (prefersDark ? 'dark' : 'light');
+  const initial = (saved === 'light' || saved === 'dark') 
+  ? saved 
+  : 'light';
 
   applyTheme(initial);
 
