@@ -15,6 +15,8 @@
   --muted: #6b7280;
   --border: #e5e7eb;
   --accent: #f97316;
+
+  --hl: #fff59d; /* amarillo marcador */
 }
 
 /* DARK cuando el usuario pulsa el toggle */
@@ -24,6 +26,8 @@
   --muted: #9ca3af;
   --border: #1f2937;
   --accent: #fb923c;
+
+  --hl: #7c6f2a; /* amarillo más sobrio en dark */
 }
 
 /* Preferencia del sistema SOLO si el usuario no ha elegido manualmente */
@@ -34,6 +38,8 @@
     --muted: #9ca3af;
     --border: #1f2937;
     --accent: #fb923c;
+
+    --hl: #7c6f2a;
   }
 }
 
@@ -49,27 +55,31 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* === Botón Dark/Light ======================================= */
+/* === Botón Dark/Light (pill) ======================================= */
 .theme-toggle{
   position: fixed;
-  top: 14px;
-  right: 14px;
-  z-index: 1001;
-  display: inline-grid;
-  place-items: center;
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
+  inset-block-start: max(12px, env(safe-area-inset-top));
+  inset-inline-end:  max(12px, env(safe-area-inset-right));
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
   border: 1px solid var(--border);
-  background: color-mix(in oklab, var(--bg) 80%, transparent);
+  border-radius: 999px; /* pill */
+  background: color-mix(in oklab, var(--bg) 92%, transparent);
   color: var(--fg);
   box-shadow: 0 8px 18px rgba(0,0,0,.12);
+  white-space: nowrap;
+  z-index: 1001;
   cursor: pointer;
-  transition: transform .08s ease, filter .12s ease, box-shadow .12s ease, border-color .12s ease, background .12s ease;
+  transition: transform .08s ease, filter .12s ease,
+              box-shadow .12s ease, border-color .12s ease, background .12s ease;
 }
+.theme-toggle .icon { font-size: 16px; line-height: 1; }
+.theme-toggle .label{ font-weight: 600; font-size: 14px; }
 .theme-toggle:hover{
   transform: translateY(-1px);
-  filter: brightness(1.05);
+  filter: brightness(1.03);
   border-color: var(--accent);
   box-shadow: 0 10px 22px rgba(0,0,0,.16);
   background: color-mix(in oklab, var(--accent) 12%, var(--bg));
@@ -78,12 +88,12 @@ body {
   outline: 2px dashed var(--accent);
   outline-offset: 2px;
 }
-
-/* Evitar que tape la UI en móviles con sidebar sticky */
-@media (max-width: 900px) {
-  .theme-toggle { top: 10px; right: 10px; }
+@media (max-width: 360px){
+  .theme-toggle{ padding: 6px 10px; gap: 6px; }
+  .theme-toggle .label{ font-size: 13px; }
 }
 
+/* === Layout ========================================================= */
 .sidebar {
   position: fixed;
   inset: 0 auto 0 0;
@@ -103,56 +113,117 @@ body {
   height: auto;
 }
 
+/* === Menú con submenus ============================================= */
 .menu {
   margin-top: var(--space-4);
   display: grid;
   gap: var(--space-2);
 }
 
-.menu a {
+/* Contenedor por item (top-level + submenu) */
+.menu .menu-item {
+  display: grid;
+  gap: 8px;
+}
+
+/* Top-level link */
+.menu .menu-item > a {
   display: inline-block;
   text-decoration: none;
   color: var(--fg);
   font-weight: 600;
-  padding: 8px 10px;
+  padding: 8px 34px 8px 10px; /* espacio para caret a la derecha */
   border-radius: var(--radius);
   transition: transform 120ms ease, color 120ms ease, background 120ms ease;
+  position: relative;
 }
-
-.menu a:hover,
-.menu a:focus-visible {
+.menu .menu-item > a:hover,
+.menu .menu-item > a:focus-visible {
   color: var(--accent);
   outline: none;
   background: color-mix(in oklab, var(--accent) 10%, transparent);
 }
-
-.menu a.is-active {
+.menu .menu-item > a.is-active {
   background: color-mix(in oklab, var(--accent) 14%, transparent);
 }
 
+/* Caret */
+.menu .menu-item > a::after{
+  content: "▸";
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: .85;
+  transition: transform 160ms ease, opacity 160ms ease;
+}
+.menu .menu-item.is-open > a::after{
+  content: "▾";
+}
+
+/* Submenu (lista de subtítulos) */
+.submenu {
+  display: none;
+  margin: 0;
+  padding-left: 12px;
+  border-left: 1px solid var(--border);
+  gap: 6px;
+}
+.menu .menu-item.is-open > .submenu {
+  display: grid;
+}
+.submenu a{
+  display: block;
+  text-decoration: none;
+  color: var(--fg);
+  font-weight: 500;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 0.96em;
+  transition: color 120ms ease, background 120ms ease;
+}
+.submenu a:hover,
+.submenu a:focus-visible{
+  color: var(--accent);
+  outline: none;
+  background: color-mix(in oklab, var(--accent) 8%, transparent);
+}
+.submenu a.is-sub-active{
+  background: color-mix(in oklab, var(--accent) 14%, transparent);
+}
+
+/* Contenido */
 .content {
   margin-left: var(--sidebar-w);
   padding: var(--space-8) var(--space-6);
   min-height: 100dvh;
   display: block;
 }
-
 .content > .section {
   display: none;
   max-width: var(--content-max);
 }
-
 .content > .section.is-active { display: block; }
 
+/* Tipografía / espaciado */
 h1, h2, h3 { line-height: 1.2; margin: 0 0 var(--space-3) 0; }
-
 h1 { font-size: clamp(28px, 3.2vw, 44px); }
 h2 { font-size: clamp(22px, 2.4vw, 32px); margin-top: var(--space-6); }
+h3 { font-size: clamp(18px, 2vw, 24px); margin-top: var(--space-3); }
 
 p { margin: 0 0 var(--space-3) 0; color: var(--fg); }
-
 .section p + p { color: var(--muted); }
 
+/* Resaltado amarillo del subtítulo seleccionado */
+h2[id], h3[id] { scroll-margin-top: 24px; }
+.is-highlighted {
+  background: color-mix(in oklab, var(--hl) 85%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--hl) 40%, transparent) inset;
+  border-radius: 6px;
+  padding: 2px 4px;
+}
+
+/* Responsive */
 @media (max-width: 900px) {
   :root { --sidebar-w: 100%; }
   .sidebar {
@@ -163,86 +234,9 @@ p { margin: 0 0 var(--space-3) 0; color: var(--fg); }
     border-bottom: 1px solid var(--border);
   }
   .brand img { width: clamp(160px, 50vw, 320px); height: auto; }
-  .menu { grid-auto-flow: column; gap: var(--space-3); overflow-x: auto; }
+  /* Menú vertical también en móvil (para submenus) */
+  .menu { grid-auto-flow: row; gap: var(--space-2); overflow: visible; }
   .content { margin-left: 0; padding-top: var(--space-6); }
 }
 
 :focus-visible { outline: 2px dashed var(--accent); outline-offset: 3px; }
-
-.theme-toggle{
-  position: fixed;
-  /* respeta notch y bordes seguros en móviles */
-  inset-block-start: max(12px, env(safe-area-inset-top));
-  inset-inline-end:  max(12px, env(safe-area-inset-right));
-
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-
-  border: 1px solid var(--border);
-  border-radius: 999px;        /* pill */
-  background: color-mix(in oklab, var(--bg) 92%, transparent);
-  color: var(--fg);
-  box-shadow: 0 8px 18px rgba(0,0,0,.12);
-
-  white-space: nowrap;         /* que no parta en dos líneas */
-  z-index: 1001;
-  cursor: pointer;
-
-  transition: transform .08s ease, filter .12s ease,
-              box-shadow .12s ease, border-color .12s ease, background .12s ease;
-}
-.theme-toggle .icon { font-size: 16px; line-height: 1; }
-.theme-toggle .label{ font-weight: 600; font-size: 14px; }
-
-.theme-toggle:hover{
-  transform: translateY(-1px);
-  filter: brightness(1.03);
-  border-color: var(--accent);
-  box-shadow: 0 10px 22px rgba(0,0,0,.16);
-  background: color-mix(in oklab, var(--accent) 12%, var(--bg));
-}
-.theme-toggle:focus-visible{
-  outline: 2px dashed var(--accent);
-  outline-offset: 2px;
-}
-
-/* Ajuste fino en pantallas muy estrechas sin sacrificar el texto */
-@media (max-width: 360px){
-  .theme-toggle{ padding: 6px 10px; gap: 6px; }
-  .theme-toggle .label{ font-size: 13px; }
-}
-
-
-/* === Sidebar colapsable (mostrar solo el activo) ==================== */
-/* En colapsado, el contenedor .menu sigue visible, pero se ocultan todos
-   los enlaces salvo el activo, que se muestra como "selector" con un ▾ */
-.sidebar.is-collapsed .menu { display: grid; } /* mantener layout */
-.sidebar.is-collapsed .menu a { display: none; }
-
-.sidebar.is-collapsed .menu a.is-active{
-  display: inline-flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  position: relative;
-  padding-right: 28px; /* espacio para el caret */
-}
-
-/* Caret/triangulito hacia abajo */
-.sidebar.is-collapsed .menu a.is-active::after{
-  content: "▾";
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  opacity: .8;
-  font-size: 14px;
-  line-height: 1;
-}
-
-/* (opcional) cursor más explícito en el “selector” colapsado */
-.sidebar.is-collapsed .menu a.is-active { cursor: pointer; }
-
-
