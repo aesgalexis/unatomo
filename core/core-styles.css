@@ -9,12 +9,17 @@
   --content-max: 960px;
   --radius: 12px;
 
-  /* LIGHT */
+  /* PALeta común (idéntica en light y dark para el menú) */
+  --accent: #22c55e;            /* verde vivo - menú/submenú */
+  --menu-hover-bg: #d1fae5;     /* verde 100 fijo */
+  --menu-active-bg: #a7f3d0;    /* verde 200 fijo */
+  --submenu-divider: #e5e7eb;   /* línea neutra fija */
+
+  /* Light */
   --bg: #ffffff;
   --fg: #111111;
   --muted: #6b7280;
   --border: #e5e7eb;
-  --accent: #22c55e;      /* verde vivo - menú/submenú */
 
   /* Resaltado SIEMPRE amarillo */
   --hl: #fde047;
@@ -23,24 +28,24 @@
   --map-allowed: #3b82f6; /* azul permitidos */
 }
 
-/* DARK (paleta del menú igual que en light) */
+/* Dark: solo cambia fondo/fg/border. El acento y colores de menú NO cambian. */
 :root[data-theme="dark"] {
   --bg: #0b0b0c;
   --fg: #e5e7eb;
   --muted: #9ca3af;
   --border: #1f2937;
-  --accent: #22c55e;      /* <- mismo verde que en light */
-  --map-allowed: #60a5fa; /* opcional: azul un poco más claro en dark */
+
+  /* Mantengo los mismos: --accent, --menu-hover-bg, --menu-active-bg, --submenu-divider */
+  --map-allowed: #60a5fa; /* opcional: azul algo más claro en dark */
 }
 
-/* Preferencia SO si no hay elección manual */
+/* Preferencia SO si no hay elección manual (mismos colores de menú) */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme]) {
     --bg: #0b0b0c;
     --fg: #e5e7eb;
     --muted: #9ca3af;
     --border: #1f2937;
-    --accent: #22c55e;
     --map-allowed: #60a5fa;
   }
 }
@@ -160,10 +165,10 @@ body > :not(.sidebar):not(.content){
 .menu .menu-item > a:focus-visible {
   color: var(--fg);
   outline: none;
-  background: color-mix(in oklab, var(--accent) 22%, transparent);
+  background: var(--menu-hover-bg);    /* fijo en ambos temas */
 }
 .menu .menu-item > a.is-active {
-  background: color-mix(in oklab, var(--accent) 30%, transparent);
+  background: var(--menu-active-bg);   /* fijo en ambos temas */
   color: var(--fg);
 }
 
@@ -184,7 +189,7 @@ body > :not(.sidebar):not(.content){
   display: none;
   margin: 0;
   padding-left: 12px;
-  border-left: 1px solid var(--border); /* línea neutra */
+  border-left: 1px solid var(--submenu-divider); /* línea neutra fija */
   gap: 6px;
 }
 .menu .menu-item.is-open > .submenu { display: grid; }
@@ -229,20 +234,20 @@ h3 { font-size: clamp(18px, 2vw, 24px); margin-top: var(--space-3); }
 p { margin: 0 0 var(--space-3) 0; color: var(--fg); }
 .section p + p { color: var(--muted); }
 
-/* Resaltado amarillo sin alterar tamaño del texto (sólo tras el texto) */
+/* Resaltado amarillo sin alterar el tamaño del título
+   - Mantiene display de bloque y márgenes del h2/h3
+   - Limita el fondo al ancho del texto con fit-content
+   - Sin padding vertical para no afectar la altura de línea */
 h2[id], h3[id] { scroll-margin-top: 24px; }
 h2.is-highlighted,
 h3.is-highlighted{
+  display: block;                 /* sigue siendo bloque (no colapsa márgenes) */
+  width: fit-content;             /* fondo solo tras el texto */
   background: var(--hl);
-  /* clave para que no “crezca”: */
-  display: inline;               /* no cambia la caja del título */
-  font-size: inherit;
-  font-weight: inherit;
-  line-height: inherit;
-  padding: 0 .2em;               /* sólo horizontal, no altera altura de línea */
-  border-radius: 0;              /* cuadrado */
+  border-radius: 0;               /* cuadrado */
+  padding: 0 .2em;                /* solo horizontal, mantiene altura de línea */
   -webkit-box-decoration-break: clone;
-  box-decoration-break: clone;   /* multi-línea coherente */
+  box-decoration-break: clone;
 }
 
 /* === Mapa Acción === */
