@@ -9,25 +9,26 @@
   --content-max: 960px;
   --radius: 12px;
 
-  /* LIGHT */
+  /* Light base */
   --bg: #ffffff;
   --fg: #111111;
   --muted: #6b7280;
   --border: #e5e7eb;
 
-  /* Menú top-level en GRIS (light) */
+  /* Menú top-level en GRIS (común, con variantes por tema más abajo) */
   --menu-hover-bg: #f3f4f6;   /* gray-100 */
   --menu-active-bg: #e5e7eb;  /* gray-200 */
 
-  /* Submenús (color en hover/activo) */
-  --accent: #22c55e;          /* verde: submenús en light */
+  /* Submenú: MISMO gris claro legible en ambos modos */
+  --submenu-fg: #94a3b8;      /* slate-400: legible en light y dark */
+  --submenu-fg-strong: #64748b; /* slate-500 en hover/activo */
   --submenu-divider: #e5e7eb;  /* línea neutra */
 
-  /* Resaltado en contenido (SIEMPRE amarillo; más oscuro en dark abajo) */
+  /* Marcado contenido (amarillo; se oscurece en dark más abajo) */
   --hl: #fde047;              /* yellow-300 */
 
   /* Mapa */
-  --map-allowed: #3b82f6;     /* azul permitidos */
+  --map-allowed: #3b82f6;
 }
 
 :root[data-theme="dark"] {
@@ -36,21 +37,22 @@
   --muted: #9ca3af;
   --border: #1f2937;
 
-  /* Menú top-level en GRIS (dark) */
+  /* Menú top-level gris en dark (más oscuros para contraste con texto claro) */
   --menu-hover-bg: #374151;   /* gray-700 */
   --menu-active-bg: #4b5563;  /* gray-600 */
 
-  /* Submenús (color en hover/activo) */
-  --accent: #60a5fa;          /* azul: submenús en dark */
+  /* Submenú: MISMO gris claro (no cambia) */
+  --submenu-fg: #94a3b8;
+  --submenu-fg-strong: #cbd5e1; /* un pelín más claro para destacar en dark */
   --submenu-divider: var(--border);
 
-  /* Amarillo más oscuro en dark para mejor contraste */
+  /* Amarillo más oscuro en dark para mejor contraste con texto claro */
   --hl: #a16207;              /* amber-700 aprox */
 
-  --map-allowed: #60a5fa;     /* opcional: azul algo más claro en dark */
+  --map-allowed: #60a5fa;
 }
 
-/* Preferencia del SO si no hay elección manual */
+/* Preferencia SO si no hay elección manual */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme]) {
     --bg: #0b0b0c;
@@ -61,7 +63,8 @@
     --menu-hover-bg: #374151;
     --menu-active-bg: #4b5563;
 
-    --accent: #60a5fa;
+    --submenu-fg: #94a3b8;
+    --submenu-fg-strong: #cbd5e1;
     --submenu-divider: var(--border);
 
     --hl: #a16207;
@@ -90,7 +93,7 @@ body {
 .sidebar { grid-column: 1; grid-row: 1; }
 .content { grid-column: 2; grid-row: 1; }
 
-/* Otros hijos del body ocupan filas aparte */
+/* Otros hijos del body en filas aparte */
 body > :not(.sidebar):not(.content){
   grid-column: 1 / -1;
 }
@@ -120,11 +123,11 @@ body > :not(.sidebar):not(.content){
 .theme-toggle:hover{
   transform: translateY(-1px);
   filter: brightness(1.03);
-  border-color: var(--accent);
-  background: color-mix(in oklab, var(--accent) 18%, var(--bg));
+  border-color: #94a3b8;
+  background: color-mix(in oklab, #94a3b8 18%, var(--bg));
 }
 .theme-toggle:focus-visible{
-  outline: 2px dashed var(--accent);
+  outline: 2px dashed #94a3b8;
   outline-offset: 2px;
 }
 @media (max-width: 360px){
@@ -169,7 +172,7 @@ body > :not(.sidebar):not(.content){
   gap: 8px;
 }
 
-/* Top-level (GRIS en ambos modos) */
+/* Top-level (GRIS) */
 .menu .menu-item > a {
   display: inline-block;
   text-decoration: none;
@@ -209,17 +212,17 @@ body > :not(.sidebar):not(.content){
   margin: 0;
   padding-left: 12px;
   border-left: 1px solid var(--submenu-divider); /* neutra */
-  gap: 4px; /* más juntos */
+  gap: 4px; /* compacto */
 }
 .menu .menu-item.is-open > .submenu { display: grid; }
 
-/* Subitems: color normal; acento SOLO en hover/activo; sin subrayado ni fondo */
+/* Subitems: MISMO gris claro en ambos modos; más fuerte en hover/activo */
 .submenu a{
   display: block;
   text-decoration: none;
-  color: var(--fg);
+  color: var(--submenu-fg);        /* gris claro fijo */
   font-weight: 400;
-  padding: 2px 0;           /* más compacto */
+  padding: 2px 0;                  /* compacto */
   border-radius: 0;
   font-size: 0.96em;
   transition: color 120ms ease, opacity 120ms ease;
@@ -227,9 +230,11 @@ body > :not(.sidebar):not(.content){
 .submenu a:hover,
 .submenu a:focus-visible{
   outline: none;
-  color: var(--accent);     /* verde (light) / azul (dark) */
+  color: var(--submenu-fg-strong); /* gris un poco más fuerte */
 }
-.submenu a.is-sub-active{ color: var(--accent); }
+.submenu a.is-sub-active{
+  color: var(--submenu-fg-strong);
+}
 
 /* === Contenido === */
 .content {
@@ -253,20 +258,19 @@ h3 { font-size: clamp(18px, 2vw, 24px); margin-top: var(--space-3); }
 p { margin: 0 0 var(--space-3) 0; color: var(--fg); }
 .section p + p { color: var(--muted); }
 
-/* Resaltado del título (amarillo). No cambia tamaño:
-   - sigue siendo bloque (mantiene márgenes)
-   - fit-content para que el fondo no ocupe toda la línea
-   - sin padding vertical */
+/* Marcado del título SIN cambios de tamaño, sin saltos:
+   subrayado grueso “tipo marcador” detrás del texto.
+   - No altera display, márgenes ni ancho
+   - Funciona en multilínea
+*/
 h2[id], h3[id] { scroll-margin-top: 24px; }
 h2.is-highlighted,
 h3.is-highlighted{
-  display: inline-block;
-  width: fit-content;
-  background: var(--hl);
-  border-radius: 0;          /* cuadrado */
-  padding: 0 .2em;           /* solo horizontal */
-  -webkit-box-decoration-break: clone;
-  box-decoration-break: clone;
+  text-decoration-line: underline;
+  text-decoration-color: var(--hl);
+  text-decoration-thickness: 0.55em;
+  text-underline-offset: -0.35em;
+  text-decoration-skip-ink: none;
 }
 
 /* === Mapa Acción === */
@@ -315,4 +319,4 @@ h3.is-highlighted{
 #app:focus-visible{ outline: none; }
 
 /* Foco accesible general */
-:focus-visible { outline: 2px dashed var(--accent); outline-offset: 3px; }
+:focus-visible { outline: 2px dashed #94a3b8; outline-offset: 3px; }
