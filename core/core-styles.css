@@ -1,3 +1,4 @@
+/* === Variables === */
 :root {
   --sidebar-w: 384px;
   --space-1: 6px;
@@ -9,47 +10,40 @@
   --content-max: 960px;
   --radius: 12px;
 
-  /* Light base */
+  /* Light */
   --bg: #ffffff;
   --fg: #111111;
   --muted: #6b7280;
   --border: #e5e7eb;
 
-  /* Menú top-level (gris) */
-  --menu-hover-bg: #f3f4f6;   /* gray-100 */
-  --menu-active-bg: #e5e7eb;  /* gray-200 */
+  /* Menú */
+  --menu-hover-bg: #f3f4f6;
+  --menu-active-bg: #e5e7eb;
 
-  /* Submenú: MISMOS grises en ambos modos (oscuro por defecto -> claro en hover/activo) */
-  --submenu-fg: #64748b;         /* slate-500 (por defecto) */
-  --submenu-fg-strong: #94a3b8;  /* slate-400 (hover/activo) */
-  --submenu-divider: #e5e7eb;     /* línea neutra */
+  /* Submenú */
+  --submenu-fg: #64748b;
+  --submenu-fg-strong: #94a3b8;
+  --submenu-divider: #e5e7eb;
 
-  /* Resaltado contenido (amarillo; se oscurece en dark en el bloque de abajo) */
-  --hl: #fde047;               /* yellow-300 */
+  /* Resaltado */
+  --hl: #fde047;
 
   /* Mapa */
   --map-allowed: #3b82f6;
 }
-
 :root[data-theme="dark"] {
   --bg: #0b0b0c;
   --fg: #e5e7eb;
   --muted: #9ca3af;
   --border: #1f2937;
 
-  /* Menú top-level gris en dark */
-  --menu-hover-bg: #374151;   /* gray-700 */
-  --menu-active-bg: #4b5563;  /* gray-600 */
+  --menu-hover-bg: #374151;
+  --menu-active-bg: #4b5563;
 
-  /* Submenú: mismos grises (no se sobreescriben fg/strong) */
   --submenu-divider: var(--border);
-
-  /* Amarillo más oscuro en dark para mejor contraste */
   --hl: #a16207;
-
   --map-allowed: #60a5fa;
 }
-
 /* Preferencia SO si no hay elección manual */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme]) {
@@ -57,20 +51,17 @@
     --fg: #e5e7eb;
     --muted: #9ca3af;
     --border: #1f2937;
-
     --menu-hover-bg: #374151;
     --menu-active-bg: #4b5563;
-
     --submenu-divider: var(--border);
-
     --hl: #a16207;
     --map-allowed: #60a5fa;
   }
 }
 
+/* === Base / Layout === */
 * { box-sizing: border-box; }
 html, body { height: 100%; }
-
 body {
   margin: 0;
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
@@ -79,22 +70,19 @@ body {
   line-height: 1.6;
   text-rendering: optimizeLegibility;
 
-  /* Layout: grid (sidebar | contenido) */
   display: grid;
-  grid-template-columns: var(--sidebar-w) 1fr;
+  grid-template-columns: var(--sidebar-w) 1fr; /* sidebar | contenido */
   grid-auto-rows: auto;
 }
-
-/* Forzar posiciones en la primera fila */
 .sidebar { grid-column: 1; grid-row: 1; }
 .content { grid-column: 2; grid-row: 1; }
+body > :not(.sidebar):not(.content) { grid-column: 1 / -1; } /* otros hijos a ancho completo */
 
-/* Otros hijos del body en filas aparte */
-body > :not(.sidebar):not(.content){
-  grid-column: 1 / -1;
-}
+#app:focus,
+#app:focus-visible { outline: none; }
+:focus-visible { outline: 2px dashed #94a3b8; outline-offset: 3px; }
 
-/* === Botón Dark/Light (pill) === */
+/* === Botón modo oscuro/claro === */
 .theme-toggle{
   position: fixed;
   inset-block-start: max(12px, env(safe-area-inset-top));
@@ -122,10 +110,7 @@ body > :not(.sidebar):not(.content){
   border-color: #94a3b8;
   background: color-mix(in oklab, #94a3b8 18%, var(--bg));
 }
-.theme-toggle:focus-visible{
-  outline: 2px dashed #94a3b8;
-  outline-offset: 2px;
-}
+.theme-toggle:focus-visible{ outline: 2px dashed #94a3b8; outline-offset: 2px; }
 @media (max-width: 360px){
   .theme-toggle{ padding: 6px 10px; gap: 6px; }
   .theme-toggle .label{ font-size: 13px; }
@@ -134,172 +119,99 @@ body > :not(.sidebar):not(.content){
 /* === Sidebar === */
 .sidebar {
   position: static;
-  inset: auto;
   width: var(--sidebar-w);
   border-right: 1px solid var(--border);
   padding: var(--space-4) var(--space-3);
-  overflow: visible;
   background: var(--bg);
 }
+.brand { display: flex; justify-content: flex-end; width: 100%; }
+.brand img { display: block; width: 192px; max-width: 100%; height: auto; }
 
-/* Logo: derecha, 1/2 tamaño */
-.brand {
-  display: flex;
-  justify-content: flex-end;
-  width: 100%;
-}
-.brand img {
-  display: block;
-  width: 192px;
-  max-width: 100%;
-  height: auto;
-}
-
-/* === Menú + submenús === */
-.menu {
-  margin-top: var(--space-4);
-  display: grid;
-  gap: var(--space-2);
-}
-
-/* Item contenedor */
-.menu .menu-item {
-  display: grid;
-  gap: 8px;
-}
-
-/* Top-level (GRIS) */
+/* === Menú === */
+.menu { margin-top: var(--space-4); display: grid; gap: var(--space-2); }
+.menu .menu-item { display: grid; gap: 8px; }
 .menu .menu-item > a {
   display: inline-block;
   text-decoration: none;
   color: var(--fg);
   font-weight: 700;
-  padding: 8px 34px 8px 10px; /* espacio para caret */
+  padding: 8px 34px 8px 10px;
   border-radius: var(--radius);
   position: relative;
   transition: transform 120ms ease, color 120ms ease, background 120ms ease;
 }
 .menu .menu-item > a:hover,
-.menu .menu-item > a:focus-visible {
-  color: var(--fg);
-  outline: none;
-  background: var(--menu-hover-bg);    /* gris */
-}
-.menu .menu-item > a.is-active {
-  background: var(--menu-active-bg);   /* gris */
-  color: var(--fg);
-}
-
-/* Caret */
+.menu .menu-item > a:focus-visible { color: var(--fg); outline: none; background: var(--menu-hover-bg); }
+.menu .menu-item > a.is-active { background: var(--menu-active-bg); color: var(--fg); }
 .menu .menu-item > a::after{
   content: "▸";
   position: absolute;
-  right: 10px;
-  top: 50%;
+  right: 10px; top: 50%;
   transform: translateY(-50%);
   opacity: .85;
   transition: transform 160ms ease, opacity 160ms ease;
 }
 .menu .menu-item.is-open > a::after{ content: "▾"; }
 
-/* Submenú (lista de subtítulos) */
 .submenu {
   display: none;
   margin: 0;
   padding-left: 12px;
-  border-left: 1px solid var(--submenu-divider); /* neutra */
-  gap: 4px; /* compacto */
+  border-left: 1px solid var(--submenu-divider);
+  gap: 4px;
 }
 .menu .menu-item.is-open > .submenu { display: grid; }
-
-/* Subitems: gris oscuro por defecto -> gris claro en hover/activo */
 .submenu a{
   display: block;
   text-decoration: none;
-  color: var(--submenu-fg);        /* slate-500 */
+  color: var(--submenu-fg);
   font-weight: 400;
-  padding: 2px 0;                  /* compacto */
-  border-radius: 0;
+  padding: 2px 0;
   font-size: 0.96em;
   transition: color 120ms ease, opacity 120ms ease;
 }
 .submenu a:hover,
-.submenu a:focus-visible{
-  outline: none;
-  color: var(--submenu-fg-strong); /* slate-400 */
-}
-.submenu a.is-sub-active{
-  color: var(--submenu-fg-strong);
-}
+.submenu a:focus-visible{ outline: none; color: var(--submenu-fg-strong); }
+.submenu a.is-sub-active{ color: var(--submenu-fg-strong); }
 
 /* === Contenido === */
 .content {
-  margin-left: 0;
   padding: var(--space-8) var(--space-6);
   min-height: 100dvh;
   display: block;
 }
-.content > .section {
-  display: none;
-  max-width: var(--content-max);
-}
+.content > .section { display: none; max-width: var(--content-max); }
 .content > .section.is-active { display: block; }
 
-/* Tipografía */
+/* === Tipografía === */
 h1, h2, h3 { line-height: 1.2; margin: 0 0 var(--space-3) 0; }
 h1 { font-size: clamp(28px, 3.2vw, 44px); }
 h2 { font-size: clamp(22px, 2.4vw, 32px); margin-top: var(--space-6); }
 h3 { font-size: clamp(18px, 2vw, 24px); margin-top: var(--space-3); }
-
 p { margin: 0 0 var(--space-3) 0; color: var(--fg); }
 .section p + p { color: var(--muted); }
 
-/* === Resaltado de títulos SIN cambios de tamaño ni ancho === */
-/* El h2/h3 mantiene display: block y sus márgenes; el fondo lo pone un span interno */
 h2[id], h3[id] { scroll-margin-top: 24px; }
-
-/* Envuelve el texto del título cuando hay que resaltarlo */
 .hl-wrap {
-  display: inline;                /* sólo ocupa el ancho del texto */
-  background: var(--hl);          /* amarillo (más oscuro en dark por var) */
-  border-radius: 2px;             /* leve suavizado */
-  padding: 0 .15em;               /* sólo horizontal, no altera altura de línea */
+  display: inline;
+  background: var(--hl);
+  border-radius: 2px;
+  padding: 0 .15em;
   -webkit-box-decoration-break: clone;
-  box-decoration-break: clone;    /* multilínea */
+  box-decoration-break: clone;
 }
+h2.is-highlighted, h3.is-highlighted { background: transparent !important; text-decoration: none !important; }
 
-/* Por si hubiese reglas anteriores de fondo en el h2/h3 */
-h2.is-highlighted, h3.is-highlighted {
-  background: transparent !important;
-  text-decoration: none !important;
-}
-
-/* === Mapa Acción === */
-.map {
-  width: 100%;
-  aspect-ratio: 7 / 5;
-  max-width: 100%;
-}
-.map svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-.country {
-  fill: none;
-  stroke: color-mix(in oklab, var(--fg) 30%, transparent);
-  stroke-width: .9;
-}
-.country.allowed {
-  fill: var(--map-allowed);
-  stroke: var(--map-allowed);
-}
+/* === Mapa === */
+.map { width: 100%; aspect-ratio: 7 / 5; max-width: 100%; }
+.map svg { display: block; width: 100%; height: 100%; }
+.country { fill: none; stroke: color-mix(in oklab, var(--fg) 30%, transparent); stroke-width: .9; }
+.country.allowed { fill: var(--map-allowed); stroke: var(--map-allowed); }
 
 /* === Responsive === */
 @media (max-width: 900px) {
   :root { --sidebar-w: 100%; }
-
-  body{ display: block; }          /* columna única */
+  body{ display: block; }
 
   .sidebar {
     position: sticky;
@@ -310,29 +222,18 @@ h2.is-highlighted, h3.is-highlighted {
   }
 
   .brand img { width: clamp(96px, 25vw, 160px); height: auto; }
-
-  .menu { grid-auto-flow: row; gap: var(--space-2); overflow: visible; }
-  .content { margin-left: 0; padding-top: var(--space-6); }
+  .menu { grid-auto-flow: row; gap: var(--space-2); }
+  .content { padding-top: var(--space-6); }
 }
 
-/* El contenedor principal no necesita anillo de foco visual */
-#app:focus,
-#app:focus-visible{ outline: none; }
-
-/* Foco accesible general */
-:focus-visible { outline: 2px dashed #94a3b8; outline-offset: 3px; }
-
-  :root { --divider-color: rgba(0,0,0,.12); }
-  @media (prefers-color-scheme: dark) {
-    :root { --divider-color: rgba(255,255,255,.16); }
-  }
-  #site-footer {
-    height: 255px;
-    background: inherit;   /* mismo fondo que el contenido */
-    color: inherit;        /* misma fuente y color que el resto */
-    border-top: 1px solid var(--divider-color); /* misma “línea” que el sidebar */
-    display: grid;
-    place-items: center;   /* contenido centrado */
-    padding: 0 16px;
-  }
-  #site-footer .footer-inner { font: inherit; }
+/* === Footer (dentro de <main>) === */
+#site-footer {
+  height: 255px;
+  background: inherit;
+  color: var(--muted);               /* gris claro como el texto de los <p> del contenido */
+  border-top: 1px solid var(--border); /* misma línea que el sidebar */
+  display: grid;
+  place-items: center;
+  padding: 0 16px;
+}
+#site-footer .footer-inner { font: inherit; }
