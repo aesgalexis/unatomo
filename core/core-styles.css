@@ -321,3 +321,18 @@ h2.is-highlighted, h3.is-highlighted {
 
 /* Foco accesible general */
 :focus-visible { outline: 2px dashed #94a3b8; outline-offset: 3px; }
+
+  :root { --divider-color: rgba(0,0,0,.12); }
+  @media (prefers-color-scheme: dark) {
+    :root { --divider-color: rgba(255,255,255,.16); }
+  }
+  #site-footer {
+    height: 255px;
+    background: inherit;   /* mismo fondo que el contenido */
+    color: inherit;        /* misma fuente y color que el resto */
+    border-top: 1px solid var(--divider-color); /* misma “línea” que el sidebar */
+    display: grid;
+    place-items: center;   /* contenido centrado */
+    padding: 0 16px;
+  }
+  #site-footer .footer-inner { font: inherit; }
