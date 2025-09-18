@@ -253,3 +253,17 @@ h2.is-highlighted, h3.is-highlighted { background: transparent !important; text-
   margin-top: -2px;
 }
 
+/* === Subtítulos dentro del contenido (h2 secundarios) === */
+.section h2:not(:first-of-type) {
+  font-size: clamp(16px, 1.6vw, 20px); /* más pequeños que el título de sección */
+  font-weight: 700;
+  line-height: 1.25;
+  margin-top: var(--space-3);          /* menos espacio arriba */
+  margin-bottom: var(--space-2);
+}
+
+/* (opcional) tagline justo debajo del subtítulo: compactar un poco */
+.section h2:not(:first-of-type) + p > strong {
+  display: inline-block;
+  margin-top: -2px;
+}
