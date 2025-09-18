@@ -69,48 +69,64 @@
     <img src="./logo-unatomo-v1.5.svg" alt="unatomo core logo" width="384" height="384" />
   </a>
 
-  <!-- Menú con contenedores .menu-item; los submenus se rellenan por JS -->
   <nav class="menu" id="sidebar-menu">
-    <div class="menu-item" data-key="home">
-      <a href="#home" data-section="home" aria-current="page">Bienvenidos</a>
-      <div class="submenu"></div>
-    </div>
+  <div class="menu-item" data-key="home">
+    <a href="#home" data-section="home" aria-current="page">Bienvenidos</a>
+    <div class="submenu"></div>
+  </div>
 
-    <div class="menu-item" data-key="servicios-generales">
-      <a href="#servicios-generales" data-section="servicios-generales">Servicios generales</a>
-      <div class="submenu"></div>
+  <div class="menu-item" data-key="seccion-1">
+    <a href="#seccion-1" data-section="seccion-1">Asesoría</a>
+    <div class="submenu">
+      <a href="#seccion-1-asesoria-tecnica" data-subsection="asesoria-tecnica">Asesoría técnica</a>
+      <a href="#seccion-1-asesoria-procesos" data-subsection="asesoria-procesos">Asesoría de procesos</a>
+      <a href="#seccion-1-asesoria-operativa" data-subsection="asesoria-operativa">Asesoría operativa</a>
     </div>
+  </div>
 
-    <div class="menu-item" data-key="servicios-especificos">
-      <a href="#servicios-especificos" data-section="servicios-especificos">Servicios específicos</a>
-      <div class="submenu"></div>
+  <div class="menu-item" data-key="seccion-2">
+    <a href="#seccion-2" data-section="seccion-2">Formación</a>
+    <div class="submenu">
+      <a href="#seccion-2-formacion-operarios" data-subsection="formacion-operarios">Formación de operarios</a>
+      <a href="#seccion-2-formacion-tecnicos" data-subsection="formacion-tecnicos">Formación de equipos técnicos</a>
     </div>
+  </div>
 
-    <div class="menu-item" data-key="otros-servicios">
-      <a href="#otros-servicios" data-section="otros-servicios">Otros servicios</a>
-      <div class="submenu"></div>
-    </div>
+  <div class="menu-item" data-key="seccion-3">
+    <a href="#seccion-3" data-section="seccion-3">Ajustes y optimización</a>
+    <div class="submenu"></div>
+  </div>
 
-    <div class="menu-item" data-key="alcance">
-      <a href="#alcance" data-section="alcance">Alcance</a>
-      <div class="submenu"></div>
-    </div>
+  <div class="menu-item" data-key="seccion-4">
+    <a href="#seccion-4" data-section="seccion-4">Control de producción</a>
+    <div class="submenu"></div>
+  </div>
 
-    <div class="menu-item" data-key="cita">
-      <a href="#cita" data-section="cita">Solicitar una cita</a>
-      <div class="submenu"></div>
-    </div>
+  <div class="menu-item" data-key="seccion-5">
+    <a href="#seccion-5" data-section="seccion-5">Mantenimiento</a>
+    <div class="submenu"></div>
+  </div>
 
-    <div class="menu-item" data-key="contacto">
-      <a href="#contacto" data-section="contacto">Contacto</a>
-      <div class="submenu"></div>
-    </div>
+  <div class="menu-item" data-key="seccion-6">
+    <a href="#seccion-6" data-section="seccion-6">Asistencia técnica</a>
+    <div class="submenu"></div>
+  </div>
 
-    <div class="menu-item" data-key="creditos">
-      <a href="#creditos" data-section="creditos">Créditos</a>
-      <div class="submenu"></div>
-    </div>
-  </nav>
+  <div class="menu-item" data-key="seccion-7">
+    <a href="#seccion-7" data-section="seccion-7">Alcance</a>
+    <div class="submenu"></div>
+  </div>
+
+  <div class="menu-item" data-key="seccion-8">
+    <a href="#seccion-8" data-section="seccion-8">Contacto</a>
+    <div class="submenu"></div>
+  </div>
+
+  <div class="menu-item" data-key="seccion-9">
+    <a href="#seccion-9" data-section="seccion-9">Créditos</a>
+    <div class="submenu"></div>
+  </div>
+</nav>
 </aside>
 
 <main id="app" class="content" tabindex="-1">
@@ -121,61 +137,62 @@
     <p>Somos una empresa fundada en Mallorca, especializada en soluciones aplicadas y consultoría de alto nivel para entornos de lavandería industrial.</p>
   </section>
 
-  <!-- Servicios generales -->
-  <section id="section-servicios-generales" data-section="servicios-generales" class="section">
-    <h2>Asesoría técnica</h2>
-    <p>Evaluación de procesos, recomendaciones de mejora y acompañamiento técnico.</p>
+  <!-- Sección 1: Asesoría -->
+  <section id="section-seccion-1" data-section="seccion-1" class="section">
+    <h2>Asesoría</h2>
+    <h3 id="seccion-1-asesoria-tecnica">Asesoría técnica — lo que mantiene las máquinas listas para trabajar</h3>
+    <h3 id="seccion-1-asesoria-procesos">Asesoría de procesos — el ajuste fino para que nada se frene</h3>
+    <h3 id="seccion-1-asesoria-operativa">Asesoría operativa — donde el uso diario convierte el plan en resultados</h3>
+  </section>
 
-    <h2>Auditoría</h2>
-    <p>Análisis integral de rendimiento, consumo y calidad, con informe accionable.</p>
-
+  <!-- Sección 2: Formación -->
+  <section id="section-seccion-2" data-section="seccion-2" class="section">
     <h2>Formación</h2>
-    <p>Programas prácticos para equipos operativos y mandos intermedios.</p>
+    <h3 id="seccion-2-formacion-operarios">Formación de operarios — trabajar sin frenos ni retrabajos</h3>
+    <h3 id="seccion-2-formacion-tecnicos">Formación de equipos técnicos — mantener y resolver sin improvisar</h3>
   </section>
 
-  <!-- Servicios específicos -->
-  <section id="section-servicios-especificos" data-section="servicios-especificos" class="section">
-    <h2>Maquinaria</h2>
-    <p>Selección, configuración y validación de equipos para cada entorno.</p>
-
-    <h2>Instalaciones</h2>
-    <p>Diseño y optimización de layout, flujos y utilidades.</p>
-
-    <h2>Suministros</h2>
-    <p>Asesoría en químicos, consumibles y contratos de aprovisionamiento.</p>
+  <!-- Sección 3: Ajustes y optimización -->
+  <section id="section-seccion-3" data-section="seccion-3" class="section">
+    <h2>Ajustes y optimización — que las máquinas rindan lo que pueden</h2>
   </section>
 
-  <!-- Otros servicios -->
-  <section id="section-otros-servicios" data-section="otros-servicios" class="section">
-    <h2>Herramientas de control de producción</h2>
-    <p>Cuadros de mando, trazabilidad y métricas para la toma de decisiones.</p>
+  <!-- Sección 4: Control de producción -->
+  <section id="section-seccion-4" data-section="seccion-4" class="section">
+    <h2>Control de producción — saber qué entra, qué sale y dónde se atasca</h2>
   </section>
 
-  <!-- Alcance -->
-  <section id="section-alcance" data-section="alcance" class="section">
-    <h2>Mapa</h2>
+  <!-- Sección 5: Mantenimiento -->
+  <section id="section-seccion-5" data-section="seccion-5" class="section">
+    <h2>Mantenimiento — anticiparse para no parar</h2>
+  </section>
+
+  <!-- Sección 6: Asistencia técnica -->
+  <section id="section-seccion-6" data-section="seccion-6" class="section">
+    <h2>Asistencia técnica — cuando se para, lo ponemos en marcha</h2>
+  </section>
+
+  <!-- Sección 7: Alcance (Mapa) -->
+  <section id="section-seccion-7" data-section="seccion-7" class="section">
+    <h2>Alcance</h2>
+    <h3>Mapa</h3>
     <p>Disponibilidad geográfica para intervenciones y proyectos.</p>
     <div id="action-map" class="map" role="img" aria-label="Mapa de disponibilidad geográfica"></div>
   </section>
 
-  <!-- Solicitar una cita -->
-  <section id="section-cita" data-section="cita" class="section">
-    <h2>Solicitar una cita</h2>
-    <p>Cuéntanos brevemente tu necesidad y proponemos fecha para la primera reunión.</p>
-  </section>
-
-  <!-- Contacto -->
-  <section id="section-contacto" data-section="contacto" class="section">
+  <!-- Sección 8: Contacto -->
+  <section id="section-seccion-8" data-section="seccion-8" class="section">
     <h2>Contacto</h2>
     <p>Escríbenos y te respondemos a la mayor brevedad.</p>
   </section>
 
-  <!-- Créditos -->
-  <section id="section-creditos" data-section="creditos" class="section">
+  <!-- Sección 9: Créditos -->
+  <section id="section-seccion-9" data-section="seccion-9" class="section">
     <h2>Créditos</h2>
     <p>Referencias y agradecimientos del proyecto.</p>
   </section>
 </main>
+
 
 <script>
 (function () {
