@@ -9,7 +9,6 @@
   const btn = document.getElementById('themeToggle');
   const metaColor = document.querySelector('meta[name="color-scheme"]');
 
-  // Preferencia: guardada o blanco por defecto
   const saved = localStorage.getItem(STORAGE_KEY);
   const initial = (saved === 'light' || saved === 'dark') ? saved : 'light';
   applyTheme(initial);
@@ -31,9 +30,8 @@
 
   function applyTheme(mode) {
     document.documentElement.dataset.theme = mode;
-
     const icon  = mode === 'dark' ? '☀️' : '🌙';
-    const text  = mode === 'dark' ? 'Light' : 'Dark'; // etiqueta visible
+    const text  = mode === 'dark' ? 'Light' : 'Dark';
     const label = mode === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro';
 
     btn?.querySelector('.icon')?.replaceChildren(document.createTextNode(icon));
@@ -42,8 +40,7 @@
       btn.setAttribute('aria-label', label);
       btn.setAttribute('title', label);
     }
-
-    if (metaColor) metaColor.setAttribute('content', mode === 'dark' ? 'dark light' : 'light dark');
+    metaColor?.setAttribute('content', mode === 'dark' ? 'dark light' : 'light dark');
   }
 })();
 
@@ -62,26 +59,17 @@
   const level2Groups = [...servicesItem.querySelectorAll('.submenu-group')]; // nivel 2 dentro de Servicios
 
   // Anchors útiles para activar clases
-  const topAnchors = topItems
-    .map(mi => mi.querySelector(':scope > a[data-section]'))
-    .filter(Boolean);
-  const lvl2Links = level2Groups
-    .map(g => g.querySelector(':scope > a.lvl2-link[data-section]'))
-    .filter(Boolean);
+  const topAnchors = topItems.map(mi => mi.querySelector(':scope > a[data-section]')).filter(Boolean);
+  const lvl2Links = level2Groups.map(g => g.querySelector(':scope > a.lvl2-link[data-section]')).filter(Boolean);
 
   // Estado de apertura
   let openKey = 'home';          // top-level abierto (home/servicios/…)
   let openSecondKey = null;      // si openKey === 'servicios': seccion-1..6
 
-  // Utilidad: slug simple si hiciera falta generar ids
-  const slug = (t) => t.toLowerCase()
-    .trim()
-    .replace(/[^\p{L}\p{N}\s-]/gu,'')
-    .replace(/\s+/g,'-')
-    .replace(/-+/g,'-')
-    .slice(0,64);
+  // Utils
+  const slug = (t) => t.toLowerCase().trim()
+    .replace(/[^\p{L}\p{N}\s-]/gu,'').replace(/\s+/g,'-').replace(/-+/g,'-').slice(0,64);
 
-  // Asegura un id único sobre un elemento (con base opcional)
   function ensureId(el, base = 'sub') {
     if (el.id) return el.id;
     const seed = slug((el.textContent || base).slice(0, 64)) || base;
@@ -91,10 +79,7 @@
     return id;
   }
 
-  // Helpers de scroll/visibilidad
-  function scrollToTop() {
-    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-  }
+  function scrollToTop() { window.scrollTo({ top: 0, left: 0, behavior: 'auto' }); }
   function isInViewport(el) {
     if (!el) return false;
     const r = el.getBoundingClientRect();
@@ -102,18 +87,15 @@
     const vw = window.innerWidth || document.documentElement.clientWidth;
     return r.bottom >= 0 && r.right >= 0 && r.top <= vh && r.left <= vw;
   }
-
-  // Quitar wrapper .hl-wrap manteniendo contenido
   function unwrap(el) {
     const parent = el.parentNode;
     while (el.firstChild) parent.insertBefore(el.firstChild, el);
     parent.removeChild(el);
   }
 
-  // Activa una sección: marca activo nivel 1 ó nivel 2 según corresponda
+  // Activa una sección (marca activo nivel 1 o nivel 2 según corresponda)
   function activate(sectionKey) {
     sections.forEach(s => s.classList.toggle('is-active', s.dataset.section === sectionKey));
-
     topAnchors.forEach(a => a.classList.remove('is-active'));
     lvl2Links.forEach(a => a.classList.remove('is-active'));
 
@@ -124,38 +106,37 @@
     } else {
       topAnchors.find(a => a.dataset.section === sectionKey)?.classList.add('is-active');
     }
-
     app?.focus({ preventScroll: true });
   }
 
-  // Visual de acordeones abiertos
+  // Acordeones (estado visual)
   function updateOpenVisual() {
     topItems.forEach(mi => mi.classList.toggle('is-open', mi.dataset.key === openKey));
     level2Groups.forEach(g => g.classList.toggle('is-open', g.dataset.key === openSecondKey));
-    updateMenuVisibility(); // 👈 asegura visibilidad real (hidden)
+    updateMenuVisibility();
   }
 
-  // Visibilidad real (independiente del CSS)
+  // Visibilidad real (robusta): usa hidden + style.display para evitar overrides
+  function setDisplay(el, visible) {
+    if (!el) return;
+    el.hidden = !visible;
+    el.style.display = visible ? '' : 'none';
+  }
   function updateMenuVisibility() {
-    // lvl2 (lista de categorías) visible solo si top-level abierto es "servicios"
     const lvl2 = servicesItem?.querySelector('.submenu.lvl2');
-    if (lvl2) lvl2.hidden = openKey !== 'servicios';
+    setDisplay(lvl2, openKey === 'servicios');
 
-    // cada grupo lvl3: visible si coincide el grupo activo y "servicios" está abierto
     level2Groups.forEach(g => {
       const box = g.querySelector('.submenu.lvl3');
-      if (!box) return;
       const visible = openKey === 'servicios' && g.dataset.key === openSecondKey;
-      box.hidden = !visible;
+      setDisplay(box, visible);
     });
   }
 
   function resetSubmenu(key) {
     if (!key) return;
     const group = level2Groups.find(g => g.dataset.key === key);
-    if (group) {
-      group.querySelectorAll('.submenu.lvl3 a.is-sub-active').forEach(a => a.classList.remove('is-sub-active'));
-    }
+    if (group) group.querySelectorAll('.submenu.lvl3 a.is-sub-active').forEach(a => a.classList.remove('is-sub-active'));
     const sec = document.querySelector(`.section[data-section="${key}"]`);
     if (sec) {
       sec.querySelectorAll('h2.is-highlighted, h3.is-highlighted').forEach(h => h.classList.remove('is-highlighted'));
@@ -166,16 +147,14 @@
   function setOpen(nextKey) {
     const prev = openKey;
     openKey = nextKey;
+    // si abrimos Servicios sin grupo, asegúrate de que lvl3 estén cerrados
+    if (openKey === 'servicios' && !openSecondKey) level2Groups.forEach(g => setDisplay(g.querySelector('.submenu.lvl3'), false));
     updateOpenVisual();
 
     if (nextKey !== 'servicios') resetSecondLevel();
-
     if (prev && prev !== nextKey) {
-      if (prev === 'servicios') {
-        level2Groups.forEach(g => resetSubmenu(g.dataset.key));
-      } else {
-        resetSubmenu(prev);
-      }
+      if (prev === 'servicios') level2Groups.forEach(g => resetSubmenu(g.dataset.key));
+      else resetSubmenu(prev);
     }
   }
 
@@ -193,7 +172,7 @@
     updateOpenVisual();
   }
 
-  // Construye submenús (nivel 3) con scroll inteligente
+  // Construye submenús (nivel 3)
   function buildSubmenus() {
     level2Groups.forEach(group => {
       const key = group.dataset.key; // "seccion-1"… "seccion-6"
@@ -210,7 +189,6 @@
       if (mainH2) {
         const next = mainH2.nextElementSibling;
         const strongInP = next?.tagName?.toLowerCase() === 'p' && next.querySelector('strong');
-
         if (strongInP) {
           const targetEl = next;
           const label = next.querySelector('strong').textContent.trim();
@@ -255,7 +233,6 @@
 
       // 2) Resto de subapartados: todos los h2/h3 MENOS el H2 principal
       const heads = allHeads.filter(h => h !== mainH2);
-
       heads.forEach((h, idx) => {
         ensureId(h, `sub-${idx + 1}`);
 
@@ -267,7 +244,6 @@
 
         a.addEventListener('click', (e) => {
           e.preventDefault();
-
           if (!section.classList.contains('is-active')) {
             history.pushState({ key }, '', `#${key}`);
             activate(key);
@@ -296,6 +272,9 @@
 
         box.appendChild(a);
       });
+
+      // Asegura que al iniciar, TODOS los lvl3 estén colapsados
+      setDisplay(box, false);
     });
   }
 
@@ -311,21 +290,24 @@
 
         if (key === 'servicios') {
           const willClose = openKey === 'servicios';
+          // toggle Servicios; si lo abrimos, empezamos con lvl2 visible y lvl3 cerrados
           setOpen(willClose ? null : 'servicios');
+          if (!willClose) {
+            setOpenSecond(null); // 👈 Asesoría cerrada al entrar en Servicios
+          }
           return;
         }
 
-        const willClose = openKey === key;
+        // Resto de top-level: navegar
         history.pushState({ key, from: 'top' }, '', `#${key}`);
         activate(key);
-        setOpen(willClose ? null : key);
-
+        setOpen(key);
         scrollToTop();
       });
     });
   }
 
-  // Nivel 2 dentro de "Servicios"
+  // Nivel 2 dentro de "Servicios" (toggle por grupo)
   function wireLevel2() {
     level2Groups.forEach(group => {
       const link = group.querySelector(':scope > a.lvl2-link[data-section]');
@@ -335,12 +317,17 @@
       link.addEventListener('click', (e) => {
         e.preventDefault();
 
+        // Toggle del grupo
+        if (openSecondKey === key) {
+          setOpenSecond(null);           // cerrar si ya estaba abierto
+          return;
+        }
+
+        // Abrir este grupo y navegar a su sección
         history.pushState({ key, from: 'top' }, '', `#${key}`);
         activate(key);
-
         setOpen('servicios');
         setOpenSecond(key);
-
         scrollToTop();
       });
     });
@@ -373,8 +360,9 @@
     setOpenSecond(startKey);
   } else {
     setOpen(startKey); // home / seccion-7 / seccion-8 / seccion-9
+    setOpenSecond(null);
   }
-  updateMenuVisibility(); // 👈 asegura estado visual inicial
+  updateMenuVisibility(); // estado visual inicial robusto
 
   // Back/forward
   window.addEventListener('popstate', () => {
@@ -386,9 +374,10 @@
       setOpenSecond(key);
     } else {
       setOpen(key);
+      setOpenSecond(null);
     }
 
-    updateMenuVisibility(); // 👈 oculta/muestra lvl2 y lvl3 según corresponda
+    updateMenuVisibility();
     scrollToTop();
   });
 })();
