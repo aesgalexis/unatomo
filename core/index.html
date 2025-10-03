@@ -25,63 +25,67 @@
   </a>
 
   <nav class="menu" id="sidebar-menu">
-    <div class="menu-item" data-key="home">
-      <a href="#home" data-section="home" aria-current="page">Inicio</a>
-      <div class="submenu"></div>
-    </div>
+  <!-- Nivel 1: Inicio -->
+  <div class="menu-item" data-key="home">
+    <a href="#home" data-section="home" aria-current="page">Bienvenidos</a>
+    <!-- sin submenú -->
+  </div>
 
-    <div class="menu-item" data-key="seccion-1">
-      <a href="#seccion-1" data-section="seccion-1">Asesoría</a>
-      <div class="submenu">
-        <a href="#seccion-1-asesoria-tecnica" data-subsection="asesoria-tecnica">Asesoría técnica</a>
-        <a href="#seccion-1-asesoria-procesos" data-subsection="asesoria-procesos">Asesoría de procesos</a>
-        <a href="#seccion-1-asesoria-operativa" data-subsection="asesoria-operativa">Asesoría operativa</a>
+  <!-- Nivel 1: Servicios (nuevo) -->
+  <div class="menu-item has-children" data-key="servicios">
+    <a href="#servicios" data-section="servicios">Servicios</a>
+
+    <!-- Nivel 2: categorías (texto) -->
+    <div class="submenu lvl2" aria-label="Servicios">
+      <!-- Cada grupo representa una sección (antes top-level) y anida el lvl3 -->
+      <div class="submenu-group" data-key="seccion-1">
+        <a class="lvl2-link" href="#seccion-1" data-section="seccion-1">Asesoría</a>
+        <div class="submenu lvl3"></div>
+      </div>
+
+      <div class="submenu-group" data-key="seccion-2">
+        <a class="lvl2-link" href="#seccion-2" data-section="seccion-2">Ajustes y optimización</a>
+        <div class="submenu lvl3"></div>
+      </div>
+
+      <div class="submenu-group" data-key="seccion-3">
+        <a class="lvl2-link" href="#seccion-3" data-section="seccion-3">Control de producción</a>
+        <div class="submenu lvl3"></div>
+      </div>
+
+      <div class="submenu-group" data-key="seccion-4">
+        <a class="lvl2-link" href="#seccion-4" data-section="seccion-4">Mantenimiento</a>
+        <div class="submenu lvl3"></div>
+      </div>
+
+      <div class="submenu-group" data-key="seccion-5">
+        <a class="lvl2-link" href="#seccion-5" data-section="seccion-5">Asistencia técnica</a>
+        <div class="submenu lvl3"></div>
+      </div>
+
+      <div class="submenu-group" data-key="seccion-6">
+        <a class="lvl2-link" href="#seccion-6" data-section="seccion-6">Formación</a>
+        <div class="submenu lvl3"></div>
       </div>
     </div>
+  </div>
 
-    <div class="menu-item" data-key="seccion-2">
-      <a href="#seccion-2" data-section="seccion-2">Ajustes y optimización</a>
-      <div class="submenu"></div>
-    </div>
+  <!-- Nivel 1: Alcance -->
+  <div class="menu-item" data-key="seccion-7">
+    <a href="#seccion-7" data-section="seccion-7">Alcance</a>
+  </div>
 
-    <div class="menu-item" data-key="seccion-3">
-      <a href="#seccion-3" data-section="seccion-3">Control de producción</a>
-      <div class="submenu"></div>
-    </div>
+  <!-- Nivel 1: Contacto -->
+  <div class="menu-item" data-key="seccion-8">
+    <a href="#seccion-8" data-section="seccion-8">Contacto</a>
+  </div>
 
-    <div class="menu-item" data-key="seccion-4">
-      <a href="#seccion-4" data-section="seccion-4">Mantenimiento</a>
-      <div class="submenu"></div>
-    </div>
+  <!-- Nivel 1: Créditos -->
+  <div class="menu-item" data-key="seccion-9">
+    <a href="#seccion-9" data-section="seccion-9">Créditos</a>
+  </div>
+</nav>
 
-    <div class="menu-item" data-key="seccion-5">
-      <a href="#seccion-5" data-section="seccion-5">Asistencia técnica</a>
-      <div class="submenu"></div>
-    </div>
-
-    <div class="menu-item" data-key="seccion-6">
-      <a href="#seccion-6" data-section="seccion-6">Formación</a>
-      <div class="submenu">
-        <a href="#seccion-6-formacion-operarios" data-subsection="formacion-operarios">Formación de operarios</a>
-        <a href="#seccion-6-formacion-tecnicos" data-subsection="formacion-tecnicos">Formación de equipos técnicos</a>
-      </div>
-    </div>
-
-    <div class="menu-item" data-key="seccion-7">
-      <a href="#seccion-7" data-section="seccion-7">Alcance</a>
-      <div class="submenu"></div>
-    </div>
-
-    <div class="menu-item" data-key="seccion-8">
-      <a href="#seccion-8" data-section="seccion-8">Contacto</a>
-      <div class="submenu"></div>
-    </div>
-
-    <div class="menu-item" data-key="seccion-9">
-      <a href="#seccion-9" data-section="seccion-9">Créditos</a>
-      <div class="submenu"></div>
-    </div>
-  </nav>
 </aside>
 
 <main id="app" class="content" tabindex="-1">
