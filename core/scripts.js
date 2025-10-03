@@ -306,3 +306,40 @@ import { feature } from "https://esm.sh/topojson-client@3";
     drawMap(topo);
   })();
 })();
+
+// === Cargar footer externo  ===
+(async () => {
+  try {
+    const r = await fetch('./footer.algo', { cache: 'no-cache' });
+    if (!r.ok) throw new Error('No se pudo cargar el footer');
+    const html = await r.text();
+
+    // Inserta al final del <body>
+    const temp = document.createElement('div');
+    temp.innerHTML = html.trim();
+    const footerEl = temp.querySelector('#site-footer');
+    if (footerEl) document.body.appendChild(footerEl);
+
+    // Año dinámico
+    const y = footerEl?.querySelector('#year-now');
+    if (y) y.textContent = String(new Date().getFullYear());
+
+    // Los enlaces del footer que apuntan a secciones usan tu navegación SPA
+    footerEl?.querySelectorAll('a[data-section]').forEach(a => {
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        const key = a.getAttribute('data-section');
+        if (!key) return;
+        history.pushState({ key }, '', `#${key}`);
+        // Reutilizamos funciones del router ya cargado:
+        // Simulamos un popstate para sincronizar (como ya haces)
+        window.dispatchEvent(new PopStateEvent('popstate'));
+        // Foco al contenido principal
+        document.getElementById('app')?.focus({ preventScroll: true });
+      });
+    });
+
+  } catch (err) {
+    console.warn('[footer] carga diferida falló:', err);
+  }
+})();
