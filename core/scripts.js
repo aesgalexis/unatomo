@@ -278,24 +278,56 @@ function resetSecondLevel() {
 
 
   // Click en top-level: toggle abrir/cerrar, y navegar a su sección
-  function wireTopLevel() {
-    menuItems.forEach(mi => {
-      const a = mi.querySelector('a[data-section]');
-      const key = a.dataset.section;
+function wireTopLevel() {
+  topItems.forEach(mi => {
+    const a = mi.querySelector(':scope > a[data-section]');
+    if (!a) return;
+    const key = a.dataset.section; // "home" | "servicios" | "seccion-7" | "seccion-8" | "seccion-9"
 
-      a.addEventListener('click', (e) => {
-        e.preventDefault();
-        const willClose = openKey === key;
+    a.addEventListener('click', (e) => {
+      e.preventDefault();
 
-        history.pushState({ key, from: 'top' }, '', `#${key}`);
-        activate(key);
-        setOpen(willClose ? null : key);
+      if (key === 'servicios') {
+        // toggle abrir/cerrar Servicios
+        const willClose = openKey === 'servicios';
+        setOpen(willClose ? null : 'servicios');
+        // al abrir Servicios no cambiamos de sección automáticamente
+        return;
+      }
 
-        // siempre al inicio al cambiar de sección
-        scrollToTop();
-      });
+      // resto de top-level navegan a su sección
+      const willClose = openKey === key;
+      history.pushState({ key, from: 'top' }, '', `#${key}`);
+      activate(key);
+      setOpen(willClose ? null : key);
+
+      scrollToTop();
     });
-  }
+  });
+}
+
+// Nivel 2: links dentro de "Servicios" (activan sección + abren su lvl3)
+function wireLevel2() {
+  level2Groups.forEach(group => {
+    const link = group.querySelector(':scope > a.lvl2-link[data-section]');
+    if (!link) return;
+    const key = link.dataset.section; // seccion-1..6
+
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+
+      history.pushState({ key, from: 'top' }, '', `#${key}`);
+      activate(key);
+
+      // Asegura que "Servicios" está abierto y este grupo también
+      setOpen('servicios');
+      setOpenSecond(key);
+
+      scrollToTop();
+    });
+  });
+}
+
 
   // Logo: a "home" y abre solo su submenú
   brand?.addEventListener('click', (e) => {
