@@ -350,6 +350,7 @@ function wireLevel2() {
 
   buildSubmenus();
   wireTopLevel();
+  wireLevel2(); 
   activate(startKey);
   setOpen('home'); // todos colapsados salvo Bienvenidos
 
