@@ -1,9 +1,5 @@
 // scripts.js (ES module)
 
-// === Imports para el mapa ===
-import { geoMercator, geoPath } from "https://esm.sh/d3-geo@3";
-import { feature } from "https://esm.sh/topojson-client@3";
-
 /* ===========================
    1) Botón modo claro/oscuro
    =========================== */
@@ -74,9 +70,8 @@ import { feature } from "https://esm.sh/topojson-client@3";
     .filter(Boolean);
 
   // Estado de apertura
-  let openKey = 'home';          // cuál top-level está abierto (home/servicios/...)
-  // si openKey === 'servicios', cuál grupo de nivel 2 está abierto (seccion-1..seccion-6)
-  let openSecondKey = null;
+  let openKey = 'home';          // top-level abierto (home/servicios/…)
+  let openSecondKey = null;      // si openKey === 'servicios': seccion-1..6
 
   // Utilidad: slug simple si hiciera falta generar ids
   const slug = (t) => t.toLowerCase()
@@ -100,7 +95,6 @@ import { feature } from "https://esm.sh/topojson-client@3";
   function scrollToTop() {
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
   }
-  // ¿El elemento es visible en el viewport (aunque sea parcialmente)?
   function isInViewport(el) {
     if (!el) return false;
     const r = el.getBoundingClientRect();
@@ -109,56 +103,43 @@ import { feature } from "https://esm.sh/topojson-client@3";
     return r.bottom >= 0 && r.right >= 0 && r.top <= vh && r.left <= vw;
   }
 
-  // Utilidad: quitar un wrapper .hl-wrap manteniendo su contenido
+  // Quitar wrapper .hl-wrap manteniendo contenido
   function unwrap(el) {
     const parent = el.parentNode;
     while (el.firstChild) parent.insertBefore(el.firstChild, el);
     parent.removeChild(el);
   }
 
-  // Activa una sección: aplica .is-active en nivel 1 y nivel 2 según corresponda
+  // Activa una sección: marca activo nivel 1 ó nivel 2 según corresponda
   function activate(sectionKey) {
-    // Mostrar la sección
     sections.forEach(s => s.classList.toggle('is-active', s.dataset.section === sectionKey));
 
-    // Reset de activos en menús
     topAnchors.forEach(a => a.classList.remove('is-active'));
     lvl2Links.forEach(a => a.classList.remove('is-active'));
 
     const isLv2 = /^seccion-[1-6]$/.test(sectionKey);
-
     if (isLv2) {
-      // nivel 1: marca "Servicios" como activo
-      const servicesTopA = servicesItem?.querySelector(':scope > a[data-section="servicios"]');
-      servicesTopA?.classList.add('is-active');
-
-      // nivel 2: marca el link correspondiente
-      const link = lvl2Links.find(a => a.dataset.section === sectionKey);
-      link?.classList.add('is-active');
+      servicesItem?.querySelector(':scope > a[data-section="servicios"]')?.classList.add('is-active');
+      lvl2Links.find(a => a.dataset.section === sectionKey)?.classList.add('is-active');
     } else {
-      // nivel 1: marca el anchor correspondiente (home / seccion-7 / seccion-8 / seccion-9)
-      const a = topAnchors.find(x => x.dataset.section === sectionKey);
-      a?.classList.add('is-active');
+      topAnchors.find(a => a.dataset.section === sectionKey)?.classList.add('is-active');
     }
 
-    if (app) app.focus({ preventScroll: true });
+    app?.focus({ preventScroll: true });
   }
 
-  // Visual de submenú abierto
+  // Visual de acordeones abiertos
   function updateOpenVisual() {
     topItems.forEach(mi => mi.classList.toggle('is-open', mi.dataset.key === openKey));
-    // dentro de Servicios, marca abierto el grupo lvl2 activo
     level2Groups.forEach(g => g.classList.toggle('is-open', g.dataset.key === openSecondKey));
   }
 
   function resetSubmenu(key) {
     if (!key) return;
-    // Limpia activo lvl3 del grupo indicado
     const group = level2Groups.find(g => g.dataset.key === key);
     if (group) {
       group.querySelectorAll('.submenu.lvl3 a.is-sub-active').forEach(a => a.classList.remove('is-sub-active'));
     }
-    // Limpia resaltados en la sección
     const sec = document.querySelector(`.section[data-section="${key}"]`);
     if (sec) {
       sec.querySelectorAll('h2.is-highlighted, h3.is-highlighted').forEach(h => h.classList.remove('is-highlighted'));
@@ -171,13 +152,9 @@ import { feature } from "https://esm.sh/topojson-client@3";
     openKey = nextKey;
     updateOpenVisual();
 
-    // al cerrar Servicios, resetea también lvl2
-    if (nextKey !== 'servicios') {
-      resetSecondLevel();
-    }
+    if (nextKey !== 'servicios') resetSecondLevel();
 
     if (prev && prev !== nextKey) {
-      // resetea submenus del anterior top-level (si era servicios, resetea todos sus lvl3)
       if (prev === 'servicios') {
         level2Groups.forEach(g => resetSubmenu(g.dataset.key));
       } else {
@@ -190,7 +167,6 @@ import { feature } from "https://esm.sh/topojson-client@3";
     const prev = openSecondKey;
     openSecondKey = nextSecondKey;
     updateOpenVisual();
-
     if (prev && prev !== nextSecondKey) resetSubmenu(prev);
   }
 
@@ -203,20 +179,18 @@ import { feature } from "https://esm.sh/topojson-client@3";
 
   // Construye submenús (nivel 3) con scroll inteligente
   function buildSubmenus() {
-    // Para cada grupo de nivel 2 (seccion-1..6) construimos su lvl3
     level2Groups.forEach(group => {
-      const key = group.dataset.key;                    // p.ej. "seccion-1"
+      const key = group.dataset.key; // "seccion-1"… "seccion-6"
       const section = sections.find(s => s.dataset.section === key);
       const box = group.querySelector('.submenu.lvl3');
       if (!box || !section) return;
 
       box.innerHTML = '';
 
-      // Título principal (primer h2 de la sección)
       const allHeads = [...section.querySelectorAll('h2, h3')];
       const mainH2 = section.querySelector('h2');
 
-      // 1) Tagline (p > strong) justo bajo el h2 principal -> primer ítem
+      // 1) Tagline (p > strong) justo tras H2
       if (mainH2) {
         const next = mainH2.nextElementSibling;
         const strongInP = next?.tagName?.toLowerCase() === 'p' && next.querySelector('strong');
@@ -234,19 +208,15 @@ import { feature } from "https://esm.sh/topojson-client@3";
 
           a.addEventListener('click', (e) => {
             e.preventDefault();
-            // Activar sección (si no lo está)
             if (!section.classList.contains('is-active')) {
               history.pushState({ key }, '', `#${key}`);
               activate(key);
             }
-            // Marcar activo en este lvl3
             box.querySelectorAll('a').forEach(x => x.classList.toggle('is-sub-active', x === a));
 
-            // limpiar resaltados previos
             section.querySelectorAll('.hl-wrap').forEach(unwrap);
             section.querySelectorAll('h2.is-highlighted, h3.is-highlighted').forEach(x => x.classList.remove('is-highlighted'));
 
-            // resalte en STRONG
             const strong = targetEl.querySelector('strong');
             if (strong && !strong.querySelector('.hl-wrap')) {
               const span = document.createElement('span');
@@ -267,7 +237,7 @@ import { feature } from "https://esm.sh/topojson-client@3";
         }
       }
 
-      // 2) Resto de subapartados: todos los h2/h3 MENOS el h2 principal
+      // 2) Resto de subapartados: todos los h2/h3 MENOS el H2 principal
       const heads = allHeads.filter(h => h !== mainH2);
 
       heads.forEach((h, idx) => {
@@ -313,7 +283,7 @@ import { feature } from "https://esm.sh/topojson-client@3";
     });
   }
 
-  // Click en top-level: toggle abrir/cerrar, y navegar a su sección
+  // Top-level (nivel 1)
   function wireTopLevel() {
     topItems.forEach(mi => {
       const a = mi.querySelector(':scope > a[data-section]');
@@ -324,14 +294,11 @@ import { feature } from "https://esm.sh/topojson-client@3";
         e.preventDefault();
 
         if (key === 'servicios') {
-          // toggle abrir/cerrar Servicios
           const willClose = openKey === 'servicios';
           setOpen(willClose ? null : 'servicios');
-          // al abrir Servicios no cambiamos de sección automáticamente
           return;
         }
 
-        // resto de top-level navegan a su sección
         const willClose = openKey === key;
         history.pushState({ key, from: 'top' }, '', `#${key}`);
         activate(key);
@@ -342,7 +309,7 @@ import { feature } from "https://esm.sh/topojson-client@3";
     });
   }
 
-  // Nivel 2: links dentro de "Servicios" (activan sección + abren su lvl3)
+  // Nivel 2 dentro de "Servicios"
   function wireLevel2() {
     level2Groups.forEach(group => {
       const link = group.querySelector(':scope > a.lvl2-link[data-section]');
@@ -355,7 +322,6 @@ import { feature } from "https://esm.sh/topojson-client@3";
         history.pushState({ key, from: 'top' }, '', `#${key}`);
         activate(key);
 
-        // Asegura que "Servicios" está abierto y este grupo también
         setOpen('servicios');
         setOpenSecond(key);
 
@@ -364,19 +330,17 @@ import { feature } from "https://esm.sh/topojson-client@3";
     });
   }
 
-  // Logo: a "home" y abre solo su submenú
+  // Logo → home
   brand?.addEventListener('click', (e) => {
     e.preventDefault();
     const key = 'home';
     history.pushState({ key, from: 'top' }, '', `#${key}`);
     activate(key);
     setOpen('home');
-
-    // subir al inicio
     scrollToTop();
   });
 
-  // Arranque: ir a hash válido o a home
+  // Arranque
   const initialKey = 'home';
   const fromHash = (location.hash || `#${initialKey}`).slice(1);
   const valid = sections.some(s => s.dataset.section === fromHash);
@@ -388,7 +352,6 @@ import { feature } from "https://esm.sh/topojson-client@3";
   wireLevel2();
   activate(startKey);
 
-  // Abrir acordeones adecuados según la sección inicial
   if (/^seccion-[1-6]$/.test(startKey)) {
     setOpen('servicios');
     setOpenSecond(startKey);
@@ -396,7 +359,7 @@ import { feature } from "https://esm.sh/topojson-client@3";
     setOpen(startKey); // home / seccion-7 / seccion-8 / seccion-9
   }
 
-  // Back/forward: sincroniza apertura + arriba del todo
+  // Back/forward
   window.addEventListener('popstate', () => {
     const key = (location.hash || '#home').slice(1);
     activate(key);
@@ -413,107 +376,23 @@ import { feature } from "https://esm.sh/topojson-client@3";
 })();
 
 /* ===========================
-   3) Mapa (D3 + TopoJSON)
+   3) Footer: carga diferida
    =========================== */
-(() => {
-  'use strict';
-  const container = document.getElementById("action-map");
-  if (!container) return;
-
-  /* Países permitidos (ISO 3166-1 alpha-2) -> azul */
-  const ALLOWED = new Set([
-    "ES","PT","FR","DE","IT","GB","IE","BE","NL","LU","CH","AT",
-    "DK","NO","SE","FI","PL","CZ","SK","HU","SI","HR","BA","RS","ME","MK","AL",
-    "GR","BG","RO","MD","UA","LT","LV","EE","IS","TR","CY","MT","AD","MC","SM",
-    "VA","LI"/*, "MA","TN","DZ" si quieres norte de África */
-  ]);
-
-  /* world-atlas usa IDs numéricos (ISO numeric). Mapeo mínimo -> alpha-2 */
-  const NUM_TO_A2 = {
-    "724":"ES","620":"PT","250":"FR","276":"DE","380":"IT","826":"GB","372":"IE",
-    "056":"BE","528":"NL","442":"LU","756":"CH","040":"AT","208":"DK","578":"NO",
-    "752":"SE","246":"FI","616":"PL","203":"CZ","703":"SK","348":"HU","705":"SI",
-    "191":"HR","070":"BA","688":"RS","499":"ME","807":"MK","008":"AL","300":"GR",
-    "100":"BG","642":"RO","498":"MD","804":"UA","440":"LT","428":"LV","233":"EE",
-    "352":"IS","792":"TR","196":"CY","470":"MT","020":"AD","492":"MC","674":"SM",
-    "336":"VA","438":"LI","112":"BY","643":"RU"
-  };
-
-  async function loadTopology() {
-    // 1) Intenta local
-    try {
-      const r = await fetch("./assets/countries-110m.json", { cache: "force-cache" });
-      if (r.ok) return r.json();
-      throw new Error("local not found");
-    } catch {
-      // 2) Fallback CDN
-      const r = await fetch("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json");
-      return r.json();
-    }
-  }
-
-  function drawMap(topo) {
-    // Base virtual 700x500; el SVG escalará con CSS (aspect-ratio)
-    const W = 700, H = 500, PAD = 12;
-
-    // Crea SVG
-    container.innerHTML = "";
-    const svgNS = "http://www.w3.org/2000/svg";
-    const svg = document.createElementNS(svgNS, "svg");
-    svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
-    svg.setAttribute("width", "100%");
-    svg.setAttribute("height", "100%");
-    container.appendChild(svg);
-
-    const proj = geoMercator();
-    const path = geoPath(proj, null);
-
-    // Enfocar Europa con un bbox aproximado
-    const europeBBox = { type:"Polygon", coordinates:[[[-25,32],[40,32],[40,72],[-25,72],[-25,32]]] };
-
-    proj.fitExtent([[PAD, PAD], [W - PAD, H - PAD]], europeBBox);
-
-    const countries = feature(topo, topo.objects.countries).features;
-
-    // Dibujo
-    const g = document.createElementNS(svgNS, "g");
-    svg.appendChild(g);
-
-    for (const f of countries) {
-      const id = String(f.id).padStart(3, "0");
-      const a2 = NUM_TO_A2[id];
-      const p = document.createElementNS(svgNS, "path");
-      p.setAttribute("d", path(f));
-      p.setAttribute("class", `country${a2 && ALLOWED.has(a2) ? " allowed" : ""}`);
-      p.setAttribute("data-iso", a2 || id);
-      g.appendChild(p);
-    }
-  }
-
-  (async () => {
-    const topo = await loadTopology();
-    drawMap(topo);
-  })();
-})();
-
-// === Cargar footer externo (footer.html) ===
 (async () => {
   try {
     const r = await fetch('./footer.html', { cache: 'no-cache' });
     if (!r.ok) throw new Error('No se pudo cargar el footer');
     const html = await r.text();
 
-    // Inserta al final del <body>
     const temp = document.createElement('div');
     temp.innerHTML = html.trim();
     const footerEl = temp.querySelector('#site-footer');
     if (footerEl) document.body.appendChild(footerEl);
 
     // Año dinámico
-    const y = footerEl?.querySelector('#year-now');
-    if (y) y.textContent = String(new Date().getFullYear());
+    footerEl?.querySelector('#year-now')?.replaceChildren(document.createTextNode(String(new Date().getFullYear())));
 
-    // Enlaces del footer que apuntan a secciones -> SPA + arriba del todo
+    // Enlaces del footer -> SPA + arriba
     footerEl?.querySelectorAll('a[data-section]').forEach(a => {
       a.addEventListener('click', (e) => {
         e.preventDefault();
@@ -523,7 +402,6 @@ import { feature } from "https://esm.sh/topojson-client@3";
         history.pushState({ key, from: 'top' }, '', `#${key}`);
         window.dispatchEvent(new PopStateEvent('popstate'));
 
-        // foco y arriba del todo
         document.getElementById('app')?.focus({ preventScroll: true });
         window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
       });
