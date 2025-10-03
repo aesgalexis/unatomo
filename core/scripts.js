@@ -56,20 +56,27 @@ import { feature } from "https://esm.sh/topojson-client@3";
    ========================================= */
 (() => {
   'use strict';
-const app = document.getElementById('app');
-const sections = [...document.querySelectorAll('.section')];
-const brand = document.querySelector('.brand');
+  const app = document.getElementById('app');
+  const sections = [...document.querySelectorAll('.section')];
+  const brand = document.querySelector('.brand');
 
-const menuRoot = document.getElementById('sidebar-menu');
-const topItems = [...menuRoot.querySelectorAll(':scope > .menu-item')]; // nivel 1
-const servicesItem = menuRoot.querySelector('.menu-item[data-key="servicios"]'); // nodo "Servicios"
-const level2Groups = [...servicesItem.querySelectorAll('.submenu-group')]; // nivel 2 dentro de Servicios
+  const menuRoot = document.getElementById('sidebar-menu');
+  const topItems = [...menuRoot.querySelectorAll(':scope > .menu-item')]; // nivel 1
+  const servicesItem = menuRoot.querySelector('.menu-item[data-key="servicios"]'); // "Servicios"
+  const level2Groups = [...servicesItem.querySelectorAll('.submenu-group')]; // nivel 2 dentro de Servicios
 
-// Estado de apertura
-let openKey = 'home';          // cuál top-level está abierto (home/servicios/...)
-// si openKey === 'servicios', cuál grupo de nivel 2 está abierto (seccion-1..seccion-6)
-let openSecondKey = null;
+  // Anchors útiles para activar clases
+  const topAnchors = topItems
+    .map(mi => mi.querySelector(':scope > a[data-section]'))
+    .filter(Boolean);
+  const lvl2Links = level2Groups
+    .map(g => g.querySelector(':scope > a.lvl2-link[data-section]'))
+    .filter(Boolean);
 
+  // Estado de apertura
+  let openKey = 'home';          // cuál top-level está abierto (home/servicios/...)
+  // si openKey === 'servicios', cuál grupo de nivel 2 está abierto (seccion-1..seccion-6)
+  let openSecondKey = null;
 
   // Utilidad: slug simple si hiciera falta generar ids
   const slug = (t) => t.toLowerCase()
@@ -109,117 +116,192 @@ let openSecondKey = null;
     parent.removeChild(el);
   }
 
-  // Activa una sección
+  // Activa una sección: aplica .is-active en nivel 1 y nivel 2 según corresponda
   function activate(sectionKey) {
+    // Mostrar la sección
     sections.forEach(s => s.classList.toggle('is-active', s.dataset.section === sectionKey));
-    menuItems.forEach(mi => {
-      const a = mi.querySelector('a[data-section]');
-      a.classList.toggle('is-active', a.dataset.section === sectionKey);
-    });
+
+    // Reset de activos en menús
+    topAnchors.forEach(a => a.classList.remove('is-active'));
+    lvl2Links.forEach(a => a.classList.remove('is-active'));
+
+    const isLv2 = /^seccion-[1-6]$/.test(sectionKey);
+
+    if (isLv2) {
+      // nivel 1: marca "Servicios" como activo
+      const servicesTopA = servicesItem?.querySelector(':scope > a[data-section="servicios"]');
+      servicesTopA?.classList.add('is-active');
+
+      // nivel 2: marca el link correspondiente
+      const link = lvl2Links.find(a => a.dataset.section === sectionKey);
+      link?.classList.add('is-active');
+    } else {
+      // nivel 1: marca el anchor correspondiente (home / seccion-7 / seccion-8 / seccion-9)
+      const a = topAnchors.find(x => x.dataset.section === sectionKey);
+      a?.classList.add('is-active');
+    }
+
     if (app) app.focus({ preventScroll: true });
   }
 
   // Visual de submenú abierto
-function updateOpenVisual() {
-  topItems.forEach(mi => mi.classList.toggle('is-open', mi.dataset.key === openKey));
-  // dentro de Servicios, marca abierto el grupo lvl2 activo
-  level2Groups.forEach(g => g.classList.toggle('is-open', g.dataset.key === openSecondKey));
-}
-
-function setOpen(nextKey) {
-  const prev = openKey;
-  openKey = nextKey;
-  updateOpenVisual();
-
-  // al cerrar Servicios, resetea también lvl2
-  if (nextKey !== 'servicios') {
-    resetSecondLevel();
+  function updateOpenVisual() {
+    topItems.forEach(mi => mi.classList.toggle('is-open', mi.dataset.key === openKey));
+    // dentro de Servicios, marca abierto el grupo lvl2 activo
+    level2Groups.forEach(g => g.classList.toggle('is-open', g.dataset.key === openSecondKey));
   }
 
-  if (prev && prev !== nextKey) {
-    // resetea submenus del anterior top-level (si era servicios, resetea todos sus lvl3)
-    if (prev === 'servicios') {
-      level2Groups.forEach(g => resetSubmenu(g.dataset.key));
-    } else {
-      resetSubmenu(prev);
+  function resetSubmenu(key) {
+    if (!key) return;
+    // Limpia activo lvl3 del grupo indicado
+    const group = level2Groups.find(g => g.dataset.key === key);
+    if (group) {
+      group.querySelectorAll('.submenu.lvl3 a.is-sub-active').forEach(a => a.classList.remove('is-sub-active'));
+    }
+    // Limpia resaltados en la sección
+    const sec = document.querySelector(`.section[data-section="${key}"]`);
+    if (sec) {
+      sec.querySelectorAll('h2.is-highlighted, h3.is-highlighted').forEach(h => h.classList.remove('is-highlighted'));
+      sec.querySelectorAll('.hl-wrap').forEach(unwrap);
     }
   }
-}
 
-function setOpenSecond(nextSecondKey) {
-  const prev = openSecondKey;
-  openSecondKey = nextSecondKey;
-  updateOpenVisual();
+  function setOpen(nextKey) {
+    const prev = openKey;
+    openKey = nextKey;
+    updateOpenVisual();
 
-  if (prev && prev !== nextSecondKey) resetSubmenu(prev);
-}
+    // al cerrar Servicios, resetea también lvl2
+    if (nextKey !== 'servicios') {
+      resetSecondLevel();
+    }
 
-function resetSecondLevel() {
-  if (!openSecondKey) return;
-  resetSubmenu(openSecondKey);
-  openSecondKey = null;
-  updateOpenVisual();
-}
+    if (prev && prev !== nextKey) {
+      // resetea submenus del anterior top-level (si era servicios, resetea todos sus lvl3)
+      if (prev === 'servicios') {
+        level2Groups.forEach(g => resetSubmenu(g.dataset.key));
+      } else {
+        resetSubmenu(prev);
+      }
+    }
+  }
 
+  function setOpenSecond(nextSecondKey) {
+    const prev = openSecondKey;
+    openSecondKey = nextSecondKey;
+    updateOpenVisual();
 
-  // Construye submenús con criterio y scroll inteligente
-  // - No incluye el H2 principal de la sección (evita duplicar títulos).
-  // - Si el H2 tiene debajo un <p><strong>…</strong></p>, lo usa como primer ítem (tagline), excepto en "home".
- function buildSubmenus() {
-  // Para cada grupo de nivel 2 (seccion-1..6) construimos su lvl3
-  level2Groups.forEach(group => {
-    const key = group.dataset.key;                    // p.ej. "seccion-1"
-    const section = sections.find(s => s.dataset.section === key);
-    const box = group.querySelector('.submenu.lvl3');
-    if (!box || !section) return;
+    if (prev && prev !== nextSecondKey) resetSubmenu(prev);
+  }
 
-    box.innerHTML = '';
+  function resetSecondLevel() {
+    if (!openSecondKey) return;
+    resetSubmenu(openSecondKey);
+    openSecondKey = null;
+    updateOpenVisual();
+  }
 
-    // Título principal (primer h2 de la sección)
-    const allHeads = [...section.querySelectorAll('h2, h3')];
-    const mainH2 = section.querySelector('h2');
+  // Construye submenús (nivel 3) con scroll inteligente
+  function buildSubmenus() {
+    // Para cada grupo de nivel 2 (seccion-1..6) construimos su lvl3
+    level2Groups.forEach(group => {
+      const key = group.dataset.key;                    // p.ej. "seccion-1"
+      const section = sections.find(s => s.dataset.section === key);
+      const box = group.querySelector('.submenu.lvl3');
+      if (!box || !section) return;
 
-    // 1) Tagline (p > strong) justo bajo el h2 principal -> primer ítem
-    if (mainH2) {
-      const next = mainH2.nextElementSibling;
-      const strongInP = next?.tagName?.toLowerCase() === 'p' && next.querySelector('strong');
+      box.innerHTML = '';
 
-      if (strongInP) {
-        const targetEl = next;
-        const label = next.querySelector('strong').textContent.trim();
-        ensureId(targetEl, 'tagline');
+      // Título principal (primer h2 de la sección)
+      const allHeads = [...section.querySelectorAll('h2, h3')];
+      const mainH2 = section.querySelector('h2');
+
+      // 1) Tagline (p > strong) justo bajo el h2 principal -> primer ítem
+      if (mainH2) {
+        const next = mainH2.nextElementSibling;
+        const strongInP = next?.tagName?.toLowerCase() === 'p' && next.querySelector('strong');
+
+        if (strongInP) {
+          const targetEl = next;
+          const label = next.querySelector('strong').textContent.trim();
+          ensureId(targetEl, 'tagline');
+
+          const a = document.createElement('a');
+          a.href = `#${key}`;
+          a.dataset.section = key;
+          a.dataset.target = targetEl.id;
+          a.textContent = label;
+
+          a.addEventListener('click', (e) => {
+            e.preventDefault();
+            // Activar sección (si no lo está)
+            if (!section.classList.contains('is-active')) {
+              history.pushState({ key }, '', `#${key}`);
+              activate(key);
+            }
+            // Marcar activo en este lvl3
+            box.querySelectorAll('a').forEach(x => x.classList.toggle('is-sub-active', x === a));
+
+            // limpiar resaltados previos
+            section.querySelectorAll('.hl-wrap').forEach(unwrap);
+            section.querySelectorAll('h2.is-highlighted, h3.is-highlighted').forEach(x => x.classList.remove('is-highlighted'));
+
+            // resalte en STRONG
+            const strong = targetEl.querySelector('strong');
+            if (strong && !strong.querySelector('.hl-wrap')) {
+              const span = document.createElement('span');
+              span.className = 'hl-wrap';
+              while (strong.firstChild) span.appendChild(strong.firstChild);
+              strong.appendChild(span);
+            }
+
+            if (!isInViewport(targetEl)) {
+              targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+
+            setOpen('servicios');
+            setOpenSecond(key);
+          });
+
+          box.appendChild(a);
+        }
+      }
+
+      // 2) Resto de subapartados: todos los h2/h3 MENOS el h2 principal
+      const heads = allHeads.filter(h => h !== mainH2);
+
+      heads.forEach((h, idx) => {
+        ensureId(h, `sub-${idx + 1}`);
 
         const a = document.createElement('a');
         a.href = `#${key}`;
         a.dataset.section = key;
-        a.dataset.target = targetEl.id;
-        a.textContent = label;
+        a.dataset.target = h.id;
+        a.textContent = (h.textContent || '').trim();
 
         a.addEventListener('click', (e) => {
           e.preventDefault();
-          // Activar sección (si no lo está)
+
           if (!section.classList.contains('is-active')) {
             history.pushState({ key }, '', `#${key}`);
             activate(key);
           }
-          // Marcar activo en este lvl3
+
           box.querySelectorAll('a').forEach(x => x.classList.toggle('is-sub-active', x === a));
 
-          // limpiar resaltados previos
           section.querySelectorAll('.hl-wrap').forEach(unwrap);
           section.querySelectorAll('h2.is-highlighted, h3.is-highlighted').forEach(x => x.classList.remove('is-highlighted'));
 
-          // resalte en STRONG
-          const strong = targetEl.querySelector('strong');
-          if (strong && !strong.querySelector('.hl-wrap')) {
+          if (!h.querySelector('.hl-wrap')) {
             const span = document.createElement('span');
             span.className = 'hl-wrap';
-            while (strong.firstChild) span.appendChild(strong.firstChild);
-            strong.appendChild(span);
+            while (h.firstChild) span.appendChild(h.firstChild);
+            h.appendChild(span);
           }
+          h.classList.add('is-highlighted');
 
-          if (!isInViewport(targetEl)) {
-            targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          if (!isInViewport(h)) {
+            h.scrollIntoView({ behavior: 'smooth', block: 'start' });
           }
 
           setOpen('servicios');
@@ -227,107 +309,60 @@ function resetSecondLevel() {
         });
 
         box.appendChild(a);
-      }
-    }
+      });
+    });
+  }
 
-    // 2) Resto de subapartados: todos los h2/h3 MENOS el h2 principal
-    const heads = allHeads.filter(h => h !== mainH2);
-
-    heads.forEach((h, idx) => {
-      ensureId(h, `sub-${idx + 1}`);
-
-      const a = document.createElement('a');
-      a.href = `#${key}`;
-      a.dataset.section = key;
-      a.dataset.target = h.id;
-      a.textContent = (h.textContent || '').trim();
+  // Click en top-level: toggle abrir/cerrar, y navegar a su sección
+  function wireTopLevel() {
+    topItems.forEach(mi => {
+      const a = mi.querySelector(':scope > a[data-section]');
+      if (!a) return;
+      const key = a.dataset.section; // "home" | "servicios" | "seccion-7" | "seccion-8" | "seccion-9"
 
       a.addEventListener('click', (e) => {
         e.preventDefault();
 
-        if (!section.classList.contains('is-active')) {
-          history.pushState({ key }, '', `#${key}`);
-          activate(key);
+        if (key === 'servicios') {
+          // toggle abrir/cerrar Servicios
+          const willClose = openKey === 'servicios';
+          setOpen(willClose ? null : 'servicios');
+          // al abrir Servicios no cambiamos de sección automáticamente
+          return;
         }
 
-        box.querySelectorAll('a').forEach(x => x.classList.toggle('is-sub-active', x === a));
+        // resto de top-level navegan a su sección
+        const willClose = openKey === key;
+        history.pushState({ key, from: 'top' }, '', `#${key}`);
+        activate(key);
+        setOpen(willClose ? null : key);
 
-        section.querySelectorAll('.hl-wrap').forEach(unwrap);
-        section.querySelectorAll('h2.is-highlighted, h3.is-highlighted').forEach(x => x.classList.remove('is-highlighted'));
+        scrollToTop();
+      });
+    });
+  }
 
-        if (!h.querySelector('.hl-wrap')) {
-          const span = document.createElement('span');
-          span.className = 'hl-wrap';
-          while (h.firstChild) span.appendChild(h.firstChild);
-          h.appendChild(span);
-        }
-        h.classList.add('is-highlighted');
+  // Nivel 2: links dentro de "Servicios" (activan sección + abren su lvl3)
+  function wireLevel2() {
+    level2Groups.forEach(group => {
+      const link = group.querySelector(':scope > a.lvl2-link[data-section]');
+      if (!link) return;
+      const key = link.dataset.section; // seccion-1..6
 
-        if (!isInViewport(h)) {
-          h.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
 
+        history.pushState({ key, from: 'top' }, '', `#${key}`);
+        activate(key);
+
+        // Asegura que "Servicios" está abierto y este grupo también
         setOpen('servicios');
         setOpenSecond(key);
+
+        scrollToTop();
       });
-
-      box.appendChild(a);
     });
-  });
-}
-
-
-  // Click en top-level: toggle abrir/cerrar, y navegar a su sección
-function wireTopLevel() {
-  topItems.forEach(mi => {
-    const a = mi.querySelector(':scope > a[data-section]');
-    if (!a) return;
-    const key = a.dataset.section; // "home" | "servicios" | "seccion-7" | "seccion-8" | "seccion-9"
-
-    a.addEventListener('click', (e) => {
-      e.preventDefault();
-
-      if (key === 'servicios') {
-        // toggle abrir/cerrar Servicios
-        const willClose = openKey === 'servicios';
-        setOpen(willClose ? null : 'servicios');
-        // al abrir Servicios no cambiamos de sección automáticamente
-        return;
-      }
-
-      // resto de top-level navegan a su sección
-      const willClose = openKey === key;
-      history.pushState({ key, from: 'top' }, '', `#${key}`);
-      activate(key);
-      setOpen(willClose ? null : key);
-
-      scrollToTop();
-    });
-  });
-}
-
-// Nivel 2: links dentro de "Servicios" (activan sección + abren su lvl3)
-function wireLevel2() {
-  level2Groups.forEach(group => {
-    const link = group.querySelector(':scope > a.lvl2-link[data-section]');
-    if (!link) return;
-    const key = link.dataset.section; // seccion-1..6
-
-    link.addEventListener('click', (e) => {
-      e.preventDefault();
-
-      history.pushState({ key, from: 'top' }, '', `#${key}`);
-      activate(key);
-
-      // Asegura que "Servicios" está abierto y este grupo también
-      setOpen('servicios');
-      setOpenSecond(key);
-
-      scrollToTop();
-    });
-  });
-}
-
+  }
 
   // Logo: a "home" y abre solo su submenú
   brand?.addEventListener('click', (e) => {
@@ -341,7 +376,7 @@ function wireLevel2() {
     scrollToTop();
   });
 
-  // Arranque: ir a hash válido o a home; submenú abierto solo en "home"
+  // Arranque: ir a hash válido o a home
   const initialKey = 'home';
   const fromHash = (location.hash || `#${initialKey}`).slice(1);
   const valid = sections.some(s => s.dataset.section === fromHash);
@@ -350,17 +385,29 @@ function wireLevel2() {
 
   buildSubmenus();
   wireTopLevel();
-  wireLevel2(); 
+  wireLevel2();
   activate(startKey);
-  setOpen('home'); // todos colapsados salvo Bienvenidos
 
-  // Back/forward: sincroniza sección y abre su submenú + arriba del todo
+  // Abrir acordeones adecuados según la sección inicial
+  if (/^seccion-[1-6]$/.test(startKey)) {
+    setOpen('servicios');
+    setOpenSecond(startKey);
+  } else {
+    setOpen(startKey); // home / seccion-7 / seccion-8 / seccion-9
+  }
+
+  // Back/forward: sincroniza apertura + arriba del todo
   window.addEventListener('popstate', () => {
     const key = (location.hash || '#home').slice(1);
     activate(key);
-    setOpen(key);
 
-    // subir al principio también con back/forward
+    if (/^seccion-[1-6]$/.test(key)) {
+      setOpen('servicios');
+      setOpenSecond(key);
+    } else {
+      setOpen(key);
+    }
+
     scrollToTop();
   });
 })();
