@@ -310,7 +310,7 @@ import { feature } from "https://esm.sh/topojson-client@3";
 // === Cargar footer externo  ===
 (async () => {
   try {
-    const r = await fetch('./footer.algo', { cache: 'no-cache' });
+    const r = await fetch('./footer.html', { cache: 'no-cache' });
     if (!r.ok) throw new Error('No se pudo cargar el footer');
     const html = await r.text();
 
