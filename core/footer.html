@@ -1,99 +1,72 @@
 <footer id="site-footer" role="contentinfo" aria-label="Pie de página">
   <div class="footer-wrap">
-    <!-- Top: Brand + claim + acciones -->
-    <div class="footer-top">
-      <div class="footer-brand">
-        <a href="#home" class="footer-logo" aria-label="Ir al inicio">
-          <img src="./logo-unatomo-v1.5.svg" alt="unátomo" width="128" height="128" />
-        </a>
+    <!-- TOP: izquierda (marca + claim + newsletter) | derecha (4 columnas) -->
+    <div class="footer-top two-col">
+      <!-- Izquierda -->
+      <div class="footer-left">
+        <h2 class="footer-brand-title">unatomo core</h2>
         <p class="footer-claim">Your process, our insight.</p>
+
+        <form class="footer-newsletter" action="#" method="post" aria-label="Suscripción al boletín" onsubmit="return false;">
+          <label for="nl-email" class="nl-label">Suscríbete para recibir ideas prácticas (1–2 veces al mes):</label>
+          <div class="nl-row">
+            <input id="nl-email" class="nl-input" type="email" name="email" placeholder="tu@correo.com" required
+                   autocomplete="email" inputmode="email" />
+            <button class="nl-btn" type="submit">Suscribirme</button>
+          </div>
+          <p class="nl-note">Aceptas nuestra <a href="#legal-privacidad">política de privacidad</a>. Sin spam.</p>
+        </form>
       </div>
 
-      <form class="footer-newsletter" action="#" method="post" aria-label="Suscripción al boletín" onsubmit="return false;">
-        <label for="nl-email" class="nl-label">Suscríbete para recibir ideas prácticas (1–2 veces al mes):</label>
-        <div class="nl-row">
-          <input id="nl-email" class="nl-input" type="email" name="email" placeholder="tu@correo.com" required
-                 autocomplete="email" inputmode="email" />
-          <button class="nl-btn" type="submit">Suscribirme</button>
-        </div>
-        <p class="nl-note">Aceptas nuestra <a href="#legal-privacidad">política de privacidad</a>. Sin spam.</p>
-      </form>
+      <!-- Derecha -->
+      <div class="footer-right">
+        <div class="footer-grid" role="navigation" aria-label="Enlaces del sitio">
+          <div class="footer-col">
+            <h3 class="footer-title">Servicios</h3>
+            <ul class="footer-links">
+              <li><a href="#seccion-1" data-section="seccion-1">Asesoría</a></li>
+              <li><a href="#seccion-2" data-section="seccion-2">Ajustes y optimización</a></li>
+              <li><a href="#seccion-3" data-section="seccion-3">Control de producción</a></li>
+              <li><a href="#seccion-4" data-section="seccion-4">Mantenimiento</a></li>
+              <li><a href="#seccion-5" data-section="seccion-5">Asistencia técnica</a></li>
+              <li><a href="#seccion-6" data-section="seccion-6">Formación</a></li>
+            </ul>
+          </div>
 
-      <div class="footer-cta">
-        <a class="cta-primary" href="#seccion-8" data-section="seccion-8">Hablemos</a>
-        <a class="cta-secondary" href="#seccion-7" data-section="seccion-7">Dónde trabajamos</a>
-      </div>
-    </div>
+          <div class="footer-col">
+            <h3 class="footer-title">Compañía</h3>
+            <ul class="footer-links">
+              <li><a href="#home" data-section="home">Sobre nosotros</a></li>
+              <li><a href="#seccion-9" data-section="seccion-9">Créditos</a></li>
+              <li><a href="#seccion-8" data-section="seccion-8">Contacto</a></li>
+            </ul>
+          </div>
 
-    <!-- Middle: columnas -->
-    <div class="footer-grid" role="navigation" aria-label="Enlaces del sitio">
-      <div class="footer-col">
-        <h3 class="footer-title">Servicios</h3>
-        <ul class="footer-links">
-          <li><a href="#seccion-1" data-section="seccion-1">Asesoría</a></li>
-          <li><a href="#seccion-2" data-section="seccion-2">Ajustes y optimización</a></li>
-          <li><a href="#seccion-3" data-section="seccion-3">Control de producción</a></li>
-          <li><a href="#seccion-4" data-section="seccion-4">Mantenimiento</a></li>
-          <li><a href="#seccion-5" data-section="seccion-5">Asistencia técnica</a></li>
-          <li><a href="#seccion-6" data-section="seccion-6">Formación</a></li>
-        </ul>
-      </div>
+          <div class="footer-col">
+            <h3 class="footer-title">Legal</h3>
+            <ul class="footer-links">
+              <li id="legal-privacidad"><a href="#" aria-disabled="true">Política de privacidad</a></li>
+              <li><a href="#" aria-disabled="true">Términos de servicio</a></li>
+              <li><a href="#" aria-disabled="true">Aviso legal</a></li>
+              <li><a href="#" aria-disabled="true">Cookies</a></li>
+            </ul>
+          </div>
 
-      <div class="footer-col">
-        <h3 class="footer-title">Compañía</h3>
-        <ul class="footer-links">
-          <li><a href="#home" data-section="home">Sobre nosotros</a></li>
-          <li><a href="#seccion-9" data-section="seccion-9">Créditos</a></li>
-          <li><a href="#seccion-8" data-section="seccion-8">Contacto</a></li>
-        </ul>
-      </div>
-
-      <div class="footer-col">
-        <h3 class="footer-title">Legal</h3>
-        <ul class="footer-links">
-          <li id="legal-privacidad"><a href="#" aria-disabled="true">Política de privacidad</a></li>
-          <li><a href="#" aria-disabled="true">Términos de servicio</a></li>
-          <li><a href="#" aria-disabled="true">Aviso legal</a></li>
-          <li><a href="#" aria-disabled="true">Cookies</a></li>
-        </ul>
-      </div>
-
-      <div class="footer-col">
-        <h3 class="footer-title">Contacto</h3>
-        <address class="footer-address">
-          UNATOMO CORE SL<br />
-          Mallorca, España<br />
-          <a href="mailto:hola@unatomo.com">hola@unatomo.com</a><br />
-          <a href="tel:+34XXXXXXXXX">+34 XXX XXX XXX</a>
-        </address>
-
-        <div class="footer-social" aria-label="Redes sociales">
-          <a class="social" href="#" aria-label="LinkedIn" title="LinkedIn" rel="noopener">
-            <!-- ícono LinkedIn -->
-            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5ZM3.5 8.98h3V20.5h-3V8.98ZM9 8.98h2.87v1.58h.04c.4-.76 1.38-1.58 2.84-1.58 3.04 0 3.6 2 3.6 4.6v6.92h-3v-6.14c0-1.47-.03-3.36-2.05-3.36-2.05 0-2.36 1.6-2.36 3.25v6.25H9V8.98Z"/></svg>
-          </a>
-          <a class="social" href="#" aria-label="X/Twitter" title="X/Twitter" rel="noopener">
-            <!-- ícono X -->
-            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M18.9 3H21l-6.52 7.45L22 21h-5.4l-4.22-5.1L7.5 21H3l6.96-7.95L2 3h5.52l3.8 4.6L18.9 3Zm-1.89 16h1.49L8.06 5H6.51l10.5 14Z"/></svg>
-          </a>
-          <a class="social" href="#" aria-label="YouTube" title="YouTube" rel="noopener">
-            <!-- ícono YouTube -->
-            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M23.5 6.2s-.2-1.6-.8-2.3c-.7-.8-1.6-.8-2-1C17.9 2.5 12 2.5 12 2.5h-.1S6 2.5 3.3 2.9c-.4.1-1.3.1-2 1C.7 4.6.5 6.2.5 6.2S0 8.2 0 10.1v1.8c0 1.9.5 3.9.5 3.9s.2 1.6.8 2.3c.7.8 1.7.8 2.2.9 1.6.2 6.5.3 6.5.3s5.9 0 8.7-.4c.4-.1 1.3-.1 2-1 .6-.7.8-2.3.8-2.3s.5-2 .5-3.9v-1.8c0-1.9-.5-3.9-.5-3.9zM9.7 13.9V7.9l6.1 3-6.1 3z"/></svg>
-          </a>
-        </div>
-
-        <div class="footer-lang">
-          <label for="lang" class="sr-only">Idioma</label>
-          <select id="lang" class="lang-select" aria-label="Cambiar idioma">
-            <option value="es" selected>Español</option>
-            <option value="en">English</option>
-          </select>
+          <div class="footer-col">
+            <h3 class="footer-title">Contacto</h3>
+            <address class="footer-address">
+              UNATOMO CORE SL<br />
+              Mallorca, España<br />
+              <a href="mailto:hola@unatomo.com">hola@unatomo.com</a><br />
+              <a href="tel:+34XXXXXXXXX">+34 XXX XXX XXX</a>
+            </address>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Bottom: copyright -->
-    <div class="footer-bottom">
+    <!-- BOTTOM: una sola línea centrada -->
+    <div class="footer-bottom footer-centered">
       <p>© <span id="year-now"></span> UNATOMO CORE SL — Todos los derechos reservados</p>
       <ul class="footer-legal-inline">
         <li><a href="#" aria-disabled="true">Accesibilidad</a></li>
@@ -102,7 +75,7 @@
     </div>
   </div>
 
-  <!-- Datos estructurados básicos (opcional) -->
+  <!-- Datos estructurados (opcional) -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
