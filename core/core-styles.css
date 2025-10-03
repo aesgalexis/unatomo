@@ -312,24 +312,6 @@ h2.is-highlighted, h3.is-highlighted { background: transparent !important; text-
 }
 .footer-links { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
 .footer-links a { color: var(--submenu-fg); text-decoration: none; }
-.footer-links a:hover,
-.footer-links a:focus-visible { color: var(--submenu-fg-strong); outline: none; }
-
-.footer-address a { color: var(--submenu-fg); text-decoration: none; }
-.footer-address a:hover { color: var(--submenu-fg-strong); }
-
-/* (si mantienes socials/lang) */
-.footer-social { display: flex; gap: 10px; margin-top: 8px; }
-.social {
-  display: inline-flex; padding: 8px; border: 1px solid var(--border);
-  border-radius: 999px; color: var(--submenu-fg); text-decoration: none;
-}
-.social:hover { color: var(--fg); }
-.footer-lang { margin-top: 10px; }
-.lang-select {
-  padding: 8px 10px; border: 1px solid var(--border); border-radius: 12px;
-  background: color-mix(in oklab, var(--bg) 92%, transparent); color: var(--fg);
-}
 
 /* ── BOTTOM: una sola fila centrada ── */
 .footer-bottom.footer-centered {
@@ -347,7 +329,6 @@ h2.is-highlighted, h3.is-highlighted { background: transparent !important; text-
   display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
 }
 .footer-legal-inline a { color: var(--submenu-fg); text-decoration: none; }
-.footer-legal-inline a:hover { color: var(--submenu-fg-strong); }
 
 /* ── Responsive ── */
 @media (max-width: 900px) {
@@ -358,6 +339,37 @@ h2.is-highlighted, h3.is-highlighted { background: transparent !important; text-
 @media (max-width: 520px) {
   .footer-grid { grid-template-columns: 1fr; }
 }
+
+/* util */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+
+/* === Footer link hover accent (naranja vivo) === */
+:root { --footer-accent: #ff7a00; }
+:root[data-theme="dark"] { --footer-accent: #ff7a00; } /* mismo acento en dark */
+
+#site-footer .footer-links a:hover,
+#site-footer .footer-links a:focus-visible,
+#site-footer .footer-legal-inline a:hover,
+#site-footer .footer-legal-inline a:focus-visible,
+#site-footer .footer-address a:hover,
+#site-footer .footer-address a:focus-visible,
+#site-footer .nl-note a:hover,
+#site-footer .nl-note a:focus-visible {
+  color: var(--footer-accent);
+  outline: none;
+}
+
+/* iconos sociales con acento al hover/focus */
+#site-footer .social:hover,
+#site-footer .social:focus-visible {
+  color: var(--footer-accent);
+  border-color: var(--footer-accent);
+  outline: none;
+}
+
 
 /* util */
 .sr-only {
