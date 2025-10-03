@@ -406,3 +406,27 @@ h2.is-highlighted, h3.is-highlighted { background: transparent !important; text-
   display: inline-block;
   margin-top: -2px;
 }
+/* Sidebar: estilado para 3 niveles */
+.menu .submenu.lvl2 { display: grid; gap: 6px; margin-top: 6px; }
+.menu .submenu-group { display: grid; gap: 6px; }
+
+.menu a.lvl2-link {
+  text-decoration: none;
+  color: var(--submenu-fg);
+  padding: 4px 0;
+  font-weight: 600;            /* más jerarquía que lvl3 */
+}
+.menu a.lvl2-link:hover,
+.menu a.lvl2-link:focus-visible {
+  color: var(--submenu-fg-strong);
+  outline: none;
+}
+
+.menu .submenu.lvl3 { display: grid; gap: 4px; padding-left: 10px; }
+.menu .submenu.lvl3 a {
+  text-decoration: none;
+  color: var(--submenu-fg);
+  font-weight: 500;            /* un paso por debajo de lvl2 */
+}
+.menu .submenu.lvl3 a.is-sub-active { color: var(--fg); font-weight: 700; }
+
