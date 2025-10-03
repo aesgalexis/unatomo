@@ -246,9 +246,16 @@ h2.is-highlighted, h3.is-highlighted { background: transparent !important; text-
 /* ── TOP: dos columnas (izquierda marca+newsletter | derecha 4 columnas) ── */
 .footer-top.two-col {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 2fr; /* antes: 1fr 1fr */
   gap: var(--space-6);
   align-items: start;
+}
+
+/* ── Derecha: 4 columnas con mínima más cómoda ── */
+.footer-grid {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(4, minmax(180px, 1fr)); /* antes: repeat(4, minmax(0,1fr)) */
 }
 
 /* Marca en texto (sin logo) */
