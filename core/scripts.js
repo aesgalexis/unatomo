@@ -93,6 +93,21 @@
     parent.removeChild(el);
   }
 
+  // --- Colapsar todo al inicio para evitar flash abierto y clases duras ---
+  (function preCollapse() {
+    // quita 'is-open' hardcodeadas del HTML
+    topItems.forEach(mi => mi.classList.remove('is-open'));
+    level2Groups.forEach(g => g.classList.remove('is-open'));
+
+    // oculta lvl2 y todos los lvl3
+    const lvl2 = servicesItem?.querySelector('.submenu.lvl2');
+    if (lvl2) { lvl2.hidden = true; lvl2.style.display = 'none'; }
+    level2Groups.forEach(g => {
+      const box = g.querySelector('.submenu.lvl3');
+      if (box) { box.hidden = true; box.style.display = 'none'; }
+    });
+  })();
+
   // Activa una sección (marca activo nivel 1 o nivel 2 según corresponda)
   function activate(sectionKey) {
     sections.forEach(s => s.classList.toggle('is-active', s.dataset.section === sectionKey));
@@ -290,15 +305,15 @@
 
         if (key === 'servicios') {
           const willClose = openKey === 'servicios';
-          // toggle Servicios; si lo abrimos, empezamos con lvl2 visible y lvl3 cerrados
+          // toggle Servicios; si lo abrimos, lvl2 visible y lvl3 cerrados
           setOpen(willClose ? null : 'servicios');
           if (!willClose) {
-            setOpenSecond(null); // 👈 Asesoría cerrada al entrar en Servicios
+            setOpenSecond(null); // 👈 categorías (Asesoría etc.) empiezan cerradas
           }
           return;
         }
 
-        // Resto de top-level: navegar
+        // Resto de top-level: navegar directamente
         history.pushState({ key, from: 'top' }, '', `#${key}`);
         activate(key);
         setOpen(key);
