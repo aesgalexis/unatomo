@@ -429,4 +429,9 @@ h2.is-highlighted, h3.is-highlighted { background: transparent !important; text-
   font-weight: 500;            /* un paso por debajo de lvl2 */
 }
 .menu .submenu.lvl3 a.is-sub-active { color: var(--fg); font-weight: 700; }
+/* Nivel 2 activo en negrita fuerte */
+.menu a.lvl2-link.is-active { font-weight: 800; }
+
+/* Nivel 3 activo sin negrita (solo color) */
+.menu .submenu.lvl3 a.is-sub-active { color: var(--fg); font-weight: 500; }
 
