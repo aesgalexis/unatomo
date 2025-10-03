@@ -434,4 +434,39 @@ h2.is-highlighted, h3.is-highlighted { background: transparent !important; text-
 
 /* Nivel 3 activo sin negrita (solo color) */
 .menu .submenu.lvl3 a.is-sub-active { color: var(--fg); font-weight: 500; }
+/* --- Sidebar: cerrar submenús por defecto, sin FOUC --- */
+.menu .submenu.lvl2,
+.menu .submenu.lvl3 {
+  display: none;                /* ocultos al cargar */
+}
+.menu .menu-item.is-open > .submenu.lvl2 {
+  display: grid;                /* visible cuando el item top-level está abierto */
+}
+.menu .submenu-group.is-open > .submenu.lvl3 {
+  display: grid;                /* visible cuando el grupo lvl2 está abierto */
+}
+
+/* --- Apariencia del nivel 2 (categorías dentro de Servicios) --- */
+.menu a.lvl2-link {
+  color: var(--submenu-fg);
+  font-weight: 600;             /* base */
+  text-decoration: none;
+}
+.menu a.lvl2-link:hover,
+.menu a.lvl2-link:focus-visible {
+  color: var(--submenu-fg-strong);
+  outline: none;
+}
+
+/* ACTIVO nivel 2: mismo color que el nivel 3 activo (var(--fg)), pero en negrita */
+.menu a.lvl2-link.is-active {
+  color: var(--fg);             /* negro en light, blanco en dark */
+  font-weight: 800;             /* más peso que lvl3 */
+}
+
+/* Nivel 3 activo: sin negrita (ya lo tenías, lo reforzamos) */
+.menu .submenu.lvl3 a.is-sub-active {
+  color: var(--fg);
+  font-weight: 500;
+}
 
