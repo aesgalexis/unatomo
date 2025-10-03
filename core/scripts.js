@@ -120,32 +120,47 @@ let openSecondKey = null;
   }
 
   // Visual de submenú abierto
-  function updateOpenVisual() {
-    menuItems.forEach(mi => mi.classList.toggle('is-open', mi.dataset.key === openKey));
+function updateOpenVisual() {
+  topItems.forEach(mi => mi.classList.toggle('is-open', mi.dataset.key === openKey));
+  // dentro de Servicios, marca abierto el grupo lvl2 activo
+  level2Groups.forEach(g => g.classList.toggle('is-open', g.dataset.key === openSecondKey));
+}
+
+function setOpen(nextKey) {
+  const prev = openKey;
+  openKey = nextKey;
+  updateOpenVisual();
+
+  // al cerrar Servicios, resetea también lvl2
+  if (nextKey !== 'servicios') {
+    resetSecondLevel();
   }
 
-  // Reset de un submenú y su contenido (quita estado de subitems y resaltados)
-  function resetSubmenu(key) {
-    if (!key) return;
-    const mi = document.querySelector(`.menu .menu-item[data-key="${key}"]`);
-    if (mi) mi.querySelectorAll('.submenu a.is-sub-active').forEach(a => a.classList.remove('is-sub-active'));
-
-    const sec = document.querySelector(`.section[data-section="${key}"]`);
-    if (sec) {
-      sec.querySelectorAll('h2.is-highlighted, h3.is-highlighted').forEach(h => h.classList.remove('is-highlighted'));
-      sec.querySelectorAll('.hl-wrap').forEach(unwrap);
+  if (prev && prev !== nextKey) {
+    // resetea submenus del anterior top-level (si era servicios, resetea todos sus lvl3)
+    if (prev === 'servicios') {
+      level2Groups.forEach(g => resetSubmenu(g.dataset.key));
+    } else {
+      resetSubmenu(prev);
     }
   }
+}
 
-  // Abre/cierra submenús (y resetea cuando corresponde)
-  function setOpen(nextKey) {
-    const prev = openKey;
-    openKey = nextKey;
-    updateOpenVisual();
+function setOpenSecond(nextSecondKey) {
+  const prev = openSecondKey;
+  openSecondKey = nextSecondKey;
+  updateOpenVisual();
 
-    if (prev && prev !== nextKey) resetSubmenu(prev);
-    if (nextKey === null) resetSubmenu(prev);
-  }
+  if (prev && prev !== nextSecondKey) resetSubmenu(prev);
+}
+
+function resetSecondLevel() {
+  if (!openSecondKey) return;
+  resetSubmenu(openSecondKey);
+  openSecondKey = null;
+  updateOpenVisual();
+}
+
 
   // Construye submenús con criterio y scroll inteligente
   // - No incluye el H2 principal de la sección (evita duplicar títulos).
