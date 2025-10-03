@@ -56,13 +56,20 @@ import { feature } from "https://esm.sh/topojson-client@3";
    ========================================= */
 (() => {
   'use strict';
-  const app = document.getElementById('app');
-  const sections = [...document.querySelectorAll('.section')];
-  const brand = document.querySelector('.brand');
-  const menuItems = [...document.querySelectorAll('.menu .menu-item')];
+const app = document.getElementById('app');
+const sections = [...document.querySelectorAll('.section')];
+const brand = document.querySelector('.brand');
 
-  // Submenú abierto (null = ninguno). Por defecto queremos Bienvenidos abierto.
-  let openKey = 'home';
+const menuRoot = document.getElementById('sidebar-menu');
+const topItems = [...menuRoot.querySelectorAll(':scope > .menu-item')]; // nivel 1
+const servicesItem = menuRoot.querySelector('.menu-item[data-key="servicios"]'); // nodo "Servicios"
+const level2Groups = [...servicesItem.querySelectorAll('.submenu-group')]; // nivel 2 dentro de Servicios
+
+// Estado de apertura
+let openKey = 'home';          // cuál top-level está abierto (home/servicios/...)
+// si openKey === 'servicios', cuál grupo de nivel 2 está abierto (seccion-1..seccion-6)
+let openSecondKey = null;
+
 
   // Utilidad: slug simple si hiciera falta generar ids
   const slug = (t) => t.toLowerCase()
