@@ -1,4 +1,3 @@
-
 // scripts.js (ES module)
 
 // === Imports para el mapa ===
@@ -67,20 +66,34 @@ import { feature } from "https://esm.sh/topojson-client@3";
 
   // Utilidad: slug simple si hiciera falta generar ids
   const slug = (t) => t.toLowerCase()
-                      .trim()
-                      .replace(/[^\p{L}\p{N}\s-]/gu,'')
-                      .replace(/\s+/g,'-')
-                      .replace(/-+/g,'-')
-                      .slice(0,64);
-   // Asegura un id único sobre un elemento (con base opcional)
+    .trim()
+    .replace(/[^\p{L}\p{N}\s-]/gu,'')
+    .replace(/\s+/g,'-')
+    .replace(/-+/g,'-')
+    .slice(0,64);
+
+  // Asegura un id único sobre un elemento (con base opcional)
   function ensureId(el, base = 'sub') {
-  if (el.id) return el.id;
-  const seed = slug((el.textContent || base).slice(0, 64)) || base;
-  let id = seed, n = 1;
-  while (document.getElementById(id)) id = `${seed}-${n++}`;
-  el.id = id;
-  return id;
-}
+    if (el.id) return el.id;
+    const seed = slug((el.textContent || base).slice(0, 64)) || base;
+    let id = seed, n = 1;
+    while (document.getElementById(id)) id = `${seed}-${n++}`;
+    el.id = id;
+    return id;
+  }
+
+  // Helpers de scroll/visibilidad
+  function scrollToTop() {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }
+  // ¿El elemento es visible en el viewport (aunque sea parcialmente)?
+  function isInViewport(el) {
+    if (!el) return false;
+    const r = el.getBoundingClientRect();
+    const vh = window.innerHeight || document.documentElement.clientHeight;
+    const vw = window.innerWidth || document.documentElement.clientWidth;
+    return r.bottom >= 0 && r.right >= 0 && r.top <= vh && r.left <= vw;
+  }
 
   // Utilidad: quitar un wrapper .hl-wrap manteniendo su contenido
   function unwrap(el) {
@@ -127,122 +140,119 @@ import { feature } from "https://esm.sh/topojson-client@3";
     if (nextKey === null) resetSubmenu(prev);
   }
 
-  // Construye submenús con criterio:
-// - No incluye el H2 principal de la sección (evita duplicar, p.ej. "Asesoría").
-// - Si el H2 principal tiene justo debajo un <p><strong>…</strong></p>, lo usa como primer ítem (tagline).
-function buildSubmenus() {
-  menuItems.forEach(mi => {
-    const key = mi.dataset.key;
-    const section = sections.find(s => s.dataset.section === key);
-    const box = mi.querySelector('.submenu');
-    if (!box || !section) return;
+  // Construye submenús con criterio y scroll inteligente
+  // - No incluye el H2 principal de la sección (evita duplicar títulos).
+  // - Si el H2 tiene debajo un <p><strong>…</strong></p>, lo usa como primer ítem (tagline), excepto en "home".
+  function buildSubmenus() {
+    menuItems.forEach(mi => {
+      const key = mi.dataset.key;
+      const section = sections.find(s => s.dataset.section === key);
+      const box = mi.querySelector('.submenu');
+      if (!box || !section) return;
 
-    box.innerHTML = '';
+      box.innerHTML = '';
 
-    // Encuentra el H2 principal de la sección (el título grande)
-    const allHeads = [...section.querySelectorAll('h2, h3')];
-    const mainH2 = section.querySelector('h2'); // primer h2 del bloque
-    const isHome = key === 'home';
+      // Título principal (primer h2 de la sección)
+      const allHeads = [...section.querySelectorAll('h2, h3')];
+      const mainH2 = section.querySelector('h2');
+      const isHome = key === 'home';
 
-    // 1) Tagline: <p><strong>...</strong></p> inmediatamente después del H2 principal
-    //    (lo añadimos como PRIMER item, excepto en "home").
-    if (!isHome && mainH2) {
-      const next = mainH2.nextElementSibling;
-      const strongInP =
-        next?.tagName?.toLowerCase() === 'p' &&
-        next.querySelector('strong');
+      // 1) Tagline (p > strong) justo bajo el h2 principal -> primer ítem (excepto en "home")
+      if (!isHome && mainH2) {
+        const next = mainH2.nextElementSibling;
+        const strongInP = next?.tagName?.toLowerCase() === 'p' && next.querySelector('strong');
 
-      if (strongInP) {
-        const targetEl = next; // anclamos al <p> del tagline
-        const label = next.querySelector('strong').textContent.trim();
-        const id = ensureId(targetEl, 'tagline');
+        if (strongInP) {
+          const targetEl = next; // anclamos al <p> del tagline
+          const label = next.querySelector('strong').textContent.trim();
+          ensureId(targetEl, 'tagline');
+
+          const a = document.createElement('a');
+          a.href = `#${key}`;
+          a.dataset.section = key;
+          a.dataset.target = targetEl.id;
+          a.textContent = label;
+
+          a.addEventListener('click', (e) => {
+            e.preventDefault();
+
+            if (!section.classList.contains('is-active')) {
+              history.pushState({ key }, '', `#${key}`);
+              activate(key);
+            }
+
+            box.querySelectorAll('a').forEach(x => x.classList.toggle('is-sub-active', x === a));
+
+            // limpiar resaltados anteriores en ESTA sección
+            section.querySelectorAll('.hl-wrap').forEach(unwrap);
+            section.querySelectorAll('h2.is-highlighted, h3.is-highlighted').forEach(x => x.classList.remove('is-highlighted'));
+
+            // resaltar el STRONG del tagline
+            const strong = targetEl.querySelector('strong');
+            if (strong && !strong.querySelector('.hl-wrap')) {
+              const span = document.createElement('span');
+              span.className = 'hl-wrap';
+              while (strong.firstChild) span.appendChild(strong.firstChild);
+              strong.appendChild(span);
+            }
+
+            // scroll condicional: solo si NO está visible
+            if (!isInViewport(targetEl)) {
+              targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+
+            setOpen(key);
+          });
+
+          box.appendChild(a);
+        }
+      }
+
+      // 2) Resto de subapartados: todos los h2/h3 MENOS el h2 principal
+      const heads = allHeads.filter(h => h !== mainH2);
+
+      heads.forEach((h, idx) => {
+        ensureId(h, `sub-${idx + 1}`);
 
         const a = document.createElement('a');
         a.href = `#${key}`;
         a.dataset.section = key;
-        a.dataset.target = id;
-        a.textContent = label;
+        a.dataset.target = h.id;
+        a.textContent = (h.textContent || '').trim();
 
         a.addEventListener('click', (e) => {
           e.preventDefault();
 
-          // Activa la sección si no lo está
           if (!section.classList.contains('is-active')) {
             history.pushState({ key }, '', `#${key}`);
             activate(key);
           }
 
-          // Marca el subitem activo
           box.querySelectorAll('a').forEach(x => x.classList.toggle('is-sub-active', x === a));
 
-          // Limpia resaltados previos SOLO de esta sección
           section.querySelectorAll('.hl-wrap').forEach(unwrap);
           section.querySelectorAll('h2.is-highlighted, h3.is-highlighted').forEach(x => x.classList.remove('is-highlighted'));
 
-          // Resalta el STRONG del tagline
-          const strong = targetEl.querySelector('strong');
-          if (strong && !strong.querySelector('.hl-wrap')) {
+          if (!h.querySelector('.hl-wrap')) {
             const span = document.createElement('span');
             span.className = 'hl-wrap';
-            while (strong.firstChild) span.appendChild(strong.firstChild);
-            strong.appendChild(span);
+            while (h.firstChild) span.appendChild(h.firstChild);
+            h.appendChild(span);
           }
-          targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          h.classList.add('is-highlighted');
 
-          // Mantener abierto este submenú
+          // scroll condicional: solo si NO está visible
+          if (!isInViewport(h)) {
+            h.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+
           setOpen(key);
         });
 
         box.appendChild(a);
-      }
-    }
-
-    // 2) Subapartados: todos los h2/h3 MENOS el H2 principal
-    const heads = allHeads.filter(h => h !== mainH2);
-
-    heads.forEach((h, idx) => {
-      const id = ensureId(h, `sub-${idx + 1}`);
-
-      const a = document.createElement('a');
-      a.href = `#${key}`;
-      a.dataset.section = key;
-      a.dataset.target = id;
-      a.textContent = (h.textContent || '').trim();
-
-      a.addEventListener('click', (e) => {
-        e.preventDefault();
-
-        // Activa la sección si no lo está
-        if (!section.classList.contains('is-active')) {
-          history.pushState({ key }, '', `#${key}`);
-          activate(key);
-        }
-
-        // Marca este subitem y desmarca el resto dentro de este submenú
-        box.querySelectorAll('a').forEach(x => x.classList.toggle('is-sub-active', x === a));
-
-        // Limpia resaltados previos de ESTE section y aplica nuevo wrapper
-        section.querySelectorAll('.hl-wrap').forEach(unwrap);
-        section.querySelectorAll('h2.is-highlighted, h3.is-highlighted').forEach(x => x.classList.remove('is-highlighted'));
-
-        if (!h.querySelector('.hl-wrap')) {
-          const span = document.createElement('span');
-          span.className = 'hl-wrap';
-          while (h.firstChild) span.appendChild(h.firstChild);
-          h.appendChild(span);
-        }
-        h.classList.add('is-highlighted');
-        h.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-        // Mantener abierto este submenú
-        setOpen(key);
       });
-
-      box.appendChild(a);
     });
-  });
-}
-
+  }
 
   // Click en top-level: toggle abrir/cerrar, y navegar a su sección
   function wireTopLevel() {
@@ -252,22 +262,28 @@ function buildSubmenus() {
 
       a.addEventListener('click', (e) => {
         e.preventDefault();
-        const willClose = openKey === key; // segundo clic sobre el mismo => colapsa
+        const willClose = openKey === key;
 
-        history.pushState({ key }, '', `#${key}`);
+        history.pushState({ key, from: 'top' }, '', `#${key}`);
         activate(key);
-        setOpen(willClose ? null : key); // si colapsa, resetea subitems y marcado
+        setOpen(willClose ? null : key);
+
+        // siempre al inicio al cambiar de sección
+        scrollToTop();
       });
     });
   }
 
-  // Logo: a "home" y abre solo su submenú (resetea el que estuviera)
+  // Logo: a "home" y abre solo su submenú
   brand?.addEventListener('click', (e) => {
     e.preventDefault();
     const key = 'home';
-    history.pushState({ key }, '', `#${key}`);
+    history.pushState({ key, from: 'top' }, '', `#${key}`);
     activate(key);
     setOpen('home');
+
+    // subir al inicio
+    scrollToTop();
   });
 
   // Arranque: ir a hash válido o a home; submenú abierto solo en "home"
@@ -282,11 +298,14 @@ function buildSubmenus() {
   activate(startKey);
   setOpen('home'); // todos colapsados salvo Bienvenidos
 
-  // Back/forward: sincroniza sección y abre su submenú
+  // Back/forward: sincroniza sección y abre su submenú + arriba del todo
   window.addEventListener('popstate', () => {
     const key = (location.hash || '#home').slice(1);
     activate(key);
     setOpen(key);
+
+    // subir al principio también con back/forward
+    scrollToTop();
   });
 })();
 
@@ -374,7 +393,7 @@ function buildSubmenus() {
   })();
 })();
 
-// === Cargar footer externo  ===
+// === Cargar footer externo (footer.html) ===
 (async () => {
   try {
     const r = await fetch('./footer.html', { cache: 'no-cache' });
@@ -391,18 +410,19 @@ function buildSubmenus() {
     const y = footerEl?.querySelector('#year-now');
     if (y) y.textContent = String(new Date().getFullYear());
 
-    // Los enlaces del footer que apuntan a secciones usan tu navegación SPA
+    // Enlaces del footer que apuntan a secciones -> SPA + arriba del todo
     footerEl?.querySelectorAll('a[data-section]').forEach(a => {
       a.addEventListener('click', (e) => {
         e.preventDefault();
         const key = a.getAttribute('data-section');
         if (!key) return;
-        history.pushState({ key }, '', `#${key}`);
-        // Reutilizamos funciones del router ya cargado:
-        // Simulamos un popstate para sincronizar (como ya haces)
+
+        history.pushState({ key, from: 'top' }, '', `#${key}`);
         window.dispatchEvent(new PopStateEvent('popstate'));
-        // Foco al contenido principal
+
+        // foco y arriba del todo
         document.getElementById('app')?.focus({ preventScroll: true });
+        window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
       });
     });
 
