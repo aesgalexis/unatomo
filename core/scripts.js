@@ -72,6 +72,15 @@ import { feature } from "https://esm.sh/topojson-client@3";
                       .replace(/\s+/g,'-')
                       .replace(/-+/g,'-')
                       .slice(0,64);
+   // Asegura un id único sobre un elemento (con base opcional)
+  function ensureId(el, base = 'sub') {
+  if (el.id) return el.id;
+  const seed = slug((el.textContent || base).slice(0, 64)) || base;
+  let id = seed, n = 1;
+  while (document.getElementById(id)) id = `${seed}-${n++}`;
+  el.id = id;
+  return id;
+}
 
   // Utilidad: quitar un wrapper .hl-wrap manteniendo su contenido
   function unwrap(el) {
@@ -118,30 +127,41 @@ import { feature } from "https://esm.sh/topojson-client@3";
     if (nextKey === null) resetSubmenu(prev);
   }
 
-  // Construye submenús desde h2/h3 de cada sección
-  function buildSubmenus() {
-    menuItems.forEach(mi => {
-      const key = mi.dataset.key;
-      const section = sections.find(s => s.dataset.section === key);
-      const box = mi.querySelector('.submenu');
-      if (!box || !section) return;
+  // Construye submenús con criterio:
+// - No incluye el H2 principal de la sección (evita duplicar, p.ej. "Asesoría").
+// - Si el H2 principal tiene justo debajo un <p><strong>…</strong></p>, lo usa como primer ítem (tagline).
+function buildSubmenus() {
+  menuItems.forEach(mi => {
+    const key = mi.dataset.key;
+    const section = sections.find(s => s.dataset.section === key);
+    const box = mi.querySelector('.submenu');
+    if (!box || !section) return;
 
-      box.innerHTML = '';
-      const heads = [...section.querySelectorAll('h2, h3')];
+    box.innerHTML = '';
 
-      heads.forEach((h, idx) => {
-        if (!h.id) {
-          const base = slug(h.textContent || `sub-${idx+1}`);
-          let id = base, n = 1;
-          while (document.getElementById(id)) id = `${base}-${n++}`;
-          h.id = id;
-        }
+    // Encuentra el H2 principal de la sección (el título grande)
+    const allHeads = [...section.querySelectorAll('h2, h3')];
+    const mainH2 = section.querySelector('h2'); // primer h2 del bloque
+    const isHome = key === 'home';
+
+    // 1) Tagline: <p><strong>...</strong></p> inmediatamente después del H2 principal
+    //    (lo añadimos como PRIMER item, excepto en "home").
+    if (!isHome && mainH2) {
+      const next = mainH2.nextElementSibling;
+      const strongInP =
+        next?.tagName?.toLowerCase() === 'p' &&
+        next.querySelector('strong');
+
+      if (strongInP) {
+        const targetEl = next; // anclamos al <p> del tagline
+        const label = next.querySelector('strong').textContent.trim();
+        const id = ensureId(targetEl, 'tagline');
 
         const a = document.createElement('a');
         a.href = `#${key}`;
         a.dataset.section = key;
-        a.dataset.target = h.id;
-        a.textContent = (h.textContent || '').trim();
+        a.dataset.target = id;
+        a.textContent = label;
 
         a.addEventListener('click', (e) => {
           e.preventDefault();
@@ -152,30 +172,77 @@ import { feature } from "https://esm.sh/topojson-client@3";
             activate(key);
           }
 
-          // Marca este subitem y desmarca el resto dentro de este submenú
+          // Marca el subitem activo
           box.querySelectorAll('a').forEach(x => x.classList.toggle('is-sub-active', x === a));
 
-          // Limpia resaltados previos de ESTE section y aplica nuevo wrapper
+          // Limpia resaltados previos SOLO de esta sección
           section.querySelectorAll('.hl-wrap').forEach(unwrap);
           section.querySelectorAll('h2.is-highlighted, h3.is-highlighted').forEach(x => x.classList.remove('is-highlighted'));
 
-          if (!h.querySelector('.hl-wrap')) {
+          // Resalta el STRONG del tagline
+          const strong = targetEl.querySelector('strong');
+          if (strong && !strong.querySelector('.hl-wrap')) {
             const span = document.createElement('span');
             span.className = 'hl-wrap';
-            while (h.firstChild) span.appendChild(h.firstChild);
-            h.appendChild(span);
+            while (strong.firstChild) span.appendChild(strong.firstChild);
+            strong.appendChild(span);
           }
-          h.classList.add('is-highlighted');
-          h.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
           // Mantener abierto este submenú
           setOpen(key);
         });
 
         box.appendChild(a);
+      }
+    }
+
+    // 2) Subapartados: todos los h2/h3 MENOS el H2 principal
+    const heads = allHeads.filter(h => h !== mainH2);
+
+    heads.forEach((h, idx) => {
+      const id = ensureId(h, `sub-${idx + 1}`);
+
+      const a = document.createElement('a');
+      a.href = `#${key}`;
+      a.dataset.section = key;
+      a.dataset.target = id;
+      a.textContent = (h.textContent || '').trim();
+
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+
+        // Activa la sección si no lo está
+        if (!section.classList.contains('is-active')) {
+          history.pushState({ key }, '', `#${key}`);
+          activate(key);
+        }
+
+        // Marca este subitem y desmarca el resto dentro de este submenú
+        box.querySelectorAll('a').forEach(x => x.classList.toggle('is-sub-active', x === a));
+
+        // Limpia resaltados previos de ESTE section y aplica nuevo wrapper
+        section.querySelectorAll('.hl-wrap').forEach(unwrap);
+        section.querySelectorAll('h2.is-highlighted, h3.is-highlighted').forEach(x => x.classList.remove('is-highlighted'));
+
+        if (!h.querySelector('.hl-wrap')) {
+          const span = document.createElement('span');
+          span.className = 'hl-wrap';
+          while (h.firstChild) span.appendChild(h.firstChild);
+          h.appendChild(span);
+        }
+        h.classList.add('is-highlighted');
+        h.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        // Mantener abierto este submenú
+        setOpen(key);
       });
+
+      box.appendChild(a);
     });
-  }
+  });
+}
+
 
   // Click en top-level: toggle abrir/cerrar, y navegar a su sección
   function wireTopLevel() {
