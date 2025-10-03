@@ -132,6 +132,22 @@
   function updateOpenVisual() {
     topItems.forEach(mi => mi.classList.toggle('is-open', mi.dataset.key === openKey));
     level2Groups.forEach(g => g.classList.toggle('is-open', g.dataset.key === openSecondKey));
+    updateMenuVisibility(); // 👈 asegura visibilidad real (hidden)
+  }
+
+  // Visibilidad real (independiente del CSS)
+  function updateMenuVisibility() {
+    // lvl2 (lista de categorías) visible solo si top-level abierto es "servicios"
+    const lvl2 = servicesItem?.querySelector('.submenu.lvl2');
+    if (lvl2) lvl2.hidden = openKey !== 'servicios';
+
+    // cada grupo lvl3: visible si coincide el grupo activo y "servicios" está abierto
+    level2Groups.forEach(g => {
+      const box = g.querySelector('.submenu.lvl3');
+      if (!box) return;
+      const visible = openKey === 'servicios' && g.dataset.key === openSecondKey;
+      box.hidden = !visible;
+    });
   }
 
   function resetSubmenu(key) {
@@ -358,6 +374,7 @@
   } else {
     setOpen(startKey); // home / seccion-7 / seccion-8 / seccion-9
   }
+  updateMenuVisibility(); // 👈 asegura estado visual inicial
 
   // Back/forward
   window.addEventListener('popstate', () => {
@@ -371,6 +388,7 @@
       setOpen(key);
     }
 
+    updateMenuVisibility(); // 👈 oculta/muestra lvl2 y lvl3 según corresponda
     scrollToTop();
   });
 })();
