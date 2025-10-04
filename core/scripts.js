@@ -98,7 +98,8 @@
     // quita 'is-open' hardcodeadas del HTML
     topItems.forEach(mi => mi.classList.remove('is-open'));
     level2Groups.forEach(g => g.classList.remove('is-open'));
-
+    menuRoot.querySelectorAll('.is-active').forEach(el => el.classList.remove('is-active'));
+     
     // oculta lvl2 y todos los lvl3
     const lvl2 = servicesItem?.querySelector('.submenu.lvl2');
     if (lvl2) { lvl2.hidden = true; lvl2.style.display = 'none'; }
@@ -363,15 +364,21 @@
 
   // Arranque
   const initialKey = 'home';
-  const fromHash = (location.hash || `#${initialKey}`).slice(1);
-  const valid = sections.some(s => s.dataset.section === fromHash);
-  const startKey = valid ? fromHash : initialKey;
-  if (startKey !== fromHash) history.replaceState({ key: initialKey }, '', `#${initialKey}`);
+const fromHash = (location.hash || `#${initialKey}`).slice(1);
+const valid = sections.some(s => s.dataset.section === fromHash);
+const rawStart = valid ? fromHash : initialKey;
 
-  buildSubmenus();
-  wireTopLevel();
-  wireLevel2();
-  activate(startKey);
+// Normaliza: si el hash es el contenedor de Servicios (seccion-2), empezamos en home
+const startKey = (rawStart === 'seccion-2') ? 'home' : rawStart;
+
+if (startKey !== fromHash) {
+  history.replaceState({ key: startKey }, '', `#${startKey}`);
+}
+
+buildSubmenus();
+wireTopLevel();
+wireLevel2();
+activate(startKey);
 
   // ⬇️ cambio: detección de nivel 2 por patrón seccion_lvl2-…
   if (/^seccion_lvl2-\d+$/.test(startKey)) {
