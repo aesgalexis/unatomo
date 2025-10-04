@@ -26,58 +26,84 @@
 
   <nav class="menu" id="sidebar-menu">
   <!-- Nivel 1: Inicio -->
-  <div class="menu-item" data-key="home">
-    <a href="#home" data-section="home" aria-current="page">Inicio</a>
-    <!-- sin submenú -->
+  <div class="menu-item" data-key="seccion-1">
+    <a href="#seccion-1" data-section="seccion-1" aria-current="page">Inicio</a>
   </div>
+    <h2>Sobre nosotros</h2> <p><strong>Your process, our insight.</strong></p> <p>Somos una empresa fundada en Mallorca, especializada en soluciones aplicadas y consultoría de alto nivel para entornos de lavandería 
+      industrial. Ofrecemos nuestros servicios en lavanderías de casi toda Europa, y algunos países de América.</p> <p>Desarrollamos e implementamos soluciones de todo tipo para mejorar la operatividad, productividad 
+      y rentabilidad de nuestros clientes. Ayudamos a que su lavandería funcione mejor, con cambios estratégicos aplicados y resultados tangibles.</p> <p>Nos abalan casi 20 años de experiencia directa en entornos de 
+      lavandería industrial, siendo impulsores directos de cambios y mejoras en lavanderías industriales a día de hoy lideres y referentes en el sector. Nuestro mayor impulsor es la pasión que sentimos, y principalmente
+      yo, por lo que hacemos. Realmente disfrutamos ajustando un pliegue, eso hace que los resultados además de positivos sean excelentes y duraderos.</p> <p>Colaboramos estrechamente con fabricantes del sector, y 
+      contamos con el apoyo y la colaboración de una red de técnicos por toda España, siempre disponibles a cruzar fronteras si es preciso. Esto nos da el respaldo y la fortaleza de saber que no estamos solos, y 
+      nuestro objetivo, es que nuestros clientes tampoco.</p>
 
-  <!-- Nivel 1: Servicios (nuevo) -->
+  <!-- Nivel 1: Servicios (mantengo data-key='servicios' para tu JS de acordeón) -->
   <div class="menu-item has-children" data-key="servicios">
-    <a href="#servicios" data-section="servicios">Servicios</a>
+    <a href="#seccion-2" data-section="seccion-2">Servicios</a>
 
     <!-- Nivel 2: categorías (texto) -->
     <div class="submenu lvl2" aria-label="Servicios">
-      <!-- Cada grupo representa una sección (antes top-level) y anida el lvl3 -->
-      <div class="submenu-group" data-key="seccion-1">
-        <a class="lvl2-link" href="#seccion-1" data-section="seccion-1">Asesoría</a>
+      <!-- Cada grupo representa una subsección de Servicios y anida el lvl3 -->
+      <div class="submenu-group" data-key="seccion_lvl2-1">
+        <a class="lvl2-link" href="#seccion_lvl2-1" data-section="seccion_lvl2-1">Asesoría</a>
         <div class="submenu lvl3"></div>
       </div>
 
-      <div class="submenu-group" data-key="seccion-2">
-        <a class="lvl2-link" href="#seccion-2" data-section="seccion-2">Optimización de procesos</a>
+      <div class="submenu-group" data-key="seccion_lvl2-2">
+        <a class="lvl2-link" href="#seccion_lvl2-2" data-section="seccion_lvl2-2">Optimización de procesos</a>
         <div class="submenu lvl3"></div>
       </div>
 
-      <div class="submenu-group" data-key="seccion-3">
-        <a class="lvl2-link" href="#seccion-3" data-section="seccion-3">Control de producción</a>
+      <div class="submenu-group" data-key="seccion_lvl2-3">
+        <a class="lvl2-link" href="#seccion_lvl2-3" data-section="seccion_lvl2-3">Control de producción</a>
         <div class="submenu lvl3"></div>
       </div>
 
-      <div class="submenu-group" data-key="seccion-4">
-        <a class="lvl2-link" href="#seccion-4" data-section="seccion-4">Mantenimiento</a>
+      <div class="submenu-group" data-key="seccion_lvl2-4">
+        <a class="lvl2-link" href="#seccion_lvl2-4" data-section="seccion_lvl2-4">Mantenimiento</a>
         <div class="submenu lvl3"></div>
       </div>
 
-      <div class="submenu-group" data-key="seccion-5">
-        <a class="lvl2-link" href="#seccion-5" data-section="seccion-5">Asistencia técnica</a>
+      <div class="submenu-group" data-key="seccion_lvl2-5">
+        <a class="lvl2-link" href="#seccion_lvl2-5" data-section="seccion_lvl2-5">Asistencia técnica</a>
         <div class="submenu lvl3"></div>
       </div>
 
-      <div class="submenu-group" data-key="seccion-6">
-        <a class="lvl2-link" href="#seccion-6" data-section="seccion-6">Formación</a>
+      <div class="submenu-group" data-key="seccion_lvl2-6">
+        <a class="lvl2-link" href="#seccion_lvl2-6" data-section="seccion_lvl2-6">Formación</a>
         <div class="submenu lvl3"></div>
       </div>
     </div>
   </div>
 
+  <!-- Nivel 1: Herramientas -->
+  <div class="menu-item" data-key="seccion-3">
+    <a href="#seccion-3" data-section="seccion-3">Herramientas</a>
+  </div>
+
+  <!-- Nivel 1: Venta de maquinaria -->
+  <div class="menu-item" data-key="seccion-4">
+    <a href="#seccion-4" data-section="seccion-4">Venta de maquinaria</a>
+  </div>
+
+  <!-- Nivel 1: Socios y colaboradores -->
+  <div class="menu-item" data-key="seccion-5">
+    <a href="#seccion-5" data-section="seccion-5">Socios y colaboradores</a>
+  </div>
+
   <!-- Nivel 1: Alcance -->
-  <div class="menu-item" data-key="seccion-7">
-    <a href="#seccion-7" data-section="seccion-7">Alcance</a>
+  <div class="menu-item" data-key="seccion-6">
+    <a href="#seccion-6" data-section="seccion-6">Alcance</a>
   </div>
 
   <!-- Nivel 1: Contacto -->
+  <div class="menu-item" data-key="seccion-7">
+    <a href="#seccion-7" data-section="seccion-7">Contacto</a>
+  </div>
+
+  <!-- Nivel 1: Aviso legal -->
   <div class="menu-item" data-key="seccion-8">
-    <a href="#seccion-8" data-section="seccion-8">Contacto</a>
+    <a href="#seccion-8" data-section="seccion-8">Aviso legal</a>
   </div>
 
   <!-- Nivel 1: Créditos -->
@@ -89,122 +115,111 @@
 </aside>
 
 <main id="app" class="content" tabindex="-1">
-  <!-- Inicio -->
-  <section id="section-home" data-section="home" class="section is-active">
-    <h2>Sobre nosotros</h2>
+  <!-- Sección 1: Inicio -->
+  <section id="section-seccion-1" data-section="seccion-1" class="section is-active">
+    <h2>Inicio</h2>
+    <h3 id="seccion_lvl3-1-sobre-nosotros">Sobre nosotros</h3>
     <p><strong>Your process, our insight.</strong></p>
-    <p>Somos una empresa fundada en Mallorca, especializada en soluciones aplicadas y consultoría de alto nivel para entornos de lavandería industrial. Ofrecemos nuestros servicios en lavanderías de casi toda Europa, 
-      y algunos países de América.</p> 
-    <p>Desarrollamos e implementamos soluciones de todo tipo para mejorar la operatividad, productividad y rentabilidad de nuestros clientes. Ayudamos a que su lavandería funcione mejor, con cambios  estratégicos aplicados
-      y resultados tangibles.</p>
-    <p>Nos abalan casi 20 años de experiencia directa en entornos de lavandería industrial, siendo impulsores directos de cambios y mejoras en lavanderías industriales a día de hoy lideres y referentes en el sector.
-    Nuestro mayor impulsor es la pasión que sentimos, y principalmente yo, por lo que hacemos. Realmente disfrutamos ajustando un pliegue, eso hace que los resultados además de positivos sean excelentes y duraderos.</p>
-    <p>Colaboramos estrechamente con fabricantes del sector, y contamos con el apoyo y la colaboración de una red de técnicos por toda España, siempre disponibles a cruzar fronteras si es preciso. Esto nos da el respaldo
-    y la fortaleza de saber que no estamos solos, y nuestro objetivo, es que nuestros clientes tampoco.</p>
+    <p>Texto de presentación…</p>
   </section>
 
-  <!-- Sección 1: Asesoría -->
-  <section id="section-seccion-1" data-section="seccion-1" class="section">
+  <!-- Sección 2: Servicios (contenedor semántico opcional) -->
+  <section id="section-seccion-2" data-section="seccion-2" class="section" hidden>
+    <h2>Servicios</h2>
+    <p>Selecciona una categoría en el menú.</p>
+  </section>
+
+  <!-- Nivel 2: Servicios / Asesoría -->
+  <section id="section-seccion_lvl2-1" data-section="seccion_lvl2-1" class="section">
     <h2>Asesoría</h2>
 
-    <h2 id="seccion-1-asesoria-tecnica">Asesoría técnica</h2>
-    <p>texto</p>
-    
-    <h2 id="seccion-1-asesoria-procesos">Asesoría de procesos</h2>
-    <p>texto</p>
-    
-    <h2 id="seccion-1-asesoria-operativa">Asesoría operativa</h2>
-    <p>texto</p>
-    
+    <h3 id="seccion_lvl3-1-asesoria-tecnica">Asesoría técnica</h3>
+    <p>Texto…</p>
+
+    <h3 id="seccion_lvl3-2-asesoria-procesos">Asesoría de procesos</h3>
+    <p>Texto…</p>
+
+    <h3 id="seccion_lvl3-3-asesoria-operativa">Asesoría operativa</h3>
+    <p>Texto…</p>
   </section>
 
-  <!-- Sección 2: Ajustes y optimización -->
-  <section id="section-seccion-2" data-section="seccion-2" class="section">
+  <!-- Nivel 2: Servicios / Optimización de procesos -->
+  <section id="section-seccion_lvl2-2" data-section="seccion_lvl2-2" class="section">
     <h2>Optimización de procesos</h2>
-    <p>texto</p>
-
-    
+    <h3 id="seccion_lvl3-1-optimizacion-intro">Que las máquinas rindan lo que pueden</h3>
+    <p>Texto…</p>
+    <!-- añade más h3 si quieres más subapartados -->
   </section>
 
-  <!-- Sección 3: Control de producción -->
-  <section id="section-seccion-3" data-section="seccion-3" class="section">
+  <!-- Nivel 2: Servicios / Control de producción -->
+  <section id="section-seccion_lvl2-3" data-section="seccion_lvl2-3" class="section">
     <h2>Control de producción</h2>
-    <p>texto</p>
-    
+    <p>Texto…</p>
   </section>
 
-  <!-- Sección 4: Mantenimiento -->
-  <section id="section-seccion-4" data-section="seccion-4" class="section">
+  <!-- Nivel 2: Servicios / Mantenimiento -->
+  <section id="section-seccion_lvl2-4" data-section="seccion_lvl2-4" class="section">
     <h2>Mantenimiento</h2>
-    <p>texto</p>
-    
+    <p>Texto…</p>
   </section>
 
-  <!-- Sección 5: Asistencia técnica -->
-  <section id="section-seccion-5" data-section="seccion-5" class="section">
+  <!-- Nivel 2: Servicios / Asistencia técnica -->
+  <section id="section-seccion_lvl2-5" data-section="seccion_lvl2-5" class="section">
     <h2>Asistencia técnica</h2>
-    <p>texto</p>
-  
+    <p>Texto…</p>
   </section>
 
-  <!-- Sección 6: Formación -->
-  <section id="section-seccion-6" data-section="seccion-6" class="section">
+  <!-- Nivel 2: Servicios / Formación -->
+  <section id="section-seccion_lvl2-6" data-section="seccion_lvl2-6" class="section">
     <h2>Formación</h2>
 
-    <h2 id="seccion-6-formacion-operarios">Formación de operarios</h2>
-    <p><strong>subtitulo</strong></p>
-    <p>texto</p>
-    <p><strong>subtitulo</strong></p>
-    <p>texto</p>
-    <p><strong>subtitulo</strong></p>
-    <p>texto</p>
-    
-    <h2 id="seccion-6-formacion-tecnicos">Formación de equipos técnicos</h2>
-    <p><strong>subtitulo</strong></p>
-    <p>texto</p>
-    <p><strong>subtitulo</strong></p>
-    <p>texto</p>
-    <p><strong>subtitulo</strong></p>
-    <p>texto</p>
-  
+    <h3 id="seccion_lvl3-1-formacion-operarios">Formación de operarios</h3>
+    <p>Texto…</p>
+
+    <h3 id="seccion_lvl3-2-formacion-tecnicos">Formación de equipos técnicos</h3>
+    <p>Texto…</p>
   </section>
 
-  <!-- Sección 7: Alcance (Mapa) -->
-  <section id="section-seccion-7" data-section="seccion-7" class="section">
+  <!-- Sección 3: Herramientas -->
+  <section id="section-seccion-3" data-section="seccion-3" class="section">
+    <h2>Herramientas</h2>
+    <p>Texto…</p>
+  </section>
+
+  <!-- Sección 4: Venta de maquinaria -->
+  <section id="section-seccion-4" data-section="seccion-4" class="section">
+    <h2>Venta de maquinaria</h2>
+    <p>Texto…</p>
+  </section>
+
+  <!-- Sección 5: Socios y colaboradores -->
+  <section id="section-seccion-5" data-section="seccion-5" class="section">
+    <h2>Socios y colaboradores</h2>
+    <p>Texto…</p>
+  </section>
+
+  <!-- Sección 6: Alcance -->
+  <section id="section-seccion-6" data-section="seccion-6" class="section">
     <h2>Alcance</h2>
-    <h2>Mapa</h2>
-    
-    <p><strong>subtitulo</strong></p>
-    <p>texto</p>
-    <p><strong>subtitulo</strong></p>
-    <p>texto</p>
-    <p><strong>subtitulo</strong></p>
-    <p>texto</p>
-    
+    <p>Texto…</p>
   </section>
 
-  <!-- Sección 8: Contacto -->
-  <section id="section-seccion-8" data-section="seccion-8" class="section">
+  <!-- Sección 7: Contacto -->
+  <section id="section-seccion-7" data-section="seccion-7" class="section">
     <h2>Contacto</h2>
-    <p><strong>subtitulo</strong></p>
-    <p>texto</p>
-    <p><strong>subtitulo</strong></p>
-    <p>texto</p>
-    <p><strong>subtitulo</strong></p>
-    <p>texto</p>
-    
+    <p>Texto…</p>
+  </section>
+
+  <!-- Sección 8: Aviso legal -->
+  <section id="section-seccion-8" data-section="seccion-8" class="section">
+    <h2>Aviso legal</h2>
+    <p>Texto…</p>
   </section>
 
   <!-- Sección 9: Créditos -->
   <section id="section-seccion-9" data-section="seccion-9" class="section">
-    <h2>Legal</h2>
-    <p><strong>subtitulo</strong></p>
-    <p>texto</p>
-    <p><strong>subtitulo</strong></p>
-    <p>texto</p>
-    <p><strong>subtitulo</strong></p>
-    <p>texto</p>
-    
+    <h2>Créditos</h2>
+    <p>Texto…</p>
   </section>
 </main>
 
