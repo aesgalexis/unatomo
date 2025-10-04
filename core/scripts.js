@@ -64,7 +64,7 @@
 
   // Estado de apertura
   let openKey = 'home';          // top-level abierto (home/servicios/…)
-  let openSecondKey = null;      // si openKey === 'servicios': seccion-1..6
+  let openSecondKey = null;      // si openKey === 'servicios': seccion_lvl2-…
 
   // Utils
   const slug = (t) => t.toLowerCase().trim()
@@ -114,9 +114,11 @@
     topAnchors.forEach(a => a.classList.remove('is-active'));
     lvl2Links.forEach(a => a.classList.remove('is-active'));
 
-    const isLv2 = /^seccion-[1-6]$/.test(sectionKey);
+    // ⬇️ cambio: nivel 2 ahora es seccion_lvl2-n
+    const isLv2 = /^seccion_lvl2-\d+$/.test(sectionKey);
+
     if (isLv2) {
-      servicesItem?.querySelector(':scope > a[data-section="servicios"]')?.classList.add('is-active');
+      servicesItem?.querySelector(':scope > a[data-section]')?.classList.add('is-active');
       lvl2Links.find(a => a.dataset.section === sectionKey)?.classList.add('is-active');
     } else {
       topAnchors.find(a => a.dataset.section === sectionKey)?.classList.add('is-active');
@@ -190,7 +192,7 @@
   // Construye submenús (nivel 3)
   function buildSubmenus() {
     level2Groups.forEach(group => {
-      const key = group.dataset.key; // "seccion-1"… "seccion-6"
+      const key = group.dataset.key; // ej: "seccion_lvl2-1"
       const section = sections.find(s => s.dataset.section === key);
       const box = group.querySelector('.submenu.lvl3');
       if (!box || !section) return;
@@ -298,17 +300,18 @@
     topItems.forEach(mi => {
       const a = mi.querySelector(':scope > a[data-section]');
       if (!a) return;
-      const key = a.dataset.section; // "home" | "servicios" | "seccion-7" | "seccion-8" | "seccion-9"
+      const key = a.dataset.section;
+      const isServices = mi.dataset.key === 'servicios'; // ⬅️ robusto
 
       a.addEventListener('click', (e) => {
         e.preventDefault();
 
-        if (key === 'servicios') {
+        if (isServices) {
           const willClose = openKey === 'servicios';
           // toggle Servicios; si lo abrimos, lvl2 visible y lvl3 cerrados
           setOpen(willClose ? null : 'servicios');
           if (!willClose) {
-            setOpenSecond(null); // 👈 categorías (Asesoría etc.) empiezan cerradas
+            setOpenSecond(null); // categorías empiezan cerradas
           }
           return;
         }
@@ -327,7 +330,7 @@
     level2Groups.forEach(group => {
       const link = group.querySelector(':scope > a.lvl2-link[data-section]');
       if (!link) return;
-      const key = link.dataset.section; // seccion-1..6
+      const key = link.dataset.section; // seccion_lvl2-…
 
       link.addEventListener('click', (e) => {
         e.preventDefault();
@@ -370,11 +373,12 @@
   wireLevel2();
   activate(startKey);
 
-  if (/^seccion-[1-6]$/.test(startKey)) {
+  // ⬇️ cambio: detección de nivel 2 por patrón seccion_lvl2-…
+  if (/^seccion_lvl2-\d+$/.test(startKey)) {
     setOpen('servicios');
     setOpenSecond(startKey);
   } else {
-    setOpen(startKey); // home / seccion-7 / seccion-8 / seccion-9
+    setOpen(startKey); // home / seccion-3..9, etc.
     setOpenSecond(null);
   }
   updateMenuVisibility(); // estado visual inicial robusto
@@ -384,7 +388,7 @@
     const key = (location.hash || '#home').slice(1);
     activate(key);
 
-    if (/^seccion-[1-6]$/.test(key)) {
+    if (/^seccion_lvl2-\d+$/.test(key)) {
       setOpen('servicios');
       setOpenSecond(key);
     } else {
