@@ -410,3 +410,21 @@ h2.is-highlighted, h3.is-highlighted { background: transparent !important; text-
 @media (max-width: 520px) {
   .footer-grid { grid-template-columns: 1fr; }
 }
+/* --- Anti-solape: respiración al final del contenido --- */
+.content {
+  /* deja aire suficiente antes del footer, funcione en pantallas cortas/largas */
+  padding-bottom: clamp(48px, 6vh, 120px);
+}
+
+/* asegura que la última pieza de cada sección no queda pegada */
+.section > :last-child {
+  margin-bottom: var(--space-8);
+}
+
+/* por si acaso alguna regla vieja lo fija: siempre flujo normal */
+#site-footer {
+  position: static !important;
+  z-index: 0 !important;
+  /* un poco de separación extra visual respecto al contenido */
+  margin-top: var(--space-6);
+}
