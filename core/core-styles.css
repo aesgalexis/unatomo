@@ -28,8 +28,8 @@
   /* Resaltado */
   --hl: #fde047;
 
-  /* Mapa */
-  --map-allowed: #3b82f6;
+  /* Footer links accent */
+  --footer-accent: #ff7a00;
 }
 :root[data-theme="dark"] {
   --bg: #0b0b0c;
@@ -42,7 +42,8 @@
 
   --submenu-divider: var(--border);
   --hl: #a16207;
-  --map-allowed: #60a5fa;
+
+  --footer-accent: #ff7a00;
 }
 /* Preferencia SO si no hay elección manual */
 @media (prefers-color-scheme: dark) {
@@ -55,7 +56,6 @@
     --menu-active-bg: #4b5563;
     --submenu-divider: var(--border);
     --hl: #a16207;
-    --map-allowed: #60a5fa;
   }
 }
 
@@ -70,13 +70,18 @@ body {
   line-height: 1.6;
   text-rendering: optimizeLegibility;
 
+  /* Grid de página: sidebar | contenido, con footer al final */
+  min-height: 100vh;
   display: grid;
-  grid-template-columns: var(--sidebar-w) 1fr; /* sidebar | contenido */
-  grid-auto-rows: auto;
+  grid-template-columns: var(--sidebar-w) 1fr;  /* sidebar | contenido */
+  grid-template-rows: auto 1fr auto;           /* (fila libre) | main | footer */
 }
-.sidebar { grid-column: 1; grid-row: 1; }
-.content { grid-column: 2; grid-row: 1; }
-body > :not(.sidebar):not(.content) { grid-column: 1 / -1; } /* otros hijos a ancho completo */
+
+/* Ubicaciones en la grid */
+.sidebar { grid-column: 1; grid-row: 2; }
+.content { grid-column: 2; grid-row: 2; }
+#site-footer { grid-column: 1 / -1; grid-row: 3; }
+body > :not(.sidebar):not(.content):not(#site-footer) { grid-column: 1 / -1; } /* otros hijos a ancho completo */
 
 #app:focus,
 #app:focus-visible { outline: none; }
@@ -153,6 +158,7 @@ body > :not(.sidebar):not(.content) { grid-column: 1 / -1; } /* otros hijos a an
 }
 .menu .menu-item.is-open > a::after{ content: "▾"; }
 
+/* Submenús */
 .submenu {
   display: none;
   margin: 0;
@@ -174,10 +180,38 @@ body > :not(.sidebar):not(.content) { grid-column: 1 / -1; } /* otros hijos a an
 .submenu a:focus-visible{ outline: none; color: var(--submenu-fg-strong); }
 .submenu a.is-sub-active{ color: var(--submenu-fg-strong); }
 
+/* === Sidebar: 3 niveles === */
+.menu .submenu.lvl2,
+.menu .submenu.lvl3 { display: none; } /* ocultos al cargar */
+.menu .menu-item.is-open > .submenu.lvl2 { display: grid; }
+.menu .submenu-group.is-open > .submenu.lvl3 { display: grid; }
+
+.menu .submenu.lvl2 { display: grid; gap: 6px; margin-top: 6px; }
+.menu .submenu-group { display: grid; gap: 6px; }
+
+.menu a.lvl2-link {
+  text-decoration: none;
+  color: var(--submenu-fg);
+  padding: 4px 0;
+  font-weight: 600; /* más jerarquía que lvl3 */
+}
+.menu a.lvl2-link:hover,
+.menu a.lvl2-link:focus-visible { color: var(--submenu-fg-strong); outline: none; }
+.menu a.lvl2-link.is-active { color: var(--fg); font-weight: 800; } /* activo nivel 2: negrita y color principal */
+
+.menu .submenu.lvl3 { display: grid; gap: 4px; padding-left: 10px; }
+.menu .submenu.lvl3 a {
+  text-decoration: none;
+  color: var(--submenu-fg);
+  font-weight: 500; /* un paso por debajo de lvl2 */
+}
+/* Nivel 3 activo: sin negrita (solo color) */
+.menu .submenu.lvl3 a.is-sub-active { color: var(--fg); font-weight: 500; }
+
 /* === Contenido === */
 .content {
   padding: var(--space-8) var(--space-6);
-  min-height: 100dvh;
+  min-height: 0;       /* clave para que el footer no tape nada */
   display: block;
 }
 .content > .section { display: none; max-width: var(--content-max); }
@@ -202,16 +236,26 @@ h2[id], h3[id] { scroll-margin-top: 24px; }
 }
 h2.is-highlighted, h3.is-highlighted { background: transparent !important; text-decoration: none !important; }
 
-/* === Mapa === */
-.map { width: 100%; aspect-ratio: 7 / 5; max-width: 100%; }
-.map svg { display: block; width: 100%; height: 100%; }
-.country { fill: none; stroke: color-mix(in oklab, var(--fg) 30%, transparent); stroke-width: .9; }
-.country.allowed { fill: var(--map-allowed); stroke: var(--map-allowed); }
+/* Subtítulos secundarios (H2 dentro de sección, salvo el primero) */
+.section h2:not(:first-of-type) {
+  font-size: clamp(16px, 1.6vw, 20px);
+  font-weight: 700;
+  line-height: 1.25;
+  margin-top: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+.section h2:not(:first-of-type) + p > strong {
+  display: inline-block;
+  margin-top: -2px;
+}
 
 /* === Responsive === */
 @media (max-width: 900px) {
   :root { --sidebar-w: 100%; }
-  body{ display: block; }
+  body{
+    display: block;       /* layout móvil simple pila */
+    min-height: 100vh;
+  }
 
   .sidebar {
     position: sticky;
@@ -219,6 +263,8 @@ h2.is-highlighted, h3.is-highlighted { background: transparent !important; text-
     width: 100%;
     border-right: none;
     border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    z-index: 10;
   }
 
   .brand img { width: clamp(96px, 25vw, 160px); height: auto; }
@@ -232,8 +278,7 @@ h2.is-highlighted, h3.is-highlighted { background: transparent !important; text-
   color: var(--muted);
   border-top: 1px solid var(--border);
   padding: var(--space-6) var(--space-3);
-  /* aire extra al borde inferior del navegador */
-  padding-bottom: 30px;
+  padding-bottom: 30px; /* aire extra al borde inferior */
 }
 
 #site-footer .footer-wrap {
@@ -243,26 +288,36 @@ h2.is-highlighted, h3.is-highlighted { background: transparent !important; text-
   gap: var(--space-6);
 }
 
-/* ── TOP: dos columnas (izquierda marca+newsletter | derecha 4 columnas) ── */
+/* TOP: 1/3 (marca+newsletter) | 2/3 (4 columnas) */
 .footer-top.two-col {
   display: grid;
-  grid-template-columns: 1fr 2fr; /* antes: 1fr 1fr */
+  grid-template-columns: 1fr 2fr;
   gap: var(--space-6);
   align-items: start;
 }
 
-/* ── Derecha: 4 columnas con mínima más cómoda ── */
+/* Derecha: 4 columnas con mínima cómoda */
 .footer-grid {
   display: grid;
   gap: var(--space-4);
-  grid-template-columns: repeat(4, minmax(180px, 1fr)); /* antes: repeat(4, minmax(0,1fr)) */
+  grid-template-columns: repeat(4, minmax(180px, 1fr));
 }
 
-/* Marca en texto (sin logo) */
+.footer-title {
+  margin: 0 0 6px 0;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--submenu-fg);
+}
+.footer-links { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.footer-links a { color: var(--submenu-fg); text-decoration: none; }
+
+/* Brand en texto (sin logo) */
 .footer-brand-title {
   margin: 0 0 4px 0;
   font-weight: 800;
-  font-size: clamp(22px, 2.4vw, 32px); /* tamaño tipo h2 del sitio */
+  font-size: clamp(22px, 2.4vw, 32px);
   line-height: 1.2;
   color: var(--fg);
 }
@@ -295,7 +350,7 @@ h2.is-highlighted, h3.is-highlighted { background: transparent !important; text-
 .nl-btn:hover { filter: brightness(1.03); }
 .nl-note { font-size: 0.9em; }
 
-/* (Opcional) CTAs si los mantienes */
+/* CTAs opcionales */
 .footer-cta { display: flex; gap: 10px; flex-wrap: wrap; }
 .cta-primary, .cta-secondary {
   display: inline-block; text-decoration: none; font-weight: 700;
@@ -304,23 +359,7 @@ h2.is-highlighted, h3.is-highlighted { background: transparent !important; text-
 .cta-primary { background: var(--menu-active-bg); color: var(--fg); }
 .cta-secondary { background: var(--menu-hover-bg); color: var(--fg); }
 
-/* ── Derecha: 4 columnas ── */
-.footer-grid {
-  display: grid;
-  gap: var(--space-4);
-  grid-template-columns: repeat(4, minmax(0,1fr));
-}
-.footer-title {
-  margin: 0 0 6px 0;
-  font-size: 14px;
-  text-transform: uppercase;
-  letter-spacing: .04em;
-  color: var(--submenu-fg);
-}
-.footer-links { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
-.footer-links a { color: var(--submenu-fg); text-decoration: none; }
-
-/* ── BOTTOM: una sola fila centrada ── */
+/* BOTTOM centrado */
 .footer-bottom.footer-centered {
   display: grid;
   gap: 8px;
@@ -328,7 +367,7 @@ h2.is-highlighted, h3.is-highlighted { background: transparent !important; text-
   text-align: center;
   border-top: 1px dashed var(--border);
   padding-top: 12px;
-  padding-bottom: 18px; /* suma con el padding-bottom del footer */
+  padding-bottom: 18px;
 }
 .footer-bottom.footer-centered p { margin: 0; color: var(--muted); }
 .footer-legal-inline {
@@ -337,26 +376,7 @@ h2.is-highlighted, h3.is-highlighted { background: transparent !important; text-
 }
 .footer-legal-inline a { color: var(--submenu-fg); text-decoration: none; }
 
-/* ── Responsive ── */
-@media (max-width: 900px) {
-  .footer-top.two-col { grid-template-columns: 1fr; } /* apila izquierda y derecha */
-  .footer-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
-  .nl-row { grid-template-columns: 1fr; }
-}
-@media (max-width: 520px) {
-  .footer-grid { grid-template-columns: 1fr; }
-}
-
-/* util */
-.sr-only {
-  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
-  overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
-}
-
-/* === Footer link hover accent (naranja vivo) === */
-:root { --footer-accent: #ff7a00; }
-:root[data-theme="dark"] { --footer-accent: #ff7a00; } /* mismo acento en dark */
-
+/* Footer hover accent (naranja vivo) */
 #site-footer .footer-links a:hover,
 #site-footer .footer-links a:focus-visible,
 #site-footer .footer-legal-inline a:hover,
@@ -368,8 +388,6 @@ h2.is-highlighted, h3.is-highlighted { background: transparent !important; text-
   color: var(--footer-accent);
   outline: none;
 }
-
-/* iconos sociales con acento al hover/focus */
 #site-footer .social:hover,
 #site-footer .social:focus-visible {
   color: var(--footer-accent);
@@ -377,103 +395,18 @@ h2.is-highlighted, h3.is-highlighted { background: transparent !important; text-
   outline: none;
 }
 
-
-/* util */
+/* === Utilidades === */
 .sr-only {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
   overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
 }
 
-/* === Subtítulos dentro del contenido (h2 secundarios) === */
-.section h2:not(:first-of-type) {
-  font-size: clamp(16px, 1.6vw, 20px); /* más pequeños que el título de sección */
-  font-weight: 700;
-  line-height: 1.25;
-  margin-top: var(--space-3);          /* menos espacio arriba */
-  margin-bottom: var(--space-2);
+/* === Responsive footer === */
+@media (max-width: 900px) {
+  .footer-top.two-col { grid-template-columns: 1fr; }
+  .footer-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .nl-row { grid-template-columns: 1fr; }
 }
-
-/* (opcional) tagline justo debajo del subtítulo: compactar un poco */
-.section h2:not(:first-of-type) + p > strong {
-  display: inline-block;
-  margin-top: -2px;
+@media (max-width: 520px) {
+  .footer-grid { grid-template-columns: 1fr; }
 }
-
-/* === Subtítulos dentro del contenido (h2 secundarios) === */
-.section h2:not(:first-of-type) {
-  font-size: clamp(16px, 1.6vw, 20px); /* más pequeños que el título de sección */
-  font-weight: 700;
-  line-height: 1.25;
-  margin-top: var(--space-3);          /* menos espacio arriba */
-  margin-bottom: var(--space-2);
-}
-
-/* (opcional) tagline justo debajo del subtítulo: compactar un poco */
-.section h2:not(:first-of-type) + p > strong {
-  display: inline-block;
-  margin-top: -2px;
-}
-/* Sidebar: estilado para 3 niveles */
-.menu .submenu.lvl2 { display: grid; gap: 6px; margin-top: 6px; }
-.menu .submenu-group { display: grid; gap: 6px; }
-
-.menu a.lvl2-link {
-  text-decoration: none;
-  color: var(--submenu-fg);
-  padding: 4px 0;
-  font-weight: 600;            /* más jerarquía que lvl3 */
-}
-.menu a.lvl2-link:hover,
-.menu a.lvl2-link:focus-visible {
-  color: var(--submenu-fg-strong);
-  outline: none;
-}
-
-.menu .submenu.lvl3 { display: grid; gap: 4px; padding-left: 10px; }
-.menu .submenu.lvl3 a {
-  text-decoration: none;
-  color: var(--submenu-fg);
-  font-weight: 500;            /* un paso por debajo de lvl2 */
-}
-.menu .submenu.lvl3 a.is-sub-active { color: var(--fg); font-weight: 700; }
-/* Nivel 2 activo en negrita fuerte */
-.menu a.lvl2-link.is-active { font-weight: 800; }
-
-/* Nivel 3 activo sin negrita (solo color) */
-.menu .submenu.lvl3 a.is-sub-active { color: var(--fg); font-weight: 500; }
-/* --- Sidebar: cerrar submenús por defecto, sin FOUC --- */
-.menu .submenu.lvl2,
-.menu .submenu.lvl3 {
-  display: none;                /* ocultos al cargar */
-}
-.menu .menu-item.is-open > .submenu.lvl2 {
-  display: grid;                /* visible cuando el item top-level está abierto */
-}
-.menu .submenu-group.is-open > .submenu.lvl3 {
-  display: grid;                /* visible cuando el grupo lvl2 está abierto */
-}
-
-/* --- Apariencia del nivel 2 (categorías dentro de Servicios) --- */
-.menu a.lvl2-link {
-  color: var(--submenu-fg);
-  font-weight: 600;             /* base */
-  text-decoration: none;
-}
-.menu a.lvl2-link:hover,
-.menu a.lvl2-link:focus-visible {
-  color: var(--submenu-fg-strong);
-  outline: none;
-}
-
-/* ACTIVO nivel 2: mismo color que el nivel 3 activo (var(--fg)), pero en negrita */
-.menu a.lvl2-link.is-active {
-  color: var(--fg);             /* negro en light, blanco en dark */
-  font-weight: 800;             /* más peso que lvl3 */
-}
-
-/* Nivel 3 activo: sin negrita (ya lo tenías, lo reforzamos) */
-.menu .submenu.lvl3 a.is-sub-active {
-  color: var(--fg);
-  font-weight: 500;
-}
-
