@@ -14,7 +14,7 @@
 
       <div class="grid">
         <div class="field">
-          <label for="name">Nombre y apellidos *</label>
+          <label for="name">Nombre *</label>
           <input id="name" name="name" type="text" required autocomplete="name" />
           <small class="err" data-for="name"></small>
         </div>
@@ -53,17 +53,6 @@
             <option>Otro</option>
           </select>
           <small class="err" data-for="topic"></small>
-        </div>
-
-        <div class="field">
-          <label for="budget">Presupuesto aproximado</label>
-          <select id="budget" name="budget">
-            <option value="">Sin especificar</option>
-            <option>Hasta 3.000 €</option>
-            <option>3.000 – 10.000 €</option>
-            <option>10.000 – 30.000 €</option>
-            <option>Más de 30.000 €</option>
-          </select>
         </div>
 
         <div class="field">
