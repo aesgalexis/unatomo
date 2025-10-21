@@ -1,4 +1,4 @@
-// /static/js/tools/cdd.js  (ajusta el path según tu estructura)
+// /static/js/tools/cdd.js
 (() => {
   'use strict';
 
@@ -9,7 +9,7 @@
     return;
   }
 
-  // Unidades soportadas
+  // Unidades soportadas (en el orden que mostraremos abajo)
   const UNITS = [
     { key: 'fh',  label: '°fH (Franceses)' },      // 1 °fH = 10 mg/L CaCO3
     { key: 'dh',  label: '°dH (Alemanes)' },       // 1 °dH = 17.848 mg/L CaCO3
@@ -17,7 +17,7 @@
     { key: 'ppm', label: 'ppm (mg/L CaCO₃)' }
   ];
 
-  // Conversión: todo pivota a ppm (mg/L CaCO3)
+  // Conversión pivotando a ppm (mg/L CaCO3)
   const toPPM = {
     fh:   (v) => v * 10,
     dh:   (v) => v * 17.848,
@@ -31,15 +31,14 @@
     ppm:  (ppm) => ppm
   };
 
-  function fmt(n) {
+  const fmt = (n) => {
     if (!isFinite(n)) return '';
-    // 0–999 con 2 decimales si hace falta; >1000 con 1 decimal
     if (Math.abs(n) >= 1000) return n.toFixed(1);
     const s = n.toFixed(2);
     return s.replace(/\.00$/, '').replace(/(\.\d)0$/, '$1');
-  }
+  };
 
-  // UI
+  // --- UI ---
   root.classList.add('cdd-wrap');
   root.innerHTML = `
     <div class="cdd-card">
@@ -53,53 +52,54 @@
 
         <label class="cdd-field">
           <span class="cdd-field-label">Unidad</span>
-          <select id="cdd-unit" class="cdd-select">
+          <select id="cdd-unit" class="cdd-select" aria-label="Unidad de entrada">
             ${UNITS.map(u => `<option value="${u.key}">${u.label}</option>`).join('')}
           </select>
         </label>
       </div>
 
-      <div class="cdd-results" id="cdd-results" aria-live="polite"></div>
+      <div class="cdd-results-grid" id="cdd-results-grid"></div>
     </div>
   `;
 
   const $value = root.querySelector('#cdd-value');
   const $unit  = root.querySelector('#cdd-unit');
-  const $out   = root.querySelector('#cdd-results');
+  const $grid  = root.querySelector('#cdd-results-grid');
 
-  function render(ppm) {
-    const rows = UNITS.map(u => {
-      const v = fromPPM[u.key](ppm);
-      return `
-        <div class="cdd-result">
-          <div class="cdd-result-label">${u.label}</div>
-          <div class="cdd-result-value">${fmt(v)}</div>
-        </div>
-      `;
-    }).join('');
-    $out.innerHTML = rows;
+  // Construimos los 4 recuadros (readonly)
+  function buildOutputs() {
+    $grid.innerHTML = UNITS.map(u => `
+      <label class="cdd-field cdd-ro">
+        <span class="cdd-field-label">${u.label}</span>
+        <input id="out-${u.key}" class="cdd-input cdd-readonly" type="text" value="0" readonly tabindex="-1" />
+      </label>
+    `).join('');
   }
 
   function recalc() {
-    const raw = parseFloat(($value.value || '').replace(',', '.'));
-    if (!isFinite(raw) || raw < 0) {
-      $out.innerHTML = '';
-      return;
-    }
-    const unit = $unit.value;
-    const ppm = toPPM[unit](raw);
-    render(ppm);
+    const raw = parseFloat(($value.value || '0').replace(',', '.'));
+    const val = (isFinite(raw) && raw >= 0) ? raw : 0;
+    const unit = $unit.value || 'ppm';
+    const ppm = toPPM[unit](val);
+
+    UNITS.forEach(u => {
+      const el = document.getElementById(`out-${u.key}`);
+      if (!el) return;
+      el.value = fmt(fromPPM[u.key](ppm));
+    });
   }
 
+  // Eventos
   $value.addEventListener('input', recalc);
   $unit.addEventListener('change', recalc);
 
-  // Valores por defecto de cortesía
+  // Estado inicial: 0 en ppm
+  buildOutputs();
   $unit.value = 'ppm';
-  $value.value = '100';
+  $value.value = '0';
   recalc();
 
-  // Señal visible en consola para comprobar que ha cargado
+  // Bandera de diagnóstico
   window.__CDD_OK__ = true;
   console.info('[CDD] Conversor listo.');
 })();
