@@ -2,120 +2,166 @@
 (() => {
   'use strict';
 
-  const ROOT_ID = 'tool-cdd';
-  const root = document.getElementById(ROOT_ID);
-  if (!root) {
-    console.warn(`[CDD] Punto de montaje #${ROOT_ID} no encontrado.`);
-    return;
+  const MOUNT_ID = 'tool-cdd';
+
+  // Factores de conversión: base = mmol/L (milimoles CaCO3/L)
+  // Unidades típicas: dH (alemana), °fH (francesa), ppm (mg/L CaCO3), mmol/L
+  const factorsFromBase = {
+    'mmol/L': 1,              // base
+    'ppm': 100.09,            // 1 mmol/L CaCO3 = 100.09 mg/L (ppm)
+    'dH': 5.607,              // 1 mmol/L = 5.607 °dH
+    '°fH': 10.009             // 1 mmol/L = 10.009 °fH
+  };
+  const factorsToBase = {
+    'mmol/L': 1,
+    'ppm': 1 / 100.09,
+    'dH': 1 / 5.607,
+    '°fH': 1 / 10.009
+  };
+
+  function round(x) {
+    return Number.isFinite(x) ? Math.round(x * 1000) / 1000 : 0;
   }
 
-  const UNITS = [
-    { key: 'fh',  label: '°fH (Franceses)' },
-    { key: 'dh',  label: '°dH (Alemanes)' },
-    { key: 'mmol',label: 'mmol/L (CaCO₃)' },
-    { key: 'ppm', label: 'ppm (mg/L CaCO₃)' }
-  ];
-
-  const toPPM = {
-    fh:   (v) => v * 10,
-    dh:   (v) => v * 17.848,
-    mmol: (v) => v * 100.09,
-    ppm:  (v) => v
-  };
-  const fromPPM = {
-    fh:   (ppm) => ppm / 10,
-    dh:   (ppm) => ppm / 17.848,
-    mmol: (ppm) => ppm / 100.09,
-    ppm:  (ppm) => ppm
-  };
-
-  const fmt = (n) => {
-    if (!isFinite(n)) return '';
-    if (Math.abs(n) >= 1000) return n.toFixed(1);
-    const s = n.toFixed(2);
-    return s.replace(/\.00$/, '').replace(/(\.\d)0$/, '$1');
-  };
-
-  // --- UI ---
-  root.classList.add('cdd-wrap');
-  root.innerHTML = `
-    <div class="cdd-card">
-      <div class="cdd-controls-grid">
-        <label class="cdd-field">
-          <span class="cdd-field-label">Valor</span>
-          <input type="number" step="0.01" min="0" id="cdd-value" class="cdd-input" placeholder="0.00" inputmode="decimal" />
-        </label>
-
-        <label class="cdd-field">
-          <span class="cdd-field-label">Unidad</span>
-          <select id="cdd-unit" class="cdd-select" aria-label="Unidad de entrada">
-            ${UNITS.map(u => `<option value="${u.key}">${u.label}</option>`).join('')}
-          </select>
-        </label>
-
-        <div class="cdd-field">
-          <span class="cdd-field-label">Calcular</span>
-          <button id="cdd-calc" type="button" class="cdd-btn">Calcular</button>
-        </div>
-
-        <div class="cdd-field">
-          <span class="cdd-field-label">Reset</span>
-          <button id="cdd-reset" type="button" class="cdd-btn cdd-btn-reset" disabled>Reset</button>
-        </div>
-      </div>
-
-      <div class="cdd-results-grid" id="cdd-results-grid"></div>
-    </div>
-  `;
-
-  const $value = root.querySelector('#cdd-value');
-  const $unit  = root.querySelector('#cdd-unit');
-  const $grid  = root.querySelector('#cdd-results-grid');
-  const $btnCalc = root.querySelector('#cdd-calc');
-  const $btnReset = root.querySelector('#cdd-reset');
-
-  function buildOutputs() {
-    $grid.innerHTML = UNITS.map(u => `
-      <label class="cdd-field cdd-ro">
-        <span class="cdd-field-label">${u.label}</span>
-        <input id="out-${u.key}" class="cdd-input cdd-readonly" type="text" value="0" readonly tabindex="-1" />
-      </label>
-    `).join('');
+  function buildSelect(options, value) {
+    const sel = document.createElement('select');
+    sel.className = 'cdd-input';
+    options.forEach(o => {
+      const opt = document.createElement('option');
+      opt.value = o; opt.textContent = o;
+      if (o === value) opt.selected = true;
+      sel.appendChild(opt);
+    });
+    return sel;
   }
 
-  function recalc() {
-    const raw = parseFloat(($value.value || '0').replace(',', '.'));
-    const val = (isFinite(raw) && raw >= 0) ? raw : 0;
-    const unit = $unit.value || 'ppm';
-    const ppm = toPPM[unit](val);
+  function build() {
+    const root = document.getElementById(MOUNT_ID);
+    if (!root) return;
 
-    UNITS.forEach(u => {
-      const el = document.getElementById(`out-${u.key}`);
-      if (el) el.value = fmt(fromPPM[u.key](ppm));
+    root.className = 'tool-cdd';
+
+    // --- TOP: Valor + Unidad + Botones (Calcular / Reset) ---
+    const rowTop = document.createElement('div');
+    rowTop.className = 'cdd-row cdd-row--top';
+
+    const fieldValue = document.createElement('div');
+    fieldValue.className = 'cdd-field';
+    const inputValue = document.createElement('input');
+    inputValue.type = 'number';
+    inputValue.inputMode = 'decimal';
+    inputValue.step = 'any';
+    inputValue.min = '0';
+    inputValue.value = '0';             // empieza en 0 (como pediste)
+    inputValue.className = 'cdd-input';
+    fieldValue.appendChild(inputValue);
+
+    const fieldUnit = document.createElement('div');
+    fieldUnit.className = 'cdd-field';
+    const selectUnit = buildSelect(['dH','°fH','ppm','mmol/L'], 'dH');
+    fieldUnit.appendChild(selectUnit);
+
+    const btnCalc = document.createElement('button');
+    btnCalc.type = 'button';
+    btnCalc.className = 'cdd-btn cdd-btn--primary';
+    btnCalc.textContent = 'Calcular';
+
+    const btnReset = document.createElement('button');
+    btnReset.type = 'button';
+    btnReset.className = 'cdd-btn cdd-btn--ghost';
+    btnReset.textContent = 'Reset';
+    btnReset.disabled = true; // ← comienza inhabilitado
+
+    rowTop.append(fieldValue, fieldUnit, btnCalc, btnReset);
+
+    // --- BOTTOM: 4 resultados (solo lectura) ---
+    const rowBottom = document.createElement('div');
+    rowBottom.className = 'cdd-row cdd-row--bottom';
+
+    function resultBox(label) {
+      const wrap = document.createElement('div');
+      wrap.className = 'cdd-field';
+
+      const out = document.createElement('input');
+      out.type = 'text';
+      out.className = 'cdd-output';
+      out.readOnly = true;
+      out.value = '0';
+      out.setAttribute('aria-label', label);
+
+      const tag = document.createElement('span');
+      tag.className = 'cdd-unit-tag';
+      tag.textContent = label;
+
+      wrap.append(out, tag);
+      return { wrap, out };
+    }
+
+    const r_dH = resultBox('dH');
+    const r_fH = resultBox('°fH');
+    const r_ppm = resultBox('ppm');
+    const r_mmol = resultBox('mmol/L');
+
+    rowBottom.append(r_dH.wrap, r_fH.wrap, r_ppm.wrap, r_mmol.wrap);
+
+    root.innerHTML = '';
+    root.append(rowTop, rowBottom);
+
+    // --- Estado inicial para controlar el botón Reset ---
+    const initial = {
+      value: inputValue.value, // "0"
+      unit: selectUnit.value   // "dH"
+    };
+
+    function setResetEnabled(enabled) {
+      btnReset.disabled = !enabled;
+    }
+
+    function checkDirty() {
+      const dirty = (inputValue.value !== initial.value) || (selectUnit.value !== initial.unit);
+      setResetEnabled(dirty);
+    }
+
+    // --- Conversión ---
+    function convertAll() {
+      const val = parseFloat(inputValue.value);
+      if (!Number.isFinite(val)) return;
+
+      // a base (mmol/L)
+      const mmol = val * (factorsToBase[selectUnit.value] || 1);
+
+      r_mmol.out.value = String(round(mmol));
+      r_ppm.out.value  = String(round(mmol * factorsFromBase['ppm']));
+      r_dH.out.value   = String(round(mmol * factorsFromBase['dH']));
+      r_fH.out.value   = String(round(mmol * factorsFromBase['°fH']));
+    }
+
+    // --- Eventos ---
+    // Cálculo automático al cambiar valor/unidad + habilitar Reset si hay cambios
+    inputValue.addEventListener('input', () => { convertAll(); checkDirty(); });
+    selectUnit.addEventListener('change', () => { convertAll(); checkDirty(); });
+
+    // Botón Calcular (recalcula a demanda)
+    btnCalc.addEventListener('click', () => {
+      convertAll();
+      checkDirty(); // por si algo quedó fuera de sync
     });
 
-    $btnReset.disabled = ($value.value.trim() === '');
+    // Botón Reset (restaura y deshabilita)
+    btnReset.addEventListener('click', () => {
+      inputValue.value = initial.value;
+      selectUnit.value = initial.unit;
+      convertAll();
+      setResetEnabled(false);
+    });
+
+    // Primer cálculo
+    convertAll();
   }
 
-  function resetAll() {
-    $value.value = '';
-    $unit.value = 'ppm';
-    buildOutputs();
-    recalc();
-    $btnReset.disabled = true;
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', build);
+  } else {
+    build();
   }
-
-  // Eventos
-  $value.addEventListener('input', recalc);
-  $unit.addEventListener('change', recalc);
-  $btnCalc.addEventListener('click', recalc);
-  $btnReset.addEventListener('click', resetAll);
-
-  // Estado inicial
-  buildOutputs();
-  $unit.value = 'ppm';
-  $value.value = '0';
-  recalc();
-
-  window.__CDD_OK__ = true;
 })();
