@@ -149,7 +149,7 @@ body {
 .menu .menu-item > a:hover,
 .menu .menu-item > a:focus-visible { color: var(--fg); outline: none; background: var(--menu-hover-bg); }
 .menu .menu-item > a.is-active { background: var(--menu-active-bg); color: var(--fg); }
-.menu .menu-item > a::after{
+.menu .menu-item.has-children > a::after{
   content: "▸";
   position: absolute;
   right: 10px; top: 50%;
