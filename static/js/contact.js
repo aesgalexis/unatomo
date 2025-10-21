@@ -63,15 +63,15 @@
       <!-- Lateral con info (editable) -->
       <aside class="contact-aside" aria-label="Información de contacto">
         <h3>Atención comercial</h3>
-        <p>Respondemos normalmente en 24–48h laborables.</p>
+        <p>Respondemos en 24-48h laborables.</p>
         <ul>
-          <li><strong>Email:</strong> <a href="mailto:hola@unatomo.com">hola@unatomo.com</a></li>
+          <li><strong>Email:</strong> <a href="mailto:info@unatomo.com">hola@unatomo.com</a></li>
           <li><strong>Teléfono:</strong> <a href="tel:+34871252049">+34 871 252 049</a></li>
         </ul>
         <h3>Horarios</h3>
         <ul>
-          <li>L–V · 9:00–18:00 CET</li>
-          <li>Sábados · Solo urgencias</li>
+          <li>L-V · 9:00-18:00 CET</li>
+        
         </ul>
       </aside>
     </div>
