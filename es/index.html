@@ -1,1 +1,350 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>unatomo core</title>
+  <link rel="preload" href=".assets/logo-unatomo-v1.5.svg" as="image" />
+  <link rel="stylesheet" href=".assets/core-styles.css" />
+  <meta name="color-scheme" content="light dark" />
+</head>
+<body>
 
+<!-- Botón tema (pill) -->
+<button id="themeToggle" class="theme-toggle" type="button" aria-label="Cambiar tema" title="Cambiar tema">
+  <span class="icon" aria-hidden="true">🌙</span>
+  <span class="label">Light</span>
+</button>
+
+<div class="atom-tint" aria-hidden="true"></div>
+
+<aside class="sidebar" role="navigation" aria-label="Navegación principal">
+  <!-- Logo: ir a Bienvenidos -->
+  <a class="brand" href="#home" data-section="home">
+    <img src="./logo-unatomo-v1.5.svg" alt="unatomo core logo" width="384" height="384" />
+  </a>
+
+  <nav class="menu" id="sidebar-menu">
+  <!-- Nivel 1: Inicio -->
+  <div class="menu-item" data-key="seccion-1">
+    <a href="#seccion-1" data-section="seccion-1" aria-current="page">Inicio</a>
+  </div>
+
+  <!-- Nivel 1: Servicios (mantengo data-key='servicios' para tu JS de acordeón) -->
+  <div class="menu-item has-children" data-key="servicios">
+    <a href="#seccion-2" data-section="seccion-2">Servicios</a>
+
+    <!-- Nivel 2: categorías (texto) -->
+    <div class="submenu lvl2" aria-label="Servicios">
+      <!-- Cada grupo representa una subsección de Servicios y anida el lvl3 -->
+      <div class="submenu-group" data-key="seccion_lvl2-1">
+        <a class="lvl2-link" href="#seccion_lvl2-1" data-section="seccion_lvl2-1">Asesoría</a>
+        <div class="submenu lvl3"></div>
+      </div>
+
+      <div class="submenu-group" data-key="seccion_lvl2-2">
+        <a class="lvl2-link" href="#seccion_lvl2-2" data-section="seccion_lvl2-2">Optimización de procesos</a>
+        <div class="submenu lvl3"></div>
+      </div>
+
+      <div class="submenu-group" data-key="seccion_lvl2-3">
+        <a class="lvl2-link" href="#seccion_lvl2-3" data-section="seccion_lvl2-3">Control de producción</a>
+        <div class="submenu lvl3"></div>
+      </div>
+
+      <div class="submenu-group" data-key="seccion_lvl2-4">
+        <a class="lvl2-link" href="#seccion_lvl2-4" data-section="seccion_lvl2-4">Mantenimiento</a>
+        <div class="submenu lvl3"></div>
+      </div>
+
+      <div class="submenu-group" data-key="seccion_lvl2-5">
+        <a class="lvl2-link" href="#seccion_lvl2-5" data-section="seccion_lvl2-5">Asistencia técnica</a>
+        <div class="submenu lvl3"></div>
+      </div>
+
+      <div class="submenu-group" data-key="seccion_lvl2-6">
+        <a class="lvl2-link" href="#seccion_lvl2-6" data-section="seccion_lvl2-6">Formación</a>
+        <div class="submenu lvl3"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Nivel 1: Herramientas -->
+  <div class="menu-item" data-key="seccion-3">
+    <a href="#seccion-3" data-section="seccion-3">Herramientas</a>
+  </div>
+
+  <!-- Nivel 1: Venta de maquinaria -->
+  <div class="menu-item" data-key="seccion-4">
+    <a href="#seccion-4" data-section="seccion-4">Venta de maquinaria</a>
+  </div>
+
+  <!-- Nivel 1: Socios y colaboradores -->
+  <div class="menu-item" data-key="seccion-5">
+    <a href="#seccion-5" data-section="seccion-5">Socios y colaboradores</a>
+  </div>
+
+  <!-- Nivel 1: Alcance -->
+  <div class="menu-item" data-key="seccion-6">
+    <a href="#seccion-6" data-section="seccion-6">Alcance</a>
+  </div>
+
+  <!-- Nivel 1: Contacto -->
+  <div class="menu-item" data-key="seccion-7">
+    <a href="#seccion-7" data-section="seccion-7">Contacto</a>
+  </div>
+
+  <!-- Nivel 1: Aviso legal -->
+  <div class="menu-item" data-key="seccion-8">
+    <a href="#seccion-8" data-section="seccion-8">Aviso legal</a>
+  </div>
+
+  <!-- Nivel 1: Créditos -->
+  <div class="menu-item" data-key="seccion-9">
+    <a href="#seccion-9" data-section="seccion-9">Créditos</a>
+  </div>
+</nav>
+
+</aside>
+
+<main id="app" class="content" tabindex="-1">
+  <!-- Sección 1: Inicio -->
+  <section id="section-seccion-1" data-section="seccion-1" class="section is-active">
+    <h2>Inicio</h2>
+    <h3 id="seccion_lvl3-1-sobre-nosotros">Sobre nosotros</h3>
+    <p><strong>Your process, our insight.</strong></p>
+    
+      <p>Somos una empresa fundada en Mallorca, especializada en soluciones aplicadas y consultoría de alto nivel para entornos de lavandería 
+      industrial. Ofrecemos nuestros servicios en lavanderías de casi toda Europa, y algunos países de América.</p> <p>Desarrollamos e implementamos soluciones de todo tipo para mejorar la operatividad, productividad 
+      y rentabilidad de nuestros clientes. Ayudamos a que su lavandería funcione mejor, con cambios estratégicos aplicados y resultados tangibles.</p> <p>Nos abalan casi 20 años de experiencia directa en entornos de 
+      lavandería industrial, siendo impulsores directos de cambios y mejoras en lavanderías industriales a día de hoy lideres y referentes en el sector. Nuestro mayor impulsor es la pasión que sentimos, y principalmente
+      yo, por lo que hacemos. Realmente disfrutamos ajustando un pliegue, eso hace que los resultados además de positivos sean excelentes y duraderos.</p> <p>Colaboramos estrechamente con fabricantes del sector, y 
+      contamos con el apoyo y la colaboración de una red de técnicos por toda España, siempre disponibles a cruzar fronteras si es preciso. Esto nos da el respaldo y la fortaleza de saber que no estamos solos, y 
+      nuestro objetivo, es que nuestros clientes tampoco.</p>
+  </section>
+
+  <!-- Sección 2: Servicios (contenedor semántico opcional) -->
+  <section id="section-seccion-2" data-section="seccion-2" class="section" hidden>
+    <h2>Servicios</h2>
+    <p>Selecciona una categoría en el menú.</p>
+  </section>
+
+  <!-- Nivel 2: Servicios / Asesoría -->
+  <section id="section-seccion_lvl2-1" data-section="seccion_lvl2-1" class="section">
+    <h2>Asesoría</h2>
+      <p>Somos conscientes de que las lavanderías son ecosistemas en sí mismos y no se trata de realizar cambios bruscos ni forzados en ninguna de las áreas. Somos conscientes de que los clientes tienen sus expectativas 
+      particulares y que lo que cada cliente espera no necesariamente es igual que el resto. Y somos muy conscientes de que la mayoría de las lavanderías ofrecen un servicio individualizado, lo cual las convierte en 
+      sistemas más complejos si cabe.
+      <br>
+      No obstante, en general hay muchas mejoras en todas las áreas que son comunes y aplicables, con resultados positivos tangibles y sin desbaratar el ecosistema. Esa es nuestra apuesta de asesoría: no se trata de cambiar 
+      lo que hay establecido, se trata de hilar fino y mejorar todos aquellos aspectos que pueden mejorar.</p>
+
+    <h3 id="seccion_lvl3-1-asesoria-tecnica">Asesoría técnica</h3>
+      <p>En nuestra asesoría técnica partimos de un análisis exhaustivo de las instalaciones: inventariamos los equipos e identificamos los puntos críticos. Con esta base, proponemos acciones concretas para mejorar 
+      la fiabilidad, reducir paradas no programadas y alargar la vida útil de la maquinaria. Ofrecemos una idea clara de las intervenciones necesarias a corto y medio plazo.
+      <br>
+      También acompañamos la implantación de protocolos sencillos para el correcto desempeño de la maquinaria: ajustes de parámetros, calibraciones, planes de mantenimiento preventivo, recogida de datos y respaldos de 
+      parámetros entre otros. El objetivo principal de la asesoría técnica es que el equipo técnico gane en control y predictibilidad, consiguiendo menos incidencias, más continuidad operativa y un criterio para la 
+      toma de decisiones que permita aprender y mejorar con el paso del tiempo.
+      </p>
+
+    <h3 id="seccion_lvl3-2-asesoria-procesos">Asesoría de procesos</h3>
+      <p>La asesoría de procesos se centra en las máquinas como un conjunto y su capacidad de producción. Analizamos el ciclo completo de la ropa, desde la entrada en el tunel hasta su expedición, para identificar 
+      posibles mejoras o problemas como cuellos de botella. Aportamos mejoras concretas que a menudo se traducen en mayor productividad y reducción de costes.</p>
+
+    <h3 id="seccion_lvl3-3-asesoria-operativa">Asesoría operativa</h3>
+      <p>La asesoría operativa pone el foco en las personas, los puestos y la dinámica del día a día. Analizamos los flujos de trabajo para eliminar esperas y equilibrar cargas, transformando el rendimiento sin necesidad 
+      de grandes inversiones. Ayudamos a que el personal operativo sepa qué hacer, cómo hacerlo y en qué orden.
+
+      Podemos trabajar en la implementación de rutinas de control (arranques y finales de turno) que garantizan que las mejoras conseguidas se mantengan en el tiempo. Apostamos por un buen flujo entre la recepción, el lavado, 
+      el planchado y la expedición. El resultado que se busca es una operativa más ágil y dinámica, que conlleva inevitablemente una mejora en la productividad.
+      </p>
+    
+   <h3 id="seccion_lvl3-4-asesoria-compra">Asesoría compra de maquinaria</h3>
+    
+
+   <p>Podemos asesorar y ayudar con la adquisición de maquinaria tanto nueva como de segunda mano. En el caso de la maquinaria nueva, podemos comparar ofertas y realizar informes comparativos independientes 
+    con recomendaciones fundamentadas dependiendo de las necesidades puntuales que se tengan.
+<br>
+  En el caso de la maquinaria usada, podemos hacer revisiones en profundidad para garantizar que la adquisición cumpla con todas las expectativas.</p>
+
+  </section>
+
+  <!-- Nivel 2: Servicios / Optimización de procesos -->
+  <section id="section-seccion_lvl2-2" data-section="seccion_lvl2-2" class="section">
+    <h2>Optimización de procesos</h2>
+    <h3 id="seccion_lvl3-1-optimizacion-intro">Que las máquinas rindan lo que pueden</h3>
+    <p>Texto…</p>
+    <!-- añade más h3 si quieres más subapartados -->
+  </section>
+
+  <!-- Nivel 2: Servicios / Control de producción -->
+  <section id="section-seccion_lvl2-3" data-section="seccion_lvl2-3" class="section">
+    <h2>Control de producción</h2>
+    <p>Texto…</p>
+  </section>
+
+  <!-- Nivel 2: Servicios / Mantenimiento -->
+  <section id="section-seccion_lvl2-4" data-section="seccion_lvl2-4" class="section">
+    <h2>Mantenimiento</h2>
+    <p>Texto…</p>
+  </section>
+
+  <!-- Nivel 2: Servicios / Asistencia técnica -->
+  <section id="section-seccion_lvl2-5" data-section="seccion_lvl2-5" class="section">
+    <h2>Asistencia técnica</h2>
+    <p>Texto…</p>
+  </section>
+
+  <!-- Nivel 2: Servicios / Formación -->
+  <section id="section-seccion_lvl2-6" data-section="seccion_lvl2-6" class="section">
+    <h2>Formación</h2>
+
+    <h3 id="seccion_lvl3-1-formacion-operarios">Formación de operarios</h3>
+    <p>Texto…</p>
+
+    <h3 id="seccion_lvl3-2-formacion-tecnicos">Formación de equipos técnicos</h3>
+    <p>Texto…</p>
+  </section>
+
+  <!-- Sección 3: Herramientas -->
+  <section id="section-seccion-3" data-section="seccion-3" class="section">
+    <h2>Herramientas</h2>
+    <p>Texto…</p>
+  </section>
+
+  <!-- Sección 4: Venta de maquinaria -->
+  <section id="section-seccion-4" data-section="seccion-4" class="section">
+    <h2>Venta de maquinaria</h2>
+    <p>Texto…</p>
+  </section>
+
+  <!-- Sección 5: Socios y colaboradores -->
+  <section id="section-seccion-5" data-section="seccion-5" class="section">
+    <h2>Socios y colaboradores</h2>
+    <p>Texto…</p>
+  </section>
+
+  <!-- Sección 6: Alcance -->
+  <section id="section-seccion-6" data-section="seccion-6" class="section">
+    <h2>Alcance</h2>
+    <p>Texto…</p>
+  </section>
+
+  <!-- Sección 7: Contacto -->
+  <section id="section-seccion-7" data-section="seccion-7" class="section">
+    <h2>Contacto</h2>
+    <p>Texto…</p>
+  </section>
+
+  <!-- Sección 8: Aviso legal -->
+  <section id="section-seccion-8" data-section="seccion-8" class="section">
+    <h2>Aviso legal</h2>
+    <p>Texto…</p>
+  </section>
+
+  <!-- Sección 9: Créditos -->
+  <section id="section-seccion-9" data-section="seccion-9" class="section">
+    <h2>Créditos</h2>
+    <p>Texto…</p>
+  </section>
+</main>
+<footer id="site-footer" role="contentinfo" aria-label="Pie de página">
+  <div class="footer-wrap">
+    <!-- TOP: izquierda (marca + claim + newsletter) | derecha (4 columnas) -->
+    <div class="footer-top two-col">
+      <!-- Izquierda -->
+      <div class="footer-left">
+        <h2 class="footer-brand-title">unatomo core</h2>
+        <p class="footer-claim">Your process, our insight.</p>
+
+        <form class="footer-newsletter" action="#" method="post" aria-label="Suscripción al boletín" onsubmit="return false;">
+          <label for="nl-email" class="nl-label">Suscríbete para mantenerte actualizado:</label>
+          <div class="nl-row">
+            <input id="nl-email" class="nl-input" type="email" name="email" placeholder="tu@correo.com" required
+                   autocomplete="email" inputmode="email" />
+            <button class="nl-btn" type="submit">Suscribirme</button>
+          </div>
+        
+        </form>
+      </div>
+
+      <!-- Derecha -->
+      <div class="footer-right">
+        <div class="footer-grid" role="navigation" aria-label="Enlaces del sitio">
+          <div class="footer-col">
+            <h3 class="footer-title">Servicios</h3>
+            <ul class="footer-links">
+              <li><a href="#seccion-1" data-section="seccion-1">Asesoría</a></li>
+              <li><a href="#seccion-2" data-section="seccion-2">Ajustes y optimización</a></li>
+              <li><a href="#seccion-3" data-section="seccion-3">Control de producción</a></li>
+              <li><a href="#seccion-4" data-section="seccion-4">Mantenimiento</a></li>
+              <li><a href="#seccion-5" data-section="seccion-5">Asistencia técnica</a></li>
+              <li><a href="#seccion-6" data-section="seccion-6">Formación</a></li>
+            </ul>
+          </div>
+
+          <div class="footer-col">
+            <h3 class="footer-title">Compañía</h3>
+            <ul class="footer-links">
+              <li><a href="#home" data-section="home">Sobre nosotros</a></li>
+              <li><a href="#seccion-9" data-section="seccion-9">Créditos</a></li>
+              <li><a href="#seccion-8" data-section="seccion-8">Contacto</a></li>
+            </ul>
+          </div>
+
+          <div class="footer-col">
+            <h3 class="footer-title">Legal</h3>
+            <ul class="footer-links">
+              <li id="legal-privacidad"><a href="#" aria-disabled="true">Política de privacidad</a></li>
+              <li><a href="#" aria-disabled="true">Términos de servicio</a></li>
+              <li><a href="#" aria-disabled="true">Aviso legal</a></li>
+              <li><a href="#" aria-disabled="true">Cookies</a></li>
+            </ul>
+          </div>
+
+          <div class="footer-col">
+            <h3 class="footer-title">Contacto</h3>
+            <address class="footer-address">
+              UNATOMO CORE SL<br />
+              Mallorca, España<br />
+              <a href="mailto:hola@unatomo.com">hola@unatomo.com</a><br />
+              <a href="tel:+34XXXXXXXXX">+34 XXX XXX XXX</a>
+            </address>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTTOM: una sola línea centrada -->
+    <div class="footer-bottom footer-centered">
+      <p>© <span id="year-now"></span> UNATOMO CORE SL | Todos los derechos reservados</p>
+      <ul class="footer-legal-inline">
+        <li><a href="#" aria-disabled="true">Accesibilidad</a></li>
+        <li><a href="#" aria-disabled="true">Mapa del sitio</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Datos estructurados (opcional) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "UNATOMO CORE SL",
+    "url": "https://unatomo.com/",
+    "logo": "https://unatomo.com/core/logo-unatomo-v1.5.svg",
+    "contactPoint": [{
+      "@type": "ContactPoint",
+      "contactType": "customer support",
+      "email": "hola@unatomo.com",
+      "telephone": "+34-XXX-XXX-XXX",
+      "areaServed": "EU"
+    }]
+  }
+  </script>
+</footer>
+<!-- JS unificado -->
+<script type="module" src="./scripts.js"></script>
+</body>
+</html>
