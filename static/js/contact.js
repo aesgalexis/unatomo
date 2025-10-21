@@ -5,46 +5,56 @@
   root.innerHTML = `
     <div class="contact-wrap">
       <form class="contact-form" id="contact-form" novalidate>
-        <!-- Fila 1: todos en una línea -->
+        <!-- Fila 1: Nombre / Email -->
         <div class="contact-row">
           <div class="field">
             <label class="label" for="c-name">Nombre y apellidos</label>
-            <input class="input" id="c-name" name="name" type="text" placeholder="Tu nombre" autocomplete="name" required>
+            <input class="input" id="c-name" name="name" type="text" autocomplete="name" required>
           </div>
 
           <div class="field">
             <label class="label" for="c-email">Email</label>
-            <input class="input" id="c-email" name="email" type="email" placeholder="tu@correo.com" autocomplete="email" required>
-          </div>
-
-          <div class="field">
-            <label class="label" for="c-phone">Teléfono</label>
-            <input class="input" id="c-phone" name="phone" type="tel" placeholder="+34 600 000 000" inputmode="tel" autocomplete="tel">
+            <input class="input" id="c-email" name="email" type="email" autocomplete="email" required>
           </div>
         </div>
 
-        <!-- Fila 2: asunto en línea con empresa (si quieres) -->
+        <!-- Fila 2: Empresa / Teléfono (opcionales) -->
         <div class="contact-row">
           <div class="field">
             <label class="label" for="c-company">Empresa (opcional)</label>
-            <input class="input" id="c-company" name="company" type="text" placeholder="Nombre de la empresa">
+            <input class="input" id="c-company" name="company" type="text" autocomplete="organization">
           </div>
 
           <div class="field">
-            <label class="label" for="c-subject">Asunto</label>
-            <input class="input" id="c-subject" name="subject" type="text" placeholder="¿Sobre qué necesitas ayuda?" required>
+            <label class="label" for="c-phone">Teléfono (opcional)</label>
+            <input class="input" id="c-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel">
           </div>
         </div>
 
-        <!-- Fila 3: mensaje -->
+        <!-- Fila 3: Asunto (select) -->
+        <div class="contact-row">
+          <div class="field">
+            <label class="label" for="c-subject">Asunto</label>
+            <select class="select" id="c-subject" name="subject" required>
+              <option value="" disabled selected>Selecciona una opción</option>
+              <option value="consulta-general">Consulta general</option>
+              <option value="presupuesto">Solicitud de presupuesto</option>
+              <option value="soporte-tecnico">Soporte técnico</option>
+              <option value="colaboracion">Colaboración / Partners</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Fila 4: Mensaje -->
         <div class="contact-row">
           <div class="field" style="min-width:100%;">
             <label class="label" for="c-message">Mensaje</label>
-            <textarea class="textarea" id="c-message" name="message" placeholder="Cuéntanos brevemente..." required></textarea>
+            <textarea class="textarea" id="c-message" name="message" required></textarea>
           </div>
         </div>
 
-        <!-- Fila 4: enviar -->
+        <!-- Fila 5: Enviar -->
         <div class="contact-row">
           <button class="btn-submit" type="submit">Enviar</button>
         </div>
@@ -67,7 +77,7 @@
     </div>
   `;
 
-  // Validación mínima + demo de envío (sustituye por tu integración)
+  // Validación básica + demo de envío
   root.querySelector('#contact-form')?.addEventListener('submit', (e) => {
     e.preventDefault();
     const form = e.currentTarget;
@@ -75,8 +85,7 @@
       form.reportValidity();
       return;
     }
-    // Aquí conectarías con tu endpoint (fetch) o mailto:
-    // fetch('/api/contact', { method:'POST', body: new FormData(form) })
+    // Sustituir por tu integración real (fetch a tu endpoint, etc.)
     alert('¡Mensaje enviado! (demo)');
     form.reset();
   });
