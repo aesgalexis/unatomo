@@ -14,7 +14,7 @@
   const lvl2Links = level2Groups.map(g => g.querySelector(':scope > a.lvl2-link[data-section]')).filter(Boolean);
 
   // Estado de apertura
-  let openKey = 'home';          // top-level abierto (home/servicios/…)
+  let openKey = 'seccion-1';     // top-level abierto por defecto (Inicio)
   let openSecondKey = null;      // si openKey === 'servicios': seccion_lvl2-…
 
   // Utils
@@ -44,14 +44,12 @@
     parent.removeChild(el);
   }
 
-  // --- Colapsar todo al inicio para evitar flash abierto y clases duras ---
+  // --- Colapsar todo al inicio para evitar flash ---
   (function preCollapse() {
-    // quita 'is-open' hardcodeadas del HTML
     topItems.forEach(mi => mi.classList.remove('is-open'));
     level2Groups.forEach(g => g.classList.remove('is-open'));
     menuRoot.querySelectorAll('.is-active').forEach(el => el.classList.remove('is-active'));
-     
-    // oculta lvl2 y todos los lvl3
+
     const lvl2 = servicesItem?.querySelector('.submenu.lvl2');
     if (lvl2) { lvl2.hidden = true; lvl2.style.display = 'none'; }
     level2Groups.forEach(g => {
@@ -66,9 +64,7 @@
     topAnchors.forEach(a => a.classList.remove('is-active'));
     lvl2Links.forEach(a => a.classList.remove('is-active'));
 
-    // ⬇️ cambio: nivel 2 ahora es seccion_lvl2-n
     const isLv2 = /^seccion_lvl2-\d+$/.test(sectionKey);
-
     if (isLv2) {
       servicesItem?.querySelector(':scope > a[data-section]')?.classList.add('is-active');
       lvl2Links.find(a => a.dataset.section === sectionKey)?.classList.add('is-active');
@@ -80,12 +76,12 @@
 
   // Acordeones (estado visual)
   function updateOpenVisual() {
-    topItems.forEach(mi => mi.classList.toggle('is-open', mi.dataset.key === openKey));
+    topItems.forEach(mi => mi.classList.toggle('is-open', mi?.dataset?.key === openKey));
     level2Groups.forEach(g => g.classList.toggle('is-open', g.dataset.key === openSecondKey));
     updateMenuVisibility();
   }
 
-  // Visibilidad real (robusta): usa hidden + style.display para evitar overrides
+  // Visibilidad real
   function setDisplay(el, visible) {
     if (!el) return;
     el.hidden = !visible;
@@ -116,7 +112,6 @@
   function setOpen(nextKey) {
     const prev = openKey;
     openKey = nextKey;
-    // si abrimos Servicios sin grupo, asegúrate de que lvl3 estén cerrados
     if (openKey === 'servicios' && !openSecondKey) level2Groups.forEach(g => setDisplay(g.querySelector('.submenu.lvl3'), false));
     updateOpenVisual();
 
@@ -164,7 +159,7 @@
           ensureId(targetEl, 'tagline');
 
           const a = document.createElement('a');
-          a.href = `#${key}`;
+          a.href = '#'; // accesible, pero no cambia URL
           a.dataset.section = key;
           a.dataset.target = targetEl.id;
           a.textContent = label;
@@ -172,7 +167,6 @@
           a.addEventListener('click', (e) => {
             e.preventDefault();
             if (!section.classList.contains('is-active')) {
-              
               activate(key);
             }
             box.querySelectorAll('a').forEach(x => x.classList.toggle('is-sub-active', x === a));
@@ -206,7 +200,7 @@
         ensureId(h, `sub-${idx + 1}`);
 
         const a = document.createElement('a');
-        a.href = `#${key}`;
+        a.href = '#'; // no cambia URL
         a.dataset.section = key;
         a.dataset.target = h.id;
         a.textContent = (h.textContent || '').trim();
@@ -214,7 +208,6 @@
         a.addEventListener('click', (e) => {
           e.preventDefault();
           if (!section.classList.contains('is-active')) {
-            history.pushState({ key }, '', `#${key}`);
             activate(key);
           }
 
@@ -253,25 +246,22 @@
       const a = mi.querySelector(':scope > a[data-section]');
       if (!a) return;
       const key = a.dataset.section;
-      const isServices = mi.dataset.key === 'servicios'; // ⬅️ robusto
+      const isServices = mi.dataset.key === 'servicios';
 
       a.addEventListener('click', (e) => {
         e.preventDefault();
 
         if (isServices) {
           const willClose = openKey === 'servicios';
-          // toggle Servicios; si lo abrimos, lvl2 visible y lvl3 cerrados
           setOpen(willClose ? null : 'servicios');
-          if (!willClose) {
-            setOpenSecond(null); // categorías empiezan cerradas
-          }
+          if (!willClose) setOpenSecond(null);
           return;
         }
 
-        // Resto de top-level: navegar directamente
-        history.pushState({ key, from: 'top' }, '', `#${key}`);
+        // Resto de top-level: navegar internamente SIN tocar la URL
         activate(key);
         setOpen(key);
+        setOpenSecond(null);
         scrollToTop();
       });
     });
@@ -287,14 +277,11 @@
       link.addEventListener('click', (e) => {
         e.preventDefault();
 
-        // Toggle del grupo
         if (openSecondKey === key) {
-          setOpenSecond(null);           // cerrar si ya estaba abierto
+          setOpenSecond(null);
           return;
         }
 
-        // Abrir este grupo y navegar a su sección
-        history.pushState({ key, from: 'top' }, '', `#${key}`);
         activate(key);
         setOpen('servicios');
         setOpenSecond(key);
@@ -303,80 +290,30 @@
     });
   }
 
-  // Logo → home
+  // Logo → Inicio (seccion-1)
   brand?.addEventListener('click', (e) => {
     e.preventDefault();
-    const key = 'home';
-    history.pushState({ key, from: 'top' }, '', `#${key}`);
+    const key = 'seccion-1';
     activate(key);
-    setOpen('home');
+    setOpen(key);
+    setOpenSecond(null);
     scrollToTop();
   });
 
-  // Arranque
-  const initialKey = 'home';
-const fromHash = (location.hash || `#${initialKey}`).slice(1);
-const valid = sections.some(s => s.dataset.section === fromHash);
-const rawStart = valid ? fromHash : initialKey;
+  // Arranque simple: ignora location.hash y empieza en Inicio
+  const startKey = 'seccion-1';
 
-// Normaliza: si el hash es el contenedor de Servicios (seccion-2), empezamos en home
-const startKey = (rawStart === 'seccion-2') ? 'home' : rawStart;
+  buildSubmenus();
+  wireTopLevel();
+  wireLevel2();
+  activate(startKey);
 
-if (startKey !== fromHash) {
-  history.replaceState({ key: startKey }, '', `#${startKey}`);
-}
-
-buildSubmenus();
-wireTopLevel();
-wireLevel2();
-activate(startKey);
-
-  // ⬇️ cambio: detección de nivel 2 por patrón seccion_lvl2-…
   if (/^seccion_lvl2-\d+$/.test(startKey)) {
     setOpen('servicios');
     setOpenSecond(startKey);
   } else {
-    setOpen(startKey); // home / seccion-3..9, etc.
+    setOpen(startKey);
     setOpenSecond(null);
   }
-  updateMenuVisibility(); // estado visual inicial robusto
-
-  // Back/forward
-  window.addEventListener('popstate', () => {
-    const key = (location.hash || '#home').slice(1);
-    activate(key);
-
-    if (/^seccion_lvl2-\d+$/.test(key)) {
-      setOpen('servicios');
-      setOpenSecond(key);
-    } else {
-      setOpen(key);
-      setOpenSecond(null);
-    }
-
-    updateMenuVisibility();
-    scrollToTop();
-  });
+  updateMenuVisibility(); // estado visual inicial
 })();
-
-/* ===========================
-   3) Footer: carga diferida
-   =========================== */
-(() => {
-  const y = document.getElementById('year-now');
-  if (y) y.textContent = String(new Date().getFullYear());
-
-  // Si tienes enlaces con data-section en el footer inline:
-  document.querySelectorAll('#site-footer a[data-section]').forEach(a => {
-    a.addEventListener('click', (e) => {
-      e.preventDefault();
-      const key = a.getAttribute('data-section');
-      if (!key) return;
-      history.pushState({ key, from: 'top' }, '', `#${key}`);
-      window.dispatchEvent(new PopStateEvent('popstate'));
-      document.getElementById('app')?.focus({ preventScroll: true });
-      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-    });
-  });
-})();
-
