@@ -281,3 +281,22 @@ h2.is-highlighted, h3.is-highlighted { background: transparent !important; text-
   .menu { grid-auto-flow: row; gap: var(--space-2); }
   .content { padding-top: var(--space-6); }
 }
+/* --- Enlaces en contenido --- */
+.section a {
+  color: #3b82f6; /* azul tono limpio, similar a "tailwind blue-500" */
+  text-decoration: none;
+  transition: color 0.2s ease, text-decoration-color 0.2s ease;
+}
+
+.section a:hover,
+.section a:focus {
+  color: #2563eb; /* azul un poco más profundo al pasar el cursor */
+  text-decoration: underline;
+  text-decoration-color: currentColor;
+}
+
+/* Si quieres que los enlaces visitados tengan un tono sutilmente distinto: */
+.section a:visited {
+  color: #1e40af; /* azul más oscuro, sin romper la armonía */
+}
+
