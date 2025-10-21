@@ -8,7 +8,7 @@
   let mounted = false;
 
   const formHTML = `
-    <p>Cuéntanos qué necesitas. Te responderemos con una propuesta clara y operativa.</p>
+    
     <form id="contactForm" novalidate>
       <input type="text" name="company_website" autocomplete="off" tabindex="-1" aria-hidden="true" class="hp" placeholder="No rellenar">
 
