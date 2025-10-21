@@ -9,15 +9,15 @@
   max-width: 960px;
 }
 
-/* Grid superior: Valor | Unidad | Botón (mismo aspecto que los 4 outputs) */
+/* === Grid superior: Valor | Unidad | Calcular | Reset === */
 .cdd-controls-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(140px, 1fr));
+  grid-template-columns: repeat(4, minmax(140px, 1fr));
   gap: var(--space-2);
   margin-bottom: var(--space-3);
 }
-@media (max-width: 900px) {
-  .cdd-controls-grid { grid-template-columns: 1fr 1fr; }
+@media (max-width: 960px) {
+  .cdd-controls-grid { grid-template-columns: repeat(2, minmax(140px, 1fr)); }
 }
 @media (max-width: 520px) {
   .cdd-controls-grid { grid-template-columns: 1fr; }
@@ -33,17 +33,18 @@
   background: color-mix(in oklab, var(--bg) 96%, transparent);
   color: var(--fg);
   width: 100%;
+  font-weight: 500;
 }
 .cdd-input:focus-visible, .cdd-select:focus-visible, .cdd-btn:focus-visible {
   outline: 2px dashed #94a3b8; outline-offset: 3px;
 }
 
-/* Ocultar los “steppers” del input number para que quede limpio */
+/* Quitar los steppers de los inputs numéricos */
 .cdd-input[type="number"]::-webkit-outer-spin-button,
 .cdd-input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .cdd-input[type="number"] { -moz-appearance: textfield; }
 
-/* Botón verde estilo “commit” (y full width en móvil) */
+/* === Botones === */
 .cdd-btn {
   align-self: end;
   padding: 10px 14px;
@@ -51,7 +52,7 @@
   border: 1px solid #2ea44f;
   background: #2ea44f;
   color: #fff;
-  font-weight: 800;
+  font-weight: 700;
   cursor: pointer;
   transition: background .12s ease, border-color .12s ease, transform .04s ease;
 }
@@ -62,7 +63,14 @@
   .cdd-btn { width: 100%; }
 }
 
-/* Resultados: 4 recuadros en línea (readonly), responsive */
+/* Botón Reset (rojo sutil) */
+.cdd-btn-reset {
+  background: #d73a49;
+  border-color: #d73a49;
+}
+.cdd-btn-reset:hover { background: #b92533; border-color: #b92533; }
+
+/* === Resultados === */
 .cdd-results-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(140px, 1fr));
@@ -75,16 +83,9 @@
   .cdd-results-grid { grid-template-columns: 1fr; }
 }
 
-/* Apariencia de “solo lectura” para los 4 recuadros */
 .cdd-ro .cdd-readonly {
   background: color-mix(in oklab, var(--bg) 98%, transparent);
   cursor: default;
   pointer-events: none;
-  font-weight: 800;
-}
-
-/* Accesibilidad */
-.sr-only {
-  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
-  overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  font-weight: 500;
 }
