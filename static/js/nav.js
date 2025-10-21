@@ -1,9 +1,3 @@
-// scripts.js (ES module)
-
-
-/* =========================================
-   2) Navegación, submenús y resaltados (UI)
-   ========================================= */
 (() => {
   'use strict';
   const app = document.getElementById('app');
