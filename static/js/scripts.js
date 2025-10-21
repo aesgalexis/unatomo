@@ -411,36 +411,21 @@ activate(startKey);
 /* ===========================
    3) Footer: carga diferida
    =========================== */
-(async () => {
-  try {
-    const r = await fetch('./footer.html', { cache: 'no-cache' });
-    if (!r.ok) throw new Error('No se pudo cargar el footer');
-    const html = await r.text();
+(() => {
+  const y = document.getElementById('year-now');
+  if (y) y.textContent = String(new Date().getFullYear());
 
-    const temp = document.createElement('div');
-    temp.innerHTML = html.trim();
-    const footerEl = temp.querySelector('#site-footer');
-    if (footerEl) document.body.appendChild(footerEl);
-
-    // Año dinámico
-    footerEl?.querySelector('#year-now')?.replaceChildren(document.createTextNode(String(new Date().getFullYear())));
-
-    // Enlaces del footer -> SPA + arriba
-    footerEl?.querySelectorAll('a[data-section]').forEach(a => {
-      a.addEventListener('click', (e) => {
-        e.preventDefault();
-        const key = a.getAttribute('data-section');
-        if (!key) return;
-
-        history.pushState({ key, from: 'top' }, '', `#${key}`);
-        window.dispatchEvent(new PopStateEvent('popstate'));
-
-        document.getElementById('app')?.focus({ preventScroll: true });
-        window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-      });
+  // Si tienes enlaces con data-section en el footer inline:
+  document.querySelectorAll('#site-footer a[data-section]').forEach(a => {
+    a.addEventListener('click', (e) => {
+      e.preventDefault();
+      const key = a.getAttribute('data-section');
+      if (!key) return;
+      history.pushState({ key, from: 'top' }, '', `#${key}`);
+      window.dispatchEvent(new PopStateEvent('popstate'));
+      document.getElementById('app')?.focus({ preventScroll: true });
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
     });
-
-  } catch (err) {
-    console.warn('[footer] carga diferida falló:', err);
-  }
+  });
 })();
+
