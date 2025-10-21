@@ -97,21 +97,29 @@
   </div>
 
   <!-- Nivel 1: Aviso legal -->
-  <div class="menu-item" data-key="seccion-8">
-    <a href="#seccion-8" data-section="seccion-8">Aviso legal</a>
-    <div class="submenu-group" data-key="seccion_lvl2-1">
-        <a class="lvl2-link" href="#seccion_lvl2-1" data-section="seccion_lvl2-1">Aviso Legal</a>
-        <div class="submenu lvl3"></div>
-      </div>
-    <div class="submenu-group" data-key="seccion_lvl2-1">
-        <a class="lvl2-link" href="#seccion_lvl2-1" data-section="seccion_lvl2-2">Política de Privacidad</a>
-        <div class="submenu lvl3"></div>
-      </div>
-    <div class="submenu-group" data-key="seccion_lvl2-1">
-        <a class="lvl2-link" href="#seccion_lvl2-1" data-section="seccion_lvl2-3">Cookies</a>
-        <div class="submenu lvl3"></div>
-      </div>
+  <div class="menu-item has-children" data-key="seccion-8">
+  <a href="#seccion-8" data-section="seccion-8">Aviso legal</a>
+
+  <div class="submenu lvl2" aria-label="Aviso legal">
+    <div class="submenu-group" data-key="legal-aviso">
+      <a class="lvl2-link" href="#legal-aviso"
+         data-section="seccion-8" data-target="legal-aviso">Aviso legal</a>
+      <div class="submenu lvl3"></div>
+    </div>
+
+    <div class="submenu-group" data-key="legal-privacidad">
+      <a class="lvl2-link" href="#legal-privacidad"
+         data-section="seccion-8" data-target="legal-privacidad">Política de privacidad</a>
+      <div class="submenu lvl3"></div>
+    </div>
+
+    <div class="submenu-group" data-key="legal-cookies">
+      <a class="lvl2-link" href="#legal-cookies"
+         data-section="seccion-8" data-target="legal-cookies">Cookies</a>
+      <div class="submenu lvl3"></div>
+    </div>
   </div>
+</div>
 
   <!-- Nivel 1: Créditos -->
   <div class="menu-item" data-key="seccion-9">
