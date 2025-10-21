@@ -1,123 +1,61 @@
-/* Conversor de dureza — estilos
-   Usa variables de tu tema: --bg, --fg, --border, etc. */
+/* /static/css/tools/cdd.css  (ajusta el path según tu estructura) */
+.cdd-wrap { margin-top: var(--space-3); }
 
-.tool-cdd {
+.cdd-card {
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 16px;
+  border-radius: var(--radius);
+  padding: var(--space-4);
+  background: color-mix(in oklab, var(--bg) 95%, transparent);
+  max-width: 720px;
+}
+
+.cdd-title {
+  margin: 0 0 var(--space-3) 0;
+  font-size: clamp(18px, 2vw, 22px);
+}
+
+.cdd-row {
+  display: grid;
+  grid-template-columns: 1fr 220px;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+@media (max-width: 640px) {
+  .cdd-row { grid-template-columns: 1fr; }
+}
+
+.cdd-field { display: grid; gap: 6px; }
+.cdd-field-label { font-weight: 600; color: var(--fg); opacity: .85; }
+
+.cdd-input, .cdd-select {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
   background: color-mix(in oklab, var(--bg) 96%, transparent);
   color: var(--fg);
-  max-width: 880px;
-}
-
-.toolcdd-head h3 {
-  margin: 0 0 4px 0;
-  font-size: clamp(18px, 2.2vw, 22px);
-  line-height: 1.25;
-}
-.toolcdd-head .muted {
-  margin: 0 0 12px 0;
-  color: var(--muted);
-}
-
-.toolcdd-form {
-  display: grid;
-  gap: 14px;
-}
-
-/* Fila de entrada */
-.row.input-row {
-  display: grid;
-  gap: 10px;
-  grid-template-columns: 1fr auto auto;
-  align-items: center;
-}
-.cdd-input, .cdd-select {
-  height: 40px;
-  padding: 8px 10px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: color-mix(in oklab, var(--bg) 94%, transparent);
-  color: var(--fg);
+  width: 100%;
 }
 .cdd-input:focus-visible, .cdd-select:focus-visible {
-  outline: 2px dashed #94a3b8;
-  outline-offset: 2px;
+  outline: 2px dashed #94a3b8; outline-offset: 3px;
 }
 
-/* Resultados */
-.row.results-row {
+.cdd-results {
   display: grid;
+  grid-template-columns: repeat(2, minmax(160px, 1fr));
   gap: 10px;
 }
-.row.results-row .card {
+@media (max-width: 520px) {
+  .cdd-results { grid-template-columns: 1fr; }
+}
+
+.cdd-result {
   display: grid;
   grid-template-columns: 1fr auto;
-  align-items: center;
+  gap: 6px;
+  padding: 10px 12px;
   border: 1px dashed var(--border);
   border-radius: 10px;
-  padding: 10px;
+  background: color-mix(in oklab, var(--bg) 98%, transparent);
 }
-.row.results-row .label {
-  font-size: 12px;
-  letter-spacing: 0.02em;
-  color: var(--muted);
-}
-.row.results-row .value {
-  grid-column: 1 / -1;
-  font-weight: 800;
-  font-size: clamp(16px, 2.6vw, 22px);
-  line-height: 1.2;
-  margin-top: 2px;
-}
-
-/* Botones */
-.copy-btn,
-.btn-reset,
-.btn-copy-all {
-  height: 34px;
-  padding: 0 12px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: var(--menu-active-bg);
-  color: var(--fg);
-  font-weight: 700;
-  cursor: pointer;
-}
-.copy-btn {
-  grid-column: 2;
-  justify-self: end;
-}
-.copy-btn.is-copied,
-.btn-copy-all.is-copied {
-  filter: brightness(1.08);
-}
-
-/* Acciones inferiores */
-.row.actions-row {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-/* Responsive */
-@media (min-width: 720px) {
-  .row.results-row {
-    grid-template-columns: repeat(3, 1fr);
-  }
-  .row.results-row .card {
-    grid-template-columns: 1fr auto;
-  }
-  .row.results-row .value {
-    grid-column: 1 / 2;
-  }
-}
-
-/* Utilidades de accesibilidad */
-.sr-only {
-  position: absolute !important;
-  width: 1px; height: 1px;
-  padding: 0; margin: -1px; overflow: hidden;
-  clip: rect(0,0,0,0); white-space: nowrap; border: 0;
-}
-
+.cdd-result-label { opacity: .9; }
+.cdd-result-value { font-weight: 800; }
