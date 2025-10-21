@@ -9,7 +9,7 @@
     return;
   }
 
-  // Unidades soportadas (en el orden que mostraremos abajo)
+  // Unidades soportadas (mantenemos este orden para los resultados)
   const UNITS = [
     { key: 'fh',  label: '°fH (Franceses)' },      // 1 °fH = 10 mg/L CaCO3
     { key: 'dh',  label: '°dH (Alemanes)' },       // 1 °dH = 17.848 mg/L CaCO3
@@ -42,9 +42,7 @@
   root.classList.add('cdd-wrap');
   root.innerHTML = `
     <div class="cdd-card">
-      <h3 class="cdd-title">Conversor de dureza</h3>
-
-      <div class="cdd-row">
+      <div class="cdd-controls-grid">
         <label class="cdd-field">
           <span class="cdd-field-label">Valor</span>
           <input type="number" step="0.01" min="0" id="cdd-value" class="cdd-input" placeholder="0.00" inputmode="decimal" />
@@ -56,6 +54,11 @@
             ${UNITS.map(u => `<option value="${u.key}">${u.label}</option>`).join('')}
           </select>
         </label>
+
+        <div class="cdd-field cdd-action">
+          <span class="cdd-field-label sr-only">Calcular</span>
+          <button id="cdd-calc" type="button" class="cdd-btn">Calcular</button>
+        </div>
       </div>
 
       <div class="cdd-results-grid" id="cdd-results-grid"></div>
@@ -65,8 +68,9 @@
   const $value = root.querySelector('#cdd-value');
   const $unit  = root.querySelector('#cdd-unit');
   const $grid  = root.querySelector('#cdd-results-grid');
+  const $btn   = root.querySelector('#cdd-calc');
 
-  // Construimos los 4 recuadros (readonly)
+  // Construimos los 4 recuadros (solo lectura)
   function buildOutputs() {
     $grid.innerHTML = UNITS.map(u => `
       <label class="cdd-field cdd-ro">
@@ -89,9 +93,15 @@
     });
   }
 
-  // Eventos
+  // Eventos (auto y botón-manual)
   $value.addEventListener('input', recalc);
   $unit.addEventListener('change', recalc);
+  $btn.addEventListener('click', () => {
+    recalc();
+    // feedback sutil
+    $btn.disabled = true;
+    setTimeout(() => { $btn.disabled = false; }, 180);
+  });
 
   // Estado inicial: 0 en ppm
   buildOutputs();
@@ -99,7 +109,6 @@
   $value.value = '0';
   recalc();
 
-  // Bandera de diagnóstico
+  // Señal para depurar
   window.__CDD_OK__ = true;
-  console.info('[CDD] Conversor listo.');
 })();
