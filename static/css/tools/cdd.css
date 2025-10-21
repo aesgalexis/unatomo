@@ -1,4 +1,4 @@
-/* /static/css/tools/cdd.css  (ajusta el path según tu estructura) */
+/* /static/css/tools/cdd.css */
 .cdd-wrap { margin-top: var(--space-3); }
 
 .cdd-card {
@@ -6,17 +6,19 @@
   border-radius: var(--radius);
   padding: var(--space-4);
   background: color-mix(in oklab, var(--bg) 95%, transparent);
-  max-width: 720px;
+  max-width: 960px;
 }
 
 .cdd-title {
   margin: 0 0 var(--space-3) 0;
+  font-weight: 800;
   font-size: clamp(18px, 2vw, 22px);
+  line-height: 1.25;
 }
 
 .cdd-row {
   display: grid;
-  grid-template-columns: 1fr 220px;
+  grid-template-columns: 1fr 260px;
   gap: var(--space-3);
   margin-bottom: var(--space-3);
 }
@@ -25,7 +27,7 @@
 }
 
 .cdd-field { display: grid; gap: 6px; }
-.cdd-field-label { font-weight: 600; color: var(--fg); opacity: .85; }
+.cdd-field-label { font-weight: 700; color: var(--fg); }
 
 .cdd-input, .cdd-select {
   padding: 10px 12px;
@@ -39,23 +41,22 @@
   outline: 2px dashed #94a3b8; outline-offset: 3px;
 }
 
-.cdd-results {
+.cdd-results-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(160px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(4, minmax(140px, 1fr));
+  gap: var(--space-2);
+}
+@media (max-width: 960px) {
+  .cdd-results-grid { grid-template-columns: repeat(2, minmax(140px, 1fr)); }
 }
 @media (max-width: 520px) {
-  .cdd-results { grid-template-columns: 1fr; }
+  .cdd-results-grid { grid-template-columns: 1fr; }
 }
 
-.cdd-result {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 6px;
-  padding: 10px 12px;
-  border: 1px dashed var(--border);
-  border-radius: 10px;
+/* Apariencia de "solo lectura" para los 4 recuadros */
+.cdd-ro .cdd-readonly {
   background: color-mix(in oklab, var(--bg) 98%, transparent);
+  cursor: default;
+  pointer-events: none;
+  font-weight: 800;
 }
-.cdd-result-label { opacity: .9; }
-.cdd-result-value { font-weight: 800; }
