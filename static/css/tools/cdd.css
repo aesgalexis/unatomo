@@ -63,12 +63,18 @@
   .cdd-btn { width: 100%; }
 }
 
-/* Botón Reset (rojo sutil) */
+/* Botón Reset */
 .cdd-btn-reset {
-  background: #d73a49;
-  border-color: #d73a49;
+  background: #6b7280; /* gris medio */
+  border-color: #6b7280;
 }
-.cdd-btn-reset:hover { background: #b92533; border-color: #b92533; }
+.cdd-btn-reset:hover { background: #4b5563; border-color: #4b5563; }
+.cdd-btn-reset:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+  background: #9ca3af;
+  border-color: #9ca3af;
+}
 
 /* === Resultados === */
 .cdd-results-grid {
