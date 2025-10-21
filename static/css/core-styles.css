@@ -82,10 +82,6 @@ body {
 .sidebar { grid-column: 1; grid-row: 2; }
 .content { grid-column: 2; grid-row: 2; }
 
-/* ⚠️ IMPORTANTE: elimina cualquier regla antigua como
-   body > :not(.sidebar):not(.content):not(#site-footer) { grid-column: 1 / -1; }
-   porque rompe colocaciones inesperadas. */
-
 #app:focus,
 #app:focus-visible { outline: none; }
 :focus-visible { outline: 2px dashed #94a3b8; outline-offset: 3px; }
@@ -157,7 +153,7 @@ body {
   opacity: .85;
   transition: transform 160ms ease, opacity 160ms ease;
 }
-.menu .menu-item.is-open > a::after{ content: "▾"; }
+.menu .menu-item.has-children.is-open > a::after{ content: "▾"; }
 
 /* Submenús */
 .submenu {
