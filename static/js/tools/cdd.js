@@ -9,15 +9,15 @@
     return;
   }
 
-  // Unidades soportadas (mantenemos este orden para los resultados)
+  // --- Unidades soportadas ---
   const UNITS = [
-    { key: 'fh',  label: '°fH (Franceses)' },      // 1 °fH = 10 mg/L CaCO3
-    { key: 'dh',  label: '°dH (Alemanes)' },       // 1 °dH = 17.848 mg/L CaCO3
-    { key: 'mmol',label: 'mmol/L (CaCO₃)' },       // 1 mmol/L = 100.09 mg/L CaCO3
+    { key: 'fh',  label: '°fH (Franceses)' },
+    { key: 'dh',  label: '°dH (Alemanes)' },
+    { key: 'mmol',label: 'mmol/L (CaCO₃)' },
     { key: 'ppm', label: 'ppm (mg/L CaCO₃)' }
   ];
 
-  // Conversión pivotando a ppm (mg/L CaCO3)
+  // --- Conversión ---
   const toPPM = {
     fh:   (v) => v * 10,
     dh:   (v) => v * 17.848,
@@ -55,9 +55,14 @@
           </select>
         </label>
 
-        <div class="cdd-field cdd-action">
-          <span class="cdd-field-label sr-only">Calcular</span>
+        <div class="cdd-field">
+          <span class="cdd-field-label">Calcular</span>
           <button id="cdd-calc" type="button" class="cdd-btn">Calcular</button>
+        </div>
+
+        <div class="cdd-field">
+          <span class="cdd-field-label">Reset</span>
+          <button id="cdd-reset" type="button" class="cdd-btn cdd-btn-reset">Reset</button>
         </div>
       </div>
 
@@ -68,9 +73,9 @@
   const $value = root.querySelector('#cdd-value');
   const $unit  = root.querySelector('#cdd-unit');
   const $grid  = root.querySelector('#cdd-results-grid');
-  const $btn   = root.querySelector('#cdd-calc');
+  const $btnCalc = root.querySelector('#cdd-calc');
+  const $btnReset = root.querySelector('#cdd-reset');
 
-  // Construimos los 4 recuadros (solo lectura)
   function buildOutputs() {
     $grid.innerHTML = UNITS.map(u => `
       <label class="cdd-field cdd-ro">
@@ -88,27 +93,28 @@
 
     UNITS.forEach(u => {
       const el = document.getElementById(`out-${u.key}`);
-      if (!el) return;
-      el.value = fmt(fromPPM[u.key](ppm));
+      if (el) el.value = fmt(fromPPM[u.key](ppm));
     });
   }
 
-  // Eventos (auto y botón-manual)
+  function resetAll() {
+    $value.value = '';
+    $unit.value = 'ppm';
+    buildOutputs();
+    recalc();
+  }
+
+  // Eventos
   $value.addEventListener('input', recalc);
   $unit.addEventListener('change', recalc);
-  $btn.addEventListener('click', () => {
-    recalc();
-    // feedback sutil
-    $btn.disabled = true;
-    setTimeout(() => { $btn.disabled = false; }, 180);
-  });
+  $btnCalc.addEventListener('click', recalc);
+  $btnReset.addEventListener('click', resetAll);
 
-  // Estado inicial: 0 en ppm
+  // Estado inicial
   buildOutputs();
   $unit.value = 'ppm';
   $value.value = '0';
   recalc();
 
-  // Señal para depurar
   window.__CDD_OK__ = true;
 })();
