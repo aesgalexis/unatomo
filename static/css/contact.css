@@ -15,14 +15,14 @@
 }
 
 .contact-row{
-  display: flex;         
+  display: flex;            /* todos los campos en una línea */
   gap: 12px;
-  flex-wrap: wrap;         
+  flex-wrap: wrap;          /* si no caben, bajan en bloque respetando el ancho */
 }
 
 .field{
-  flex: 1 1 0;          
-  min-width: 220px;         
+  flex: 1 1 0;              /* mismo ancho relativo entre campos */
+  min-width: 220px;         /* evita romperse en pantallas muy estrechas */
   display: grid;
   gap: 6px;
 }
@@ -41,8 +41,27 @@
   color: var(--fg);
 }
 
+.select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%),
+    linear-gradient(to right, transparent, transparent);
+  background-position:
+    calc(100% - 18px) calc(1em - 2px),
+    calc(100% - 12px) calc(1em - 2px),
+    0 0;
+  background-size:
+    6px 6px,
+    6px 6px,
+    100% 100%;
+  background-repeat: no-repeat;
+}
+
 .textarea{
-  min-height: 120px;
+  min-height: 160px;
   resize: vertical;
 }
 
@@ -56,7 +75,7 @@
 /* Botón enviar — verde estilo GitHub */
 .btn-submit{
   align-self: start;
-  padding: 10px 14px;
+  padding: 12px 16px;
   border-radius: 12px;
   border: 1px solid #2da44e;
   background: #2da44e;     /* GitHub “commit” green */
@@ -79,9 +98,6 @@
   outline: 2px dashed #94a3b8;
   outline-offset: 3px;
 }
-@media (max-width: 480px){
-  .btn-submit{ width: 100%; }
-}
 
 /* Lateral de información */
 .contact-aside{
@@ -99,7 +115,7 @@
 .contact-aside p,
 .contact-aside li{
   margin: 0;
-  color: var(--fg);  /* respeta el color base (sin grises) */
+  color: var(--fg); /* texto base */
 }
 .contact-aside ul{
   list-style: none;
@@ -115,4 +131,6 @@
     grid-template-columns: 1fr; /* apila: formulario arriba, info abajo */
   }
 }
-
+@media (max-width: 480px){
+  .btn-submit{ width: 100%; }   /* botón a ancho completo en móvil */
+}
