@@ -63,7 +63,8 @@
 * { box-sizing: border-box; }
 
 body {
-  min-height: 100svh; /* evita "footer flotante" y cubre móviles modernos */
+  position: relative;               /* ← para el divisor vertical */
+  min-height: 100svh;
   margin: 0;
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
   background: var(--bg);
@@ -77,8 +78,20 @@ body {
   grid-template-rows: auto 1fr auto;           /* (fila libre) | main | footer */
 }
 
+/* Línea vertical que llega hasta el footer */
+body::before{
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;                     /* ← ocupa toda la altura del documento */
+  left: var(--sidebar-w);        /* alineada al borde del sidebar */
+  width: 1px;
+  background: var(--border);
+  pointer-events: none;
+}
+
 /* Ubicaciones en la grid */
-.sidebar { grid-column: 1; grid-row: 1 / -1; } /* ← abarca hasta el footer */
+.sidebar { grid-column: 1; grid-row: 2; }
 .content { grid-column: 2; grid-row: 2; }
 
 #app:focus,
@@ -89,7 +102,7 @@ body {
 .theme-toggle{
   position: fixed;
   inset-block-start: max(12px, env(safe-area-inset-top));
-  inset-inline-start: max(12px, env(safe-area-inset-left)); /* izquierda */
+  inset-inline-start: max(12px, env(safe-area-inset-left));
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -98,7 +111,7 @@ body {
   border-radius: 999px;
   background: color-mix(in oklab, var(--bg) 92%, transparent);
   color: var(--fg);
-  box-shadow: none; /* sin sombra */
+  box-shadow: none;
   white-space: nowrap;
   z-index: 1001;
   cursor: pointer;
@@ -121,7 +134,7 @@ body {
 .sidebar {
   position: static;
   width: var(--sidebar-w);
-  border-right: 1px solid var(--border);
+  /* border-right: 1px solid var(--border);  ← lo sustituye body::before */
   padding: var(--space-4) var(--space-3);
   background: var(--bg);
 }
@@ -178,7 +191,7 @@ body {
 
 /* === Sidebar: 3 niveles === */
 .menu .submenu.lvl2,
-.menu .submenu.lvl3 { display: none; } /* ocultos al cargar */
+.menu .submenu.lvl3 { display: none; }
 .menu .menu-item.is-open > .submenu.lvl2 { display: grid; }
 .menu .submenu-group.is-open > .submenu.lvl3 { display: grid; }
 
@@ -189,7 +202,7 @@ body {
   text-decoration: none;
   color: var(--submenu-fg);
   padding: 4px 0;
-  font-weight: 600; /* más jerarquía que lvl3 */
+  font-weight: 600;
 }
 .menu a.lvl2-link:hover,
 .menu a.lvl2-link:focus-visible { color: var(--submenu-fg-strong); outline: none; }
@@ -220,8 +233,9 @@ h3 { font-size: clamp(18px, 2vw, 24px); margin-top: var(--space-3); }
 
 p { margin: 0 0 var(--space-3) 0; color: var(--fg); }
 
-/* (Eliminado) — no queremos párrafos en gris:
-   .section h2 + p, .section h3 + p { color: var(--muted); } */
+/* (Eliminado)
+.section h2 + p,
+.section h3 + p { color: var(--muted); } */
 
 h2[id], h3[id] { scroll-margin-top: 24px; }
 .hl-wrap {
@@ -256,6 +270,9 @@ h2.is-highlighted, h3.is-highlighted { background: transparent !important; text-
 @media (max-width: 900px) {
   :root { --sidebar-w: 100%; }
 
+  /* La línea vertical no aplica en móvil (sidebar arriba) */
+  body::before { content: none; }
+
   /* En móvil: pila natural (sidebar, contenido, footer) */
   body{
     display: block;
@@ -266,7 +283,7 @@ h2.is-highlighted, h3.is-highlighted { background: transparent !important; text-
     position: sticky;
     top: 0;
     width: 100%;
-    border-right: none;
+    border-right: none;              /* aseguramos que no se pinte */
     border-bottom: 1px solid var(--border);
     background: var(--bg);
     z-index: 10;
