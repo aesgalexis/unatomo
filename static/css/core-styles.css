@@ -78,7 +78,7 @@ body {
 }
 
 /* Ubicaciones en la grid */
-.sidebar { grid-column: 1; grid-row: 2; }
+.sidebar { grid-column: 1; grid-row: 1 / -1; } /* ← abarca hasta el footer */
 .content { grid-column: 2; grid-row: 2; }
 
 #app:focus,
