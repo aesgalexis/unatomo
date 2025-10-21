@@ -1,97 +1,101 @@
 /* /static/css/tools/cdd.css */
-.cdd-wrap { margin-top: var(--space-3); }
 
-.cdd-card {
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: var(--space-4);
-  background: color-mix(in oklab, var(--bg) 95%, transparent);
-  max-width: 960px;
-}
-
-/* === Grid superior: Valor | Unidad | Calcular | Reset === */
-.cdd-controls-grid {
+.tool-cdd {
   display: grid;
-  grid-template-columns: repeat(4, minmax(140px, 1fr));
-  gap: var(--space-2);
-  margin-bottom: var(--space-3);
+  gap: 16px;
 }
-@media (max-width: 960px) {
-  .cdd-controls-grid { grid-template-columns: repeat(2, minmax(140px, 1fr)); }
+
+.cdd-row {
+  display: grid;
+  gap: 12px;
+}
+
+/* 4 columnas en desktop, 2 en tablet, 1 en móvil */
+.cdd-row--top,
+.cdd-row--bottom {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+@media (max-width: 900px) {
+  .cdd-row--top,
+  .cdd-row--bottom {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 @media (max-width: 520px) {
-  .cdd-controls-grid { grid-template-columns: 1fr; }
+  .cdd-row--top,
+  .cdd-row--bottom {
+    grid-template-columns: 1fr;
+  }
 }
 
-.cdd-field { display: grid; gap: 6px; }
-.cdd-field-label { font-weight: 700; color: var(--fg); }
+.cdd-field {
+  display: grid;
+  gap: 6px;
+}
 
-.cdd-input, .cdd-select {
-  padding: 10px 12px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: color-mix(in oklab, var(--bg) 96%, transparent);
-  color: var(--fg);
+/* Inputs y salidas mismo tamaño */
+.cdd-input,
+.cdd-output {
   width: 100%;
-  font-weight: 500;
-}
-.cdd-input:focus-visible, .cdd-select:focus-visible, .cdd-btn:focus-visible {
-  outline: 2px dashed #94a3b8; outline-offset: 3px;
-}
-
-/* Quitar los steppers de los inputs numéricos */
-.cdd-input[type="number"]::-webkit-outer-spin-button,
-.cdd-input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-.cdd-input[type="number"] { -moz-appearance: textfield; }
-
-/* === Botones === */
-.cdd-btn {
-  align-self: end;
-  padding: 10px 14px;
+  padding: 12px 12px;
+  border: 1px solid var(--border);
   border-radius: 10px;
-  border: 1px solid #2ea44f;
-  background: #2ea44f;
-  color: #fff;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background .12s ease, border-color .12s ease, transform .04s ease;
-}
-.cdd-btn:hover { background: #2c974b; border-color: #2c974b; }
-.cdd-btn:active { transform: translateY(1px); }
-.cdd-btn:disabled { opacity: .8; cursor: default; }
-@media (max-width: 520px) {
-  .cdd-btn { width: 100%; }
+  background: var(--bg);
+  color: var(--fg);
+  font: inherit;
+  line-height: 1.2;
 }
 
-/* Botón Reset */
-.cdd-btn-reset {
-  background: #6b7280; /* gris medio */
-  border-color: #6b7280;
-}
-.cdd-btn-reset:hover { background: #4b5563; border-color: #4b5563; }
-.cdd-btn-reset:disabled {
-  opacity: .5;
-  cursor: not-allowed;
-  background: #9ca3af;
-  border-color: #9ca3af;
+.cdd-output {
+  font-weight: 400; /* ← resultados SIN negrita */
 }
 
-/* === Resultados === */
-.cdd-results-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(140px, 1fr));
-  gap: var(--space-2);
-}
-@media (max-width: 960px) {
-  .cdd-results-grid { grid-template-columns: repeat(2, minmax(140px, 1fr)); }
-}
-@media (max-width: 520px) {
-  .cdd-results-grid { grid-template-columns: 1fr; }
+/* Etiqueta de unidad en los resultados */
+.cdd-unit-tag {
+  font-size: 12px;
+  color: var(--muted);
 }
 
-.cdd-ro .cdd-readonly {
-  background: color-mix(in oklab, var(--bg) 98%, transparent);
-  cursor: default;
-  pointer-events: none;
-  font-weight: 500;
+/* Botones (igual tamaño que inputs) */
+.cdd-btn {
+  width: 100%;
+  padding: 12px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--fg);
+  font: inherit;
+  font-weight: 600;
+  line-height: 1.2;
+  transition: filter .15s ease, background .15s ease, color .15s ease, border-color .15s ease;
+}
+
+/* Primario (verde como el botón de enviar del contacto) */
+.cdd-btn--primary {
+  background: #2da44e;      /* GitHub green */
+  border-color: #2da44e;
+  color: #ffffff;
+}
+.cdd-btn--primary:hover,
+.cdd-btn--primary:focus-visible {
+  filter: brightness(1.02);
+}
+
+/* Secundario neutro (gris) para Reset */
+.cdd-btn--ghost {
+  background: var(--menu-active-bg);
+  border-color: var(--border);
+  color: var(--fg);
+}
+.cdd-btn--ghost:hover,
+.cdd-btn--ghost:focus-visible {
+  filter: brightness(1.02);
+}
+
+/* Disabled: sin pointer especial, un poco más tenue */
+.cdd-btn:disabled {
+  opacity: .6;
+  cursor: default;   /* ← no cambia a "not-allowed" */
+  filter: none;
 }
