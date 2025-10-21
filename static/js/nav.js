@@ -46,17 +46,21 @@
 
   // --- Colapsar todo al inicio para evitar flash ---
   (function preCollapse() {
-    topItems.forEach(mi => mi.classList.remove('is-open'));
-    level2Groups.forEach(g => g.classList.remove('is-open'));
-    menuRoot.querySelectorAll('.is-active').forEach(el => el.classList.remove('is-active'));
+  topItems.forEach(mi => mi.classList.remove('is-open'));
+  level2Groups.forEach(g => g.classList.remove('is-open'));
+  menuRoot.querySelectorAll('.is-active').forEach(el => el.classList.remove('is-active'));
 
-    const lvl2 = servicesItem?.querySelector('.submenu.lvl2');
-    if (lvl2) { lvl2.hidden = true; lvl2.style.display = 'none'; }
-    level2Groups.forEach(g => {
-      const box = g.querySelector('.submenu.lvl3');
-      if (box) { box.hidden = true; box.style.display = 'none'; }
-    });
-  })();
+  menuRoot.querySelectorAll('.menu-item.has-children .submenu.lvl2').forEach(box => {
+    box.hidden = true;
+    box.style.display = 'none';
+  });
+
+  menuRoot.querySelectorAll('.submenu.lvl3').forEach(box => {
+    box.hidden = true;
+    box.style.display = 'none';
+  });
+})();
+
 
   // Activa una sección (marca activo nivel 1 o nivel 2 según corresponda)
   function activate(sectionKey) {
