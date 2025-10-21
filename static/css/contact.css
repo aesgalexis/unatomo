@@ -1,1 +1,34 @@
+/* /static/css/contact.css */
+#section-seccion-7 #contactForm { margin-top: 8px; display: grid; gap: 16px; }
+#section-seccion-7 .grid {
+  display: grid; gap: 16px;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+}
+#section-seccion-7 .field { display: grid; gap: 6px; }
+#section-seccion-7 .field.wide { grid-column: 1 / -1; }
+#section-seccion-7 .field.compact { margin-top: -6px; }
+#section-seccion-7 label { font-weight: 600; }
+#section-seccion-7 input[type="text"],
+#section-seccion-7 input[type="email"],
+#section-seccion-7 input[type="tel"],
+#section-seccion-7 select,
+#section-seccion-7 textarea {
+  padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px;
+  background: color-mix(in oklab, var(--bg) 92%, transparent); color: var(--fg);
+}
+#section-seccion-7 textarea { resize: vertical; }
+#section-seccion-7 .check { display: flex; gap: 10px; align-items: flex-start; }
+#section-seccion-7 .err { color: #b91c1c; min-height: 1.2em; font-size: 0.9em; }
+#section-seccion-7 .actions { display: flex; gap: 12px; align-items: center; }
+#section-seccion-7 #submitBtn {
+  padding: 10px 16px; border-radius: 12px; border: 1px solid var(--border);
+  background: var(--menu-active-bg); color: var(--fg); font-weight: 700; cursor: pointer;
+}
+#section-seccion-7 #submitBtn[disabled] { opacity: .6; cursor: progress; }
+#section-seccion-7 .hp { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+#section-seccion-7 .alt-mail { color: var(--muted); }
+
+@media (max-width: 900px) {
+  #section-seccion-7 .grid { grid-template-columns: 1fr; }
+}
 
