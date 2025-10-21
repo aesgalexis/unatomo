@@ -1,13 +1,15 @@
-<!doctype html>
-<html lang="es">
-<head>
+<!doctype html><html lang="es"><head>
   <meta charset="utf-8" />
+  <meta http-equiv="refresh" content="0; url=/es/" />
+  <script>
+    (function () {
+      const pref = (navigator.language || '').toLowerCase();
+      const go = pref.startsWith('en') ? '/en/' : '/es/';
+      // mantiene hash si alguien pega un anchor (#seccion-3)
+      const h = location.hash || '';
+      location.replace(go + h);
+    })();
+  </script>
   <title>unatomo</title>
-  <meta name="robots" content="noindex" />
-  <meta http-equiv="refresh" content="0; url=/core/" />
-</head>
-<body>
-  <script>location.replace('/core/');</script>
-  <p>Redirigiendo a <a href="/core/">unatomo.com/core/</a>…</p>
-</body>
-</html>
+  <meta name="robots" content="noindex">
+</head><body></body></html>
