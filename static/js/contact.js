@@ -55,14 +55,6 @@
           <small class="err" data-for="topic"></small>
         </div>
 
-        <div class="field">
-          <label for="preferred">Preferencia de contacto</label>
-          <select id="preferred" name="preferred">
-            <option>Email</option>
-            <option>Teléfono</option>
-          </select>
-        </div>
-
         <div class="field wide">
           <label for="message">Mensaje *</label>
           <textarea id="message" name="message" rows="6" required></textarea>
@@ -82,7 +74,7 @@
         <button id="submitBtn" type="submit">Enviar</button>
         <p id="formStatus" role="status" aria-live="polite"></p>
       </div>
-      <p class="alt-mail">También puedes escribirnos a <a href="mailto:hola@unatomo.com">hola@unatomo.com</a></p>
+ 
     </form>
   `;
 
