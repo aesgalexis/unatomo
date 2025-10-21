@@ -9,7 +9,6 @@
     return;
   }
 
-  // --- Unidades soportadas ---
   const UNITS = [
     { key: 'fh',  label: '°fH (Franceses)' },
     { key: 'dh',  label: '°dH (Alemanes)' },
@@ -17,7 +16,6 @@
     { key: 'ppm', label: 'ppm (mg/L CaCO₃)' }
   ];
 
-  // --- Conversión ---
   const toPPM = {
     fh:   (v) => v * 10,
     dh:   (v) => v * 17.848,
@@ -62,7 +60,7 @@
 
         <div class="cdd-field">
           <span class="cdd-field-label">Reset</span>
-          <button id="cdd-reset" type="button" class="cdd-btn cdd-btn-reset">Reset</button>
+          <button id="cdd-reset" type="button" class="cdd-btn cdd-btn-reset" disabled>Reset</button>
         </div>
       </div>
 
@@ -95,6 +93,8 @@
       const el = document.getElementById(`out-${u.key}`);
       if (el) el.value = fmt(fromPPM[u.key](ppm));
     });
+
+    $btnReset.disabled = ($value.value.trim() === '');
   }
 
   function resetAll() {
@@ -102,6 +102,7 @@
     $unit.value = 'ppm';
     buildOutputs();
     recalc();
+    $btnReset.disabled = true;
   }
 
   // Eventos
