@@ -172,7 +172,7 @@
           a.addEventListener('click', (e) => {
             e.preventDefault();
             if (!section.classList.contains('is-active')) {
-              history.pushState({ key }, '', `#${key}`);
+              
               activate(key);
             }
             box.querySelectorAll('a').forEach(x => x.classList.toggle('is-sub-active', x === a));
