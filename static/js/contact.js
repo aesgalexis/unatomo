@@ -8,7 +8,7 @@
         <!-- Fila 1: Nombre / Email -->
         <div class="contact-row">
           <div class="field">
-            <label class="label" for="c-name">Nombre y apellidos</label>
+            <label class="label" for="c-name">Nombre</label>
             <input class="input" id="c-name" name="name" type="text" autocomplete="name" required>
           </div>
 
