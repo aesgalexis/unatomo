@@ -63,7 +63,7 @@
 * { box-sizing: border-box; }
 
 body {
-  min-height: 100svh;
+  min-height: 100svh; /* evita "footer flotante" y cubre móviles modernos */
   margin: 0;
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
   background: var(--bg);
@@ -72,7 +72,6 @@ body {
   text-rendering: optimizeLegibility;
 
   /* Grid de página: sidebar | contenido, con footer al final */
-  min-height: 100vh;
   display: grid;
   grid-template-columns: var(--sidebar-w) 1fr;  /* sidebar | contenido */
   grid-template-rows: auto 1fr auto;           /* (fila libre) | main | footer */
@@ -207,7 +206,7 @@ body {
 /* === Contenido === */
 .content {
   padding: var(--space-8) var(--space-6);
-  min-height: 0;       /* clave para que el footer no tape nada en grids */
+  min-height: 0; /* importante en layouts grid para evitar solapes */
   display: block;
 }
 .content > .section { display: none; max-width: var(--content-max); }
@@ -218,11 +217,11 @@ h1, h2, h3 { line-height: 1.2; margin: 0 0 var(--space-3) 0; }
 h1 { font-size: clamp(28px, 3.2vw, 44px); }
 h2 { font-size: clamp(22px, 2.4vw, 32px); margin-top: var(--space-6); }
 h3 { font-size: clamp(18px, 2vw, 24px); margin-top: var(--space-3); }
+
 p { margin: 0 0 var(--space-3) 0; color: var(--fg); }
-.section h2 + p,
-.section h3 + p {
-  color: var(--muted);
-}
+
+/* (Eliminado) — no queremos párrafos en gris:
+   .section h2 + p, .section h3 + p { color: var(--muted); } */
 
 h2[id], h3[id] { scroll-margin-top: 24px; }
 .hl-wrap {
@@ -257,9 +256,9 @@ h2.is-highlighted, h3.is-highlighted { background: transparent !important; text-
 @media (max-width: 900px) {
   :root { --sidebar-w: 100%; }
 
-  /* En móvil puedes seguir con grid o usar flujo normal. Mantengo pila. */
+  /* En móvil: pila natural (sidebar, contenido, footer) */
   body{
-    display: block;       /* layout móvil pila: sidebar, contenido, footer */
+    display: block;
     min-height: 100vh;
   }
 
@@ -277,22 +276,19 @@ h2.is-highlighted, h3.is-highlighted { background: transparent !important; text-
   .menu { grid-auto-flow: row; gap: var(--space-2); }
   .content { padding-top: var(--space-6); }
 }
+
 /* --- Enlaces en contenido --- */
 .section a {
-  color: #3b82f6; /* azul tono limpio, similar a "tailwind blue-500" */
+  color: #3b82f6; /* azul visible y limpio */
   text-decoration: none;
   transition: color 0.2s ease, text-decoration-color 0.2s ease;
 }
-
 .section a:hover,
 .section a:focus {
-  color: #2563eb; /* azul un poco más profundo al pasar el cursor */
+  color: #2563eb; /* más profundo on hover/focus */
   text-decoration: underline;
   text-decoration-color: currentColor;
 }
-
-/* Si quieres que los enlaces visitados tengan un tono sutilmente distinto: */
 .section a:visited {
-  color: #1e40af; /* azul más oscuro, sin romper la armonía */
+  color: #1e40af; /* sutilmente más oscuro al visitar */
 }
-
