@@ -66,13 +66,13 @@ body{
 .sidebar{ grid-column: 1; grid-row: 2; position: relative; }
 .content{ grid-column: 2; grid-row: 2; }
 
-/* Línea vertical SOLO a lo largo del sidebar (no cruza el footer) */
+.sidebar { position: relative; }
 .sidebar::after{
   content: "";
   position: absolute;
   top: 0;
-  bottom: 0;          /* llega solo hasta donde llega el sidebar */
-  right: 0;           /* borde derecho del sidebar */
+  bottom: 0; 
+  right: 0;
   width: 1px;
   background: var(--border);
   pointer-events: none;
