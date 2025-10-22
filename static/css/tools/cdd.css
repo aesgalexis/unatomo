@@ -63,7 +63,7 @@
   .cdd-btn { width: 100%; }
 }
 
-/* Botón Reset  */
+/* Botón Reset (gris a tono con el sitio) */
 .cdd-btn-reset {
   background: #6b7280; /* gris medio */
   border-color: #6b7280;
@@ -75,7 +75,6 @@
   background: #9ca3af;
   border-color: #9ca3af;
 }
-
 
 /* === Resultados === */
 .cdd-results-grid {
