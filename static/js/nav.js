@@ -3,9 +3,9 @@
 
   // --- Mapeo de secciones -> partials ---
   const SECTION_TO_PARTIAL = {
-    'inicio': '/static/content/inicio.html',
-    'servicios': '/static/content/servicios.html',
-  };
+  'inicio': '/es/content/inicio.html',
+  'servicios': '/es/content/servicios.html',
+};
 
   const contentEl = document.getElementById('content');
   const sidebar = document.getElementById('sidebar-menu');
