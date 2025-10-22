@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>unatomo core</title>
 
-  <!-- CSS (mantenemos las llamadas para conservar el estilo) -->
+  <!-- Estilos comunes -->
   <link rel="preload" href="/static/img/logo-unatomo-v1.5.svg" as="image" />
   <link rel="stylesheet" href="/static/css/core-styles.css" />
   <link rel="stylesheet" href="/static/css/footer.css" />
@@ -15,7 +15,7 @@
 </head>
 <body>
 
-  <!-- Botón tema (modo claro/oscuro) -->
+  <!-- Modo claro/oscuro -->
   <button id="themeToggle" class="theme-toggle" type="button" aria-label="Cambiar tema" title="Cambiar tema">
     <span class="icon" aria-hidden="true">🌙</span>
     <span class="label">Claro</span>
@@ -23,23 +23,36 @@
 
   <div class="atom-tint" aria-hidden="true"></div>
 
-  <!-- Sidebar / Nav (se mantiene) -->
+  <!-- Sidebar -->
   <aside class="sidebar" role="navigation" aria-label="Navegación principal">
-    <!-- Logo (enlaza al home/hash por ahora) -->
-    <a class="brand" href="#home" data-section="home" aria-label="Inicio">
+    <!-- Logo -->
+    <a class="brand" href="#servicios" data-section="servicios" aria-label="Inicio">
       <img src="/static/img/logo-unatomo-v1.5.svg" alt="unatomo core logo" width="384" height="384" />
     </a>
 
+    <!-- Menú con <details> accesible -->
     <nav class="menu" id="sidebar-menu">
-      <!-- De momento sin items; se añadirán más tarde -->
+      <details class="nav-group" data-section="servicios" open>
+        <summary>Servicios</summary>
+        <ul class="nav-list">
+          <li><a href="#servicios/asistencia-tecnica" data-section="servicios" data-anchor="asistencia-tecnica">Asistencia técnica</a></li>
+          <li><a href="#servicios/mantenimiento" data-section="servicios" data-anchor="mantenimiento">Mantenimiento</a></li>
+          <li><a href="#servicios/asesoria" data-section="servicios" data-anchor="asesoria">Asesoría</a></li>
+          <li><a href="#servicios/control-produccion" data-section="servicios" data-anchor="control-produccion">Control de producción</a></li>
+          <li><a href="#servicios/optimizacion-procesos" data-section="servicios" data-anchor="optimizacion-procesos">Optimización de procesos</a></li>
+          <li><a href="#servicios/formacion" data-section="servicios" data-anchor="formacion">Formación</a></li>
+        </ul>
+      </details>
     </nav>
   </aside>
 
-  <!-- Contenido principal vacío por ahora -->
-  <main id="app" class="content" tabindex="-1"></main>
+  <!-- Contenido principal (slot) -->
+  <main id="app" class="content" tabindex="-1">
+    <div id="content" class="section-slot" aria-live="polite"></div>
+  </main>
 
-  <!-- JS necesarios -->
-  <script type="module" src="/static/js/nav.js"></script>
+  <!-- JS -->
   <script src="/static/js/theme.js" defer></script>
+  <script src="/static/js/nav.js" defer></script>
 </body>
 </html>
