@@ -91,10 +91,19 @@
   `;
 
   const scrollToAnchor = (anchor) => {
-    if (!anchor) return;
-    const target = document.getElementById(`${anchor}`) || document.getElementById(`${anchor}-content`);
-    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
+  if (!anchor) return;
+
+  const target = document.getElementById(anchor) || document.getElementById(`${anchor}-content`);
+  if (!target) return;
+
+  // Calcula si el elemento está visible en pantalla
+  const rect = target.getBoundingClientRect();
+  const isVisible = rect.top >= 0 && rect.bottom <= window.innerHeight;
+
+  if (!isVisible) {
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+};
 
   // --- Router principal ---
   const route = async () => {
