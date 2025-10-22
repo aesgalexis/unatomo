@@ -5,6 +5,7 @@
   const SECTION_TO_PARTIAL = {
   'inicio': '/es/content/inicio.html',
   'servicios': '/es/content/servicios.html',
+  'contacto': '/es/content/contacto.html',
 };
 
   const contentEl = document.getElementById('content');
