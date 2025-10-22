@@ -1,111 +1,157 @@
 (() => {
   'use strict';
 
-  // Config (podrás ampliar cuando añadas más secciones)
-const SECTION_TO_PARTIAL = {
-  'inicio': '/static/content/inicio.html',
-  'servicios': '/static/content/servicios.html',
-};
-
-// 2) Default al arrancar:
-const parseHash = () => {
-  const raw = (location.hash || '#inicio').slice(1);
-  const [section = 'inicio', anchor = ''] = raw.split('/');
-  return { section, anchor };
-};
+  // --- Mapeo de secciones -> partials ---
+  const SECTION_TO_PARTIAL = {
+    'inicio': '/static/content/inicio.html',
+    'servicios': '/static/content/servicios.html',
+  };
 
   const contentEl = document.getElementById('content');
   const sidebar = document.getElementById('sidebar-menu');
-  const cache = new Map(); // sección -> HTML string
+  const cache = new Map(); // key: partial path -> html string
 
-  // --- Utils ---
+  // --- Utils de routing ---
   const parseHash = () => {
-    const raw = (location.hash || '#servicios').slice(1); // sin "#"
-    const [section = 'servicios', anchor = ''] = raw.split('/');
+    // formatos: #inicio | #servicios | #servicios/asesoria
+    const raw = (location.hash || '#inicio').slice(1);
+    const [section = 'inicio', anchor = ''] = raw.split('/');
     return { section, anchor };
   };
 
   const setAriaCurrent = ({ section, anchor }) => {
-    // Limpia estados
     sidebar.querySelectorAll('a[aria-current]').forEach(a => a.removeAttribute('aria-current'));
-    // Marca el activo
-    const sel = `a[data-section="${section}"]${anchor ? `[data-anchor="${anchor}"]` : ''}`;
-    const active = sidebar.querySelector(sel);
-    if (active) active.setAttribute('aria-current', 'page');
-  };
 
-  const syncAccordion = (section) => {
-    // Abre el <details> de esa sección; aquí solo existe "servicios"
+    // marca activo el enlace exacto (con data-anchor si aplica)
+    let selector = `a[data-section="${section}"]`;
+    if (anchor) selector += `[data-anchor="${anchor}"]`;
+
+    const active = sidebar.querySelector(selector) ||
+                   sidebar.querySelector(`a[data-section="${section}"]:not([data-anchor])`);
+    if (active) active.setAttribute('aria-current', 'page');
+
+    // abrir/cerrar <details> según sección
     sidebar.querySelectorAll('details.nav-group').forEach(d => {
-      if (d.dataset.section === section) d.open = true;
-      else d.open = false;
+      d.open = (d.dataset.section === section);
     });
   };
 
-  const highlight = (el) => {
-    if (!el) return;
-    el.classList.add('is-highlighted');
-    setTimeout(() => el.classList.remove('is-highlighted'), 1200);
-  };
+  const focusMain = () => document.getElementById('app')?.focus({ preventScroll: true });
 
-  const scrollToAnchor = (anchor) => {
-    if (!anchor) return;
-    const target = document.getElementById(anchor);
-    if (target) {
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      highlight(target);
-    }
-  };
-
-  const loadSection = async (section) => {
-    if (cache.has(section)) return cache.get(section);
-    const url = SECTION_TO_PARTIAL[section];
-    if (!url) return '';
-    const res = await fetch(url, { credentials: 'same-origin' });
-    if (!res.ok) return '';
+  const fetchPartial = async (path) => {
+    if (cache.has(path)) return cache.get(path);
+    const res = await fetch(path, { credentials: 'same-origin' });
+    if (!res.ok) throw new Error(`No se pudo cargar ${path}`);
     const html = await res.text();
-    cache.set(section, html);
+    cache.set(path, html);
     return html;
   };
 
-  const render = (html) => {
-    contentEl.innerHTML = html || '<p>Contenido no disponible.</p>';
-    // Enfoca el main para accesibilidad
-    document.getElementById('app')?.focus({ preventScroll: true });
+  // --- Render helpers ---
+  const renderHTML = (html) => {
+    contentEl.innerHTML = html;
+    focusMain();
+  };
+
+  const renderError = (msg) => {
+    renderHTML(`<section><h1>Error</h1><p>${msg}</p></section>`);
+  };
+
+  // Extrae solo la subsección pedida: desde <h2 id="anchor"> hasta el siguiente <h2> o fin
+  const extractSubsection = (fullHTML, anchor) => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(fullHTML, 'text/html');
+
+    // localiza el h2 con ese id
+    const start = doc.getElementById(anchor);
+    if (!start || start.tagName.toLowerCase() !== 'h2') return null;
+
+    const wrapper = doc.createElement('section');
+    wrapper.id = `${anchor}-content`;
+
+    // incluir el propio h2
+    wrapper.appendChild(start.cloneNode(true));
+
+    // ir cogiendo hermanos siguientes hasta el próximo H2
+    let node = start.nextElementSibling;
+    while (node && node.tagName.toLowerCase() !== 'h2') {
+      wrapper.appendChild(node.cloneNode(true));
+      node = node.nextElementSibling;
+    }
+
+    return wrapper.outerHTML;
+  };
+
+  const renderServiciosOverview = () => `
+    <section id="servicios-overview">
+      <h1>Servicios</h1>
+      <p>Selecciona una categoría en el menú: asistencia técnica, mantenimiento, asesoría, control de producción,
+         optimización de procesos o formación.</p>
+    </section>
+  `;
+
+  const scrollToAnchor = (anchor) => {
+    if (!anchor) return;
+    const target = document.getElementById(`${anchor}`) || document.getElementById(`${anchor}-content`);
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   // --- Router principal ---
   const route = async () => {
     const { section, anchor } = parseHash();
-
-    // sólo gestionamos "servicios" por ahora
-    if (section !== 'servicios') {
-      location.hash = '#servicios';
-      return;
-    }
-
-    syncAccordion(section);
     setAriaCurrent({ section, anchor });
 
-    const html = await loadSection(section);
-    render(html);
-    if (anchor) scrollToAnchor(anchor);
+    try {
+      // INICIO
+      if (section === 'inicio') {
+        const html = await fetchPartial(SECTION_TO_PARTIAL.inicio);
+        renderHTML(html);
+        return;
+      }
+
+      // SERVICIOS (overview o subsección)
+      if (section === 'servicios') {
+        const full = await fetchPartial(SECTION_TO_PARTIAL.servicios);
+
+        if (!anchor) {
+          renderHTML(renderServiciosOverview());
+          return;
+        }
+
+        const sliced = extractSubsection(full, anchor);
+        if (sliced) {
+          renderHTML(sliced);
+          // highlight y scroll
+          scrollToAnchor(anchor);
+        } else {
+          // si no existe el h2 pedido, mostramos overview
+          renderHTML(renderServiciosOverview());
+        }
+        return;
+      }
+
+      // Si llega aquí, sección desconocida → fallback a inicio
+      location.hash = '#inicio';
+    } catch (err) {
+      renderError('No se pudo cargar el contenido. Inténtalo de nuevo.');
+      // console.error(err);
+    }
   };
 
-  // --- Eventos ---
-  // Navegación por clic en el sidebar (evita recargar y gestiona hash)
+  // --- Enlaces del sidebar (evita navegación plena, usamos hash) ---
   sidebar.addEventListener('click', (e) => {
     const a = e.target.closest('a[data-section]');
     if (!a) return;
     e.preventDefault();
+
     const section = a.getAttribute('data-section');
     const anchor = a.getAttribute('data-anchor') || '';
-    const nextHash = anchor ? `#${section}/${anchor}` : `#${section}`;
-    if (location.hash !== nextHash) {
-      location.hash = nextHash; // disparará hashchange -> route()
+    const next = anchor ? `#${section}/${anchor}` : `#${section}`;
+
+    if (location.hash !== next) {
+      location.hash = next; // disparará hashchange→route
     } else {
-      // mismo hash: dispara routing manual (útil si el usuario vuelve a pulsar)
-      route();
+      route(); // mismo hash, forzamos render (útil si reclick)
     }
   });
 
@@ -113,8 +159,8 @@ const parseHash = () => {
 
   // --- Arranque ---
   (async () => {
-    // Hash por defecto
-    if (!location.hash) location.hash = '#servicios';
+    // hash por defecto
+    if (!location.hash) location.hash = '#inicio';
     await route();
   })();
 })();
