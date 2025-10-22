@@ -2,9 +2,17 @@
   'use strict';
 
   // Config (podrás ampliar cuando añadas más secciones)
-  const SECTION_TO_PARTIAL = {
-    'servicios': '/static/content/servicios.html',
-  };
+const SECTION_TO_PARTIAL = {
+  'inicio': '/static/content/inicio.html',
+  'servicios': '/static/content/servicios.html',
+};
+
+// 2) Default al arrancar:
+const parseHash = () => {
+  const raw = (location.hash || '#inicio').slice(1);
+  const [section = 'inicio', anchor = ''] = raw.split('/');
+  return { section, anchor };
+};
 
   const contentEl = document.getElementById('content');
   const sidebar = document.getElementById('sidebar-menu');
