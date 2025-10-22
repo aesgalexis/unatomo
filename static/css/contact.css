@@ -3,7 +3,7 @@
 
 .contact-wrap{
   display: grid;
-  grid-template-columns: 1fr 320px; /* formulario | info lateral */
+  grid-template-columns: 1fr 320px;
   gap: 24px;
   align-items: start;
 }
@@ -15,14 +15,14 @@
 }
 
 .contact-row{
-  display: flex;            /* todos los campos en una línea */
+  display: flex;        
   gap: 12px;
-  flex-wrap: wrap;          /* si no caben, bajan en bloque respetando el ancho */
+  flex-wrap: wrap;        
 }
 
 .field{
-  flex: 1 1 0;              /* mismo ancho relativo entre campos */
-  min-width: 220px;         /* evita romperse en pantallas muy estrechas */
+  flex: 1 1 0;    
+  min-width: 220px;        
   display: grid;
   gap: 6px;
 }
