@@ -17,7 +17,7 @@
         </form>
       </div>
 
-      <!-- Derecha: tres secciones vacías listas para contenido futuro -->
+      <!-- Derecha: tres secciones vacías -->
       <div class="footer-right">
         <div class="footer-grid" role="navigation" aria-label="Secciones del sitio">
           <div class="footer-col" id="footer-sec1">
@@ -32,5 +32,19 @@
         </div>
       </div>
     </div>
+
+    <!-- Pie inferior restaurado -->
+    <div class="footer-bottom footer-centered">
+      <p>© <span id="year-now"></span> UNATOMO CORE SL | Todos los derechos reservados</p>
+      <ul class="footer-legal-inline">
+        <li><a href="#" aria-disabled="true">Accesibilidad</a></li>
+        <li><a href="#" aria-disabled="true">Mapa del sitio</a></li>
+      </ul>
+    </div>
   </div>
+
+  <!-- Script para año automático -->
+  <script>
+    document.getElementById('year-now').textContent = new Date().getFullYear();
+  </script>
 </footer>
