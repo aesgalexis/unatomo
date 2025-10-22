@@ -1,19 +1,14 @@
-/* === Footer (colocación en la grid) === */
-#site-footer {
-  grid-column: 1 / -1;
-  grid-row: 3;
-  position: static !important;
-  z-index: 0;
-  margin-top: var(--space-6);
-}
+/* === Footer (solo estilos visuales) === */
+/* La colocación en la grid (fila 3, ancho completo) se define en styles.css
+   para evitar conflictos. */
 
-/* === Footer (estilos visuales) === */
 #site-footer {
   background: inherit;
   color: var(--muted);
   border-top: 1px solid var(--border);
   padding: var(--space-6) var(--space-3);
   padding-bottom: 30px; /* aire extra al borde inferior */
+  margin-top: var(--space-6);
 }
 
 #site-footer .footer-wrap {
@@ -45,10 +40,24 @@
   letter-spacing: .04em;
   color: var(--submenu-fg);
 }
-.footer-links { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
-.footer-links a { color: var(--submenu-fg); text-decoration: none; }
 
-/* Brand en texto (sin logo) */
+.footer-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.footer-links a {
+  color: var(--submenu-fg);
+  text-decoration: none;
+}
+.footer-links a:hover,
+.footer-links a:focus-visible {
+  text-decoration: underline;
+  outline: none;
+}
+
 .footer-brand-title {
   margin: 0 0 4px 0;
   font-weight: 800;
@@ -109,7 +118,15 @@
   list-style: none; margin: 0; padding: 0;
   display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
 }
-.footer-legal-inline a { color: var(--submenu-fg); text-decoration: none; }
+.footer-legal-inline a {
+  color: var(--submenu-fg);
+  text-decoration: none;
+}
+.footer-legal-inline a:hover,
+.footer-legal-inline a:focus-visible {
+  text-decoration: underline;
+  outline: none;
+}
 
 /* Footer hover accent (naranja vivo) */
 #site-footer .footer-links a:hover,
