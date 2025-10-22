@@ -140,15 +140,15 @@ const route = async () => {
     }
 
     // CONTACTO
-    if (section === 'contacto') {
-      const html = await fetchPartial(SECTION_TO_PARTIAL.contacto);
-      renderHTML(html);
-      // inicializa el formulario ahora que #contact-root existe
-      if (typeof window.initContacto === 'function') {
-        window.initContacto();
-      }
-      return;
-    }
+if (section === 'contacto') {
+  const html = await fetchPartial(SECTION_TO_PARTIAL.contacto);
+  renderHTML(html);
+  // inicializa el formulario ahora que #contact-root existe
+  if (typeof window.initContacto === 'function') {
+    window.initContacto();
+  }
+  return;
+}
 
     // Fallback
     location.hash = '#inicio';
