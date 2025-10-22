@@ -1,27 +1,19 @@
 (() => {
   'use strict';
 
-  const footerTargetId = 'footer-slot';
+  const slot = document.getElementById('footer-slot');
+  if (!slot) return;
 
-  // Crea un contenedor al final del body si no existe
-  let footerContainer = document.getElementById(footerTargetId);
-  if (!footerContainer) {
-    footerContainer = document.createElement('footer');
-    footerContainer.id = footerTargetId;
-    document.body.appendChild(footerContainer);
-  }
-
-  // Ruta del footer según idioma
-  const lang = document.documentElement.lang || 'es';
+  const lang = (document.documentElement.lang || 'es').toLowerCase();
   const footerPath = `/${lang}/footer.html`;
 
-  // Cargar el footer
-  fetch(footerPath)
-    .then(res => res.ok ? res.text() : '')
+  fetch(footerPath, { credentials: 'same-origin' })
+    .then(res => res.ok ? res.text() : Promise.reject(res.status))
     .then(html => {
-      footerContainer.innerHTML = html || '<p style="text-align:center;opacity:.6;">Footer no disponible.</p>';
+      // Reemplaza el <div id="footer-slot"> completo por el HTML del footer
+      slot.outerHTML = html || '<footer id="site-footer"><p style="text-align:center;opacity:.6;">Footer no disponible.</p></footer>';
     })
     .catch(() => {
-      footerContainer.innerHTML = '<p style="text-align:center;opacity:.6;">Error al cargar el footer.</p>';
+      slot.outerHTML = '<footer id="site-footer"><p style="text-align:center;opacity:.6;">Error al cargar el footer.</p></footer>';
     });
 })();
