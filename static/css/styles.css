@@ -223,3 +223,32 @@ h2[id], h3[id]{ scroll-margin-top: 24px; }
   .content{ padding-top: var(--space-6); grid-column: 1; }
   #site-footer{ grid-column: 1; }
 }
+/* Inicio como nav-group estático (sin caret ni despliegue) */
+.nav-group.nav-static { 
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 6px 8px;
+  background: color-mix(in oklab, var(--bg) 96%, transparent);
+}
+
+.nav-static-link{
+  display: block;
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--fg);
+  padding: 8px 8px;                /* mismo padding que summary (sin hueco del caret) */
+  border-radius: calc(var(--radius) - 2px);
+  transition: background .12s ease, color .12s ease;
+}
+
+.nav-static-link:hover,
+.nav-static-link:focus-visible{
+  background: var(--menu-hover-bg);
+  outline: none;
+}
+
+.nav-static-link[aria-current="page"]{
+  background: var(--menu-active-bg);
+  color: var(--fg);
+  border-radius: calc(var(--radius) - 2px);
+}
