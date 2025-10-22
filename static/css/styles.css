@@ -48,7 +48,6 @@
 /* === Base / Layout === */
 *{ box-sizing: border-box; }
 body{
-  position: relative;                 /* para la línea vertical */
   min-height: 100svh;
   margin: 0;
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans";
@@ -63,22 +62,23 @@ body{
   grid-template-rows: auto 1fr auto;  /* (fila libre) | main | footer */
 }
 
-/* Línea vertical (borde entre sidebar y contenido) */
-body::before{
+/* Áreas de la grid */
+.sidebar{ grid-column: 1; grid-row: 2; position: relative; }
+.content{ grid-column: 2; grid-row: 2; }
+
+/* Línea vertical SOLO a lo largo del sidebar (no cruza el footer) */
+.sidebar::after{
   content: "";
   position: absolute;
-  inset-block: 0;
-  left: var(--sidebar-w);
+  top: 0;
+  bottom: 0;          /* llega solo hasta donde llega el sidebar */
+  right: 0;           /* borde derecho del sidebar */
   width: 1px;
   background: var(--border);
   pointer-events: none;
 }
 
-/* Áreas de la grid */
-.sidebar{ grid-column: 1; grid-row: 2; }
-.content{ grid-column: 2; grid-row: 2; }
-
-/* Slot del footer: se sitúa ya en la fila 3 antes de cargar el footer real */
+/* Slot del footer: ya en la fila 3 mientras carga */
 #footer-slot{ grid-column: 1 / -1; grid-row: 3; }
 
 /* Footer real (tras reemplazo) */
@@ -92,6 +92,10 @@ body::before{
   left: auto !important;
   right: auto !important;
 }
+
+/* Evita contorno negro al enfocar el main */
+#app:focus,
+#app:focus-visible { outline: none; }
 
 /* === Botón tema === */
 .theme-toggle{
@@ -200,7 +204,10 @@ h2[id], h3[id]{ scroll-margin-top: 24px; }
 /* === Responsive === */
 @media (max-width: 900px){
   :root{ --sidebar-w: 100%; }
-  body::before{ content: none; }           /* sin línea vertical en móvil */
+
+  /* en móvil no dibujamos la línea vertical */
+  .sidebar::after{ display: none; }
+
   body{
     display: grid;
     grid-template-columns: 1fr;
@@ -216,9 +223,3 @@ h2[id], h3[id]{ scroll-margin-top: 24px; }
   .content{ padding-top: var(--space-6); grid-column: 1; }
   #site-footer{ grid-column: 1; }
 }
-
-#app:focus,
-#app:focus-visible {
-  outline: none;
-}
-
