@@ -1,450 +1,112 @@
 (() => {
   'use strict';
 
-  const app = document.getElementById('app');
-  const sections = [...document.querySelectorAll('.section')];
-  const brand = document.querySelector('.brand');
+  // Config (podrás ampliar cuando añadas más secciones)
+  const SECTION_TO_PARTIAL = {
+    'servicios': '/static/content/servicios.html',
+  };
 
-  const menuRoot = document.getElementById('sidebar-menu');
-  const topItems = [...menuRoot.querySelectorAll(':scope > .menu-item')];
-  const hasChildrenItems = [...menuRoot.querySelectorAll(':scope > .menu-item.has-children')];
+  const contentEl = document.getElementById('content');
+  const sidebar = document.getElementById('sidebar-menu');
+  const cache = new Map(); // sección -> HTML string
 
-  // "Servicios" (para su lvl3 autogenerado actual)
-  const servicesItem = menuRoot.querySelector('.menu-item[data-key="servicios"]');
-  const level2GroupsServices = servicesItem
-    ? [...servicesItem.querySelectorAll('.submenu-group')]
-    : [];
+  // --- Utils ---
+  const parseHash = () => {
+    const raw = (location.hash || '#servicios').slice(1); // sin "#"
+    const [section = 'servicios', anchor = ''] = raw.split('/');
+    return { section, anchor };
+  };
 
-  const topAnchors = topItems.map(mi => mi.querySelector(':scope > a[data-section]')).filter(Boolean);
-  const lvl2LinksAll = [...menuRoot.querySelectorAll('.lvl2-link[data-section]')];
-  const allGroups = [...menuRoot.querySelectorAll('.submenu-group')];
-  const groupKeys = new Set(allGroups.map(g => g.dataset.key));
+  const setAriaCurrent = ({ section, anchor }) => {
+    // Limpia estados
+    sidebar.querySelectorAll('a[aria-current]').forEach(a => a.removeAttribute('aria-current'));
+    // Marca el activo
+    const sel = `a[data-section="${section}"]${anchor ? `[data-anchor="${anchor}"]` : ''}`;
+    const active = sidebar.querySelector(sel);
+    if (active) active.setAttribute('aria-current', 'page');
+  };
 
-  // Estado
-  let openKey = 'seccion-1';   // item top abierto (por defecto: Inicio)
-  let openSecondKey = null;    // SOLO para lvl3 de Servicios (seccion_lvl2-...)
-
-  // Utils
-  const slug = (t) => t.toLowerCase().trim()
-    .replace(/[^\p{L}\p{N}\s-]/gu,'').replace(/\s+/g,'-').replace(/-+/g,'-').slice(0,64);
-
-  function ensureId(el, base = 'sub') {
-    if (el.id) return el.id;
-    const seed = slug((el.textContent || base).slice(0, 64)) || base;
-    let id = seed, n = 1;
-    while (document.getElementById(id)) id = `${seed}-${n++}`;
-    el.id = id;
-    return id;
-  }
-
-  function scrollToTop() { window.scrollTo({ top: 0, left: 0, behavior: 'auto' }); }
-  function isInViewport(el) {
-    if (!el) return false;
-    const r = el.getBoundingClientRect();
-    const vh = window.innerHeight || document.documentElement.clientHeight;
-    const vw = window.innerWidth || document.documentElement.clientWidth;
-    return r.bottom >= 0 && r.right >= 0 && r.top <= vh && r.left <= vw;
-  }
-  function unwrap(el) {
-    const parent = el.parentNode;
-    while (el.firstChild) parent.insertBefore(el.firstChild, el);
-    parent.removeChild(el);
-  }
-
-  function findParentKeyOfGroupKey(groupKey) {
-    const node = menuRoot.querySelector(`.submenu-group[data-key="${groupKey}"]`);
-    return node?.closest('.menu-item.has-children')?.dataset.key || null;
-  }
-  function findLinkBySectionKey(sectionKey) {
-    return menuRoot.querySelector(`.lvl2-link[data-section="${sectionKey}"]`);
-  }
-
-  // --- Colapsar todo al inicio para evitar flash ---
-  (function preCollapse() {
-    topItems.forEach(mi => mi.classList.remove('is-open'));
-    menuRoot.querySelectorAll('.is-active').forEach(el => el.classList.remove('is-active'));
-
-    // Oculta todos los lvl2 de cualquier item con hijos
-    menuRoot.querySelectorAll('.menu-item.has-children .submenu.lvl2').forEach(box => {
-      box.hidden = true;
-      box.style.display = 'none';
+  const syncAccordion = (section) => {
+    // Abre el <details> de esa sección; aquí solo existe "servicios"
+    sidebar.querySelectorAll('details.nav-group').forEach(d => {
+      if (d.dataset.section === section) d.open = true;
+      else d.open = false;
     });
+  };
 
-    // Oculta todos los lvl3
-    menuRoot.querySelectorAll('.submenu.lvl3').forEach(box => {
-      box.hidden = true;
-      box.style.display = 'none';
-    });
-  })();
-
-  // Activar sección + marcas activas
-  function activate(sectionKey) {
-    // Cambia la sección visible
-    sections.forEach(s => s.classList.toggle('is-active', s.dataset.section === sectionKey));
-
-    // Limpia marcas activas
-    topAnchors.forEach(a => a.classList.remove('is-active'));
-    lvl2LinksAll.forEach(a => a.classList.remove('is-active'));
-
-    // Marca activo Top si coincide
-    const topA = topAnchors.find(a => a.dataset.section === sectionKey);
-    if (topA) topA.classList.add('is-active');
-
-    // Marca activo lvl2 si coincide
-    const subA = findLinkBySectionKey(sectionKey);
-    if (subA) subA.classList.add('is-active');
-
-    app?.focus({ preventScroll: true });
-  }
-
-  // Mostrar/ocultar lvl2 y lvl3
-  function setDisplay(el, visible) {
+  const highlight = (el) => {
     if (!el) return;
-    el.hidden = !visible;
-    el.style.display = visible ? '' : 'none';
-  }
+    el.classList.add('is-highlighted');
+    setTimeout(() => el.classList.remove('is-highlighted'), 1200);
+  };
 
-  function updateMenuVisibility() {
-    // Cierra todos los lvl2
-    menuRoot.querySelectorAll('.menu-item.has-children .submenu.lvl2')
-      .forEach(box => setDisplay(box, false));
-
-    // Abre el lvl2 del item abierto (si existe)
-    const openItemLvl2 = menuRoot.querySelector(`.menu-item.has-children[data-key="${openKey}"] .submenu.lvl2`);
-    setDisplay(openItemLvl2, !!openItemLvl2);
-
-    // Lvl3 SOLO para Servicios (si usas ese árbol interno)
-    if (servicesItem) {
-      level2GroupsServices.forEach(g => {
-        const box = g.querySelector('.submenu.lvl3');
-        const visible = openKey === 'servicios' && g.dataset.key === openSecondKey;
-        setDisplay(box, visible);
-      });
+  const scrollToAnchor = (anchor) => {
+    if (!anchor) return;
+    const target = document.getElementById(anchor);
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      highlight(target);
     }
-  }
+  };
 
-  function updateOpenVisual() {
-    topItems.forEach(mi => mi.classList.toggle('is-open', mi?.dataset?.key === openKey));
-    updateMenuVisibility();
-  }
+  const loadSection = async (section) => {
+    if (cache.has(section)) return cache.get(section);
+    const url = SECTION_TO_PARTIAL[section];
+    if (!url) return '';
+    const res = await fetch(url, { credentials: 'same-origin' });
+    if (!res.ok) return '';
+    const html = await res.text();
+    cache.set(section, html);
+    return html;
+  };
 
-  function resetHighlightsIn(sectionEl) {
-    if (!sectionEl) return;
-    sectionEl.querySelectorAll('.hl-wrap').forEach(unwrap);
-    sectionEl.querySelectorAll('h2.is-highlighted, h3.is-highlighted').forEach(x => x.classList.remove('is-highlighted'));
-  }
+  const render = (html) => {
+    contentEl.innerHTML = html || '<p>Contenido no disponible.</p>';
+    // Enfoca el main para accesibilidad
+    document.getElementById('app')?.focus({ preventScroll: true });
+  };
 
-  function setOpen(nextKey) {
-    const prev = openKey;
-    openKey = nextKey || null;
+  // --- Router principal ---
+  const route = async () => {
+    const { section, anchor } = parseHash();
 
-    // Si abrimos Servicios y no hay grupo activo, cerramos todos los lvl3
-    if (openKey === 'servicios' && !openSecondKey && servicesItem) {
-      level2GroupsServices.forEach(g => setDisplay(g.querySelector('.submenu.lvl3'), false));
-    }
-
-    updateOpenVisual();
-
-    // Al cerrar o cambiar de item, resetea subnivel de Servicios
-    if (prev !== nextKey && prev === 'servicios') {
-      openSecondKey = null;
-      if (servicesItem) {
-        level2GroupsServices.forEach(g => {
-          const k = g.dataset.key;
-          const sec = document.querySelector(`.section[data-section="${k}"]`);
-          resetHighlightsIn(sec);
-        });
-      }
-    }
-  }
-
-  // ---- Submenús genéricos (lvl2) en cualquier item.has-children ----
-  function wireGenericLevel2() {
-    // Toggle de los items con hijos (abre/cierra su lvl2)
-    hasChildrenItems.forEach(mi => {
-      const a = mi.querySelector(':scope > a[data-section]');
-      if (!a) return;
-      const itemKey = mi.dataset.key; // ej: "servicios", "seccion-3", "seccion-8"
-
-      a.addEventListener('click', (e) => {
-        e.preventDefault();
-        const willClose = openKey === itemKey;
-        setOpen(willClose ? null : itemKey);
-      });
-    });
-
-    // Clic en enlaces de lvl2
-    menuRoot.querySelectorAll('.menu-item.has-children .lvl2-link[data-section]').forEach(link => {
-      link.addEventListener('click', (e) => {
-        e.preventDefault();
-
-        const parentItem = link.closest('.menu-item.has-children');
-        const parentKey = parentItem?.dataset.key;
-
-        const sectionKey = link.getAttribute('data-section'); // sección destino
-        const targetId   = link.getAttribute('data-target');  // opcional (ancla dentro de esa sección)
-        const groupKey   = link.closest('.submenu-group')?.dataset.key;
-
-        // Activa la sección
-        activate(sectionKey);
-        setOpen(parentKey || null);
-
-        const sectionEl = document.querySelector(`.section[data-section="${sectionKey}"]`);
-        resetHighlightsIn(sectionEl);
-
-        // Si hay ancla (p.ej. Legal → subsección dentro de seccion-8)
-        if (targetId) {
-          const targetEl = document.getElementById(targetId);
-          if (targetEl) {
-            if (!targetEl.querySelector('.hl-wrap')) {
-              const span = document.createElement('span');
-              span.className = 'hl-wrap';
-              while (targetEl.firstChild) span.appendChild(targetEl.firstChild);
-              targetEl.appendChild(span);
-            }
-            targetEl.classList.add('is-highlighted');
-            if (!isInViewport(targetEl)) {
-              targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-          }
-          // URL con el groupKey (más semántico)
-          if (groupKey) history.pushState({ key: groupKey, from: 'lvl2' }, '', `#${groupKey}`);
-        } else {
-          scrollToTop();
-          // Herramientas con página propia → URL a la sección
-          history.pushState({ key: sectionKey, from: 'lvl2' }, '', `#${sectionKey}`);
-        }
-
-        // Si el padre es Servicios y la sección es de nivel2 (seccion_lvl2-x), abre su lvl3
-        if (parentKey === 'servicios') {
-          openSecondKey = sectionKey; // ej: "seccion_lvl2-1"
-          updateMenuVisibility();
-        }
-      });
-    });
-  }
-
-  // ---- Solo para Servicios: construir lvl3 desde H2/H3 de cada sección de lvl2 ----
-  function buildServicesLvl3() {
-    if (!servicesItem) return;
-
-    level2GroupsServices.forEach(group => {
-      const key = group.dataset.key; // ej: "seccion_lvl2-1"
-      const section = sections.find(s => s.dataset.section === key);
-      const box = group.querySelector('.submenu.lvl3');
-      if (!box || !section) return;
-
-      box.innerHTML = '';
-
-      const allHeads = [...section.querySelectorAll('h2, h3')];
-      const mainH2 = section.querySelector('h2');
-
-      // 1) Tagline (p > strong) tras el H2 principal
-      if (mainH2) {
-        const next = mainH2.nextElementSibling;
-        const strongInP = next?.tagName?.toLowerCase() === 'p' && next.querySelector('strong');
-        if (strongInP) {
-          const targetEl = next;
-          const label = next.querySelector('strong')?.textContent?.trim() || next.textContent.trim();
-          ensureId(targetEl, 'tagline');
-
-          const a = document.createElement('a');
-          a.href = '#';
-          a.dataset.section = key;
-          a.dataset.target = targetEl.id;
-          a.textContent = label;
-
-          a.addEventListener('click', (e) => {
-            e.preventDefault();
-            if (!section.classList.contains('is-active')) activate(key);
-
-            box.querySelectorAll('a').forEach(x => x.classList.toggle('is-sub-active', x === a));
-
-            resetHighlightsIn(section);
-
-            const strong = targetEl.querySelector('strong');
-            if (strong && !strong.querySelector('.hl-wrap')) {
-              const span = document.createElement('span');
-              span.className = 'hl-wrap';
-              while (strong.firstChild) span.appendChild(strong.firstChild);
-              strong.appendChild(span);
-            }
-
-            if (!isInViewport(targetEl)) {
-              targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-
-            setOpen('servicios');
-            openSecondKey = key;
-            updateMenuVisibility();
-          });
-
-          box.appendChild(a);
-        }
-      }
-
-      // 2) Resto de H2/H3 (excepto el H2 principal)
-      const heads = allHeads.filter(h => h !== mainH2);
-      heads.forEach((h, idx) => {
-        ensureId(h, `sub-${idx + 1}`);
-
-        const a = document.createElement('a');
-        a.href = '#';
-        a.dataset.section = key;
-        a.dataset.target = h.id;
-        a.textContent = (h.textContent || '').trim();
-
-        a.addEventListener('click', (e) => {
-          e.preventDefault();
-          if (!section.classList.contains('is-active')) activate(key);
-
-          box.querySelectorAll('a').forEach(x => x.classList.toggle('is-sub-active', x === a));
-
-          resetHighlightsIn(section);
-
-          if (!h.querySelector('.hl-wrap')) {
-            const span = document.createElement('span');
-            span.className = 'hl-wrap';
-            while (h.firstChild) span.appendChild(h.firstChild);
-            h.appendChild(span);
-          }
-          h.classList.add('is-highlighted');
-
-          if (!isInViewport(h)) {
-            h.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }
-
-          setOpen('servicios');
-          openSecondKey = key;
-          updateMenuVisibility();
-        });
-
-        box.appendChild(a);
-      });
-
-      setDisplay(box, false); // lvl3 empieza colapsado
-    });
-  }
-
-  // Top-level (nivel 1) para items SIN hijos (navegación directa)
-  function wireTopLevelSingles() {
-    const singles = topItems.filter(mi => !mi.classList.contains('has-children'));
-    singles.forEach(mi => {
-      const a = mi.querySelector(':scope > a[data-section]');
-      if (!a) return;
-      const key = a.dataset.section;
-
-      a.addEventListener('click', (e) => {
-        e.preventDefault();
-        activate(key);
-        setOpen(key);
-        openSecondKey = null;
-        scrollToTop();
-        history.pushState({ key, from: 'top' }, '', `#${key}`);
-      });
-    });
-  }
-
-  // ---------- Routing: hash inicial + back/forward ----------
-  function applyRoute(key) {
-    // 1) Si existe una sección con data-section=key → ir directo a esa página
-    const sectionExists = !!document.querySelector(`.section[data-section="${key}"]`);
-    if (sectionExists) {
-      // ¿Tiene padre en el menú? (cuando es lvl2 de un item con hijos)
-      const link = findLinkBySectionKey(key);
-      const parentKey = link ? link.closest('.menu-item.has-children')?.dataset.key : null;
-
-      activate(key);
-      if (parentKey) setOpen(parentKey); else setOpen(key);
-
-      // Servicios: abrir lvl3 si aplica
-      if (parentKey === 'servicios') {
-        openSecondKey = key; // seccion_lvl2-x
-      } else {
-        openSecondKey = null;
-      }
-
-      updateMenuVisibility();
-      scrollToTop();
+    // sólo gestionamos "servicios" por ahora
+    if (section !== 'servicios') {
+      location.hash = '#servicios';
       return;
     }
 
-    // 2) Si el hash es una "groupKey" (p.ej. legal-privacidad) → encontrar su sección + ancla
-    if (groupKeys.has(key)) {
-      const group = menuRoot.querySelector(`.submenu-group[data-key="${key}"]`);
-      const link  = group?.querySelector('.lvl2-link[data-section]');
-      const parentKey = findParentKeyOfGroupKey(key);
-      if (link) {
-        const sectionKey = link.getAttribute('data-section');
-        const targetId   = link.getAttribute('data-target');
+    syncAccordion(section);
+    setAriaCurrent({ section, anchor });
 
-        activate(sectionKey);
-        setOpen(parentKey || null);
+    const html = await loadSection(section);
+    render(html);
+    if (anchor) scrollToAnchor(anchor);
+  };
 
-        const sectionEl = document.querySelector(`.section[data-section="${sectionKey}"]`);
-        resetHighlightsIn(sectionEl);
-
-        if (targetId) {
-          const targetEl = document.getElementById(targetId);
-          if (targetEl) {
-            if (!targetEl.querySelector('.hl-wrap')) {
-              const span = document.createElement('span');
-              span.className = 'hl-wrap';
-              while (targetEl.firstChild) span.appendChild(targetEl.firstChild);
-              targetEl.appendChild(span);
-            }
-            targetEl.classList.add('is-highlighted');
-            if (!isInViewport(targetEl)) {
-              targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-          } else {
-            scrollToTop();
-          }
-        } else {
-          scrollToTop();
-        }
-
-        if (parentKey === 'servicios') {
-          openSecondKey = sectionKey;
-        } else {
-          openSecondKey = null;
-        }
-        updateMenuVisibility();
-        return;
-      }
-    }
-
-    // 3) Fallback: trata el key como top-level normal
-    activate(key);
-    setOpen(key);
-    openSecondKey = null;
-    updateMenuVisibility();
-    scrollToTop();
-  }
-
-  // Logo → Inicio
-  brand?.addEventListener('click', (e) => {
+  // --- Eventos ---
+  // Navegación por clic en el sidebar (evita recargar y gestiona hash)
+  sidebar.addEventListener('click', (e) => {
+    const a = e.target.closest('a[data-section]');
+    if (!a) return;
     e.preventDefault();
-    const key = 'seccion-1';
-    activate(key);
-    setOpen(key);
-    openSecondKey = null;
-    scrollToTop();
-    history.pushState({ key, from: 'brand' }, '', `#${key}`);
+    const section = a.getAttribute('data-section');
+    const anchor = a.getAttribute('data-anchor') || '';
+    const nextHash = anchor ? `#${section}/${anchor}` : `#${section}`;
+    if (location.hash !== nextHash) {
+      location.hash = nextHash; // disparará hashchange -> route()
+    } else {
+      // mismo hash: dispara routing manual (útil si el usuario vuelve a pulsar)
+      route();
+    }
   });
 
-  // Arranque
-  const startKey = (location.hash || '#seccion-1').slice(1) || 'seccion-1';
+  window.addEventListener('hashchange', route);
 
-  buildServicesLvl3();     // solo Servicios (si existe)
-  wireTopLevelSingles();   // top sin hijos
-  wireGenericLevel2();     // top con hijos + lvl2 genérico
-
-  applyRoute(startKey);
-
-  // Back/forward
-  window.addEventListener('popstate', () => {
-    const key = (location.hash || '#seccion-1').slice(1) || 'seccion-1';
-    applyRoute(key);
-  });
+  // --- Arranque ---
+  (async () => {
+    // Hash por defecto
+    if (!location.hash) location.hash = '#servicios';
+    await route();
+  })();
 })();
