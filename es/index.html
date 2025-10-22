@@ -32,8 +32,10 @@
 
   
 <nav class="menu" id="sidebar-menu">
-  <!-- Inicio (enlace simple) -->
-  <a class="nav-top" href="#inicio" data-section="inicio" aria-label="Inicio">Inicio</a>
+  <!-- Inicio (estático, no desplegable) -->
+  <div class="nav-group nav-static">
+    <a class="nav-static-link" href="#inicio" data-section="inicio" aria-label="Inicio">Inicio</a>
+  </div>
 
   <!-- Servicios -->
   <details class="nav-group" data-section="servicios" open>
@@ -48,6 +50,7 @@
     </ul>
   </details>
 </nav>
+
   </aside>
 
   <main id="app" class="content" tabindex="-1">
