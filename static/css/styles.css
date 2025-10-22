@@ -77,7 +77,21 @@ body::before{
 /* Áreas de la grid */
 .sidebar{ grid-column: 1; grid-row: 2; }
 .content{ grid-column: 2; grid-row: 2; }
-#site-footer{ grid-column: 1 / -1; grid-row: 3; position: static; z-index: auto; }
+
+/* Slot del footer: se sitúa ya en la fila 3 antes de cargar el footer real */
+#footer-slot{ grid-column: 1 / -1; grid-row: 3; }
+
+/* Footer real (tras reemplazo) */
+#site-footer{
+  grid-column: 1 / -1;
+  grid-row: 3;
+  position: static !important;
+  z-index: auto !important;
+  top: auto !important;
+  bottom: auto !important;
+  left: auto !important;
+  right: auto !important;
+}
 
 /* === Botón tema === */
 .theme-toggle{
