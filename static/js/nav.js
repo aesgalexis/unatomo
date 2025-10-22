@@ -106,47 +106,58 @@
   }
 };
 
-  // --- Router principal ---
-  const route = async () => {
-    const { section, anchor } = parseHash();
-    setAriaCurrent({ section, anchor });
+// --- Router principal ---
+const route = async () => {
+  const { section, anchor } = parseHash();
+  setAriaCurrent({ section, anchor });
 
-    try {
-      // INICIO
-      if (section === 'inicio') {
-        const html = await fetchPartial(SECTION_TO_PARTIAL.inicio);
-        renderHTML(html);
-        return;
-      }
-
-      // SERVICIOS (overview o subsección)
-      if (section === 'servicios') {
-        const full = await fetchPartial(SECTION_TO_PARTIAL.servicios);
-
-        if (!anchor) {
-          renderHTML(renderServiciosOverview());
-          return;
-        }
-
-        const sliced = extractSubsection(full, anchor);
-        if (sliced) {
-          renderHTML(sliced);
-          // highlight y scroll
-          scrollToAnchor(anchor);
-        } else {
-          // si no existe el h2 pedido, mostramos overview
-          renderHTML(renderServiciosOverview());
-        }
-        return;
-      }
-
-      // Si llega aquí, sección desconocida → fallback a inicio
-      location.hash = '#inicio';
-    } catch (err) {
-      renderError('No se pudo cargar el contenido. Inténtalo de nuevo.');
-      // console.error(err);
+  try {
+    // INICIO
+    if (section === 'inicio') {
+      const html = await fetchPartial(SECTION_TO_PARTIAL.inicio);
+      renderHTML(html);
+      return;
     }
-  };
+
+    // SERVICIOS (overview o subsección)
+    if (section === 'servicios') {
+      const full = await fetchPartial(SECTION_TO_PARTIAL.servicios);
+
+      if (!anchor) {
+        renderHTML(renderServiciosOverview());
+        return;
+      }
+
+      const sliced = extractSubsection(full, anchor);
+      if (sliced) {
+        renderHTML(sliced);
+        // scroll solo si no es visible
+        scrollToAnchor(anchor);
+      } else {
+        renderHTML(renderServiciosOverview());
+      }
+      return;
+    }
+
+    // CONTACTO
+    if (section === 'contacto') {
+      const html = await fetchPartial(SECTION_TO_PARTIAL.contacto);
+      renderHTML(html);
+      // inicializa el formulario ahora que #contact-root existe
+      if (typeof window.initContacto === 'function') {
+        window.initContacto();
+      }
+      return;
+    }
+
+    // Fallback
+    location.hash = '#inicio';
+  } catch (err) {
+    renderError('No se pudo cargar el contenido. Inténtalo de nuevo.');
+    // console.error(err);
+  }
+};
+
 
   // --- Enlaces del sidebar (evita navegación plena, usamos hash) ---
   sidebar.addEventListener('click', (e) => {
