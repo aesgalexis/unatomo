@@ -134,3 +134,29 @@
 @media (max-width: 480px){
   .btn-submit{ width: 100%; }   /* botón a ancho completo en móvil */
 }
+/* Toast de contacto */
+.contact-toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-8px);
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: #16a34a;           /* éxito */
+  color: #ffffff;
+  box-shadow: 0 6px 16px rgba(0,0,0,.14);
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity .18s ease, transform .18s ease;
+  pointer-events: none;           /* no bloquea clicks */
+  font-weight: 600;
+}
+.contact-toast.is-visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Si quieres distintos colores por tipo (si los aplicas desde JS con dataset/type) */
+.form-status[data-type="success"] { color: #16a34a; }
+.form-status[data-type="error"]   { color: #dc2626; }
+
