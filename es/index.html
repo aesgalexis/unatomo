@@ -3,71 +3,56 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>unatomo core</title>
+  <title>unatomo core - sitio en construcción</title>
+  <meta name="robots" content="noindex, nofollow">
 
-  <!-- Estilos comunes -->
-  <link rel="preload" href="/static/img/logo-unatomo-v1.5.svg" as="image" />
-  <link rel="stylesheet" href="/static/css/styles.css" />
-  <link rel="stylesheet" href="/static/css/footer.css" />
-  <link rel="stylesheet" href="/static/css/contact.css" />
-  <link rel="stylesheet" href="/static/css/tools/cdd.css" />
-  <meta name="color-scheme" content="light dark" />
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #ffffff;
+      --fg: #111111;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0b0b0c;
+        --fg: #e5e7eb;
+      }
+    }
+    body {
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      text-align: center;
+      padding: 20px;
+    }
+    img.logo {
+      width: 100%;
+      max-width: 180px;
+      height: auto;
+      margin-bottom: 40px;
+      opacity: 0.9;
+    }
+    h1 {
+      font-size: clamp(40px, 6vw, 80px);
+      margin: 0;
+      letter-spacing: -1px;
+    }
+    p {
+      font-size: clamp(18px, 2vw, 24px);
+      margin-top: 16px;
+      opacity: .75;
+    }
+  </style>
 </head>
 <body>
-
-  <!-- Modo claro/oscuro -->
-  <button id="themeToggle" class="theme-toggle" type="button" aria-label="Cambiar tema" title="Cambiar tema">
-    <span class="icon" aria-hidden="true">🌙</span>
-    <span class="label">Claro</span>
-  </button>
-
-  <div class="atom-tint" aria-hidden="true"></div>
-
-  <!-- Sidebar -->
-  <aside class="sidebar" role="navigation" aria-label="Navegación principal">
-    <!-- Logo -->
-<a class="brand" href="#inicio" data-section="inicio" aria-label="Inicio">
-  <img src="/static/img/logo-unatomo-v1.5.svg" alt="unatomo core logo" width="384" height="384" />
-</a>
-
-  
-<nav class="menu" id="sidebar-menu">
-  <!-- Inicio (estático, no desplegable) -->
-  <div class="nav-group nav-static">
-    <a class="nav-static-link" href="#inicio" data-section="inicio" aria-label="Inicio">Inicio</a>
-  </div>
-
-  <!-- Servicios -->
-  <details class="nav-group" data-section="servicios" open>
-    <summary>Servicios</summary>
-    <ul class="nav-list">
-      <li><a href="#servicios/asistencia-tecnica" data-section="servicios" data-anchor="asistencia-tecnica">Asistencia técnica</a></li>
-      <li><a href="#servicios/mantenimiento" data-section="servicios" data-anchor="mantenimiento">Mantenimiento</a></li>
-      <li><a href="#servicios/asesoria" data-section="servicios" data-anchor="asesoria">Asesoría</a></li>
-      <li><a href="#servicios/control-produccion" data-section="servicios" data-anchor="control-produccion">Control de producción</a></li>
-      <li><a href="#servicios/optimizacion-procesos" data-section="servicios" data-anchor="optimizacion-procesos">Optimización de procesos</a></li>
-      <li><a href="#servicios/formacion" data-section="servicios" data-anchor="formacion">Formación</a></li>
-    </ul>
-  </details>
-
-    <!-- Contacto (estático) -->
-  <div class="nav-group nav-static">
-    <a class="nav-static-link" href="#contacto" data-section="contacto" aria-label="Contacto">Contacto</a>
-  </div>
-</nav>
-
-  </aside>
-
-  <main id="app" class="content" tabindex="-1">
-    <div id="content" class="section-slot" aria-live="polite"></div>
-  </main>
-
-  <div id="footer-slot"></div> 
-
-  <script src="/static/js/theme.js" defer></script>
-  <script src="/static/js/nav.js" defer></script>
-  <script src="/static/js/footer.js" defer></script>
-  <script src="/static/js/contacto.js" defer></script>
-
+  <img src="/es/static/img/logo-unatomo-v1.5.svg" alt="unatomo logo" class="logo" loading="lazy" />
+  <h1>unatomo core</h1>
+  <p>Sitio en construcción</p>
 </body>
 </html>
