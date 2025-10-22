@@ -4,9 +4,18 @@
   <div class="contact-wrap">
     <!-- Formulario con textos en HTML. Mensajes en data-attrs para i18n -->
     <form class="contact-form" id="contact-form"
-          novalidate
-          data-success="¡Mensaje enviado! (demo)"
-          data-error="Por favor, revisa los campos obligatorios.">
+      action="https://formspree.io/f/mkgqlvqj"
+      method="POST"
+      novalidate
+      data-success="¡Mensaje enviado! Gracias, te responderemos pronto."
+      data-error="Por favor, revisa los campos obligatorios.">
+
+  <!-- Honeypot anti-spam -->
+  <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" style="display:none">
+
+  <!-- Opcional: asunto que verás en el panel/email -->
+  <input type="hidden" name="_subject" value="Nuevo mensaje desde unatomo.com">
+
       <!-- Fila 1: Nombre / Email -->
       <div class="contact-row">
         <div class="field">
