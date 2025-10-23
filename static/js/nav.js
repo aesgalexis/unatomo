@@ -6,6 +6,7 @@
   'inicio': '/es/content/inicio.html',
   'servicios': '/es/content/servicios.html',
   'contacto': '/es/content/contacto.html',
+  'legal': '/es/content/legal.html',
 };
 
   const contentEl = document.getElementById('content');
