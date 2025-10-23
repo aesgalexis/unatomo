@@ -55,6 +55,7 @@ body{
   color: var(--fg);
   line-height: 1.6;
   text-rendering: optimizeLegibility;
+  padding-bottom: 34px;
 
   /* Grid: sidebar | contenido | footer */
   display: grid;
