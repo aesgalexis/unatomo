@@ -1,162 +1,155 @@
-/* === Contacto: layout === */
-#contact-root { margin-top: 12px; }
-
+/* ====== Layout general del bloque de contacto ====== */
 .contact-wrap{
   display: grid;
-  grid-template-columns: 1fr 320px;
-  gap: 24px;
+  grid-template-columns: 1fr minmax(260px, 320px);
+  gap: var(--space-6);
   align-items: start;
 }
 
-/* Formulario */
+/* En móvil: una columna */
+@media (max-width: 900px){
+  .contact-wrap{
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ====== Formulario ====== */
 .contact-form{
   display: grid;
-  gap: 12px;
+  gap: var(--space-4);
 }
 
+/* Filas del formulario (por defecto 2 columnas iguales) */
 .contact-row{
-  display: flex;        
-  gap: 12px;
-  flex-wrap: wrap;        
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
 }
 
+/* Fila ocupando todo el ancho */
+.field--full{
+  grid-column: 1 / -1;
+}
+
+/* Fila final: botón + estado (a la derecha) */
+.submit-row{
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  column-gap: 12px;
+}
+
+/* En móvil, filas a una sola columna */
+@media (max-width: 640px){
+  .contact-row{
+    grid-template-columns: 1fr;
+  }
+  .submit-row{
+    grid-template-columns: 1fr;
+    row-gap: 10px;
+  }
+}
+
+/* Campos */
 .field{
-  flex: 1 1 0;    
-  min-width: 220px;        
   display: grid;
   gap: 6px;
 }
-
 .label{
   font-weight: 600;
   color: var(--fg);
 }
 
-.input, .textarea, .select{
+/* Inputs / Select / Textarea */
+.input,
+.select,
+.textarea{
   width: 100%;
   padding: 10px 12px;
   border: 1px solid var(--border);
   border-radius: 12px;
   background: color-mix(in oklab, var(--bg) 92%, transparent);
   color: var(--fg);
+  font: inherit;
 }
-
-.select {
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  background-image:
-    linear-gradient(45deg, transparent 50%, currentColor 50%),
-    linear-gradient(135deg, currentColor 50%, transparent 50%),
-    linear-gradient(to right, transparent, transparent);
-  background-position:
-    calc(100% - 18px) calc(1em - 2px),
-    calc(100% - 12px) calc(1em - 2px),
-    0 0;
-  background-size:
-    6px 6px,
-    6px 6px,
-    100% 100%;
-  background-repeat: no-repeat;
-}
-
 .textarea{
   min-height: 160px;
   resize: vertical;
 }
 
 .input:focus-visible,
-.textarea:focus-visible,
-.select:focus-visible{
+.select:focus-visible,
+.textarea:focus-visible{
   outline: 2px dashed #94a3b8;
   outline-offset: 3px;
 }
 
-/* Botón enviar — verde estilo GitHub */
+/* Botón enviar */
 .btn-submit{
-  align-self: start;
-  padding: 12px 16px;
+  padding: 10px 14px;
   border-radius: 12px;
-  border: 1px solid #2da44e;
-  background: #2da44e;   
-  color: #fff;
+  border: 1px solid var(--border);
+  background: var(--menu-active-bg);
+  color: var(--fg);
   font-weight: 700;
   cursor: pointer;
-  transition: filter .15s ease, transform .04s ease, background .15s ease, border-color .15s ease;
 }
 .btn-submit:hover{
-  background: #2c974b;
-  border-color: #2c974b;
-  filter: brightness(1.02);
-}
-.btn-submit:active{
-  transform: translateY(1px);
-  background: #2a8f47;
-  border-color: #2a8f47;
-}
-.btn-submit:focus-visible{
-  outline: 2px dashed #94a3b8;
-  outline-offset: 3px;
+  filter: brightness(1.03);
 }
 
-/* Lateral de información */
+/* Estado del formulario (a la derecha del botón) */
+.form-status{
+  min-height: 1.2em;                /* reserva espacio para evitar saltos */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--muted);
+  font-weight: 600;
+}
+.form-status.is-ok{ color: #16a34a; }   /* verde */
+.form-status.is-error{ color: #dc2626; }/* rojo */
+
+/* Honeypot anti-spam (oculto) */
+.hp{
+  display: none !important;
+}
+
+/* ====== Aside de información ====== */
 .contact-aside{
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 14px;
-  background: color-mix(in oklab, var(--bg) 92%, transparent);
+  border-left: 1px solid var(--border);
+  padding-left: var(--space-4);
+  color: var(--muted);
   display: grid;
   gap: 8px;
 }
 .contact-aside h3{
   margin: 0;
-  font-size: 16px;
+  font-size: 15px;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+  color: var(--submenu-fg, var(--muted));
 }
-.contact-aside p,
-.contact-aside li{
-  margin: 0;
-  color: var(--fg);
-}
+.contact-aside p{ margin: 0; }
 .contact-aside ul{
-  list-style: none;
-  padding: 0;
   margin: 0;
-  display: grid;
-  gap: 4px;
+  padding-left: 18px;
+}
+.contact-aside a{
+  color: #3b82f6;
+  text-decoration: none;
+}
+.contact-aside a:hover,
+.contact-aside a:focus{
+  color: #2563eb;
+  text-decoration: underline;
 }
 
-/* Responsive */
-@media (max-width: 980px){
-  .contact-wrap{
-    grid-template-columns: 1fr; 
+/* En móvil, sin borde lateral */
+@media (max-width: 900px){
+  .contact-aside{
+    border-left: none;
+    padding-left: 0;
+    border-top: 1px dashed var(--border);
+    padding-top: var(--space-4);
   }
 }
-@media (max-width: 480px){
-  .btn-submit{ width: 100%; } 
-}
-/* Toast de contacto */
-.contact-toast {
-  position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%) translateY(-8px);
-  padding: 12px 16px;
-  border-radius: 10px;
-  background: #16a34a;           /* éxito */
-  color: #ffffff;
-  box-shadow: 0 6px 16px rgba(0,0,0,.14);
-  z-index: 1000;
-  opacity: 0;
-  transition: opacity .18s ease, transform .18s ease;
-  pointer-events: none;           /* no bloquea clicks */
-  font-weight: 600;
-}
-.contact-toast.is-visible {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
-
-
-.form-status[data-type="success"] { color: #16a34a; }
-.form-status[data-type="error"]   { color: #dc2626; }
-
