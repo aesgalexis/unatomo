@@ -1,50 +1,58 @@
-<!-- FOOTER -->
-<footer id="site-footer" role="contentinfo" aria-label="Pie de página">
-  <div class="footer-wrap">
-    <div class="footer-top two-col">
-      <!-- Izquierda: brand + newsletter -->
-      <div class="footer-left">
-        <h2 class="footer-brand-title">unatomo core</h2>
-        <br>
-        <form class="footer-newsletter" action="#" method="post" aria-label="Suscripción al boletín" onsubmit="return false;">
-          <label for="nl-email" class="nl-label">Suscríbete para mantenerte actualizado:</label>
-          <div class="nl-row">
-            <input id="nl-email" class="nl-input" type="email" name="email" placeholder="tu@correo.com" required
-                   autocomplete="email" inputmode="email" />
-            <button class="nl-btn" type="submit">Suscribirme</button>
-          </div>
-          <p class="nl-note" aria-live="polite" hidden></p>
-        </form>
-      </div>
+<!-- FOOTER (colapsable) -->
+<footer id="site-footer" role="contentinfo" aria-label="Pie de página" class="footer-collapsible" data-state="closed">
+  <!-- Barra visible (34px): clic para abrir/cerrar -->
+  <button class="footer-toggle" type="button" aria-controls="footer-panel" aria-expanded="false">
+    <span class="footer-toggle-text">© <span id="year-now"></span> UNATOMO CORE SL | Todos los derechos reservados</span>
+    <span class="footer-caret" aria-hidden="true">▾</span>
+  </button>
 
-      <!-- Derecha: tres secciones vacías -->
-      <div class="footer-right">
-        <div class="footer-grid" role="navigation" aria-label="Secciones del sitio">
-          <div class="footer-col" id="footer-sec1">
-            <h3 class="footer-title">Sec 1</h3>
-          </div>
-          <div class="footer-col" id="footer-sec2">
-            <h3 class="footer-title">Sec 2</h3>
-          </div>
-          <div class="footer-col" id="footer-sec3">
-            <h3 class="footer-title">Sec 3</h3>
+  <!-- Panel expandible -->
+  <div class="footer-panel" id="footer-panel" aria-hidden="true">
+    <div class="footer-wrap">
+      <div class="footer-top two-col">
+        <div class="footer-left">
+          <h2 class="footer-brand-title">unatomo core</h2>
+          <br>
+          <form class="footer-newsletter" action="#" method="post" aria-label="Suscripción al boletín" onsubmit="return false;">
+            <label for="nl-email" class="nl-label">Suscríbete para mantenerte actualizado:</label>
+            <div class="nl-row">
+              <input id="nl-email" class="nl-input" type="email" name="email" placeholder="tu@correo.com" required
+                     autocomplete="email" inputmode="email" />
+              <button class="nl-btn" type="submit">Suscribirme</button>
+            </div>
+            <p class="nl-note" aria-live="polite" hidden></p>
+          </form>
+        </div>
+
+        <div class="footer-right">
+          <div class="footer-grid" role="navigation" aria-label="Secciones del sitio">
+            <div class="footer-col" id="footer-sec1">
+              <h3 class="footer-title">Sec 1</h3>
+            </div>
+            <div class="footer-col" id="footer-sec2">
+              <h3 class="footer-title">Sec 2</h3>
+            </div>
+            <div class="footer-col" id="footer-sec3">
+              <h3 class="footer-title">Sec 3</h3>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Pie inferior restaurado -->
-    <div class="footer-bottom footer-centered">
-      <p>© <span id="year-now"></span> UNATOMO CORE SL | Todos los derechos reservados</p>
-      <ul class="footer-legal-inline">
-        <li><a href="#" aria-disabled="true">Accesibilidad</a></li>
-        <li><a href="#" aria-disabled="true">Mapa del sitio</a></li>
-      </ul>
+      <div class="footer-bottom footer-centered">
+        <p>© <span id="year-now-2"></span> UNATOMO CORE SL | Todos los derechos reservados</p>
+        <ul class="footer-legal-inline">
+          <li><a href="#" aria-disabled="true">Accesibilidad</a></li>
+          <li><a href="#" aria-disabled="true">Mapa del sitio</a></li>
+        </ul>
+      </div>
     </div>
   </div>
 
-  <!-- Script para año automático -->
   <script>
-    document.getElementById('year-now').textContent = new Date().getFullYear();
+    // Años automáticos (barra y contenido)
+    const y = String(new Date().getFullYear());
+    document.getElementById('year-now')?.replaceChildren(document.createTextNode(y));
+    document.getElementById('year-now-2')?.replaceChildren(document.createTextNode(y));
   </script>
 </footer>
