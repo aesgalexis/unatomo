@@ -84,17 +84,18 @@
 }
 
 /* Botón enviar */
-.btn-submit{
+.btn-submit {
   padding: 10px 14px;
   border-radius: 12px;
-  border: 1px solid var(--border);
-  background: var(--menu-active-bg);
-  color: var(--fg);
+  border: 1px solid #2ea44f;
+  background: #2ea44f;
+  color: white;
   font-weight: 700;
   cursor: pointer;
 }
-.btn-submit:hover{
-  filter: brightness(1.03);
+.btn-submit:hover {
+  background: #2c974b;
+  border-color: #2c974b;
 }
 
 /* Estado del formulario (a la derecha del botón) */
