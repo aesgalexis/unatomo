@@ -1,253 +1,96 @@
-/* === Footer (solo estilos visuales) === */
-/* La colocación en la grid (fila 3, ancho completo) se define en styles.css
-   para evitar conflictos. */
-
-#site-footer {
-  background: inherit;
-  color: var(--muted);
-  border-top: 1px solid var(--border);
-  padding: var(--space-6) var(--space-3);
-  padding-bottom: 30px;
-  margin-top: 0;  
-}
-
-#site-footer .footer-wrap {
-  max-width: var(--content-max);
-  margin: 0 auto;
-  display: grid;
-  gap: var(--space-6);
-}
-
-/* TOP: 1/3 (marca+newsletter) | 2/3 (4 columnas) */
-.footer-top.two-col {
-  display: grid;
-  grid-template-columns: 1fr 2fr;
-  gap: var(--space-6);
-  align-items: start;
-}
-
-/* Derecha: 4 columnas con mínima cómoda */
-.footer-grid {
-  display: grid;
-  gap: var(--space-4);
-  grid-template-columns: repeat(4, minmax(180px, 1fr));
-}
-
-.footer-title {
-  margin: 0 0 6px 0;
-  font-size: 14px;
-  text-transform: uppercase;
-  letter-spacing: .04em;
-  color: var(--submenu-fg);
-}
-
-.footer-links {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 6px;
-}
-.footer-links a {
-  color: var(--submenu-fg);
-  text-decoration: none;
-}
-.footer-links a:hover,
-.footer-links a:focus-visible {
-  text-decoration: underline;
-  outline: none;
-}
-
-.footer-brand-title {
-  margin: 0 0 4px 0;
-  font-weight: 800;
-  font-size: clamp(22px, 2.4vw, 32px);
-  line-height: 1.2;
-  color: var(--fg);
-}
-.footer-claim {
-  margin: 0 0 var(--space-3) 0;
-  color: var(--fg);
-  font-weight: 600;
-}
-
-/* Newsletter */
-.footer-newsletter { display: grid; gap: 6px; }
-.nl-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
-.nl-input {
-  padding: 10px 12px;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: color-mix(in oklab, var(--bg) 92%, transparent);
-  color: var(--fg);
-}
-.nl-input:focus-visible { outline: 2px dashed #94a3b8; outline-offset: 3px; }
-.nl-btn {
-  padding: 10px 14px;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  background: var(--menu-active-bg);
-  color: var(--fg);
-  font-weight: 700;
-  cursor: pointer;
-}
-.nl-btn:hover { filter: brightness(1.03); }
-.nl-note { font-size: 0.9em; }
-
-/* CTAs opcionales */
-.footer-cta { display: flex; gap: 10px; flex-wrap: wrap; }
-.cta-primary, .cta-secondary {
-  display: inline-block; text-decoration: none; font-weight: 700;
-  padding: 10px 14px; border-radius: 12px; border: 1px solid var(--border);
-}
-.cta-primary { background: var(--menu-active-bg); color: var(--fg); }
-.cta-secondary { background: var(--menu-hover-bg); color: var(--fg); }
-
-/* BOTTOM centrado */
-.footer-bottom.footer-centered {
-  display: grid;
-  gap: 8px;
-  justify-items: center;
-  text-align: center;
-  border-top: 1px dashed var(--border);
-  padding-top: 12px;
-  padding-bottom: 18px;
-}
-.footer-bottom.footer-centered p { margin: 0; color: var(--muted); }
-.footer-legal-inline {
-  list-style: none; margin: 0; padding: 0;
-  display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
-}
-.footer-legal-inline a {
-  color: var(--submenu-fg);
-  text-decoration: none;
-}
-.footer-legal-inline a:hover,
-.footer-legal-inline a:focus-visible {
-  text-decoration: underline;
-  outline: none;
-}
-
-/* Footer hover accent (naranja vivo) */
-#site-footer .footer-links a:hover,
-#site-footer .footer-links a:focus-visible,
-#site-footer .footer-legal-inline a:hover,
-#site-footer .footer-legal-inline a:focus-visible,
-#site-footer .footer-address a:hover,
-#site-footer .footer-address a:focus-visible,
-#site-footer .nl-note a:hover,
-#site-footer .nl-note a:focus-visible {
-  color: var(--footer-accent);
-  outline: none;
-}
-#site-footer .social:hover,
-#site-footer .social:focus-visible {
-  color: var(--footer-accent);
-  border-color: var(--footer-accent);
-  outline: none;
-}
-
-/* === Footer colapsable (ajustes) === */
-.footer-collapsible {
+/* === Footer colapsable fijo al fondo === */
+.footer-collapsible{
   position: fixed;
   left: 0; right: 0; bottom: 0;
   z-index: 1200;
+  display: flex;               /* panel arriba + toggle abajo */
+  flex-direction: column;
+  margin: 0; padding: 0;       /* evita sumar altura */
   background: color-mix(in oklab, var(--bg) 94%, transparent);
   -webkit-backdrop-filter: blur(6px);
   backdrop-filter: blur(6px);
   border-top: 1px solid var(--border);
-  margin: 0;
-  padding: 0;
 }
 
-/* Barra: EXACTO 34px, sin extras y sin negrita */
-.footer-toggle {
+/* Barra inferior: EXACTO 34px */
+.footer-toggle{
   all: unset;
   display: flex; align-items: center; justify-content: center;
   gap: 10px;
   height: 34px;
-  line-height: 34px;
+  line-height: 34px;           /* alinea verticalmente */
   width: 100%;
   cursor: pointer;
   color: var(--muted);
-  font-weight: 400;           /* no bold */
-  padding: 0 12px;            /* solo horizontal */
-  margin: 0;                  /* sin margen que sume altura */
+  font-weight: 400;            /* sin negrita */
+  padding: 0 12px;             /* solo horizontal */
 }
-.footer-toggle:focus-visible { outline: 2px dashed #94a3b8; outline-offset: 2px; }
-.footer-toggle-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.footer-caret { transition: transform .18s ease, opacity .18s ease; opacity: .9; }
+.footer-toggle:focus-visible{ outline: 2px dashed #94a3b8; outline-offset: 2px; }
+.footer-toggle-text{ white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.footer-caret{ opacity: .9; }
 
-/* Panel expandible (sin línea punteada) */
-.footer-panel {
+/* Panel expandible (arriba) */
+.footer-panel{
   overflow: hidden;
-  max-height: 0;
+  max-height: 0;               /* cerrado: no ocupa */
   transition: max-height .22s ease;
-  border-top: none;           /* quita la punteada */
-  margin: 0; padding: 0;
+  margin: 0; padding: 0;       /* sin relleno que sume al cerrar */
+  border-top: none;            /* sin línea punteada */
 }
 
-/* Cuando está abierto, JS ajusta max-height; caret cambia por JS (sin rotación). */
-.footer-collapsible.is-open .footer-caret { transform: none; }
-
-/* Mantén tu layout interno, pero sin bordes punteados extra */
-#site-footer .footer-wrap {
+/* Contenido interno centrado y limpio */
+#site-footer .footer-wrap{
   max-width: var(--content-max);
-  margin: 0 auto;
+  margin: 0 auto;              /* centrado de TODO el contenido */
+  padding: var(--space-6) var(--space-3) 18px;
   display: grid;
   gap: var(--space-6);
-  padding: var(--space-6) var(--space-3) 18px;
 }
 
-/* Tu grid original */
-.footer-top.two-col {
+.footer-top.two-col{
   display: grid;
   grid-template-columns: 1fr 2fr;
   gap: var(--space-6);
   align-items: start;
 }
 
-.footer-grid {
+.footer-grid{
   display: grid;
   gap: var(--space-4);
   grid-template-columns: repeat(4, minmax(180px, 1fr));
 }
 
-/* Footer bottom sin línea punteada */
-.footer-bottom.footer-centered {
+/* Parte inferior centrada, sin líneas */
+.footer-bottom.footer-centered{
   display: grid;
   gap: 8px;
   justify-items: center;
   text-align: center;
-  border-top: none;           /* quitar punteada */
+  border-top: none;            /* sin punteada */
   padding-top: 0;
   padding-bottom: 6px;
 }
-.footer-bottom.footer-centered p { margin: 0; color: var(--muted); }
+.footer-bottom.footer-centered p{ margin: 0; color: var(--muted); }
 
-/* Links, etc. conservan estilo */
-.footer-legal-inline {
+.footer-legal-inline{
   list-style: none; margin: 0; padding: 0;
   display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
 }
-.footer-legal-inline a {
+.footer-legal-inline a{
   color: var(--submenu-fg);
   text-decoration: none;
 }
 .footer-legal-inline a:hover,
-.footer-legal-inline a:focus-visible {
+.footer-legal-inline a:focus-visible{
   text-decoration: underline;
   outline: none;
 }
 
-/* Responsive como antes */
-@media (max-width: 900px) {
-  .footer-top.two-col { grid-template-columns: 1fr; }
-  .footer-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+/* Responsive */
+@media (max-width: 900px){
+  .footer-top.two-col{ grid-template-columns: 1fr; }
+  .footer-grid{ grid-template-columns: repeat(2, minmax(0,1fr)); }
 }
-@media (max-width: 520px) {
-  .footer-grid { grid-template-columns: 1fr; }
+@media (max-width: 520px){
+  .footer-grid{ grid-template-columns: 1fr; }
 }
-
-}
-
