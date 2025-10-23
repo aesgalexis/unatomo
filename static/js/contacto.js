@@ -3,7 +3,7 @@ window.initContacto = function initContacto(){
   const form = document.getElementById('contact-form');
   if (!form) return;
 
-  const statusEl = form.querySelector('.form-status'); // opcional: si quieres seguir mostrando estado inline
+  const statusEl = form.querySelector('.form-status'); 
   const toast = document.getElementById('contact-toast');
 
   const setStatus = (msg, type = 'info') => {
