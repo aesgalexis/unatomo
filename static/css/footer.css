@@ -147,12 +147,93 @@
   outline: none;
 }
 
-/* === Responsive footer === */
+/* === Footer colapsable === */
+.footer-collapsible {
+  position: fixed;        /* se ancla abajo y se expande hacia arriba */
+  left: 0; right: 0; bottom: 0;
+  z-index: 1200;
+  /* Misma "opacidad" perceptual que la topbar: */
+  background: color-mix(in oklab, var(--bg) 94%, transparent); /* misma proporción que topbar */
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  border-top: 1px solid var(--border);
+}
+
+/* Barra visible (34px de alto) */
+.footer-toggle {
+  all: unset;
+  display: flex; align-items: center; justify-content: center;
+  gap: 10px;
+  height: 34px;
+  width: 100%;
+  cursor: pointer;
+  color: var(--muted);
+  font-weight: 600;
+  padding-inline: 12px;
+}
+.footer-toggle:focus-visible { outline: 2px dashed #94a3b8; outline-offset: 2px; }
+.footer-toggle-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.footer-caret { transition: transform .18s ease, opacity .18s ease; opacity: .9; }
+
+/* Panel expandible */
+.footer-panel {
+  overflow: hidden;
+  max-height: 0;                 /* colapsado */
+  transition: max-height .22s ease;
+  border-top: 1px dashed var(--border);
+}
+
+/* Cuando está abierto */
+.footer-collapsible.is-open .footer-panel {
+  /* max-height se ajusta por JS al scrollHeight exacto */
+}
+.footer-collapsible.is-open .footer-caret {
+  transform: rotate(180deg);
+}
+
+/* Conserva tu diseño interno existente */
+#site-footer .footer-wrap {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  display: grid;
+  gap: var(--space-6);
+  padding: var(--space-6) var(--space-3) 18px;
+}
+.footer-top.two-col {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: var(--space-6);
+  align-items: start;
+}
+
+.footer-grid {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(4, minmax(180px, 1fr));
+}
+
+.footer-bottom.footer-centered {
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  text-align: center;
+  border-top: 1px dashed var(--border);
+  padding-top: 12px;
+  padding-bottom: 6px;
+}
+.footer-bottom.footer-centered p { margin: 0; color: var(--muted); }
+
+/* Hover/links tal como tenías */
+.footer-links a { color: var(--submenu-fg); text-decoration: none; }
+.footer-links a:hover,
+.footer-links a:focus-visible { text-decoration: underline; outline: none; }
+
+/* Responsive igual que antes */
 @media (max-width: 900px) {
   .footer-top.two-col { grid-template-columns: 1fr; }
   .footer-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
-  .nl-row { grid-template-columns: 1fr; }
 }
 @media (max-width: 520px) {
   .footer-grid { grid-template-columns: 1fr; }
 }
+
