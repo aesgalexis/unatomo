@@ -150,6 +150,25 @@ if (section === 'contacto') {
   }
   return;
 }
+    
+    // LEGAL (overview o subsección)
+if (section === 'legal') {
+  const full = await fetchPartial(SECTION_TO_PARTIAL.legal);
+
+  if (!anchor) {
+    renderHTML(`<section><h1>Información legal</h1><p>Selecciona una categoría en el menú lateral.</p></section>`);
+    return;
+  }
+
+  const sliced = extractSubsection(full, anchor);
+  if (sliced) {
+    renderHTML(sliced);
+    scrollToAnchor(anchor);
+  } else {
+    renderHTML(`<section><h1>Información legal</h1><p>Selecciona una categoría en el menú lateral.</p></section>`);
+  }
+  return;
+}
 
     // Fallback
     location.hash = '#inicio';
