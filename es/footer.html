@@ -1,12 +1,6 @@
-<!-- FOOTER (colapsable) -->
-<footer id="site-footer" role="contentinfo" aria-label="Pie de página" class="footer-collapsible" data-state="closed">
-  <!-- Barra visible (34px): clic para abrir/cerrar -->
-  <button class="footer-toggle" type="button" aria-controls="footer-panel" aria-expanded="false">
-    <span class="footer-toggle-text">© <span id="year-now"></span> UNATOMO CORE SL | Todos los derechos reservados</span>
-    <span class="footer-caret" aria-hidden="true">▴</span>
-  </button>
-
-  <!-- Panel expandible -->
+<footer id="site-footer" role="contentinfo" aria-label="Pie de página"
+        class="footer-collapsible" data-state="closed">
+  <!-- Panel expandible (arriba) -->
   <div class="footer-panel" id="footer-panel" aria-hidden="true">
     <div class="footer-wrap">
       <div class="footer-top two-col">
@@ -25,20 +19,13 @@
 
         <div class="footer-right">
           <div class="footer-grid" role="navigation" aria-label="Secciones del sitio">
-            <div class="footer-col" id="footer-sec1">
-              <h3 class="footer-title">Sec 1</h3>
-            </div>
-            <div class="footer-col" id="footer-sec2">
-              <h3 class="footer-title">Sec 2</h3>
-            </div>
-            <div class="footer-col" id="footer-sec3">
-              <h3 class="footer-title">Sec 3</h3>
-            </div>
+            <div class="footer-col" id="footer-sec1"><h3 class="footer-title">Sec 1</h3></div>
+            <div class="footer-col" id="footer-sec2"><h3 class="footer-title">Sec 2</h3></div>
+            <div class="footer-col" id="footer-sec3"><h3 class="footer-title">Sec 3</h3></div>
           </div>
         </div>
       </div>
 
-      <!-- Sin la línea duplicada de © dentro -->
       <div class="footer-bottom footer-centered">
         <ul class="footer-legal-inline">
           <li><a href="#" aria-disabled="true">Accesibilidad</a></li>
@@ -48,8 +35,13 @@
     </div>
   </div>
 
+  <!-- Barra visible (34px) -->
+  <button class="footer-toggle" type="button" aria-controls="footer-panel" aria-expanded="false">
+    <span class="footer-toggle-text">© <span id="year-now"></span> UNATOMO CORE SL | Todos los derechos reservados</span>
+    <span class="footer-caret" aria-hidden="true">▴</span>
+  </button>
+
   <script>
-    // Año automático en la barra
     const y = String(new Date().getFullYear());
     document.getElementById('year-now')?.replaceChildren(document.createTextNode(y));
   </script>
