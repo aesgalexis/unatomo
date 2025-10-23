@@ -10,36 +10,35 @@
   fetch(footerPath, { credentials: 'same-origin', cache: 'no-store' })
     .then(res => res.ok ? res.text() : Promise.reject(res.status))
     .then(html => {
-      // Montamos el footer
       slot.outerHTML = html || '<footer id="site-footer"><p style="text-align:center;opacity:.6;">Footer no disponible.</p></footer>';
 
-      // Después de montar, inicializamos el modo colapsable
       const footer = document.getElementById('site-footer');
       const toggle = footer?.querySelector('.footer-toggle');
       const panel  = footer?.querySelector('.footer-panel');
+      const caret  = footer?.querySelector('.footer-caret');
 
-      if (!footer || !toggle || !panel) return;
+      if (!footer || !toggle || !panel || !caret) return;
 
       let open = false;
 
-      const setOpen = (nextOpen) => {
-        open = !!nextOpen;
+      const setOpen = (next) => {
+        open = !!next;
         footer.classList.toggle('is-open', open);
         footer.dataset.state = open ? 'open' : 'closed';
 
-        // Calcula altura exacta cuando abre; 0 al cerrar
         if (open) {
           panel.style.maxHeight = panel.scrollHeight + 'px';
           panel.setAttribute('aria-hidden', 'false');
           toggle.setAttribute('aria-expanded', 'true');
+          caret.textContent = '▾'; // abierto: flecha hacia abajo
         } else {
           panel.style.maxHeight = '0px';
           panel.setAttribute('aria-hidden', 'true');
           toggle.setAttribute('aria-expanded', 'false');
+          caret.textContent = '▴'; // cerrado: flecha hacia arriba (abre hacia arriba)
         }
       };
 
-      // Recalcula si cambia el contenido (por seguridad)
       const ro = new ResizeObserver(() => {
         if (open) panel.style.maxHeight = panel.scrollHeight + 'px';
       });
@@ -47,7 +46,6 @@
 
       toggle.addEventListener('click', () => setOpen(!open));
 
-      // Cerrar con Escape cuando el foco esté en el footer
       footer.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && open) {
           e.stopPropagation();
