@@ -16,29 +16,28 @@
       const toggle = footer?.querySelector('.footer-toggle');
       const panel  = footer?.querySelector('.footer-panel');
       const caret  = footer?.querySelector('.footer-caret');
-
       if (!footer || !toggle || !panel || !caret) return;
 
       let open = false;
 
       const setOpen = (next) => {
         open = !!next;
-        footer.classList.toggle('is-open', open);
         footer.dataset.state = open ? 'open' : 'closed';
 
         if (open) {
           panel.style.maxHeight = panel.scrollHeight + 'px';
           panel.setAttribute('aria-hidden', 'false');
           toggle.setAttribute('aria-expanded', 'true');
-          caret.textContent = '▾'; // abierto: flecha hacia abajo
+          caret.textContent = '▾';   // abierto
         } else {
           panel.style.maxHeight = '0px';
           panel.setAttribute('aria-hidden', 'true');
           toggle.setAttribute('aria-expanded', 'false');
-          caret.textContent = '▴'; // cerrado: flecha hacia arriba (abre hacia arriba)
+          caret.textContent = '▴';   // cerrado
         }
       };
 
+      // Recalcular si el contenido interno cambia (fuentes, ancho, etc.)
       const ro = new ResizeObserver(() => {
         if (open) panel.style.maxHeight = panel.scrollHeight + 'px';
       });
@@ -54,7 +53,6 @@
         }
       });
 
-      // Estado inicial: cerrado
       setOpen(false);
     })
     .catch(() => {
