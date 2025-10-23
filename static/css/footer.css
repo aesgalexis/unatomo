@@ -147,51 +147,50 @@
   outline: none;
 }
 
-/* === Footer colapsable === */
+/* === Footer colapsable (ajustes) === */
 .footer-collapsible {
-  position: fixed;        /* se ancla abajo y se expande hacia arriba */
+  position: fixed;
   left: 0; right: 0; bottom: 0;
   z-index: 1200;
-  /* Misma "opacidad" perceptual que la topbar: */
-  background: color-mix(in oklab, var(--bg) 94%, transparent); /* misma proporción que topbar */
+  background: color-mix(in oklab, var(--bg) 94%, transparent);
   -webkit-backdrop-filter: blur(6px);
   backdrop-filter: blur(6px);
   border-top: 1px solid var(--border);
+  margin: 0;
+  padding: 0;
 }
 
-/* Barra visible (34px de alto) */
+/* Barra: EXACTO 34px, sin extras y sin negrita */
 .footer-toggle {
   all: unset;
   display: flex; align-items: center; justify-content: center;
   gap: 10px;
   height: 34px;
+  line-height: 34px;
   width: 100%;
   cursor: pointer;
   color: var(--muted);
-  font-weight: 600;
-  padding-inline: 12px;
+  font-weight: 400;           /* no bold */
+  padding: 0 12px;            /* solo horizontal */
+  margin: 0;                  /* sin margen que sume altura */
 }
 .footer-toggle:focus-visible { outline: 2px dashed #94a3b8; outline-offset: 2px; }
 .footer-toggle-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .footer-caret { transition: transform .18s ease, opacity .18s ease; opacity: .9; }
 
-/* Panel expandible */
+/* Panel expandible (sin línea punteada) */
 .footer-panel {
   overflow: hidden;
-  max-height: 0;                 /* colapsado */
+  max-height: 0;
   transition: max-height .22s ease;
-  border-top: 1px dashed var(--border);
+  border-top: none;           /* quita la punteada */
+  margin: 0; padding: 0;
 }
 
-/* Cuando está abierto */
-.footer-collapsible.is-open .footer-panel {
-  /* max-height se ajusta por JS al scrollHeight exacto */
-}
-.footer-collapsible.is-open .footer-caret {
-  transform: rotate(180deg);
-}
+/* Cuando está abierto, JS ajusta max-height; caret cambia por JS (sin rotación). */
+.footer-collapsible.is-open .footer-caret { transform: none; }
 
-/* Conserva tu diseño interno existente */
+/* Mantén tu layout interno, pero sin bordes punteados extra */
 #site-footer .footer-wrap {
   max-width: var(--content-max);
   margin: 0 auto;
@@ -199,6 +198,8 @@
   gap: var(--space-6);
   padding: var(--space-6) var(--space-3) 18px;
 }
+
+/* Tu grid original */
 .footer-top.two-col {
   display: grid;
   grid-template-columns: 1fr 2fr;
@@ -212,28 +213,41 @@
   grid-template-columns: repeat(4, minmax(180px, 1fr));
 }
 
+/* Footer bottom sin línea punteada */
 .footer-bottom.footer-centered {
   display: grid;
   gap: 8px;
   justify-items: center;
   text-align: center;
-  border-top: 1px dashed var(--border);
-  padding-top: 12px;
+  border-top: none;           /* quitar punteada */
+  padding-top: 0;
   padding-bottom: 6px;
 }
 .footer-bottom.footer-centered p { margin: 0; color: var(--muted); }
 
-/* Hover/links tal como tenías */
-.footer-links a { color: var(--submenu-fg); text-decoration: none; }
-.footer-links a:hover,
-.footer-links a:focus-visible { text-decoration: underline; outline: none; }
+/* Links, etc. conservan estilo */
+.footer-legal-inline {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+}
+.footer-legal-inline a {
+  color: var(--submenu-fg);
+  text-decoration: none;
+}
+.footer-legal-inline a:hover,
+.footer-legal-inline a:focus-visible {
+  text-decoration: underline;
+  outline: none;
+}
 
-/* Responsive igual que antes */
+/* Responsive como antes */
 @media (max-width: 900px) {
   .footer-top.two-col { grid-template-columns: 1fr; }
   .footer-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
 }
 @media (max-width: 520px) {
   .footer-grid { grid-template-columns: 1fr; }
+}
+
 }
 
