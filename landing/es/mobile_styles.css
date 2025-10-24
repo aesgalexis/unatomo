@@ -10,3 +10,66 @@ html, body { overscroll-behavior-y: contain; }
     min-height: 100vh;
   }
 }
+/* ===== Modo carrusel en móvil para #screen2 ===== */
+
+/* Una tarjeta por vista, swipe horizontal con snap */
+#screen2 .screen2class .grid {
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  gap: 16px;
+  padding-bottom: 48px; /* espacio para los puntitos */
+  scrollbar-width: none;          /* Firefox */
+}
+#screen2 .screen2class .grid::-webkit-scrollbar { display: none; } /* WebKit */
+
+#screen2 .screen2class .card {
+  flex: 0 0 100%;
+  max-width: 100%;
+  scroll-snap-align: center;
+}
+
+/* Puntitos (opuestos al botón: abajo-centro fijo) */
+#screen2 .dots {
+  position: fixed;
+  left: 50%;
+  bottom: 12px;
+  transform: translateX(-50%);
+  z-index: 900;
+  display: flex;
+  gap: 8px;
+  pointer-events: auto;
+}
+
+/* Colores de puntitos: invertidos respecto al fondo de pantalla par
+   (light → gris claro de fondo ⇒ puntos oscuros; dark → gris oscuro ⇒ puntos claros) */
+#screen2 {
+  --dot-active: var(--even-fg);
+  /* “apagado” = mitad de intensidad del activo */
+  --dot: color-mix(in srgb, var(--even-fg) 50%, transparent);
+}
+
+#screen2 .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--dot);
+  border: none;
+  padding: 0;
+  opacity: 0.9;
+}
+
+#screen2 .dot[aria-current="true"],
+#screen2 .dot.active {
+  background: var(--dot-active); /* totalmente blanco o negro según el modo */
+  opacity: 1;
+}
+
+/* Evita rebotes de scroll en móvil */
+html, body { overscroll-behavior-y: contain; }
+
+/* Altura estable por pantalla (usa --vh de nav.js) */
+#screen2 .screen2class { height: calc(var(--vh, 1svh) * 100); }
+/* Nota: ya tienes .screen con min-height; aquí garantizamos la altura del contenedor en móviles */
