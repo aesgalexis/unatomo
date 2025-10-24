@@ -15,6 +15,13 @@
     });
   }, { threshold: [0.6] });
   sections.forEach(s => io.observe(s));
+  // Fija --vh al alto real; evita saltos cuando la barra se oculta/muestra
+function setVH() {
+  const vh = window.innerHeight * 0.01;
+  document.documentElement.style.setProperty('--vh', `${vh}px`);
+}
+window.addEventListener('DOMContentLoaded', setVH);
+window.addEventListener('resize', setVH);
 
   // Utilidad
   const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
