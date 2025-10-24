@@ -1,71 +1,46 @@
-/* Reset mínimo */
-line-height: 1.05;
-letter-spacing: -0.02em;
-margin: 0 0 12px 0;
+:root {
+  color-scheme: light dark;
+  --bg: #ffffff;
+  --fg: #111111;
 }
 
-
-.card p {
-font-family: var(--font);
-color: var(--fg-muted);
-font-size: clamp(18px, 2vw, 24px);
-line-height: 1.5;
-margin: 0;
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0b0b0c;
+    --fg: #e5e7eb;
+  }
 }
 
-
-/* Toggle de tema */
-.theme-toggle {
-position: fixed;
-top: 16px;
-right: 16px;
-z-index: 40;
-font: 600 13px/1 var(--font);
-display: inline-flex;
-align-items: center;
-gap: 8px;
-padding: 10px 12px;
-background: var(--card-bg);
-color: var(--fg-muted);
-border: 1px solid var(--card-border);
-border-radius: 999px;
-cursor: pointer;
-transition: transform .15s ease;
-}
-.theme-toggle:hover { transform: translateY(-1px); }
-.theme-toggle:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
-.theme-toggle .icon { display: inline-block; width: 1.2em; text-align: center; }
-
-
-/* Paginador (opcional) */
-.pager {
-position: fixed;
-bottom: 16px;
-left: 50%;
-transform: translateX(-50%);
-display: flex;
-gap: 8px;
+body {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  text-align: center;
+  padding: 20px;
 }
 
-
-.pager button {
-font: 600 12px/1 var(--font);
-background: var(--card-bg);
-color: var(--fg-muted);
-border: 1px solid var(--card-border);
-border-radius: 999px;
-padding: 8px 10px;
-cursor: pointer;
-transition: transform .15s ease;
+img.logo {
+  width: 100%;
+  max-width: 180px;
+  height: auto;
+  margin-bottom: 40px;
+  opacity: 0.9;
 }
 
+h1 {
+  font-size: clamp(40px, 6vw, 80px);
+  margin: 0;
+  letter-spacing: -1px;
+}
 
-.pager button:hover { transform: translateY(-1px); }
-.pager button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
-
-
-/* Soporte para usuarios con motion reducido */
-@media (prefers-reduced-motion: reduce) {
-#snap { scroll-behavior: auto; }
-.pager button, .theme-toggle { transition: none; }
+p {
+  font-size: clamp(18px, 2vw, 24px);
+  margin-top: 16px;
+  opacity: .75;
 }
