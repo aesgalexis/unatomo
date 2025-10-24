@@ -44,3 +44,18 @@ p {
   margin-top: 16px;
   opacity: .75;
 }
+.screen {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Segunda pantalla */
+#screen2 {
+  background: #1a1a1a;
+  color: #e5e7eb;
+}
+
+
