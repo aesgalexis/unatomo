@@ -177,7 +177,8 @@ html, body { overscroll-behavior-y: contain; }
   border: 1px solid var(--current-fg);
   border-radius: 12px;
   padding: 24px;
-
+  padding-left: 32px;
+  padding-right: 32px;
   display: flex;
   flex-direction: column;
   justify-content: flex-start; 
