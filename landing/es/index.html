@@ -21,26 +21,52 @@
   </div>
   
 <div class="screen" id="screen2">
-    <section class="acerca">
-      <h2 class="section-title">Acerca de Nosotros · Filosofía</h2>
+  <section class="acerca">
+    <h2 class="section-title">Acerca de Nosotros · Filosofía</h2>
 
-      <div class="grid">
-        <article class="card acerca-card">
-          <h3>Experiencia con Criterio Técnico Superior</h3>
-          <p>Fundamentamos nuestro servicio en más de 15 años de liderazgo técnico en el sector, incluyendo la gestión operativa de grandes lavanderías industriales en España. </p>
-          <p>Este bagaje nos dota de un criterio profesional inigualable, priorizando siempre la estabilidad y la rentabilidad de su ciclo productivo. Nuestro enfoque va más allá del reemplazo de piezas; nos centramos en la comprensión profunda del funcionamiento integral de su planta.</p>
+    <!-- Variante ESCRITORIO: 1 sola tarjeta (visible en >=600px) -->
+    <div class="grid acerca-desktop">
+      <article class="card acerca-card">
+        <h3>Experiencia con Criterio Técnico Superior</h3>
+        <p>Fundamentamos nuestro servicio en más de 15 años de liderazgo técnico en el sector, incluyendo la gestión operativa de grandes lavanderías industriales en España.</p>
+        <p>Este bagaje nos dota de un criterio profesional inigualable, priorizando siempre la estabilidad y la rentabilidad de su ciclo productivo. Nuestro enfoque va más allá del reemplazo de piezas; nos centramos en la comprensión profunda del funcionamiento integral de su planta.</p>
 
-          <h3>Metodología Analítica y Preventiva</h3>
-          <p>Hemos desarrollado una capacidad analítica que excede los estándares de la industria. Nuestra especialidad es identificar y corregir las causas raíz de los fallos. </p>
-          <p>Nos enfocamos en la optimización de procesos y el ajuste mecánico preciso (plegadoras, calandras, túneles), detectando proactivamente desajustes y componentes en riesgo. Esta visión predictiva, respaldada por colaboradores expertos en áreas específicas (química, electricidad), garantiza el máximo rendimiento.</p>
-        
-          <h3>Compromiso y Alcance Geográfico</h3>
-          <p>La pasión por la excelencia nos impulsa a garantizar la solución completa de cada desafío técnico. Nuestra filosofía es simple: identificar el problema y trabajar hasta estabilizar la operatividad. </p>
-          <p>Si bien operamos desde Mallorca, nuestra estructura nos permite ofrecer servicios de alto nivel y respuesta rápida en la Península Ibérica, Italia, Grecia y otros puntos de Europa. Invertir en nuestra experiencia es invertir en disponibilidad sin precedentes.</p>
-        </article>
-      </div>
-    </section>
+        <h3>Metodología Analítica y Preventiva</h3>
+        <p>Hemos desarrollado una capacidad analítica que excede los estándares de la industria. Nuestra especialidad es identificar y corregir las causas raíz de los fallos.</p>
+        <p>Nos enfocamos en la optimización de procesos y el ajuste mecánico preciso (plegadoras, calandras, túneles), detectando proactivamente desajustes y componentes en riesgo. Esta visión predictiva, respaldada por colaboradores expertos en áreas específicas (química, electricidad), garantiza el máximo rendimiento.</p>
+
+        <h3>Compromiso y Alcance Geográfico</h3>
+        <p>La pasión por la excelencia nos impulsa a garantizar la solución completa de cada desafío técnico. Nuestra filosofía es simple: identificar el problema y trabajar hasta estabilizar la operatividad.</p>
+        <p>Si bien operamos desde Mallorca, nuestra estructura nos permite ofrecer servicios de alto nivel y respuesta rápida en la Península Ibérica, Italia, Grecia y otros puntos de Europa. Invertir en nuestra experiencia es invertir en disponibilidad sin precedentes.</p>
+      </article>
+    </div>
+
+    <!-- Variante MÓVIL: 3 tarjetas + dots (visible en <=600px) -->
+    <div class="grid acerca-mobile">
+      <article class="card acerca-card"><h3>Experiencia con Criterio Técnico Superior</h3>
+        <p>Fundamentamos nuestro servicio en más de 15 años de liderazgo técnico…</p>
+        <p>Este bagaje nos dota de un criterio profesional inigualable…</p>
+      </article>
+
+      <article class="card acerca-card"><h3>Metodología Analítica y Preventiva</h3>
+        <p>Hemos desarrollado una capacidad analítica que excede los estándares…</p>
+        <p>Nos enfocamos en la optimización de procesos y el ajuste mecánico…</p>
+      </article>
+
+      <article class="card acerca-card"><h3>Compromiso y Alcance Geográfico</h3>
+        <p>La pasión por la excelencia nos impulsa a garantizar la solución…</p>
+        <p>Operamos desde Mallorca, con respuesta rápida en Península, Italia, Grecia…</p>
+      </article>
+    </div>
+
+    <div class="dots dots-acerca" aria-label="Paginación acerca">
+      <button class="dot" type="button" aria-label="Tarjeta 1"></button>
+      <button class="dot" type="button" aria-label="Tarjeta 2"></button>
+      <button class="dot" type="button" aria-label="Tarjeta 3"></button>
+    </div>
+  </section>
 </div>
+
   
 <div class="screen" id="screen3">
   <section class="servicios">
