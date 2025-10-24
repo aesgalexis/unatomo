@@ -176,14 +176,15 @@ html, body { overscroll-behavior-y: contain; }
 
 /* Tarjeta */
 #screen2 .screen2class .card {
-  border: 1px solid var(--current-fg);   /* línea blanca/negra según modo */
+  border: 1px solid var(--current-fg);
   border-radius: 12px;
   padding: 16px;
 
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
+  justify-content: flex-start; 
+  align-items: flex-start;      
+  gap: 8px;                      
 
   background: transparent;
   color: var(--current-fg);
