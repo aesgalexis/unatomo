@@ -1,5 +1,4 @@
-/* Estilos específicos para móviles (archivo ya enlazado con media query) */
-
+html, body { overscroll-behavior-y: contain; }
 /* Altura estable por pantalla usando la variable --vh fijada en nav.js */
 .screen {
   min-height: calc(var(--vh, 1svh) * 100);
