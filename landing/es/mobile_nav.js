@@ -3,18 +3,21 @@
   const cards    = scroller ? Array.from(scroller.querySelectorAll('.card')) : [];
   const dotsWrap = document.querySelector('#screen3 .dots');
   const dots     = dotsWrap ? Array.from(dotsWrap.querySelectorAll('.dot')) : [];
+  const screen3  = document.getElementById('screen3');
 
-  // --- Mostrar los dots solo cuando #screen3 está a la vista ---
-  const screen3 = document.getElementById('screen3');
-  if (screen3 && dotsWrap) {
-    const visIO = new IntersectionObserver((entries) => {
-      const e = entries[0];
-      const on = e.isIntersecting && e.intersectionRatio >= 0.25;
-      // control robusto por clase en <body>
-      document.body.classList.toggle('in-screen3', on);
-    }, { threshold: [0, 0.25, 0.5, 0.75, 1] });
-    visIO.observe(screen3);
+  // --- Mostrar los dots solo cuando #screen3 ocupa toda la pantalla ---
+  function updateDotsVisibility() {
+    if (!screen3 || !dotsWrap) return;
+    const r = screen3.getBoundingClientRect();
+    const fullyVisible = r.top <= 0 && r.bottom >= window.innerHeight;
+    dotsWrap.hidden = !fullyVisible;
+    document.body.classList.toggle('in-screen3', fullyVisible);
   }
+  // ocultar en cuanto empieza a moverse y decidir al asentarse
+  window.addEventListener('scroll', updateDotsVisibility, { passive: true });
+  window.addEventListener('resize', updateDotsVisibility);
+  window.addEventListener('load',   updateDotsVisibility);
+  updateDotsVisibility();
 
   if (!scroller || cards.length === 0 || dots.length !== cards.length) return;
 
