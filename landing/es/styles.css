@@ -1,14 +1,42 @@
 :root {
   color-scheme: light dark;
+
+  /* Tema base (LIGHT por defecto) */
   --bg: #ffffff;
   --fg: #111111;
+
+  /* Pantallas pares en LIGHT (gris 15% oscuro) */
+  --even-bg: hsl(0 0% 15%);
+  --even-fg: #e5e7eb;
 }
 
+/* Si el usuario NO ha elegido tema manualmente, seguimos el sistema */
 @media (prefers-color-scheme: dark) {
   :root {
+    /* Tema base en DARK */
     --bg: #0b0b0c;
     --fg: #e5e7eb;
+
+    /* Pantallas pares en DARK (gris 85% claro) */
+    --even-bg: hsl(0 0% 85%);
+    --even-fg: #111111;
   }
+}
+
+/* Si el usuario ELIGE tema con el botón, esto tiene prioridad sobre el sistema */
+:root[data-theme="light"] {
+  --bg: #ffffff;
+  --fg: #111111;
+
+  --even-bg: hsl(0 0% 15%); /* gris 15% (oscuro) */
+  --even-fg: #e5e7eb;
+}
+:root[data-theme="dark"] {
+  --bg: #0b0b0c;            /* negro del sitio */
+  --fg: #e5e7eb;
+
+  --even-bg: hsl(0 0% 85%); /* gris 85% (claro) */
+  --even-fg: #111111;
 }
 
 /* Alturas base */
@@ -92,31 +120,14 @@ p {
    COLORES DE LAS PANTALLAS
    ========================= */
 
-/* IMPARES (1,3,5,...) */
+/* IMPARES (1,3,5,...) → heredan el color base del tema */
 .screen:nth-of-type(odd) {
-  /* Light */
-  background: #ffffff;
-  color: #111111;
-}
-@media (prefers-color-scheme: dark) {
-  .screen:nth-of-type(odd) {
-    /* Dark */
-    background: #000000; /* o #0b0b0c si prefieres */
-    color: #e5e7eb;
-  }
+  background: var(--bg);
+  color: var(--fg);
 }
 
-/* PARES (2,4,6,...) */
+/* PARES (2,4,6,...) → gris según modo (15% light / 85% dark) */
 .screen:nth-of-type(even) {
-  /* Light → gris 15% (oscuro) */
-  background: hsl(0 0% 15%);
-  color: #e5e7eb;
+  background: var(--even-bg);
+  color: var(--even-fg);
 }
-@media (prefers-color-scheme: dark) {
-  .screen:nth-of-type(even) {
-    /* Dark → gris 85% (claro) */
-    background: hsl(0 0% 85%);
-    color: #111111;
-  }
-}
-
