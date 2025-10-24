@@ -1,59 +1,71 @@
-* { box-sizing: border-box; }
-html, body { height: 100%; }
-body { margin: 0; }
-
-
-/* Sistema de color */
-:root {
-color-scheme: light dark;
---font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-
-
-/* Colores por defecto (usados si no hay data-theme) */
---bg-1: #0b0b0c; /* negro profundo */
---bg-2: #16181b; /* gris muy oscuro */
---fg-strong: #ffffff;
---fg-muted: #c8ccd2;
---card-bg: rgba(255,255,255,0.03);
---card-border: rgba(255,255,255,0.12);
---focus: #7dd3fc; /* cyan suave */
+/* Reset mínimo */
+line-height: 1.05;
+letter-spacing: -0.02em;
+margin: 0 0 12px 0;
 }
 
 
-/* Tema oscuro explícito */
-html[data-theme="dark"] {
---bg-1: #0b0b0c; /* negro */
---bg-2: #16181b; /* gris oscuro */
---fg-strong: #ffffff;
---fg-muted: #c8ccd2;
---card-bg: rgba(255,255,255,0.03);
---card-border: rgba(255,255,255,0.12);
+.card p {
+font-family: var(--font);
+color: var(--fg-muted);
+font-size: clamp(18px, 2vw, 24px);
+line-height: 1.5;
+margin: 0;
 }
 
 
-/* Tema claro explícito */
-html[data-theme="light"] {
---bg-1: #ffffff; /* blanco */
---bg-2: #f2f3f5; /* gris claro */
---fg-strong: #111111;
---fg-muted: #6b7280; /* gris medio */
---card-bg: rgba(0,0,0,0.02);
---card-border: rgba(0,0,0,0.08);
+/* Toggle de tema */
+.theme-toggle {
+position: fixed;
+top: 16px;
+right: 16px;
+z-index: 40;
+font: 600 13px/1 var(--font);
+display: inline-flex;
+align-items: center;
+gap: 8px;
+padding: 10px 12px;
+background: var(--card-bg);
+color: var(--fg-muted);
+border: 1px solid var(--card-border);
+border-radius: 999px;
+cursor: pointer;
+transition: transform .15s ease;
+}
+.theme-toggle:hover { transform: translateY(-1px); }
+.theme-toggle:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.theme-toggle .icon { display: inline-block; width: 1.2em; text-align: center; }
+
+
+/* Paginador (opcional) */
+.pager {
+position: fixed;
+bottom: 16px;
+left: 50%;
+transform: translateX(-50%);
+display: flex;
+gap: 8px;
 }
 
 
-/* Contenedor de secciones con scroll-snap */
-#snap {
-height: 100vh;
-overflow-y: auto;
-scroll-snap-type: y mandatory;
-scroll-behavior: smooth;
+.pager button {
+font: 600 12px/1 var(--font);
+background: var(--card-bg);
+color: var(--fg-muted);
+border: 1px solid var(--card-border);
+border-radius: 999px;
+padding: 8px 10px;
+cursor: pointer;
+transition: transform .15s ease;
 }
 
 
-/* Cada sección ocupa la pantalla completa */
-.section {
-min-height: 100vh;
-display: grid;
-place-items: center; /* centra la tarjeta */
+.pager button:hover { transform: translateY(-1px); }
+.pager button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+
+/* Soporte para usuarios con motion reducido */
+@media (prefers-reduced-motion: reduce) {
+#snap { scroll-behavior: auto; }
+.pager button, .theme-toggle { transition: none; }
 }
