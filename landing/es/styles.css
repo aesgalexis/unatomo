@@ -133,7 +133,76 @@ p {
 }
 html, body { overscroll-behavior-y: contain; }
 
-/* ===== Pantalla 2: contenedor genérico servicios (título + grid 3×3) ===== */
+/* ===== Pantalla 2: Acerca de Nosotros / Filosofía ===== */
+
+/* Colores locales de la pantalla par (gris) */
+#screen2 {
+  --current-bg: var(--even-bg);
+  --current-fg: var(--even-fg);
+  --current-muted: color-mix(in srgb, var(--current-fg) 70%, transparent);
+}
+
+#screen2 .acerca {
+  max-width: 1125px;        /* mismo “lienzo” que servicios */
+  max-height: 812px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+#screen2 .acerca .section-title {
+  font-size: clamp(28px, 4vw, 48px);
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+  margin: 88px 0 24px;      /* aire bajo el botón fijo */
+  color: var(--current-fg);
+}
+
+/* Grid 3×3 en escritorio */
+#screen2 .acerca .grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: 1fr;
+  gap: 20px;
+  height: 100%;
+}
+
+/* Tarjeta única que ocupa todo el grid */
+#screen2 .acerca .acerca-card {
+  grid-column: 1 / -1;
+  grid-row: 1 / -1;
+
+  border: 1px solid var(--current-fg);
+  border-radius: 12px;
+  padding: 24px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;   /* contenido alineado arriba */
+  align-items: flex-start;
+  gap: 10px;
+
+  background: transparent;
+  color: var(--current-fg);
+}
+
+#screen2 .acerca .acerca-card h3 {
+  margin: 0;
+  font-weight: 600;
+  font-size: clamp(16px, 2vw, 20px);
+  color: var(--current-fg);
+}
+
+#screen2 .acerca .acerca-card p {
+  margin: 0;
+  font-size: clamp(14px, 1.4vw, 16px);
+  line-height: 1.5;
+  color: var(--current-muted);
+}
+
+
+/* ===== Pantalla 3 contenedor genérico servicios (título + grid 3×3) ===== */
 
 /* Variables locales para colores de pantalla PAR (gris),
    derivadas de --even-bg / --even-fg que ya definiste: */
