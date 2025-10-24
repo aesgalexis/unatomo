@@ -78,7 +78,7 @@ html, body { overscroll-behavior-y: contain; }
 }
 
 /* se muestran SOLO cuando el <body> indica que #screen3 está a la vista */
-body.in-screen2 #screen3 .dots {
+body.in-screen3 #screen3 .dots {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
