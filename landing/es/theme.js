@@ -1,40 +1,46 @@
-(() => {
-  'use strict';
-  const STORAGE_KEY = 'ui-theme'; // 'light' | 'dark'
-  const btn = document.getElementById('themeToggle');
-  const metaColor = document.querySelector('meta[name="color-scheme"]');
+(function () {
+  const root = document.documentElement;
+  const btn  = document.getElementById("theme-toggle");
+  if (!btn) return;
 
-  const saved = localStorage.getItem(STORAGE_KEY);
-  const initial = (saved === 'light' || saved === 'dark') ? saved : 'light';
-  applyTheme(initial);
+  const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
 
-  const mq = window.matchMedia('(prefers-color-scheme: dark)');
-  const onChange = (e) => {
-    const hasManual = localStorage.getItem(STORAGE_KEY);
-    if (hasManual) return;
-    applyTheme(e.matches ? 'dark' : 'light');
-  };
-  if (mq.addEventListener) mq.addEventListener('change', onChange);
-  else if (mq.addListener) mq.addListener(onChange);
+  // Lee guardado (light|dark) o usa preferencia del sistema
+  const saved = localStorage.getItem("theme");
+  const effective = saved || (prefersDark ? "dark" : "light");
 
-  btn?.addEventListener('click', () => {
-    const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
-    applyTheme(next);
-    localStorage.setItem(STORAGE_KEY, next);
+  // Solo fija atributo si el usuario ya eligió antes; si no, deja actuar al sistema
+  if (saved) root.setAttribute("data-theme", saved);
+
+  setBtnLabel(getCurrentTheme());
+
+  btn.addEventListener("click", () => {
+    const current = getCurrentTheme();
+    const next = current === "dark" ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    localStorage.setItem("theme", next);
+    setBtnLabel(next);
   });
 
-  function applyTheme(mode) {
-    document.documentElement.dataset.theme = mode;
-    const icon  = mode === 'dark' ? '☀️' : '🌙';
-    const text  = mode === 'dark' ? 'Claro' : 'Oscuro';
-    const label = mode === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro';
+  // Si el usuario cambia el tema del SO y NO hay elección guardada, respeta el cambio
+  if (!saved && window.matchMedia) {
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
+      // No tocamos localStorage; solo reflejamos el estado visual del botón
+      setBtnLabel(e.matches ? "dark" : "light");
+      root.removeAttribute("data-theme"); // vuelve a dejar que el sistema mande
+    });
+  }
 
-    btn?.querySelector('.icon')?.replaceChildren(document.createTextNode(icon));
-    btn?.querySelector('.label')?.replaceChildren(document.createTextNode(text));
-    if (btn) {
-      btn.setAttribute('aria-label', label);
-      btn.setAttribute('title', label);
-    }
-    metaColor?.setAttribute('content', mode === 'dark' ? 'dark light' : 'light dark');
+  function getCurrentTheme() {
+    // Prioriza data-theme si existe; si no, usa sistema
+    const attr = root.getAttribute("data-theme");
+    if (attr === "light" || attr === "dark") return attr;
+    return prefersDark ? "dark" : "light";
+  }
+
+  function setBtnLabel(mode) {
+    // Opcional: cambia icono/label accesible
+    btn.textContent = mode === "dark" ? "☼" : "☾";
+    btn.setAttribute("aria-label", mode === "dark" ? "Cambiar a claro" : "Cambiar a oscuro");
   }
 })();
