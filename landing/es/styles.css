@@ -42,6 +42,7 @@ body.snap {
   scroll-snap-stop: always;
 }
 
+/* Padding horizontal del contenido (para evitar franjas laterales) */
 .screen > * {
   padding-left: 20px;
   padding-right: 20px;
@@ -87,16 +88,29 @@ p {
 }
 #theme-toggle:hover { opacity: 1; }
 
-/* Pantalla 2: gris fijo por tema del SISTEMA (NO cambia con el botón) */
-#screen2 {
-  background: hsl(0 0% 50%);  /* ~85% en light */
+/* =========================
+   COLORES DE LAS PANTALLAS
+   ========================= */
+
+/* Pantallas grises (2 y 4): light 85% / dark 15% (según sistema, NO botón) */
+#screen2,
+#screen4 {
+  background: hsl(0 0% 85%);  /* light */
   color: #111111;
 }
 @media (prefers-color-scheme: dark) {
-  #screen2 {
-    background: hsl(0 0% 15%); /* ~15% en dark */
+  #screen2,
+  #screen4 {
+    background: hsl(0 0% 15%); /* dark */
     color: #e5e7eb;
   }
+}
+
+/* Pantallas negras (3 y 5) */
+#screen3,
+#screen5 {
+  background: #000;
+  color: #e5e7eb;
 }
 
 /* Soporte para tu toggle global (resto del sitio) */
