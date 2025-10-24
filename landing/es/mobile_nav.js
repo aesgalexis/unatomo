@@ -7,16 +7,12 @@
   // --- Mostrar los dots solo cuando #screen2 está a la vista ---
   const screen2 = document.getElementById('screen2');
   if (screen2 && dotsWrap) {
-    // oculto por defecto hasta que entre en vista
-    dotsWrap.hidden = true;
-
     const visIO = new IntersectionObserver((entries) => {
       const e = entries[0];
-      // si al menos un 25% de #screen2 está visible, mostramos los dots
       const on = e.isIntersecting && e.intersectionRatio >= 0.25;
-      dotsWrap.hidden = !on;
+      // control robusto por clase en <body>
+      document.body.classList.toggle('in-screen2', on);
     }, { threshold: [0, 0.25, 0.5, 0.75, 1] });
-
     visIO.observe(screen2);
   }
 
