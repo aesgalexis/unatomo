@@ -52,19 +52,49 @@ p {
   align-items: center;
 }
 
-/* Segunda pantalla */
-#screen2 {
-  background: #1a1a1a;
-  color: #e5e7eb;
+/* Scroll a pantallas completas (snap obligatorio) */
+html, body {
+  height: 100%;
+}
+
+body {
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+}
+
+.screen {
+  min-height: 100vh;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+/* Pantalla 2: colores por tema (usar luminosidad aprox. 15% dark / 85% light) */
+:root {
+  --screen2-bg: hsl(0 0% 85%); /* fallback claro */
+  --screen2-fg: #111111;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --screen2-bg: hsl(0 0% 15%);
+    --screen2-fg: #e5e7eb;
+  }
 }
 
 :root[data-theme="light"] {
-  --bg: #ffffff;
-  --fg: #111111;
+  --screen2-bg: hsl(0 0% 85%);
+  --screen2-fg: #111111;
 }
 
 :root[data-theme="dark"] {
-  --bg: #0b0b0c;
-  --fg: #e5e7eb;
+  --screen2-bg: hsl(0 0% 15%);
+  --screen2-fg: #e5e7eb;
 }
+
+/* Aplica variables a la segunda pantalla */
+#screen2 {
+  background: var(--screen2-bg);
+  color: var(--screen2-fg);
+}
+
 
