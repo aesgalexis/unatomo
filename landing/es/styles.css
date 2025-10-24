@@ -11,17 +11,39 @@
   }
 }
 
+/* Alturas base */
+html, body { height: 100%; }
+
+/* Body SIN flex (centrado lo hace .screen) */
 body {
   margin: 0;
-  /* NO flex aquí */
   background: var(--bg);
   color: var(--fg);
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
   text-align: center;
   padding: 20px;
+  overflow-y: auto;   /* scroll normal por defecto */
 }
 
+/* Snap solo cuando nav.js añada la clase */
+body.snap {
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+}
 
+/* Secciones a pantalla completa y centradas */
+.screen {
+  min-height: 100svh; /* evita cortes en móvil */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+/* Elementos de la landing */
 img.logo {
   width: 100%;
   max-width: 180px;
@@ -41,47 +63,8 @@ p {
   margin-top: 16px;
   opacity: .75;
 }
-.screen {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
 
-/* Scroll a pantallas completas (snap obligatorio) */
-html, body {
-  height: 100%;
-}
-
-/* reemplaza tu bloque de scroll por este */
-html, body { height: 100%; }
-
-body {
-  overflow-y: auto;
-  /* sin scroll-snap por defecto */
-}
-
-body.snap {
-  scroll-snap-type: y mandatory;
-}
-
-.screen {
-  min-height: 100svh; /* evita cortes en móvil */
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
-}
-
-
-/* Scroll-snap obligatorio */
-html, body { height: 100%; }
-body {
-  overflow-y: auto;
-  scroll-snap-type: y mandatory;
-  scroll-behavior: smooth;
-}
-
-/* BOTÓN: fijo y CENTRADO ARRIBA, estilo minimal original */
+/* Botón light/dark fijo y centrado arriba */
 #theme-toggle {
   position: fixed;
   top: 12px;
@@ -100,7 +83,7 @@ body {
 }
 #theme-toggle:hover { opacity: 1; }
 
-/* PANTALLA 2: gris fijo por tema del SISTEMA (NO cambia con tu botón) */
+/* Pantalla 2: gris fijo por tema del SISTEMA (NO cambia con el botón) */
 #screen2 {
   background: hsl(0 0% 85%);  /* ~85% en light */
   color: #111111;
@@ -112,6 +95,6 @@ body {
   }
 }
 
-/* Mantén tus vars de tema para el resto del sitio */
-:root[data-theme="light"] { --bg:#ffffff; --fg:#111111; }
-:root[data-theme="dark"]  { --bg:#0b0b0c; --fg:#e5e7eb; }
+/* Soporte para tu toggle global (resto del sitio) */
+:root[data-theme="light"] { --bg: #ffffff; --fg: #111111; }
+:root[data-theme="dark"]  { --bg: #0b0b0c; --fg: #e5e7eb; }
