@@ -1,1 +1,78 @@
 
+<!doctype html>
+<h1>Título 2</h1>
+<p>Texto</p>
+</article>
+</div>
+</section>
+
+
+<!-- Sección 3 -->
+<section class="section">
+<div class="wrap">
+<article class="card">
+<h1>Título 3</h1>
+<p>Texto</p>
+</article>
+</div>
+</section>
+
+
+<!-- Sección 4 -->
+<section class="section">
+<div class="wrap">
+<article class="card">
+<h1>Título 4</h1>
+<p>Texto</p>
+</article>
+</div>
+</section>
+
+
+<!-- Sección 5 -->
+<section class="section">
+<div class="wrap">
+<article class="card">
+<h1>Título 5</h1>
+<p>Texto</p>
+</article>
+</div>
+</section>
+
+
+<!-- Sección 6 -->
+<section class="section">
+<div class="wrap">
+<article class="card">
+<h1>Título 6</h1>
+<p>Texto</p>
+</article>
+</div>
+</section>
+</main>
+
+
+<!-- Ayuda para accesibilidad: botón opcional para saltar entre páginas -->
+<nav class="pager" aria-label="Secciones">
+<button data-goto="1" aria-label="Ir a sección 1">1</button>
+<button data-goto="2" aria-label="Ir a sección 2">2</button>
+<button data-goto="3" aria-label="Ir a sección 3">3</button>
+<button data-goto="4" aria-label="Ir a sección 4">4</button>
+<button data-goto="5" aria-label="Ir a sección 5">5</button>
+<button data-goto="6" aria-label="Ir a sección 6">6</button>
+</nav>
+
+
+<script>
+// Navegación rápida entre secciones (sin depender de theme.js)
+const snap = document.getElementById('snap');
+document.querySelectorAll('.pager [data-goto]').forEach(btn => {
+btn.addEventListener('click', () => {
+const i = Number(btn.dataset.goto) - 1;
+const target = snap.children[i];
+if (target) target.scrollIntoView({ behavior: 'smooth' });
+});
+});
+</script>
+</body>
+</html>
