@@ -21,7 +21,6 @@ body {
   color: var(--fg);
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
   text-align: center;
-  padding: 20px;
   overflow-y: auto;   /* scroll normal por defecto */
 }
 
