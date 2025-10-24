@@ -92,33 +92,31 @@ p {
    COLORES DE LAS PANTALLAS
    ========================= */
 
-#screen2,
-#screen4,
-#screen6,
-#screen8 {
-  background: hsl(0 0% 15%); /* Light mode */
+/* IMPARES (1,3,5,...) */
+.screen:nth-of-type(odd) {
+  /* Light */
+  background: #ffffff;
   color: #111111;
 }
 @media (prefers-color-scheme: dark) {
-  #screen2,
-  #screen4,
-  #screen6,
-  #screen8 {
-    background: hsl(0 0% 85%); /* Dark mode */
+  .screen:nth-of-type(odd) {
+    /* Dark */
+    background: #000000; /* o #0b0b0c si prefieres */
+    color: #e5e7eb;
+  }
+}
+
+/* PARES (2,4,6,...) */
+.screen:nth-of-type(even) {
+  /* Light → gris 15% (oscuro) */
+  background: hsl(0 0% 15%);
+  color: #e5e7eb;
+}
+@media (prefers-color-scheme: dark) {
+  .screen:nth-of-type(even) {
+    /* Dark → gris 85% (claro) */
+    background: hsl(0 0% 85%);
     color: #111111;
   }
 }
 
-/* Pantallas IMPARES:
-   → No definimos fondo
-   → heredan: Light = blanca, Dark = negra automáticamente
-   → gracias a --bg en :root
-*/
-#screen1,
-#screen3,
-#screen5,
-#screen7,
-#screen9 {
-  background: var(--bg);
-  color: var(--fg);
-}
