@@ -1,1 +1,14 @@
+/* Usar altura dinámica del viewport en móviles:
+   llena la pantalla aunque la barra del navegador se oculte/appezca */
+@supports (min-height: 100dvh) {
+  .screen {
+    min-height: 100dvh; /* sustituye al 100svh del CSS global en móviles */
+  }
+}
 
+/* Fallback para navegadores sin 100dvh */
+@supports not (min-height: 100dvh) {
+  .screen {
+    min-height: 100vh;
+  }
+}
