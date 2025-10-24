@@ -1,11 +1,12 @@
-/* Fijar la altura de cada pantalla al alto real del viewport (estable) */
+/* Estilos específicos para móviles (archivo ya enlazado con media query) */
+
+/* Altura estable por pantalla usando la variable --vh fijada en nav.js */
 .screen {
   min-height: calc(var(--vh, 1svh) * 100);
 }
 
-
-/* Fallback para navegadores sin 100dvh */
-@supports not (min-height: 100dvh) {
+/* Fallback adicional para navegadores muy antiguos */
+@supports not (height: 100svh) {
   .screen {
     min-height: 100vh;
   }
