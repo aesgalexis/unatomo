@@ -14,14 +14,14 @@ html, body { overscroll-behavior-y: contain; }
 /* ===== Modo carrusel en móvil para #screen2 ===== */
 
 /* Contenedor: alto estable; sin padding lateral (lo dan las tarjetas) */
-#screen2 .screen2class {
+#screen2 .servicios {
   height: calc(var(--vh, 1svh) * 100);
   padding-left: 0;
   padding-right: 0;
 }
 
 /* Carrusel: 1 tarjeta por vista, swipe con snap estricto */
-#screen2 .screen2class .grid {
+#screen2 .servicios .grid {
   display: flex;
   overflow-x: auto;
   overflow-y: hidden;
@@ -40,10 +40,10 @@ html, body { overscroll-behavior-y: contain; }
   /* ocultar scrollbar en móviles */
   scrollbar-width: none;               /* Firefox */
 }
-#screen2 .screen2class .grid::-webkit-scrollbar { display: none; } /* WebKit */
+#screen2 .servicios .grid::-webkit-scrollbar { display: none; } /* WebKit */
 
 /* Tarjeta: ocupa casi todo el ancho, con márgenes laterales estándar */
-#screen2 .screen2class .card {
+#screen2 .servicios .card {
   flex: 0 0 auto;                      /* no fuerces 100% exacto */
   width: calc(100% - 32px);            /* 16px de margen a cada lado */
   max-width: calc(100% - 32px);
