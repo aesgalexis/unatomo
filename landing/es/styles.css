@@ -137,14 +137,14 @@ html, body { overscroll-behavior-y: contain; }
 
 /* Variables locales para colores de pantalla PAR (gris),
    derivadas de --even-bg / --even-fg que ya definiste: */
-#screen2 {
+#screen3 {
   --current-bg: var(--even-bg);
   --current-fg: var(--even-fg);
   /* “muted” automático: mezcla del fg con transparencia, invertido según modo */
   --current-muted: color-mix(in srgb, var(--current-fg) 70%, transparent);
 }
 
-#screen2 .servicios {
+#screen3 .servicios {
   /* 25% más grande que 900×650 → ~1125×812 (incluyendo gap) */
   max-width: 1125px;
   max-height: 812px;
@@ -156,7 +156,7 @@ html, body { overscroll-behavior-y: contain; }
 }
 
 /* Título “Servicios”: un poco más separado del grid, y más pequeño que el h1 */
-#screen2 .servicios .section-title {
+#screen3 .servicios .section-title {
   font-size: clamp(28px, 4vw, 48px);
   line-height: 1.1;
   letter-spacing: -0.5px;
@@ -167,7 +167,7 @@ html, body { overscroll-behavior-y: contain; }
 }
 
 /* Grid 3×3 */
-#screen2 .servicios .grid {
+#screen3 .servicios .grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;                     /* algo más de hueco al subir tamaño */
@@ -175,7 +175,7 @@ html, body { overscroll-behavior-y: contain; }
 }
 
 /* Tarjeta */
-#screen2 .servicios .card {
+#screen3 .servicios .card {
   border: 1px solid var(--current-fg);
   border-radius: 12px;
   padding: 16px;
@@ -191,7 +191,7 @@ html, body { overscroll-behavior-y: contain; }
 }
 
 /* Subtítulo dentro de tarjeta: pequeño pero claro */
-#screen2 .servicios .card h3 {
+#screen3 .servicios .card h3 {
   margin: 0 0 6px;
   font-weight: 600;
   /* mínimo legible ≈14px, techo 18px */
@@ -201,13 +201,13 @@ html, body { overscroll-behavior-y: contain; }
 
 /* Texto de tarjeta: “blanco apagado” en dark (gris claro),
    y “gris oscuro” en light (sobre gris claro) automáticamente */
-#screen2 .servicios .card p {
+#screen3 .servicios .card p {
   margin: 0;
   /* mínimo legible ≈14px, techo 16px */
   font-size: clamp(14px, 1.4vw, 16px);
   line-height: 1.45;
   color: var(--current-muted);
 }
-#screen2 .dots { 
+#screen3 .dots { 
   display: none;
 }
