@@ -133,9 +133,7 @@ p {
 }
 html, body { overscroll-behavior-y: contain; }
 
-/* ===== Pantalla 2: Acerca de Nosotros / Filosofía ===== */
-
-/* Colores locales de la pantalla par (gris) */
+/* ===== Pantalla 2 (par): Acerca de Nosotros — ESCRITORIO ===== */
 #screen2 {
   --current-bg: var(--even-bg);
   --current-fg: var(--even-fg);
@@ -143,7 +141,7 @@ html, body { overscroll-behavior-y: contain; }
 }
 
 #screen2 .acerca {
-  max-width: 1125px;        /* mismo “lienzo” que servicios */
+  max-width: 1125px;
   max-height: 812px;
   width: 100%;
   margin: 0 auto;
@@ -155,12 +153,11 @@ html, body { overscroll-behavior-y: contain; }
   font-size: clamp(28px, 4vw, 48px);
   line-height: 1.1;
   letter-spacing: -0.5px;
-  margin: 88px 0 24px;      /* aire bajo el botón fijo */
+  margin: 88px 0 24px;
   color: var(--current-fg);
-  
+  text-align: center; /* si prefieres centrado del título */
 }
 
-/* Grid 3×3 en escritorio */
 #screen2 .acerca .grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -169,24 +166,21 @@ html, body { overscroll-behavior-y: contain; }
   height: 100%;
 }
 
-/* Tarjeta única que ocupa todo el grid */
-#screen2 .acerca .acerca-card {
+/* 1 sola tarjeta ocupa todo el grid (ESCRITORIO) */
+#screen2 .acerca-desktop .acerca-card {
   grid-column: 1 / -1;
   grid-row: 1 / -1;
-
   border: 1px solid var(--current-fg);
   border-radius: 12px;
   padding: 24px;
-  padding-left: 32px;
-  padding-right: 32px;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start; 
   align-items: flex-start;
+  justify-content: flex-start;
   gap: 10px;
-  text-align: left;
   background: transparent;
   color: var(--current-fg);
+  text-align: left;
 }
 
 #screen2 .acerca .acerca-card h3 {
@@ -195,13 +189,15 @@ html, body { overscroll-behavior-y: contain; }
   font-size: clamp(16px, 2vw, 20px);
   color: var(--current-fg);
 }
-
 #screen2 .acerca .acerca-card p {
   margin: 0;
   font-size: clamp(14px, 1.4vw, 16px);
   line-height: 1.5;
   color: var(--current-muted);
 }
+
+/* Por defecto, los dots NO se ven en escritorio */
+#screen2 .dots-acerca { display: none; }
 
 
 /* ===== Pantalla 3 contenedor genérico servicios (título + grid 3×3) ===== */
