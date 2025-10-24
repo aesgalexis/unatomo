@@ -11,17 +11,17 @@ html, body { overscroll-behavior-y: contain; }
   .screen { min-height: 100vh; }
 }
 
-/* ===== Modo carrusel en móvil para #screen2 ===== */
+/* ===== Modo carrusel en móvil para #screen3 ===== */
 
 /* Contenedor: alto estable; sin padding lateral (lo dan las tarjetas) */
-#screen2 .servicios {
+#screen3 .servicios {
   height: calc(var(--vh, 1svh) * 100);
   padding-left: 0;
   padding-right: 0;
 }
 
 /* Carrusel: 1 tarjeta por vista, swipe con snap estricto */
-#screen2 .servicios .grid {
+#screen3 .servicios .grid {
   display: flex;
   overflow-x: auto;
   overflow-y: hidden;
@@ -40,10 +40,10 @@ html, body { overscroll-behavior-y: contain; }
   /* ocultar scrollbar en móviles */
   scrollbar-width: none;               /* Firefox */
 }
-#screen2 .servicios .grid::-webkit-scrollbar { display: none; } /* WebKit */
+#screen3 .servicios .grid::-webkit-scrollbar { display: none; } /* WebKit */
 
 /* Tarjeta: ocupa casi todo el ancho, con márgenes laterales estándar */
-#screen2 .servicios .card {
+#screen3 .servicios .card {
   flex: 0 0 auto;                      /* no fuerces 100% exacto */
   width: calc(100% - 32px);            /* 16px de margen a cada lado */
   max-width: calc(100% - 32px);
@@ -56,7 +56,7 @@ html, body { overscroll-behavior-y: contain; }
 }
 
 /* Puntitos: (no tocamos estilo, solo visibilidad por sección) */
-#screen2 .dots {
+#screen3 .dots {
   position: fixed;
   left: 50%;
   bottom: 12px;
@@ -77,15 +77,15 @@ html, body { overscroll-behavior-y: contain; }
   pointer-events: none;
 }
 
-/* se muestran SOLO cuando el <body> indica que #screen2 está a la vista */
-body.in-screen2 #screen2 .dots {
+/* se muestran SOLO cuando el <body> indica que #screen3 está a la vista */
+body.in-screen2 #screen3 .dots {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
 }
 
 /* Dots individuales (no cambiamos colores, ya los tenías perfectos) */
-#screen2 .dot {
+#screen3 .dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
@@ -97,25 +97,25 @@ body.in-screen2 #screen2 .dots {
   background: currentColor;
 }
 /* ===== Colores correctos para .dot (según modo) ===== */
-:root[data-theme="light"] #screen2 .dot { color: hsl(0 0% 15% / 0.55); }  /* inactivo: casi negro */
-:root[data-theme="light"] #screen2 .dot[aria-current="true"],
-:root[data-theme="light"] #screen2 .dot.active { color: hsl(0 0% 0%); }    /* activo: negro puro */
+:root[data-theme="light"] #screen3 .dot { color: hsl(0 0% 15% / 0.55); }  /* inactivo: casi negro */
+:root[data-theme="light"] #screen3 .dot[aria-current="true"],
+:root[data-theme="light"] #screen3 .dot.active { color: hsl(0 0% 0%); }    /* activo: negro puro */
 
-:root[data-theme="dark"]  #screen2 .dot { color: hsl(0 0% 85% / 0.55); }  /* inactivo: casi blanco */
-:root[data-theme="dark"]  #screen2 .dot[aria-current="true"],
-:root[data-theme="dark"]  #screen2 .dot.active { color: hsl(0 0% 100%); } /* activo: blanco puro */
+:root[data-theme="dark"]  #screen3 .dot { color: hsl(0 0% 85% / 0.55); }  /* inactivo: casi blanco */
+:root[data-theme="dark"]  #screen3 .dot[aria-current="true"],
+:root[data-theme="dark"]  #screen3 .dot.active { color: hsl(0 0% 100%); } /* activo: blanco puro */
 
 /* Fallback si NO hay data-theme (seguir el sistema) */
 @media (prefers-color-scheme: light) {
-  :root:not([data-theme]) #screen2 .dot { color: hsl(0 0% 15% / 0.55); }
-  :root:not([data-theme]) #screen2 .dot[aria-current="true"],
-  :root:not([data-theme]) #screen2 .dot.active { color: hsl(0 0% 0%); }
+  :root:not([data-theme]) #screen3 .dot { color: hsl(0 0% 15% / 0.55); }
+  :root:not([data-theme]) #screen3 .dot[aria-current="true"],
+  :root:not([data-theme]) #screen3 .dot.active { color: hsl(0 0% 0%); }
 }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme]) #screen2 .dot { color: hsl(0 0% 85% / 0.55); }
-  :root:not([data-theme]) #screen2 .dot[aria-current="true"],
-  :root:not([data-theme]) #screen2 .dot.active { color: hsl(0 0% 100%); }
+  :root:not([data-theme]) #screen3 .dot { color: hsl(0 0% 85% / 0.55); }
+  :root:not([data-theme]) #screen3 .dot[aria-current="true"],
+  :root:not([data-theme]) #screen3 .dot.active { color: hsl(0 0% 100%); }
 }
 
 /* Evitar resaltado azul por tap en móvil */
-#screen2 .dot { -webkit-tap-highlight-color: transparent; }
+#screen3 .dot { -webkit-tap-highlight-color: transparent; }
