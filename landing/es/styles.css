@@ -133,55 +133,78 @@ p {
 }
 html, body { overscroll-behavior-y: contain; }
 
-/* ===== Pantalla 2: título + grid 3×3 de tarjetas ===== */
+/* ===== Pantalla 2: contenedor genérico screen2class (título + grid 3×3) ===== */
+
+/* Variables locales para colores de pantalla PAR (gris),
+   derivadas de --even-bg / --even-fg que ya definiste: */
+#screen2 {
+  --current-bg: var(--even-bg);
+  --current-fg: var(--even-fg);
+  /* “muted” automático: mezcla del fg con transparencia, invertido según modo */
+  --current-muted: color-mix(in srgb, var(--current-fg) 70%, transparent);
+}
 
 #screen2 .screen2class {
-  /* Contenedor del contenido de pantalla 2 */
-  max-width: 900px;
-  max-height: 650px;          /* límite total como pediste */
+  /* 25% más grande que 900×650 → ~1125×812 (incluyendo gap) */
+  max-width: 1125px;
+  max-height: 812px;
   width: 100%;
   margin: 0 auto;
+
   display: flex;
   flex-direction: column;
 }
 
-#screen2 .section-title {
-  /* Un poco más pequeño que el h1 de pantalla 1 */
+/* Título “Servicios”: un poco más separado del grid, y más pequeño que el h1 */
+#screen2 .screen2class .section-title {
   font-size: clamp(28px, 4vw, 48px);
   line-height: 1.1;
-  margin: 56px 0 16px;        /* deja espacio bajo el botón fijo */
   letter-spacing: -0.5px;
+
+  /* Más aire bajo el botón fijo (sin centrar del todo) */
+  margin: 88px 0 24px;
+  color: var(--current-fg);
 }
 
-#screen2 .services-grid {
+/* Grid 3×3 */
+#screen2 .screen2class .grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  /* para ceñirnos a 900×650 en conjunto */
+  gap: 20px;                     /* algo más de hueco al subir tamaño */
   height: 100%;
 }
 
-#screen2 .card {
-  border: 1px solid var(--fg);    /* blanco/negro según tema */
+/* Tarjeta */
+#screen2 .screen2class .card {
+  border: 1px solid var(--current-fg);   /* línea blanca/negra según modo */
   border-radius: 12px;
   padding: 16px;
+
   display: flex;
   flex-direction: column;
-  justify-content: center;        /* centra contenido verticalmente */
+  justify-content: center;
   align-items: flex-start;
-  background: transparent;        /* sin fondo, solo borde */
+
+  background: transparent;
+  color: var(--current-fg);
 }
 
-#screen2 .card h3 {
-  margin: 0 0 8px;
-  font-size: clamp(16px, 2vw, 20px);
+/* Subtítulo dentro de tarjeta: pequeño pero claro */
+#screen2 .screen2class .card h3 {
+  margin: 0 0 6px;
   font-weight: 600;
-  color: var(--fg);               /* subtítulo con el color del tema */
+  /* mínimo legible ≈14px, techo 18px */
+  font-size: clamp(14px, 1.6vw, 18px);
+  color: var(--current-fg);
 }
 
-#screen2 .card p {
+/* Texto de tarjeta: “blanco apagado” en dark (gris claro),
+   y “gris oscuro” en light (sobre gris claro) automáticamente */
+#screen2 .screen2class .card p {
   margin: 0;
-  /* “blanco apagado” como pediste */
-  color: rgba(255, 255, 255, 0.72);
+  /* mínimo legible ≈14px, techo 16px */
+  font-size: clamp(14px, 1.4vw, 16px);
+  line-height: 1.45;
+  color: var(--current-muted);
 }
 
