@@ -58,4 +58,13 @@ p {
   color: #e5e7eb;
 }
 
+:root[data-theme="light"] {
+  --bg: #ffffff;
+  --fg: #111111;
+}
+
+:root[data-theme="dark"] {
+  --bg: #0b0b0c;
+  --fg: #e5e7eb;
+}
 
