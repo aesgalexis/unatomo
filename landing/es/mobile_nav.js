@@ -1,5 +1,5 @@
 (function () {
-  const scroller = document.querySelector('#screen2 .screen2class .grid');
+  const scroller = document.querySelector('#screen2 .servicios .grid');
   const cards    = scroller ? Array.from(scroller.querySelectorAll('.card')) : [];
   const dotsWrap = document.querySelector('#screen2 .dots');
   const dots     = dotsWrap ? Array.from(dotsWrap.querySelectorAll('.dot')) : [];
