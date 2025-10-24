@@ -92,27 +92,33 @@ p {
    COLORES DE LAS PANTALLAS
    ========================= */
 
-/* Pantallas grises (2 y 4): light 85% / dark 15% (según sistema, NO botón) */
 #screen2,
-#screen4 {
-  background: hsl(0 0% 85%);  /* light */
+#screen4,
+#screen6,
+#screen8 {
+  background: hsl(0 0% 15%); /* Light mode */
   color: #111111;
 }
 @media (prefers-color-scheme: dark) {
   #screen2,
-  #screen4 {
-    background: hsl(0 0% 15%); /* dark */
-    color: #e5e7eb;
+  #screen4,
+  #screen6,
+  #screen8 {
+    background: hsl(0 0% 85%); /* Dark mode */
+    color: #111111;
   }
 }
 
-/* Pantallas negras (3 y 5) */
+/* Pantallas IMPARES:
+   → No definimos fondo
+   → heredan: Light = blanca, Dark = negra automáticamente
+   → gracias a --bg en :root
+*/
+#screen1,
 #screen3,
-#screen5 {
-  background: #000;
-  color: #e5e7eb;
+#screen5,
+#screen7,
+#screen9 {
+  background: var(--bg);
+  color: var(--fg);
 }
-
-/* Soporte para tu toggle global (resto del sitio) */
-:root[data-theme="light"] { --bg: #ffffff; --fg: #111111; }
-:root[data-theme="dark"]  { --bg: #0b0b0c; --fg: #e5e7eb; }
