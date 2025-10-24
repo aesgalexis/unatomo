@@ -10,47 +10,34 @@
     const h = window.innerHeight;
     return Math.round(y / h);
   }
-
-  function clamp(n, min, max) {
-    return Math.max(min, Math.min(max, n));
-  }
-
+  function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
   function scrollToIndex(idx) {
     const target = sections[clamp(idx, 0, sections.length - 1)];
     if (!target) return;
     isScrolling = true;
     target.scrollIntoView({ behavior: 'smooth' });
-    // libera el candado tras un pequeño tiempo
     setTimeout(() => { isScrolling = false; }, 450);
   }
 
-  // Rueda / trackpad
+  /* NUEVO: asegúrate de empezar “encajado” en pantalla 1 */
+  window.addEventListener('load', () => scrollToIndex(0));
+  window.addEventListener('resize', () => scrollToIndex(currentIndex()));
+
+  // Rueda/trackpad
   window.addEventListener('wheel', (e) => {
     if (isScrolling) return;
     const delta = e.deltaY;
-    if (Math.abs(delta) < 1) return; // micro-movimientos, ignorar
-    const idx = currentIndex();
-    scrollToIndex(idx + (delta > 0 ? 1 : -1));
+    if (Math.abs(delta) < 1) return;
+    scrollToIndex(currentIndex() + (delta > 0 ? 1 : -1));
   }, { passive: true });
 
-  // Touch (móvil)
-  window.addEventListener('touchstart', (e) => {
-    touchStartY = e.touches[0].clientY;
-  }, { passive: true });
-
-  window.addEventListener('touchend', (e) => {
+  // Touch
+  window.addEventListener('touchstart', (e) => { touchStartY = e.touches[0].clientY; }, { passive: true });
+  window.addEventListener('touchend',   (e) => {
     if (isScrolling) return;
     const endY = (e.changedTouches && e.changedTouches[0]?.clientY) || touchStartY;
     const deltaY = touchStartY - endY;
-    const threshold = 12; // gesto mínimo
-    if (Math.abs(deltaY) < threshold) return;
-    const idx = currentIndex();
-    scrollToIndex(idx + (deltaY > 0 ? 1 : -1));
+    if (Math.abs(deltaY) < 12) return;
+    scrollToIndex(currentIndex() + (deltaY > 0 ? 1 : -1));
   }, { passive: true });
-
-  // En caso de resize, reencaja a la pantalla más cercana
-  window.addEventListener('resize', () => {
-    const idx = currentIndex();
-    scrollToIndex(idx);
-  });
 })();
