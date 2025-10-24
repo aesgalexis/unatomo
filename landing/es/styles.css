@@ -57,18 +57,24 @@ html, body {
   height: 100%;
 }
 
+/* reemplaza tu bloque de scroll por este */
+html, body { height: 100%; }
+
 body {
   overflow-y: auto;
+  /* sin scroll-snap por defecto */
+}
+
+body.snap {
   scroll-snap-type: y mandatory;
 }
 
-/* Asegura pantallas completas (sin cortes por barras del navegador) */
 .screen {
-  min-height: 100vh;
-  min-height: 100svh; /* mejor en móviles */
+  min-height: 100svh; /* evita cortes en móvil */
   scroll-snap-align: start;
   scroll-snap-stop: always;
 }
+
 
 /* Scroll-snap obligatorio */
 html, body { height: 100%; }
