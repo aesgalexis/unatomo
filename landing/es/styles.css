@@ -97,4 +97,46 @@ body {
   color: var(--screen2-fg);
 }
 
+/* Botón light/dark fijo en todas las pantallas */
+:root {
+  /* soporte para notch en móviles */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+
+#theme-toggle {
+  position: fixed;
+  top: calc(12px + var(--safe-top));
+  right: calc(12px + var(--safe-right));
+  z-index: 1000;
+
+  padding: 6px 14px;
+  border-radius: 8px;
+
+  /* que herede el color del tema */
+  color: var(--fg);
+  border: 1px solid currentColor;
+
+  /* fondo sutil para legibilidad sobre ambos fondos */
+  background: color-mix(in srgb, var(--bg) 70%, transparent);
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+
+  cursor: pointer;
+  opacity: .9;
+  transition: background .2s ease, opacity .2s ease, transform .06s ease;
+}
+
+#theme-toggle:hover { 
+  opacity: 1; 
+  background: color-mix(in srgb, var(--bg) 85%, var(--fg) 15%); 
+}
+
+#theme-toggle:active { 
+  transform: scale(0.98); 
+}
+
+#theme-toggle:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
 
