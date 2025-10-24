@@ -89,7 +89,7 @@ p {
 
 /* Pantalla 2: gris fijo por tema del SISTEMA (NO cambia con el botón) */
 #screen2 {
-  background: hsl(0 0% 85%);  /* ~85% en light */
+  background: hsl(0 0% 50%);  /* ~85% en light */
   color: #111111;
 }
 @media (prefers-color-scheme: dark) {
