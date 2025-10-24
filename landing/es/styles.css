@@ -42,6 +42,11 @@ body.snap {
   scroll-snap-stop: always;
 }
 
+.screen > * {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
 /* Elementos de la landing */
 img.logo {
   width: 100%;
