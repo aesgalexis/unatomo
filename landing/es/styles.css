@@ -208,4 +208,6 @@ html, body { overscroll-behavior-y: contain; }
   line-height: 1.45;
   color: var(--current-muted);
 }
-
+#screen2 .dots { 
+  display: none;
+}
