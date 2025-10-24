@@ -149,7 +149,6 @@ html, body { overscroll-behavior-y: contain; }
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  text-align: left;
 }
 
 #screen2 .acerca .section-title {
@@ -180,10 +179,10 @@ html, body { overscroll-behavior-y: contain; }
 
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;   /* contenido alineado arriba */
+  justify-content: flex-start; 
   align-items: flex-start;
   gap: 10px;
-
+  text-align: left;
   background: transparent;
   color: var(--current-fg);
 }
