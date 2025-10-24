@@ -132,3 +132,56 @@ p {
   color: var(--even-fg);
 }
 html, body { overscroll-behavior-y: contain; }
+
+/* ===== Pantalla 2: título + grid 3×3 de tarjetas ===== */
+
+#screen2 .screen2class {
+  /* Contenedor del contenido de pantalla 2 */
+  max-width: 900px;
+  max-height: 650px;          /* límite total como pediste */
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+#screen2 .section-title {
+  /* Un poco más pequeño que el h1 de pantalla 1 */
+  font-size: clamp(28px, 4vw, 48px);
+  line-height: 1.1;
+  margin: 56px 0 16px;        /* deja espacio bajo el botón fijo */
+  letter-spacing: -0.5px;
+}
+
+#screen2 .services-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  /* para ceñirnos a 900×650 en conjunto */
+  height: 100%;
+}
+
+#screen2 .card {
+  border: 1px solid var(--fg);    /* blanco/negro según tema */
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;        /* centra contenido verticalmente */
+  align-items: flex-start;
+  background: transparent;        /* sin fondo, solo borde */
+}
+
+#screen2 .card h3 {
+  margin: 0 0 8px;
+  font-size: clamp(16px, 2vw, 20px);
+  font-weight: 600;
+  color: var(--fg);               /* subtítulo con el color del tema */
+}
+
+#screen2 .card p {
+  margin: 0;
+  /* “blanco apagado” como pediste */
+  color: rgba(255, 255, 255, 0.72);
+}
+
