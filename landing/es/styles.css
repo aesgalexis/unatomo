@@ -62,81 +62,53 @@ body {
   scroll-snap-type: y mandatory;
 }
 
+/* Asegura pantallas completas (sin cortes por barras del navegador) */
 .screen {
   min-height: 100vh;
+  min-height: 100svh; /* mejor en móviles */
   scroll-snap-align: start;
   scroll-snap-stop: always;
 }
 
-/* Pantalla 2: colores por tema (usar luminosidad aprox. 15% dark / 85% light) */
-:root {
-  --screen2-bg: hsl(0 0% 85%); /* fallback claro */
-  --screen2-fg: #111111;
+/* Scroll-snap obligatorio */
+html, body { height: 100%; }
+body {
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --screen2-bg: hsl(0 0% 15%);
-    --screen2-fg: #e5e7eb;
-  }
-}
-
-:root[data-theme="light"] {
-  --screen2-bg: hsl(0 0% 85%);
-  --screen2-fg: #111111;
-}
-
-:root[data-theme="dark"] {
-  --screen2-bg: hsl(0 0% 15%);
-  --screen2-fg: #e5e7eb;
-}
-
-/* Aplica variables a la segunda pantalla */
-#screen2 {
-  background: var(--screen2-bg);
-  color: var(--screen2-fg);
-}
-
-/* Botón light/dark fijo en todas las pantallas */
-:root {
-  /* soporte para notch en móviles */
-  --safe-top: env(safe-area-inset-top, 0px);
-  --safe-right: env(safe-area-inset-right, 0px);
-}
-
+/* BOTÓN: fijo y CENTRADO ARRIBA, estilo minimal original */
 #theme-toggle {
   position: fixed;
-  top: calc(12px + var(--safe-top));
-  right: calc(12px + var(--safe-right));
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 1000;
 
   padding: 6px 14px;
-  border-radius: 8px;
-
-  /* que herede el color del tema */
+  border: 1px solid var(--fg);
+  background: transparent;
   color: var(--fg);
-  border: 1px solid currentColor;
-
-  /* fondo sutil para legibilidad sobre ambos fondos */
-  background: color-mix(in srgb, var(--bg) 70%, transparent);
-  box-shadow: 0 2px 8px rgba(0,0,0,.08);
-
+  border-radius: 6px;
+  font-size: 16px;
   cursor: pointer;
-  opacity: .9;
-  transition: background .2s ease, opacity .2s ease, transform .06s ease;
+  opacity: 0.9;
+}
+#theme-toggle:hover { opacity: 1; }
+
+/* PANTALLA 2: gris fijo por tema del SISTEMA (NO cambia con tu botón) */
+#screen2 {
+  background: hsl(0 0% 85%);  /* ~85% en light */
+  color: #111111;
+}
+@media (prefers-color-scheme: dark) {
+  #screen2 {
+    background: hsl(0 0% 15%); /* ~15% en dark */
+    color: #e5e7eb;
+  }
 }
 
-#theme-toggle:hover { 
-  opacity: 1; 
-  background: color-mix(in srgb, var(--bg) 85%, var(--fg) 15%); 
-}
-
-#theme-toggle:active { 
-  transform: scale(0.98); 
-}
-
-#theme-toggle:focus-visible {
-  outline: 2px solid currentColor;
-  outline-offset: 2px;
-}
-
+/* Mantén tus vars de tema para el resto del sitio */
+:root[data-theme="light"] { --bg:#ffffff; --fg:#111111; }
+:root[data-theme="dark"]  { --bg:#0b0b0c; --fg:#e5e7eb; }
