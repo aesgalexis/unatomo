@@ -131,3 +131,4 @@ p {
   background: var(--even-bg);
   color: var(--even-fg);
 }
+html, body { overscroll-behavior-y: contain; }
