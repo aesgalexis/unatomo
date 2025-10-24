@@ -1,19 +1,19 @@
 (function () {
-  const scroller = document.querySelector('#screen2 .servicios .grid');
+  const scroller = document.querySelector('#screen3 .servicios .grid');
   const cards    = scroller ? Array.from(scroller.querySelectorAll('.card')) : [];
-  const dotsWrap = document.querySelector('#screen2 .dots');
+  const dotsWrap = document.querySelector('#screen3 .dots');
   const dots     = dotsWrap ? Array.from(dotsWrap.querySelectorAll('.dot')) : [];
 
-  // --- Mostrar los dots solo cuando #screen2 está a la vista ---
-  const screen2 = document.getElementById('screen2');
-  if (screen2 && dotsWrap) {
+  // --- Mostrar los dots solo cuando #screen3 está a la vista ---
+  const screen3 = document.getElementById('screen3');
+  if (screen3 && dotsWrap) {
     const visIO = new IntersectionObserver((entries) => {
       const e = entries[0];
       const on = e.isIntersecting && e.intersectionRatio >= 0.25;
       // control robusto por clase en <body>
-      document.body.classList.toggle('in-screen2', on);
+      document.body.classList.toggle('in-screen3', on);
     }, { threshold: [0, 0.25, 0.5, 0.75, 1] });
-    visIO.observe(screen2);
+    visIO.observe(screen3);
   }
 
   if (!scroller || cards.length === 0 || dots.length !== cards.length) return;
