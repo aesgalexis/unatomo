@@ -8,51 +8,53 @@ html, body { overscroll-behavior-y: contain; }
 
 /* Fallback adicional para navegadores muy antiguos */
 @supports not (height: 100svh) {
-  .screen {
-    min-height: 100vh;
-  }
+  .screen { min-height: 100vh; }
 }
 
 /* ===== Modo carrusel en móvil para #screen2 ===== */
 
-/* Anular padding lateral del contenedor en esta pantalla para ocupar todo el ancho visible */
+/* Contenedor: ocupar ancho completo y alto estable; sin padding lateral */
 #screen2 .screen2class {
-  height: calc(var(--vh, 1svh) * 100); /* asegura alto completo en móvil */
+  height: calc(var(--vh, 1svh) * 100);
   padding-left: 0;
   padding-right: 0;
 }
 
-/* Una tarjeta por vista, swipe horizontal con snap */
+/* Carrusel: una tarjeta por vista, swipe con snap estricto */
 #screen2 .screen2class .grid {
   display: flex;
   overflow-x: auto;
   overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
 
-  /* 1 por vista: sin gap para que no asome la siguiente */
+  /* 1 por vista: que no asome la siguiente */
   gap: 0;
 
-  /* snap horizontal estricto */
+  /* Snap horizontal estricto */
   scroll-snap-type: x mandatory;
 
-  /* espacio para los puntitos */
-  padding-bottom: 48px;
+  /* Espacio para los dots */
+  padding-bottom: 44px;
 
   /* ocultar scrollbar en móviles */
   scrollbar-width: none;               /* Firefox */
 }
 #screen2 .screen2class .grid::-webkit-scrollbar { display: none; } /* WebKit */
 
-/* Cada tarjeta ocupa exactamente el ancho visible del carrusel */
+/* Card: se adapta al ancho de pantalla, sin mínimos forzados */
 #screen2 .screen2class .card {
   flex: 0 0 100%;
+  width: 100%;
   max-width: 100%;
+  min-width: 0;                        /* explícito: sin ancho mínimo */
+  box-sizing: border-box;              /* incluye borde en el ancho */
   margin: 0;
+
   scroll-snap-align: center;
   scroll-snap-stop: always;
 }
 
-/* Puntitos (abajo-centro fijo, opuestos al botón) */
+/* Puntitos: sutiles, sin fondo ni rectángulo contenedor */
 #screen2 .dots {
   position: fixed;
   left: 50%;
@@ -60,30 +62,52 @@ html, body { overscroll-behavior-y: contain; }
   transform: translateX(-50%);
   z-index: 900;
   display: flex;
-  gap: 8px;
+  gap: 6px;
   pointer-events: auto;
+
+  /* asegurar que NO hay caja de fondo */
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  border: 0;
 }
 
-/* Colores de puntitos: invertidos respecto al fondo de la pantalla par
-   (light → gris claro ⇒ puntos oscuros; dark → gris oscuro ⇒ puntos claros) */
-#screen2 {
-  --dot-active: var(--even-fg);
-  /* “apagado” = mitad de intensidad del activo */
-  --dot: color-mix(in srgb, var(--even-fg) 50%, transparent);
-}
-
+/* Dots base */
 #screen2 .dot {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  background: var(--dot);
   border: none;
   padding: 0;
+  margin: 0;
+
+  /* eliminar estilos nativos de iOS/Android */
+  appearance: none;
+  -webkit-appearance: none;
+
   opacity: 0.9;
+  background: currentColor;  /* tomará el color del estado (definido abajo) */
 }
 
-#screen2 .dot[aria-current="true"],
-#screen2 .dot.active {
-  background: var(--dot-active); /* totalmente blanco o negro según el modo */
-  opacity: 1;
+/* ===== Colores de dots (invertidos por modo) ===== */
+
+/* Prioridad: elección del usuario (data-theme) */
+:root[data-theme="light"] #screen2 .dot { color: hsl(0 0% 15% / 0.55); }  /* inactivo: casi negro suave */
+:root[data-theme="light"] #screen2 .dot[aria-current="true"],
+:root[data-theme="light"] #screen2 .dot.active { color: hsl(0 0% 0%); }    /* activo: negro puro */
+
+:root[data-theme="dark"]  #screen2 .dot { color: hsl(0 0% 85% / 0.55); }  /* inactivo: casi blanco suave */
+:root[data-theme="dark"]  #screen2 .dot[aria-current="true"],
+:root[data-theme="dark"]  #screen2 .dot.active { color: hsl(0 0% 100%); } /* activo: blanco puro */
+
+/* Fallback si NO hay data-theme: usar preferencia del sistema */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) #screen2 .dot { color: hsl(0 0% 15% / 0.55); }
+  :root:not([data-theme]) #screen2 .dot[aria-current="true"],
+  :root:not([data-theme]) #screen2 .dot.active { color: hsl(0 0% 0%); }
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) #screen2 .dot { color: hsl(0 0% 85% / 0.55); }
+  :root:not([data-theme]) #screen2 .dot[aria-current="true"],
+  :root:not([data-theme]) #screen2 .dot.active { color: hsl(0 0% 100%); }
 }
