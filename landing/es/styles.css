@@ -157,6 +157,7 @@ html, body { overscroll-behavior-y: contain; }
   letter-spacing: -0.5px;
   margin: 88px 0 24px;      /* aire bajo el botón fijo */
   color: var(--current-fg);
+  text-align: center;
 }
 
 /* Grid 3×3 en escritorio */
