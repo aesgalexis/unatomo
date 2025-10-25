@@ -1,13 +1,4 @@
 (function () {
-  // --- 0) Altura estable en móviles (evita saltos por barra del navegador)
-  function setVH() {
-    const vh = window.innerHeight * 0.01;
-    document.documentElement.style.setProperty('--vh', `${vh}px`);
-  }
-  window.addEventListener('DOMContentLoaded', setVH);
-  window.addEventListener('resize', setVH);
-  window.addEventListener('load', setVH);
-
   // --- 1) Selección y estado
   const sections = Array.from(document.querySelectorAll('.screen'));
   if (!sections.length) return;
@@ -83,13 +74,16 @@
     if (e.key === 'ArrowUp'   || e.key === 'PageUp')   { e.preventDefault(); scrollToIndex(curIndex - 1); }
   }
 
+  function onScrollDuringAnimation() {
+    if (isAnimating) unlockAfterScrollSettles();
+  }
+
   function attachDesktopHandlers() {
     if (handlersActive) return;
     window.addEventListener('wheel', onWheel, { passive: false });
     window.addEventListener('touchstart', onTouchStart, { passive: true });
     window.addEventListener('touchend', onTouchEnd, { passive: false });
     window.addEventListener('keydown', onKeydown);
-    // Mientras haya scroll en curso, reiniciamos detector de fin de scroll
     window.addEventListener('scroll', onScrollDuringAnimation, { passive: true });
     handlersActive = true;
   }
@@ -101,9 +95,6 @@
     window.removeEventListener('keydown', onKeydown);
     window.removeEventListener('scroll', onScrollDuringAnimation);
     handlersActive = false;
-  }
-  function onScrollDuringAnimation() {
-    if (isAnimating) unlockAfterScrollSettles();
   }
 
   // Activar/desactivar modo según breakpoint
@@ -120,10 +111,7 @@
   }
 
   // Init
-  window.addEventListener('DOMContentLoaded', () => {
-    // Decide por breakpoint (no forzamos scrollTo top aquí para no molestar)
-    applyMode();
-  });
+  window.addEventListener('DOMContentLoaded', applyMode);
 
   // Reaccionar a cambios de tamaño/orientación / breakpoint
   const mq = window.matchMedia('(min-width: 601px)');
