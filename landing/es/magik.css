@@ -1,0 +1,53 @@
+/* magik.css — botón de cierre + animación "pop!" */
+
+:root {
+  --magik-btn-size: 28px;
+  --magik-btn-pad: 4px;
+  --magik-btn-radius: 999px;
+  --magik-btn-bg: color-mix(in srgb, currentColor 10%, transparent);
+  --magik-btn-bg-hover: color-mix(in srgb, currentColor 18%, transparent);
+  --magik-btn-border: currentColor;
+  --magik-z-btn: 20;
+}
+
+/* Asegura contexto de posicionamiento para el botón */
+.card { position: relative; }
+
+/* Botón de cerrar (se inyecta vía JS) */
+.card .close-card {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: var(--magik-btn-size);
+  height: var(--magik-btn-size);
+  padding: var(--magik-btn-pad);
+  border: 1px solid var(--magik-btn-border);
+  border-radius: var(--magik-btn-radius);
+  background: var(--magik-btn-bg);
+  color: currentColor;
+  display: grid;
+  place-items: center;
+  line-height: 1;
+  font-size: 16px;
+  cursor: pointer;
+  z-index: var(--magik-z-btn);
+  opacity: .85;
+  -webkit-tap-highlight-color: transparent;
+}
+.card .close-card:hover { opacity: 1; background: var(--magik-btn-bg-hover); }
+.card .close-card:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+/* Animación de salida */
+.card.magik-pop-out {
+  animation: magik-pop-out .22s ease-in forwards;
+  will-change: transform, opacity;
+}
+@keyframes magik-pop-out {
+  to { opacity: 0; transform: scale(.85); }
+}
+
+/* Evita que el botón tape el contenido (ya elevamos z del botón) */
+.card * { position: relative; z-index: 1; }
