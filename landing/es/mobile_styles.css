@@ -15,7 +15,8 @@ html, body { overscroll-behavior-y: contain; }
 /* Ocultar versión de escritorio; mostrar versión móvil */
 #screen2 .acerca-desktop { display: none; }
 #screen2 .acerca-mobile  { display: block; }
-
+#screen2 .acerca .acerca-desktop { display: none; }
+#screen2 .acerca .acerca-mobile  { display: flex; }  /* importante: flex para el carrusel */
 /* Carrusel horizontal: 1 tarjeta por vista, con márgenes laterales */
 #screen2 .acerca .acerca-mobile {
   display: flex;
