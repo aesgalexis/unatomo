@@ -156,7 +156,7 @@ html, body { overscroll-behavior-y: contain; }
   font-size: clamp(28px, 4vw, 48px);
   line-height: 1.1;
   letter-spacing: -0.5px;
-  margin: 88px 0 24px;
+  margin: 24px 0 24px;
   color: var(--current-fg);
   text-align: center; /* si prefieres centrado del título */
 }
@@ -231,9 +231,7 @@ html, body { overscroll-behavior-y: contain; }
   font-size: clamp(28px, 4vw, 48px);
   line-height: 1.1;
   letter-spacing: -0.5px;
-
-  /* Más aire bajo el botón fijo (sin centrar del todo) */
-  margin: 88px 0 24px;
+  margin: 24px 0 24px;
   color: var(--current-fg);
 }
 
