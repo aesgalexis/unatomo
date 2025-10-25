@@ -198,7 +198,8 @@ html, body { overscroll-behavior-y: contain; }
 
 /* Por defecto, los dots NO se ven en escritorio */
 #screen2 .dots-acerca { display: none; }
-
+#screen2 .acerca-desktop { display: grid; } /* ya tienes reglas de grid aplicadas */
+#screen2 .acerca-mobile  { display: none; }
 
 /* ===== Pantalla 3 contenedor genérico servicios (título + grid 3×3) ===== */
 
