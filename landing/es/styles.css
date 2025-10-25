@@ -282,3 +282,17 @@ html, body { overscroll-behavior-y: contain; }
 #screen3 .dots { 
   display: none;
 }
+/* ===== SCREEN 2 (Acerca) — forzar ESCRITORIO (≥601px) ===== */
+@media (min-width: 601px) {
+  /* Mostrar SOLO la variante de escritorio */
+  #screen2 .acerca .acerca-desktop {
+    display: grid !important; /* tu grid 3×3 ya definido */
+  }
+
+  /* Ocultar COMPLETAMENTE la variante móvil y sus dots */
+  #screen2 .acerca .acerca-mobile,
+  #screen2 .acerca .acerca-mobile .acerca-card,
+  #screen2 .dots-acerca {
+    display: none !important;
+  }
+}
