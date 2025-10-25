@@ -24,7 +24,7 @@ html, body { overscroll-behavior-y: contain; }
 #screen2 .acerca .acerca-desktop { display: none; }
 #screen2 .acerca .acerca-mobile  { display: flex; }  /* flex para carrusel */
 
-/* Contenedor: alto estable y sin padding lateral (igual que en screen3) */
+/* Contenedor: alto estable y sin padding lateral */
 #screen2 .acerca {
   height: calc(var(--vh, 1svh) * 100);
   padding-left: 0;
@@ -37,29 +37,29 @@ html, body { overscroll-behavior-y: contain; }
   padding-right: 16px;
 }
 
-/* Carrusel horizontal: 1 tarjeta por vista, con márgenes laterales */
+/* Carrusel horizontal: 1 tarjeta por vista, con gutter simétrico (padding+gap) */
 #screen2 .acerca .acerca-mobile {
   display: flex;
   overflow-x: auto;
   overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
 
-  gap: 0;                          /* que no asome la siguiente */
+  gap: 16px;                    /* separación entre tarjetas */
+  padding: 0 16px 44px;         /* 16px a izquierda/derecha + espacio para dots */
   scroll-snap-type: x mandatory;
-  scroll-padding-inline: 16px;     /* compensa el margen lateral */
+  scroll-padding-inline: 16px;  /* alinea respetando el gutter */
 
-  padding-bottom: 44px;            /* espacio para los dots */
-  scrollbar-width: none;           /* Firefox */
+  scrollbar-width: none;        /* Firefox */
 }
 #screen2 .acerca .acerca-mobile::-webkit-scrollbar { display: none; } /* WebKit */
 
-/* Tarjeta móvil: mismas medidas y layout que en screen3 */
+/* Tarjeta móvil: ocupa todo el ancho disponible dentro del gutter */
 #screen2 .acerca .acerca-mobile .acerca-card {
   flex: 0 0 auto;
-  width: calc(100% - 32px);        /* 16px de margen a cada lado */
-  max-width: calc(100% - 32px);
+  width: 100%;
+  max-width: 100%;
   min-width: 0;
-  margin: 0 16px;
+  margin: 0;                    /* sin márgenes laterales en la tarjeta */
   box-sizing: border-box;
 
   border: 1px solid var(--current-fg);
@@ -71,7 +71,7 @@ html, body { overscroll-behavior-y: contain; }
   align-items: flex-start;
   justify-content: flex-start;
   gap: 8px;
-  text-align: left;                /* evita herencia del centrado del body */
+  text-align: left;             /* evita herencia del centrado del body */
 
   background: transparent;
   color: var(--current-fg);
