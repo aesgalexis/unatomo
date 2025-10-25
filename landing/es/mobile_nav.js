@@ -75,9 +75,9 @@
 })();
 /* ===== Carrusel + dots para SCREEN 4 (Tecnología) ===== */
 (function () {
-  const scroller = document.querySelector('#screen4 .tecno .tecno-mobile');
+  const scroller = document.querySelector('#screen4 .tecno .grid');
   const cards    = scroller ? Array.from(scroller.querySelectorAll('.card')) : [];
-  const dotsWrap = document.querySelector('#screen4 .dots-tecno');
+  const dotsWrap = document.querySelector('#screen4 .dots');
   const dots     = dotsWrap ? Array.from(dotsWrap.querySelectorAll('.dot')) : [];
 
   if (!scroller || cards.length === 0 || dots.length !== cards.length) return;
