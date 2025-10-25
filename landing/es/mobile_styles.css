@@ -234,7 +234,7 @@ html, body {
   :root:not([data-theme]) #screen3 .dot[aria-current="true"],
   :root:not([data-theme]) #screen3 .dot.active { color: hsl(0 0% 100%); }
 }
-/* ===== SCREEN 4 (Tecnología) — versión MÓVIL: carrusel + dots ===== */
+/* ===== SCREEN 4 (Tecnología) — MÓVIL: carrusel + dots (mismo patrón que #screen3) ===== */
 
 #screen4 .tecno {
   height: 100svh;
@@ -242,29 +242,26 @@ html, body {
   padding-right: 0;
 }
 
-/* Mostrar carrusel móvil y ocultar desktop */
-#screen4 .tecno .tecno-desktop { display: none; }
-#screen4 .tecno .tecno-mobile  { display: flex; }
-
-#screen4 .tecno .tecno-mobile {
+/* Carrusel: el MISMO .grid pasa a flex scroller en móvil */
+#screen4 .tecno .grid {
   display: flex;
   overflow-x: auto;
   overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
 
-  gap: 0; /* márgenes los pone la tarjeta */
+  gap: 0; /* sin gap; márgenes en .card */
   scroll-snap-type: x mandatory;
   scroll-padding-inline: 16px;
 
   padding-bottom: 44px; /* espacio para dots */
-  scrollbar-width: none;
+  scrollbar-width: none; /* Firefox */
 }
-#screen4 .tecno .tecno-mobile::-webkit-scrollbar { display: none; }
+#screen4 .tecno .grid::-webkit-scrollbar { display: none; } /* WebKit */
 
-/* Tarjeta móvil: ocupa casi todo el ancho con margen lateral */
-#screen4 .tecno .tecno-mobile .card {
+/* Tarjeta móvil: exactamente como #screen3 */
+#screen4 .tecno .card {
   flex: 0 0 auto;
-  width: calc(100% - 32px);
+  width: calc(100% - 32px); /* 16px por lado */
   max-width: calc(100% - 32px);
   min-width: 0;
   margin: 0 16px;
@@ -274,10 +271,10 @@ html, body {
   scroll-snap-stop: always;
 }
 
-/* Dots móviles */
-#screen4 .dots-tecno {
+/* Dots móviles (mismo selector/clase que #screen3) */
+#screen4 .dots {
   position: sticky;
-  bottom: 20px;
+  bottom: 20px;            /* mismo ajuste de #screen3 */
   z-index: 900;
   display: flex;
   justify-content: center;
@@ -287,7 +284,8 @@ html, body {
   margin: 0;
   border: 0;
 }
-#screen4 .dots-tecno .dot {
+
+#screen4 .dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
@@ -300,21 +298,21 @@ html, body {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Colores de dots según tema (como screen2/3) */
-:root[data-theme="light"] #screen4 .dots-tecno .dot { color: hsl(0 0% 15% / 0.55); }
-:root[data-theme="light"] #screen4 .dots-tecno .dot[aria-current="true"],
-:root[data-theme="light"] #screen4 .dots-tecno .dot.active { color: hsl(0 0% 0%); }
+/* Colores de dots según tema — mismos que #screen3 */
+:root[data-theme="light"] #screen4 .dot { color: hsl(0 0% 15% / 0.55); }
+:root[data-theme="light"] #screen4 .dot[aria-current="true"],
+:root[data-theme="light"] #screen4 .dot.active { color: hsl(0 0% 0%); }
 
-:root[data-theme="dark"] #screen4 .dots-tecno .dot { color: hsl(0 0% 85% / 0.55); }
-:root[data-theme="dark"] #screen4 .dots-tecno .dot[aria-current="true"],
-:root[data-theme="dark"] #screen4 .dots-tecno .dot.active { color: hsl(0 0% 100%); }
+:root[data-theme="dark"] #screen4 .dot { color: hsl(0 0% 85% / 0.55); }
+:root[data-theme="dark"] #screen4 .dot[aria-current="true"],
+:root[data-theme="dark"] #screen4 .dot.active { color: hsl(0 0% 100%); }
 
 /* Fallback si NO hay data-theme */
 @media (prefers-color-scheme: light) {
-  :root:not([data-theme]) #screen4 .dots-tecno .dot { color: hsl(0 0% 15% / 0.55); }
-  :root:not([data-theme]) #screen4 .dots-tecno .dot[aria-current="true"] { color: hsl(0 0% 0%); }
+  :root:not([data-theme]) #screen4 .dot { color: hsl(0 0% 15% / 0.55); }
+  :root:not([data-theme]) #screen4 .dot[aria-current="true"] { color: hsl(0 0% 0%); }
 }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme]) #screen4 .dots-tecno .dot { color: hsl(0 0% 85% / 0.55); }
-  :root:not([data-theme]) #screen4 .dots-tecno .dot[aria-current="true"] { color: hsl(0 0% 100%); }
+  :root:not([data-theme]) #screen4 .dot { color: hsl(0 0% 85% / 0.55); }
+  :root:not([data-theme]) #screen4 .dot[aria-current="true"] { color: hsl(0 0% 100%); }
 }
