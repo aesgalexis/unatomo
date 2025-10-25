@@ -5,9 +5,9 @@
 /* Evita rebotes de scroll en móvil */
 html, body { overscroll-behavior-y: contain; }
 
-/* Altura estable por pantalla usando la variable --vh fijada en nav.js */
+/* Altura estable por pantalla usando 100svh (sin corrección JS) */
 .screen {
-  min-height: calc(var(--vh, 1svh) * 100);
+  min-height: 100svh;
 }
 
 /* Fallback adicional para navegadores muy antiguos */
@@ -26,7 +26,7 @@ html, body { overscroll-behavior-y: contain; }
 
 /* Contenedor: alto estable y sin padding lateral */
 #screen2 .acerca {
-  height: calc(var(--vh, 1svh) * 100);
+  height: 100svh;
   padding-left: 0;
   padding-right: 0;
 }
@@ -143,7 +143,7 @@ body.in-screen2 #screen2 .dots-acerca {
 
 /* Contenedor: alto estable; sin padding lateral (lo dan las tarjetas) */
 #screen3 .servicios {
-  height: calc(var(--vh, 1svh) * 100);
+  height: 100svh;
   padding-left: 0;
   padding-right: 0;
 }
