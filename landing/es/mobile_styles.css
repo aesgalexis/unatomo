@@ -234,3 +234,87 @@ html, body {
   :root:not([data-theme]) #screen3 .dot[aria-current="true"],
   :root:not([data-theme]) #screen3 .dot.active { color: hsl(0 0% 100%); }
 }
+/* ===== SCREEN 4 (Tecnología) — versión MÓVIL: carrusel + dots ===== */
+
+#screen4 .tecno {
+  height: 100svh;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* Mostrar carrusel móvil y ocultar desktop */
+#screen4 .tecno .tecno-desktop { display: none; }
+#screen4 .tecno .tecno-mobile  { display: flex; }
+
+#screen4 .tecno .tecno-mobile {
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+
+  gap: 0; /* márgenes los pone la tarjeta */
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: 16px;
+
+  padding-bottom: 44px; /* espacio para dots */
+  scrollbar-width: none;
+}
+#screen4 .tecno .tecno-mobile::-webkit-scrollbar { display: none; }
+
+/* Tarjeta móvil: ocupa casi todo el ancho con margen lateral */
+#screen4 .tecno .tecno-mobile .card {
+  flex: 0 0 auto;
+  width: calc(100% - 32px);
+  max-width: calc(100% - 32px);
+  min-width: 0;
+  margin: 0 16px;
+  box-sizing: border-box;
+
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+}
+
+/* Dots móviles */
+#screen4 .dots-tecno {
+  position: sticky;
+  bottom: 20px;
+  z-index: 900;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+#screen4 .dots-tecno .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  border: none;
+  padding: 0;
+  margin: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  background: currentColor;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Colores de dots según tema (como screen2/3) */
+:root[data-theme="light"] #screen4 .dots-tecno .dot { color: hsl(0 0% 15% / 0.55); }
+:root[data-theme="light"] #screen4 .dots-tecno .dot[aria-current="true"],
+:root[data-theme="light"] #screen4 .dots-tecno .dot.active { color: hsl(0 0% 0%); }
+
+:root[data-theme="dark"] #screen4 .dots-tecno .dot { color: hsl(0 0% 85% / 0.55); }
+:root[data-theme="dark"] #screen4 .dots-tecno .dot[aria-current="true"],
+:root[data-theme="dark"] #screen4 .dots-tecno .dot.active { color: hsl(0 0% 100%); }
+
+/* Fallback si NO hay data-theme */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) #screen4 .dots-tecno .dot { color: hsl(0 0% 15% / 0.55); }
+  :root:not([data-theme]) #screen4 .dots-tecno .dot[aria-current="true"] { color: hsl(0 0% 0%); }
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) #screen4 .dots-tecno .dot { color: hsl(0 0% 85% / 0.55); }
+  :root:not([data-theme]) #screen4 .dots-tecno .dot[aria-current="true"] { color: hsl(0 0% 100%); }
+}
