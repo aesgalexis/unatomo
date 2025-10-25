@@ -302,7 +302,7 @@ html, body { overscroll-behavior-y: contain; }
 }
 
 #screen4 .tecno {
-  max-width: 1125px;   /* igual que screen3 */
+  max-width: 1125px;
   max-height: 812px;
   width: 100%;
   margin: 0 auto;
@@ -318,18 +318,14 @@ html, body { overscroll-behavior-y: contain; }
   color: var(--current-fg);
 }
 
-/* Grid 3 columnas en escritorio */
-#screen4 .tecno .grid.tecno-desktop {
+/* Grid 3 columnas en escritorio (mismo patrón que #screen3 .servicios .grid) */
+#screen4 .tecno .grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
   height: 100%;
 }
 
-/* Ocultar variante móvil en escritorio */
-#screen4 .tecno .tecno-mobile { display: none; }
-
-/* Tarjetas (reutiliza estética de screen3) */
 #screen4 .tecno .card {
   border: 1px solid var(--current-fg);
   border-radius: 12px;
@@ -356,12 +352,7 @@ html, body { overscroll-behavior-y: contain; }
   color: var(--current-muted);
 }
 
-/* Dots ocultos en escritorio */
-#screen4 .dots-tecno { display: none; }
-
-/* Forzar escritorio (≥601px) */
-@media (min-width: 601px) {
-  #screen4 .tecno .tecno-desktop { display: grid !important; }
-  #screen4 .tecno .tecno-mobile,
-  #screen4 .dots-tecno { display: none !important; }
+/* Dots ocultos en escritorio, como en #screen3 */
+#screen4 .dots { 
+  display: none;
 }
