@@ -294,3 +294,74 @@ html, body { overscroll-behavior-y: contain; }
     display: none !important;
   }
 }
+/* ===== Pantalla 4 (par): Tecnología y Eficiencia — ESCRITORIO ===== */
+#screen4 {
+  --current-bg: var(--even-bg);
+  --current-fg: var(--even-fg);
+  --current-muted: color-mix(in srgb, var(--current-fg) 70%, transparent);
+}
+
+#screen4 .tecno {
+  max-width: 1125px;   /* igual que screen3 */
+  max-height: 812px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+#screen4 .tecno .section-title {
+  font-size: clamp(28px, 4vw, 48px);
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+  margin: 24px 0 24px;
+  color: var(--current-fg);
+}
+
+/* Grid 3 columnas en escritorio */
+#screen4 .tecno .grid.tecno-desktop {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  height: 100%;
+}
+
+/* Ocultar variante móvil en escritorio */
+#screen4 .tecno .tecno-mobile { display: none; }
+
+/* Tarjetas (reutiliza estética de screen3) */
+#screen4 .tecno .card {
+  border: 1px solid var(--current-fg);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  background: transparent;
+  color: var(--current-fg);
+}
+
+#screen4 .tecno .card h3 {
+  margin: 0 0 6px;
+  font-weight: 600;
+  font-size: clamp(14px, 1.6vw, 18px);
+  color: var(--current-fg);
+}
+
+#screen4 .tecno .card p {
+  margin: 0;
+  font-size: clamp(14px, 1.4vw, 16px);
+  line-height: 1.45;
+  color: var(--current-muted);
+}
+
+/* Dots ocultos en escritorio */
+#screen4 .dots-tecno { display: none; }
+
+/* Forzar escritorio (≥601px) */
+@media (min-width: 601px) {
+  #screen4 .tecno .tecno-desktop { display: grid !important; }
+  #screen4 .tecno .tecno-mobile,
+  #screen4 .dots-tecno { display: none !important; }
+}
