@@ -7,7 +7,7 @@
   --magik-btn-bg: color-mix(in srgb, currentColor 10%, transparent);
   --magik-btn-bg-hover: color-mix(in srgb, currentColor 18%, transparent);
   --magik-btn-border: currentColor;
-  --magik-z-btn: 20;
+  --magik-z-btn: 1002; /* por encima de dots fijos (1000) si los usas */
 }
 
 /* Asegura contexto de posicionamiento para el botón */
@@ -31,7 +31,7 @@
   font-size: 16px;
   cursor: pointer;
   z-index: var(--magik-z-btn);
-  opacity: .85;
+  opacity: .9;
   -webkit-tap-highlight-color: transparent;
 }
 .card .close-card:hover { opacity: 1; background: var(--magik-btn-bg-hover); }
@@ -49,5 +49,8 @@
   to { opacity: 0; transform: scale(.85); }
 }
 
-/* Evita que el botón tape el contenido (ya elevamos z del botón) */
-.card * { position: relative; z-index: 1; }
+/* ❗ Importante: NO pises el z-index del botón */
+.card *:not(.close-card) {
+  position: relative;
+  z-index: 1;
+}
