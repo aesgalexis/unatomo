@@ -6,9 +6,7 @@
 html, body { overscroll-behavior-y: contain; }
 
 /* Altura estable por pantalla usando 100svh (sin corrección JS) */
-.screen {
-  min-height: 100svh;
-}
+.screen { min-height: 100svh; }
 
 /* Fallback adicional para navegadores muy antiguos */
 @supports not (height: 100svh) {
@@ -45,7 +43,7 @@ html, body { overscroll-behavior-y: contain; }
   -webkit-overflow-scrolling: touch;
 
   gap: 16px;                    /* separación entre tarjetas */
-  padding: 0 16px 44px;         /* 16px a izquierda/derecha + espacio para dots */
+  padding: 0 16px 44px;         /* 16px a izq/der + espacio para dots */
   scroll-snap-type: x mandatory;
   scroll-padding-inline: 16px;  /* alinea respetando el gutter */
 
@@ -80,35 +78,22 @@ html, body { overscroll-behavior-y: contain; }
   scroll-snap-stop: always;
 }
 
-/* Dots SOLO en móvil para screen2 */
+/* Dots en móvil para screen2: SIEMPRE en su posición dentro de la sección */
 #screen2 .dots-acerca {
-  position: fixed;
-  left: 50%;
+  position: sticky;   /* se queda pegado al borde inferior mientras esté en la sección */
   bottom: 12px;
-  transform: translateX(-50%);
   z-index: 900;
   display: flex;
+  justify-content: center;
   gap: 6px;
 
   background: transparent;
   padding: 0;
   margin: 0;
   border: 0;
-
-  /* ocultos por defecto hasta que screen2 esté visible */
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
 }
 
-/* Mostrar dots cuando screen2 llena la pantalla (mobile_nav añade .in-screen2) */
-body.in-screen2 #screen2 .dots-acerca {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-}
-
-/* Botoncitos (estética consistente con screen3) */
+/* Botoncitos (estética consistente) */
 #screen2 .dots-acerca .dot {
   width: 6px; height: 6px; border-radius: 50%;
   border: none; padding: 0; margin: 0;
@@ -117,7 +102,7 @@ body.in-screen2 #screen2 .dots-acerca {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Colores invertidos según modo (igual que en screen3) */
+/* Colores invertidos según modo */
 :root[data-theme="light"] #screen2 .dots-acerca .dot { color: hsl(0 0% 15% / 0.55); }
 :root[data-theme="light"] #screen2 .dots-acerca .dot[aria-current="true"],
 :root[data-theme="light"] #screen2 .dots-acerca .dot.active { color: hsl(0 0% 0%); }
@@ -172,46 +157,33 @@ body.in-screen2 #screen2 .dots-acerca {
 
 /* Tarjeta: ocupa casi todo el ancho, con márgenes laterales estándar */
 #screen3 .servicios .card {
-  flex: 0 0 auto;                      /* no fuerces 100% exacto */
+  flex: 0 0 auto;
   width: calc(100% - 32px);            /* 16px de margen a cada lado */
   max-width: calc(100% - 32px);
-  min-width: 0;                        /* sin mínimo forzado */
-  margin: 0 16px;                      /* márgenes laterales */
+  min-width: 0;
+  margin: 0 16px;
   box-sizing: border-box;
 
   scroll-snap-align: center;
   scroll-snap-stop: always;
 }
 
-/* Puntitos: visibles solo cuando la screen3 está a la vista */
+/* Dots en móvil para screen3: SIEMPRE en su posición dentro de la sección */
 #screen3 .dots {
-  position: fixed;
-  left: 50%;
+  position: sticky;  /* pegado al borde inferior mientras estés en screen3 */
   bottom: 12px;
-  transform: translateX(-50%);
   z-index: 900;
   display: flex;
+  justify-content: center;
   gap: 6px;
 
   background: transparent;
   padding: 0;
   margin: 0;
   border: 0;
-
-  /* por defecto, ocultos */
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
 }
 
-/* se muestran SOLO cuando el <body> indica que #screen3 está a la vista */
-body.in-screen3 #screen3 .dots {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-}
-
-/* Dots individuales (mismos tamaños y comportamiento) */
+/* Dots individuales */
 #screen3 .dot {
   width: 6px;
   height: 6px;
@@ -226,13 +198,13 @@ body.in-screen3 #screen3 .dots {
 }
 
 /* Colores correctos según modo (consistentes con screen2) */
-:root[data-theme="light"] #screen3 .dot { color: hsl(0 0% 15% / 0.55); }  /* inactivo: casi negro */
+:root[data-theme="light"] #screen3 .dot { color: hsl(0 0% 15% / 0.55); }
 :root[data-theme="light"] #screen3 .dot[aria-current="true"],
-:root[data-theme="light"] #screen3 .dot.active { color: hsl(0 0% 0%); }    /* activo: negro puro */
+:root[data-theme="light"] #screen3 .dot.active { color: hsl(0 0% 0%); }
 
-:root[data-theme="dark"]  #screen3 .dot { color: hsl(0 0% 85% / 0.55); }  /* inactivo: casi blanco */
+:root[data-theme="dark"]  #screen3 .dot { color: hsl(0 0% 85% / 0.55); }
 :root[data-theme="dark"]  #screen3 .dot[aria-current="true"],
-:root[data-theme="dark"]  #screen3 .dot.active { color: hsl(0 0% 100%); } /* activo: blanco puro */
+:root[data-theme="dark"]  #screen3 .dot.active { color: hsl(0 0% 100%); }
 
 /* Fallback si NO hay data-theme (seguir el sistema) */
 @media (prefers-color-scheme: light) {
