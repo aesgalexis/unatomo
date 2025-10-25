@@ -313,6 +313,53 @@ html, body {
   :root:not([data-theme]) #screen4 .dot[aria-current="true"] { color: hsl(0 0% 0%); }
 }
 @media (prefers-color-scheme: dark) {
+
+/* ===== Dots FIJOS en móvil (pantallas 2, 3 y 4) ===== */
+/* Por compatibilidad, lo ponemos al final para sobreescribir cualquier "position: sticky" previo */
+
+#screen2 .dots-acerca,
+#screen3 .dots,
+#screen4 .dots {
+  position: fixed !important;              /* <-- fijos en viewport */
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 16px); /* respetar notch */
+  z-index: 1000;
+
+
+
+
+
+
+  
+  /* Mostrar solo los de la pantalla “activa” */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .18s ease-out;
+}
+
+/* Cuando la pantalla correspondiente está visible (clase que activamos por JS) */
+#screen2 .dots-acerca.is-visible,
+#screen3 .dots.is-visible,
+#screen4 .dots.is-visible {
+  opacity: 1;
+  pointer-events: auto;  /* clicables */
+}
+
+/* Por si algún sticky anterior quedara aplicado, neutralizamos anclas */
+#screen2 .dots-acerca,
+#screen3 .dots,
+#screen4 .dots {
+  top: auto !important;
+}
+
+/* Mantenemos el espacio inferior del carrusel para que el contenido no “quede debajo” de los dots */
+#screen2 .acerca .acerca-mobile,
+#screen3 .servicios .grid,
+#screen4 .tecno .grid {
+  padding-bottom: 44px;   /* ya lo tienes en 2/3; lo aseguramos también en 4 */
+}
+
   :root:not([data-theme]) #screen4 .dot { color: hsl(0 0% 85% / 0.55); }
   :root:not([data-theme]) #screen4 .dot[aria-current="true"] { color: hsl(0 0% 100%); }
 }
