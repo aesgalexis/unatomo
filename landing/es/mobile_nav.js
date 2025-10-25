@@ -108,3 +108,34 @@
 
   setActive(0);
 })();
+
+
+
+/* ===== Visibilidad FIJA de dots por pantalla =====
+   Muestra los dots de la pantalla que esté ≥60% en viewport y oculta el resto.
+*/
+(function () {
+  const entries = [
+    { screen: document.getElementById('screen2'), dots: document.querySelector('#screen2 .dots-acerca') },
+    { screen: document.getElementById('screen3'), dots: document.querySelector('#screen3 .dots') },
+    { screen: document.getElementById('screen4'), dots: document.querySelector('#screen4 .dots') },
+  ].filter(x => x.screen && x.dots);
+
+  if (!entries.length) return;
+
+  const io = new IntersectionObserver((obs) => {
+    // 1) ¿cuál(es) pasan del umbral?
+    const visibleIds = new Set(
+      obs.filter(e => e.isIntersecting && e.intersectionRatio >= 0.6)
+         .map(e => e.target.id)
+    );
+
+    // 2) Activar solo los dots de las pantallas visibles (prácticamente será una)
+    entries.forEach(({ screen, dots }) => {
+      const on = visibleIds.has(screen.id);
+      dots.classList.toggle('is-visible', on);
+    });
+  }, { threshold: [0.6] });
+
+  entries.forEach(({ screen }) => io.observe(screen));
+})();
