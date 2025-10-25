@@ -139,6 +139,9 @@ html, body { overscroll-behavior-y: contain; }
   --current-fg: var(--even-fg);
   --current-muted: color-mix(in srgb, var(--current-fg) 70%, transparent);
 }
+#screen2 .acerca .acerca-desktop { display: grid; } 
+#screen2 .acerca .acerca-mobile  { display: none; }  
+#screen2 .dots-acerca { display: none; }          
 
 #screen2 .acerca {
   max-width: 1125px;
