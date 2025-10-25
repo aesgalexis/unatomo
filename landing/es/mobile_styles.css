@@ -1,3 +1,7 @@
+/* =========================
+   Base móvil compartida
+   ========================= */
+
 /* Evita rebotes de scroll en móvil */
 html, body { overscroll-behavior-y: contain; }
 
@@ -10,13 +14,29 @@ html, body { overscroll-behavior-y: contain; }
 @supports not (height: 100svh) {
   .screen { min-height: 100vh; }
 }
-/* ===== Pantalla 2: variante MÓVIL (3 tarjetas + dots) ===== */
 
-/* Ocultar versión de escritorio; mostrar versión móvil */
-#screen2 .acerca-desktop { display: none; }
-#screen2 .acerca-mobile  { display: block; }
+
+/* =========================================================
+   SCREEN 2 (Acerca) — versión MÓVIL: 3 tarjetas + dots
+   ========================================================= */
+
+/* Visibilidad de variantes en móvil (solo carrusel) */
 #screen2 .acerca .acerca-desktop { display: none; }
-#screen2 .acerca .acerca-mobile  { display: flex; }  /* importante: flex para el carrusel */
+#screen2 .acerca .acerca-mobile  { display: flex; }  /* flex para carrusel */
+
+/* Contenedor: alto estable y sin padding lateral (igual que en screen3) */
+#screen2 .acerca {
+  height: calc(var(--vh, 1svh) * 100);
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* Título encajado con el ancho visual de las tarjetas (16px por lado) */
+#screen2 .acerca .section-title {
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
 /* Carrusel horizontal: 1 tarjeta por vista, con márgenes laterales */
 #screen2 .acerca .acerca-mobile {
   display: flex;
@@ -29,14 +49,14 @@ html, body { overscroll-behavior-y: contain; }
   scroll-padding-inline: 16px;     /* compensa el margen lateral */
 
   padding-bottom: 44px;            /* espacio para los dots */
-
-  scrollbar-width: none;
+  scrollbar-width: none;           /* Firefox */
 }
-#screen2 .acerca .acerca-mobile::-webkit-scrollbar { display: none; }
+#screen2 .acerca .acerca-mobile::-webkit-scrollbar { display: none; } /* WebKit */
 
+/* Tarjeta móvil: mismas medidas y layout que en screen3 */
 #screen2 .acerca .acerca-mobile .acerca-card {
   flex: 0 0 auto;
-  width: calc(100% - 32px);        /* 16px margen lateral a cada lado */
+  width: calc(100% - 32px);        /* 16px de margen a cada lado */
   max-width: calc(100% - 32px);
   min-width: 0;
   margin: 0 16px;
@@ -51,6 +71,7 @@ html, body { overscroll-behavior-y: contain; }
   align-items: flex-start;
   justify-content: flex-start;
   gap: 8px;
+  text-align: left;                /* evita herencia del centrado del body */
 
   background: transparent;
   color: var(--current-fg);
@@ -59,7 +80,7 @@ html, body { overscroll-behavior-y: contain; }
   scroll-snap-stop: always;
 }
 
-/* Dots SOLO en móvil para screen2 (misma estética que screen3) */
+/* Dots SOLO en móvil para screen2 */
 #screen2 .dots-acerca {
   position: fixed;
   left: 50%;
@@ -68,19 +89,26 @@ html, body { overscroll-behavior-y: contain; }
   z-index: 900;
   display: flex;
   gap: 6px;
+
   background: transparent;
-  padding: 0; margin: 0; border: 0;
+  padding: 0;
+  margin: 0;
+  border: 0;
 
   /* ocultos por defecto hasta que screen2 esté visible */
-  opacity: 0; visibility: hidden; pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 
-/* Mostrar dots cuando screen2 llena la pantalla (mobile_nav se encarga de la clase) */
+/* Mostrar dots cuando screen2 llena la pantalla (mobile_nav añade .in-screen2) */
 body.in-screen2 #screen2 .dots-acerca {
-  opacity: 1; visibility: visible; pointer-events: auto;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
 
-/* Botoncitos */
+/* Botoncitos (estética consistente con screen3) */
 #screen2 .dots-acerca .dot {
   width: 6px; height: 6px; border-radius: 50%;
   border: none; padding: 0; margin: 0;
@@ -98,6 +126,7 @@ body.in-screen2 #screen2 .dots-acerca {
 :root[data-theme="dark"]  #screen2 .dots-acerca .dot[aria-current="true"],
 :root[data-theme="dark"]  #screen2 .dots-acerca .dot.active { color: hsl(0 0% 100%); }
 
+/* Fallback si NO hay data-theme (seguir el sistema) */
 @media (prefers-color-scheme: light) {
   :root:not([data-theme]) #screen2 .dots-acerca .dot { color: hsl(0 0% 15% / 0.55); }
   :root:not([data-theme]) #screen2 .dots-acerca .dot[aria-current="true"] { color: hsl(0 0% 0%); }
@@ -107,7 +136,10 @@ body.in-screen2 #screen2 .dots-acerca {
   :root:not([data-theme]) #screen2 .dots-acerca .dot[aria-current="true"] { color: hsl(0 0% 100%); }
 }
 
-/* ===== Modo carrusel en móvil para #screen3 ===== */
+
+/* =========================================================
+   SCREEN 3 (Servicios) — versión MÓVIL: carrusel + dots
+   ========================================================= */
 
 /* Contenedor: alto estable; sin padding lateral (lo dan las tarjetas) */
 #screen3 .servicios {
@@ -151,7 +183,7 @@ body.in-screen2 #screen2 .dots-acerca {
   scroll-snap-stop: always;
 }
 
-/* Puntitos: (no tocamos estilo, solo visibilidad por sección) */
+/* Puntitos: visibles solo cuando la screen3 está a la vista */
 #screen3 .dots {
   position: fixed;
   left: 50%;
@@ -160,7 +192,6 @@ body.in-screen2 #screen2 .dots-acerca {
   z-index: 900;
   display: flex;
   gap: 6px;
-  pointer-events: auto;
 
   background: transparent;
   padding: 0;
@@ -180,7 +211,7 @@ body.in-screen3 #screen3 .dots {
   pointer-events: auto;
 }
 
-/* Dots individuales (no cambiamos colores, ya los tenías perfectos) */
+/* Dots individuales (mismos tamaños y comportamiento) */
 #screen3 .dot {
   width: 6px;
   height: 6px;
@@ -191,8 +222,10 @@ body.in-screen3 #screen3 .dots {
   appearance: none;
   -webkit-appearance: none;
   background: currentColor;
+  -webkit-tap-highlight-color: transparent;
 }
-/* ===== Colores correctos para .dot (según modo) ===== */
+
+/* Colores correctos según modo (consistentes con screen2) */
 :root[data-theme="light"] #screen3 .dot { color: hsl(0 0% 15% / 0.55); }  /* inactivo: casi negro */
 :root[data-theme="light"] #screen3 .dot[aria-current="true"],
 :root[data-theme="light"] #screen3 .dot.active { color: hsl(0 0% 0%); }    /* activo: negro puro */
@@ -212,6 +245,3 @@ body.in-screen3 #screen3 .dots {
   :root:not([data-theme]) #screen3 .dot[aria-current="true"],
   :root:not([data-theme]) #screen3 .dot.active { color: hsl(0 0% 100%); }
 }
-
-/* Evitar resaltado azul por tap en móvil */
-#screen3 .dot { -webkit-tap-highlight-color: transparent; }
