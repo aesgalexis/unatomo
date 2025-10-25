@@ -33,7 +33,7 @@ html, body {
 }
 
 /* Título encajado con el ancho visual de las tarjetas (16px por lado) */
-#screen2 .acerca .section-title {
+ .section-title {
   padding-left: 16px;
   padding-right: 16px;
 }
@@ -110,10 +110,7 @@ html, body {
   background: currentColor;
   -webkit-tap-highlight-color: transparent;
 }
-/* Reservar hueco inferior para que los dots queden estáticos y no “bailen” */
-#screen2 .acerca { 
-  padding-bottom: 56px;  /* hueco para los dots */
-}
+
 
 /* Colócalos un poco más cerca de las tarjetas */
 #screen2 .dots-acerca { 
@@ -212,10 +209,6 @@ html, body {
   -webkit-appearance: none;
   background: currentColor;
   -webkit-tap-highlight-color: transparent;
-}
-/* Lo mismo para Servicios (screen 3) */
-#screen3 .servicios { 
-  padding-bottom: 56px;  /* hueco para los dots */
 }
 
 #screen3 .dots { 
