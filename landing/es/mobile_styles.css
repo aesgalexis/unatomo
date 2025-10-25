@@ -110,7 +110,15 @@ html, body {
   background: currentColor;
   -webkit-tap-highlight-color: transparent;
 }
+/* Reservar hueco inferior para que los dots queden estáticos y no “bailen” */
+#screen2 .acerca { 
+  padding-bottom: 56px;  /* hueco para los dots */
+}
 
+/* Colócalos un poco más cerca de las tarjetas */
+#screen2 .dots-acerca { 
+  bottom: 20px;          /* antes 32px */
+}
 /* Colores invertidos según modo */
 :root[data-theme="light"] #screen2 .dots-acerca .dot { color: hsl(0 0% 15% / 0.55); }
 :root[data-theme="light"] #screen2 .dots-acerca .dot[aria-current="true"],
@@ -205,7 +213,14 @@ html, body {
   background: currentColor;
   -webkit-tap-highlight-color: transparent;
 }
+/* Lo mismo para Servicios (screen 3) */
+#screen3 .servicios { 
+  padding-bottom: 56px;  /* hueco para los dots */
+}
 
+#screen3 .dots { 
+  bottom: 20px;          /* antes 12px */
+}
 /* Colores correctos según modo (consistentes con screen2) */
 :root[data-theme="light"] #screen3 .dot { color: hsl(0 0% 15% / 0.55); }
 :root[data-theme="light"] #screen3 .dot[aria-current="true"],
