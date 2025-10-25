@@ -1,16 +1,16 @@
-/* =========================
-   Base móvil compartida
-   ========================= */
+/* ========================= Base móvil compartida ========================= */
 
+/* Evita rebotes de scroll en móvil */
 html, body {
-  overscroll-behavior-y: contain; /* evita rebotes en móvil */
+  overscroll-behavior-y: contain;
 }
 
-/* Altura estable en móvil: sin hacks de JS */
+/* Altura estable por pantalla usando 100svh (sin corrección JS) */
 .screen {
   min-height: 100svh;
 }
 
+/* Fallback adicional para navegadores muy antiguos */
 @supports not (height: 100svh) {
   .screen { min-height: 100vh; }
 }
@@ -21,44 +21,47 @@ html, body {
    SCREEN 2 (Acerca) — versión MÓVIL: 3 tarjetas + dots
    ========================================================= */
 
+/* Visibilidad de variantes en móvil (solo carrusel) */
 #screen2 .acerca .acerca-desktop { display: none; }
-#screen2 .acerca .acerca-mobile  { display: flex; }
+#screen2 .acerca .acerca-mobile  { display: flex; } /* flex para carrusel */
 
+/* Contenedor: alto estable y sin padding lateral */
 #screen2 .acerca {
   height: 100svh;
   padding-left: 0;
   padding-right: 0;
 }
 
-/* Título alineado al mismo ancho que tarjetas */
+/* Título encajado con el ancho visual de las tarjetas (16px por lado) */
 #screen2 .acerca .section-title {
   padding-left: 16px;
   padding-right: 16px;
 }
 
-/* Carrusel horizontal */
+/* Carrusel horizontal: 1 tarjeta por vista, con gutter simétrico (padding+gap) */
 #screen2 .acerca .acerca-mobile {
   display: flex;
   overflow-x: auto;
   overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
 
-  gap: 16px;
-  padding: 0 16px 32px; /* espacio equilibrado para puntitos */
+  gap: 16px; /* separación entre tarjetas */
+  padding: 0 16px 44px; /* 16px a izq/der + espacio para dots */
+
   scroll-snap-type: x mandatory;
-  scroll-padding-inline: 16px;
+  scroll-padding-inline: 16px; /* alinea respetando el gutter */
 
-  scrollbar-width: none;
+  scrollbar-width: none; /* Firefox */
 }
-#screen2 .acerca .acerca-mobile::-webkit-scrollbar { display: none; }
+#screen2 .acerca .acerca-mobile::-webkit-scrollbar { display: none; } /* WebKit */
 
-/* Tarjeta móvil */
+/* Tarjeta móvil: ocupa todo el ancho disponible dentro del gutter */
 #screen2 .acerca .acerca-mobile .acerca-card {
   flex: 0 0 auto;
   width: 100%;
   max-width: 100%;
   min-width: 0;
-  margin: 0;
+  margin: 0; /* sin márgenes laterales en la tarjeta */
   box-sizing: border-box;
 
   border: 1px solid var(--current-fg);
@@ -70,7 +73,7 @@ html, body {
   align-items: flex-start;
   justify-content: flex-start;
   gap: 8px;
-  text-align: left;
+  text-align: left; /* evita herencia del centrado del body */
 
   background: transparent;
   color: var(--current-fg);
@@ -79,32 +82,36 @@ html, body {
   scroll-snap-stop: always;
 }
 
-/* Puntitos fijos y simples */
+/* Dots en móvil para screen2: SIEMPRE en su posición dentro de la sección */
 #screen2 .dots-acerca {
-  position: sticky;
+  position: sticky; /* se queda pegado al borde inferior mientras esté en la sección */
   bottom: 32px;
   z-index: 900;
   display: flex;
   justify-content: center;
   gap: 6px;
+
+  background: transparent;
   padding: 0;
   margin: 0;
-  background: transparent;
   border: 0;
 }
 
-/* Puntitos — colores coherentes */
+/* Botoncitos (estética consistente) */
 #screen2 .dots-acerca .dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
   border: none;
-  background: currentColor;
+  padding: 0;
+  margin: 0;
   appearance: none;
   -webkit-appearance: none;
+  background: currentColor;
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Colores invertidos según modo */
 :root[data-theme="light"] #screen2 .dots-acerca .dot { color: hsl(0 0% 15% / 0.55); }
 :root[data-theme="light"] #screen2 .dots-acerca .dot[aria-current="true"],
 :root[data-theme="light"] #screen2 .dots-acerca .dot.active { color: hsl(0 0% 0%); }
@@ -112,6 +119,16 @@ html, body {
 :root[data-theme="dark"] #screen2 .dots-acerca .dot { color: hsl(0 0% 85% / 0.55); }
 :root[data-theme="dark"] #screen2 .dots-acerca .dot[aria-current="true"],
 :root[data-theme="dark"] #screen2 .dots-acerca .dot.active { color: hsl(0 0% 100%); }
+
+/* Fallback si NO hay data-theme (seguir el sistema) */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) #screen2 .dots-acerca .dot { color: hsl(0 0% 15% / 0.55); }
+  :root:not([data-theme]) #screen2 .dots-acerca .dot[aria-current="true"] { color: hsl(0 0% 0%); }
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) #screen2 .dots-acerca .dot { color: hsl(0 0% 85% / 0.55); }
+  :root:not([data-theme]) #screen2 .dots-acerca .dot[aria-current="true"] { color: hsl(0 0% 100%); }
+}
 
 
 
@@ -125,60 +142,71 @@ html, body {
   padding-right: 0;
 }
 
+/* Carrusel: 1 tarjeta por vista, swipe con snap estricto */
 #screen3 .servicios .grid {
   display: flex;
   overflow-x: auto;
   overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
 
+  /* sin gap para que no asome la siguiente; márgenes los pone la tarjeta */
   gap: 0;
+
+  /* snap horizontal estricto */
   scroll-snap-type: x mandatory;
-  scroll-padding-inline: 16px;
+  scroll-padding-inline: 16px; /* centra teniendo en cuenta el margen lateral */
 
-  padding-bottom: 32px;
+  /* espacio para los puntitos */
+  padding-bottom: 44px;
 
-  scrollbar-width: none;
+  /* ocultar scrollbar en móviles */
+  scrollbar-width: none; /* Firefox */
 }
-#screen3 .servicios .grid::-webkit-scrollbar { display: none; }
+#screen3 .servicios .grid::-webkit-scrollbar { display: none; } /* WebKit */
 
-/* Tarjetas mismo comportamiento que screen2 */
+/* Tarjeta: ocupa casi todo el ancho, con márgenes laterales estándar */
 #screen3 .servicios .card {
   flex: 0 0 auto;
-  width: calc(100% - 32px);
+  width: calc(100% - 32px); /* 16px de margen a cada lado */
   max-width: calc(100% - 32px);
   min-width: 0;
   margin: 0 16px;
   box-sizing: border-box;
+
   scroll-snap-align: center;
   scroll-snap-stop: always;
 }
 
-/* Puntitos en screen3 */
+/* Dots en móvil para screen3: SIEMPRE en su posición dentro de la sección */
 #screen3 .dots {
-  position: sticky;
-  bottom: 32px;
+  position: sticky; /* pegado al borde inferior mientras estés en screen3 */
+  bottom: 12px;
   z-index: 900;
   display: flex;
   justify-content: center;
   gap: 6px;
+
+  background: transparent;
   padding: 0;
   margin: 0;
-  background: transparent;
   border: 0;
 }
 
+/* Dots individuales */
 #screen3 .dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
   border: none;
-  background: currentColor;
+  padding: 0;
+  margin: 0;
   appearance: none;
   -webkit-appearance: none;
+  background: currentColor;
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Colores coherentes */
+/* Colores correctos según modo (consistentes con screen2) */
 :root[data-theme="light"] #screen3 .dot { color: hsl(0 0% 15% / 0.55); }
 :root[data-theme="light"] #screen3 .dot[aria-current="true"],
 :root[data-theme="light"] #screen3 .dot.active { color: hsl(0 0% 0%); }
@@ -187,3 +215,14 @@ html, body {
 :root[data-theme="dark"] #screen3 .dot[aria-current="true"],
 :root[data-theme="dark"] #screen3 .dot.active { color: hsl(0 0% 100%); }
 
+/* Fallback si NO hay data-theme (seguir el sistema) */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) #screen3 .dot { color: hsl(0 0% 15% / 0.55); }
+  :root:not([data-theme]) #screen3 .dot[aria-current="true"],
+  :root:not([data-theme]) #screen3 .dot.active { color: hsl(0 0% 0%); }
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) #screen3 .dot { color: hsl(0 0% 85% / 0.55); }
+  :root:not([data-theme]) #screen3 .dot[aria-current="true"],
+  :root:not([data-theme]) #screen3 .dot.active { color: hsl(0 0% 100%); }
+}
