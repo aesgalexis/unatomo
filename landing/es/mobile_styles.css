@@ -75,7 +75,7 @@ html, body { overscroll-behavior-y: contain; }
   scroll-snap-stop: always;
 }
 
-/* ===== SCREEN 4 (Tecnología) ===== */
+/* ===== SCREEN 5 (Tecnología) ===== */
 #screen5 .tecno { padding-left: 0; padding-right: 0; }
 
 #screen5 .tecno .grid {
@@ -101,7 +101,7 @@ html, body { overscroll-behavior-y: contain; }
   scroll-snap-stop: always;
 }
 
-/* ===== SCREEN 5 (Software) ===== */
+/* ===== SCREEN 4 (Software) ===== */
 #screen4 .soft { padding-left: 0; padding-right: 0; }
 
 #screen4 .soft .grid {
