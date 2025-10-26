@@ -1,9 +1,10 @@
 /* =======================================================================
-   mobile_dots.css — Dots FIJOS en móvil (input táctil) + espacio inferior
+   mobile_dots.css — Dots fijos + espacio inferior para carruseles
+   Muestra solo los dots de la pantalla visible (via .is-visible desde JS)
    Pantallas: #screen2 (acerca), #screen3 (servicios), #screen4 (tecno), #screen5 (soft)
    ======================================================================= */
 
-/* ====== Activación por tipo de entrada (robusto en móviles grandes) ====== */
+/* Activación por entrada táctil; incluye fallback por anchura más abajo */
 @media (hover: none) and (pointer: coarse) {
 
   :root {
@@ -13,7 +14,7 @@
     --dots-z: 1000;
   }
 
-  /* Contenedores de dots fijos y centrados */
+  /* Contenedores DOTS: fijos pero OCULTOS por defecto */
   #screen2 .dots-acerca,
   #screen3 .dots,
   #screen4 .dots,
@@ -28,7 +29,7 @@
     justify-content: center !important;
     gap: 6px !important;
 
-    /* neutralizar restos */
+    /* neutralizaciones */
     top: auto !important;
     right: auto !important;
     background: transparent !important;
@@ -36,8 +37,17 @@
     margin: 0 !important;
     border: 0 !important;
 
-    /* sin transiciones / opacidades */
-    transition: none !important;
+    /* ocultos por defecto */
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transition: none !important; /* sin animaciones */
+  }
+
+  /* Mostrar SOLO el contenedor que JS marque como visible */
+  #screen2 .dots-acerca.is-visible,
+  #screen3 .dots.is-visible,
+  #screen4 .dots.is-visible,
+  #screen5 .dots.is-visible {
     opacity: 1 !important;
     pointer-events: auto !important;
   }
@@ -95,15 +105,10 @@
   }
 }
 
-/* ====== Fallback por anchura (por si algún dispositivo no reporta coarse) ====== */
+/* Fallback por anchura (si el dispositivo no reporta coarse) */
 @media (max-width: 900px) {
-
-  :root {
-    --dots-bottom-gap: 16px;
-    --dots-safe-bottom: env(safe-area-inset-bottom, 0px);
-    --dots-total-offset: calc(var(--dots-safe-bottom) + var(--dots-bottom-gap));
-    --dots-z: 1000;
-  }
+  :root { --dots-bottom-gap: 16px; --dots-safe-bottom: env(safe-area-inset-bottom, 0px);
+          --dots-total-offset: calc(var(--dots-safe-bottom) + var(--dots-bottom-gap)); --dots-z: 1000; }
 
   #screen2 .dots-acerca,
   #screen3 .dots,
@@ -117,21 +122,17 @@
     display: flex !important;
     justify-content: center !important;
     gap: 6px !important;
-    top: auto !important;
-    right: auto !important;
-    background: transparent !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    border: 0 !important;
-    transition: none !important;
-    opacity: 1 !important;
-    pointer-events: auto !important;
+    top: auto !important; right: auto !important; background: transparent !important;
+    padding: 0 !important; margin: 0 !important; border: 0 !important;
+    opacity: 0 !important; pointer-events: none !important; transition: none !important;
   }
+  #screen2 .dots-acerca.is-visible,
+  #screen3 .dots.is-visible,
+  #screen4 .dots.is-visible,
+  #screen5 .dots.is-visible { opacity: 1 !important; pointer-events: auto !important; }
 
   #screen2 .acerca .acerca-mobile,
   #screen3 .servicios .grid,
   #screen4 .tecno .grid,
-  #screen5 .soft .grid {
-    padding-bottom: calc(44px + var(--dots-safe-bottom)) !important;
-  }
+  #screen5 .soft .grid { padding-bottom: calc(44px + var(--dots-safe-bottom)) !important; }
 }
