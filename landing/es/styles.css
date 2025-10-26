@@ -356,3 +356,66 @@ html, body { overscroll-behavior-y: contain; }
 #screen4 .dots { 
   display: none;
 }
+/* ===== Pantalla 5 (impar/negra): Soluciones Digitales — ESCRITORIO ===== */
+#screen5 {
+  /* Para impares ya heredas var(--bg)/--fg; si prefieres locales, usa: */
+  --current-bg: var(--bg);
+  --current-fg: var(--fg);
+  --current-muted: color-mix(in srgb, var(--current-fg) 70%, transparent);
+}
+
+#screen5 .soft {
+  max-width: 1125px;
+  max-height: 812px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+#screen5 .soft .section-title {
+  font-size: clamp(28px, 4vw, 48px);
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+  margin: 24px 0 24px;
+  color: var(--current-fg);
+}
+
+/* Grid 3 columnas en escritorio (igual que #screen3/#screen4) */
+#screen5 .soft .grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  height: 100%;
+}
+
+#screen5 .soft .card {
+  border: 1px solid var(--current-fg);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  background: transparent;
+  color: var(--current-fg);
+}
+
+#screen5 .soft .card h3 {
+  margin: 0 0 6px;
+  font-weight: 600;
+  font-size: clamp(14px, 1.6vw, 18px);
+  color: var(--current-fg);
+}
+
+#screen5 .soft .card p {
+  margin: 0;
+  font-size: clamp(14px, 1.4vw, 16px);
+  line-height: 1.45;
+  color: var(--current-muted);
+}
+
+/* Dots ocultos en escritorio, igual que en otras */
+#screen5 .dots { 
+  display: none;
+}
