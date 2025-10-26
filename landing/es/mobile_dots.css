@@ -1,44 +1,38 @@
 /* =======================================================================
-   movile_dots.css — Dots FIJOS en móvil (sin transiciones, sin “aparecer”)
-   Pantallas soportadas: #screen2 (acerca), #screen3 (servicios),
-                         #screen4 (tecno), #screen5 (software/soft/genérico)
-   -----------------------------------------------------------------------
-   Objetivos:
-   - position: fixed para los contenedores de dots en móvil.
-   - Centrados y pegados al borde inferior, respetando notch (safe-area).
-   - Sin transiciones ni opacidades.
-   - Evitar superposición: padding-bottom en los carruseles móviles.
-   - Desktop intacto: sólo aplica en ≤600px.
+   mobile_dots.css — Dots FIJOS en móvil, sin transiciones ni apariciones
+   Pantallas: #screen2 (acerca), #screen3 (servicios), #screen4 (tecno), #screen5 (soft)
+   - Fijamos los contenedores de dots al viewport (abajo, centrados)
+   - Aportamos el padding-bottom a los carruseles para evitar superposición
+   - Colores y tamaño coherentes con el resto del sitio
    ======================================================================= */
 
 @media (max-width: 600px) {
 
   /* ---------- Variables utilitarias ---------- */
   :root {
-    --dots-bottom-gap: 16px;                 /* separación visual del borde */
+    --dots-bottom-gap: 16px;                          /* separación del borde inferior */
     --dots-safe-bottom: env(safe-area-inset-bottom, 0px);
     --dots-total-offset: calc(var(--dots-safe-bottom) + var(--dots-bottom-gap));
-    --dots-z: 1000;                          /* por encima del contenido, por debajo de overlays críticos */
+    --dots-z: 1000;
   }
 
-  /* ---------- Poner los DOTS FIJOS en móvil ---------- */
-  /* screen2 usa .dots-acerca; screen3/4/5 usan .dots */
+  /* ========== DOTS FIJOS (contenedores) ========== */
+  /* screen2 usa .dots-acerca; las demás usan .dots */
   #screen2 .dots-acerca,
   #screen3 .dots,
   #screen4 .dots,
-  /* soporte previsto para pantalla 5 */
   #screen5 .dots {
-    position: fixed !important;              /* FIJOS al viewport */
+    position: fixed !important;              /* fijos al viewport */
     left: 50% !important;
     transform: translateX(-50%) !important;
     bottom: var(--dots-total-offset) !important;
     z-index: var(--dots-z) !important;
 
     display: flex !important;                /* visibles siempre en móvil */
-    opacity: 1 !important;                   /* sin fades ni rarezas */
-    pointer-events: auto !important;
+    justify-content: center !important;
+    gap: 6px !important;
 
-    /* neutralizar restos de estilos anteriores */
+    /* neutralizamos cualquier estilo previo */
     top: auto !important;
     right: auto !important;
     background: transparent !important;
@@ -46,11 +40,13 @@
     margin: 0 !important;
     border: 0 !important;
 
-    /* sin transiciones */
+    /* sin transiciones ni opacidades raras */
     transition: none !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
   }
 
-  /* Botoncitos (tamaño y aspecto coherente con tus pantallas) */
+  /* ========== BOTONES (dots) ========== */
   #screen2 .dots-acerca .dot,
   #screen3 .dots .dot,
   #screen4 .dots .dot,
@@ -67,7 +63,7 @@
     -webkit-tap-highlight-color: transparent !important;
   }
 
-  /* Colores según tema (igual que en tus pantallas 2/3/4) */
+  /* Colores según tema (coinciden con tu sitio) */
   :root[data-theme="light"] #screen2 .dots-acerca .dot,
   :root[data-theme="light"] #screen3 .dots .dot,
   :root[data-theme="light"] #screen4 .dots .dot,
@@ -124,31 +120,12 @@
     :root:not([data-theme]) #screen5 .dots .dot[aria-current="true"] { color: hsl(0 0% 100%); }
   }
 
-  /* ---------- Evitar superposición: padding inferior en carruseles ---------- */
-  /* Pantalla 2 (Acerca) — carrusel móvil */
-  #screen2 .acerca .acerca-mobile {
+  /* ========== ESPACIO INFERIOR PARA NO SUPERPONER CONTENIDO ========== */
+  /* Lo añadimos aquí (y lo quitamos de mobile_styles.css) */
+  #screen2 .acerca .acerca-mobile,
+  #screen3 .servicios .grid,
+  #screen4 .tecno .grid,
+  #screen5 .soft .grid {
     padding-bottom: calc(44px + var(--dots-safe-bottom)) !important;
   }
-
-  /* Pantalla 3 (Servicios) — carrusel móvil */
-  #screen3 .servicios .grid {
-    padding-bottom: calc(44px + var(--dots-safe-bottom)) !important;
-  }
-
-  /* Pantalla 4 (Tecnología) — carrusel móvil */
-  #screen4 .tecno .grid {
-    padding-bottom: calc(44px + var(--dots-safe-bottom)) !important;
-  }
-
-  /* Pantalla 5 (Software) — carrusel móvil (ajusta clase según tu HTML) */
-  #screen5 .software .grid,
-  #screen5 .soft .grid,
-  /* fallback genérico por si usas el mismo patrón que en #screen3/#screen4 */
-  #screen5 .grid {
-    padding-bottom: calc(44px + var(--dots-safe-bottom)) !important;
-  }
-
-  /* ---------- Asegurar que sólo se aplica en móvil y no interfiere en desktop ---------- */
-  /* (En desktop, tus dots ya están ocultos por defecto; aquí no tocamos nada) */
-
-} /* /@media (max-width: 600px) */
+}
