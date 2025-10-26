@@ -3,11 +3,11 @@
   'use strict';
 
   const SCREENS = [
-    { grid: '#screen2 .acerca .acerca-mobile', cardSel: '.acerca-card', dots: '#screen2 .dots-acerca' },
-    { grid: '#screen3 .servicios .grid',       cardSel: '.card',        dots: '#screen3 .dots' },
-    { grid: '#screen4 .tecno .grid',           cardSel: '.card',        dots: '#screen4 .dots' },
-    { grid: '#screen5 .soft .grid',            cardSel: '.card',        dots: '#screen5 .dots' },
-  ];
+  { grid: '#screen2 .acerca .acerca-mobile', cardSel: '.acerca-card', dots: '#screen2 .dots-acerca' },
+  { grid: '#screen3 .servicios .grid',       cardSel: '.card',        dots: '#screen3 .dots' },
+  { grid: '#screen4 .soft .grid',            cardSel: '.card',        dots: '#screen4 .dots' },
+];
+
 
   SCREENS.forEach(({ grid, cardSel, dots }) => {
     const scroller = document.querySelector(grid);
