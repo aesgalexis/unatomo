@@ -76,9 +76,9 @@ html, body { overscroll-behavior-y: contain; }
 }
 
 /* ===== SCREEN 4 (Tecnología) ===== */
-#screen4 .tecno { padding-left: 0; padding-right: 0; }
+#screen5 .tecno { padding-left: 0; padding-right: 0; }
 
-#screen4 .tecno .grid {
+#screen5 .tecno .grid {
   display: flex;
   overflow-x: auto;
   overflow-y: hidden;
@@ -88,9 +88,9 @@ html, body { overscroll-behavior-y: contain; }
   scroll-padding-inline: 16px;
   scrollbar-width: none;
 }
-#screen4 .tecno .grid::-webkit-scrollbar { display: none; }
+#screen5 .tecno .grid::-webkit-scrollbar { display: none; }
 
-#screen4 .tecno .card {
+#screen5 .tecno .card {
   flex: 0 0 auto;
   width: calc(100% - 32px);
   max-width: calc(100% - 32px);
@@ -102,9 +102,9 @@ html, body { overscroll-behavior-y: contain; }
 }
 
 /* ===== SCREEN 5 (Software) ===== */
-#screen5 .soft { padding-left: 0; padding-right: 0; }
+#screen4 .soft { padding-left: 0; padding-right: 0; }
 
-#screen5 .soft .grid {
+#screen4 .soft .grid {
   display: flex;
   overflow-x: auto;
   overflow-y: hidden;
@@ -114,9 +114,9 @@ html, body { overscroll-behavior-y: contain; }
   scroll-padding-inline: 16px;
   scrollbar-width: none;
 }
-#screen5 .soft .grid::-webkit-scrollbar { display: none; }
+#screen4 .soft .grid::-webkit-scrollbar { display: none; }
 
-#screen5 .soft .card {
+#screen4 .soft .card {
   flex: 0 0 auto;
   width: calc(100% - 32px);
   max-width: calc(100% - 32px);
