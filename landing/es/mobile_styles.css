@@ -18,7 +18,7 @@ html, body {
 
 
 /* =========================================================
-   SCREEN 2 (Acerca) — versión MÓVIL: 3 tarjetas + dots
+   SCREEN 2 (Acerca) — versión MÓVIL: 3 tarjetas
    ========================================================= */
 
 /* Visibilidad de variantes en móvil (solo carrusel) */
@@ -33,25 +33,25 @@ html, body {
 }
 
 /* Título encajado con el ancho visual de las tarjetas (16px por lado) */
- .section-title {
+.section-title {
   padding-left: 16px;
   padding-right: 16px;
 }
 
-/* Carrusel horizontal: 1 tarjeta por vista, con gutter simétrico (padding+gap) */
+/* Carrusel horizontal: 1 tarjeta por vista, con gutter simétrico */
 #screen2 .acerca .acerca-mobile {
   display: flex;
   overflow-x: auto;
   overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
 
-  gap: 16px; /* separación entre tarjetas */
-  padding: 0 16px 44px; /* 16px a izq/der + espacio para dots */
+  gap: 16px;                /* separación entre tarjetas */
+  padding: 0 16px 0;        /* << SIN bottom; lo aporta mobile_dots.css */
 
   scroll-snap-type: x mandatory;
   scroll-padding-inline: 16px; /* alinea respetando el gutter */
 
-  scrollbar-width: none; /* Firefox */
+  scrollbar-width: none;    /* Firefox */
 }
 #screen2 .acerca .acerca-mobile::-webkit-scrollbar { display: none; } /* WebKit */
 
@@ -82,63 +82,10 @@ html, body {
   scroll-snap-stop: always;
 }
 
-/* Dots en móvil para screen2: SIEMPRE en su posición dentro de la sección */
-#screen2 .dots-acerca {
-  position: sticky; /* se queda pegado al borde inferior mientras esté en la sección */
-  bottom: 32px;
-  z-index: 900;
-  display: flex;
-  justify-content: center;
-  gap: 6px;
-
-  background: transparent;
-  padding: 0;
-  margin: 0;
-  border: 0;
-}
-
-/* Botoncitos (estética consistente) */
-#screen2 .dots-acerca .dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  border: none;
-  padding: 0;
-  margin: 0;
-  appearance: none;
-  -webkit-appearance: none;
-  background: currentColor;
-  -webkit-tap-highlight-color: transparent;
-}
-
-
-/* Colócalos un poco más cerca de las tarjetas */
-#screen2 .dots-acerca { 
-  bottom: 20px;          /* antes 32px */
-}
-/* Colores invertidos según modo */
-:root[data-theme="light"] #screen2 .dots-acerca .dot { color: hsl(0 0% 15% / 0.55); }
-:root[data-theme="light"] #screen2 .dots-acerca .dot[aria-current="true"],
-:root[data-theme="light"] #screen2 .dots-acerca .dot.active { color: hsl(0 0% 0%); }
-
-:root[data-theme="dark"] #screen2 .dots-acerca .dot { color: hsl(0 0% 85% / 0.55); }
-:root[data-theme="dark"] #screen2 .dots-acerca .dot[aria-current="true"],
-:root[data-theme="dark"] #screen2 .dots-acerca .dot.active { color: hsl(0 0% 100%); }
-
-/* Fallback si NO hay data-theme (seguir el sistema) */
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme]) #screen2 .dots-acerca .dot { color: hsl(0 0% 15% / 0.55); }
-  :root:not([data-theme]) #screen2 .dots-acerca .dot[aria-current="true"] { color: hsl(0 0% 0%); }
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme]) #screen2 .dots-acerca .dot { color: hsl(0 0% 85% / 0.55); }
-  :root:not([data-theme]) #screen2 .dots-acerca .dot[aria-current="true"] { color: hsl(0 0% 100%); }
-}
-
 
 
 /* =========================================================
-   SCREEN 3 (Servicios) — versión MÓVIL: carrusel + dots
+   SCREEN 3 (Servicios) — versión MÓVIL: carrusel
    ========================================================= */
 
 #screen3 .servicios {
@@ -161,8 +108,7 @@ html, body {
   scroll-snap-type: x mandatory;
   scroll-padding-inline: 16px; /* centra teniendo en cuenta el margen lateral */
 
-  /* espacio para los puntitos */
-  padding-bottom: 44px;
+  /* SIN padding-bottom aquí; lo da mobile_dots.css */
 
   /* ocultar scrollbar en móviles */
   scrollbar-width: none; /* Firefox */
@@ -182,59 +128,11 @@ html, body {
   scroll-snap-stop: always;
 }
 
-/* Dots en móvil para screen3: SIEMPRE en su posición dentro de la sección */
-#screen3 .dots {
-  position: sticky; /* pegado al borde inferior mientras estés en screen3 */
-  bottom: 12px;
-  z-index: 900;
-  display: flex;
-  justify-content: center;
-  gap: 6px;
 
-  background: transparent;
-  padding: 0;
-  margin: 0;
-  border: 0;
-}
 
-/* Dots individuales */
-#screen3 .dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  border: none;
-  padding: 0;
-  margin: 0;
-  appearance: none;
-  -webkit-appearance: none;
-  background: currentColor;
-  -webkit-tap-highlight-color: transparent;
-}
-
-#screen3 .dots { 
-  bottom: 20px;          /* antes 12px */
-}
-/* Colores correctos según modo (consistentes con screen2) */
-:root[data-theme="light"] #screen3 .dot { color: hsl(0 0% 15% / 0.55); }
-:root[data-theme="light"] #screen3 .dot[aria-current="true"],
-:root[data-theme="light"] #screen3 .dot.active { color: hsl(0 0% 0%); }
-
-:root[data-theme="dark"] #screen3 .dot { color: hsl(0 0% 85% / 0.55); }
-:root[data-theme="dark"] #screen3 .dot[aria-current="true"],
-:root[data-theme="dark"] #screen3 .dot.active { color: hsl(0 0% 100%); }
-
-/* Fallback si NO hay data-theme (seguir el sistema) */
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme]) #screen3 .dot { color: hsl(0 0% 15% / 0.55); }
-  :root:not([data-theme]) #screen3 .dot[aria-current="true"],
-  :root:not([data-theme]) #screen3 .dot.active { color: hsl(0 0% 0%); }
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme]) #screen3 .dot { color: hsl(0 0% 85% / 0.55); }
-  :root:not([data-theme]) #screen3 .dot[aria-current="true"],
-  :root:not([data-theme]) #screen3 .dot.active { color: hsl(0 0% 100%); }
-}
-/* ===== SCREEN 4 (Tecnología) — MÓVIL: carrusel + dots (mismo patrón que #screen3) ===== */
+/* =========================================================
+   SCREEN 4 (Tecnología) — versión MÓVIL: carrusel
+   ========================================================= */
 
 #screen4 .tecno {
   height: 100svh;
@@ -242,23 +140,23 @@ html, body {
   padding-right: 0;
 }
 
-/* Carrusel: el MISMO .grid pasa a flex scroller en móvil */
+/* La MISMA .grid pasa a carrusel en móvil */
 #screen4 .tecno .grid {
   display: flex;
   overflow-x: auto;
   overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
 
-  gap: 0; /* sin gap; márgenes en .card */
+  gap: 0;  /* márgenes en .card */
   scroll-snap-type: x mandatory;
   scroll-padding-inline: 16px;
 
-  padding-bottom: 44px; /* espacio para dots */
+  /* SIN padding-bottom aquí; lo da mobile_dots.css */
   scrollbar-width: none; /* Firefox */
 }
 #screen4 .tecno .grid::-webkit-scrollbar { display: none; } /* WebKit */
 
-/* Tarjeta móvil: exactamente como #screen3 */
+/* Tarjeta móvil (exactamente como screen3) */
 #screen4 .tecno .card {
   flex: 0 0 auto;
   width: calc(100% - 32px); /* 16px por lado */
@@ -271,61 +169,11 @@ html, body {
   scroll-snap-stop: always;
 }
 
-/* Dots móviles (mismo selector/clase que #screen3) */
-#screen4 .dots {
-  position: sticky;
-  bottom: 20px;            /* mismo ajuste de #screen3 */
-  z-index: 900;
-  display: flex;
-  justify-content: center;
-  gap: 6px;
-  background: transparent;
-  padding: 0;
-  margin: 0;
-  border: 0;
-}
 
-#screen4 .dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  border: none;
-  padding: 0;
-  margin: 0;
-  appearance: none;
-  -webkit-appearance: none;
-  background: currentColor;
-  -webkit-tap-highlight-color: transparent;
-}
 
-/* Colores de dots según tema — mismos que #screen3 */
-:root[data-theme="light"] #screen4 .dot { color: hsl(0 0% 15% / 0.55); }
-:root[data-theme="light"] #screen4 .dot[aria-current="true"],
-:root[data-theme="light"] #screen4 .dot.active { color: hsl(0 0% 0%); }
-
-:root[data-theme="dark"] #screen4 .dot { color: hsl(0 0% 85% / 0.55); }
-:root[data-theme="dark"] #screen4 .dot[aria-current="true"],
-:root[data-theme="dark"] #screen4 .dot.active { color: hsl(0 0% 100%); }
-
-/* Fallback si NO hay data-theme */
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme]) #screen4 .dot { color: hsl(0 0% 15% / 0.55); }
-  :root:not([data-theme]) #screen4 .dot[aria-current="true"] { color: hsl(0 0% 0%); }
-}
-@media (prefers-color-scheme: dark) {
-
-/* ===== Dots FIJOS en móvil (pantallas 2, 3 y 4) ===== */
-/* Por compatibilidad, lo ponemos al final para sobreescribir cualquier "position: sticky" previo */
-
-#screen2 .dots-acerca,
-#screen3 .dots,
-#screen4 .dots {
-  position: fixed !important;              /* <-- fijos en viewport */
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 16px); /* respetar notch */
-  z-index: 1000;
-/* ===== SCREEN 5 (Software) — MÓVIL: carrusel + dots ===== */
+/* =========================================================
+   SCREEN 5 (Software) — versión MÓVIL: carrusel
+   ========================================================= */
 
 #screen5 .soft {
   height: 100svh;
@@ -344,12 +192,12 @@ html, body {
   scroll-snap-type: x mandatory;
   scroll-padding-inline: 16px;
 
-  padding-bottom: 44px;  /* espacio para dots */
+  /* SIN padding-bottom aquí; lo da mobile_dots.css */
   scrollbar-width: none;
 }
 #screen5 .soft .grid::-webkit-scrollbar { display: none; }
 
-/* Tarjeta móvil (exactamente igual que screen3/4) */
+/* Tarjeta móvil (exactamente como screen3/4) */
 #screen5 .soft .card {
   flex: 0 0 auto;
   width: calc(100% - 32px);
@@ -360,86 +208,4 @@ html, body {
 
   scroll-snap-align: center;
   scroll-snap-stop: always;
-}
-
-/* Dots móviles */
-#screen5 .dots {
-  position: sticky;   /* OJO: si ya usas dots fijos, esta regla la pisa la hoja de "dots fijos" */
-  bottom: 20px;
-  z-index: 900;
-  display: flex;
-  justify-content: center;
-  gap: 6px;
-  background: transparent;
-  padding: 0;
-  margin: 0;
-  border: 0;
-}
-#screen5 .dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  border: none;
-  padding: 0;
-  margin: 0;
-  appearance: none;
-  -webkit-appearance: none;
-  background: currentColor;
-  -webkit-tap-highlight-color: transparent;
-}
-
-/* Colores dots (igual que el resto) */
-:root[data-theme="light"] #screen5 .dot { color: hsl(0 0% 15% / 0.55); }
-:root[data-theme="light"] #screen5 .dot[aria-current="true"],
-:root[data-theme="light"] #screen5 .dot.active { color: hsl(0 0% 0%); }
-
-:root[data-theme="dark"] #screen5 .dot { color: hsl(0 0% 85% / 0.55); }
-:root[data-theme="dark"] #screen5 .dot[aria-current="true"],
-:root[data-theme="dark"] #screen5 .dot.active { color: hsl(0 0% 100%); }
-
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme]) #screen5 .dot { color: hsl(0 0% 15% / 0.55); }
-  :root:not([data-theme]) #screen5 .dot[aria-current="true"] { color: hsl(0 0% 0%); }
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme]) #screen5 .dot { color: hsl(0 0% 85% / 0.55); }
-  :root:not([data-theme]) #screen5 .dot[aria-current="true"] { color: hsl(0 0% 100%); }
-}
-
-
-
-
-
-
-  
-  /* Mostrar solo los de la pantalla “activa” */
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity .18s ease-out;
-}
-
-/* Cuando la pantalla correspondiente está visible (clase que activamos por JS) */
-#screen2 .dots-acerca.is-visible,
-#screen3 .dots.is-visible,
-#screen4 .dots.is-visible {
-  opacity: 1;
-  pointer-events: auto;  /* clicables */
-}
-
-/* Por si algún sticky anterior quedara aplicado, neutralizamos anclas */
-#screen2 .dots-acerca,
-#screen3 .dots,
-#screen4 .dots {
-  top: auto !important;
-}
-
-/* Mantenemos el espacio inferior del carrusel para que el contenido no “quede debajo” de los dots */
-#screen2 .acerca .acerca-mobile,
-#screen3 .servicios .grid,
-#screen4 .tecno .grid {
-  padding-bottom: 44px;   /* ya lo tienes en 2/3; lo aseguramos también en 4 */
-}
-
-  :root:not([data-theme]) #screen4 .dot { color: hsl(0 0% 85% / 0.55); }
-  :root:not([data-theme]) #screen4 .dot[aria-current="true"] { color: hsl(0 0% 100%); }
 }
