@@ -1,38 +1,34 @@
 /* =======================================================================
-   mobile_dots.css — Dots FIJOS en móvil, sin transiciones ni apariciones
+   mobile_dots.css — Dots FIJOS en móvil (input táctil) + espacio inferior
    Pantallas: #screen2 (acerca), #screen3 (servicios), #screen4 (tecno), #screen5 (soft)
-   - Fijamos los contenedores de dots al viewport (abajo, centrados)
-   - Aportamos el padding-bottom a los carruseles para evitar superposición
-   - Colores y tamaño coherentes con el resto del sitio
    ======================================================================= */
 
-@media (max-width: 600px) {
+/* ====== Activación por tipo de entrada (robusto en móviles grandes) ====== */
+@media (hover: none) and (pointer: coarse) {
 
-  /* ---------- Variables utilitarias ---------- */
   :root {
-    --dots-bottom-gap: 16px;                          /* separación del borde inferior */
+    --dots-bottom-gap: 16px;
     --dots-safe-bottom: env(safe-area-inset-bottom, 0px);
     --dots-total-offset: calc(var(--dots-safe-bottom) + var(--dots-bottom-gap));
     --dots-z: 1000;
   }
 
-  /* ========== DOTS FIJOS (contenedores) ========== */
-  /* screen2 usa .dots-acerca; las demás usan .dots */
+  /* Contenedores de dots fijos y centrados */
   #screen2 .dots-acerca,
   #screen3 .dots,
   #screen4 .dots,
   #screen5 .dots {
-    position: fixed !important;              /* fijos al viewport */
+    position: fixed !important;
     left: 50% !important;
     transform: translateX(-50%) !important;
     bottom: var(--dots-total-offset) !important;
     z-index: var(--dots-z) !important;
 
-    display: flex !important;                /* visibles siempre en móvil */
+    display: flex !important;
     justify-content: center !important;
     gap: 6px !important;
 
-    /* neutralizamos cualquier estilo previo */
+    /* neutralizar restos */
     top: auto !important;
     right: auto !important;
     background: transparent !important;
@@ -40,13 +36,13 @@
     margin: 0 !important;
     border: 0 !important;
 
-    /* sin transiciones ni opacidades raras */
+    /* sin transiciones / opacidades */
     transition: none !important;
     opacity: 1 !important;
     pointer-events: auto !important;
   }
 
-  /* ========== BOTONES (dots) ========== */
+  /* Botones */
   #screen2 .dots-acerca .dot,
   #screen3 .dots .dot,
   #screen4 .dots .dot,
@@ -63,13 +59,11 @@
     -webkit-tap-highlight-color: transparent !important;
   }
 
-  /* Colores según tema (coinciden con tu sitio) */
+  /* Colores por tema */
   :root[data-theme="light"] #screen2 .dots-acerca .dot,
   :root[data-theme="light"] #screen3 .dots .dot,
   :root[data-theme="light"] #screen4 .dots .dot,
-  :root[data-theme="light"] #screen5 .dots .dot {
-    color: hsl(0 0% 15% / 0.55) !important;
-  }
+  :root[data-theme="light"] #screen5 .dots .dot { color: hsl(0 0% 15% / 0.55) !important; }
   :root[data-theme="light"] #screen2 .dots-acerca .dot[aria-current="true"],
   :root[data-theme="light"] #screen3 .dots .dot[aria-current="true"],
   :root[data-theme="light"] #screen4 .dots .dot[aria-current="true"],
@@ -77,16 +71,12 @@
   :root[data-theme="light"] #screen2 .dots-acerca .dot.active,
   :root[data-theme="light"] #screen3 .dots .dot.active,
   :root[data-theme="light"] #screen4 .dots .dot.active,
-  :root[data-theme="light"] #screen5 .dots .dot.active {
-    color: hsl(0 0% 0%);
-  }
+  :root[data-theme="light"] #screen5 .dots .dot.active { color: hsl(0 0% 0%); }
 
   :root[data-theme="dark"] #screen2 .dots-acerca .dot,
   :root[data-theme="dark"] #screen3 .dots .dot,
   :root[data-theme="dark"] #screen4 .dots .dot,
-  :root[data-theme="dark"] #screen5 .dots .dot {
-    color: hsl(0 0% 85% / 0.55) !important;
-  }
+  :root[data-theme="dark"] #screen5 .dots .dot { color: hsl(0 0% 85% / 0.55) !important; }
   :root[data-theme="dark"] #screen2 .dots-acerca .dot[aria-current="true"],
   :root[data-theme="dark"] #screen3 .dots .dot[aria-current="true"],
   :root[data-theme="dark"] #screen4 .dots .dot[aria-current="true"],
@@ -94,34 +84,50 @@
   :root[data-theme="dark"] #screen2 .dots-acerca .dot.active,
   :root[data-theme="dark"] #screen3 .dots .dot.active,
   :root[data-theme="dark"] #screen4 .dots .dot.active,
-  :root[data-theme="dark"] #screen5 .dots .dot.active {
-    color: hsl(0 0% 100%);
+  :root[data-theme="dark"] #screen5 .dots .dot.active { color: hsl(0 0% 100%); }
+
+  /* Espacio inferior en carruseles para no tapar contenido */
+  #screen2 .acerca .acerca-mobile,
+  #screen3 .servicios .grid,
+  #screen4 .tecno .grid,
+  #screen5 .soft .grid {
+    padding-bottom: calc(44px + var(--dots-safe-bottom)) !important;
+  }
+}
+
+/* ====== Fallback por anchura (por si algún dispositivo no reporta coarse) ====== */
+@media (max-width: 900px) {
+
+  :root {
+    --dots-bottom-gap: 16px;
+    --dots-safe-bottom: env(safe-area-inset-bottom, 0px);
+    --dots-total-offset: calc(var(--dots-safe-bottom) + var(--dots-bottom-gap));
+    --dots-z: 1000;
   }
 
-  /* Fallback si NO hay data-theme (seguir el sistema) */
-  @media (prefers-color-scheme: light) {
-    :root:not([data-theme]) #screen2 .dots-acerca .dot,
-    :root:not([data-theme]) #screen3 .dots .dot,
-    :root:not([data-theme]) #screen4 .dots .dot,
-    :root:not([data-theme]) #screen5 .dots .dot { color: hsl(0 0% 15% / 0.55); }
-    :root:not([data-theme]) #screen2 .dots-acerca .dot[aria-current="true"],
-    :root:not([data-theme]) #screen3 .dots .dot[aria-current="true"],
-    :root:not([data-theme]) #screen4 .dots .dot[aria-current="true"],
-    :root:not([data-theme]) #screen5 .dots .dot[aria-current="true"] { color: hsl(0 0% 0%); }
-  }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme]) #screen2 .dots-acerca .dot,
-    :root:not([data-theme]) #screen3 .dots .dot,
-    :root:not([data-theme]) #screen4 .dots .dot,
-    :root:not([data-theme]) #screen5 .dots .dot { color: hsl(0 0% 85% / 0.55); }
-    :root:not([data-theme]) #screen2 .dots-acerca .dot[aria-current="true"],
-    :root:not([data-theme]) #screen3 .dots .dot[aria-current="true"],
-    :root:not([data-theme]) #screen4 .dots .dot[aria-current="true"],
-    :root:not([data-theme]) #screen5 .dots .dot[aria-current="true"] { color: hsl(0 0% 100%); }
+  #screen2 .dots-acerca,
+  #screen3 .dots,
+  #screen4 .dots,
+  #screen5 .dots {
+    position: fixed !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    bottom: var(--dots-total-offset) !important;
+    z-index: var(--dots-z) !important;
+    display: flex !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    top: auto !important;
+    right: auto !important;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: 0 !important;
+    transition: none !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
   }
 
-  /* ========== ESPACIO INFERIOR PARA NO SUPERPONER CONTENIDO ========== */
-  /* Lo añadimos aquí (y lo quitamos de mobile_styles.css) */
   #screen2 .acerca .acerca-mobile,
   #screen3 .servicios .grid,
   #screen4 .tecno .grid,
