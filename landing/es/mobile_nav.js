@@ -1,8 +1,7 @@
-/* mobile_nav.js — Carrusel + dots (solo sincronía del activo, layout aparte) */
+/* mobile_nav.js — Carruseles móviles + dots sincronizados */
 (function () {
   'use strict';
 
-  // Config de cada pantalla (grid, tarjetas, contenedor y dots)
   const SCREENS = [
     { grid: '#screen2 .acerca .acerca-mobile', cardSel: '.acerca-card', dots: '#screen2 .dots-acerca' },
     { grid: '#screen3 .servicios .grid',       cardSel: '.card',        dots: '#screen3 .dots' },
@@ -18,7 +17,7 @@
 
     if (!scroller || cards.length === 0 || dotBtns.length !== cards.length) return;
 
-    // 1) Resalta el activo
+    /* --- 1. Activar el punto correspondiente --- */
     function setActive(i) {
       dotBtns.forEach((d, idx) => {
         const on = idx === i;
@@ -27,8 +26,8 @@
       });
     }
 
-    // 2) Observer dentro del carrusel (no a nivel de pantalla)
-    const io = new IntersectionObserver((entries) => {
+    /* --- 2. Detectar qué tarjeta está centrada --- */
+    const observer = new IntersectionObserver((entries) => {
       entries.forEach(e => {
         if (e.isIntersecting && e.intersectionRatio >= 0.6) {
           const i = cards.indexOf(e.target);
@@ -37,16 +36,17 @@
       });
     }, { root: scroller, threshold: [0.6] });
 
-    cards.forEach(c => io.observe(c));
+    cards.forEach(card => observer.observe(card));
 
-    // 3) Click en dot → scroll a la tarjeta
+    /* --- 3. Al hacer clic en un punto, mover al slide --- */
     dotBtns.forEach((d, i) => {
       d.addEventListener('click', () => {
         cards[i].scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        setActive(i);
       });
     });
 
-    // 4) Estado inicial
+    /* --- 4. Estado inicial --- */
     setActive(0);
   });
 })();
