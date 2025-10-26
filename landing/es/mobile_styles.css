@@ -1,203 +1,125 @@
 /* ========================= Base móvil compartida ========================= */
+html, body { overscroll-behavior-y: contain; }
+.screen { min-height: 100svh; }
+@supports not (height: 100svh) { .screen { min-height: 100vh; } }
 
-/* Evita rebotes de scroll en móvil */
-html, body {
-  overscroll-behavior-y: contain;
-}
-
-/* Altura estable por pantalla usando 100svh (sin corrección JS) */
-.screen {
-  min-height: 100svh;
-}
-
-/* Fallback adicional para navegadores muy antiguos */
-@supports not (height: 100svh) {
-  .screen { min-height: 100vh; }
-}
-
-
-
-/* =========================================================
-   SCREEN 2 (Acerca) — versión MÓVIL: 3 tarjetas
-   ========================================================= */
-
-/* Visibilidad de variantes en móvil (solo carrusel) */
+/* ================= SCREEN 2 (Acerca) — MÓVIL: carrusel ================== */
 #screen2 .acerca .acerca-desktop { display: none; }
-#screen2 .acerca .acerca-mobile  { display: flex; } /* flex para carrusel */
+#screen2 .acerca .acerca-mobile  { display: flex; }
 
-/* Contenedor: alto estable y sin padding lateral */
 #screen2 .acerca {
   height: 100svh;
   padding-left: 0;
   padding-right: 0;
 }
 
-/* Título encajado con el ancho visual de las tarjetas (16px por lado) */
-.section-title {
-  padding-left: 16px;
-  padding-right: 16px;
-}
+.section-title { padding-left: 16px; padding-right: 16px; }
 
-/* Carrusel horizontal: 1 tarjeta por vista, con gutter simétrico */
 #screen2 .acerca .acerca-mobile {
   display: flex;
   overflow-x: auto;
   overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
-
-  gap: 16px;                /* separación entre tarjetas */
-  padding: 0 16px 0;        /* << SIN bottom; lo aporta mobile_dots.css */
-
+  gap: 16px;
+  padding: 0 16px 0;          /* el bottom lo aporta mobile_dots.css */
   scroll-snap-type: x mandatory;
-  scroll-padding-inline: 16px; /* alinea respetando el gutter */
-
-  scrollbar-width: none;    /* Firefox */
+  scroll-padding-inline: 16px;
+  scrollbar-width: none;
 }
-#screen2 .acerca .acerca-mobile::-webkit-scrollbar { display: none; } /* WebKit */
+#screen2 .acerca .acerca-mobile::-webkit-scrollbar { display: none; }
 
-/* Tarjeta móvil: ocupa todo el ancho disponible dentro del gutter */
 #screen2 .acerca .acerca-mobile .acerca-card {
   flex: 0 0 auto;
   width: 100%;
   max-width: 100%;
   min-width: 0;
-  margin: 0; /* sin márgenes laterales en la tarjeta */
+  margin: 0;
   box-sizing: border-box;
-
   border: 1px solid var(--current-fg);
   border-radius: 12px;
   padding: 16px;
-
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
   gap: 8px;
-  text-align: left; /* evita herencia del centrado del body */
-
+  text-align: left;
   background: transparent;
   color: var(--current-fg);
-
   scroll-snap-align: center;
   scroll-snap-stop: always;
 }
 
+/* ================ SCREEN 3 (Servicios) — MÓVIL: carrusel ================ */
+#screen3 .servicios { height: 100svh; padding-left: 0; padding-right: 0; }
 
-
-/* =========================================================
-   SCREEN 3 (Servicios) — versión MÓVIL: carrusel
-   ========================================================= */
-
-#screen3 .servicios {
-  height: 100svh;
-  padding-left: 0;
-  padding-right: 0;
-}
-
-/* Carrusel: 1 tarjeta por vista, swipe con snap estricto */
 #screen3 .servicios .grid {
   display: flex;
   overflow-x: auto;
   overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
-
-  /* sin gap para que no asome la siguiente; márgenes los pone la tarjeta */
   gap: 0;
-
-  /* snap horizontal estricto */
   scroll-snap-type: x mandatory;
-  scroll-padding-inline: 16px; /* centra teniendo en cuenta el margen lateral */
-
-  /* SIN padding-bottom aquí; lo da mobile_dots.css */
-
-  /* ocultar scrollbar en móviles */
-  scrollbar-width: none; /* Firefox */
+  scroll-padding-inline: 16px;
+  /* padding-bottom lo pone mobile_dots.css */
+  scrollbar-width: none;
 }
-#screen3 .servicios .grid::-webkit-scrollbar { display: none; } /* WebKit */
+#screen3 .servicios .grid::-webkit-scrollbar { display: none; }
 
-/* Tarjeta: ocupa casi todo el ancho, con márgenes laterales estándar */
 #screen3 .servicios .card {
   flex: 0 0 auto;
-  width: calc(100% - 32px); /* 16px de margen a cada lado */
+  width: calc(100% - 32px);
   max-width: calc(100% - 32px);
   min-width: 0;
   margin: 0 16px;
   box-sizing: border-box;
-
   scroll-snap-align: center;
   scroll-snap-stop: always;
 }
 
+/* ================ SCREEN 4 (Tecnología) — MÓVIL: carrusel =============== */
+#screen4 .tecno { height: 100svh; padding-left: 0; padding-right: 0; }
 
-
-/* =========================================================
-   SCREEN 4 (Tecnología) — versión MÓVIL: carrusel
-   ========================================================= */
-
-#screen4 .tecno {
-  height: 100svh;
-  padding-left: 0;
-  padding-right: 0;
-}
-
-/* La MISMA .grid pasa a carrusel en móvil */
 #screen4 .tecno .grid {
   display: flex;
   overflow-x: auto;
   overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
-
-  gap: 0;  /* márgenes en .card */
+  gap: 0;
   scroll-snap-type: x mandatory;
   scroll-padding-inline: 16px;
-
-  /* SIN padding-bottom aquí; lo da mobile_dots.css */
-  scrollbar-width: none; /* Firefox */
+  /* padding-bottom lo pone mobile_dots.css */
+  scrollbar-width: none;
 }
-#screen4 .tecno .grid::-webkit-scrollbar { display: none; } /* WebKit */
+#screen4 .tecno .grid::-webkit-scrollbar { display: none; }
 
-/* Tarjeta móvil (exactamente como screen3) */
 #screen4 .tecno .card {
   flex: 0 0 auto;
-  width: calc(100% - 32px); /* 16px por lado */
+  width: calc(100% - 32px);
   max-width: calc(100% - 32px);
   min-width: 0;
   margin: 0 16px;
   box-sizing: border-box;
-
   scroll-snap-align: center;
   scroll-snap-stop: always;
 }
 
+/* ================= SCREEN 5 (Software) — MÓVIL: carrusel ================= */
+#screen5 .soft { height: 100svh; padding-left: 0; padding-right: 0; }
 
-
-/* =========================================================
-   SCREEN 5 (Software) — versión MÓVIL: carrusel
-   ========================================================= */
-
-#screen5 .soft {
-  height: 100svh;
-  padding-left: 0;
-  padding-right: 0;
-}
-
-/* La MISMA .grid pasa a carrusel en móvil */
 #screen5 .soft .grid {
   display: flex;
   overflow-x: auto;
   overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
-
-  gap: 0;  /* márgenes los pone la tarjeta */
+  gap: 0;
   scroll-snap-type: x mandatory;
   scroll-padding-inline: 16px;
-
-  /* SIN padding-bottom aquí; lo da mobile_dots.css */
+  /* padding-bottom lo pone mobile_dots.css */
   scrollbar-width: none;
 }
 #screen5 .soft .grid::-webkit-scrollbar { display: none; }
 
-/* Tarjeta móvil (exactamente como screen3/4) */
 #screen5 .soft .card {
   flex: 0 0 auto;
   width: calc(100% - 32px);
@@ -205,7 +127,6 @@ html, body {
   min-width: 0;
   margin: 0 16px;
   box-sizing: border-box;
-
   scroll-snap-align: center;
   scroll-snap-stop: always;
 }
