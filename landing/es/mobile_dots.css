@@ -1,58 +1,30 @@
-/* =======================================================================
-   mobile_dots.css — Dots fijos + espacio inferior para carruseles
-   Muestra solo los dots de la pantalla visible (via .is-visible desde JS)
-   Pantallas: #screen2 (acerca), #screen3 (servicios), #screen4 (tecno), #screen5 (soft)
-   ======================================================================= */
+/* mobile_dots.css — Dots en flujo, debajo del carrusel (sin fixed/sticky) */
+@media (max-width: 1200px) {
 
-/* Activación por entrada táctil; incluye fallback por anchura más abajo */
-@media (hover: none) and (pointer: coarse) {
-
-  :root {
-    --dots-bottom-gap: 16px;
-    --dots-safe-bottom: env(safe-area-inset-bottom, 0px);
-    --dots-total-offset: calc(var(--dots-safe-bottom) + var(--dots-bottom-gap));
-    --dots-z: 1000;
-  }
-
-  /* Contenedores DOTS: fijos pero OCULTOS por defecto */
+  /* Contenedores: asegúrate de que están en el flujo y visibles */
   #screen2 .dots-acerca,
   #screen3 .dots,
   #screen4 .dots,
   #screen5 .dots {
-    position: fixed !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    bottom: var(--dots-total-offset) !important;
-    z-index: var(--dots-z) !important;
-
-    display: flex !important;
+    position: static !important;   /* clave */
+    z-index: auto !important;      /* nunca por encima del carrusel */
+    display: flex !important;      /* override a cualquier display:none de desktop */
     justify-content: center !important;
+    align-items: center !important;
     gap: 6px !important;
 
-    /* neutralizaciones */
-    top: auto !important;
-    right: auto !important;
-    background: transparent !important;
+    margin: 12px 0 0 !important;   /* aire respecto a las tarjetas */
     padding: 0 !important;
-    margin: 0 !important;
-    border: 0 !important;
+    height: 28px !important;       /* alto estable para el bloque */
+    background: transparent !important;
 
-    /* ocultos por defecto */
-    opacity: 0 !important;
-    pointer-events: none !important;
-    transition: none !important; /* sin animaciones */
+    /* neutraliza restos */
+    top: auto !important; right: auto !important; bottom: auto !important; left: auto !important;
+    transform: none !important;
+    opacity: 1 !important; pointer-events: auto !important; transition: none !important;
   }
 
-  /* Mostrar SOLO el contenedor que JS marque como visible */
-  #screen2 .dots-acerca.is-visible,
-  #screen3 .dots.is-visible,
-  #screen4 .dots.is-visible,
-  #screen5 .dots.is-visible {
-    opacity: 1 !important;
-    pointer-events: auto !important;
-  }
-
-  /* Botones */
+  /* Dots */
   #screen2 .dots-acerca .dot,
   #screen3 .dots .dot,
   #screen4 .dots .dot,
@@ -60,7 +32,7 @@
     width: 6px !important;
     height: 6px !important;
     border-radius: 50% !important;
-    border: none !important;
+    border: 0 !important;
     padding: 0 !important;
     margin: 0 !important;
     appearance: none !important;
@@ -74,6 +46,7 @@
   :root[data-theme="light"] #screen3 .dots .dot,
   :root[data-theme="light"] #screen4 .dots .dot,
   :root[data-theme="light"] #screen5 .dots .dot { color: hsl(0 0% 15% / 0.55) !important; }
+
   :root[data-theme="light"] #screen2 .dots-acerca .dot[aria-current="true"],
   :root[data-theme="light"] #screen3 .dots .dot[aria-current="true"],
   :root[data-theme="light"] #screen4 .dots .dot[aria-current="true"],
@@ -87,6 +60,7 @@
   :root[data-theme="dark"] #screen3 .dots .dot,
   :root[data-theme="dark"] #screen4 .dots .dot,
   :root[data-theme="dark"] #screen5 .dots .dot { color: hsl(0 0% 85% / 0.55) !important; }
+
   :root[data-theme="dark"] #screen2 .dots-acerca .dot[aria-current="true"],
   :root[data-theme="dark"] #screen3 .dots .dot[aria-current="true"],
   :root[data-theme="dark"] #screen4 .dots .dot[aria-current="true"],
@@ -95,44 +69,4 @@
   :root[data-theme="dark"] #screen3 .dots .dot.active,
   :root[data-theme="dark"] #screen4 .dots .dot.active,
   :root[data-theme="dark"] #screen5 .dots .dot.active { color: hsl(0 0% 100%); }
-
-  /* Espacio inferior en carruseles para no tapar contenido */
-  #screen2 .acerca .acerca-mobile,
-  #screen3 .servicios .grid,
-  #screen4 .tecno .grid,
-  #screen5 .soft .grid {
-    padding-bottom: calc(44px + var(--dots-safe-bottom)) !important;
-  }
-}
-
-/* Fallback por anchura (si el dispositivo no reporta coarse) */
-@media (max-width: 900px) {
-  :root { --dots-bottom-gap: 16px; --dots-safe-bottom: env(safe-area-inset-bottom, 0px);
-          --dots-total-offset: calc(var(--dots-safe-bottom) + var(--dots-bottom-gap)); --dots-z: 1000; }
-
-  #screen2 .dots-acerca,
-  #screen3 .dots,
-  #screen4 .dots,
-  #screen5 .dots {
-    position: fixed !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    bottom: var(--dots-total-offset) !important;
-    z-index: var(--dots-z) !important;
-    display: flex !important;
-    justify-content: center !important;
-    gap: 6px !important;
-    top: auto !important; right: auto !important; background: transparent !important;
-    padding: 0 !important; margin: 0 !important; border: 0 !important;
-    opacity: 0 !important; pointer-events: none !important; transition: none !important;
-  }
-  #screen2 .dots-acerca.is-visible,
-  #screen3 .dots.is-visible,
-  #screen4 .dots.is-visible,
-  #screen5 .dots.is-visible { opacity: 1 !important; pointer-events: auto !important; }
-
-  #screen2 .acerca .acerca-mobile,
-  #screen3 .servicios .grid,
-  #screen4 .tecno .grid,
-  #screen5 .soft .grid { padding-bottom: calc(44px + var(--dots-safe-bottom)) !important; }
 }
