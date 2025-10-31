@@ -164,3 +164,22 @@ html, body { overscroll-behavior-y: contain; }
     -webkit-box-orient: initial;
   }
 }
+@media (max-width: 1200px) {
+  .dots, .dots-acerca {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin: 12px 0 0;
+    color: var(--dots-color, currentColor); /* hereda del tema */
+  }
+  .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    opacity: 0.35; background: currentColor; border: none;
+  }
+  .dot.active, .dot[aria-current="true"] { opacity: 1; }
+  /* Ejemplo de tema si usas data-theme en <html> */
+  html[data-theme="light"] .dots,
+  html[data-theme="light"] .dots-acerca { color: #111; }
+  html[data-theme="dark"]  .dots,
+  html[data-theme="dark"]  .dots-acerca { color: #fff; }
+}
