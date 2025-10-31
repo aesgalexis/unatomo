@@ -1,292 +1,297 @@
-/* ===== Base móvil ===== */
+/* =========================================
+   MOBILE (<=1200px) — mismo patrón para 2→10
+   ========================================= */
+
+/* Base móvil */
 html, body { overscroll-behavior-y: contain; }
 .screen { min-height: 100svh; }
 @supports not (height: 100svh) { .screen { min-height: 100vh; } }
 
-/* ===== SCREEN 2 (Acerca) ===== */
-#screen2 .acerca .acerca-desktop { display: none; }
-#screen2 .acerca .acerca-mobile  { display: flex; }
-
-#screen2 .acerca {
-  /* BLOQUE normal: NADA de flex/space-between aquí */
-  padding-left: 0;
-  padding-right: 0;
-}
-
-.section-title { padding-left: 16px; padding-right: 16px; }
-
-/* Carrusel */
-#screen2 .acerca .acerca-mobile {
-  display: flex;
-  overflow-x: auto;
-  overflow-y: hidden;
-  -webkit-overflow-scrolling: touch;
-  gap: 16px;
-  padding: 0 16px;                 /* sin padding-bottom: los dots van debajo */
-  scroll-snap-type: x mandatory;
-  scroll-padding-inline: 16px;
-  scrollbar-width: none;
-}
-#screen2 .acerca .acerca-mobile::-webkit-scrollbar { display: none; }
-
-#screen2 .acerca .acerca-mobile .acerca-card {
-  flex: 0 0 auto;
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  margin: 0;
-  box-sizing: border-box;
-  border: 1px solid var(--current-fg);
-  border-radius: 12px;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  text-align: left;
-  background: transparent;
-  color: var(--current-fg);
-  scroll-snap-align: center;
-  scroll-snap-stop: always;
-}
-
-/* ===== SCREEN 3 (Servicios) ===== */
-#screen3 .servicios { padding-left: 0; padding-right: 0; }
-
-#screen3 .servicios .grid {
-  display: flex;
-  overflow-x: auto;
-  overflow-y: hidden;
-  -webkit-overflow-scrolling: touch;
-  gap: 0;
-  scroll-snap-type: x mandatory;
-  scroll-padding-inline: 16px;
-  scrollbar-width: none;
-}
-#screen3 .servicios .grid::-webkit-scrollbar { display: none; }
-
-#screen3 .servicios .card {
-  flex: 0 0 auto;
-  width: calc(100% - 32px);
-  max-width: calc(100% - 32px);
-  min-width: 0;
-  margin: 0 16px;
-  box-sizing: border-box;
-  scroll-snap-align: center;
-  scroll-snap-stop: always;
-}
-
-/* ===== SCREEN 5 (Tecnología) ===== */
-#screen5 .tecno { padding-left: 0; padding-right: 0; }
-
-#screen5 .tecno .grid {
-  display: flex;
-  overflow-x: auto;
-  overflow-y: hidden;
-  -webkit-overflow-scrolling: touch;
-  gap: 0;
-  scroll-snap-type: x mandatory;
-  scroll-padding-inline: 16px;
-  scrollbar-width: none;
-}
-#screen5 .tecno .grid::-webkit-scrollbar { display: none; }
-
-#screen5 .tecno .card {
-  flex: 0 0 auto;
-  width: calc(100% - 32px);
-  max-width: calc(100% - 32px);
-  min-width: 0;
-  margin: 0 16px;
-  box-sizing: border-box;
-  scroll-snap-align: center;
-  scroll-snap-stop: always;
-}
-
-/* ===== SCREEN 4 (Software) ===== */
-#screen4 .soft { padding-left: 0; padding-right: 0; }
-
-#screen4 .soft .grid {
-  display: flex;
-  overflow-x: auto;
-  overflow-y: hidden;
-  -webkit-overflow-scrolling: touch;
-  gap: 0;
-  scroll-snap-type: x mandatory;
-  scroll-padding-inline: 16px;
-  scrollbar-width: none;
-}
-#screen4 .soft .grid::-webkit-scrollbar { display: none; }
-
-#screen4 .soft .card {
-  flex: 0 0 auto;
-  width: calc(100% - 32px);
-  max-width: calc(100% - 32px);
-  min-width: 0;
-  margin: 0 16px;
-  box-sizing: border-box;
-  scroll-snap-align: center;
-  scroll-snap-stop: always;
-}
-/* === Fix tarjetas móviles: altura auto y contenido completo === */
-@media (max-width: 1200px) {
-  /* Asegura que el contenedor sea realmente scrollable horizontal */
-  .acerca-mobile,
-  #screen3 .servicios .grid,
-  #screen4 .soft .grid {
-    display: flex;
-    gap: 16px;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    padding: 0 16px;
-  }
-
-  /* Cada tarjeta ocupa ~90% del viewport para “snap” agradable */
-  .acerca-mobile .acerca-card,
-  #screen3 .servicios .grid .card,
-  #screen4 .soft .grid .card {
-    flex: 0 0 90vw;
-    max-width: 90vw;
-    scroll-snap-align: center;
-    /* 🔑 Altura automática y sin recortes */
-    height: auto;
-    max-height: none;
-    overflow: visible;
-    display: block;
-  }
-
-  /* Si había clamping de texto, lo anulamos en móvil */
-  .acerca-mobile .acerca-card p,
-  #screen3 .servicios .grid .card p,
-  #screen4 .soft .grid .card p {
-    display: block;
-    overflow: visible;
-    /* anula posibles clamps */
-    -webkit-line-clamp: initial;
-    -webkit-box-orient: initial;
-  }
-}
+/* Dots unificados */
 @media (max-width: 1200px) {
   .dots, .dots-acerca {
     display: flex;
     gap: 8px;
     justify-content: center;
     margin: 12px 0 0;
-    color: var(--dots-color, currentColor); /* hereda del tema */
+    color: var(--dots-color, currentColor);
   }
   .dot {
     width: 8px; height: 8px; border-radius: 50%;
-    opacity: 0.35; background: currentColor; border: none;
+    background: currentColor; opacity: .35; border: 0;
   }
   .dot.active, .dot[aria-current="true"] { opacity: 1; }
-  /* Ejemplo de tema si usas data-theme en <html> */
-  html[data-theme="light"] .dots,
-  html[data-theme="light"] .dots-acerca { color: #111; }
-  html[data-theme="dark"]  .dots,
-  html[data-theme="dark"]  .dots-acerca { color: #fff; }
 }
-/* ===== Genérico móvil para TODAS las secciones con .grid .card ===== */
+
+/* ============ SCREEN 2 — Acerca (móvil) ============ */
 @media (max-width: 1200px) {
-  /* Contenedores de carrusel horizontal */
-  .screen .grid {
-    display: flex;
-    gap: 16px;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    padding: 0 16px;
-  }
-  .screen .grid::-webkit-scrollbar { display: none; }
-  .screen .grid { -ms-overflow-style: none; scrollbar-width: none; }
+  /* Cambiamos a variante móvil */
+  #screen2 .acerca .acerca-desktop { display: none !important; }
+  #screen2 .acerca .acerca-mobile  { display: flex !important; }
 
-  /* Tarjeta a viewport width, snap centrado */
-  .screen .grid .card,
-  .acerca-mobile .acerca-card {
-    flex: 0 0 90vw;
-    max-width: 90vw;
-    scroll-snap-align: center;
-    height: auto; max-height: none; overflow: visible;
-  }
+  #screen2 .acerca { padding-left: 0; padding-right: 0; }
+  #screen2 .acerca .section-title { padding: 0 16px; }
 
-  /* Asegura texto completo (por si había clamps/overflows previos) */
-  .screen .grid .card p,
-  .acerca-mobile .acerca-card p {
-    overflow: visible;
-    display: block;
-    -webkit-line-clamp: initial;
-    -webkit-box-orient: initial;
-  }
-}
-/* ===== GENÉRICO MÓVIL para TODAS las secciones con .grid/.card ===== */
-@media (max-width: 1200px) {
-  /* Contenedor carrusel horizontal */
-  .screen .grid {
-    display: flex;
-    gap: 16px;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    padding: 0 16px;
-  }
-  .screen .grid::-webkit-scrollbar { display: none; }
-  .screen .grid { -ms-overflow-style: none; scrollbar-width: none; }
-
-  /* Tarjeta a ancho de viewport con snap centrado */
-  .screen .grid .card,
-  .acerca-mobile .acerca-card {
-    flex: 0 0 90vw;
-    max-width: 90vw;
-    scroll-snap-align: center;
-    height: auto;
-    max-height: none;
-    overflow: visible;
-  }
-
-  /* Texto completo (sin clamps) */
-  .screen .grid .card p,
-  .acerca-mobile .acerca-card p {
-    overflow: visible;
-    display: block;
-    -webkit-line-clamp: initial;
-    -webkit-box-orient: initial;
-  }
-}
-@media (max-width: 1200px) {
-  /* Fuerza carrusel con igual o mayor especificidad que las reglas de desktop */
-  #screen3 .servicios .grid,
-  #screen4 .soft .grid,
-  #screen5 .tecno .grid,
-  #screen6 .tinto .grid,
-  #screen7 .indus .grid,
-  #screen8 .config .grid,
-  #screen9 .alcance .grid,
-  #screen10 .contacto .grid {
+  /* Carrusel */
+  #screen2 .acerca .acerca-mobile {
     display: flex !important;
-    gap: 16px;
-    overflow-x: auto;
+    overflow-x: auto; overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    gap: 0;
     scroll-snap-type: x mandatory;
+    scroll-padding-inline: 16px;
     padding: 0 16px;
     -ms-overflow-style: none; scrollbar-width: none;
   }
-  #screen3 .servicios .grid::-webkit-scrollbar,
-  #screen4 .soft .grid::-webkit-scrollbar,
-  #screen5 .tecno .grid::-webkit-scrollbar,
-  #screen6 .tinto .grid::-webkit-scrollbar,
-  #screen7 .indus .grid::-webkit-scrollbar,
-  #screen8 .config .grid::-webkit-scrollbar,
-  #screen9 .alcance .grid::-webkit-scrollbar,
-  #screen10 .contacto .grid::-webkit-scrollbar {
-    display: none;
+  #screen2 .acerca .acerca-mobile::-webkit-scrollbar { display: none; }
+
+  /* Tarjeta = 100% - 32px (una por vista) */
+  #screen2 .acerca .acerca-mobile .acerca-card {
+    flex: 0 0 auto;
+    width: calc(100% - 32px);
+    max-width: calc(100% - 32px);
+    margin: 0 16px;
+    box-sizing: border-box;
+    scroll-snap-align: center; scroll-snap-stop: always;
+
+    height: auto; max-height: none; overflow: visible; /* sin cortes */
   }
 
-  /* Tarjeta ancho viewport + snap centrado (idéntico en todas) */
-  #screen3 .servicios .grid .card,
-  #screen4 .soft .grid .card,
-  #screen5 .tecno .grid .card,
-  #screen6 .tinto .grid .card,
-  #screen7 .indus .grid .card,
-  #screen8 .config .grid .card,
-  #screen9 .alcance .grid .card,
-  #screen10 .contacto .grid .card {
-    flex: 0 0 90vw;
-    max-width: 90vw;
-    scroll-snap-align: center;
+  /* Texto sin clamps */
+  #screen2 .acerca .acerca-mobile .acerca-card p {
+    overflow: visible; display: block;
+    -webkit-line-clamp: initial; -webkit-box-orient: initial;
+  }
+}
+
+/* ============ SCREEN 3 — Servicios (móvil) ============ */
+@media (max-width: 1200px) {
+  #screen3 .servicios { padding-left: 0; padding-right: 0; }
+
+  #screen3 .servicios .grid {
+    display: flex !important;
+    overflow-x: auto; overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    gap: 0;
+    scroll-snap-type: x mandatory; scroll-padding-inline: 16px;
+    padding: 0 16px;
+    -ms-overflow-style: none; scrollbar-width: none;
+  }
+  #screen3 .servicios .grid::-webkit-scrollbar { display: none; }
+
+  #screen3 .servicios .grid .card {
+    flex: 0 0 auto;
+    width: calc(100% - 32px); max-width: calc(100% - 32px);
+    margin: 0 16px; box-sizing: border-box;
+    scroll-snap-align: center; scroll-snap-stop: always;
+
     height: auto; max-height: none; overflow: visible;
+  }
+  #screen3 .servicios .grid .card p {
+    overflow: visible; display: block;
+    -webkit-line-clamp: initial; -webkit-box-orient: initial;
+  }
+}
+
+/* ============ SCREEN 4 — Software (móvil) ============ */
+@media (max-width: 1200px) {
+  #screen4 .soft { padding-left: 0; padding-right: 0; }
+
+  #screen4 .soft .grid {
+    display: flex !important;
+    overflow-x: auto; overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    gap: 0;
+    scroll-snap-type: x mandatory; scroll-padding-inline: 16px;
+    padding: 0 16px;
+    -ms-overflow-style: none; scrollbar-width: none;
+  }
+  #screen4 .soft .grid::-webkit-scrollbar { display: none; }
+
+  #screen4 .soft .grid .card {
+    flex: 0 0 auto;
+    width: calc(100% - 32px); max-width: calc(100% - 32px);
+    margin: 0 16px; box-sizing: border-box;
+    scroll-snap-align: center; scroll-snap-stop: always;
+
+    height: auto; max-height: none; overflow: visible;
+  }
+  #screen4 .soft .grid .card p {
+    overflow: visible; display: block;
+    -webkit-line-clamp: initial; -webkit-box-orient: initial;
+  }
+}
+
+/* ============ SCREEN 5 — Hoteles (móvil) ============ */
+@media (max-width: 1200px) {
+  #screen5 .tecno { padding-left: 0; padding-right: 0; }
+
+  #screen5 .tecno .grid {
+    display: flex !important;
+    overflow-x: auto; overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    gap: 0;
+    scroll-snap-type: x mandatory; scroll-padding-inline: 16px;
+    padding: 0 16px;
+    -ms-overflow-style: none; scrollbar-width: none;
+  }
+  #screen5 .tecno .grid::-webkit-scrollbar { display: none; }
+
+  #screen5 .tecno .grid .card {
+    flex: 0 0 auto;
+    width: calc(100% - 32px); max-width: calc(100% - 32px);
+    margin: 0 16px; box-sizing: border-box;
+    scroll-snap-align: center; scroll-snap-stop: always;
+
+    height: auto; max-height: none; overflow: visible;
+  }
+  #screen5 .tecno .grid .card p {
+    overflow: visible; display: block;
+    -webkit-line-clamp: initial; -webkit-box-orient: initial;
+  }
+}
+
+/* ============ SCREEN 6 — Tintorerías (móvil) ============ */
+@media (max-width: 1200px) {
+  #screen6 .tinto { padding-left: 0; padding-right: 0; }
+
+  #screen6 .tinto .grid {
+    display: flex !important;
+    overflow-x: auto; overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    gap: 0;
+    scroll-snap-type: x mandatory; scroll-padding-inline: 16px;
+    padding: 0 16px;
+    -ms-overflow-style: none; scrollbar-width: none;
+  }
+  #screen6 .tinto .grid::-webkit-scrollbar { display: none; }
+
+  #screen6 .tinto .grid .card {
+    flex: 0 0 auto;
+    width: calc(100% - 32px); max-width: calc(100% - 32px);
+    margin: 0 16px; box-sizing: border-box;
+    scroll-snap-align: center; scroll-snap-stop: always;
+
+    height: auto; max-height: none; overflow: visible;
+  }
+  #screen6 .tinto .grid .card p {
+    overflow: visible; display: block;
+    -webkit-line-clamp: initial; -webkit-box-orient: initial;
+  }
+}
+
+/* ============ SCREEN 7 — Lav. Industriales (móvil) ============ */
+@media (max-width: 1200px) {
+  #screen7 .indus { padding-left: 0; padding-right: 0; }
+
+  #screen7 .indus .grid {
+    display: flex !important;
+    overflow-x: auto; overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    gap: 0;
+    scroll-snap-type: x mandatory; scroll-padding-inline: 16px;
+    padding: 0 16px;
+    -ms-overflow-style: none; scrollbar-width: none;
+  }
+  #screen7 .indus .grid::-webkit-scrollbar { display: none; }
+
+  #screen7 .indus .grid .card {
+    flex: 0 0 auto;
+    width: calc(100% - 32px); max-width: calc(100% - 32px);
+    margin: 0 16px; box-sizing: border-box;
+    scroll-snap-align: center; scroll-snap-stop: always;
+
+    height: auto; max-height: none; overflow: visible;
+  }
+  #screen7 .indus .grid .card p {
+    overflow: visible; display: block;
+    -webkit-line-clamp: initial; -webkit-box-orient: initial;
+  }
+}
+
+/* ============ SCREEN 8 — Configurador (móvil) ============ */
+@media (max-width: 1200px) {
+  #screen8 .config { padding-left: 0; padding-right: 0; }
+
+  #screen8 .config .grid {
+    display: flex !important;
+    overflow-x: auto; overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    gap: 0;
+    scroll-snap-type: x mandatory; scroll-padding-inline: 16px;
+    padding: 0 16px;
+    -ms-overflow-style: none; scrollbar-width: none;
+  }
+  #screen8 .config .grid::-webkit-scrollbar { display: none; }
+
+  #screen8 .config .grid .card {
+    flex: 0 0 auto;
+    width: calc(100% - 32px); max-width: calc(100% - 32px);
+    margin: 0 16px; box-sizing: border-box;
+    scroll-snap-align: center; scroll-snap-stop: always;
+
+    height: auto; max-height: none; overflow: visible;
+  }
+  #screen8 .config .grid .card p {
+    overflow: visible; display: block;
+    -webkit-line-clamp: initial; -webkit-box-orient: initial;
+  }
+}
+
+/* ============ SCREEN 9 — Alcance y Colab. (móvil) ============ */
+@media (max-width: 1200px) {
+  #screen9 .alcance { padding-left: 0; padding-right: 0; }
+
+  #screen9 .alcance .grid {
+    display: flex !important;
+    overflow-x: auto; overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    gap: 0;
+    scroll-snap-type: x mandatory; scroll-padding-inline: 16px;
+    padding: 0 16px;
+    -ms-overflow-style: none; scrollbar-width: none;
+  }
+  #screen9 .alcance .grid::-webkit-scrollbar { display: none; }
+
+  #screen9 .alcance .grid .card {
+    flex: 0 0 auto;
+    width: calc(100% - 32px); max-width: calc(100% - 32px);
+    margin: 0 16px; box-sizing: border-box;
+    scroll-snap-align: center; scroll-snap-stop: always;
+
+    height: auto; max-height: none; overflow: visible;
+  }
+  #screen9 .alcance .grid .card p {
+    overflow: visible; display: block;
+    -webkit-line-clamp: initial; -webkit-box-orient: initial;
+  }
+}
+
+/* ============ SCREEN 10 — Contacto (móvil) ============ */
+@media (max-width: 1200px) {
+  #screen10 .contacto { padding-left: 0; padding-right: 0; }
+
+  #screen10 .contacto .grid {
+    display: flex !important;
+    overflow-x: auto; overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    gap: 0;
+    scroll-snap-type: x mandatory; scroll-padding-inline: 16px;
+    padding: 0 16px;
+    -ms-overflow-style: none; scrollbar-width: none;
+  }
+  #screen10 .contacto .grid::-webkit-scrollbar { display: none; }
+
+  #screen10 .contacto .grid .card {
+    flex: 0 0 auto;
+    width: calc(100% - 32px); max-width: calc(100% - 32px);
+    margin: 0 16px; box-sizing: border-box;
+    scroll-snap-align: center; scroll-snap-stop: always;
+
+    height: auto; max-height: none; overflow: visible;
+  }
+  #screen10 .contacto .grid .card p {
+    overflow: visible; display: block;
+    -webkit-line-clamp: initial; -webkit-box-orient: initial;
   }
 }
