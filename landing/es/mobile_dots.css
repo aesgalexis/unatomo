@@ -87,3 +87,17 @@
   :root:not([data-theme]) .dot[aria-current="true"],
   :root:not([data-theme]) .dot.active { color: hsl(0 0% 100%); }
 }
+@media (max-width: 1200px) {
+  .dots,
+  .dots-acerca {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin: 12px 0 0;
+  }
+  .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: currentColor; opacity: .35; border: 0;
+  }
+  .dot.active, .dot[aria-current="true"] { opacity: 1; }
+}
