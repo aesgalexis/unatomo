@@ -5,7 +5,13 @@
   #screen2 .dots-acerca,
   #screen3 .dots,
   #screen4 .dots,
-  #screen5 .dots {
+  #screen5 .dots,
+  #screen6 .dots,
+  #screen7 .dots,
+  #screen8 .dots,
+  #screen9 .dots,
+  #screen10 .dots,
+  #screen11 .dots {
     position: static !important;   /* clave */
     z-index: auto !important;      /* nunca por encima del carrusel */
     display: flex !important;      /* override a cualquier display:none de desktop */
@@ -28,7 +34,13 @@
   #screen2 .dots-acerca .dot,
   #screen3 .dots .dot,
   #screen4 .dots .dot,
-  #screen5 .dots .dot {
+  #screen5 .dots .dot,
+  #screen6 .dots .dot,
+  #screen7 .dots .dot,
+  #screen8 .dots .dot,
+  #screen9 .dots .dot,
+  #screen10 .dots .dot,
+  #screen11 .dots .dot {
     width: 6px !important;
     height: 6px !important;
     border-radius: 50% !important;
@@ -41,35 +53,74 @@
     -webkit-tap-highlight-color: transparent !important;
   }
 
-  /* Colores por tema */
-  :root[data-theme="light"] #screen2 .dots-acerca .dot,
-  :root[data-theme="light"] #screen3 .dots .dot,
-  :root[data-theme="light"] #screen4 .dots .dot,
-  :root[data-theme="light"] #screen5 .dots .dot { color: hsl(0 0% 15% / 0.55) !important; }
+/* Colores por tema */
+:root[data-theme="light"] #screen2 .dots-acerca .dot,
+:root[data-theme="light"] #screen3 .dots .dot,
+:root[data-theme="light"] #screen4 .dots .dot,
+:root[data-theme="light"] #screen5 .dots .dot,
+:root[data-theme="light"] #screen6 .dots .dot, /* AÑADIDO */
+:root[data-theme="light"] #screen7 .dots .dot, /* AÑADIDO */
+:root[data-theme="light"] #screen8 .dots .dot, /* AÑADIDO */
+:root[data-theme="light"] #screen9 .dots .dot, /* AÑADIDO */
+:root[data-theme="light"] #screen10 .dots .dot, /* AÑADIDO */
+:root[data-theme="light"] #screen11 .dots .dot /* AÑADIDO */
+{ color: hsl(0 0% 15% / 0.55) !important; }
 
-  :root[data-theme="light"] #screen2 .dots-acerca .dot[aria-current="true"],
-  :root[data-theme="light"] #screen3 .dots .dot[aria-current="true"],
-  :root[data-theme="light"] #screen4 .dots .dot[aria-current="true"],
-  :root[data-theme="light"] #screen5 .dots .dot[aria-current="true"],
-  :root[data-theme="light"] #screen2 .dots-acerca .dot.active,
-  :root[data-theme="light"] #screen3 .dots .dot.active,
-  :root[data-theme="light"] #screen4 .dots .dot.active,
-  :root[data-theme="light"] #screen5 .dots .dot.active { color: hsl(0 0% 0%); }
+:root[data-theme="light"] #screen2 .dots-acerca .dot[aria-current="true"],
+:root[data-theme="light"] #screen3 .dots .dot[aria-current="true"],
+:root[data-theme="light"] #screen4 .dots .dot[aria-current="true"],
+:root[data-theme="light"] #screen5 .dots .dot[aria-current="true"],
+:root[data-theme="light"] #screen6 .dots .dot[aria-current="true"], /* AÑADIDO */
+:root[data-theme="light"] #screen7 .dots .dot[aria-current="true"], /* AÑADIDO */
+:root[data-theme="light"] #screen8 .dots .dot[aria-current="true"], /* AÑADIDO */
+:root[data-theme="light"] #screen9 .dots .dot[aria-current="true"], /* AÑADIDO */
+:root[data-theme="light"] #screen10 .dots .dot[aria-current="true"], /* AÑADIDO */
+:root[data-theme="light"] #screen11 .dots .dot[aria-current="true"], /* AÑADIDO */
+:root[data-theme="light"] #screen2 .dots-acerca .dot.active,
+:root[data-theme="light"] #screen3 .dots .dot.active,
+:root[data-theme="light"] #screen4 .dots .dot.active,
+:root[data-theme="light"] #screen5 .dots .dot.active,
+:root[data-theme="light"] #screen6 .dots .dot.active, /* AÑADIDO */
+:root[data-theme="light"] #screen7 .dots .dot.active, /* AÑADIDO */
+:root[data-theme="light"] #screen8 .dots .dot.active, /* AÑADIDO */
+:root[data-theme="light"] #screen9 .dots .dot.active, /* AÑADIDO */
+:root[data-theme="light"] #screen10 .dots .dot.active, /* AÑADIDO */
+:root[data-theme="light"] #screen11 .dots .dot.active /* AÑADIDO */
+{ color: hsl(0 0% 0%); }
 
-  :root[data-theme="dark"] #screen2 .dots-acerca .dot,
-  :root[data-theme="dark"] #screen3 .dots .dot,
-  :root[data-theme="dark"] #screen4 .dots .dot,
-  :root[data-theme="dark"] #screen5 .dots .dot { color: hsl(0 0% 85% / 0.55) !important; }
+:root[data-theme="dark"] #screen2 .dots-acerca .dot,
+:root[data-theme="dark"] #screen3 .dots .dot,
+:root[data-theme="dark"] #screen4 .dots .dot,
+:root[data-theme="dark"] #screen5 .dots .dot,
+:root[data-theme="dark"] #screen6 .dots .dot, /* AÑADIDO */
+:root[data-theme="dark"] #screen7 .dots .dot, /* AÑADIDO */
+:root[data-theme="dark"] #screen8 .dots .dot, /* AÑADIDO */
+:root[data-theme="dark"] #screen9 .dots .dot, /* AÑADIDO */
+:root[data-theme="dark"] #screen10 .dots .dot, /* AÑADIDO */
+:root[data-theme="dark"] #screen11 .dots .dot /* AÑADIDO */
+{ color: hsl(0 0% 85% / 0.55) !important; }
 
-  :root[data-theme="dark"] #screen2 .dots-acerca .dot[aria-current="true"],
-  :root[data-theme="dark"] #screen3 .dots .dot[aria-current="true"],
-  :root[data-theme="dark"] #screen4 .dots .dot[aria-current="true"],
-  :root[data-theme="dark"] #screen5 .dots .dot[aria-current="true"],
-  :root[data-theme="dark"] #screen2 .dots-acerca .dot.active,
-  :root[data-theme="dark"] #screen3 .dots .dot.active,
-  :root[data-theme="dark"] #screen4 .dots .dot.active,
-  :root[data-theme="dark"] #screen5 .dots .dot.active { color: hsl(0 0% 100%); }
-}
+:root[data-theme="dark"] #screen2 .dots-acerca .dot[aria-current="true"],
+:root[data-theme="dark"] #screen3 .dots .dot[aria-current="true"],
+:root[data-theme="dark"] #screen4 .dots .dot[aria-current="true"],
+:root[data-theme="dark"] #screen5 .dots .dot[aria-current="true"],
+:root[data-theme="dark"] #screen6 .dots .dot[aria-current="true"], /* AÑADIDO */
+:root[data-theme="dark"] #screen7 .dots .dot[aria-current="true"], /* AÑADIDO */
+:root[data-theme="dark"] #screen8 .dots .dot[aria-current="true"], /* AÑADIDO */
+:root[data-theme="dark"] #screen9 .dots .dot[aria-current="true"], /* AÑADIDO */
+:root[data-theme="dark"] #screen10 .dots .dot[aria-current="true"], /* AÑADIDO */
+:root[data-theme="dark"] #screen11 .dots .dot[aria-current="true"], /* AÑADIDO */
+:root[data-theme="dark"] #screen2 .dots-acerca .dot.active,
+:root[data-theme="dark"] #screen3 .dots .dot.active,
+:root[data-theme="dark"] #screen4 .dots .dot.active,
+:root[data-theme="dark"] #screen5 .dots .dot.active,
+:root[data-theme="dark"] #screen6 .dots .dot.active, /* AÑADIDO */
+:root[data-theme="dark"] #screen7 .dots .dot.active, /* AÑADIDO */
+:root[data-theme="dark"] #screen8 .dots .dot.active, /* AÑADIDO */
+:root[data-theme="dark"] #screen9 .dots .dot.active, /* AÑADIDO */
+:root[data-theme="dark"] #screen10 .dots .dot.active, /* AÑADIDO */
+:root[data-theme="dark"] #screen11 .dots .dot.active /* AÑADIDO */
+{ color: hsl(0 0% 100%); }
 
 /* Activo (tema claro/oscuro) */
 :root[data-theme="light"] .dot[aria-current="true"],
