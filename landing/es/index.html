@@ -1,82 +1,96 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" data-theme="light">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Unatomo Core</title>
-  <meta name="robots" content="noindex, nofollow">
-  
-<link rel="stylesheet" href="/landing/es/styles.css">
-<link rel="stylesheet" href="/landing/es/mobile_styles.css" media="(max-width: 1200px)">
-<link rel="stylesheet" href="/landing/es/mobile_dots.css"  media="(max-width: 1200px)">
-<link rel="stylesheet" href="/landing/es/magik.css?v=2">
+  <meta name="robots" content="noindex, nofollow" />
 
-
+  <!-- Estilos -->
+  <link rel="stylesheet" href="/landing/es/styles.css">
+  <link rel="stylesheet" href="/landing/es/mobile_styles.css" media="(max-width: 1200px)">
+  <link rel="stylesheet" href="/landing/es/mobile_dots.css" media="(max-width: 1200px)">
+  <link rel="stylesheet" href="/landing/es/magik.css?v=2">
 </head>
 <body>
 
-  <button id="theme-toggle">☾ / ☼</button>
+  <!-- Toggle de tema -->
+  <button id="theme-toggle" aria-label="Cambiar tema">☾ / ☼</button>
 
+  <!-- =========================================================
+       SCREEN 1 (sin cambios)
+  ========================================================== -->
   <div class="screen" id="screen1">
     <img src="/static/img/logo-unatomo-v1.5.svg" alt="unatomo logo" class="logo" loading="lazy" />
     <h1>unatomo</h1>
     <p>Servicios Profesionales para Lavanderias</p>
   </div>
-  
-<div class="screen" id="screen2">
-  <section class="acerca">
-    <h2 class="section-title">Acerca de Nosotros · Filosofía</h2>
 
-    <!-- Variante ESCRITORIO: 1 sola tarjeta (visible en >=600px) -->
-    <div class="grid acerca-desktop">
-      <article class="card acerca-card">
-        <h3>Experiencia con Criterio Técnico Superior</h3>
-        <p>Fundamentamos nuestro servicio en más de 15 años de liderazgo técnico en el sector, incluyendo la gestión operativa de grandes lavanderías industriales en España.</p>
-        <p>Este bagaje nos dota de un criterio profesional inigualable, priorizando siempre la estabilidad y la rentabilidad de su ciclo productivo. Nuestro enfoque va más allá del reemplazo de piezas; nos centramos en la comprensión profunda del funcionamiento integral de su planta.</p>
+  <!-- =========================================================
+       SCREEN 2 — ACERCA
+       Desktop: 1 tarjeta (acerca-desktop)
+       Móvil:   3 tarjetas (acerca-mobile) + dots-acerca
+  ========================================================== -->
+  <div class="screen" id="screen2">
+    <section class="acerca" aria-label="Acerca de nosotros · Filosofía">
+      <h2 class="section-title">Acerca de Nosotros · Filosofía</h2>
 
-        <h3>Metodología Analítica y Preventiva</h3>
-        <p>Hemos desarrollado una capacidad analítica que excede los estándares de la industria. Nuestra especialidad es identificar y corregir las causas raíz de los fallos.</p>
-        <p>Nos enfocamos en la optimización de procesos y el ajuste mecánico preciso (plegadoras, calandras, túneles), detectando proactivamente desajustes y componentes en riesgo. Esta visión predictiva, respaldada por colaboradores expertos en áreas específicas (química, electricidad), garantiza el máximo rendimiento.</p>
+      <!-- ESCRITORIO -->
+      <div class="grid acerca-desktop">
+        <article class="card acerca-card">
+          <h3>Experiencia con Criterio Técnico Superior</h3>
+          <p>Fundamentamos nuestro servicio en más de 15 años de liderazgo técnico en el sector, incluyendo la gestión operativa de grandes lavanderías industriales en España.</p>
+          <p>Este bagaje nos dota de un criterio profesional inigualable, priorizando siempre la estabilidad y la rentabilidad de su ciclo productivo. Nuestro enfoque va más allá del reemplazo de piezas; nos centramos en la comprensión profunda del funcionamiento integral de su planta.</p>
 
-        <h3>Compromiso y Alcance Geográfico</h3>
-        <p>La pasión por la excelencia nos impulsa a garantizar la solución completa de cada desafío técnico. Nuestra filosofía es simple: identificar el problema y trabajar hasta estabilizar la operatividad.</p>
-        <p>Si bien operamos desde Mallorca, nuestra estructura nos permite ofrecer servicios de alto nivel y respuesta rápida en la Península Ibérica, Italia, Grecia y otros puntos de Europa. Invertir en nuestra experiencia es invertir en disponibilidad sin precedentes.</p>
-      </article>
-    </div>
+          <h3>Metodología Analítica y Preventiva</h3>
+          <p>Hemos desarrollado una capacidad analítica que excede los estándares de la industria. Nuestra especialidad es identificar y corregir las causas raíz de los fallos.</p>
+          <p>Nos enfocamos en la optimización de procesos y el ajuste mecánico preciso (plegadoras, calandras, túneles), detectando proactivamente desajustes y componentes en riesgo. Esta visión predictiva, respaldada por colaboradores expertos en áreas específicas (química, electricidad), garantiza el máximo rendimiento.</p>
 
-    <!-- Variante MÓVIL: 3 tarjetas + dots (visible en <=600px) -->
-    <div class="grid acerca-mobile">
-      <article class="card acerca-card"><h3>Experiencia con Criterio Técnico Superior</h3>
-        <p>Fundamentamos nuestro servicio en más de 15 años de liderazgo técnico…</p>
-        <p>Este bagaje nos dota de un criterio profesional inigualable…</p>
-      </article>
+          <h3>Compromiso y Alcance Geográfico</h3>
+          <p>La pasión por la excelencia nos impulsa a garantizar la solución completa de cada desafío técnico. Nuestra filosofía es simple: identificar el problema y trabajar hasta estabilizar la operatividad.</p>
+          <p>Si bien operamos desde Mallorca, nuestra estructura nos permite ofrecer servicios de alto nivel y respuesta rápida en la Península Ibérica, Italia, Grecia y otros puntos de Europa. Invertir en nuestra experiencia es invertir en disponibilidad sin precedentes.</p>
+        </article>
+      </div>
 
-      <article class="card acerca-card"><h3>Metodología Analítica y Preventiva</h3>
-        <p>Hemos desarrollado una capacidad analítica que excede los estándares…</p>
-        <p>Nos enfocamos en la optimización de procesos y el ajuste mecánico…</p>
-      </article>
+      <!-- MÓVIL -->
+      <div class="grid acerca-mobile" aria-live="polite">
+        <article class="card acerca-card">
+          <h3>Experiencia con Criterio Técnico Superior</h3>
+          <p>Fundamentamos nuestro servicio en más de 15 años de liderazgo técnico…</p>
+          <p>Este bagaje nos dota de un criterio profesional inigualable…</p>
+        </article>
 
-      <article class="card acerca-card"><h3>Compromiso y Alcance Geográfico</h3>
-        <p>La pasión por la excelencia nos impulsa a garantizar la solución…</p>
-        <p>Operamos desde Mallorca, con respuesta rápida en Península, Italia, Grecia…</p>
-      </article>
-    </div>
+        <article class="card acerca-card">
+          <h3>Metodología Analítica y Preventiva</h3>
+          <p>Hemos desarrollado una capacidad analítica que excede los estándares…</p>
+          <p>Nos enfocamos en la optimización de procesos y el ajuste mecánico…</p>
+        </article>
 
-    <div class="dots dots-acerca" aria-label="Paginación acerca">
-      <button class="dot" type="button" aria-label="Tarjeta 1"></button>
-      <button class="dot" type="button" aria-label="Tarjeta 2"></button>
-      <button class="dot" type="button" aria-label="Tarjeta 3"></button>
-    </div>
-  </section>
-</div>
+        <article class="card acerca-card">
+          <h3>Compromiso y Alcance Geográfico</h3>
+          <p>La pasión por la excelencia nos impulsa a garantizar la solución…</p>
+          <p>Operamos desde Mallorca, con respuesta rápida en Península, Italia, Grecia…</p>
+        </article>
+      </div>
 
-  
-<div class="screen" id="screen3">
-  <section class="servicios">
-    <h2 class="section-title">Gestión Integral de Mantenimiento y Procesos</h2>
+      <!-- Dots (móvil) -->
+      <div class="dots dots-acerca" aria-label="Paginación acerca">
+        <button class="dot" type="button" aria-label="Tarjeta 1" aria-current="true"></button>
+        <button class="dot" type="button" aria-label="Tarjeta 2"></button>
+        <button class="dot" type="button" aria-label="Tarjeta 3"></button>
+      </div>
+    </section>
+  </div>
 
-    <div class="grid">
-      <article class="card">
+  <!-- =========================================================
+       SCREEN 3 — SERVICIOS (9 tarjetas + dots)
+  ========================================================== -->
+  <div class="screen" id="screen3">
+    <section class="servicios" aria-label="Gestión Integral de Mantenimiento y Procesos">
+      <h2 class="section-title">Gestión Integral de Mantenimiento y Procesos</h2>
+
+      <div class="grid" aria-live="polite">
+        <article class="card">
           <h3>⚡️ Asistencia Técnica Urgente</h3>
           <p>Respuesta rápida y efectiva ante averías críticas. Diagnóstico preciso en sitio para minimizar el tiempo de inactividad de su equipo de lavandería industrial. Servicio especializado para todas las marcas.</p>
         </article>
@@ -109,77 +123,79 @@
           <p>Diseño o modificación de la distribución de su planta para optimizar el flujo lineal de ropa (sucia a limpia). Máxima productividad por metro cuadrado con gestión de la ventilación.</p>
         </article>
         <article class="card">
-        <h3>📦 Gestión de Stock Crítico</h3>
-        <p>Auditoría de inventario para continuidad operativa. Definimos su Stock Crítico de Seguridad (calculando el ROI) para eliminar paradas evitables. Gestión de componentes esenciales con suministro ágil.</p>
+          <h3>📦 Gestión de Stock Crítico</h3>
+          <p>Auditoría de inventario para continuidad operativa. Definimos su Stock Crítico de Seguridad (calculando el ROI) para eliminar paradas evitables. Gestión de componentes esenciales con suministro ágil.</p>
         </article>
-    </div>
+      </div>
 
-    
-    <div class="dots" aria-label="Paginación de servicios">
-      <button class="dot" type="button" aria-label="Tarjeta 1"></button>
-      <button class="dot" type="button" aria-label="Tarjeta 2"></button>
-      <button class="dot" type="button" aria-label="Tarjeta 3"></button>
-      <button class="dot" type="button" aria-label="Tarjeta 4"></button>
-      <button class="dot" type="button" aria-label="Tarjeta 5"></button>
-      <button class="dot" type="button" aria-label="Tarjeta 6"></button>
-      <button class="dot" type="button" aria-label="Tarjeta 7"></button>
-      <button class="dot" type="button" aria-label="Tarjeta 8"></button>
-      <button class="dot" type="button" aria-label="Tarjeta 9"></button>
-    </div>
-    
-  </section>
-</div>
+      <div class="dots" aria-label="Paginación de servicios">
+        <button class="dot" type="button" aria-label="Tarjeta 1" aria-current="true"></button>
+        <button class="dot" type="button" aria-label="Tarjeta 2"></button>
+        <button class="dot" type="button" aria-label="Tarjeta 3"></button>
+        <button class="dot" type="button" aria-label="Tarjeta 4"></button>
+        <button class="dot" type="button" aria-label="Tarjeta 5"></button>
+        <button class="dot" type="button" aria-label="Tarjeta 6"></button>
+        <button class="dot" type="button" aria-label="Tarjeta 7"></button>
+        <button class="dot" type="button" aria-label="Tarjeta 8"></button>
+        <button class="dot" type="button" aria-label="Tarjeta 9"></button>
+      </div>
+    </section>
+  </div>
 
+  <!-- =========================================================
+       SCREEN 4 — SOFTWARE (3 tarjetas + dots)
+  ========================================================== -->
+  <div class="screen" id="screen4">
+    <section class="soft" aria-label="Soluciones Digitales (Software)">
+      <h2 class="section-title">Soluciones Digitales (Software)</h2>
 
-<div class="screen" id="screen4">
-  <section class="soft">
-    <h2 class="section-title">Soluciones Digitales (Software)</h2>
+      <div class="grid" aria-live="polite">
+        <article class="card">
+          <h3>💻 Modernización y Control PLC a Medida</h3>
+          <p>Adaptamos la infraestructura de control de su maquinaria existente ... programación optimizada para su producción actual.</p>
+        </article>
 
-    <div class="grid">
-      <article class="card">
-        <h3>💻 Modernización y Control PLC a Medida</h3>
-        <p>Adaptamos la infraestructura de control de su maquinaria existente (desde una plegadora hasta una línea completa de túnel) mediante la instalación de PLCs industriales y software libre/a medida. Esto es dotar a su equipo de una inteligencia flexible, permitiendo funcionalidades avanzadas, diagnósticos en tiempo real y una programación totalmente optimizada para su producción actual.</p>
-      </article>
+        <article class="card">
+          <h3>🔢 Contadores de Piezas e Integración de Datos</h3>
+          <p>Implementamos sistemas de conteo de piezas ... datos de producción fiables (piezas/hora) ... planificación de la capacidad productiva.</p>
+        </article>
 
-      <article class="card">
-        <h3>🔢 Contadores de Piezas e Integración de Datos</h3>
-        <p>Implementamos sistemas de conteo de piezas de alta precisión en equipos clave (calandras, plegadoras) y los conectamos directamente a bases de datos centralizadas. Esto elimina los errores manuales y le proporciona datos de producción fiables (piezas/hora), esenciales para la trazabilidad, la justificación de costes y la planificación de la capacidad productiva.</p>
-      </article>
+        <article class="card">
+          <h3>⚙️ Automatización de Procesos con Control Activo</h3>
+          <p>Diseñamos e integramos soluciones de control activo ... clasificación y control de flujo ... optimizando los tiempos de ciclo.</p>
+        </article>
+      </div>
 
-      <article class="card">
-        <h3>⚙️ Automatización de Procesos con Control Activo</h3>
-        <p>Diseñamos e integramos soluciones de control activo para procesos logísticos internos, como sistemas de cintas de transporte inteligentes y control de piezas por básculas. Esto permite el conteo automatizado, la clasificación activa y el control de flujo basado en el peso o el destino, reduciendo la intervención humana, minimizando el riesgo de error logístico y optimizando los tiempos de ciclo.</p>
-      </article>
-    </div>
+      <div class="dots" aria-label="Paginación software">
+        <button class="dot" type="button" aria-label="Tarjeta 1" aria-current="true"></button>
+        <button class="dot" type="button" aria-label="Tarjeta 2"></button>
+        <button class="dot" type="button" aria-label="Tarjeta 3"></button>
+      </div>
+    </section>
+  </div>
 
-    <div class="dots" aria-label="Paginación software">
-      <button class="dot" type="button" aria-label="Tarjeta 1"></button>
-      <button class="dot" type="button" aria-label="Tarjeta 2"></button>
-      <button class="dot" type="button" aria-label="Tarjeta 3"></button>
-    </div>
-  </section>
-</div>
-
+  <!-- =========================================================
+       SCREEN 5 — TECNOLOGÍA / COLABORADORES
+       (SIN TARJETAS → SIN DOTS)
+  ========================================================== -->
   <div class="screen" id="screen5">
-  <section class="tecno">
-    <h2 class="section-title">Alcance y Colaboradores</h2>
+    <section class="tecno" aria-label="Alcance y Colaboradores">
+      <h2 class="section-title">Alcance y Colaboradores</h2>
 
-    <div class="grid">
+      <div class="grid" aria-live="polite">
+        <!-- De momento sin tarjetas; cuando añadas:
+             <article class="card">...</article> xN
+             y entonces añade el bloque .dots con N botones. -->
+      </div>
 
-    </div>
+      <!-- Sin dots porque no hay tarjetas -->
+    </section>
+  </div>
 
-    <div class="dots" aria-label="Paginación tecnología">
-      <button class="dot" type="button" aria-label="Tarjeta 1"></button>
-      <button class="dot" type="button" aria-label="Tarjeta 2"></button>
-      <button class="dot" type="button" aria-label="Tarjeta 3"></button>
-    </div>
-  </section>
-</div>
-  
+  <!-- Scripts (orden importante) -->
   <script src="/landing/es/theme.js"></script>
   <script src="/landing/es/nav.js"></script>
   <script src="/landing/es/mobile_nav.js"></script>
   <script src="/landing/es/magik.js?v=2" defer></script>
-
 </body>
 </html>
