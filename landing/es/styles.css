@@ -438,3 +438,6 @@ html, body { overscroll-behavior-y: contain; }
     height: auto; max-height: none; overflow: visible;
   }
 }
+/* Dots: ocultos por defecto (desktop) */
+.dots,
+.dots-acerca { display: none; }
