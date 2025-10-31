@@ -1,15 +1,40 @@
-/* mobile_nav.js — Carrusel + dots: activo por tarjeta centrada */
+/* mobile_nav.js — carruseles móviles + dots robustos */
 (function () {
   'use strict';
 
-  // Estructura actual tras borrar la antigua #screen4 y renumerar:
-  const SCREENS = [
+  // Candidatos que pueden existir según tu HTML/CSS actual
+  const CANDIDATES = [
     { grid: '#screen2 .acerca .acerca-mobile', cardSel: '.acerca-card', dots: '#screen2 .dots-acerca' },
     { grid: '#screen3 .servicios .grid',       cardSel: '.card',        dots: '#screen3 .dots' },
-    { grid: '#screen4 .soft .grid',            cardSel: '.card',        dots: '#screen4 .dots' }, // <- la “nueva” 4 (software)
+    { grid: '#screen4 .soft .grid',            cardSel: '.card',        dots: '#screen4 .dots' },
+    { grid: '#screen5 .tecno .grid',           cardSel: '.card',        dots: '#screen5 .dots' }, // <- añadida
   ];
 
-  // Utilidad: marcar activo
+  function ensureSameCount(dotsWrap, count) {
+    if (!dotsWrap) return [];
+    const now = Array.from(dotsWrap.querySelectorAll('.dot'));
+    const diff = count - now.length;
+    if (diff > 0) {
+      // crea los que falten
+      const frag = document.createDocumentFragment();
+      for (let i = 0; i < diff; i++) {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'dot';
+        b.setAttribute('aria-label', `Tarjeta ${now.length + i + 1}`);
+        frag.appendChild(b);
+      }
+      dotsWrap.appendChild(frag);
+    } else if (diff < 0) {
+      // elimina sobrantes del final
+      for (let i = 0; i < -diff; i++) {
+        const last = dotsWrap.querySelector('.dot:last-of-type');
+        if (last) last.remove();
+      }
+    }
+    return Array.from(dotsWrap.querySelectorAll('.dot'));
+  }
+
   function setActive(dotBtns, i) {
     dotBtns.forEach((d, idx) => {
       const on = idx === i;
@@ -18,57 +43,17 @@
     });
   }
 
-  // Calcula el índice de la tarjeta más centrada dentro del scroller
-  function centeredIndex(scroller, cards) {
-    const sRect = scroller.getBoundingClientRect();
-    const sCenter = (sRect.left + sRect.right) / 2;
-
-    let best = 0;
-    let bestDist = Infinity;
-
-    for (let i = 0; i < cards.length; i++) {
-      const r = cards[i].getBoundingClientRect();
-      const cCenter = (r.left + r.right) / 2;
-      const dist = Math.abs(cCenter - sCenter);
-      if (dist < bestDist) {
-        bestDist = dist;
-        best = i;
-      }
-    }
-    return best;
-  }
-
-  // Throttle con rAF
-  function onScrollRAF(scroller, cards, dots) {
-    let ticking = false;
-    function update() {
-      ticking = false;
-      const i = centeredIndex(scroller, cards);
-      setActive(dots, i);
-    }
-    return function () {
-      if (!ticking) {
-        ticking = true;
-        requestAnimationFrame(update);
-      }
-    };
-  }
-
-  SCREENS.forEach(({ grid, cardSel, dots }) => {
+  function setupCarousel({ grid, cardSel, dots }) {
     const scroller = document.querySelector(grid);
-    const cards    = scroller ? Array.from(scroller.querySelectorAll(cardSel)) : [];
+    if (!scroller) return;
+
+    const cards = Array.from(scroller.querySelectorAll(cardSel));
+    if (cards.length === 0) return;
+
     const dotsWrap = document.querySelector(dots);
-    const dotBtns  = dotsWrap ? Array.from(dotsWrap.querySelectorAll('.dot')) : [];
+    const dotBtns  = ensureSameCount(dotsWrap, cards.length);
 
-    // Debe haber mismo número de dots y tarjetas
-    if (!scroller || cards.length === 0 || dotBtns.length !== cards.length) return;
-
-    // Scroll → recalcular activo
-    const handler = onScrollRAF(scroller, cards, dotBtns);
-    scroller.addEventListener('scroll', handler, { passive: true });
-    window.addEventListener('resize', () => handler(), { passive: true });
-
-    // Click en dot → ir a su tarjeta
+    // Click en dot → centrar tarjeta
     dotBtns.forEach((d, i) => {
       d.addEventListener('click', () => {
         cards[i].scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
@@ -76,7 +61,66 @@
       });
     });
 
+    // Observa qué tarjeta está más centrada
+    let observer = null;
+    const useIO = 'IntersectionObserver' in window;
+
+    if (useIO) {
+      const root = scroller;
+      observer = new IntersectionObserver((entries) => {
+        // Elige la tarjeta con mayor intersección (visible/centrada)
+        let bestIdx = 0, best = -1;
+        entries.forEach(e => {
+          const idx = cards.indexOf(e.target);
+          if (idx !== -1) {
+            const score = e.intersectionRatio;
+            if (score > best) { best = score; bestIdx = idx; }
+          }
+        });
+        setActive(dotBtns, bestIdx);
+      }, {
+        root,
+        threshold: [0.51, 0.6, 0.7, 0.8, 0.9, 1], // más de la mitad visible ≈ “actual”
+      });
+
+      cards.forEach(c => observer.observe(c));
+    } else {
+      // Fallback: calcula la más centrada con scroll + rAF
+      let ticking = false;
+      const handler = () => {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(() => {
+          ticking = false;
+          const sRect = scroller.getBoundingClientRect();
+          const sCenter = (sRect.left + sRect.right) / 2;
+          let best = 0, bestDist = Infinity;
+          for (let i = 0; i < cards.length; i++) {
+            const r = cards[i].getBoundingClientRect();
+            const cCenter = (r.left + r.right) / 2;
+            const dist = Math.abs(cCenter - sCenter);
+            if (dist < bestDist) { bestDist = dist; best = i; }
+          }
+          setActive(dotBtns, best);
+        });
+      };
+      scroller.addEventListener('scroll', handler, { passive: true });
+      window.addEventListener('resize', handler, { passive: true });
+    }
+
     // Estado inicial
-    setActive(dotBtns, centeredIndex(scroller, cards));
-  });
+    setTimeout(() => {
+      // fuerza un primer cálculo
+      if (useIO) {
+        // IO disparará en cuanto mida; por si acaso, activa la 0
+        setActive(dotBtns, 0);
+      } else {
+        const evt = new Event('scroll');
+        scroller.dispatchEvent(evt);
+      }
+    }, 0);
+  }
+
+  // Inicializa sólo los carruseles que existen realmente en el DOM
+  CANDIDATES.forEach(c => setupCarousel(c));
 })();
