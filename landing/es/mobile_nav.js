@@ -7,7 +7,9 @@
     { grid: '#screen2 .acerca .acerca-mobile', cardSel: '.acerca-card', dots: '#screen2 .dots-acerca' },
     { grid: '#screen3 .servicios .grid',       cardSel: '.card',        dots: '#screen3 .dots' },
     { grid: '#screen4 .soft .grid',            cardSel: '.card',        dots: '#screen4 .dots' },
-    { grid: '#screen5 .tecno .grid',           cardSel: '.card',        dots: '#screen5 .dots' }, // solo actuará si existen tarjetas y dots
+    { grid: '#screen5 .tecno .grid',           cardSel: '.card',        dots: '#screen5 .dots' },
+    { grid: '#screen6 .tinto .grid',           cardSel: '.card',        dots: '#screen6 .dots' },
+    { grid: '#screen7 .indus .grid',           cardSel: '.card',        dots: '#screen7 .dots' },
   ];
 
   function getDots(dotsWrap) {
