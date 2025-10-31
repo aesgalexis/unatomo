@@ -247,3 +247,46 @@ html, body { overscroll-behavior-y: contain; }
     -webkit-box-orient: initial;
   }
 }
+@media (max-width: 1200px) {
+  /* Fuerza carrusel con igual o mayor especificidad que las reglas de desktop */
+  #screen3 .servicios .grid,
+  #screen4 .soft .grid,
+  #screen5 .tecno .grid,
+  #screen6 .tinto .grid,
+  #screen7 .indus .grid,
+  #screen8 .config .grid,
+  #screen9 .alcance .grid,
+  #screen10 .contacto .grid {
+    display: flex !important;
+    gap: 16px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding: 0 16px;
+    -ms-overflow-style: none; scrollbar-width: none;
+  }
+  #screen3 .servicios .grid::-webkit-scrollbar,
+  #screen4 .soft .grid::-webkit-scrollbar,
+  #screen5 .tecno .grid::-webkit-scrollbar,
+  #screen6 .tinto .grid::-webkit-scrollbar,
+  #screen7 .indus .grid::-webkit-scrollbar,
+  #screen8 .config .grid::-webkit-scrollbar,
+  #screen9 .alcance .grid::-webkit-scrollbar,
+  #screen10 .contacto .grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Tarjeta ancho viewport + snap centrado (idéntico en todas) */
+  #screen3 .servicios .grid .card,
+  #screen4 .soft .grid .card,
+  #screen5 .tecno .grid .card,
+  #screen6 .tinto .grid .card,
+  #screen7 .indus .grid .card,
+  #screen8 .config .grid .card,
+  #screen9 .alcance .grid .card,
+  #screen10 .contacto .grid .card {
+    flex: 0 0 90vw;
+    max-width: 90vw;
+    scroll-snap-align: center;
+    height: auto; max-height: none; overflow: visible;
+  }
+}
