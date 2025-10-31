@@ -126,3 +126,41 @@ html, body { overscroll-behavior-y: contain; }
   scroll-snap-align: center;
   scroll-snap-stop: always;
 }
+/* === Fix tarjetas móviles: altura auto y contenido completo === */
+@media (max-width: 1200px) {
+  /* Asegura que el contenedor sea realmente scrollable horizontal */
+  .acerca-mobile,
+  #screen3 .servicios .grid,
+  #screen4 .soft .grid {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding: 0 16px;
+  }
+
+  /* Cada tarjeta ocupa ~90% del viewport para “snap” agradable */
+  .acerca-mobile .acerca-card,
+  #screen3 .servicios .grid .card,
+  #screen4 .soft .grid .card {
+    flex: 0 0 90vw;
+    max-width: 90vw;
+    scroll-snap-align: center;
+    /* 🔑 Altura automática y sin recortes */
+    height: auto;
+    max-height: none;
+    overflow: visible;
+    display: block;
+  }
+
+  /* Si había clamping de texto, lo anulamos en móvil */
+  .acerca-mobile .acerca-card p,
+  #screen3 .servicios .grid .card p,
+  #screen4 .soft .grid .card p {
+    display: block;
+    overflow: visible;
+    /* anula posibles clamps */
+    -webkit-line-clamp: initial;
+    -webkit-box-orient: initial;
+  }
+}
