@@ -183,3 +183,6 @@ html, body { overscroll-behavior-y: contain; }
   html[data-theme="dark"]  .dots,
   html[data-theme="dark"]  .dots-acerca { color: #fff; }
 }
+/* Dots: ocultos por defecto (desktop) */
+.dots,
+.dots-acerca { display: none; }
