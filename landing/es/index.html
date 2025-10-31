@@ -174,23 +174,156 @@
     </section>
   </div>
 
-  <!-- =========================================================
-       SCREEN 5 — TECNOLOGÍA / COLABORADORES
-       (SIN TARJETAS → SIN DOTS)
-  ========================================================== -->
-  <div class="screen" id="screen5">
-    <section class="tecno" aria-label="Alcance y Colaboradores">
-      <h2 class="section-title">Alcance y Colaboradores</h2>
+ <!-- =========================================================
+     SCREEN 5 — HOTELES (3 tarjetas + dots)
+     (Usa .tecno para que el JS actual siga funcionando)
+========================================================== -->
+<div class="screen" id="screen5">
+  <section class="tecno" aria-label="Hoteles">
+    <h2 class="section-title">Hoteles</h2>
 
-      <div class="grid" aria-live="polite">
-        <!-- De momento sin tarjetas; cuando añadas:
-             <article class="card">...</article> xN
-             y entonces añade el bloque .dots con N botones. -->
+    <div class="grid" aria-live="polite">
+      <article class="card">
+        <h3>🛎️ Room Linen & Turnover</h3>
+        <p>Optimización de ciclos para lencería de habitaciones: reducción de roturas y tiempos muertos, control de calidad por lote y estandarización de plegado.</p>
+      </article>
+      <article class="card">
+        <h3>🍽️ F&B & Mantelería</h3>
+        <p>Parámetros específicos por gramaje y tejido. Calandrado fino para manteles y servilletas, con control de humedad de salida para acabado premium.</p>
+      </article>
+      <article class="card">
+        <h3>🏊‍♂️ Wellness & SPA</h3>
+        <p>Protocolos diferenciados para toallas, albornoces y textiles de spa. Dosificación y aclarados orientados a piel sensible y alta rotación.</p>
+      </article>
+    </div>
+
+    <div class="dots" aria-label="Paginación hoteles">
+      <button class="dot" type="button" aria-label="Tarjeta 1" aria-current="true"></button>
+      <button class="dot" type="button" aria-label="Tarjeta 2"></button>
+      <button class="dot" type="button" aria-label="Tarjeta 3"></button>
+    </div>
+  </section>
+</div>
+
+<!-- =========================================================
+     SCREEN 6 — TINTORERÍAS (3 tarjetas + dots)
+     (Los dots aquí son visuales; si luego quieres que se enciendan,
+      añadimos esta pantalla al JS. Por ahora no tocamos nada del JS.)
+========================================================== -->
+<div class="screen" id="screen6">
+  <section class="tinto" aria-label="Tintorerías">
+    <h2 class="section-title">Tintorerías</h2>
+
+    <div class="grid" aria-live="polite">
+      <article class="card">
+        <h3>🧥 Prenda Delicada</h3>
+        <p>Protocolos por tipología (lana, seda, mezclas) y por color. Matrices de manchas y pretratamientos para mantener textura y caída.</p>
+      </article>
+      <article class="card">
+        <h3>♻️ Solventes & Wet Cleaning</h3>
+        <p>Equilibrio entre solvente y agua: parámetros de temperatura, mecánica y química para minimizar encogimiento y migraciones.</p>
+      </article>
+      <article class="card">
+        <h3>📦 Flujo y Entrega</h3>
+        <p>Etiquetado, trazabilidad y colado por ruta de entrega. Picos de demanda y buffers inteligentes para horas punta.</p>
+      </article>
+    </div>
+
+    <div class="dots" aria-label="Paginación tintorerías">
+      <button class="dot" type="button" aria-label="Tarjeta 1" aria-current="true"></button>
+      <button class="dot" type="button" aria-label="Tarjeta 2"></button>
+      <button class="dot" type="button" aria-label="Tarjeta 3"></button>
+    </div>
+  </section>
+</div>
+
+<!-- =========================================================
+     SCREEN 7 — LAVANDERÍAS INDUSTRIALES (3 tarjetas + dots)
+========================================================== -->
+<div class="screen" id="screen7">
+  <section class="indus" aria-label="Lavanderías Industriales">
+    <h2 class="section-title">Lavanderías Industriales</h2>
+
+    <div class="grid" aria-live="polite">
+      <article class="card">
+        <h3>🏗️ Layout & Flujo Lineal</h3>
+        <p>Diseño de flujo sucio→limpio, buffers, cintas y elevadores. Minimización de cruces y reposicionamientos.</p>
+      </article>
+      <article class="card">
+        <h3>🧪 Consumos y Dosificación</h3>
+        <p>Optimización de agua, energía, gas y química. Curvas de dosificación por carga real y ensuciamiento.</p>
+      </article>
+      <article class="card">
+        <h3>📈 OEE y Trazabilidad</h3>
+        <p>Métricas de disponibilidad, rendimiento y calidad. Contadores en calandras/plegadoras y registros a base de datos.</p>
+      </article>
+    </div>
+
+    <div class="dots" aria-label="Paginación industriales">
+      <button class="dot" type="button" aria-label="Tarjeta 1" aria-current="true"></button>
+      <button class="dot" type="button" aria-label="Tarjeta 2"></button>
+      <button class="dot" type="button" aria-label="Tarjeta 3"></button>
+    </div>
+  </section>
+</div>
+
+<!-- =========================================================
+     SCREEN 8 — CONFIGURADOR LAVANDERÍA (CTA, sin dots)
+========================================================== -->
+<div class="screen" id="screen8">
+  <section class="config" aria-label="Configurador de Lavandería">
+    <h2 class="section-title">Configurador de Lavandería</h2>
+
+    <div class="config-cta">
+      <p>Defina su producción objetivo y obtenga una propuesta técnica orientativa (equipos, consumos y flujo).</p>
+      <a class="button" href="#contacto">Quiero configurar mi planta</a>
+    </div>
+  </section>
+</div>
+
+<!-- =========================================================
+     SCREEN 9 — ALCANCE Y COLABORADORES (sin dots)
+     (Esta sustituye conceptualmente a la antigua ‘tecno’,
+      pero mantenemos Hoteles en #screen5 para no tocar el JS.)
+========================================================== -->
+<div class="screen" id="screen9">
+  <section class="alcance" aria-label="Alcance y Colaboradores">
+    <h2 class="section-title">Alcance y Colaboradores</h2>
+
+    <div class="grid partners">
+      <!-- Añade logos/textos según convenga -->
+      <article class="card"><h3>Europa Sur</h3><p>España, Italia, Grecia.</p></article>
+      <article class="card"><h3>Química</h3><p>Colaboradores especializados en detergencia y proceso.</p></article>
+      <article class="card"><h3>Electricidad & PLC</h3><p>Integradores y automatización industrial.</p></article>
+    </div>
+    <!-- Sin dots: no es carrusel móvil crítico -->
+  </section>
+</div>
+
+<!-- =========================================================
+     SCREEN 10 — CONTACTO (sin dots)
+========================================================== -->
+<div class="screen" id="screen10">
+  <section class="contacto" aria-label="Contacto">
+    <h2 class="section-title">Contacto</h2>
+
+    <form class="contact-form" id="contacto" action="https://formspree.io/f/tu-endpoint" method="POST">
+      <div class="row">
+        <label>Nombre
+          <input type="text" name="nombre" required>
+        </label>
+        <label>Email
+          <input type="email" name="email" required>
+        </label>
       </div>
+      <label>Mensaje
+        <textarea name="mensaje" rows="6" required></textarea>
+      </label>
+      <button type="submit" class="button">Enviar</button>
+    </form>
+  </section>
+</div>
 
-      <!-- Sin dots porque no hay tarjetas -->
-    </section>
-  </div>
 
   <!-- Scripts (orden importante) -->
   <script src="/landing/es/theme.js"></script>
