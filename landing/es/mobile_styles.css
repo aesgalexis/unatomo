@@ -214,3 +214,36 @@ html, body { overscroll-behavior-y: contain; }
     -webkit-box-orient: initial;
   }
 }
+/* ===== GENÉRICO MÓVIL para TODAS las secciones con .grid/.card ===== */
+@media (max-width: 1200px) {
+  /* Contenedor carrusel horizontal */
+  .screen .grid {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding: 0 16px;
+  }
+  .screen .grid::-webkit-scrollbar { display: none; }
+  .screen .grid { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* Tarjeta a ancho de viewport con snap centrado */
+  .screen .grid .card,
+  .acerca-mobile .acerca-card {
+    flex: 0 0 90vw;
+    max-width: 90vw;
+    scroll-snap-align: center;
+    height: auto;
+    max-height: none;
+    overflow: visible;
+  }
+
+  /* Texto completo (sin clamps) */
+  .screen .grid .card p,
+  .acerca-mobile .acerca-card p {
+    overflow: visible;
+    display: block;
+    -webkit-line-clamp: initial;
+    -webkit-box-orient: initial;
+  }
+}
