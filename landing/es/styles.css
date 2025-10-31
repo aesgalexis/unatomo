@@ -441,3 +441,22 @@ html, body { overscroll-behavior-y: contain; }
 /* Dots: ocultos por defecto (desktop) */
 .dots,
 .dots-acerca { display: none; }
+/* ===== Genérico desktop para .grid .card ===== */
+@media (min-width: 1201px) {
+  /* Grids de 3 columnas por defecto */
+  #screen3 .grid,
+  #screen4 .grid,
+  #screen5 .grid,
+  #screen6 .grid,
+  #screen7 .grid,
+  #screen9 .grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+    padding: 0 24px;
+  }
+
+  /* La variante de ACERCA de escritorio ya es un bloque único (ok) */
+  .acerca-desktop { display: block; }
+  .acerca-mobile   { display: none; } /* solo móvil */
+}
