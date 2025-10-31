@@ -419,3 +419,22 @@ html, body { overscroll-behavior-y: contain; }
 #screen4 .dots { 
   display: none;
 }
+@media (max-width: 1200px) {
+  /* Si ya tienes esto para otras secciones, suma estas dos: */
+  #screen6 .tinto .grid,
+  #screen7 .indus .grid {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding: 0 16px;
+  }
+
+  #screen6 .tinto .grid .card,
+  #screen7 .indus .grid .card {
+    flex: 0 0 90vw;
+    max-width: 90vw;
+    scroll-snap-align: center;
+    height: auto; max-height: none; overflow: visible;
+  }
+}
