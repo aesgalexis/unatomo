@@ -515,3 +515,30 @@ html, body { overscroll-behavior-y: contain; }
   line-height: 1.45;
   color: var(--muted);
 }
+/* ===== Contenedores de sección (como en #screen3/#screen4/#screen5) ===== */
+#screen6 .tinto,
+#screen7 .indus,
+#screen8 .config,
+#screen9 .alcance,
+#screen10 .contacto {
+  max-width: 1125px;
+  max-height: 812px;
+  width: 100%;
+  margin: 0 auto;          /* centra el bloque */
+  display: flex;
+  flex-direction: column;  /* título arriba + grid debajo */
+}
+
+/* Títulos con el mismo estilo que las secciones previas (por si alguna faltaba) */
+#screen6 .section-title,
+#screen7 .section-title,
+#screen8 .section-title,
+#screen9 .section-title,
+#screen10 .section-title {
+  font-size: clamp(28px, 4vw, 48px);
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+  margin: 24px 0 24px;
+  color: currentColor;
+  text-align: center;
+}
