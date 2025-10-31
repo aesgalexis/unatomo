@@ -1,64 +1,66 @@
+/* =========================================
+   0) VARIABLES DE TEMA / BASE
+   ========================================= */
 :root {
   color-scheme: light dark;
 
-  /* Tema base (LIGHT por defecto) */
+  /* Tema base (LIGHT) */
   --bg: #ffffff;
   --fg: #111111;
 
-  /* Pantallas pares en LIGHT (gris 85% claro) */
+  /* Pantallas pares (LIGHT) */
   --even-bg: hsl(0 0% 85%);
   --even-fg: #111111;
 }
 
-/* Si el usuario NO ha elegido tema manualmente, seguimos el sistema */
 @media (prefers-color-scheme: dark) {
   :root {
-    /* Tema base en DARK */
+    /* Tema base (DARK) */
     --bg: #0b0b0c;
     --fg: #e5e7eb;
 
-    /* Pantallas pares en DARK (gris 15% oscuro) */
+    /* Pantallas pares (DARK) */
     --even-bg: hsl(0 0% 15%);
     --even-fg: #e5e7eb;
   }
 }
 
-/* Si el usuario ELIGE tema con el botón, esto tiene prioridad sobre el sistema */
+/* Tema forzado por botón (prioriza frente a prefers-color-scheme) */
 :root[data-theme="light"] {
   --bg: #ffffff;
   --fg: #111111;
-
-  --even-bg: hsl(0 0% 85%); /* gris 85% (claro) */
+  --even-bg: hsl(0 0% 85%);
   --even-fg: #111111;
 }
 :root[data-theme="dark"] {
-  --bg: #0b0b0c;            /* negro del sitio */
+  --bg: #0b0b0c;
   --fg: #e5e7eb;
-
-  --even-bg: hsl(0 0% 15%); /* gris 15% (oscuro) */
+  --even-bg: hsl(0 0% 15%);
   --even-fg: #e5e7eb;
 }
 
-/* Alturas base */
+/* =========================================
+   1) RESETEO / BASE
+   ========================================= */
 html, body { height: 100%; }
+html, body { overscroll-behavior-y: contain; }
 
-/* Body SIN flex (centrado lo hace .screen) */
 body {
   margin: 0;
   background: var(--bg);
   color: var(--fg);
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
   text-align: center;
-  overflow-y: auto;   /* scroll normal por defecto */
+  overflow-y: auto; /* scroll vertical normal por defecto */
 }
 
-/* Snap solo cuando nav.js añada la clase */
+/* Activado por nav.js cuando hay snap */
 body.snap {
   scroll-snap-type: y mandatory;
   scroll-behavior: smooth;
 }
 
-/* Secciones a pantalla completa y centradas */
+/* Sección a pantalla completa y centrada */
 .screen {
   min-height: 100svh; /* evita cortes en móvil */
   display: flex;
@@ -68,15 +70,15 @@ body.snap {
 
   scroll-snap-align: start;
   scroll-snap-stop: always;
+
+  /* util genérico para texto apagado dentro de la screen */
+  --muted: color-mix(in srgb, currentColor 70%, transparent);
 }
 
-/* Padding horizontal del contenido (para evitar franjas laterales) */
-.screen > * {
-  padding-left: 20px;
-  padding-right: 20px;
-}
+/* Padding horizontal del contenido directo (evita “pegarse” a bordes) */
+.screen > * { padding-left: 20px; padding-right: 20px; }
 
-/* Elementos de la landing */
+/* Elementos comunes de la landing */
 img.logo {
   width: 100%;
   max-width: 180px;
@@ -97,7 +99,7 @@ p {
   opacity: .75;
 }
 
-/* Botón light/dark fijo y centrado arriba */
+/* Botón tema (centrado arriba) */
 #theme-toggle {
   position: fixed;
   top: 12px;
@@ -116,32 +118,29 @@ p {
 }
 #theme-toggle:hover { opacity: 1; }
 
-/* =========================
-   COLORES DE LAS PANTALLAS
-   ========================= */
+/* =========================================
+   2) COLORES POR PARIDAD DE PANTALLA
+   ========================================= */
+.screen:nth-of-type(odd)  { background: var(--bg);      color: var(--fg); }
+.screen:nth-of-type(even) { background: var(--even-bg); color: var(--even-fg); }
 
-/* IMPARES (1,3,5,...) → heredan el color base del tema */
-.screen:nth-of-type(odd) {
-  background: var(--bg);
-  color: var(--fg);
-}
+/* Dots: ocultos por defecto (solo se muestran en mobile_dots.css) */
+.dots, .dots-acerca { display: none; }
 
-/* PARES (2,4,6,...) → gris según modo (85% light / 15% dark) */
-.screen:nth-of-type(even) {
-  background: var(--even-bg);
-  color: var(--even-fg);
-}
-html, body { overscroll-behavior-y: contain; }
+/* =========================================
+   3) PANTALLA 1 — Portada (logo, título, claim)
+   (Sin reglas específicas adicionales)
+   ========================================= */
 
-/* ===== Pantalla 2 (par): Acerca de Nosotros — ESCRITORIO ===== */
+
+/* =========================================
+   4) PANTALLA 2 — Acerca de Nosotros (ESCRITORIO)
+   ========================================= */
 #screen2 {
   --current-bg: var(--even-bg);
   --current-fg: var(--even-fg);
   --current-muted: color-mix(in srgb, var(--current-fg) 70%, transparent);
 }
-#screen2 .acerca .acerca-desktop { display: grid; } 
-#screen2 .acerca .acerca-mobile  { display: none; }  
-#screen2 .dots-acerca { display: none; }          
 
 #screen2 .acerca {
   max-width: 1125px;
@@ -158,8 +157,13 @@ html, body { overscroll-behavior-y: contain; }
   letter-spacing: -0.5px;
   margin: 24px 0 24px;
   color: var(--current-fg);
-  text-align: center; /* si prefieres centrado del título */
+  text-align: center;
 }
+
+/* Variante escritorio activa; móvil oculta en desktop */
+#screen2 .acerca .acerca-desktop { display: grid; }
+#screen2 .acerca .acerca-mobile  { display: none; }
+#screen2 .dots-acerca             { display: none; }
 
 #screen2 .acerca .grid {
   display: grid;
@@ -169,18 +173,20 @@ html, body { overscroll-behavior-y: contain; }
   height: 100%;
 }
 
-/* 1 sola tarjeta ocupa todo el grid (ESCRITORIO) */
+/* Tarjeta única ocupa todo el grid */
 #screen2 .acerca-desktop .acerca-card {
   grid-column: 1 / -1;
   grid-row: 1 / -1;
   border: 1px solid var(--current-fg);
   border-radius: 12px;
   padding: 24px;
+
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
   gap: 10px;
+
   background: transparent;
   color: var(--current-fg);
   text-align: left;
@@ -199,34 +205,33 @@ html, body { overscroll-behavior-y: contain; }
   color: var(--current-muted);
 }
 
-/* Por defecto, los dots NO se ven en escritorio */
-#screen2 .dots-acerca { display: none; }
-#screen2 .acerca-desktop { display: grid; } /* ya tienes reglas de grid aplicadas */
-#screen2 .acerca-mobile  { display: none; }
+/* Forzar variante escritorio en ≥601px */
+@media (min-width: 601px) {
+  #screen2 .acerca .acerca-desktop { display: grid !important; }
+  #screen2 .acerca .acerca-mobile,
+  #screen2 .acerca .acerca-mobile .acerca-card,
+  #screen2 .dots-acerca { display: none !important; }
+}
 
-/* ===== Pantalla 3 contenedor genérico servicios (título + grid 3×3) ===== */
 
-/* Variables locales para colores de pantalla PAR (gris),
-   derivadas de --even-bg / --even-fg que ya definiste: */
+/* =========================================
+   5) PANTALLA 3 — Servicios (título + grid 3×3)
+   ========================================= */
 #screen3 {
   --current-bg: var(--even-bg);
   --current-fg: var(--even-fg);
-  /* “muted” automático: mezcla del fg con transparencia, invertido según modo */
   --current-muted: color-mix(in srgb, var(--current-fg) 70%, transparent);
 }
 
 #screen3 .servicios {
-  /* 25% más grande que 900×650 → ~1125×812 (incluyendo gap) */
   max-width: 1125px;
   max-height: 812px;
   width: 100%;
   margin: 0 auto;
-
   display: flex;
   flex-direction: column;
 }
 
-/* Título “Servicios”: un poco más separado del grid, y más pequeño que el h1 */
 #screen3 .servicios .section-title {
   font-size: clamp(28px, 4vw, 48px);
   line-height: 1.1;
@@ -235,15 +240,13 @@ html, body { overscroll-behavior-y: contain; }
   color: var(--current-fg);
 }
 
-/* Grid 3×3 */
 #screen3 .servicios .grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 20px;                     /* algo más de hueco al subir tamaño */
+  gap: 20px;
   height: 100%;
 }
 
-/* Tarjeta */
 #screen3 .servicios .card {
   border: 1px solid var(--current-fg);
   border-radius: 12px;
@@ -251,114 +254,32 @@ html, body { overscroll-behavior-y: contain; }
 
   display: flex;
   flex-direction: column;
-  justify-content: flex-start; 
-  align-items: flex-start;      
-  gap: 8px;                      
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 8px;
 
   background: transparent;
   color: var(--current-fg);
 }
 
-/* Subtítulo dentro de tarjeta: pequeño pero claro */
 #screen3 .servicios .card h3 {
   margin: 0 0 6px;
   font-weight: 600;
-  /* mínimo legible ≈14px, techo 18px */
   font-size: clamp(14px, 1.6vw, 18px);
   color: var(--current-fg);
 }
-
-/* Texto de tarjeta: “blanco apagado” en dark (gris claro),
-   y “gris oscuro” en light (sobre gris claro) automáticamente */
 #screen3 .servicios .card p {
   margin: 0;
-  /* mínimo legible ≈14px, techo 16px */
-  font-size: clamp(14px, 1.4vw, 16px);
-  line-height: 1.45;
-  color: var(--current-muted);
-}
-#screen3 .dots { 
-  display: none;
-}
-/* ===== SCREEN 2 (Acerca) — forzar ESCRITORIO (≥601px) ===== */
-@media (min-width: 601px) {
-  /* Mostrar SOLO la variante de escritorio */
-  #screen2 .acerca .acerca-desktop {
-    display: grid !important; /* tu grid 3×3 ya definido */
-  }
-
-  /* Ocultar COMPLETAMENTE la variante móvil y sus dots */
-  #screen2 .acerca .acerca-mobile,
-  #screen2 .acerca .acerca-mobile .acerca-card,
-  #screen2 .dots-acerca {
-    display: none !important;
-  }
-}
-/* ===== Pantalla 4 (par): Tecnología y Eficiencia — ESCRITORIO ===== */
-#screen5 {
-  --current-bg: var(--even-bg);
-  --current-fg: var(--even-fg);
-  --current-muted: color-mix(in srgb, var(--current-fg) 70%, transparent);
-}
-
-#screen5 .tecno {
-  max-width: 1125px;
-  max-height: 812px;
-  width: 100%;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-}
-
-#screen5 .tecno .section-title {
-  font-size: clamp(28px, 4vw, 48px);
-  line-height: 1.1;
-  letter-spacing: -0.5px;
-  margin: 24px 0 24px;
-  color: var(--current-fg);
-}
-
-/* Grid 3 columnas en escritorio (mismo patrón que #screen3 .servicios .grid) */
-#screen5 .tecno .grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-  height: 100%;
-}
-
-#screen5 .tecno .card {
-  border: 1px solid var(--current-fg);
-  border-radius: 12px;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 8px;
-  background: transparent;
-  color: var(--current-fg);
-}
-
-#screen5 .tecno .card h3 {
-  margin: 0 0 6px;
-  font-weight: 600;
-  font-size: clamp(14px, 1.6vw, 18px);
-  color: var(--current-fg);
-}
-
-#screen5 .tecno .card p {
-  margin: 0;
   font-size: clamp(14px, 1.4vw, 16px);
   line-height: 1.45;
   color: var(--current-muted);
 }
 
-/* Dots ocultos en escritorio, como en #screen3 */
-#screen4 .dots { 
-  display: none;
-}
-/* ===== Pantalla 5 (impar/negra): Soluciones Digitales — ESCRITORIO ===== */
+
+/* =========================================
+   6) PANTALLA 4 — Soluciones Digitales (Software)
+   ========================================= */
 #screen4 {
-  /* Para impares ya heredas var(--bg)/--fg; si prefieres locales, usa: */
   --current-bg: var(--bg);
   --current-fg: var(--fg);
   --current-muted: color-mix(in srgb, var(--current-fg) 70%, transparent);
@@ -381,7 +302,6 @@ html, body { overscroll-behavior-y: contain; }
   color: var(--current-fg);
 }
 
-/* Grid 3 columnas en escritorio (igual que #screen3/#screen4) */
 #screen4 .soft .grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -407,7 +327,6 @@ html, body { overscroll-behavior-y: contain; }
   font-size: clamp(14px, 1.6vw, 18px);
   color: var(--current-fg);
 }
-
 #screen4 .soft .card p {
   margin: 0;
   font-size: clamp(14px, 1.4vw, 16px);
@@ -415,59 +334,137 @@ html, body { overscroll-behavior-y: contain; }
   color: var(--current-muted);
 }
 
-/* Dots ocultos en escritorio, igual que en otras */
-#screen4 .dots { 
-  display: none;
-}
-@media (max-width: 1200px) {
-  /* Si ya tienes esto para otras secciones, suma estas dos: */
-  #screen6 .tinto .grid,
-  #screen7 .indus .grid {
-    display: flex;
-    gap: 16px;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    padding: 0 16px;
-  }
 
-  #screen6 .tinto .grid .card,
-  #screen7 .indus .grid .card {
-    flex: 0 0 90vw;
-    max-width: 90vw;
-    scroll-snap-align: center;
-    height: auto; max-height: none; overflow: visible;
-  }
-}
-/* Dots: ocultos por defecto (desktop) */
-.dots,
-.dots-acerca { display: none; }
-/* ===== Genérico desktop para .grid .card ===== */
-@media (min-width: 1201px) {
-  /* Grids de 3 columnas por defecto */
-  #screen3 .grid,
-  #screen4 .grid,
-  #screen5 .grid,
-  #screen6 .grid,
-  #screen7 .grid,
-  #screen9 .grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 24px;
-    padding: 0 24px;
-  }
-
-  /* La variante de ACERCA de escritorio ya es un bloque único (ok) */
-  .acerca-desktop { display: block; }
-  .acerca-mobile   { display: none; } /* solo móvil */
-}
-/* ===== GENÉRICOS (todas las pantallas nuevas) ===== */
-
-/* Cada .screen hereda bg/fg por paridad; definimos un "muted" genérico */
-.screen {
-  --muted: color-mix(in srgb, currentColor 70%, transparent);
+/* =========================================
+   7) PANTALLA 5 — Hoteles (usa .tecno)
+   ========================================= */
+#screen5 {
+  --current-bg: var(--even-bg);
+  --current-fg: var(--even-fg);
+  --current-muted: color-mix(in srgb, var(--current-fg) 70%, transparent);
 }
 
-/* Título de sección genérico (mismo look que 2–5) */
+#screen5 .tecno {
+  max-width: 1125px;
+  max-height: 812px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+#screen5 .tecno .section-title {
+  font-size: clamp(28px, 4vw, 48px);
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+  margin: 24px 0 24px;
+  color: var(--current-fg);
+}
+
+#screen5 .tecno .grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  height: 100%;
+}
+
+#screen5 .tecno .card {
+  border: 1px solid var(--current-fg);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  background: transparent;
+  color: var(--current-fg);
+}
+
+#screen5 .tecno .card h3 {
+  margin: 0 0 6px;
+  font-weight: 600;
+  font-size: clamp(14px, 1.6vw, 18px);
+  color: var(--current-fg);
+}
+#screen5 .tecno .card p {
+  margin: 0;
+  font-size: clamp(14px, 1.4vw, 16px);
+  line-height: 1.45;
+  color: var(--current-muted);
+}
+
+
+/* =========================================
+   8) PANTALLA 6 — Tintorerías
+   ========================================= */
+#screen6 .tinto {
+  max-width: 1125px;
+  max-height: 812px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+
+/* =========================================
+   9) PANTALLA 7 — Lavanderías Industriales
+   ========================================= */
+#screen7 .indus {
+  max-width: 1125px;
+  max-height: 812px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+
+/* =========================================
+   10) PANTALLA 8 — Configurador
+   ========================================= */
+#screen8 .config {
+  max-width: 1125px;
+  max-height: 812px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+
+/* =========================================
+   11) PANTALLA 9 — Alcance y Colaboradores
+   ========================================= */
+#screen9 .alcance {
+  max-width: 1125px;
+  max-height: 812px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+
+/* =========================================
+   12) PANTALLA 10 — Contacto
+   ========================================= */
+#screen10 .contacto {
+  max-width: 1125px;
+  max-height: 812px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+
+/* =========================================
+   13) GENÉRICOS DE ESCRITORIO (tarjetas y grids)
+   — No alteran lo específico: #screen3/#screen4/#screen5 tienen mayor especificidad.
+   ========================================= */
+
+/* Título de sección genérico */
 .screen .section-title {
   font-size: clamp(28px, 4vw, 48px);
   line-height: 1.1;
@@ -477,68 +474,50 @@ html, body { overscroll-behavior-y: contain; }
   text-align: center;
 }
 
-/* Grid de escritorio por defecto para pantallas nuevas 
-   (ya cubres 3–7 y 9 arriba; añadimos 8 y 10 también) */
+/* Grids de 3 columnas por defecto en escritorio */
 @media (min-width: 1201px) {
+  #screen3 .grid,
+  #screen4 .grid,
+  #screen5 .grid,
+  #screen6 .grid,
+  #screen7 .grid,
   #screen8 .grid,
+  #screen9 .grid,
   #screen10 .grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 24px;
     padding: 0 24px;
   }
+
+  /* Pantalla 2: mostrar solo variante escritorio */
+  .acerca-desktop { display: block; }
+  .acerca-mobile  { display: none; }
 }
 
-/* Tarjeta genérica de escritorio (borde, padding, tipografía) */
+/* Tarjeta genérica (bordes, paddings, tipografía) */
 .screen .grid .card {
   border: 1px solid currentColor;
   border-radius: 12px;
   padding: 16px;
+
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 8px;
-  background: transparent;
-  color: currentColor; /* textos dentro heredan */
-}
 
+  background: transparent;
+  color: currentColor;
+}
 .screen .grid .card h3 {
   margin: 0 0 6px;
   font-weight: 600;
   font-size: clamp(14px, 1.6vw, 18px);
   color: currentColor;
 }
-
 .screen .grid .card p {
   margin: 0;
   font-size: clamp(14px, 1.4vw, 16px);
   line-height: 1.45;
   color: var(--muted);
-}
-/* ===== Contenedores de sección (como en #screen3/#screen4/#screen5) ===== */
-#screen6 .tinto,
-#screen7 .indus,
-#screen8 .config,
-#screen9 .alcance,
-#screen10 .contacto {
-  max-width: 1125px;
-  max-height: 812px;
-  width: 100%;
-  margin: 0 auto;          /* centra el bloque */
-  display: flex;
-  flex-direction: column;  /* título arriba + grid debajo */
-}
-
-/* Títulos con el mismo estilo que las secciones previas (por si alguna faltaba) */
-#screen6 .section-title,
-#screen7 .section-title,
-#screen8 .section-title,
-#screen9 .section-title,
-#screen10 .section-title {
-  font-size: clamp(28px, 4vw, 48px);
-  line-height: 1.1;
-  letter-spacing: -0.5px;
-  margin: 24px 0 24px;
-  color: currentColor;
-  text-align: center;
 }
