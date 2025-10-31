@@ -394,9 +394,12 @@ p {
 }
 
 
-/* =========================================
-   8) PANTALLA 6 — Tintorerías
-   ========================================= */
+/* ===== Pantalla 6 — Tintorerías (mismo patrón que #screen5) ===== */
+#screen6 {
+  --current-bg: var(--even-bg);
+  --current-fg: var(--even-fg);
+  --current-muted: color-mix(in srgb, var(--current-fg) 70%, transparent);
+}
 #screen6 .tinto {
   max-width: 1125px;
   max-height: 812px;
@@ -405,11 +408,49 @@ p {
   display: flex;
   flex-direction: column;
 }
+#screen6 .tinto .section-title {
+  font-size: clamp(28px, 4vw, 48px);
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+  margin: 24px 0 24px;
+  color: var(--current-fg);
+}
+#screen6 .tinto .grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  height: 100%;
+}
+#screen6 .tinto .card {
+  border: 1px solid var(--current-fg);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  background: transparent;
+  color: var(--current-fg);
+}
+#screen6 .tinto .card h3 {
+  margin: 0 0 6px;
+  font-weight: 600;
+  font-size: clamp(14px, 1.6vw, 18px);
+  color: var(--current-fg);
+}
+#screen6 .tinto .card p {
+  margin: 0;
+  font-size: clamp(14px, 1.4vw, 16px);
+  line-height: 1.45;
+  color: var(--current-muted);
+}
 
-
-/* =========================================
-   9) PANTALLA 7 — Lavanderías Industriales
-   ========================================= */
+/* ===== Pantalla 7 — Lavanderías Industriales ===== */
+#screen7 {
+  --current-bg: var(--bg);
+  --current-fg: var(--fg);
+  --current-muted: color-mix(in srgb, var(--current-fg) 70%, transparent);
+}
 #screen7 .indus {
   max-width: 1125px;
   max-height: 812px;
@@ -418,11 +459,49 @@ p {
   display: flex;
   flex-direction: column;
 }
+#screen7 .indus .section-title {
+  font-size: clamp(28px, 4vw, 48px);
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+  margin: 24px 0 24px;
+  color: var(--current-fg);
+}
+#screen7 .indus .grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  height: 100%;
+}
+#screen7 .indus .card {
+  border: 1px solid var(--current-fg);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  background: transparent;
+  color: var(--current-fg);
+}
+#screen7 .indus .card h3 {
+  margin: 0 0 6px;
+  font-weight: 600;
+  font-size: clamp(14px, 1.6vw, 18px);
+  color: var(--current-fg);
+}
+#screen7 .indus .card p {
+  margin: 0;
+  font-size: clamp(14px, 1.4vw, 16px);
+  line-height: 1.45;
+  color: var(--current-muted);
+}
 
-
-/* =========================================
-   10) PANTALLA 8 — Configurador
-   ========================================= */
+/* ===== Pantalla 8 — Configurador ===== */
+#screen8 {
+  --current-bg: var(--even-bg);
+  --current-fg: var(--even-fg);
+  --current-muted: color-mix(in srgb, var(--current-fg) 70%, transparent);
+}
 #screen8 .config {
   max-width: 1125px;
   max-height: 812px;
@@ -431,11 +510,25 @@ p {
   display: flex;
   flex-direction: column;
 }
+#screen8 .config .section-title {
+  font-size: clamp(28px, 4vw, 48px);
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+  margin: 24px 0 24px;
+  color: var(--current-fg);
+}
+/* Si más adelante usas grid+cards aquí, reutiliza el patrón: */
+#screen8 .config .grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; height: 100%; }
+#screen8 .config .card { border: 1px solid var(--current-fg); border-radius: 12px; padding:16px; display:flex; flex-direction:column; align-items:flex-start; gap:8px; background:transparent; color:var(--current-fg); }
+#screen8 .config .card h3 { margin:0 0 6px; font-weight:600; font-size:clamp(14px,1.6vw,18px); color:var(--current-fg); }
+#screen8 .config .card p  { margin:0; font-size:clamp(14px,1.4vw,16px); line-height:1.45; color:var(--current-muted); }
 
-
-/* =========================================
-   11) PANTALLA 9 — Alcance y Colaboradores
-   ========================================= */
+/* ===== Pantalla 9 — Alcance y Colaboradores ===== */
+#screen9 {
+  --current-bg: var(--bg);
+  --current-fg: var(--fg);
+  --current-muted: color-mix(in srgb, var(--current-fg) 70%, transparent);
+}
 #screen9 .alcance {
   max-width: 1125px;
   max-height: 812px;
@@ -444,11 +537,49 @@ p {
   display: flex;
   flex-direction: column;
 }
+#screen9 .alcance .section-title {
+  font-size: clamp(28px, 4vw, 48px);
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+  margin: 24px 0 24px;
+  color: var(--current-fg);
+}
+#screen9 .alcance .grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  height: 100%;
+}
+#screen9 .alcance .card {
+  border: 1px solid var(--current-fg);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  background: transparent;
+  color: var(--current-fg);
+}
+#screen9 .alcance .card h3 {
+  margin: 0 0 6px;
+  font-weight: 600;
+  font-size: clamp(14px, 1.6vw, 18px);
+  color: var(--current-fg);
+}
+#screen9 .alcance .card p {
+  margin: 0;
+  font-size: clamp(14px, 1.4vw, 16px);
+  line-height: 1.45;
+  color: var(--current-muted);
+}
 
-
-/* =========================================
-   12) PANTALLA 10 — Contacto
-   ========================================= */
+/* ===== Pantalla 10 — Contacto ===== */
+#screen10 {
+  --current-bg: var(--even-bg);
+  --current-fg: var(--even-fg);
+  --current-muted: color-mix(in srgb, var(--current-fg) 70%, transparent);
+}
 #screen10 .contacto {
   max-width: 1125px;
   max-height: 812px;
@@ -457,6 +588,19 @@ p {
   display: flex;
   flex-direction: column;
 }
+#screen10 .contacto .section-title {
+  font-size: clamp(28px, 4vw, 48px);
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+  margin: 24px 0 24px;
+  color: var(--current-fg);
+}
+/* Si usas .grid y .card aquí también, copia el patrón tal cual */
+#screen10 .contacto .grid { display: grid; grid-template-columns: repeat(3,1fr); gap:20px; height:100%; }
+#screen10 .contacto .card { border:1px solid var(--current-fg); border-radius:12px; padding:16px; display:flex; flex-direction:column; align-items:flex-start; gap:8px; background:transparent; color:var(--current-fg); }
+#screen10 .contacto .card h3 { margin:0 0 6px; font-weight:600; font-size:clamp(14px,1.6vw,18px); color:var(--current-fg); }
+#screen10 .contacto .card p  { margin:0; font-size:clamp(14px,1.4vw,16px); line-height:1.45; color:var(--current-muted); }
+
 
 
 /* =========================================
