@@ -101,3 +101,10 @@
   }
   .dot.active, .dot[aria-current="true"] { opacity: 1; }
 }
+@media (max-width: 1200px) {
+  .dots, .dots-acerca { display: flex; gap: 8px; justify-content: center; margin: 12px 0 0; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; opacity: .35; border: 0; }
+  .dot.active, .dot[aria-current="true"] { opacity: 1; }
+  html[data-theme="light"] .dots, html[data-theme="light"] .dots-acerca { color: #111; }
+  html[data-theme="dark"]  .dots, html[data-theme="dark"]  .dots-acerca { color: #fff; }
+}
