@@ -177,7 +177,6 @@ p {
 #screen2 .acerca-desktop .acerca-card {
   grid-column: 1 / -1;
   grid-row: 1 / -1;
-  border: 1px solid var(--current-fg);
   border-radius: 12px;
   padding: 24px;
 
@@ -248,7 +247,6 @@ p {
 }
 
 #screen3 .servicios .card {
-  border: 1px solid var(--current-fg);
   border-radius: 12px;
   padding: 16px;
 
@@ -310,7 +308,6 @@ p {
 }
 
 #screen4 .soft .card {
-  border: 1px solid var(--current-fg);
   border-radius: 12px;
   padding: 16px;
   display: flex;
@@ -369,7 +366,6 @@ p {
 }
 
 #screen5 .tecno .card {
-  border: 1px solid var(--current-fg);
   border-radius: 12px;
   padding: 16px;
   display: flex;
@@ -422,7 +418,6 @@ p {
   height: 100%;
 }
 #screen6 .tinto .card {
-  border: 1px solid var(--current-fg);
   border-radius: 12px;
   padding: 16px;
   display: flex;
@@ -473,7 +468,6 @@ p {
   height: 100%;
 }
 #screen7 .indus .card {
-  border: 1px solid var(--current-fg);
   border-radius: 12px;
   padding: 16px;
   display: flex;
@@ -519,7 +513,7 @@ p {
 }
 /* Si más adelante usas grid+cards aquí, reutiliza el patrón: */
 #screen8 .config .grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; height: 100%; }
-#screen8 .config .card { border: 1px solid var(--current-fg); border-radius: 12px; padding:16px; display:flex; flex-direction:column; align-items:flex-start; gap:8px; background:transparent; color:var(--current-fg); }
+#screen8 .config .card { border-radius: 12px; padding:16px; display:flex; flex-direction:column; align-items:flex-start; gap:8px; background:transparent; color:var(--current-fg); }
 #screen8 .config .card h3 { margin:0 0 6px; font-weight:600; font-size:clamp(14px,1.6vw,18px); color:var(--current-fg); }
 #screen8 .config .card p  { margin:0; font-size:clamp(14px,1.4vw,16px); line-height:1.45; color:var(--current-muted); }
 
@@ -551,7 +545,6 @@ p {
   height: 100%;
 }
 #screen9 .alcance .card {
-  border: 1px solid var(--current-fg);
   border-radius: 12px;
   padding: 16px;
   display: flex;
