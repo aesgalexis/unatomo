@@ -13,7 +13,7 @@ html, body { overscroll-behavior-y: contain; }
     display: flex;
     gap: 8px;
     justify-content: center;
-    margin: 12px 0 0;
+    margin: 20px 0 0; /* ↑ antes 12px */
     color: var(--dots-color, currentColor);
   }
   .dot {
@@ -40,7 +40,7 @@ html, body { overscroll-behavior-y: contain; }
     gap: 0;
     scroll-snap-type: x mandatory;
     scroll-padding-inline: 16px;
-    padding: 0 16px;
+    padding: 0 16px 18px; /* ↑ aire inferior */
     -ms-overflow-style: none; scrollbar-width: none;
   }
   #screen2 .acerca .acerca-mobile::-webkit-scrollbar { display: none; }
@@ -74,7 +74,7 @@ html, body { overscroll-behavior-y: contain; }
     -webkit-overflow-scrolling: touch;
     gap: 0;
     scroll-snap-type: x mandatory; scroll-padding-inline: 16px;
-    padding: 0 16px;
+    padding: 0 16px 18px; /* ↑ aire inferior */
     -ms-overflow-style: none; scrollbar-width: none;
   }
   #screen3 .servicios .grid::-webkit-scrollbar { display: none; }
@@ -103,7 +103,7 @@ html, body { overscroll-behavior-y: contain; }
     -webkit-overflow-scrolling: touch;
     gap: 0;
     scroll-snap-type: x mandatory; scroll-padding-inline: 16px;
-    padding: 0 16px;
+    padding: 0 16px 18px; /* ↑ aire inferior */
     -ms-overflow-style: none; scrollbar-width: none;
   }
   #screen4 .soft .grid::-webkit-scrollbar { display: none; }
@@ -132,7 +132,7 @@ html, body { overscroll-behavior-y: contain; }
     -webkit-overflow-scrolling: touch;
     gap: 0;
     scroll-snap-type: x mandatory; scroll-padding-inline: 16px;
-    padding: 0 16px;
+    padding: 0 16px 18px; /* ↑ aire inferior */
     -ms-overflow-style: none; scrollbar-width: none;
   }
   #screen5 .tecno .grid::-webkit-scrollbar { display: none; }
@@ -161,7 +161,7 @@ html, body { overscroll-behavior-y: contain; }
     -webkit-overflow-scrolling: touch;
     gap: 0;
     scroll-snap-type: x mandatory; scroll-padding-inline: 16px;
-    padding: 0 16px;
+    padding: 0 16px 18px; /* ↑ aire inferior */
     -ms-overflow-style: none; scrollbar-width: none;
   }
   #screen6 .tinto .grid::-webkit-scrollbar { display: none; }
@@ -190,7 +190,7 @@ html, body { overscroll-behavior-y: contain; }
     -webkit-overflow-scrolling: touch;
     gap: 0;
     scroll-snap-type: x mandatory; scroll-padding-inline: 16px;
-    padding: 0 16px;
+    padding: 0 16px 18px; /* ↑ aire inferior */
     -ms-overflow-style: none; scrollbar-width: none;
   }
   #screen7 .indus .grid::-webkit-scrollbar { display: none; }
@@ -219,7 +219,7 @@ html, body { overscroll-behavior-y: contain; }
     -webkit-overflow-scrolling: touch;
     gap: 0;
     scroll-snap-type: x mandatory; scroll-padding-inline: 16px;
-    padding: 0 16px;
+    padding: 0 16px 18px; /* ↑ aire inferior */
     -ms-overflow-style: none; scrollbar-width: none;
   }
   #screen8 .config .grid::-webkit-scrollbar { display: none; }
@@ -248,7 +248,7 @@ html, body { overscroll-behavior-y: contain; }
     -webkit-overflow-scrolling: touch;
     gap: 0;
     scroll-snap-type: x mandatory; scroll-padding-inline: 16px;
-    padding: 0 16px;
+    padding: 0 16px 18px; /* ↑ aire inferior */
     -ms-overflow-style: none; scrollbar-width: none;
   }
   #screen9 .alcance .grid::-webkit-scrollbar { display: none; }
@@ -277,7 +277,7 @@ html, body { overscroll-behavior-y: contain; }
     -webkit-overflow-scrolling: touch;
     gap: 0;
     scroll-snap-type: x mandatory; scroll-padding-inline: 16px;
-    padding: 0 16px;
+    padding: 0 16px 18px; /* ↑ aire inferior */
     -ms-overflow-style: none; scrollbar-width: none;
   }
   #screen10 .contacto .grid::-webkit-scrollbar { display: none; }
