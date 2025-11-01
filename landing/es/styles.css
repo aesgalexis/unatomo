@@ -645,6 +645,8 @@ p {
 
   background: transparent;
   color: currentColor;
+  background-clip: padding-box;  
+  transform: translateZ(0);  
 }
 .screen .grid .card h3 {
   margin: 0 0 6px;
