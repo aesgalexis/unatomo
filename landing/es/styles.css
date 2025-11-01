@@ -667,43 +667,44 @@ p {
 
 
 /* =========================================
-   FOOTER
+   PANTALLA 11 — Footer como .screen
    ========================================= */
-.site-footer {
-  /* Contraste suave respecto a la última .screen par/impar */
-  background: var(--even-bg);
-  color: var(--even-fg);
-  border-top: 1px solid color-mix(in srgb, currentColor 25%, transparent);
+#screen11 {
+  --current-bg: var(--bg);   /* impar → hereda base */
+  --current-fg: var(--fg);
+  --current-muted: color-mix(in srgb, var(--current-fg) 70%, transparent);
 }
 
-.site-footer .footer-inner {
+#screen11 .footer {
+  width: 100%;
+  /* el alto ya lo gestiona .screen (centra vertical) */
+}
+
+#screen11 .footer .footer-inner {
   max-width: 1125px;
   margin: 0 auto;
   padding: 28px 20px 40px;
   display: grid;
   gap: 16px;
+  color: var(--current-fg);
 }
 
-.footer-brand {
+#screen11 .footer .footer-brand {
   display: inline-flex;
   align-items: center;
   gap: 10px;
   font-weight: 700;
   letter-spacing: -0.2px;
 }
-.footer-logo {
-  width: 28px;
-  height: 28px;
-  opacity: .9;
-}
-.footer-title { font-size: 18px; }
+#screen11 .footer .footer-logo { width: 28px; height: 28px; opacity: .9; }
+#screen11 .footer .footer-title { font-size: 18px; }
 
-.footer-nav {
+#screen11 .footer .footer-nav {
   display: flex;
   flex-wrap: wrap;
   gap: 12px 16px;
 }
-.footer-nav a {
+#screen11 .footer .footer-nav a {
   color: currentColor;
   text-decoration: none;
   border: 1px solid color-mix(in srgb, currentColor 20%, transparent);
@@ -711,27 +712,27 @@ p {
   padding: 6px 10px;
   opacity: .9;
 }
-.footer-nav a:hover {
+#screen11 .footer .footer-nav a:hover {
   opacity: 1;
   border-color: color-mix(in srgb, currentColor 40%, transparent);
 }
 
-.footer-meta {
+#screen11 .footer .footer-meta {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 8px;
   opacity: .9;
 }
-.footer-link {
+#screen11 .footer .footer-link {
   color: currentColor;
   text-decoration: none;
   border-bottom: 1px dashed color-mix(in srgb, currentColor 35%, transparent);
 }
-.footer-link:hover { border-bottom-style: solid; }
-.dot-sep { opacity: .5; }
+#screen11 .footer .footer-link:hover { border-bottom-style: solid; }
+#screen11 .footer .dot-sep { opacity: .5; }
 
-.footer-legal {
+#screen11 .footer .footer-legal {
   display: flex;
   gap: 12px;
   align-items: center;
@@ -741,29 +742,22 @@ p {
   margin-top: 8px;
   opacity: .85;
 }
-.footer-legal small { font-size: 12px; }
+#screen11 .footer .footer-legal small { font-size: 12px; }
 
-.to-top {
+#screen11 .footer .to-top {
   color: currentColor;
   text-decoration: none;
   border: 1px solid color-mix(in srgb, currentColor 25%, transparent);
   border-radius: 8px;
   padding: 6px 10px;
 }
-.to-top:hover {
+#screen11 .footer .to-top:hover {
   border-color: color-mix(in srgb, currentColor 45%, transparent);
 }
 
-/* Modo claro/oscuro ya está cubierto con currentColor/vars.
-   Si prefieres el footer igual al fondo base en lugar de --even-bg,
-   cambia .site-footer { background: var(--bg); color: var(--fg); } */
-
-/* Responsive */
+/* Responsive (opcional) */
 @media (min-width: 860px) {
-  .site-footer .footer-inner {
-    grid-template-columns: 1fr;
-    /* Puedes convertirlo a 2–3 columnas si quieres, por ejemplo: 
-       grid-template-columns: 1fr auto; */
-  }
-  .footer-legal { margin-top: 4px; }
+  #screen11 .footer .footer-inner { grid-template-columns: 1fr; }
+  #screen11 .footer .footer-legal { margin-top: 4px; }
 }
+
