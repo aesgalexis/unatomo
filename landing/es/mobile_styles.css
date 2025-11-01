@@ -1,297 +1,157 @@
 /* =========================================
-   MOBILE (<=1200px) — mismo patrón para 2→10
+   0) VARIABLES DE TEMA / BASE
+   ========================================= */
+:root {
+  color-scheme: light dark;
+  --bg: #ffffff; --fg: #111111;
+  --even-bg: hsl(0 0% 85%); --even-fg: #111111;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0b0b0c; --fg:#e5e7eb; --even-bg:hsl(0 0% 15%); --even-fg:#e5e7eb; }
+}
+:root[data-theme="light"] { --bg:#fff; --fg:#111; --even-bg:hsl(0 0% 85%); --even-fg:#111; }
+:root[data-theme="dark"]  { --bg:#0b0b0c; --fg:#e5e7eb; --even-bg:hsl(0 0% 15%); --even-fg:#e5e7eb; }
+
+/* =========================================
+   1) RESETEO / BASE
+   ========================================= */
+html, body { height:100%; overscroll-behavior-y: contain; }
+body {
+  margin:0; background:var(--bg); color:var(--fg);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  text-align:center; overflow-y:auto;
+}
+body.snap { scroll-snap-type: y mandatory; scroll-behavior:smooth; }
+
+/* Pantalla base */
+.screen {
+  min-height: 100svh;
+  display:flex; flex-direction:column; justify-content:center; align-items:center;
+  scroll-snap-align:start; scroll-snap-stop:always;
+  --muted: color-mix(in srgb, currentColor 70%, transparent);
+  /* aliases para compatibilidad con reglas antiguas */
+  --current-fg: currentColor; --current-muted: var(--muted);
+}
+.screen > * { padding-inline:20px; }
+
+.screen:nth-of-type(odd)  { background:var(--bg);      color:var(--fg); }
+.screen:nth-of-type(even) { background:var(--even-bg); color:var(--even-fg); }
+
+/* Elementos comunes */
+img.logo { width:100%; max-width:180px; height:auto; margin-bottom:40px; opacity:.9; }
+h1 { font-size:clamp(40px,6vw,80px); margin:0; letter-spacing:-1px; }
+p  { font-size:clamp(18px,2vw,24px); margin-top:16px; opacity:.75; }
+
+/* Botón tema */
+#theme-toggle{
+  position:fixed; top:12px; left:50%; transform:translateX(-50%); z-index:1000;
+  padding:6px 14px; border:1px solid currentColor; background:transparent; color:currentColor;
+  border-radius:6px; font-size:16px; cursor:pointer; opacity:.9;
+}
+#theme-toggle:hover{ opacity:1; }
+
+/* Dots ocultos en desktop (en móvil los muestra mobile_styles.css) */
+.dots, .dots-acerca { display:none; }
+
+/* =========================================
+   2) CONTENEDOR DE SECCIÓN + TÍTULOS
+   ========================================= */
+.section {            /* .servicios, .soft, .tecno, .tinto, .indus, .config, .alcance, .contacto */
+  max-width:1125px; max-height:812px; width:100%;
+  margin:0 auto; display:flex; flex-direction:column;
+}
+.section-title {
+  font-size:clamp(28px,4vw,48px); line-height:1.1; letter-spacing:-0.5px;
+  margin:24px 0 24px; color:currentColor; text-align:center;
+}
+
+/* =========================================
+   3) GRIDS (desktop) + TARJETAS
+   ========================================= */
+@media (min-width:1201px){
+  .screen .grid{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:20px; height:100%; padding:0 24px; }
+}
+
+/* Tarjeta genérica */
+.screen .grid .card,
+.acerca-mobile .acerca-card { /* compat móvil acerca */
+  border:1px solid currentColor; border-radius:12px; padding:16px;
+  display:flex; flex-direction:column; align-items:flex-start; gap:8px;
+  background:transparent; color:currentColor;
+  outline:0; box-shadow:none; background-clip:padding-box; transform:translateZ(0);
+}
+.screen .grid .card h3,
+.acerca-mobile .acerca-card h3 { margin:0 0 6px; font-weight:600; font-size:clamp(14px,1.6vw,18px); color:currentColor; }
+.screen .grid .card p,
+.acerca-mobile .acerca-card p  { margin:0; font-size:clamp(14px,1.4vw,16px); line-height:1.45; color:var(--muted); }
+
+/* =========================================
+   4) EXCEPCIONES DE PANTALLA
    ========================================= */
 
-/* Base móvil */
-html, body { overscroll-behavior-y: contain; }
-.screen { min-height: 100svh; }
-@supports not (height: 100svh) { .screen { min-height: 100vh; } }
-
-/* Dots unificados */
-@media (max-width: 1200px) {
-  .dots, .dots-acerca {
-    display: flex;
-    gap: 8px;
-    justify-content: center;
-    margin: 20px 0 0; /* ↑ antes 12px */
-    color: var(--dots-color, currentColor);
-  }
-  .dot {
-    width: 8px; height: 8px; border-radius: 50%;
-    background: currentColor; opacity: .35; border: 0;
-  }
-  .dot.active, .dot[aria-current="true"] { opacity: 1; }
+/* SCREEN 2 — Acerca (desktop: una sola tarjeta a toda área) */
+#screen2 .acerca .section-title { text-align:center; }
+@media (min-width:601px){
+  #screen2 .acerca .acerca-desktop{ display:grid; grid-template-columns:repeat(3,1fr); grid-auto-rows:1fr; gap:20px; height:100%; }
+  #screen2 .acerca .acerca-mobile, #screen2 .dots-acerca{ display:none !important; }
+  #screen2 .acerca-desktop .acerca-card{ grid-column:1 / -1; grid-row:1 / -1; padding:24px; text-align:left; }
 }
 
-/* ============ SCREEN 2 — Acerca (móvil) ============ */
-@media (max-width: 1200px) {
-  /* Cambiamos a variante móvil */
-  #screen2 .acerca .acerca-desktop { display: none !important; }
-  #screen2 .acerca .acerca-mobile  { display: flex !important; }
+/* SCREEN 3 — Servicios */
+#screen3 .servicios{}
 
-  #screen2 .acerca { padding-left: 0; padding-right: 0; }
-  #screen2 .acerca .section-title { padding: 0 16px; }
+/* SCREEN 4 — Soft (Software) */
+#screen4 .soft{}
 
-  /* Carrusel */
-  #screen2 .acerca .acerca-mobile {
-    display: flex !important;
-    overflow-x: auto; overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    gap: 0;
-    scroll-snap-type: x mandatory;
-    scroll-padding-inline: 16px;
-    padding: 0 16px 18px; /* ↑ aire inferior */
-    -ms-overflow-style: none; scrollbar-width: none;
-  }
-  #screen2 .acerca .acerca-mobile::-webkit-scrollbar { display: none; }
+/* SCREEN 5 — Hoteles */
+#screen5 .tecno{}
 
-  /* Tarjeta = 100% - 32px (una por vista) */
-  #screen2 .acerca .acerca-mobile .acerca-card {
-    flex: 0 0 auto;
-    width: calc(100% - 32px);
-    max-width: calc(100% - 32px);
-    margin: 0 16px;
-    box-sizing: border-box;
-    scroll-snap-align: center; scroll-snap-stop: always;
+/* SCREEN 6 — Tintorerías */
+#screen6 .tinto{}
 
-    height: auto; max-height: none; overflow: visible; /* sin cortes */
-  }
+/* SCREEN 7 — Lavanderías Industriales */
+#screen7 .indus{}
 
-  /* Texto sin clamps */
-  #screen2 .acerca .acerca-mobile .acerca-card p {
-    overflow: visible; display: block;
-    -webkit-line-clamp: initial; -webkit-box-orient: initial;
-  }
+/* SCREEN 8 — Configurador (si usas grid/card, hereda lo genérico) */
+#screen8 .config{}
+
+/* SCREEN 9 — Alcance y Colaboradores */
+#screen9 .alcance{}
+
+/* SCREEN 10 — Contacto (cards opcionales) */
+#screen10 .contacto{}
+
+/* SCREEN 11 — Footer (como screen) */
+#screen11 .footer .footer-inner{
+  max-width:1125px; margin:0 auto; padding:28px 20px 40px; display:grid; gap:16px; color:currentColor;
 }
-
-/* ============ SCREEN 3 — Servicios (móvil) ============ */
-@media (max-width: 1200px) {
-  #screen3 .servicios { padding-left: 0; padding-right: 0; }
-
-  #screen3 .servicios .grid {
-    display: flex !important;
-    overflow-x: auto; overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    gap: 0;
-    scroll-snap-type: x mandatory; scroll-padding-inline: 16px;
-    padding: 0 16px 18px; /* ↑ aire inferior */
-    -ms-overflow-style: none; scrollbar-width: none;
-  }
-  #screen3 .servicios .grid::-webkit-scrollbar { display: none; }
-
-  #screen3 .servicios .grid .card {
-    flex: 0 0 auto;
-    width: calc(100% - 32px); max-width: calc(100% - 32px);
-    margin: 0 16px; box-sizing: border-box;
-    scroll-snap-align: center; scroll-snap-stop: always;
-
-    height: auto; max-height: none; overflow: visible;
-  }
-  #screen3 .servicios .grid .card p {
-    overflow: visible; display: block;
-    -webkit-line-clamp: initial; -webkit-box-orient: initial;
-  }
+#screen11 .footer .footer-brand{ display:inline-flex; align-items:center; gap:10px; font-weight:700; letter-spacing:-0.2px; }
+#screen11 .footer .footer-logo{ width:28px; height:28px; opacity:.9; }
+#screen11 .footer .footer-title{ font-size:18px; }
+#screen11 .footer .footer-nav{ display:flex; flex-wrap:wrap; gap:12px 16px; }
+#screen11 .footer .footer-nav a{
+  color:currentColor; text-decoration:none;
+  border:1px solid color-mix(in srgb, currentColor 20%, transparent);
+  border-radius:999px; padding:6px 10px; opacity:.9;
 }
-
-/* ============ SCREEN 4 — Software (móvil) ============ */
-@media (max-width: 1200px) {
-  #screen4 .soft { padding-left: 0; padding-right: 0; }
-
-  #screen4 .soft .grid {
-    display: flex !important;
-    overflow-x: auto; overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    gap: 0;
-    scroll-snap-type: x mandatory; scroll-padding-inline: 16px;
-    padding: 0 16px 18px; /* ↑ aire inferior */
-    -ms-overflow-style: none; scrollbar-width: none;
-  }
-  #screen4 .soft .grid::-webkit-scrollbar { display: none; }
-
-  #screen4 .soft .grid .card {
-    flex: 0 0 auto;
-    width: calc(100% - 32px); max-width: calc(100% - 32px);
-    margin: 0 16px; box-sizing: border-box;
-    scroll-snap-align: center; scroll-snap-stop: always;
-
-    height: auto; max-height: none; overflow: visible;
-  }
-  #screen4 .soft .grid .card p {
-    overflow: visible; display: block;
-    -webkit-line-clamp: initial; -webkit-box-orient: initial;
-  }
+#screen11 .footer .footer-nav a:hover{ opacity:1; border-color:color-mix(in srgb, currentColor 40%, transparent); }
+#screen11 .footer .footer-meta{ display:flex; align-items:center; flex-wrap:wrap; gap:8px; opacity:.9; }
+#screen11 .footer .footer-link{ color:currentColor; text-decoration:none; border-bottom:1px dashed color-mix(in srgb, currentColor 35%, transparent); }
+#screen11 .footer .footer-link:hover{ border-bottom-style:solid; }
+#screen11 .footer .dot-sep{ opacity:.5; }
+#screen11 .footer .footer-legal{
+  display:flex; gap:12px; align-items:center; justify-content:space-between;
+  border-top:1px dashed color-mix(in srgb, currentColor 20%, transparent);
+  padding-top:12px; margin-top:8px; opacity:.85;
 }
-
-/* ============ SCREEN 5 — Hoteles (móvil) ============ */
-@media (max-width: 1200px) {
-  #screen5 .tecno { padding-left: 0; padding-right: 0; }
-
-  #screen5 .tecno .grid {
-    display: flex !important;
-    overflow-x: auto; overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    gap: 0;
-    scroll-snap-type: x mandatory; scroll-padding-inline: 16px;
-    padding: 0 16px 18px; /* ↑ aire inferior */
-    -ms-overflow-style: none; scrollbar-width: none;
-  }
-  #screen5 .tecno .grid::-webkit-scrollbar { display: none; }
-
-  #screen5 .tecno .grid .card {
-    flex: 0 0 auto;
-    width: calc(100% - 32px); max-width: calc(100% - 32px);
-    margin: 0 16px; box-sizing: border-box;
-    scroll-snap-align: center; scroll-snap-stop: always;
-
-    height: auto; max-height: none; overflow: visible;
-  }
-  #screen5 .tecno .grid .card p {
-    overflow: visible; display: block;
-    -webkit-line-clamp: initial; -webkit-box-orient: initial;
-  }
+#screen11 .footer .footer-legal small{ font-size:12px; }
+#screen11 .footer .to-top{
+  color:currentColor; text-decoration:none;
+  border:1px solid color-mix(in srgb, currentColor 25%, transparent);
+  border-radius:8px; padding:6px 10px;
 }
-
-/* ============ SCREEN 6 — Tintorerías (móvil) ============ */
-@media (max-width: 1200px) {
-  #screen6 .tinto { padding-left: 0; padding-right: 0; }
-
-  #screen6 .tinto .grid {
-    display: flex !important;
-    overflow-x: auto; overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    gap: 0;
-    scroll-snap-type: x mandatory; scroll-padding-inline: 16px;
-    padding: 0 16px 18px; /* ↑ aire inferior */
-    -ms-overflow-style: none; scrollbar-width: none;
-  }
-  #screen6 .tinto .grid::-webkit-scrollbar { display: none; }
-
-  #screen6 .tinto .grid .card {
-    flex: 0 0 auto;
-    width: calc(100% - 32px); max-width: calc(100% - 32px);
-    margin: 0 16px; box-sizing: border-box;
-    scroll-snap-align: center; scroll-snap-stop: always;
-
-    height: auto; max-height: none; overflow: visible;
-  }
-  #screen6 .tinto .grid .card p {
-    overflow: visible; display: block;
-    -webkit-line-clamp: initial; -webkit-box-orient: initial;
-  }
-}
-
-/* ============ SCREEN 7 — Lav. Industriales (móvil) ============ */
-@media (max-width: 1200px) {
-  #screen7 .indus { padding-left: 0; padding-right: 0; }
-
-  #screen7 .indus .grid {
-    display: flex !important;
-    overflow-x: auto; overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    gap: 0;
-    scroll-snap-type: x mandatory; scroll-padding-inline: 16px;
-    padding: 0 16px 18px; /* ↑ aire inferior */
-    -ms-overflow-style: none; scrollbar-width: none;
-  }
-  #screen7 .indus .grid::-webkit-scrollbar { display: none; }
-
-  #screen7 .indus .grid .card {
-    flex: 0 0 auto;
-    width: calc(100% - 32px); max-width: calc(100% - 32px);
-    margin: 0 16px; box-sizing: border-box;
-    scroll-snap-align: center; scroll-snap-stop: always;
-
-    height: auto; max-height: none; overflow: visible;
-  }
-  #screen7 .indus .grid .card p {
-    overflow: visible; display: block;
-    -webkit-line-clamp: initial; -webkit-box-orient: initial;
-  }
-}
-
-/* ============ SCREEN 8 — Configurador (móvil) ============ */
-@media (max-width: 1200px) {
-  #screen8 .config { padding-left: 0; padding-right: 0; }
-
-  #screen8 .config .grid {
-    display: flex !important;
-    overflow-x: auto; overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    gap: 0;
-    scroll-snap-type: x mandatory; scroll-padding-inline: 16px;
-    padding: 0 16px 18px; /* ↑ aire inferior */
-    -ms-overflow-style: none; scrollbar-width: none;
-  }
-  #screen8 .config .grid::-webkit-scrollbar { display: none; }
-
-  #screen8 .config .grid .card {
-    flex: 0 0 auto;
-    width: calc(100% - 32px); max-width: calc(100% - 32px);
-    margin: 0 16px; box-sizing: border-box;
-    scroll-snap-align: center; scroll-snap-stop: always;
-
-    height: auto; max-height: none; overflow: visible;
-  }
-  #screen8 .config .grid .card p {
-    overflow: visible; display: block;
-    -webkit-line-clamp: initial; -webkit-box-orient: initial;
-  }
-}
-
-/* ============ SCREEN 9 — Alcance y Colab. (móvil) ============ */
-@media (max-width: 1200px) {
-  #screen9 .alcance { padding-left: 0; padding-right: 0; }
-
-  #screen9 .alcance .grid {
-    display: flex !important;
-    overflow-x: auto; overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    gap: 0;
-    scroll-snap-type: x mandatory; scroll-padding-inline: 16px;
-    padding: 0 16px 18px; /* ↑ aire inferior */
-    -ms-overflow-style: none; scrollbar-width: none;
-  }
-  #screen9 .alcance .grid::-webkit-scrollbar { display: none; }
-
-  #screen9 .alcance .grid .card {
-    flex: 0 0 auto;
-    width: calc(100% - 32px); max-width: calc(100% - 32px);
-    margin: 0 16px; box-sizing: border-box;
-    scroll-snap-align: center; scroll-snap-stop: always;
-
-    height: auto; max-height: none; overflow: visible;
-  }
-  #screen9 .alcance .grid .card p {
-    overflow: visible; display: block;
-    -webkit-line-clamp: initial; -webkit-box-orient: initial;
-  }
-}
-
-/* ============ SCREEN 10 — Contacto (móvil) ============ */
-@media (max-width: 1200px) {
-  #screen10 .contacto { padding-left: 0; padding-right: 0; }
-
-  #screen10 .contacto .grid {
-    display: flex !important;
-    overflow-x: auto; overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    gap: 0;
-    scroll-snap-type: x mandatory; scroll-padding-inline: 16px;
-    padding: 0 16px 18px; /* ↑ aire inferior */
-    -ms-overflow-style: none; scrollbar-width: none;
-  }
-  #screen10 .contacto .grid::-webkit-scrollbar { display: none; }
-
-  #screen10 .contacto .grid .card {
-    flex: 0 0 auto;
-    width: calc(100% - 32px); max-width: calc(100% - 32px);
-    margin: 0 16px; box-sizing: border-box;
-    scroll-snap-align: center; scroll-snap-stop: always;
-
-    height: auto; max-height: none; overflow: visible;
-  }
-  #screen10 .contacto .grid .card p {
-    overflow: visible; display: block;
-    -webkit-line-clamp: initial; -webkit-box-orient: initial;
-  }
+#screen11 .footer .to-top:hover{ border-color:color-mix(in srgb, currentColor 45%, transparent); }
+@media (min-width:860px){
+  #screen11 .footer .footer-inner{ grid-template-columns:1fr; }
+  #screen11 .footer .footer-legal{ margin-top:4px; }
 }
