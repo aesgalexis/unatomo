@@ -658,3 +658,112 @@ p {
   line-height: 1.45;
   color: var(--muted);
 }
+
+
+
+
+
+
+
+
+/* =========================================
+   FOOTER
+   ========================================= */
+.site-footer {
+  /* Contraste suave respecto a la última .screen par/impar */
+  background: var(--even-bg);
+  color: var(--even-fg);
+  border-top: 1px solid color-mix(in srgb, currentColor 25%, transparent);
+}
+
+.site-footer .footer-inner {
+  max-width: 1125px;
+  margin: 0 auto;
+  padding: 28px 20px 40px;
+  display: grid;
+  gap: 16px;
+}
+
+.footer-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+}
+.footer-logo {
+  width: 28px;
+  height: 28px;
+  opacity: .9;
+}
+.footer-title { font-size: 18px; }
+
+.footer-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+}
+.footer-nav a {
+  color: currentColor;
+  text-decoration: none;
+  border: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+  border-radius: 999px;
+  padding: 6px 10px;
+  opacity: .9;
+}
+.footer-nav a:hover {
+  opacity: 1;
+  border-color: color-mix(in srgb, currentColor 40%, transparent);
+}
+
+.footer-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  opacity: .9;
+}
+.footer-link {
+  color: currentColor;
+  text-decoration: none;
+  border-bottom: 1px dashed color-mix(in srgb, currentColor 35%, transparent);
+}
+.footer-link:hover { border-bottom-style: solid; }
+.dot-sep { opacity: .5; }
+
+.footer-legal {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px dashed color-mix(in srgb, currentColor 20%, transparent);
+  padding-top: 12px;
+  margin-top: 8px;
+  opacity: .85;
+}
+.footer-legal small { font-size: 12px; }
+
+.to-top {
+  color: currentColor;
+  text-decoration: none;
+  border: 1px solid color-mix(in srgb, currentColor 25%, transparent);
+  border-radius: 8px;
+  padding: 6px 10px;
+}
+.to-top:hover {
+  border-color: color-mix(in srgb, currentColor 45%, transparent);
+}
+
+/* Modo claro/oscuro ya está cubierto con currentColor/vars.
+   Si prefieres el footer igual al fondo base en lugar de --even-bg,
+   cambia .site-footer { background: var(--bg); color: var(--fg); } */
+
+/* Responsive */
+@media (min-width: 860px) {
+  .site-footer .footer-inner {
+    grid-template-columns: 1fr;
+    /* Puedes convertirlo a 2–3 columnas si quieres, por ejemplo: 
+       grid-template-columns: 1fr auto; */
+  }
+  .footer-legal { margin-top: 4px; }
+}
