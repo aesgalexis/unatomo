@@ -360,6 +360,41 @@
     </form>
   </section>
 </div>
+<footer id="footer" class="site-footer" aria-label="Pie de página">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <img src="/static/img/logo-unatomo-v1.5.svg" alt="" class="footer-logo" loading="lazy">
+      <span class="footer-title">unatomo</span>
+    </div>
+
+    <nav class="footer-nav" aria-label="Navegación secundaria">
+      <a href="#screen2">Acerca</a>
+      <a href="#screen3">Servicios</a>
+      <a href="#screen4">Software</a>
+      <a href="#screen5">Hoteles</a>
+      <a href="#screen6">Tintorerías</a>
+      <a href="#screen7">Industriales</a>
+      <a href="#screen9">Alcance</a>
+      <a href="#screen10">Contacto</a>
+    </nav>
+
+    <div class="footer-meta">
+      <a href="mailto:hola@unatomo.com" class="footer-link">hola@unatomo.com</a>
+      <span class="dot-sep" aria-hidden="true">•</span>
+      <a href="tel:+34999999999" class="footer-link">+34 999 999 999</a>
+    </div>
+
+    <div class="footer-legal">
+      <small>© <span id="year"></span> unatomo. Todos los derechos reservados.</small>
+      <a href="#screen1" class="to-top" aria-label="Volver arriba">↑ Arriba</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Año dinámico (opcional)
+  (function(){var y=document.getElementById('year'); if(y) y.textContent=new Date().getFullYear();})();
+</script>
 
 
   <!-- Scripts (orden importante) -->
