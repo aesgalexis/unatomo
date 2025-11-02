@@ -205,10 +205,12 @@ function clearAllRows() {
   updateTotals();
 }
 
+// ====== Estimador por habitaciones (aplicación) ======
 function applyEstimator() {
   const s = parseNum(document.getElementById('est-simples')?.value);
   const d = parseNum(document.getElementById('est-dobles')?.value);
   const u = parseNum(document.getElementById('est-suites')?.value);
+  const cubiertos = parseNum(document.getElementById('est-cubiertos')?.value);
   const f = Math.max(0, parseNum(document.getElementById('est-factor')?.value) || 1);
 
   const incPiscina  = !!document.getElementById('est-incluir-piscina')?.checked;
@@ -227,6 +229,7 @@ function applyEstimator() {
     });
   }
 
+  // Habitaciones
   addForRooms(s, ROOM_MATRIX.simple);
   addForRooms(d, ROOM_MATRIX.doble);
 
@@ -234,6 +237,14 @@ function applyEstimator() {
   if (incPiscina)  suiteDef.toalla_piscina = (suiteDef.toalla_piscina || 0) + 2;
   if (incAlbornoz) suiteDef.albornoz       = (suiteDef.albornoz || 0) + 2;
   addForRooms(u, suiteDef);
+
+  // ===== Mantelería por "Cubiertos" =====
+  // 1 servilleta por cubierto; 1 mantel cada 4 cubiertos (ceil), todo * factor
+  if (cubiertos > 0) {
+    totalsByKey.servilleta += cubiertos * f;
+    const mantelesEstimados = Math.ceil(cubiertos / 4);
+    totalsByKey.mantel += mantelesEstimados * f;
+  }
 
   // Aplicar a la UI
   Object.entries(totalsByKey).forEach(([key, units]) => setUnitsForKey(key, units));
