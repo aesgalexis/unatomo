@@ -33,7 +33,7 @@ const CATEGORIES = {
 // ====== Estimador por habitaciones (matriz de consumo) ======
 const ROOM_MATRIX = {
   simple: {
-    sabanas_s: 2,       // encimera + bajera
+    sabanas_s: 2,
     fundas_std: 1,
     nordico_s: 1,
     toalla_manos: 1,
@@ -50,7 +50,7 @@ const ROOM_MATRIX = {
   },
   suite: {
     sabanas_l: 2,
-    fundas_std: 4,      // suites suelen tener 4 almohadas
+    fundas_std: 4,
     nordico_l: 1,
     toalla_manos: 2,
     toalla_bano: 2,
@@ -85,14 +85,20 @@ function initRows() {
     // Guardamos referencias
     state.rows[key] = { row, units, kg, ppu };
 
+    // Placeholders grises (no valores reales)
+    if (units) {
+      if (!units.placeholder) units.placeholder = '0';
+      units.value = '';
+    }
+    if (kg) {
+      if (!kg.placeholder) kg.placeholder = '0.00';
+      kg.value = '';
+    }
+
     // Listeners
     if (units) units.addEventListener('input', () => onUnitsChange(key));
     if (kg)    kg.addEventListener('input',    () => onKgChange(key));
     if (ppu)   ppu.addEventListener('input',   () => onPpuChange(key));
-
-    // Valores iniciales coherentes
-    if (units && !units.value) units.value = '0';
-    if (kg && !kg.value)       kg.value    = '0.00';
   });
 
   updateTotals();
@@ -104,7 +110,11 @@ function onUnitsChange(key) {
   const w = parseNum(ppu?.value) || state.weights[key] || 0; // kg/ud
   const u = parseNum(units?.value);
   const k = w * u;
-  if (kg) kg.value = k ? k.toFixed(2) : '0.00';
+
+  if (kg) {
+    if (u > 0) kg.value = k.toFixed(2);
+    else kg.value = ''; // vuelve al placeholder 0.00
+  }
   updateTotals();
 }
 
@@ -113,7 +123,11 @@ function onKgChange(key) {
   const w = parseNum(ppu?.value) || state.weights[key] || 0;
   const k = parseNum(kg?.value);
   const u = w ? (k / w) : 0;
-  if (units) units.value = u ? Math.round(u) : '0';
+
+  if (units) {
+    if (k > 0 && w > 0) units.value = Math.round(u);
+    else units.value = ''; // vuelve al placeholder 0
+  }
   updateTotals();
 }
 
@@ -163,15 +177,27 @@ function updateTotals() {
 function setUnitsForKey(key, units) {
   const row = state.rows[key];
   if (!row) return;
-  if (row.units) row.units.value = units > 0 ? Math.round(units) : '0';
+  if (row.units) {
+    if (units > 0) row.units.value = Math.round(units);
+    else row.units.value = ''; // placeholder 0
+  }
   onUnitsChange(key);
 }
 
 function clearAllRows() {
+  // Tabla principal
   Object.values(state.rows).forEach(({ units, kg }) => {
-    if (units) units.value = '0';
-    if (kg)    kg.value    = '0.00';
+    if (units) units.value = '';
+    if (kg)    kg.value    = '';
   });
+
+  // Estimador: limpiar campos y resetear factores a 1
+  const idsCounts = ['est-simples','est-dobles','est-suites','est-cubiertos'];
+  idsCounts.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+
+  const idsFactors = ['est-factor-s','est-factor-d','est-factor-u','est-factor-cub'];
+  idsFactors.forEach(id => { const el = document.getElementById(id); if (el) el.value = '1'; });
+
   updateTotals();
 }
 
@@ -199,9 +225,7 @@ function applyEstimator() {
   const addForRooms = (count, roomDef, factor) => {
     if (count <= 0 || factor <= 0) return;
     Object.entries(roomDef).forEach(([key, perRoom]) => {
-      if (totalsByKey[key] !== undefined) {
-        totalsByKey[key] += perRoom * count * factor;
-      }
+      if (totalsByKey[key] !== undefined) totalsByKey[key] += perRoom * count * factor;
     });
   };
 
