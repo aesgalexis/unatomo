@@ -158,6 +158,20 @@ details.cfg-estimator > summary::-webkit-details-marker { display: none; }
 .cfg-input::placeholder { color: #bdbdbd; }
 .cfg-input:focus::placeholder { color: transparent; }
 
+/* Botón "Añadir artículo" visible */
+#otros-add.btn-ghost {
+  color: #000 !important;
+  background: #fff !important;
+  border-color: #c8c8c8 !important;
+}
+#otros-add.btn-ghost:hover { background: #f6f6f6 !important; }
+
+/* Estado inválido para inputs (borde rojo) */
+.cfg-input.is-invalid {
+  border-color: #d14343 !important;
+  box-shadow: 0 0 0 2px rgba(209,67,67,.12) !important;
+}
+
 /* Responsive estimador */
 @media (max-width: 1100px) {
   .est-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
