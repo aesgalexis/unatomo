@@ -153,6 +153,8 @@ details.cfg-estimator > summary::-webkit-details-marker { display: none; }
 #est-clear.btn-ghost:active { background: #ededed !important; }
 #est-clear.btn-ghost:focus  { outline: none; box-shadow: 0 0 0 2px rgba(0,0,0,.12); }
 
+.cfg-input::placeholder { color: #bdbdbd; }
+.cfg-input:focus::placeholder { color: transparent; }
 
 /* Responsive estimador */
 @media (max-width: 1100px) {
