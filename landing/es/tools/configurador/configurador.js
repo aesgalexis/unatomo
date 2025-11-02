@@ -61,7 +61,8 @@ const ROOM_MATRIX = {
 // ====== Estado ======
 const state = {
   weights: { ...DEFAULT_WEIGHTS },
-  rows: {}
+  rows: {},
+  customSeq: 0
 };
 
 // ====== Utils ======
