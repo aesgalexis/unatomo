@@ -137,10 +137,12 @@ details.cfg-estimator > summary::-webkit-details-marker { display: none; }
 #est-apply.btn-primary:focus { outline: none; box-shadow: 0 0 0 2px rgba(0,0,0,.12); }
 
 /* Estimador: que los textos usen la misma fuente que la tabla */
-.est-grid .est-field,
-.est-grid .est-field > span,
-.est-grid .est-subfield small {
-  font-family: inherit;   /* misma familia tipográfica que el resto */
+.est-grid .est-field > span {
+  font-family: inherit;  /* misma fuente que el sitio */
+  font-weight: 600;
+  font-size: 14px;
+  opacity: .8;
+  line-height: 1.2;
 }
 /* Botón "Limpiar todo" visible sobre fondo claro */
 #est-clear.btn-ghost {
