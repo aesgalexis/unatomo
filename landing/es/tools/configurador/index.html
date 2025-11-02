@@ -6,11 +6,11 @@
   <title>Configurador de Lavandería · unatomo</title>
   <meta name="robots" content="noindex, nofollow" />
 
-  <!-- Estilos del sitio (rutas absolutas según tu estructura) -->
-  <link rel="stylesheet" href="/landing/es/styles.css">
-  <link rel="stylesheet" href="/landing/es/contact.css">
-  <!-- Hoja propia del configurador en esta misma carpeta -->
-  <link rel="stylesheet" href="/landing/es/tools/configurador/configurador.css">
+  <!-- Respeta estilos del sitio -->
+  <link rel="stylesheet" href="styles.css"><!-- ajusta la ruta si tu sitio la tiene en otra carpeta -->
+  <link rel="stylesheet" href="contact.css"><!-- idem -->
+  <!-- Hoja propia -->
+  <link rel="stylesheet" href="configurador.css">
 </head>
 <body>
   <!-- TOP BAR (55px fija, translúcida) -->
@@ -160,12 +160,8 @@
         <!-- TOTALES -->
         <div class="cfg-totals" aria-live="polite">
           <div class="sum">Total</div>
-          <label>Unidades (uds)
-            <input class="cfg-input" id="total-units" type="number" readonly aria-label="Total unidades" />
-          </label>
-          <label>Kilos (kg)
-            <input class="cfg-input" id="total-kg" type="number" readonly aria-label="Total kilos" />
-          </label>
+          <div><input class="cfg-input" id="total-units" type="number" readonly aria-label="Total unidades" /></div>
+          <div><input class="cfg-input" id="total-kg" type="number" readonly aria-label="Total kilos" /></div>
         </div>
 
         <!-- Ajustes de pesos -->
@@ -182,6 +178,6 @@
     </div>
   </main>
 
-  <script src="/landing/es/tools/configurador/configurador.js"></script>
+  <script src="configurador.js"></script>
 </body>
 </html>
