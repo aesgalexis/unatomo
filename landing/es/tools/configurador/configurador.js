@@ -23,6 +23,13 @@ const DEFAULT_WEIGHTS = {
   servilleta: 0.05
 };
 
+// Categorías para el breakdown porcentual (solo kg)
+const CATEGORIES = {
+  cama: ['sabanas_s','sabanas_m','sabanas_l','nordico_s','nordico_m','nordico_l','fundas_std'],
+  rizo: ['toalla_alfombrin','toalla_manos','toalla_bano','toalla_piscina','albornoz'],
+  mant: ['mantel','servilleta']
+};
+
 const state = {
   weights: { ...DEFAULT_WEIGHTS },
   rows: {}
@@ -94,8 +101,27 @@ function updateTotals() {
   });
   const tU = document.getElementById('total-units');
   const tK = document.getElementById('total-kg');
-  tU.value = totalUnits ? Math.round(totalUnits) : '';
-  tK.value = totalKg ? totalKg.toFixed(2) : '';
+  if (tU) tU.value = totalUnits ? Math.round(totalUnits) : '';
+  if (tK) tK.value = totalKg ? totalKg.toFixed(2) : '';
+
+  // ===== Breakdown porcentual por categoría (solo kg) =====
+  // Suma de kg por categoría
+  const sumKg = (keys) => {
+    let k = 0;
+    keys.forEach(key => { k += parseNum(state.rows[key]?.kg?.value); });
+    return k;
+  };
+
+  const kgCama = sumKg(CATEGORIES.cama);
+  const kgRizo = sumKg(CATEGORIES.rizo);
+  const kgMant = sumKg(CATEGORIES.mant);
+
+  const pct = (part, total) => (total > 0 ? Math.round((part / total) * 100) : 0) + '%';
+  const setText = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
+
+  setText('pct-cama-kg', pct(kgCama, totalKg));
+  setText('pct-rizo-kg', pct(kgRizo, totalKg));
+  setText('pct-mant-kg', pct(kgMant, totalKg));
 }
 
 // Panel de ajuste de pesos (muestra pares clave→input)
