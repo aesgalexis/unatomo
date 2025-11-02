@@ -1,187 +1,85 @@
-<!doctype html>
-<html lang="es" data-theme="light">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Configurador de Lavandería · unatomo</title>
-  <meta name="robots" content="noindex, nofollow" />
+:root {
+  --cfg-maxw: 1125px; /* igual que el resto del sitio */
+}
 
-  <!-- Respeta estilos del sitio -->
-  <link rel="stylesheet" href="styles.css"><!-- ajusta la ruta si tu sitio la tiene en otra carpeta -->
-  <link rel="stylesheet" href="contact.css"><!-- idem -->
-  <!-- Hoja propia -->
-  <link rel="stylesheet" href="configurador.css">
-</head>
-<body>
-  <!-- TOP BAR (55px fija, translúcida) -->
-  <header class="cfg-topbar" role="banner">
-    <div class="inner">
-      <a class="cfg-brand" href="/" aria-label="Inicio unatomo">
-        <img class="cfg-logo" src="/static/img/logo-unatomo-v1.5.svg" alt="unatomo" />
-        <span class="cfg-title">Configurador de Lavandería</span>
-      </a>
-    </div>
-  </header>
+/* ====== Top bar fija (55px) ====== */
+.cfg-topbar {
+  position: fixed; inset: 0 0 auto 0; height: 55px;
+  display: flex; align-items: center; gap: 14px;
+  background: color-mix(in srgb, #fff 80%, transparent);
+  -webkit-backdrop-filter: saturate(140%) blur(6px);
+  backdrop-filter: saturate(140%) blur(6px);
+  border-bottom: 1px solid color-mix(in srgb, #111 10%, transparent);
+  z-index: 1000;
+}
+.cfg-topbar .inner {
+  width: 100%; max-width: var(--cfg-maxw); margin: 0 auto;
+  padding: 0 20px; display: flex; align-items: center; gap: 12px;
+  justify-content: flex-start;
+}
+.cfg-brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; }
+.cfg-logo { width: 32px; height: 32px; opacity: .9; }
+.cfg-title { font-size: 16px; font-weight: 600; letter-spacing: .2px; }
 
-  <main class="cfg-page" id="main" role="main">
-    <div class="cfg-container">
-      <div class="cfg-header">
-        <h1>¿Qué quieres lavar?</h1>
-        <p class="cfg-muted">Introduce <strong>kg</strong> o <strong>unidades</strong>; calculamos la otra cifra al vuelo. Puedes ajustar pesos por pieza.</p>
-      </div>
+/* ====== Layout principal ====== */
+body { background: #fff; }
+.cfg-page { padding-top: 72px; padding-bottom: 48px; }
+.cfg-container { width: 100%; max-width: var(--cfg-maxw); margin: 0 auto; padding: 0 20px; text-align: left; }
 
-      <section class="cfg-card" aria-label="Configurador de piezas y kilos">
-        <!-- Cabecera de columnas -->
-        <div class="cfg-grid header" role="row">
-          <div>Artículo</div>
-          <div class="col-un">Unidades</div>
-          <div>Kilos</div>
-          <div>Peso/ud (kg)</div>
-        </div>
+/* Encabezado de sección */
+.cfg-header { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin: 8px 0 18px; }
+.cfg-header h1 { font-size: clamp(26px, 4vw, 36px); margin: 0; letter-spacing: -.3px; }
+.cfg-muted { color: color-mix(in srgb, currentColor 60%, transparent); font-size: 14px; }
 
-        <!-- ======= Sábanas (3 tamaños) ======= -->
-        <div class="cfg-family" id="fam-sabanas">
-          <div class="fam-title">Sábanas</div>
+/* Tarjeta contenedora */
+.cfg-card {
+  border: 1px solid color-mix(in srgb, currentColor 18%, transparent);
+  border-radius: 12px; padding: 16px; background: #fff;
+  box-shadow: 0 1px 0 color-mix(in srgb, #000 6%, transparent);
+}
 
-          <div class="cfg-grid" data-key="sabanas_s" role="row">
-            <div class="item-name">Sábana · <span class="item-sub">Individual</span></div>
-            <input class="cfg-input col-un" type="number" min="0" step="1" inputmode="numeric" placeholder="0" data-field="units" aria-label="Sábanas individual unidades" />
-            <input class="cfg-input" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" data-field="kg" aria-label="Sábanas individual kilos" />
-            <input class="cfg-input" type="number" min="0" step="0.01" inputmode="decimal" data-field="ppu" aria-label="Peso por unidad sábanas individual" />
-          </div>
+/* Tabla adaptable (grid) */
+.cfg-grid { display: grid; grid-template-columns: 2.2fr .9fr .9fr .9fr; gap: 10px; align-items: center; }
+.cfg-grid.header { font-weight: 600; font-size: 14px; opacity: .8; }
+.cfg-grid + .cfg-grid { margin-top: 8px; }
 
-          <div class="cfg-grid" data-key="sabanas_m" role="row">
-            <div class="item-name">Sábana · <span class="item-sub">Doble/Queen</span></div>
-            <input class="cfg-input col-un" type="number" min="0" step="1" inputmode="numeric" placeholder="0" data-field="units" aria-label="Sábanas doble unidades" />
-            <input class="cfg-input" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" data-field="kg" aria-label="Sábanas doble kilos" />
-            <input class="cfg-input" type="number" min="0" step="0.01" inputmode="decimal" data-field="ppu" aria-label="Peso por unidad sábanas doble" />
-          </div>
+/* Filas agrupables por familia */
+.cfg-family { margin-top: 18px; }
+.cfg-family > .fam-title { font-weight: 700; margin: 10px 0 8px; font-size: 15px; color: #000; opacity: 1; }
 
-          <div class="cfg-grid" data-key="sabanas_l" role="row">
-            <div class="item-name">Sábana · <span class="item-sub">King</span></div>
-            <input class="cfg-input col-un" type="number" min="0" step="1" inputmode="numeric" placeholder="0" data-field="units" aria-label="Sábanas king unidades" />
-            <input class="cfg-input" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" data-field="kg" aria-label="Sábanas king kilos" />
-            <input class="cfg-input" type="number" min="0" step="0.01" inputmode="decimal" data-field="ppu" aria-label="Peso por unidad sábanas king" />
-          </div>
-        </div>
+/* Celdas e inputs */
+.item-name { display: flex; align-items: center; gap: 8px; color: color-mix(in srgb, currentColor 60%, transparent); }
+.item-sub { font-size: 12px; opacity: .75; }
 
-        <!-- ======= Nórdicos ======= -->
-        <div class="cfg-family" id="fam-nordicos">
-          <div class="fam-title">Nórdicos</div>
+.cfg-input { width: 100%; box-sizing: border-box; height: 38px; padding: 6px 10px; border-radius: 8px; border: 1px solid color-mix(in srgb, currentColor 18%, transparent); background: #fff; color: #111; font-size: 14px; color-scheme: light; }
+.cfg-input[readonly] { background: #fafafa; color: #333; }
+.cfg-input:focus { outline: none; border-color: color-mix(in srgb, #111 40%, transparent); box-shadow: 0 0 0 2px color-mix(in srgb, #111 10%, transparent); }
 
-          <div class="cfg-grid" data-key="nordico_s" role="row">
-            <div class="item-name">Nórdico · <span class="item-sub">Individual</span></div>
-            <input class="cfg-input col-un" type="number" min="0" step="1" data-field="units" aria-label="Nórdico individual unidades" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="kg" aria-label="Nórdico individual kilos" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="ppu" aria-label="Peso por unidad nórdico individual" />
-          </div>
-          <div class="cfg-grid" data-key="nordico_m" role="row">
-            <div class="item-name">Nórdico · <span class="item-sub">Doble/Queen</span></div>
-            <input class="cfg-input col-un" type="number" min="0" step="1" data-field="units" aria-label="Nórdico doble unidades" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="kg" aria-label="Nórdico doble kilos" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="ppu" aria-label="Peso por unidad nórdico doble" />
-          </div>
-          <div class="cfg-grid" data-key="nordico_l" role="row">
-            <div class="item-name">Nórdico · <span class="item-sub">King</span></div>
-            <input class="cfg-input col-un" type="number" min="0" step="1" data-field="units" aria-label="Nórdico king unidades" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="kg" aria-label="Nórdico king kilos" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="ppu" aria-label="Peso por unidad nórdico king" />
-          </div>
-        </div>
+/* Spinners sin fondo */
+.cfg-input[type=number]::-webkit-inner-spin-button,
+.cfg-input[type=number]::-webkit-outer-spin-button { background: transparent; margin: 0; }
+/* Firefox */
+.cfg-input[type=number] { -moz-appearance: textfield; }
 
-        <!-- ======= Fundas de almohada ======= -->
-        <div class="cfg-family" id="fam-fundas">
-          <div class="fam-title">Fundas de almohada</div>
-          <div class="cfg-grid" data-key="fundas_std" role="row">
-            <div class="item-name">Funda de almohada</div>
-            <input class="cfg-input col-un" type="number" min="0" step="1" data-field="units" aria-label="Fundas unidades" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="kg" aria-label="Fundas kilos" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="ppu" aria-label="Peso por unidad funda" />
-          </div>
-        </div>
+.cfg-note { font-size: 12px; opacity: .7; margin-top: 4px; }
 
-        <!-- ======= Toallas (alfombrines, manos, baño, piscina) ======= -->
-        <div class="cfg-family" id="fam-toallas">
-          <div class="fam-title">Toallas</div>
-          <div class="cfg-grid" data-key="toalla_alfombrin" role="row">
-            <div class="item-name">Alfombrín</div>
-            <input class="cfg-input col-un" type="number" min="0" step="1" data-field="units" aria-label="Alfombrines unidades" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="kg" aria-label="Alfombrines kilos" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="ppu" aria-label="Peso por unidad alfombrín" />
-          </div>
-          <div class="cfg-grid" data-key="toalla_manos" role="row">
-            <div class="item-name">Toalla de manos</div>
-            <input class="cfg-input col-un" type="number" min="0" step="1" data-field="units" aria-label="Manos unidades" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="kg" aria-label="Manos kilos" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="ppu" aria-label="Peso por unidad manos" />
-          </div>
-          <div class="cfg-grid" data-key="toalla_bano" role="row">
-            <div class="item-name">Toalla de baño</div>
-            <input class="cfg-input col-un" type="number" min="0" step="1" data-field="units" aria-label="Baño unidades" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="kg" aria-label="Baño kilos" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="ppu" aria-label="Peso por unidad baño" />
-          </div>
-          <div class="cfg-grid" data-key="toalla_piscina" role="row">
-            <div class="item-name">Toalla de piscina</div>
-            <input class="cfg-input col-un" type="number" min="0" step="1" data-field="units" aria-label="Piscina unidades" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="kg" aria-label="Piscina kilos" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="ppu" aria-label="Peso por unidad piscina" />
-          </div>
-        </div>
+/* Totales */
+.cfg-totals { display: grid; grid-template-columns: 1fr .6fr .6fr; gap: 10px; margin-top: 16px; align-items: center; }
+.cfg-totals .sum { font-weight: 700; font-size: 16px; }
+.cfg-totals label { display: grid; gap: 4px; font-size: 12px; opacity: .7; }
 
-        <!-- ======= Albornoces ======= -->
-        <div class="cfg-family" id="fam-albornoces">
-          <div class="fam-title">Albornoces</div>
-          <div class="cfg-grid" data-key="albornoz" role="row">
-            <div class="item-name">Albornoz</div>
-            <input class="cfg-input col-un" type="number" min="0" step="1" data-field="units" aria-label="Albornoces unidades" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="kg" aria-label="Albornoces kilos" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="ppu" aria-label="Peso por unidad albornoz" />
-          </div>
-        </div>
+/* Panel de ajustes */
+details.cfg-weights { margin-top: 18px; }
+details.cfg-weights > summary { cursor: pointer; list-style: none; }
+details.cfg-weights > summary::-webkit-details-marker { display: none; }
+.weights-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; margin-top: 12px; }
 
-        <!-- ======= Mantelería y servilletas ======= -->
-        <div class="cfg-family" id="fam-manteleria">
-          <div class="fam-title">Mantelería y servilletas</div>
-          <div class="cfg-grid" data-key="mantel" role="row">
-            <div class="item-name">Mantel</div>
-            <input class="cfg-input col-un" type="number" min="0" step="1" data-field="units" aria-label="Manteles unidades" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="kg" aria-label="Manteles kilos" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="ppu" aria-label="Peso por unidad mantel" />
-          </div>
-          <div class="cfg-grid" data-key="servilleta" role="row">
-            <div class="item-name">Servilleta</div>
-            <input class="cfg-input col-un" type="number" min="0" step="1" data-field="units" aria-label="Servilletas unidades" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="kg" aria-label="Servilletas kilos" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="ppu" aria-label="Peso por unidad servilleta" />
-          </div>
-        </div>
-
-        <!-- TOTALES -->
-        <div class="cfg-totals" aria-live="polite">
-          <div class="sum">Total</div>
-          <label>Unidades (uds)
-            <input class="cfg-input" id="total-units" type="number" readonly aria-label="Total unidades" />
-          </label>
-          <label>Kilos (kg)
-            <input class="cfg-input" id="total-kg" type="number" readonly aria-label="Total kilos" />
-          </label>
-        </div>
-
-        <!-- Ajustes de pesos -->
-        <details class="cfg-weights">
-          <summary class="cfg-muted">Ajustar pesos por unidad (opcional)</summary>
-          <div class="weights-grid" id="weights-grid" aria-label="Pesos por unidad"></div>
-          <p class="cfg-note">Los cálculos usan estos pesos. Cambiarlos recalcula todo al momento.</p>
-        </details>
-
-      </section>
-
-      <p class="cfg-note" style="margin-top:10px">Consejo: si conoces tus kilos por categoría, escribe los <strong>kg</strong> y deja las unidades en blanco. O al revés: pon unidades y estimamos los kg.</p>
-
-    </div>
-  </main>
-
-  <script src="configurador.js"></script>
-</body>
-</html>
+/* Responsive */
+@media (max-width: 860px) {
+  .cfg-grid, .cfg-totals { grid-template-columns: 1.7fr .8fr .8fr .8fr; }
+  .cfg-header { flex-direction: column; align-items: flex-start; gap: 6px; }
+}
+@media (max-width: 620px) {
+  .cfg-grid, .cfg-totals { grid-template-columns: 1.5fr 1fr 1fr; }
+  .col-un { display: none; }
+}
