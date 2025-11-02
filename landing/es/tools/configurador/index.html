@@ -31,59 +31,62 @@
       </div>
 
       
-<!-- ======= Estimador por habitaciones (plegable, abierto) ======= -->
-<details class="cfg-estimator" aria-label="Estimador por habitaciones" open>
-  <summary class="cfg-muted">Estimador por habitaciones</summary>
+<div class="cfg-card est-body">
+  <p class="cfg-muted" style="margin-top:0">
+    Introduce nº de habitaciones y su <strong>factor</strong>. Al aplicar, rellenamos las <strong>unidades</strong>; los <strong>kg</strong> se calculan solos.
+  </p>
 
-  <div class="cfg-card est-body">
-    <p class="cfg-muted" style="margin-top:0">
-      Introduce nº de habitaciones y su <strong>factor</strong>. Al aplicar, rellenamos las <strong>unidades</strong>; los <strong>kg</strong> se calculan solos.
-    </p>
-
-   
-    <div class="cfg-grid header" role="row">
-      <div>Tipo</div>
-      <div class="col-un">Habitaciones</div>
-      <div>Factor</div>
-    </div>
-
+  <!-- 4 columnas: Simples, Dobles, Suites, Cubiertos -->
+  <div class="est-grid">
     <!-- Simples -->
-    <div class="cfg-grid" role="row">
-      <div class="item-name">Simples</div>
-      <input id="est-simples" class="cfg-input col-un" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
-      <input id="est-factor-s" class="cfg-input" type="number" min="0" step="0.1" inputmode="decimal" value="1">
-    </div>
+    <label class="est-field">
+      <span>Simples</span>
+      <input id="est-simples" class="cfg-input" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+      <div class="est-subfield">
+        <small>Factor simples</small>
+        <input id="est-factor-s" class="cfg-input" type="number" min="0" step="0.1" inputmode="decimal" value="1">
+      </div>
+    </label>
 
     <!-- Dobles -->
-    <div class="cfg-grid" role="row">
-      <div class="item-name">Dobles</div>
-      <input id="est-dobles" class="cfg-input col-un" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
-      <input id="est-factor-d" class="cfg-input" type="number" min="0" step="0.1" inputmode="decimal" value="1">
-    </div>
+    <label class="est-field">
+      <span>Dobles</span>
+      <input id="est-dobles" class="cfg-input" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+      <div class="est-subfield">
+        <small>Factor dobles</small>
+        <input id="est-factor-d" class="cfg-input" type="number" min="0" step="0.1" inputmode="decimal" value="1">
+      </div>
+    </label>
 
     <!-- Suites -->
-    <div class="cfg-grid" role="row">
-      <div class="item-name">Suites</div>
-      <input id="est-suites" class="cfg-input col-un" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
-      <input id="est-factor-u" class="cfg-input" type="number" min="0" step="0.1" inputmode="decimal" value="1">
-    </div>
+    <label class="est-field">
+      <span>Suites</span>
+      <input id="est-suites" class="cfg-input" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+      <div class="est-subfield">
+        <small>Factor suites</small>
+        <input id="est-factor-u" class="cfg-input" type="number" min="0" step="0.1" inputmode="decimal" value="1">
+      </div>
+    </label>
 
     <!-- Cubiertos -->
-    <div class="cfg-grid" role="row">
-      <div class="item-name">Cubiertos</div>
-      <input id="est-cubiertos" class="cfg-input col-un" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
-      <input id="est-factor-cub" class="cfg-input" type="number" min="0" step="0.1" inputmode="decimal" value="1">
-    </div>
-
-    
-    <p class="cfg-note est-note">1 = un juego por habitación. Ajusta si cambias ropa con más/menos frecuencia.</p>
-
-    <div class="est-actions">
-      <button id="est-apply" type="button" class="btn-primary">Aplicar estimación</button>
-      <button id="est-clear" type="button" class="btn-ghost">Limpiar todo</button>
-    </div>
+    <label class="est-field">
+      <span>Cubiertos</span>
+      <input id="est-cubiertos" class="cfg-input" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+      <div class="est-subfield">
+        <small>Factor cubiertos</small>
+        <input id="est-factor-cub" class="cfg-input" type="number" min="0" step="0.1" inputmode="decimal" value="1">
+      </div>
+    </label>
   </div>
-</details>
+
+  <!-- Nota que querías mantener -->
+  <p class="cfg-note est-note">1 = un juego por habitación. Ajusta si cambias ropa con más/menos frecuencia.</p>
+
+  <div class="est-actions">
+    <button id="est-apply" type="button" class="btn-primary">Aplicar estimación</button>
+    <button id="est-clear" type="button" class="btn-ghost">Limpiar todo</button>
+  </div>
+</div>
 
 
 
