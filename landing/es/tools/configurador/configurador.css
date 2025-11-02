@@ -74,6 +74,41 @@ details.cfg-weights > summary { cursor: pointer; list-style: none; }
 details.cfg-weights > summary::-webkit-details-marker { display: none; }
 .weights-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; margin-top: 12px; }
 
+/* ====== Breakdown porcentual ====== */
+.cfg-breakdown { 
+  margin-top: 12px; 
+  border-top: 1px dashed color-mix(in srgb, currentColor 20%, transparent); 
+  padding-top: 12px;
+}
+.bd-title { 
+  font-size: 13px; 
+  opacity: .8; 
+  margin-bottom: 8px; 
+}
+.bd-grid { 
+  display: grid; 
+  grid-template-columns: 1.4fr .8fr .8fr; 
+  gap: 10px; 
+}
+.bd-row { 
+  display: contents; 
+}
+.bd-row > div { 
+  padding: 6px 0; 
+  font-size: 14px; 
+}
+.bd-row > div:nth-child(1) { 
+  font-weight: 600; 
+}
+.bd-unit { 
+  opacity: .6; 
+  font-size: 12px; 
+  margin-left: 4px; 
+}
+@media (max-width: 620px) {
+  .bd-grid { grid-template-columns: 1.2fr .9fr .9fr; }
+}
+
 /* Responsive */
 @media (max-width: 860px) {
   .cfg-grid, .cfg-totals { grid-template-columns: 1.7fr .8fr .8fr .8fr; }
