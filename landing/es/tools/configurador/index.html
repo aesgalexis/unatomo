@@ -167,7 +167,27 @@
             <input class="cfg-input" id="total-kg" type="number" readonly aria-label="Total kilos" />
           </label>
         </div>
-
+<!-- Porcentaje por categoría -->
+<div class="cfg-breakdown" aria-live="polite">
+  <div class="bd-title">Porcentaje por categoría</div>
+  <div class="bd-grid">
+    <div class="bd-row">
+      <div>Ropa de cama</div>
+      <div><output id="pct-cama-un">0%</output> <span class="bd-unit">uds</span></div>
+      <div><output id="pct-cama-kg">0%</output> <span class="bd-unit">kg</span></div>
+    </div>
+    <div class="bd-row">
+      <div>Rizo</div>
+      <div><output id="pct-rizo-un">0%</output> <span class="bd-unit">uds</span></div>
+      <div><output id="pct-rizo-kg">0%</output> <span class="bd-unit">kg</span></div>
+    </div>
+    <div class="bd-row">
+      <div>Mantelería</div>
+      <div><output id="pct-mant-un">0%</output> <span class="bd-unit">uds</span></div>
+      <div><output id="pct-mant-kg">0%</output> <span class="bd-unit">kg</span></div>
+    </div>
+  </div>
+</div>
         <!-- Ajustes de pesos -->
         <details class="cfg-weights">
           <summary class="cfg-muted">Ajustar pesos por unidad (opcional)</summary>
