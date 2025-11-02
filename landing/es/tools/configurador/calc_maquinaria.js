@@ -170,13 +170,6 @@ function renderMachinery() {
   const towelUnitsPerHour = towelUnitsPerDay / Math.max(1, Math.min(24, Math.round(hours || 8)));
   const foldQty = requiredTowelFolders(towelUnitsPerHour);
 
-  // Aviso tonelaje alto
-  const tonnageNote = kgTotal >= PRODUCTIVITY.tonnageWarningKgPerDay
-    ? `<p class="cfg-note" style="margin-top:8px">
-         Volumen alto (&ge; 5.000 kg/día). Recomendable estudiar túneles de lavado, prensas, enfriadores y líneas de calandra completas.
-       </p>`
-    : '';
-
   // Render tabla simple
   host.innerHTML = `
     <div class="cfg-grid header" style="grid-template-columns: 2fr 1fr 1fr;">
