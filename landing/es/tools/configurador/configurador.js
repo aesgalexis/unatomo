@@ -205,13 +205,26 @@ function clearAllRows() {
   updateTotals();
 }
 
+// Factor por campo con fallback (usa 1 si no hay input)
+// Si conservas un factor global #est-factor, se usa como respaldo.
+function getFactor(id) {
+  const globalFallback = parseNum(document.getElementById('est-factor')?.value) || 1;
+  const v = parseNum(document.getElementById(id)?.value);
+  return Math.max(0, v || globalFallback || 1);
+}
+
 // ====== Estimador por habitaciones (aplicación) ======
 function applyEstimator() {
   const s = parseNum(document.getElementById('est-simples')?.value);
   const d = parseNum(document.getElementById('est-dobles')?.value);
   const u = parseNum(document.getElementById('est-suites')?.value);
   const cubiertos = parseNum(document.getElementById('est-cubiertos')?.value);
-  const f = Math.max(0, parseNum(document.getElementById('est-factor')?.value) || 1);
+
+  // Factores por categoría (si no existen, fallback a #est-factor o 1)
+  const fS = getFactor('est-factor-s');       // factor para Simples
+  const fD = getFactor('est-factor-d');       // factor para Dobles
+  const fU = getFactor('est-factor-u');       // factor para Suites
+  const fC = getFactor('est-factor-cub');     // factor para Cubiertos (opcional)
 
   const incPiscina  = !!document.getElementById('est-incluir-piscina')?.checked;
   const incAlbornoz = !!document.getElementById('est-incluir-albornoz')?.checked;
@@ -220,30 +233,30 @@ function applyEstimator() {
   const totalsByKey = {};
   Object.keys(state.rows).forEach(k => totalsByKey[k] = 0);
 
-  function addForRooms(count, roomDef) {
-    if (count <= 0) return;
+  function addForRooms(count, roomDef, factor) {
+    if (count <= 0 || factor <= 0) return;
     Object.entries(roomDef).forEach(([key, perRoom]) => {
       if (totalsByKey[key] !== undefined) {
-        totalsByKey[key] += perRoom * count * f;
+        totalsByKey[key] += perRoom * count * factor;
       }
     });
   }
 
-  // Habitaciones
-  addForRooms(s, ROOM_MATRIX.simple);
-  addForRooms(d, ROOM_MATRIX.doble);
+  // Habitaciones (cada una con su factor)
+  addForRooms(s, ROOM_MATRIX.simple, fS);
+  addForRooms(d, ROOM_MATRIX.doble,  fD);
 
   const suiteDef = { ...ROOM_MATRIX.suite };
   if (incPiscina)  suiteDef.toalla_piscina = (suiteDef.toalla_piscina || 0) + 2;
   if (incAlbornoz) suiteDef.albornoz       = (suiteDef.albornoz || 0) + 2;
-  addForRooms(u, suiteDef);
+  addForRooms(u, suiteDef, fU);
 
   // ===== Mantelería por "Cubiertos" =====
-  // 1 servilleta por cubierto; 1 mantel cada 4 cubiertos (ceil), todo * factor
-  if (cubiertos > 0) {
-    totalsByKey.servilleta += cubiertos * f;
+  // 1 servilleta por cubierto; 1 mantel cada 4 cubiertos (ceil), todo * factor de cubiertos
+  if (cubiertos > 0 && fC > 0) {
+    totalsByKey.servilleta += cubiertos * fC;
     const mantelesEstimados = Math.ceil(cubiertos / 4);
-    totalsByKey.mantel += mantelesEstimados * f;
+    totalsByKey.mantel += mantelesEstimados * fC;
   }
 
   // Aplicar a la UI
