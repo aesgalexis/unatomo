@@ -23,7 +23,7 @@ const DEFAULT_WEIGHTS = {
   servilleta: 0.05
 };
 
-// Categorías para el breakdown porcentual (solo kg)
+// ====== Categorías para breakdown porcentual (solo kg) ======
 const CATEGORIES = {
   cama: ['sabanas_s','sabanas_m','sabanas_l','nordico_s','nordico_m','nordico_l','fundas_std'],
   rizo: ['toalla_alfombrin','toalla_manos','toalla_bano','toalla_piscina','albornoz'],
@@ -31,7 +31,6 @@ const CATEGORIES = {
 };
 
 // ====== Estimador por habitaciones (matriz de consumo) ======
-// Unidades por habitación; luego se multiplica por nº de habitaciones y factor.
 const ROOM_MATRIX = {
   simple: {
     sabanas_s: 2,       // encimera + bajera
@@ -59,17 +58,23 @@ const ROOM_MATRIX = {
   }
 };
 
+// ====== Estado ======
 const state = {
   weights: { ...DEFAULT_WEIGHTS },
   rows: {}
 };
 
+// ====== Utils ======
 function qsa(sel, root=document) { return Array.from(root.querySelectorAll(sel)); }
+function parseNum(v) {
+  const n = parseFloat(String(v).replace(',', '.'));
+  return Number.isFinite(n) ? n : 0;
+}
 
-// Inicializa filas: engancha eventos, pone pesos por defecto y valores 0/0.00 coherentes
+// ====== Init filas ======
 function initRows() {
   qsa('.cfg-grid[data-key]').forEach(row => {
-    const key = row.getAttribute('data-key');
+    const key   = row.getAttribute('data-key');
     const units = row.querySelector('[data-field="units"]');
     const kg    = row.querySelector('[data-field="kg"]');
     const ppu   = row.querySelector('[data-field="ppu"]');
@@ -80,25 +85,20 @@ function initRows() {
     // Guardamos referencias
     state.rows[key] = { row, units, kg, ppu };
 
-    // Listeners de entrada
+    // Listeners
     if (units) units.addEventListener('input', () => onUnitsChange(key));
     if (kg)    kg.addEventListener('input',    () => onKgChange(key));
     if (ppu)   ppu.addEventListener('input',   () => onPpuChange(key));
 
-    // === Valores iniciales coherentes (mostrar 0 en todo) ===
+    // Valores iniciales coherentes
     if (units && !units.value) units.value = '0';
     if (kg && !kg.value)       kg.value    = '0.00';
   });
 
-  // Inicializa totales a 0/0.00
   updateTotals();
 }
 
-function parseNum(v) {
-  const n = parseFloat(String(v).replace(',', '.'));
-  return Number.isFinite(n) ? n : 0;
-}
-
+// ====== Handlers fila ======
 function onUnitsChange(key) {
   const { units, kg, ppu } = state.rows[key];
   const w = parseNum(ppu?.value) || state.weights[key] || 0; // kg/ud
@@ -110,7 +110,7 @@ function onUnitsChange(key) {
 
 function onKgChange(key) {
   const { units, kg, ppu } = state.rows[key];
-  const w = parseNum(ppu?.value) || state.weights[key] || 0; // kg/ud
+  const w = parseNum(ppu?.value) || state.weights[key] || 0;
   const k = parseNum(kg?.value);
   const u = w ? (k / w) : 0;
   if (units) units.value = u ? Math.round(u) : '0';
@@ -121,32 +121,32 @@ function onPpuChange(key) {
   const { units, kg, ppu } = state.rows[key];
   const newW = parseNum(ppu?.value);
   if (newW > 0) state.weights[key] = newW;
-  // Recalcula fila según último input no vacío (prioriza kg si hay)
+
+  // Recalcula según último input no vacío (prioriza kg si hay)
   const k = parseNum(kg?.value);
   const u = parseNum(units?.value);
-  if (k) onKgChange(key); else if (u) onUnitsChange(key); else updateTotals();
-  buildWeightsPanel();
+  if (k) onKgChange(key);
+  else if (u) onUnitsChange(key);
+  else updateTotals();
 }
 
+// ====== Totales y breakdown ======
 function updateTotals() {
   let totalKg = 0, totalUnits = 0;
+
   Object.keys(state.rows).forEach(key => {
     const { units, kg } = state.rows[key];
     totalUnits += parseNum(units?.value);
     totalKg    += parseNum(kg?.value);
   });
+
   const tU = document.getElementById('total-units');
   const tK = document.getElementById('total-kg');
-  if (tU) tU.value = Math.round(totalUnits).toString(); // siempre muestra 0 o más
-  if (tK) tK.value = totalKg.toFixed(2);                // siempre muestra 0.00 o más
+  if (tU) tU.value = Math.round(totalUnits).toString();
+  if (tK) tK.value = totalKg.toFixed(2);
 
-  // ===== Breakdown porcentual por categoría (solo kg) =====
-  const sumKg = (keys) => {
-    let k = 0;
-    keys.forEach(key => { k += parseNum(state.rows[key]?.kg?.value); });
-    return k;
-  };
-
+  // Breakdown porcentual por categoría (solo kg)
+  const sumKg = (keys) => keys.reduce((acc, k) => acc + parseNum(state.rows[k]?.kg?.value), 0);
   const kgCama = sumKg(CATEGORIES.cama);
   const kgRizo = sumKg(CATEGORIES.rizo);
   const kgMant = sumKg(CATEGORIES.mant);
@@ -159,48 +159,12 @@ function updateTotals() {
   setText('pct-mant-kg', pct(kgMant, totalKg));
 }
 
-// Panel de ajuste de pesos (muestra pares clave→input)
-function buildWeightsPanel() {
-  const host = document.getElementById('weights-grid');
-  if (!host) return;
-  host.innerHTML = '';
-  Object.entries(state.weights).forEach(([key, val]) => {
-    const label = key.replace(/_/g,' · ')
-      .replace('sabanas','sábanas').replace('nordico','nórdico')
-      .replace('toalla','toalla').replace('fundas','funda')
-      .replace('servilleta','servilleta').replace('mantel','mantel')
-      .replace('albornoz','albornoz')
-      .replace('s','individual').replace('m','doble/queen').replace('l','king');
-    const row = document.createElement('div');
-    row.className = 'weights-row';
-    const name = document.createElement('div');
-    name.textContent = label;
-    const inp = document.createElement('input');
-    inp.type = 'number'; inp.step = '0.01'; inp.min = '0';
-    inp.className = 'cfg-input'; inp.value = Number(val).toFixed(2);
-    inp.addEventListener('input', () => {
-      const v = parseNum(inp.value);
-      if (v > 0) {
-        state.weights[key] = v;
-        // Sincroniza también el PPU visible de cada fila
-        const rowRef = state.rows[key];
-        if (rowRef?.ppu) rowRef.ppu.value = v.toFixed(2);
-        // Recomputa totales acorde a lo que esté relleno
-        const k = parseNum(rowRef?.kg?.value);
-        const u = parseNum(rowRef?.units?.value);
-        if (k) onKgChange(key); else if (u) onUnitsChange(key); else updateTotals();
-      }
-    });
-    row.appendChild(name); row.appendChild(inp); host.appendChild(row);
-  });
-}
-
-// ====== Estimador por habitaciones (helpers) ======
+// ====== Estimador por habitaciones ======
 function setUnitsForKey(key, units) {
   const row = state.rows[key];
   if (!row) return;
-  if (row.units) { row.units.value = units > 0 ? Math.round(units) : '0'; }
-  onUnitsChange(key); // recalcula kg
+  if (row.units) row.units.value = units > 0 ? Math.round(units) : '0';
+  onUnitsChange(key);
 }
 
 function clearAllRows() {
@@ -211,51 +175,45 @@ function clearAllRows() {
   updateTotals();
 }
 
-// Factor por campo con fallback (usa 1 si no hay input)
-// Si conservas un factor global #est-factor, se usa como respaldo.
+// Factor por campo con fallback (si no hay input, usa 1; si existe #est-factor, lo toma como respaldo)
 function getFactor(id) {
   const globalFallback = parseNum(document.getElementById('est-factor')?.value) || 1;
   const v = parseNum(document.getElementById(id)?.value);
   return Math.max(0, v || globalFallback || 1);
 }
 
-// ====== Estimador por habitaciones (aplicación) ======
 function applyEstimator() {
   const s = parseNum(document.getElementById('est-simples')?.value);
   const d = parseNum(document.getElementById('est-dobles')?.value);
   const u = parseNum(document.getElementById('est-suites')?.value);
   const cubiertos = parseNum(document.getElementById('est-cubiertos')?.value);
 
-  // Factores por categoría (si no existen, fallback a #est-factor o 1)
-  const fS = getFactor('est-factor-s');       // factor para Simples
-  const fD = getFactor('est-factor-d');       // factor para Dobles
-  const fU = getFactor('est-factor-u');       // factor para Suites
-  const fC = getFactor('est-factor-cub');     // factor para Cubiertos (opcional)
+  const fS = getFactor('est-factor-s');
+  const fD = getFactor('est-factor-d');
+  const fU = getFactor('est-factor-u');
+  const fC = getFactor('est-factor-cub');
 
-  // Totales por item
   const totalsByKey = {};
   Object.keys(state.rows).forEach(k => totalsByKey[k] = 0);
 
-  function addForRooms(count, roomDef, factor) {
+  const addForRooms = (count, roomDef, factor) => {
     if (count <= 0 || factor <= 0) return;
     Object.entries(roomDef).forEach(([key, perRoom]) => {
       if (totalsByKey[key] !== undefined) {
         totalsByKey[key] += perRoom * count * factor;
       }
     });
-  }
+  };
 
-  // Habitaciones (cada una con su factor)
+  // Habitaciones
   addForRooms(s, ROOM_MATRIX.simple, fS);
   addForRooms(d, ROOM_MATRIX.doble,  fD);
   addForRooms(u, ROOM_MATRIX.suite,  fU);
 
-  // ===== Mantelería por "Cubiertos" =====
-  // 1 servilleta por cubierto; 1 mantel cada 4 cubiertos (ceil), todo * factor de cubiertos
+  // Mantelería por "Cubiertos"
   if (cubiertos > 0 && fC > 0) {
     totalsByKey.servilleta += cubiertos * fC;
-    const mantelesEstimados = Math.ceil(cubiertos / 4);
-    totalsByKey.mantel += mantelesEstimados * fC;
+    totalsByKey.mantel     += Math.ceil(cubiertos / 4) * fC;
   }
 
   // Aplicar a la UI
@@ -263,9 +221,9 @@ function applyEstimator() {
   updateTotals();
 }
 
+// ====== Boot ======
 window.addEventListener('DOMContentLoaded', () => {
   initRows();
-  buildWeightsPanel();
 
   // Estimador (si existe el bloque en el HTML)
   const btnApply = document.getElementById('est-apply');
