@@ -142,6 +142,16 @@ details.cfg-estimator > summary::-webkit-details-marker { display: none; }
 .est-grid .est-subfield small {
   font-family: inherit;   /* misma familia tipográfica que el resto */
 }
+/* Botón "Limpiar todo" visible sobre fondo claro */
+#est-clear.btn-ghost {
+  color: #000 !important;           /* texto negro */
+  background: transparent !important;
+  border-color: #c8c8c8 !important; /* borde gris para que se vea */
+}
+
+#est-clear.btn-ghost:hover { background: #f6f6f6 !important; }
+#est-clear.btn-ghost:active { background: #ededed !important; }
+#est-clear.btn-ghost:focus  { outline: none; box-shadow: 0 0 0 2px rgba(0,0,0,.12); }
 
 
 /* Responsive estimador */
