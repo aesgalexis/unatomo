@@ -56,7 +56,6 @@ const ROOM_MATRIX = {
     toalla_manos: 2,
     toalla_bano: 2,
     toalla_alfombrin: 1
-    // piscina y albornoz opcionales se añaden en runtime
   }
 };
 
@@ -67,7 +66,7 @@ const state = {
 
 function qsa(sel, root=document) { return Array.from(root.querySelectorAll(sel)); }
 
-// Inicializa filas: engancha eventos y pone pesos por defecto
+// Inicializa filas: engancha eventos, pone pesos por defecto y valores 0/0.00 coherentes
 function initRows() {
   qsa('.cfg-grid[data-key]').forEach(row => {
     const key = row.getAttribute('data-key');
@@ -85,7 +84,14 @@ function initRows() {
     if (units) units.addEventListener('input', () => onUnitsChange(key));
     if (kg)    kg.addEventListener('input',    () => onKgChange(key));
     if (ppu)   ppu.addEventListener('input',   () => onPpuChange(key));
+
+    // === Valores iniciales coherentes (mostrar 0 en todo) ===
+    if (units && !units.value) units.value = '0';
+    if (kg && !kg.value)       kg.value    = '0.00';
   });
+
+  // Inicializa totales a 0/0.00
+  updateTotals();
 }
 
 function parseNum(v) {
@@ -98,7 +104,7 @@ function onUnitsChange(key) {
   const w = parseNum(ppu?.value) || state.weights[key] || 0; // kg/ud
   const u = parseNum(units?.value);
   const k = w * u;
-  if (kg) kg.value = k ? k.toFixed(2) : '';
+  if (kg) kg.value = k ? k.toFixed(2) : '0.00';
   updateTotals();
 }
 
@@ -107,7 +113,7 @@ function onKgChange(key) {
   const w = parseNum(ppu?.value) || state.weights[key] || 0; // kg/ud
   const k = parseNum(kg?.value);
   const u = w ? (k / w) : 0;
-  if (units) units.value = u ? Math.round(u) : '';
+  if (units) units.value = u ? Math.round(u) : '0';
   updateTotals();
 }
 
@@ -118,7 +124,7 @@ function onPpuChange(key) {
   // Recalcula fila según último input no vacío (prioriza kg si hay)
   const k = parseNum(kg?.value);
   const u = parseNum(units?.value);
-  if (k) onKgChange(key); else if (u) onUnitsChange(key);
+  if (k) onKgChange(key); else if (u) onUnitsChange(key); else updateTotals();
   buildWeightsPanel();
 }
 
@@ -131,8 +137,8 @@ function updateTotals() {
   });
   const tU = document.getElementById('total-units');
   const tK = document.getElementById('total-kg');
-  if (tU) tU.value = totalUnits ? Math.round(totalUnits) : '';
-  if (tK) tK.value = totalKg ? totalKg.toFixed(2) : '';
+  if (tU) tU.value = Math.round(totalUnits).toString(); // siempre muestra 0 o más
+  if (tK) tK.value = totalKg.toFixed(2);                // siempre muestra 0.00 o más
 
   // ===== Breakdown porcentual por categoría (solo kg) =====
   const sumKg = (keys) => {
@@ -193,14 +199,14 @@ function buildWeightsPanel() {
 function setUnitsForKey(key, units) {
   const row = state.rows[key];
   if (!row) return;
-  if (row.units) { row.units.value = units > 0 ? Math.round(units) : ''; }
+  if (row.units) { row.units.value = units > 0 ? Math.round(units) : '0'; }
   onUnitsChange(key); // recalcula kg
 }
 
 function clearAllRows() {
   Object.values(state.rows).forEach(({ units, kg }) => {
-    if (units) units.value = '';
-    if (kg) kg.value = '';
+    if (units) units.value = '0';
+    if (kg)    kg.value    = '0.00';
   });
   updateTotals();
 }
@@ -226,9 +232,6 @@ function applyEstimator() {
   const fU = getFactor('est-factor-u');       // factor para Suites
   const fC = getFactor('est-factor-cub');     // factor para Cubiertos (opcional)
 
-  const incPiscina  = !!document.getElementById('est-incluir-piscina')?.checked;
-  const incAlbornoz = !!document.getElementById('est-incluir-albornoz')?.checked;
-
   // Totales por item
   const totalsByKey = {};
   Object.keys(state.rows).forEach(k => totalsByKey[k] = 0);
@@ -245,11 +248,7 @@ function applyEstimator() {
   // Habitaciones (cada una con su factor)
   addForRooms(s, ROOM_MATRIX.simple, fS);
   addForRooms(d, ROOM_MATRIX.doble,  fD);
-
-  const suiteDef = { ...ROOM_MATRIX.suite };
-  if (incPiscina)  suiteDef.toalla_piscina = (suiteDef.toalla_piscina || 0) + 2;
-  if (incAlbornoz) suiteDef.albornoz       = (suiteDef.albornoz || 0) + 2;
-  addForRooms(u, suiteDef, fU);
+  addForRooms(u, ROOM_MATRIX.suite,  fU);
 
   // ===== Mantelería por "Cubiertos" =====
   // 1 servilleta por cubierto; 1 mantel cada 4 cubiertos (ceil), todo * factor de cubiertos
