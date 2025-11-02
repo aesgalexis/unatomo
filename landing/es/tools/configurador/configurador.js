@@ -253,8 +253,10 @@ window.addEventListener('DOMContentLoaded', () => {
   // Estimador (si existe el bloque en el HTML)
   const btnApply = document.getElementById('est-apply');
   const btnClear = document.getElementById('est-clear');
+  const btnAddOther = document.getElementById('otros-add');
   if (btnApply) btnApply.addEventListener('click', applyEstimator);
   if (btnClear) btnClear.addEventListener('click', clearAllRows);
+  if (btnAddOther) btnAddOther.addEventListener('click', () => addCustomItem());
 });
 function addCustomItem(prefillName = '', prefillPPU = 0) {
   const host = document.getElementById('otros-rows');
