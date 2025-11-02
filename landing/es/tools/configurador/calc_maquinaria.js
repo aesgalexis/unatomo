@@ -1,16 +1,16 @@
 // ===== calc_maquinaria.js =====
-// Lee los kg/unidades/ppu actuales del configurador y propone maquinaria.
-// No necesita tocar tu otro JS. Se actualiza al teclear y al cambiar horas/día.
+// Calcula mix de Lavadoras / Secadoras / Calandras / Plegadores en función de tus kg y horas.
+// Se actualiza dinámicamente al cambiar cualquier input relevante.
 
-// ---- Config: mapeos y supuestos de productividad ----
-const MACH_CATEGORIES = {
+// ---- Claves por categoría (coinciden con tus data-key) ----
+const MACH_KEYS = {
   cama: ['sabanas_s','sabanas_m','sabanas_l','nordico_s','nordico_m','nordico_l','fundas_std'],
   rizo: ['toalla_alfombrin','toalla_manos','toalla_bano','toalla_piscina','albornoz'],
   mant: ['mantel','servilleta']
 };
 
-// Pesos de referencia (por si solo hay kg o solo unidades)
-const REF_WEIGHTS = {
+// Pesos de referencia por si falta ppu visible
+const REF_WEIGHTS_MACH = {
   sabanas_s: 0.50, sabanas_m: 0.70, sabanas_l: 0.90,
   nordico_s: 1.50, nordico_m: 2.00, nordico_l: 2.50,
   fundas_std: 0.20,
@@ -19,211 +19,221 @@ const REF_WEIGHTS = {
   mantel: 0.40, servilleta: 0.05
 };
 
-// Productividades (supuestos simples y conservadores)
-const PRODUCTIVITY = {
-  washer: { // lavadora
-    capacities: [20, 30, 50],         // kg nominales
-    cyclesPerHour: 1.2,               // 45-50 min por ciclo
-    loadFactor: 0.9                    // llenado medio 90%
-  },
-  dryer: { // secadora (solo rizo)
-    capacities: [25, 35],             // kg nominales
-    cyclesPerHour: 1.2,
-    loadFactor: 0.85
-  },
-  ironer: { // calandra mural (para ropa plana: cama + mantelería)
-    // kg/h por máquina según rango: orientativo
-    optionsKgPerHour: [
-      { label: 'Calandra mural pequeña',  kgph: 40 },
-      { label: 'Calandra mural estándar', kgph: 60 },
-      { label: 'Calandra mural grande',   kgph: 80 }
-    ]
-  },
-  towelFolder: { // plegador de toallas
-    piecesPerHour: 400 // uds/h
-  },
-  tonnageWarningKgPerDay: 5000 // >5t/día: sugerir túnel
-};
+// ---- Helpers DOM/num ----
+function m_qs(sel, root=document) { return root.querySelector(sel); }
+function m_qsa(sel, root=document) { return Array.from(root.querySelectorAll(sel)); }
+function m_num(v){ const n=parseFloat(String(v??'').replace(',','.')); return Number.isFinite(n)?n:0; }
 
-// ---- Utilidades DOM ----
-function $$qsa(sel, root = document) { return Array.from(root.querySelectorAll(sel)); }
-function $$qs(sel, root = document)  { return root.querySelector(sel); }
-function num(v) {
-  const n = parseFloat(String(v ?? '').replace(',', '.'));
-  return Number.isFinite(n) ? n : 0;
-}
-
-// Dado un data-key, intenta obtener kg actuales de esa fila.
-// Si no hay kg, estima usando unidades*ppu (o REF_WEIGHTS).
+// ---- Lectura de kg/unidades desde tu configurador ----
 function getKgForKey(key) {
-  const row = $$qs(`.cfg-grid[data-key="${key}"]`);
+  const row = m_qs(`.cfg-grid[data-key="${key}"]`);
   if (!row) return 0;
-
   const kgEl = row.querySelector('[data-field="kg"]');
   const unEl = row.querySelector('[data-field="units"]');
   const puEl = row.querySelector('[data-field="ppu"]');
 
-  // 1) Prioriza kg si hay
-  const k = num(kgEl?.value);
+  const k = m_num(kgEl?.value);
   if (k > 0) return k;
 
-  // 2) Si no, intenta unidades*ppu visible
-  const u = num(unEl?.value);
-  let w = num(puEl?.value);
-  if (!(w > 0)) w = REF_WEIGHTS[key] ?? 0;
+  const u = m_num(unEl?.value);
+  let w = m_num(puEl?.value);
+  if (!(w>0)) w = REF_WEIGHTS_MACH[key] ?? 0;
 
-  return u > 0 && w > 0 ? u * w : 0;
+  return (u>0 && w>0) ? u*w : 0;
 }
-
-// Intenta obtener unidades (para plegador de toallas).
-function getUnitsForKey(key) {
-  const row = $$qs(`.cfg-grid[data-key="${key}"]`);
-  if (!row) return 0;
-  const unEl = row.querySelector('[data-field="units"]');
-  const puEl = row.querySelector('[data-field="ppu"]');
-  const kgEl = row.querySelector('[data-field="kg"]');
-
-  let u = num(unEl?.value);
-  if (u > 0) return u;
-
-  // Si no hay unidades, estima a partir de kg/w
-  const k = num(kgEl?.value);
-  let w = num(puEl?.value);
-  if (!(w > 0)) w = REF_WEIGHTS[key] ?? 0;
-  return k > 0 && w > 0 ? Math.round(k / w) : 0;
-}
-
-// Suma kg de un grupo de claves
-function sumKg(keys) { return keys.reduce((acc, k) => acc + getKgForKey(k), 0); }
-// Suma unidades de un grupo de claves
-function sumUnits(keys) { return keys.reduce((acc, k) => acc + getUnitsForKey(k), 0); }
-
-// ---- Cálculos de dimensionamiento ----
-function requiredPerHour(totalKgPerDay, hoursPerDay) {
-  const h = Math.max(1, Math.min(24, Math.round(hoursPerDay || 8)));
-  return totalKgPerDay / h;
-}
-
-function pickWasherConfig(kgPerHour) {
-  const { capacities, cyclesPerHour, loadFactor } = PRODUCTIVITY.washer;
-  const options = capacities.map(cap => {
-    const eff = cap * cyclesPerHour * loadFactor; // kg/h por máquina
-    return { cap, effKgPh: eff, qty: eff > 0 ? Math.ceil(kgPerHour / eff) : 0 };
+function getUnitsForKeys(keys){
+  let total = 0;
+  keys.forEach(key=>{
+    const row = m_qs(`.cfg-grid[data-key="${key}"]`);
+    if (!row) return;
+    const unEl = row.querySelector('[data-field="units"]');
+    const kgEl = row.querySelector('[data-field="kg"]');
+    const puEl = row.querySelector('[data-field="ppu"]');
+    let u = m_num(unEl?.value);
+    if (u>0) { total += u; return; }
+    const k = m_num(kgEl?.value); let w = m_num(puEl?.value);
+    if (!(w>0)) w = REF_WEIGHTS_MACH[key] ?? 0;
+    if (k>0 && w>0) total += Math.round(k/w);
   });
-  // Escoge la que dé menos máquinas; si empata, la de menor capacidad
-  options.sort((a,b) => a.qty - b.qty || a.cap - b.cap);
-  return options[0];
+  return total;
 }
 
-function pickDryerConfig(rizoKgPerHour) {
-  const { capacities, cyclesPerHour, loadFactor } = PRODUCTIVITY.dryer;
-  const options = capacities.map(cap => {
-    const eff = cap * cyclesPerHour * loadFactor;
-    return { cap, effKgPh: eff, qty: eff > 0 ? Math.ceil(rizoKgPerHour / eff) : 0 };
+// ---- Demanda por hora ----
+function kgPerHour(kgPerDay, hours){
+  const h = Math.max(1, Math.min(24, Math.round(hours||8)));
+  return kgPerDay / h;
+}
+
+// ---- Catálogo activo (checkboxes) ----
+function getActiveModels() {
+  const washers = m_qsa('.mach-model[data-type="washer"]:checked')
+    .map(el => m_num(el.getAttribute('data-cap')) ).filter(Boolean).sort((a,b)=>b-a);
+  const dryers = m_qsa('.mach-model[data-type="dryer"]:checked')
+    .map(el => m_num(el.getAttribute('data-cap')) ).filter(Boolean).sort((a,b)=>b-a);
+  const ironers = m_qsa('.mach-model[data-type="ironer"]:checked')
+    .map(el => m_num(el.getAttribute('data-kgph')) ).filter(Boolean).sort((a,b)=>b-a);
+  return { washers, dryers, ironers };
+}
+
+// ---- Capacidad efectiva por máquina ----
+function washerEffKgPh(cap, fill, washMin){
+  const cyclesPerHour = 60 / Math.max(10, washMin||48);
+  return cap * (fill||0.9) * cyclesPerHour; // kg/h máquina
+}
+function dryerEffKgPh(cap, fill, dryMin, handleMin){
+  const totalMin = Math.max(5, (dryMin||35) + (handleMin||5));
+  const cyclesPerHour = 60 / totalMin;
+  return cap * (fill||0.85) * cyclesPerHour; // kg/h máquina
+}
+function ironerEffKgPh(kgph){ return Math.max(1, kgph||60); } // ya viene en kg/h
+
+// ---- Greedy: compone mix mínimo de máquinas para cubrir demanda kg/h ----
+function composeMix(requiredKgPh, capacitiesEffDesc) {
+  // capacitiesEffDesc: array de capacidades efectivas (kg/h por modelo) ordenado desc
+  const result = []; // [{eff:xx, qty:n}]
+  let remaining = Math.max(0, requiredKgPh);
+
+  if (!capacitiesEffDesc.length || remaining<=0) return result;
+
+  for (let i=0;i<capacitiesEffDesc.length && remaining>0;i++){
+    const eff = capacitiesEffDesc[i];
+    if (eff <= 0) continue;
+    // tomar tantas como haga falta de este modelo
+    const qty = Math.floor(remaining / eff);
+    if (qty > 0) {
+      result.push({ eff, qty });
+      remaining -= qty * eff;
+    }
+    // si aún sobra y es la última opción, redondea al alza 1 más
+    const last = (i === capacitiesEffDesc.length - 1);
+    if (remaining > 0 && last) {
+      result.push({ eff, qty: 1 });
+      remaining = 0;
+    }
+  }
+  return result;
+}
+
+// ---- Render resumen (ej. "2×55 kg + 1×24 kg") ----
+function summarizeWasherMix(washMix, modelCapsAscMap) {
+  // modelCapsAscMap: { effKgPh -> capLabel } para mostrar "×cap kg"
+  // Agrupa por capLabel equivalente (mismo eff no implica mismo cap; por eso pasamos un map)
+  const groups = {};
+  washMix.forEach(({eff, qty})=>{
+    const label = modelCapsAscMap[eff] || `${eff.toFixed(0)} kg/h`;
+    groups[label] = (groups[label]||0) + qty;
   });
-  options.sort((a,b) => a.qty - b.qty || a.cap - b.cap);
-  return options[0];
+  return Object.entries(groups)
+    .map(([lab,qty]) => `${qty}×${lab}`)
+    .join(' + ');
 }
 
-function pickIronerConfig(planKgPerHour) {
-  // planKgPerHour = ropa plana (cama + mantelería) a procesar/hora
-  const opts = PRODUCTIVITY.ironer.optionsKgPerHour
-    .map(o => ({ ...o, qty: o.kgph > 0 ? Math.ceil(planKgPerHour / o.kgph) : 0 }));
-  opts.sort((a,b) => a.qty - b.qty || a.kgph - b.kgph);
-  return opts[0];
-}
-
-function requiredTowelFolders(totalTowelPiecesPerHour) {
-  const tph = PRODUCTIVITY.towelFolder.piecesPerHour;
-  return tph > 0 ? Math.ceil(totalTowelPiecesPerHour / tph) : 0;
-}
-
-// ---- Render ----
 function renderMachinery() {
-  const host = $$qs('#mach-results');
+  const host = m_qs('#mach-results');
   if (!host) return;
 
-  // Kg por categoría
-  const kgCama = sumKg(MACH_CATEGORIES.cama);
-  const kgRizo = sumKg(MACH_CATEGORIES.rizo);
-  const kgMant = sumKg(MACH_CATEGORIES.mant);
+  // Demanda diaria (kg)
+  const kgCama = MACH_KEYS.cama.reduce((s,k)=>s+getKgForKey(k),0);
+  const kgRizo = MACH_KEYS.rizo.reduce((s,k)=>s+getKgForKey(k),0);
+  const kgMant = MACH_KEYS.mant.reduce((s,k)=>s+getKgForKey(k),0);
   const kgTotal = kgCama + kgRizo + kgMant;
 
-  const hours = num($$qs('#mach-hours')?.value) || 8;
+  // Parámetros
+  const hours = m_num(m_qs('#mach-hours')?.value) || 8;
 
-  const kgPerHourTotal = requiredPerHour(kgTotal, hours);
-  const kgPerHourRizo  = requiredPerHour(kgRizo, hours);
-  const kgPerHourPlano = requiredPerHour(kgCama + kgMant, hours);
+  const washMin = m_num(m_qs('#mach-wash-min')?.value) || 48;
+  const washFill = m_num(m_qs('#mach-wash-fill')?.value) || 0.9;
 
-  // Lavadoras (toda la colada)
-  const wPick = pickWasherConfig(kgPerHourTotal);
+  const dryMin = m_num(m_qs('#mach-dry-min')?.value) || 35;
+  const dryHandle = m_num(m_qs('#mach-dry-handle')?.value) || 5;
+  const dryFill = m_num(m_qs('#mach-dry-fill')?.value) || 0.85;
 
-  // Secadoras (solo rizo)
-  const dPick = pickDryerConfig(kgPerHourRizo);
+  const { washers, dryers, ironers } = getActiveModels();
 
-  // Calandra(s) (plano: cama + mantelería)
-  const iPick = pickIronerConfig(kgPerHourPlano);
+  // Demanda por hora
+  const reqWashKgPh  = kgPerHour(kgTotal, hours);
+  const reqDryKgPh   = kgPerHour(kgRizo,  hours);
+  const reqIronKgPh  = kgPerHour(kgCama + kgMant, hours);
 
-  // Plegador toallas (estimación piezas/h)
-  const towelUnitsPerDay =
-    sumUnits(['toalla_manos','toalla_bano','toalla_piscina']); // alfombrín no se pliega en carpeta normalmente
-  const towelUnitsPerHour = towelUnitsPerDay / Math.max(1, Math.min(24, Math.round(hours || 8)));
-  const foldQty = requiredTowelFolders(towelUnitsPerHour);
+  // Capacidades efectivas por modelo (orden desc)
+  // Mapeo eff -> etiqueta de “cap kg” para el resumen
+  const washerEffsDesc = washers.map(cap => washerEffKgPh(cap, washFill, washMin)).sort((a,b)=>b-a);
+  const washerEffToCapLabel = {};
+  washers.forEach(cap => {
+    const eff = washerEffKgPh(cap, washFill, washMin);
+    washerEffToCapLabel[eff] = `${cap} kg`;
+  });
 
-  // Render tabla simple
-  host.innerHTML = `
-    <div class="cfg-grid header" style="grid-template-columns: 2fr 1fr 1fr;">
-      <div>Equipo</div><div>Cantidad</div><div>Notas</div>
-    </div>
+  const dryerEffsDesc = dryers.map(cap => dryerEffKgPh(cap, dryFill, dryMin, dryHandle)).sort((a,b)=>b-a);
+  const dryerEffToCapLabel = {};
+  dryers.forEach(cap => {
+    const eff = dryerEffKgPh(cap, dryFill, dryMin, dryHandle);
+    dryerEffToCapLabel[eff] = `${cap} kg`;
+  });
 
-    <div class="cfg-grid" style="grid-template-columns: 2fr 1fr 1fr; margin-top:8px;">
-      <div>Lavadora(s) (${wPick.cap} kg)</div>
-      <div>${wPick.qty}</div>
-      <div>≈ ${wPick.effKgPh.toFixed(0)} kg/h por máquina</div>
-    </div>
+  const ironerEffsDesc = ironers.map(kgph => ironerEffKgPh(kgph)).sort((a,b)=>b-a);
+  const ironEffToLabel = {};
+  ironers.forEach(kgph => { ironEffToLabel[ironEffKgPh(kgph)] = `${kgph} kg/h`; });
 
-    <div class="cfg-grid" style="grid-template-columns: 2fr 1fr 1fr;">
-      <div>Secadora(s) (${dPick.cap} kg) — solo rizo</div>
-      <div>${dPick.qty}</div>
-      <div>≈ ${dPick.effKgPh.toFixed(0)} kg/h por máquina</div>
-    </div>
+  // Componer mixes
+  const washMix = composeMix(reqWashKgPh, washerEffsDesc);
+  const dryMix  = composeMix(reqDryKgPh,  dryerEffsDesc);
+  const ironMix = composeMix(reqIronKgPh, ironerEffsDesc);
 
-    <div class="cfg-grid" style="grid-template-columns: 2fr 1fr 1fr;">
-      <div>${iPick.label}</div>
-      <div>${iPick.qty}</div>
-      <div>${(iPick.kgph)} kg/h por máquina (plano)</div>
-    </div>
+  // Resumen legible
+  const washSummary = washMix.length
+    ? summarizeWasherMix(washMix, washerEffToCapLabel)
+    : '—';
 
-    <div class="cfg-grid" style="grid-template-columns: 2fr 1fr 1fr;">
-      <div>Plegador de toallas</div>
-      <div>${foldQty}</div>
-      <div>≈ ${PRODUCTIVITY.towelFolder.piecesPerHour} uds/h por máquina</div>
-    </div>
+  const drySummary = dryMix.length
+    ? summarizeWasherMix(dryMix, dryerEffToCapLabel)
+    : '—';
 
-    <div style="margin-top:10px; font-size:12px; opacity:.7">
-      Carga horaria: ${Math.max(1, Math.min(24, Math.round(hours)))} h/día ·
-      Total: ${kgTotal.toFixed(0)} kg/día &mdash; Plano: ${(kgCama+kgMant).toFixed(0)} kg/día · Rizo: ${kgRizo.toFixed(0)} kg/día
-    </div>
-    ${tonnageNote}
-  `;
+  const ironSummary = ironMix.length
+    ? summarizeWasherMix(ironMix, ironEffToLabel)
+    : '—';
+
+  // Plegadores (toallas)
+  const towelUnitsPerDay = getUnitsForKeys(['toalla_manos','toalla_bano','toalla_piscina']);
+  const towelUnitsPerHour = towelUnitsPerDay / Math.max(1, Math.min(24, Math.round(hours||8)));
+  const pph = Math.max(50, m_num(m_qs('#mach-fold-pph')?.value) || 400);
+  const foldQty = Math.ceil(towelUnitsPerHour / pph);
+
+  // HTML resultados
+  const row = (name, qty, note) => `
+    <div class="cfg-grid" style="grid-template-columns: 2fr 1fr 1fr; gap:10px;">
+      <div>${name}</div>
+      <div>${qty > 0 ? qty : '—'}</div>
+      <div>${note || ''}</div>
+    </div>`;
+
+  host.innerHTML = [
+    row('Lavadoras', washMix.reduce((s,r)=>s+r.qty,0), washSummary),
+    row('Secadoras (rizo)', dryMix.reduce((s,r)=>s+r.qty,0), drySummary),
+    row('Calandras (plano)', ironMix.reduce((s,r)=>s+r.qty,0), ironSummary),
+    row('Plegadores de toallas', Math.max(0, foldQty), `${pph} uds/h`)
+  ].join('');
 }
 
-// ---- Eventos / Bootstrap ----
-function hookGlobalInputs() {
-  // Recalcular al escribir en cualquier input del configurador
-  $$qsa('.cfg-input').forEach(inp => {
-    inp.addEventListener('input', renderMachinery);
-    inp.addEventListener('change', renderMachinery);
+// ---- Enlaces de eventos ----
+function hookMachineryRecalc() {
+  // cualquier input del bloque maquinaria
+  m_qsa('#machinery-card .cfg-input').forEach(el=>{
+    el.addEventListener('input', renderMachinery);
+    el.addEventListener('change', renderMachinery);
   });
-  const hoursEl = $$qs('#mach-hours');
-  if (hoursEl) {
-    hoursEl.addEventListener('input', renderMachinery);
-    hoursEl.addEventListener('change', renderMachinery);
-  }
+  // checkboxes de modelos
+  m_qsa('#machinery-card .mach-model').forEach(el=>{
+    el.addEventListener('change', renderMachinery);
+  });
+  // y además escuchar al resto del configurador (para que cambie con kg/unidades)
+  m_qsa('.cfg-input').forEach(el=>{
+    el.addEventListener('input', renderMachinery);
+    el.addEventListener('change', renderMachinery);
+  });
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-  hookGlobalInputs();
-  // primera pasada
+  hookMachineryRecalc();
   renderMachinery();
 });
