@@ -74,7 +74,7 @@ details.cfg-weights > summary { cursor: pointer; list-style: none; }
 details.cfg-weights > summary::-webkit-details-marker { display: none; }
 .weights-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; margin-top: 12px; }
 
-/* ====== Breakdown porcentual ====== */
+/* ====== Breakdown porcentual (solo % kg) ====== */
 .cfg-breakdown { 
   margin-top: 12px; 
   border-top: 1px dashed color-mix(in srgb, currentColor 20%, transparent); 
@@ -85,17 +85,21 @@ details.cfg-weights > summary::-webkit-details-marker { display: none; }
   opacity: .8; 
   margin-bottom: 8px; 
 }
+
+/* -> 2 columnas: [Categoría] [Porcentaje kg] */
 .bd-grid { 
   display: grid; 
-  grid-template-columns: 1.4fr .8fr .8fr; 
+  grid-template-columns: 1.6fr .7fr; 
   gap: 10px; 
 }
+
 .bd-row { 
   display: contents; 
 }
 .bd-row > div { 
   padding: 6px 0; 
   font-size: 14px; 
+  align-self: center;
 }
 .bd-row > div:nth-child(1) { 
   font-weight: 600; 
@@ -105,16 +109,7 @@ details.cfg-weights > summary::-webkit-details-marker { display: none; }
   font-size: 12px; 
   margin-left: 4px; 
 }
-@media (max-width: 620px) {
-  .bd-grid { grid-template-columns: 1.2fr .9fr .9fr; }
-}
 
-/* Responsive */
-@media (max-width: 860px) {
-  .cfg-grid, .cfg-totals { grid-template-columns: 1.7fr .8fr .8fr .8fr; }
-  .cfg-header { flex-direction: column; align-items: flex-start; gap: 6px; }
-}
 @media (max-width: 620px) {
-  .cfg-grid, .cfg-totals { grid-template-columns: 1.5fr 1fr 1fr; }
-  .col-un { display: none; }
+  .bd-grid { grid-template-columns: 1.4fr .8fr; }
 }
