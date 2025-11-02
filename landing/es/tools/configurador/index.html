@@ -266,23 +266,102 @@
     </div>
 
 <!-- ======= Maquinaria necesaria ======= -->
+<!-- ======= Maquinaria necesaria ======= -->
 <section class="cfg-card" id="machinery-card" aria-label="Maquinaria necesaria">
-  <div class="cfg-grid header" role="row" style="grid-template-columns: 1fr auto;">
-    <div>Maquinaria necesaria (estimación)</div>
-    <label style="display:flex; align-items:center; gap:8px;">
-      <span style="font-weight:600; opacity:.8; font-size:14px;">Horas/día</span>
-      <input id="mach-hours" class="cfg-input" type="number" min="1" max="24" step="1" value="8" style="width:90px;">
+  <div class="cfg-grid header" role="row" style="grid-template-columns: 1fr;">
+    <div>Maquinaria necesaria (estimación dinámica)</div>
+  </div>
+
+  <!-- Parámetros globales -->
+  <div class="cfg-grid" style="grid-template-columns: repeat(6, minmax(0,1fr)); gap:10px; margin-top:10px;">
+    <label class="est-field">
+      <span>Horas/día</span>
+      <input id="mach-hours" class="cfg-input" type="number" min="1" max="24" step="1" value="8">
+    </label>
+
+    <label class="est-field">
+      <span>Ciclo lavado (min)</span>
+      <input id="mach-wash-min" class="cfg-input" type="number" min="10" step="1" value="48">
+    </label>
+
+    <label class="est-field">
+      <span>Llenado lavadora</span>
+      <input id="mach-wash-fill" class="cfg-input" type="number" min="0.5" max="1" step="0.05" value="0.9">
+    </label>
+
+    <label class="est-field">
+      <span>Ciclo secado (min)</span>
+      <input id="mach-dry-min" class="cfg-input" type="number" min="10" step="1" value="35">
+    </label>
+
+    <label class="est-field">
+      <span>Manejo secado (min)</span>
+      <input id="mach-dry-handle" class="cfg-input" type="number" min="0" step="1" value="5">
+    </label>
+
+    <label class="est-field">
+      <span>Llenado secadora</span>
+      <input id="mach-dry-fill" class="cfg-input" type="number" min="0.5" max="1" step="0.05" value="0.85">
     </label>
   </div>
 
-  <div id="mach-results" style="margin-top:12px;">
-    <!-- Se rellena por JS -->
+  <!-- Catálogo de modelos activables -->
+  <div class="cfg-grid header" style="grid-template-columns: 1fr; margin-top:12px;">Modelos disponibles</div>
+
+  <div class="cfg-grid" style="grid-template-columns: repeat(3, minmax(0,1fr)); gap: 16px;">
+    <!-- Lavadoras -->
+    <div>
+      <div class="cfg-muted" style="font-weight:600; margin-bottom:6px;">Lavadoras (kg)</div>
+      <div class="est-suite-options">
+        <label class="est-check"><input type="checkbox" class="mach-model" data-type="washer" data-cap="7"   checked> 7</label>
+        <label class="est-check"><input type="checkbox" class="mach-model" data-type="washer" data-cap="8"> 8</label>
+        <label class="est-check"><input type="checkbox" class="mach-model" data-type="washer" data-cap="13"  checked> 13</label>
+        <label class="est-check"><input type="checkbox" class="mach-model" data-type="washer" data-cap="18"  checked> 18</label>
+        <label class="est-check"><input type="checkbox" class="mach-model" data-type="washer" data-cap="24"  checked> 24</label>
+        <label class="est-check"><input type="checkbox" class="mach-model" data-type="washer" data-cap="40"  checked> 40</label>
+        <label class="est-check"><input type="checkbox" class="mach-model" data-type="washer" data-cap="55"  checked> 55</label>
+        <label class="est-check"><input type="checkbox" class="mach-model" data-type="washer" data-cap="110" checked> 110</label>
+      </div>
+    </div>
+
+    <!-- Secadoras -->
+    <div>
+      <div class="cfg-muted" style="font-weight:600; margin-bottom:6px;">Secadoras (kg) – solo rizo</div>
+      <div class="est-suite-options">
+        <label class="est-check"><input type="checkbox" class="mach-model" data-type="dryer" data-cap="18"  checked> 18</label>
+        <label class="est-check"><input type="checkbox" class="mach-model" data-type="dryer" data-cap="36"  checked> 36</label>
+        <label class="est-check"><input type="checkbox" class="mach-model" data-type="dryer" data-cap="54"  checked> 54</label>
+        <label class="est-check"><input type="checkbox" class="mach-model" data-type="dryer" data-cap="110" checked> 110</label>
+      </div>
+    </div>
+
+    <!-- Calandras -->
+    <div>
+      <div class="cfg-muted" style="font-weight:600; margin-bottom:6px;">Calandras (kg/h plano)</div>
+      <div class="est-suite-options">
+        <label class="est-check"><input type="checkbox" class="mach-model" data-type="ironer" data-kgph="40"> 40 kg/h</label>
+        <label class="est-check"><input type="checkbox" class="mach-model" data-type="ironer" data-kgph="60" checked> 60 kg/h</label>
+        <label class="est-check"><input type="checkbox" class="mach-model" data-type="ironer" data-kgph="80"> 80 kg/h</label>
+      </div>
+    </div>
   </div>
 
-  <p class="cfg-note" style="margin-top:10px">
-    Estimación orientativa. Para > <strong>5.000 kg/día</strong> conviene estudiar túneles, prensas, enfriadores y líneas de calandra completas.
-  </p>
+  <!-- Plegadores -->
+  <div class="cfg-grid" style="grid-template-columns: repeat(3, minmax(0,1fr)); gap:10px; margin-top:12px;">
+    <label class="est-field">
+      <span>Plegador toallas (uds/h)</span>
+      <input id="mach-fold-pph" class="cfg-input" type="number" min="100" step="50" value="400">
+    </label>
+    <div></div><div></div>
+  </div>
+
+  <!-- Resultados -->
+  <div class="cfg-grid header" role="row" style="grid-template-columns: 2fr 1fr 1fr; margin-top:12px;">
+    <div>Equipo</div><div>Cantidad</div><div>Detalle</div>
+  </div>
+  <div id="mach-results"></div>
 </section>
+
 
 
 
