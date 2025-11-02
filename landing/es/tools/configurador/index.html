@@ -31,7 +31,6 @@
       </div>
 
 <!-- ======= Estimador por habitaciones (plegable, abierto) ======= -->
-<!-- ======= Estimador por habitaciones (plegable, abierto) ======= -->
 <details class="cfg-estimator" aria-label="Estimador por habitaciones" open>
   <summary class="cfg-muted">Estimador por habitaciones</summary>
 
@@ -69,16 +68,6 @@
           <small>Factor suites</small>
           <input id="est-factor-u" type="number" min="0" step="0.1" class="cfg-input" value="1">
         </div>
-
-        <!-- Opciones SOLO para suites -->
-        <div class="est-suite-options">
-          <label class="est-check">
-            <input id="est-incluir-piscina" type="checkbox"> Incluir toalla de piscina en suites (2 ud)
-          </label>
-          <label class="est-check">
-            <input id="est-incluir-albornoz" type="checkbox"> Incluir albornoces en suites (2 ud)
-          </label>
-        </div>
       </label>
 
       <!-- Cubiertos (mantelería) -->
@@ -92,13 +81,15 @@
       </label>
     </div>
 
+    <!-- Nota (se mantiene, como pediste) -->
+    <p class="cfg-note est-note">1 = un juego por habitación. Ajusta si cambias ropa con más/menos frecuencia.</p>
+
     <div class="est-actions">
       <button id="est-apply" type="button" class="btn-primary">Aplicar estimación</button>
       <button id="est-clear" type="button" class="btn-ghost">Limpiar todo</button>
     </div>
   </div>
 </details>
-
 
 
       
