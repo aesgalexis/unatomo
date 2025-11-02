@@ -264,8 +264,33 @@
       <p class="cfg-note" style="margin-top:10px">Consejo: si conoces tus kilos por categoría, escribe los <strong>kg</strong> y deja las unidades en blanco que se calcularán automaticamente en función del peso por unidad.</p>
 
     </div>
+
+<!-- ======= Maquinaria necesaria ======= -->
+<section class="cfg-card" id="machinery-card" aria-label="Maquinaria necesaria">
+  <div class="cfg-grid header" role="row" style="grid-template-columns: 1fr auto;">
+    <div>Maquinaria necesaria (estimación)</div>
+    <label style="display:flex; align-items:center; gap:8px;">
+      <span style="font-weight:600; opacity:.8; font-size:14px;">Horas/día</span>
+      <input id="mach-hours" class="cfg-input" type="number" min="1" max="24" step="1" value="8" style="width:90px;">
+    </label>
+  </div>
+
+  <div id="mach-results" style="margin-top:12px;">
+    <!-- Se rellena por JS -->
+  </div>
+
+  <p class="cfg-note" style="margin-top:10px">
+    Estimación orientativa. Para > <strong>5.000 kg/día</strong> conviene estudiar túneles, prensas, enfriadores y líneas de calandra completas.
+  </p>
+</section>
+
+
+
+    
   </main>
 
   <script src="/landing/es/tools/configurador/configurador.js"></script>
+  <script src="/landing/es/tools/configurador/calc_maquinaria.js"></script>
+
 </body>
 </html>
