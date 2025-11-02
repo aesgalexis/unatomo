@@ -30,6 +30,36 @@ const CATEGORIES = {
   mant: ['mantel','servilleta']
 };
 
+// ====== Estimador por habitaciones (matriz de consumo) ======
+// Unidades por habitación; luego se multiplica por nº de habitaciones y factor.
+const ROOM_MATRIX = {
+  simple: {
+    sabanas_s: 2,       // encimera + bajera
+    fundas_std: 1,
+    nordico_s: 1,
+    toalla_manos: 1,
+    toalla_bano: 1,
+    toalla_alfombrin: 1
+  },
+  doble: {
+    sabanas_m: 2,
+    fundas_std: 2,
+    nordico_m: 1,
+    toalla_manos: 2,
+    toalla_bano: 2,
+    toalla_alfombrin: 1
+  },
+  suite: {
+    sabanas_l: 2,
+    fundas_std: 4,      // suites suelen tener 4 almohadas
+    nordico_l: 1,
+    toalla_manos: 2,
+    toalla_bano: 2,
+    toalla_alfombrin: 1
+    // piscina y albornoz opcionales se añaden en runtime
+  }
+};
+
 const state = {
   weights: { ...DEFAULT_WEIGHTS },
   rows: {}
@@ -105,7 +135,6 @@ function updateTotals() {
   if (tK) tK.value = totalKg ? totalKg.toFixed(2) : '';
 
   // ===== Breakdown porcentual por categoría (solo kg) =====
-  // Suma de kg por categoría
   const sumKg = (keys) => {
     let k = 0;
     keys.forEach(key => { k += parseNum(state.rows[key]?.kg?.value); });
@@ -160,7 +189,64 @@ function buildWeightsPanel() {
   });
 }
 
+// ====== Estimador por habitaciones (helpers) ======
+function setUnitsForKey(key, units) {
+  const row = state.rows[key];
+  if (!row) return;
+  if (row.units) { row.units.value = units > 0 ? Math.round(units) : ''; }
+  onUnitsChange(key); // recalcula kg
+}
+
+function clearAllRows() {
+  Object.values(state.rows).forEach(({ units, kg }) => {
+    if (units) units.value = '';
+    if (kg) kg.value = '';
+  });
+  updateTotals();
+}
+
+function applyEstimator() {
+  const s = parseNum(document.getElementById('est-simples')?.value);
+  const d = parseNum(document.getElementById('est-dobles')?.value);
+  const u = parseNum(document.getElementById('est-suites')?.value);
+  const f = Math.max(0, parseNum(document.getElementById('est-factor')?.value) || 1);
+
+  const incPiscina  = !!document.getElementById('est-incluir-piscina')?.checked;
+  const incAlbornoz = !!document.getElementById('est-incluir-albornoz')?.checked;
+
+  // Totales por item
+  const totalsByKey = {};
+  Object.keys(state.rows).forEach(k => totalsByKey[k] = 0);
+
+  function addForRooms(count, roomDef) {
+    if (count <= 0) return;
+    Object.entries(roomDef).forEach(([key, perRoom]) => {
+      if (totalsByKey[key] !== undefined) {
+        totalsByKey[key] += perRoom * count * f;
+      }
+    });
+  }
+
+  addForRooms(s, ROOM_MATRIX.simple);
+  addForRooms(d, ROOM_MATRIX.doble);
+
+  const suiteDef = { ...ROOM_MATRIX.suite };
+  if (incPiscina)  suiteDef.toalla_piscina = (suiteDef.toalla_piscina || 0) + 2;
+  if (incAlbornoz) suiteDef.albornoz       = (suiteDef.albornoz || 0) + 2;
+  addForRooms(u, suiteDef);
+
+  // Aplicar a la UI
+  Object.entries(totalsByKey).forEach(([key, units]) => setUnitsForKey(key, units));
+  updateTotals();
+}
+
 window.addEventListener('DOMContentLoaded', () => {
   initRows();
   buildWeightsPanel();
+
+  // Estimador (si existe el bloque en el HTML)
+  const btnApply = document.getElementById('est-apply');
+  const btnClear = document.getElementById('est-clear');
+  if (btnApply) btnApply.addEventListener('click', applyEstimator);
+  if (btnClear) btnClear.addEventListener('click', clearAllRows);
 });
