@@ -3,40 +3,35 @@
   const form = document.querySelector('.contact-form');
   if (!form) return;
 
-  // Mensaje inline: crea uno si no existe
-  let statusEl = form.querySelector('.form-status');
+  const submitBtn = form.querySelector('button[type="submit"], [type="submit"]');
+  if (!submitBtn) return;
+
+  // Crear/colocar el mensaje a la IZQUIERDA del botón
+  let statusEl = form.querySelector('.form-status-inline');
   if (!statusEl) {
-    statusEl = document.createElement('p');
-    statusEl.className = 'form-status';
+    statusEl = document.createElement('span');
+    statusEl.className = 'form-status-inline';
     statusEl.setAttribute('role', 'status');
     statusEl.setAttribute('aria-live', 'polite');
     statusEl.hidden = true;
-    form.appendChild(statusEl);
   }
 
-  // Toast superior (opcional)
-  function showToast(msg, variant = 'ok', timeout = 4000) {
-    const t = document.createElement('div');
-    t.className = `toast ${variant}`;
-    t.textContent = msg;
-    document.body.appendChild(t);
-    // fuerza reflow para la animación
-    // eslint-disable-next-line no-unused-expressions
-    t.offsetHeight; 
-    t.classList.add('show');
-    setTimeout(() => {
-      t.classList.remove('show');
-      t.addEventListener('transitionend', () => t.remove(), { once: true });
-    }, timeout);
+  // Asegurar contenedor en fila para status + botón
+  let actions = submitBtn.parentElement;
+  if (!actions || !actions.classList.contains('form-actions')) {
+    actions = document.createElement('div');
+    actions.className = 'form-actions';
+    submitBtn.replaceWith(actions);
+    actions.appendChild(statusEl);       // primero el mensaje
+    actions.appendChild(submitBtn);      // luego el botón
+  } else {
+    actions.insertBefore(statusEl, submitBtn);
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
 
-    const submitBtn = form.querySelector('button[type="submit"]');
-    submitBtn?.setAttribute('disabled', 'true');
-
-    // Construye el cuerpo
+    submitBtn.setAttribute('disabled', 'true');
     const data = new FormData(form);
 
     try {
@@ -47,41 +42,32 @@
       });
 
       if (res.ok) {
-        // Mensaje inline
         statusEl.textContent = 'Su mensaje ha sido enviado correctamente. Responderemos lo antes posible.';
         statusEl.classList.remove('error');
         statusEl.classList.add('success');
         statusEl.hidden = false;
-
-        // Toast opcional arriba
-        showToast('Mensaje enviado ✅', 'ok', 3500);
-
-        // Limpia y oculta el inline a los 5s
         form.reset();
+
+        // Ocultar a los 5s
         setTimeout(() => { statusEl.hidden = true; }, 5000);
       } else {
-        // Intenta leer error de Formspree
         let errText = 'Ha ocurrido un problema. Inténtelo de nuevo.';
         try {
           const j = await res.json();
-          if (j?.errors?.length) {
-            errText = j.errors.map(e => e.message).join(' · ');
-          }
+          if (j?.errors?.length) errText = j.errors.map(e => e.message).join(' · ');
         } catch {}
         statusEl.textContent = errText;
         statusEl.classList.remove('success');
         statusEl.classList.add('error');
         statusEl.hidden = false;
-        showToast('No se pudo enviar 😕', 'error', 4000);
       }
-    } catch (err) {
-      statusEl.textContent = 'No hay conexión o el servicio no responde. Vuelva a intentarlo en unos segundos.';
+    } catch {
+      statusEl.textContent = 'No hay conexión o el servicio no responde. Vuelva a intentarlo.';
       statusEl.classList.remove('success');
       statusEl.classList.add('error');
       statusEl.hidden = false;
-      showToast('Error de red', 'error', 4000);
     } finally {
-      submitBtn?.removeAttribute('disabled');
+      submitBtn.removeAttribute('disabled');
     }
   }
 
