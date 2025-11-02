@@ -215,3 +215,4 @@ details.cfg-estimator > summary::-webkit-details-marker { display: none; }
 @media (max-width: 680px) {
   .est-grid { grid-template-columns: 1fr; }
 }
+.cfg-estimator .btn-primary { color: #000; }
