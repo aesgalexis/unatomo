@@ -113,3 +113,46 @@ details.cfg-weights > summary::-webkit-details-marker { display: none; }
 @media (max-width: 620px) {
   .bd-grid { grid-template-columns: 1.4fr .8fr; }
 }
+
+
+
+
+/* ====== Estimador (plegable) ====== */
+details.cfg-estimator { margin: 0 0 16px 0; }
+details.cfg-estimator > summary {
+  cursor: pointer; list-style: none; padding: 6px 0; font-weight: 600;
+}
+details.cfg-estimator > summary::-webkit-details-marker { display: none; }
+
+.est-body { margin-top: 8px; }
+
+.est-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0,1fr));
+  gap: 10px;
+  margin-top: 8px;
+}
+.est-field { display: grid; gap: 6px; font-size: 14px; }
+.est-field small { line-height: 1.2; }
+
+.est-opts { margin-top: 8px; }
+.est-opt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+.est-check { display: flex; gap: 8px; align-items: center; font-size: 14px; }
+
+.est-actions { display: flex; gap: 10px; margin-top: 12px; }
+
+/* Botones mínimos */
+.btn-primary, .btn-ghost {
+  height: 38px; padding: 0 12px; border-radius: 8px; border: 1px solid;
+  background: #fff; cursor: pointer; font-weight: 600;
+  border-color: color-mix(in srgb, currentColor 25%, transparent);
+}
+.btn-primary { background: color-mix(in srgb, #111 5%, #fff); }
+.btn-primary:focus, .btn-ghost:focus { outline: none; box-shadow: 0 0 0 2px color-mix(in srgb, #111 12%, transparent); }
+.btn-ghost { background: transparent; }
+
+@media (max-width: 860px) {
+  .est-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .est-opt-grid { grid-template-columns: 1fr; }
+}
+
