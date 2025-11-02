@@ -45,21 +45,28 @@ body { background: #fff; }
 
 /* Filas agrupables por familia */
 .cfg-family { margin-top: 18px; }
-.cfg-family > .fam-title { font-weight: 600; margin: 10px 0 8px; font-size: 15px; opacity: .75; }
+.cfg-family > .fam-title { font-weight: 700; margin: 10px 0 8px; font-size: 15px; color: #000; opacity: 1; }
 
 /* Celdas e inputs */
-.item-name { display: flex; align-items: center; gap: 8px; }
+.item-name { display: flex; align-items: center; gap: 8px; color: color-mix(in srgb, currentColor 60%, transparent); }
 .item-sub { font-size: 12px; opacity: .75; }
 
-.cfg-input { width: 100%; box-sizing: border-box; height: 38px; padding: 6px 10px; border-radius: 8px; border: 1px solid color-mix(in srgb, currentColor 18%, transparent); background: #fff; color: #111; font-size: 14px; }
+.cfg-input { width: 100%; box-sizing: border-box; height: 38px; padding: 6px 10px; border-radius: 8px; border: 1px solid color-mix(in srgb, currentColor 18%, transparent); background: #fff; color: #111; font-size: 14px; color-scheme: light; }
 .cfg-input[readonly] { background: #fafafa; color: #333; }
 .cfg-input:focus { outline: none; border-color: color-mix(in srgb, #111 40%, transparent); box-shadow: 0 0 0 2px color-mix(in srgb, #111 10%, transparent); }
+
+/* Spinners sin fondo */
+.cfg-input[type=number]::-webkit-inner-spin-button,
+.cfg-input[type=number]::-webkit-outer-spin-button { background: transparent; margin: 0; }
+/* Firefox */
+.cfg-input[type=number] { -moz-appearance: textfield; }
 
 .cfg-note { font-size: 12px; opacity: .7; margin-top: 4px; }
 
 /* Totales */
 .cfg-totals { display: grid; grid-template-columns: 1fr .6fr .6fr; gap: 10px; margin-top: 16px; align-items: center; }
 .cfg-totals .sum { font-weight: 700; font-size: 16px; }
+.cfg-totals label { display: grid; gap: 4px; font-size: 12px; opacity: .7; }
 
 /* Panel de ajustes */
 details.cfg-weights { margin-top: 18px; }
