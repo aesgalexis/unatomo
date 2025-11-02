@@ -163,23 +163,25 @@ select.field {
   }
 }
 /* Mensaje inline debajo del formulario */
-.form-status {
-  margin-top: 12px;
-  font-weight: 600;
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid transparent;
+
+.form-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
 }
-.form-status.success {
-  color: #065f46;
-  background: #ecfdf5;
-  border-color: #a7f3d0;
+
+/* Mensaje minimal (sin marco, texto verde pequeño) */
+.form-status-inline {
+  font-size: .95rem;
+  line-height: 1.2;
+  font-weight: 500;
 }
-.form-status.error {
-  color: #991b1b;
-  background: #fef2f2;
-  border-color: #fecaca;
-}
+
+/* Éxito en verde, Error en rojo, sin bordes ni fondo */
+.form-status-inline.success { color: #047857; } /* verde */
+.form-status-inline.error   { color: #b91c1c; } /* rojo */
+
 
 /* Toast superior */
 .toast {
