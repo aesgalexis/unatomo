@@ -256,3 +256,38 @@ window.addEventListener('DOMContentLoaded', () => {
   if (btnApply) btnApply.addEventListener('click', applyEstimator);
   if (btnClear) btnClear.addEventListener('click', clearAllRows);
 });
+function addCustomItem(prefillName = '', prefillPPU = 0) {
+  const host = document.getElementById('otros-rows');
+  if (!host) return;
+
+  const key = 'custom_' + (++state.customSeq);
+
+  // Fila con mismos 4 campos: [Artículo] [Unidades] [Kilos] [Peso/ud]
+  const row = document.createElement('div');
+  row.className = 'cfg-grid';
+  row.setAttribute('data-key', key);
+  row.innerHTML = `
+    <div class="item-name">
+      <input class="cfg-input" type="text" data-field="name" placeholder="Nombre del artículo" value="${prefillName}">
+    </div>
+    <input class="cfg-input col-un" type="number" min="0" step="1" inputmode="numeric" placeholder="0" data-field="units">
+    <input class="cfg-input" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" data-field="kg">
+    <input class="cfg-input" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" data-field="ppu" value="${Number(prefillPPU || 0).toFixed(2)}">
+  `;
+
+  host.appendChild(row);
+
+  // Registrar en estado y enganchar eventos
+  const units = row.querySelector('[data-field="units"]');
+  const kg    = row.querySelector('[data-field="kg"]');
+  const ppu   = row.querySelector('[data-field="ppu"]');
+  const name  = row.querySelector('[data-field="name"]');
+
+  state.rows[key] = { row, units, kg, ppu, name }; // 'name' es informativo
+
+  if (units) units.addEventListener('input', () => onUnitsChange(key));
+  if (kg)    kg.addEventListener('input',    () => onKgChange(key));
+  if (ppu)   ppu.addEventListener('input',   () => onPpuChange(key));
+
+  updateTotals();
+}
