@@ -30,6 +30,52 @@
         <p class="cfg-muted">Introduce <strong>kg</strong> o <strong>unidades</strong>; calculamos la otra cifra al vuelo. Puedes ajustar pesos por pieza.</p>
       </div>
 
+<!-- ======= Estimador por habitaciones (plegable) ======= -->
+<details class="cfg-estimator" aria-label="Estimador por habitaciones">
+  <summary class="cfg-muted">Estimador por habitaciones</summary>
+
+  <div class="cfg-card est-body">
+    <p class="cfg-muted" style="margin-top:0">
+      Introduce nº de habitaciones y un factor de reposición. Al aplicar, rellenamos las <strong>unidades</strong>; los <strong>kg</strong> se calculan solos.
+    </p>
+
+    <div class="est-grid">
+      <label class="est-field">
+        <span>Simples</span>
+        <input id="est-simples" type="number" min="0" step="1" class="cfg-input" placeholder="0">
+      </label>
+      <label class="est-field">
+        <span>Dobles</span>
+        <input id="est-dobles" type="number" min="0" step="1" class="cfg-input" placeholder="0">
+      </label>
+      <label class="est-field">
+        <span>Suites</span>
+        <input id="est-suites" type="number" min="0" step="1" class="cfg-input" placeholder="0">
+      </label>
+
+      <label class="est-field">
+        <span>Factor de reposición</span>
+        <input id="est-factor" type="number" min="0" step="0.1" class="cfg-input" value="1">
+        <small class="cfg-note">1 = un juego por habitación (ajústalo según frecuencia de cambio)</small>
+      </label>
+    </div>
+
+    <details class="est-opts">
+      <summary class="cfg-muted">Opciones</summary>
+      <div class="est-opt-grid">
+        <label class="est-check"><input id="est-incluir-piscina" type="checkbox"> Incluir toalla de piscina en suites (2 ud)</label>
+        <label class="est-check"><input id="est-incluir-albornoz" type="checkbox"> Incluir albornoces en suites (2 ud)</label>
+      </div>
+    </details>
+
+    <div class="est-actions">
+      <button id="est-apply" type="button" class="btn-primary">Aplicar estimación</button>
+      <button id="est-clear" type="button" class="btn-ghost">Limpiar todo</button>
+    </div>
+  </div>
+</details>
+
+      
       <section class="cfg-card" aria-label="Configurador de piezas y kilos">
         <!-- Cabecera de columnas -->
         <div class="cfg-grid header" role="row">
