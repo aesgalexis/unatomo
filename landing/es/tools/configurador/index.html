@@ -30,8 +30,8 @@
         <p class="cfg-muted">Introduce <strong>kg</strong> o <strong>unidades</strong>; calculamos la otra cifra al vuelo. Puedes ajustar pesos por pieza.</p>
       </div>
 
-<!-- ======= Estimador por habitaciones (plegable) ======= -->
-<details class="cfg-estimator" aria-label="Estimador por habitaciones">
+<!-- ======= Estimador por habitaciones (plegable, abierto) ======= -->
+<details class="cfg-estimator" aria-label="Estimador por habitaciones" open>
   <summary class="cfg-muted">Estimador por habitaciones</summary>
 
   <div class="cfg-card est-body">
@@ -52,21 +52,28 @@
         <span>Suites</span>
         <input id="est-suites" type="number" min="0" step="1" class="cfg-input" placeholder="0">
       </label>
-
+      <label class="est-field">
+        <span>Cubiertos</span>
+        <input id="est-cubiertos" type="number" min="0" step="1" class="cfg-input" placeholder="0">
+      </label>
       <label class="est-field">
         <span>Factor de reposición</span>
         <input id="est-factor" type="number" min="0" step="0.1" class="cfg-input" value="1">
-        <small class="cfg-note">1 = un juego por habitación (ajústalo según frecuencia de cambio)</small>
       </label>
     </div>
 
-    <details class="est-opts">
-      <summary class="cfg-muted">Opciones</summary>
-      <div class="est-opt-grid">
-        <label class="est-check"><input id="est-incluir-piscina" type="checkbox"> Incluir toalla de piscina en suites (2 ud)</label>
-        <label class="est-check"><input id="est-incluir-albornoz" type="checkbox"> Incluir albornoces en suites (2 ud)</label>
-      </div>
-    </details>
+    <!-- Nota fuera del grid para que el factor quede alineado -->
+    <p class="cfg-note est-note">1 = un juego por habitación. Ajusta si cambias ropa con más/menos frecuencia.</p>
+
+    <!-- Opciones siempre visibles (sin details) -->
+    <div class="est-opt-grid">
+      <label class="est-check">
+        <input id="est-incluir-piscina" type="checkbox"> Incluir toalla de piscina en suites (2 ud)
+      </label>
+      <label class="est-check">
+        <input id="est-incluir-albornoz" type="checkbox"> Incluir albornoces en suites (2 ud)
+      </label>
+    </div>
 
     <div class="est-actions">
       <button id="est-apply" type="button" class="btn-primary">Aplicar estimación</button>
@@ -74,6 +81,7 @@
     </div>
   </div>
 </details>
+
 
       
       <section class="cfg-card" aria-label="Configurador de piezas y kilos">
