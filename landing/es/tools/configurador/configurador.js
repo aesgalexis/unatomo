@@ -71,6 +71,11 @@ function parseNum(v) {
   const n = parseFloat(String(v).replace(',', '.'));
   return Number.isFinite(n) ? n : 0;
 }
+// marcar/desmarcar inválido (usa clase CSS is-invalid)
+function markInvalid(el, invalid) {
+  if (!el) return;
+  el.classList.toggle('is-invalid', !!invalid);
+}
 
 // ====== Init filas ======
 function initRows() {
@@ -107,9 +112,20 @@ function initRows() {
 
 // ====== Handlers fila ======
 function onUnitsChange(key) {
-  const { units, kg, ppu } = state.rows[key];
+  const { units, kg, ppu, name } = state.rows[key];
   const w = parseNum(ppu?.value) || state.weights[key] || 0; // kg/ud
   const u = parseNum(units?.value);
+
+  // Si es una fila custom con ppu vacío/0, marcar rojo y no calcular
+  if (ppu && ppu.closest('#fam-otros') && !(w > 0)) {
+    markInvalid(ppu, true);
+    if (kg) kg.value = '';
+    updateTotals();
+    return;
+  } else if (ppu && ppu.closest('#fam-otros')) {
+    markInvalid(ppu, false);
+  }
+
   const k = w * u;
 
   if (kg) {
@@ -123,6 +139,17 @@ function onKgChange(key) {
   const { units, kg, ppu } = state.rows[key];
   const w = parseNum(ppu?.value) || state.weights[key] || 0;
   const k = parseNum(kg?.value);
+
+  // Si es una fila custom con ppu vacío/0, marcar rojo y no calcular
+  if (ppu && ppu.closest('#fam-otros') && !(w > 0)) {
+    markInvalid(ppu, true);
+    if (units) units.value = '';
+    updateTotals();
+    return;
+  } else if (ppu && ppu.closest('#fam-otros')) {
+    markInvalid(ppu, false);
+  }
+
   const u = w ? (k / w) : 0;
 
   if (units) {
@@ -135,7 +162,14 @@ function onKgChange(key) {
 function onPpuChange(key) {
   const { units, kg, ppu } = state.rows[key];
   const newW = parseNum(ppu?.value);
+
+  // Actualizar peso para filas estándar
   if (newW > 0) state.weights[key] = newW;
+
+  // Validación visual solo para custom (familia "Otros")
+  if (ppu && ppu.closest('#fam-otros')) {
+    markInvalid(ppu, !(newW > 0));
+  }
 
   // Recalcula según último input no vacío (prioriza kg si hay)
   const k = parseNum(kg?.value);
@@ -187,9 +221,11 @@ function setUnitsForKey(key, units) {
 
 function clearAllRows() {
   // Tabla principal
-  Object.values(state.rows).forEach(({ units, kg }) => {
+  Object.values(state.rows).forEach(({ units, kg, ppu }) => {
     if (units) units.value = '';
     if (kg)    kg.value    = '';
+    // limpiar estados inválidos de posibles custom
+    if (ppu && ppu.closest('#fam-otros')) markInvalid(ppu, false);
   });
 
   // Estimador: limpiar campos y resetear factores a 1
@@ -258,6 +294,8 @@ window.addEventListener('DOMContentLoaded', () => {
   if (btnClear) btnClear.addEventListener('click', clearAllRows);
   if (btnAddOther) btnAddOther.addEventListener('click', () => addCustomItem());
 });
+
+// ====== “Otros”: añadir fila libre ======
 function addCustomItem(prefillName = '', prefillPPU = 0) {
   const host = document.getElementById('otros-rows');
   if (!host) return;
@@ -274,7 +312,7 @@ function addCustomItem(prefillName = '', prefillPPU = 0) {
     </div>
     <input class="cfg-input col-un" type="number" min="0" step="1" inputmode="numeric" placeholder="0" data-field="units">
     <input class="cfg-input" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" data-field="kg">
-    <input class="cfg-input" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" data-field="ppu" value="${Number(prefillPPU || 0).toFixed(2)}">
+    <input class="cfg-input" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" data-field="ppu">
   `;
 
   host.appendChild(row);
@@ -285,11 +323,37 @@ function addCustomItem(prefillName = '', prefillPPU = 0) {
   const ppu   = row.querySelector('[data-field="ppu"]');
   const name  = row.querySelector('[data-field="name"]');
 
-  state.rows[key] = { row, units, kg, ppu, name }; // 'name' es informativo
+  // En custom: PPU empieza vacío y marcado como inválido (rojo) hasta que sea > 0
+  ppu.value = prefillPPU > 0 ? Number(prefillPPU).toFixed(2) : '';
+  markInvalid(ppu, !(parseNum(ppu.value) > 0));
+
+  // (Opcional) nombre obligatorio → marcar si vacío
+  if (name) markInvalid(name, name.value.trim() === '');
+
+  state.rows[key] = { row, units, kg, ppu, name };
+
+  // Listeners
+  if (name) {
+    const validateName = () => markInvalid(name, name.value.trim() === '');
+    name.addEventListener('input', validateName);
+    name.addEventListener('blur',  validateName);
+  }
+
+  if (ppu) {
+    ppu.addEventListener('input', () => {
+      const v = parseNum(ppu.value);
+      markInvalid(ppu, !(v > 0));
+      // Si ya hay algo en unidades o kg, recalculo con el nuevo ppu
+      const k = parseNum(kg?.value);
+      const u = parseNum(units?.value);
+      if (k) onKgChange(key);
+      else if (u) onUnitsChange(key);
+      else updateTotals();
+    });
+  }
 
   if (units) units.addEventListener('input', () => onUnitsChange(key));
   if (kg)    kg.addEventListener('input',    () => onKgChange(key));
-  if (ppu)   ppu.addEventListener('input',   () => onPpuChange(key));
 
   updateTotals();
 }
