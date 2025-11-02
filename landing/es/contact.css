@@ -162,3 +162,46 @@ select.field {
     max-width: 100%;
   }
 }
+/* Mensaje inline debajo del formulario */
+.form-status {
+  margin-top: 12px;
+  font-weight: 600;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+}
+.form-status.success {
+  color: #065f46;
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+}
+.form-status.error {
+  color: #991b1b;
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
+/* Toast superior */
+.toast {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-10px);
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, currentColor 25%, transparent);
+  background: color-mix(in srgb, currentColor 8%, transparent);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 6px 14px rgba(0,0,0,.15);
+  opacity: 0;
+  transition: opacity .18s ease, transform .18s ease;
+  z-index: 9999;
+}
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+:root[data-theme="light"] .toast.ok    { color: #065f46; }
+:root[data-theme="light"] .toast.error { color: #7f1d1d; }
+:root[data-theme="dark"]  .toast.ok    { color: #34d399; }
+:root[data-theme="dark"]  .toast.error { color: #fca5a5; }
