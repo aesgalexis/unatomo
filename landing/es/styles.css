@@ -749,7 +749,12 @@ p {
 #screen11 .footer .to-top {
   color: currentColor;
   text-decoration: none;
-  border: 1px solid color-mix(in srgb, currentColor 25%, transparent);
+  background: url("/static/img/idf.png") center center / cover no-repeat;
+    
+     content: "";
+  position: absolute;opacity: 0.5;  
+     z-index: -1;      
+   border: 1px solid color-mix(in srgb, currentColor 25%, transparent);
   border-radius: 8px;
   padding: 6px 10px;
 }
@@ -763,3 +768,17 @@ p {
   #screen11 .footer .footer-legal { margin-top: 4px; }
 }
 
+footer {
+  position: relative;
+  z-index: 0;              /* asegura que el contenido quede por encima */
+  /* si ya tienes padding/color, déjalo */
+}
+
+footer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("/static/img/idf.png") center center / cover no-repeat;
+  opacity: 0.5;            /* 50% de transparencia */
+  z-index: -1;             /* se queda detrás del contenido del footer */
+}
