@@ -752,7 +752,7 @@ p {
   background: url("/static/img/idf.png") center center / cover no-repeat;
     
      content: "";
-  position: absolute;opacity: 0.5;  
+  position: absolute;opacity: 0.25;  
      z-index: -1;      
    border: 1px solid color-mix(in srgb, currentColor 25%, transparent);
   border-radius: 8px;
@@ -779,6 +779,6 @@ footer::before {
   position: absolute;
   inset: 0;
   background: url("/static/img/idf.png") center center / cover no-repeat;
-  opacity: 0.5;            /* 50% de transparencia */
+  opacity: 0.25;            /* 50% de transparencia */
   z-index: -1;             /* se queda detrás del contenido del footer */
 }
