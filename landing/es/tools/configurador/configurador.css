@@ -266,13 +266,12 @@ details.cfg-estimator > summary::-webkit-details-marker { display: none; }
   letter-spacing: -.2px;
 }
 
-/* Marco interno */
+/* Marco interno: alineado con el resto de la tarjeta */
 .mach-frame {
   margin-top: 10px;
-  padding: 12px 12px 14px;
-  border-radius: 10px;
-  border: 1px solid color-mix(in srgb, currentColor 18%, transparent);
-  background: #fafafa;
+  padding-top: 8px;
+  border-top: 1px dashed color-mix(in srgb, currentColor 18%, transparent);
+  background: transparent;
 }
 
 /* Controles de cálculo */
@@ -292,12 +291,16 @@ details.cfg-estimator > summary::-webkit-details-marker { display: none; }
   min-width: 180px;
 }
 
+.mach-add-btn,
 .mach-adjust-btn {
-  margin-left: auto;
-  align-self: flex-end;
   height: 38px;
   padding: 0 14px;
   font-size: 13px;
+}
+
+.mach-adjust-btn {
+  margin-left: auto;
+  align-self: flex-end;
 }
 
 /* Lista de lavadoras individuales */
@@ -309,8 +312,8 @@ details.cfg-estimator > summary::-webkit-details-marker { display: none; }
 }
 
 .mach-item {
-  display: grid;
-  grid-template-columns: 1.4fr 1.6fr;
+  display: flex;
+  flex-wrap: wrap;
   gap: 10px;
   align-items: flex-start;
   padding: 8px 10px;
@@ -319,37 +322,33 @@ details.cfg-estimator > summary::-webkit-details-marker { display: none; }
   background: #fff;
 }
 
-.mach-item-main {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+.mach-item-header {
+  flex: 0 0 auto;
+  min-width: 140px;
+  max-width: 220px;
 }
 
-.mach-item-title {
+.mach-name-input {
+  height: 34px;
   font-weight: 600;
   font-size: 14px;
 }
 
-.mach-item-sub {
-  font-size: 12px;
-  opacity: .8;
+.mach-item-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-end;
+  flex: 1 1 auto;
 }
 
-.mach-item-sub label {
+.mach-item-fields label {
   display: flex;
   flex-direction: column;
   gap: 4px;
-}
-
-.mach-item-cycle {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.mach-item-cycle label {
   font-size: 12px;
   opacity: .8;
+  min-width: 140px;
 }
 
 .mach-item-info {
@@ -430,11 +429,15 @@ details.cfg-estimator > summary::-webkit-details-marker { display: none; }
   }
 
   .mach-item {
-    grid-template-columns: 1fr;
+    flex-direction: column;
   }
 
   .mach-adjust-btn {
     width: 100%;
     margin-left: 0;
+  }
+
+  .mach-add-btn {
+    width: 100%;
   }
 }
