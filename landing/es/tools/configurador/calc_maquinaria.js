@@ -1,6 +1,6 @@
 // calc_maquinaria.js
 // Recomendación de lavadoras a partir de los kg totales, jornada,
-// y ciclos individuales por lavadora.
+// capacidades y ciclos individuales por lavadora.
 
 (function () {
   // Capacidades disponibles (kg)
@@ -47,17 +47,14 @@
     return machine.cap * cyclesPerDay;
   }
 
-  // ====== Cálculo de composición (número y capacidad de lavadoras) ======
-  // IMPORTANTE: la composición se calcula asumiendo el ciclo por defecto (60 min),
-  // igual que la versión anterior. Luego los ciclos reales ajustan la cobertura.
-
+  // ====== Cálculo de composición base (asumiendo ciclo de 60 min) ======
   function computeAutoComposition(kgPerDay, hours) {
     if (kgPerDay <= 0 || hours <= 0) return [];
 
     const sortedDesc = [...WASH_CAPACITIES].sort((a, b) => b - a);
     const sortedAsc = [...WASH_CAPACITIES].sort((a, b) => a - b);
 
-    const capPerDay = cap => cap * hours; // asumiendo 1 ciclo/hora (55+5 → 60 min)
+    const capPerDay = cap => cap * hours; // asumiendo 1 ciclo/hora
     let remaining = kgPerDay;
 
     const comp = [];
@@ -90,14 +87,13 @@
       comp.push({ cap, n });
     });
 
-    // Orden por capacidad desc para que se vean grandes primero
     comp.sort((a, b) => b.cap - a.cap);
     return comp;
   }
 
   function computeFixedComposition(kgPerDay, hours, cap) {
     if (kgPerDay <= 0 || hours <= 0 || cap <= 0) return [];
-    const perMachine = cap * hours; // con ciclo por defecto de 60 min
+    const perMachine = cap * hours; // 1 ciclo/hora (60 min)
     const n = Math.max(1, Math.ceil(kgPerDay / perMachine));
     return [{ cap, n }];
   }
@@ -140,7 +136,12 @@
       wrapper.innerHTML = `
         <div class="mach-item-main">
           <div class="mach-item-title">Lavadora ${idx + 1}</div>
-          <div class="mach-item-sub">${m.cap} kg</div>
+          <div class="mach-item-sub">
+            <label>
+              Capacidad
+              <select class="cfg-input mach-cap-select" data-id="${m.id}"></select>
+            </label>
+          </div>
         </div>
         <div class="mach-item-cycle">
           <label>
@@ -154,21 +155,30 @@
         </div>
       `;
 
-      const select = wrapper.querySelector('.mach-cycle-select');
+      const selectCap = wrapper.querySelector('.mach-cap-select');
+      const selectCycle = wrapper.querySelector('.mach-cycle-select');
       const perDaySpan = wrapper.querySelector('[data-role="perday"]');
       const cycSpan = wrapper.querySelector('[data-role="cyctime"]');
 
-      // Rellenar opciones de ciclo (30–90 min en pasos de 5)
+      // Opciones de capacidad
+      WASH_CAPACITIES.forEach(cap => {
+        const opt = document.createElement('option');
+        opt.value = String(cap);
+        opt.textContent = `${cap} kg`;
+        if (cap === m.cap) opt.selected = true;
+        selectCap.appendChild(opt);
+      });
+
+      // Opciones de duración de lavado (30–90, paso 5) + 5 min fijos
       for (let t = MIN_WASH_MIN; t <= MAX_WASH_MIN; t += STEP_WASH_MIN) {
         const opt = document.createElement('option');
         opt.value = String(t);
         const total = t + EXTRA_LOAD_UNLOAD;
         opt.textContent = `${t} + 5 min (total ${total})`;
         if (t === (m.washMin || DEFAULT_WASH_MIN)) opt.selected = true;
-        select.appendChild(opt);
+        selectCycle.appendChild(opt);
       }
 
-      // Función para refrescar info de esa lavadora
       function refreshMachineInfo() {
         const capDay = capacityPerMachinePerDay(m, hours);
         if (perDaySpan) perDaySpan.textContent = capDay.toFixed(1).replace('.', ',');
@@ -176,18 +186,27 @@
         if (cycSpan) cycSpan.textContent = totalCycle;
       }
 
-      // Listener de cambio de ciclo
-      select.addEventListener('change', () => {
-        const val = toNumber(select.value);
+      // Cambio de capacidad individual
+      selectCap.addEventListener('change', () => {
+        const cap = toNumber(selectCap.value);
+        if (cap > 0) {
+          m.cap = cap;
+          refreshMachineInfo();
+          updateMachinerySummary();
+        }
+      });
+
+      // Cambio de ciclo individual
+      selectCycle.addEventListener('change', () => {
+        const val = toNumber(selectCycle.value);
         let wash = val || DEFAULT_WASH_MIN;
         if (wash < MIN_WASH_MIN) wash = MIN_WASH_MIN;
         if (wash > MAX_WASH_MIN) wash = MAX_WASH_MIN;
         m.washMin = wash;
         refreshMachineInfo();
-        updateMachinerySummary(); // recalcula cobertura total
+        updateMachinerySummary();
       });
 
-      // Inicial
       refreshMachineInfo();
       listEl.appendChild(wrapper);
     });
@@ -205,7 +224,6 @@
     const legend = document.getElementById('mach-legend');
 
     let installedKgPerDay = 0;
-
     const grouped = new Map(); // cap -> count
 
     currentMachines.forEach(m => {
@@ -227,11 +245,11 @@
       covOut.classList.toggle('is-over', pct >= 100 && totalKg > 0);
     }
 
-    // Breakdown tipo "2×30kg + 1×13kg"
+    // Breakdown tipo "2×30kg + 1×24kg"
     let breakdown = '—';
     if (grouped.size) {
       breakdown = Array.from(grouped.entries())
-        .sort((a, b) => b[0] - a[0]) // por capacidad desc
+        .sort((a, b) => b[0] - a[0])
         .map(([cap, n]) => `${n}×${cap}kg`)
         .join(' + ');
     }
@@ -246,27 +264,26 @@
 
         const modeLabel =
           mode === 'fixed'
-            ? `lavadoras de ${toNumber(capSel && capSel.value)} kg`
-            : 'combinación automática de capacidades (mínimo nº de lavadoras)';
+            ? `lavadoras de ${toNumber(capSel && capSel.value)} kg (base)`
+            : 'combinación automática de capacidades (base)';
 
         const coberturaTexto =
           pct < 100
-            ? 'Estás por debajo del 100% (no cubierto).'
+            ? 'Estás por debajo del 100% (no cubierto). Usa “Ajustar cobertura” para añadir máquinas.'
             : (pct > 100
                ? 'Tienes margen por encima del 100%.'
                : 'Quedas exactamente al 100%.');
 
         legend.textContent =
           `Composición: ${breakdown}. Con ${hours} h de jornada, ` +
-          `${modeLabel} y ciclos ajustados como ves arriba, ` +
-          `tienes ${totalMachines} lavadora` + (totalMachines !== 1 ? 's' : '') +
-          ` y quedas al ${pct}% de cobertura sobre tus kilos diarios. ` +
+          `${totalMachines} lavadora${totalMachines !== 1 ? 's' : ''} y los ciclos/capacidades definidos, ` +
+          `tienes un ${pct}% de cobertura sobre tus kilos diarios. ` +
           coberturaTexto;
       }
     }
   }
 
-  // ====== Recalcular composición completa (nº y tipo de lavadoras) ======
+  // ====== Recalcular composición completa (base) ======
   function recomputeCompositionAndRender() {
     const totalKg = getTotalKgPerDay();
     const hours = getHours();
@@ -295,6 +312,53 @@
     updateMachinerySummary();
   }
 
+  // ====== Botón "Ajustar cobertura" ======
+  function adjustCoverage() {
+    const totalKg = getTotalKgPerDay();
+    const hours = getHours();
+    if (totalKg <= 0 || hours <= 0) {
+      updateMachinerySummary();
+      return;
+    }
+
+    let installed = currentMachines.reduce(
+      (acc, m) => acc + capacityPerMachinePerDay(m, hours),
+      0
+    );
+
+    if (installed >= totalKg) {
+      updateMachinerySummary();
+      return;
+    }
+
+    const remaining = totalKg - installed;
+
+    const modeSel = document.getElementById('mach-mode');
+    const capSel = document.getElementById('mach-fixed-cap');
+    const mode = modeSel ? modeSel.value : 'auto';
+
+    let addComp = [];
+    if (mode === 'fixed') {
+      const cap = toNumber(capSel && capSel.value) || 30;
+      addComp = computeFixedComposition(remaining, hours, cap);
+    } else {
+      addComp = computeAutoComposition(remaining, hours);
+    }
+
+    addComp.forEach(item => {
+      for (let i = 0; i < item.n; i++) {
+        currentMachines.push({
+          id: ++machineSeq,
+          cap: item.cap,
+          washMin: DEFAULT_WASH_MIN
+        });
+      }
+    });
+
+    renderMachineList();
+    updateMachinerySummary();
+  }
+
   // ====== Enganches a cambios de datos de ropa ======
   function hookDataChanges() {
     const inputs = document.querySelectorAll(
@@ -303,7 +367,6 @@
     );
     inputs.forEach(input => {
       input.addEventListener('input', () => {
-        // Recalculamos composición en cuanto cambien los kilos
         recomputeCompositionAndRender();
       });
     });
@@ -329,6 +392,7 @@
     const hoursSel = document.getElementById('mach-hours');
     const capSel = document.getElementById('mach-fixed-cap');
     const modeSel = document.getElementById('mach-mode');
+    const adjustBtn = document.getElementById('mach-adjust');
 
     // Horas (1..24)
     if (hoursSel && !hoursSel.options.length) {
@@ -341,13 +405,13 @@
       }
     }
 
-    // Capacidades
+    // Capacidades base
     if (capSel && !capSel.options.length) {
       WASH_CAPACITIES.forEach(cap => {
         const opt = document.createElement('option');
         opt.value = String(cap);
         opt.textContent = `${cap} kg`;
-        if (cap === 30) opt.selected = true; // por defecto 30 kg
+        if (cap === 30) opt.selected = true; // base 30 kg
         capSel.appendChild(opt);
       });
     }
@@ -356,6 +420,7 @@
     if (hoursSel) hoursSel.addEventListener('change', recomputeCompositionAndRender);
     if (capSel) capSel.addEventListener('change', recomputeCompositionAndRender);
     if (modeSel) modeSel.addEventListener('change', recomputeCompositionAndRender);
+    if (adjustBtn) adjustBtn.addEventListener('click', adjustCoverage);
 
     hookDataChanges();
 
