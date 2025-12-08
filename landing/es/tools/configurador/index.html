@@ -267,6 +267,67 @@
 
 
 
+<!-- ====== Maquinaria recomendada (solo lavado) ====== -->
+<section class="cfg-card cfg-machinery" aria-label="Recomendación de maquinaria de lavado">
+  <h2>Maquinaria recomendada (lavado)</h2>
+  <p class="cfg-muted" style="margin-top:0">
+    Usamos los <strong>kg/día totales</strong>. Mantelería, ropa de cama y toallas se lavan por separado,
+    pero ocupan la misma maquinaria de lavado.
+  </p>
+
+  <!-- Controles de cálculo -->
+  <div class="mach-controls">
+    <label>
+      Jornada de trabajo
+      <select id="mach-hours" class="cfg-input" aria-label="Horas de trabajo diarias">
+        <!-- Se rellena por JS de 1 a 24 -->
+      </select>
+    </label>
+
+    <label>
+      Modo de cálculo
+      <select id="mach-mode" class="cfg-input" aria-label="Modo de cálculo de maquinaria">
+        <option value="auto" selected>Automático · mínimo nº de lavadoras</option>
+        <option value="fixed">Capacidad fija por lavadora</option>
+      </select>
+    </label>
+
+    <label id="mach-fixed-wrapper" style="display:none">
+      Capacidad por lavadora
+      <select id="mach-fixed-cap" class="cfg-input" aria-label="Capacidad fija de lavadora (kg)">
+        <!-- Se rellena por JS con 8,13,18,22,24,30,40,55,110 -->
+      </select>
+    </label>
+  </div>
+
+  <!-- Tabla resumen -->
+  <div class="mach-table">
+    <div class="cfg-grid mach-header">
+      <div></div>
+      <div>Kilos/día</div>
+      <div>Lavadoras</div>
+      <div>Capacidad instalada</div>
+      <div>Cobertura</div>
+    </div>
+
+    <div class="cfg-grid mach-row">
+      <div class="mach-label">Total lavandería</div>
+      <div><output id="mach-kg-total">0</output> kg</div>
+      <div><output id="mach-machines-total">0</output> uds</div>
+      <div><output id="mach-cap-total">0</output> kg/día</div>
+      <div><output id="mach-cover-total">0%</output></div>
+    </div>
+  </div>
+
+  <p id="mach-legend" class="mach-legend cfg-muted">
+    Introduce kilos para ver la maquinaria recomendada.
+  </p>
+
+  <p class="cfg-note mach-note">
+    Cálculo orientativo: 1 ciclo/hora y carga al 100%. Ajusta la jornada o la capacidad
+    para ver escenarios de cobertura (&lt;100% no cubierto, &gt;100% con margen).
+  </p>
+</section>
 
 
 
