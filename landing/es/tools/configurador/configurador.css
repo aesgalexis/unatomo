@@ -179,9 +179,17 @@ details.cfg-estimator > summary::-webkit-details-marker { display: none; }
 @media (max-width: 680px) {
   .est-grid { grid-template-columns: 1fr; }
 }
+
+
+
+
+
 /* ====== Maquinaria recomendada (solo lavado) ====== */
-.cfg-machinery {
-  margin-top: 18px;
+.cfg-card.cfg-machinery {
+  /* Asegura mismo ancho que el resto aunque la sección se escape del contenedor */
+  width: 100%;
+  max-width: var(--cfg-maxw);
+  margin: 18px auto 0;
 }
 
 .cfg-machinery h2 {
@@ -190,83 +198,7 @@ details.cfg-estimator > summary::-webkit-details-marker { display: none; }
   letter-spacing: -.2px;
 }
 
-/* Controles de cálculo */
-.mach-controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin: 10px 0 12px;
-}
-
-.mach-controls label {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 12px;
-  opacity: .8;
-  min-width: 180px;
-}
-
-/* Tabla de maquinaria (usa misma grid base pero con 5 columnas) */
-.mach-table {
-  margin-top: 8px;
-}
-
-.mach-table .cfg-grid {
-  grid-template-columns: 1.6fr .9fr .9fr 1.2fr .8fr;
-}
-
-.mach-table .mach-header {
-  font-weight: 600;
-  font-size: 13px;
-  opacity: .8;
-}
-
-.mach-table .mach-row {
-  margin-top: 6px;
-  font-size: 14px;
-}
-
-.mach-label {
-  font-weight: 600;
-}
-
-#mach-cover-total.is-under {
-  color: #d14343;
-  font-weight: 600;
-}
-
-#mach-cover-total.is-over {
-  color: #0c7a43;
-  font-weight: 600;
-}
-
-.mach-legend {
-  margin-top: 10px;
-  font-size: 13px;
-}
-
-.mach-note {
-  margin-top: 8px;
-}
-
-@media (max-width: 720px) {
-  .mach-table .cfg-grid {
-    grid-template-columns: 1.5fr .8fr .8fr 1.1fr .8fr;
-  }
-}
-/* ====== Maquinaria recomendada (solo lavado) ====== */
-.cfg-machinery {
-  margin-top: 18px;
-}
-
-.cfg-machinery h2 {
-  font-size: 18px;
-  margin: 0 0 8px;
-  letter-spacing: -.2px;
-}
-
-/* Marco interno: mismo ancho que la tarjeta, sin “doble marco” */
+/* Marco interno: línea superior, sin “doble tarjeta” */
 .mach-frame {
   margin-top: 10px;
   padding-top: 8px;
@@ -291,7 +223,6 @@ details.cfg-estimator > summary::-webkit-details-marker { display: none; }
   min-width: 180px;
 }
 
-.mach-recalc-btn,
 .mach-add-btn,
 .mach-adjust-btn {
   height: 38px;
@@ -299,13 +230,7 @@ details.cfg-estimator > summary::-webkit-details-marker { display: none; }
   font-size: 13px;
 }
 
-/* “Calcular” a la derecha, los otros a continuación */
-.mach-recalc-btn {
-  margin-left: auto;
-  align-self: flex-end;
-}
-
-/* Botón verde estilo “GitHub submit” */
+/* Botón verde (Añadir lavadora) */
 .mach-add-btn {
   background: #2da44e !important;
   border-color: #2da44e !important;
@@ -318,6 +243,19 @@ details.cfg-estimator > summary::-webkit-details-marker { display: none; }
 .mach-add-btn:active {
   background: #26863f !important;
   border-color: #26863f !important;
+}
+
+/* Botón blanco tipo "Añadir artículo" */
+.mach-adjust-btn.btn-ghost {
+  color: #000 !important;
+  background: #fff !important;
+  border-color: #c8c8c8 !important;
+}
+.mach-adjust-btn.btn-ghost:hover {
+  background: #f6f6f6 !important;
+}
+.mach-adjust-btn.btn-ghost:active {
+  background: #ededed !important;
 }
 
 /* Lista de lavadoras individuales */
@@ -383,15 +321,15 @@ details.cfg-estimator > summary::-webkit-details-marker { display: none; }
   font-weight: 600;
 }
 
-/* Botón para quitar equipo */
+/* Botón para quitar equipo, con color visible */
 .mach-remove-btn {
   border: none;
   background: transparent;
   cursor: pointer;
   font-size: 12px;
-  opacity: .8;
   padding: 4px 6px;
   margin-left: auto;
+  color: #333;              /* texto visible */
 }
 .mach-remove-btn:hover {
   opacity: 1;
@@ -471,10 +409,9 @@ details.cfg-estimator > summary::-webkit-details-marker { display: none; }
     flex-direction: column;
   }
 
-  .mach-adjust-btn,
   .mach-add-btn,
-  .mach-recalc-btn {
+  .mach-adjust-btn {
     width: 100%;
-    margin-left: 0;
   }
 }
+
