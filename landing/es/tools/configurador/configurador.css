@@ -266,7 +266,7 @@ details.cfg-estimator > summary::-webkit-details-marker { display: none; }
   letter-spacing: -.2px;
 }
 
-/* Marco interno: alineado con el resto de la tarjeta */
+/* Marco interno: mismo ancho que la tarjeta, sin “doble marco” */
 .mach-frame {
   margin-top: 10px;
   padding-top: 8px;
@@ -291,6 +291,7 @@ details.cfg-estimator > summary::-webkit-details-marker { display: none; }
   min-width: 180px;
 }
 
+.mach-recalc-btn,
 .mach-add-btn,
 .mach-adjust-btn {
   height: 38px;
@@ -298,9 +299,25 @@ details.cfg-estimator > summary::-webkit-details-marker { display: none; }
   font-size: 13px;
 }
 
-.mach-adjust-btn {
+/* “Calcular” a la derecha, los otros a continuación */
+.mach-recalc-btn {
   margin-left: auto;
   align-self: flex-end;
+}
+
+/* Botón verde estilo “GitHub submit” */
+.mach-add-btn {
+  background: #2da44e !important;
+  border-color: #2da44e !important;
+  color: #fff !important;
+}
+.mach-add-btn:hover {
+  background: #2c974b !important;
+  border-color: #2c974b !important;
+}
+.mach-add-btn:active {
+  background: #26863f !important;
+  border-color: #26863f !important;
 }
 
 /* Lista de lavadoras individuales */
@@ -324,8 +341,15 @@ details.cfg-estimator > summary::-webkit-details-marker { display: none; }
 
 .mach-item-header {
   flex: 0 0 auto;
-  min-width: 140px;
+  min-width: 160px;
   max-width: 220px;
+}
+
+.mach-label-small {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  opacity: .6;
 }
 
 .mach-name-input {
@@ -357,6 +381,21 @@ details.cfg-estimator > summary::-webkit-details-marker { display: none; }
 
 .mach-item-info span {
   font-weight: 600;
+}
+
+/* Botón para quitar equipo */
+.mach-remove-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 12px;
+  opacity: .8;
+  padding: 4px 6px;
+  margin-left: auto;
+}
+.mach-remove-btn:hover {
+  opacity: 1;
+  text-decoration: underline;
 }
 
 .mach-empty {
@@ -432,12 +471,10 @@ details.cfg-estimator > summary::-webkit-details-marker { display: none; }
     flex-direction: column;
   }
 
-  .mach-adjust-btn {
+  .mach-adjust-btn,
+  .mach-add-btn,
+  .mach-recalc-btn {
     width: 100%;
     margin-left: 0;
-  }
-
-  .mach-add-btn {
-    width: 100%;
   }
 }
