@@ -517,6 +517,67 @@ p {
 #screen8 .config .card h3 { margin:0 0 6px; font-weight:600; font-size:clamp(14px,1.6vw,18px); color:var(--current-fg); }
 #screen8 .config .card p  { margin:0; font-size:clamp(14px,1.4vw,16px); line-height:1.45; color:var(--current-muted); }
 
+/* CTA del configurador */
+#screen8 .config .config-cta {
+  text-align: center;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+#screen8 .config .config-cta p {
+  margin-bottom: 16px;
+  font-size: 15px;
+  color: var(--current-muted);
+}
+
+/* Botón con degradado para el configurador */
+.config-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 22px;
+  border-radius: 999px;
+  border: 1px solid rgba(0,0,0,.06);
+
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: .02em;
+  text-decoration: none;
+
+  color: #ffffff;
+  background-image: linear-gradient(135deg, #16a34a, #22c55e, #4ade80);
+  box-shadow:
+    0 8px 18px rgba(22,163,74,.32),
+    0 0 0 1px rgba(0,0,0,.02);
+
+  transition:
+    transform .08s ease-out,
+    box-shadow .08s ease-out,
+    filter .08s ease-out;
+}
+
+.config-btn:hover {
+  filter: brightness(1.03);
+  transform: translateY(-1px);
+  box-shadow:
+    0 10px 22px rgba(22,163,74,.40),
+    0 0 0 1px rgba(0,0,0,.03);
+}
+
+.config-btn:active {
+  transform: translateY(0);
+  box-shadow:
+    0 4px 10px rgba(22,163,74,.28),
+    0 0 0 1px rgba(0,0,0,.04);
+}
+
+.config-btn:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 3px rgba(255,255,255,1),
+    0 0 0 5px rgba(22,163,74,.8);
+}
+
 /* ===== Pantalla 9 — Alcance y Colaboradores ===== */
 #screen9 {
   --current-bg: var(--bg);
@@ -666,8 +727,6 @@ p {
 
 
 
-
-
 /* =========================================
    PANTALLA 11 — Footer como .screen
    ========================================= */
@@ -762,4 +821,3 @@ p {
   #screen11 .footer .footer-inner { grid-template-columns: 1fr; }
   #screen11 .footer .footer-legal { margin-top: 4px; }
 }
-
