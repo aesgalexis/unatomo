@@ -17,7 +17,7 @@
   const DEFAULT_WASH_MIN = 55; // por defecto: 55 + 5 = 60 min totales
 
   let machineSeq = 0;
-  let currentMachines = []; // { id, cap, washMin }
+  let currentMachines = []; // { id, cap, washMin, name }
 
   // ====== Utils ======
   function toNumber(v) {
@@ -106,7 +106,8 @@
         currentMachines.push({
           id: ++machineSeq,
           cap: item.cap,
-          washMin: DEFAULT_WASH_MIN
+          washMin: DEFAULT_WASH_MIN,
+          name: '' // se rellena en el render si está vacío
         });
       }
     });
@@ -133,17 +134,23 @@
       const wrapper = document.createElement('div');
       wrapper.className = 'mach-item';
 
+      const defaultName = `Lavadora ${idx + 1}`;
+      if (!m.name) m.name = defaultName;
+
       wrapper.innerHTML = `
-        <div class="mach-item-main">
-          <div class="mach-item-title">Lavadora ${idx + 1}</div>
-          <div class="mach-item-sub">
-            <label>
-              Capacidad
-              <select class="cfg-input mach-cap-select" data-id="${m.id}"></select>
-            </label>
-          </div>
+        <div class="mach-item-header">
+          <input
+            class="cfg-input mach-name-input"
+            type="text"
+            data-id="${m.id}"
+            value="${m.name}"
+          >
         </div>
-        <div class="mach-item-cycle">
+        <div class="mach-item-fields">
+          <label>
+            Capacidad
+            <select class="cfg-input mach-cap-select" data-id="${m.id}"></select>
+          </label>
           <label>
             Duración de lavado
             <select class="cfg-input mach-cycle-select" data-id="${m.id}"></select>
@@ -155,10 +162,18 @@
         </div>
       `;
 
-      const selectCap = wrapper.querySelector('.mach-cap-select');
+      const nameInput  = wrapper.querySelector('.mach-name-input');
+      const selectCap  = wrapper.querySelector('.mach-cap-select');
       const selectCycle = wrapper.querySelector('.mach-cycle-select');
       const perDaySpan = wrapper.querySelector('[data-role="perday"]');
-      const cycSpan = wrapper.querySelector('[data-role="cyctime"]');
+      const cycSpan    = wrapper.querySelector('[data-role="cyctime"]');
+
+      // Nombre editable
+      if (nameInput) {
+        nameInput.addEventListener('input', () => {
+          m.name = nameInput.value.trim() || defaultName;
+        });
+      }
 
       // Opciones de capacidad
       WASH_CAPACITIES.forEach(cap => {
@@ -217,7 +232,7 @@
     const totalKg = getTotalKgPerDay();
     const hours = getHours();
 
-    const kgOut = document.getElementById('mach-kg-total');
+    const kgOut  = document.getElementById('mach-kg-total');
     const machOut = document.getElementById('mach-machines-total');
     const capOut = document.getElementById('mach-cap-total');
     const covOut = document.getElementById('mach-cover-total');
@@ -235,14 +250,14 @@
     const coverage = totalKg > 0 ? installedKgPerDay / totalKg : 0;
     const pct = totalKg > 0 ? Math.round(coverage * 100) : 0;
 
-    if (kgOut) kgOut.textContent = totalKg.toFixed(1).replace('.', ',');
+    if (kgOut)   kgOut.textContent = totalKg.toFixed(1).replace('.', ',');
     if (machOut) machOut.textContent = totalMachines;
-    if (capOut) capOut.textContent = installedKgPerDay.toFixed(1).replace('.', ',');
+    if (capOut)  capOut.textContent = installedKgPerDay.toFixed(1).replace('.', ',');
 
     if (covOut) {
       covOut.textContent = pct + '%';
       covOut.classList.toggle('is-under', pct < 100 && totalKg > 0);
-      covOut.classList.toggle('is-over', pct >= 100 && totalKg > 0);
+      covOut.classList.toggle('is-over',  pct >= 100 && totalKg > 0);
     }
 
     // Breakdown tipo "2×30kg + 1×24kg"
@@ -259,7 +274,7 @@
         legend.textContent = 'Introduce kilos para ver la maquinaria recomendada.';
       } else {
         const modeSel = document.getElementById('mach-mode');
-        const capSel = document.getElementById('mach-fixed-cap');
+        const capSel  = document.getElementById('mach-fixed-cap');
         const mode = modeSel ? modeSel.value : 'auto';
 
         const modeLabel =
@@ -289,7 +304,7 @@
     const hours = getHours();
 
     const modeSel = document.getElementById('mach-mode');
-    const capSel = document.getElementById('mach-fixed-cap');
+    const capSel  = document.getElementById('mach-fixed-cap');
     const fixedWrapper = document.getElementById('mach-fixed-wrapper');
 
     if (!modeSel || !capSel || !fixedWrapper) return;
@@ -334,7 +349,7 @@
     const remaining = totalKg - installed;
 
     const modeSel = document.getElementById('mach-mode');
-    const capSel = document.getElementById('mach-fixed-cap');
+    const capSel  = document.getElementById('mach-fixed-cap');
     const mode = modeSel ? modeSel.value : 'auto';
 
     let addComp = [];
@@ -350,9 +365,35 @@
         currentMachines.push({
           id: ++machineSeq,
           cap: item.cap,
-          washMin: DEFAULT_WASH_MIN
+          washMin: DEFAULT_WASH_MIN,
+          name: '' // se asignará en el render
         });
       }
+    });
+
+    renderMachineList();
+    updateMachinerySummary();
+  }
+
+  // ====== Botón "Añadir lavadora" manual ======
+  function addMachineManual() {
+    const modeSel = document.getElementById('mach-mode');
+    const capSel  = document.getElementById('mach-fixed-cap');
+    const mode = modeSel ? modeSel.value : 'auto';
+
+    let cap;
+    if (mode === 'fixed') {
+      cap = toNumber(capSel && capSel.value) || 30;
+    } else {
+      // en modo auto, por defecto 30 kg (neutral)
+      cap = 30;
+    }
+
+    currentMachines.push({
+      id: ++machineSeq,
+      cap,
+      washMin: DEFAULT_WASH_MIN,
+      name: ''
     });
 
     renderMachineList();
@@ -389,10 +430,11 @@
 
   // ====== Boot ======
   window.addEventListener('DOMContentLoaded', () => {
-    const hoursSel = document.getElementById('mach-hours');
-    const capSel = document.getElementById('mach-fixed-cap');
-    const modeSel = document.getElementById('mach-mode');
+    const hoursSel  = document.getElementById('mach-hours');
+    const capSel    = document.getElementById('mach-fixed-cap');
+    const modeSel   = document.getElementById('mach-mode');
     const adjustBtn = document.getElementById('mach-adjust');
+    const addBtn    = document.getElementById('mach-add');
 
     // Horas (1..24)
     if (hoursSel && !hoursSel.options.length) {
@@ -418,9 +460,10 @@
 
     // Listeners de controles generales
     if (hoursSel) hoursSel.addEventListener('change', recomputeCompositionAndRender);
-    if (capSel) capSel.addEventListener('change', recomputeCompositionAndRender);
-    if (modeSel) modeSel.addEventListener('change', recomputeCompositionAndRender);
+    if (capSel)   capSel.addEventListener('change',  recomputeCompositionAndRender);
+    if (modeSel)  modeSel.addEventListener('change', recomputeCompositionAndRender);
     if (adjustBtn) adjustBtn.addEventListener('click', adjustCoverage);
+    if (addBtn)    addBtn.addEventListener('click', addMachineManual);
 
     hookDataChanges();
 
