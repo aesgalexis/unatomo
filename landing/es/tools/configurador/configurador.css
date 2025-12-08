@@ -229,6 +229,7 @@ details.cfg-estimator > summary::-webkit-details-marker { display: none; }
   height: 38px;
   padding: 0 14px;
   font-size: 13px;
+  margin-left: auto;
 }
 
 /* Botón verde (Añadir lavadora) */
@@ -413,6 +414,7 @@ details.cfg-estimator > summary::-webkit-details-marker { display: none; }
   .mach-add-btn,
   .mach-adjust-btn {
     width: 100%;
+    margin-left: 0;
   }
 }
 
