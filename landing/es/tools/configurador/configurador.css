@@ -266,12 +266,21 @@ details.cfg-estimator > summary::-webkit-details-marker { display: none; }
   letter-spacing: -.2px;
 }
 
+/* Marco interno */
+.mach-frame {
+  margin-top: 10px;
+  padding: 12px 12px 14px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, currentColor 18%, transparent);
+  background: #fafafa;
+}
+
 /* Controles de cálculo */
 .mach-controls {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin: 10px 0 12px;
+  margin-bottom: 10px;
 }
 
 .mach-controls label {
@@ -283,11 +292,17 @@ details.cfg-estimator > summary::-webkit-details-marker { display: none; }
   min-width: 180px;
 }
 
+.mach-adjust-btn {
+  margin-left: auto;
+  align-self: flex-end;
+  height: 38px;
+  padding: 0 14px;
+  font-size: 13px;
+}
+
 /* Lista de lavadoras individuales */
 .mach-list {
-  margin-top: 10px;
-  border-top: 1px dashed color-mix(in srgb, currentColor 20%, transparent);
-  padding-top: 10px;
+  margin-top: 8px;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -307,7 +322,7 @@ details.cfg-estimator > summary::-webkit-details-marker { display: none; }
 .mach-item-main {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 6px;
 }
 
 .mach-item-title {
@@ -316,8 +331,14 @@ details.cfg-estimator > summary::-webkit-details-marker { display: none; }
 }
 
 .mach-item-sub {
-  font-size: 13px;
-  opacity: .7;
+  font-size: 12px;
+  opacity: .8;
+}
+
+.mach-item-sub label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .mach-item-cycle {
@@ -351,7 +372,7 @@ details.cfg-estimator > summary::-webkit-details-marker { display: none; }
 }
 
 .mach-table .cfg-grid {
-  grid-template-columns: 1.6fr .9fr .9fr 1.2fr .8fr;
+  grid-template-columns: 1.6fr .9fr .9fr 1.2fr .9fr;
 }
 
 .mach-table .mach-header {
@@ -369,14 +390,29 @@ details.cfg-estimator > summary::-webkit-details-marker { display: none; }
   font-weight: 600;
 }
 
+/* Cobertura destacada */
+#mach-cover-total {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 70px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, currentColor 30%, transparent);
+  font-weight: 700;
+  font-size: 14px;
+}
+
 #mach-cover-total.is-under {
   color: #d14343;
-  font-weight: 600;
+  border-color: #d14343;
+  background: rgba(209, 67, 67, 0.06);
 }
 
 #mach-cover-total.is-over {
   color: #0c7a43;
-  font-weight: 600;
+  border-color: #0c7a43;
+  background: rgba(12, 122, 67, 0.06);
 }
 
 .mach-legend {
@@ -390,10 +426,15 @@ details.cfg-estimator > summary::-webkit-details-marker { display: none; }
 
 @media (max-width: 720px) {
   .mach-table .cfg-grid {
-    grid-template-columns: 1.5fr .8fr .8fr 1.1fr .8fr;
+    grid-template-columns: 1.5fr .8fr .8fr 1.1fr .9fr;
   }
 
   .mach-item {
     grid-template-columns: 1fr;
+  }
+
+  .mach-adjust-btn {
+    width: 100%;
+    margin-left: 0;
   }
 }
