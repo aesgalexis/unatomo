@@ -186,11 +186,12 @@ details.cfg-estimator > summary::-webkit-details-marker { display: none; }
 
 /* ====== Maquinaria recomendada (solo lavado) ====== */
 .cfg-card.cfg-machinery {
-  /* Asegura mismo ancho que el resto aunque la sección se escape del contenedor */
+  /* Misma anchura visible que el resto de tarjetas dentro de .cfg-container */
   width: 100%;
-  max-width: var(--cfg-maxw);
+  max-width: calc(var(--cfg-maxw) - 40px); /* 40px = padding 20+20 del contenedor */
   margin: 18px auto 0;
 }
+
 
 .cfg-machinery h2 {
   font-size: 18px;
