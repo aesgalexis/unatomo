@@ -286,10 +286,10 @@ details.cfg-estimator > summary::-webkit-details-marker { display: none; }
 }
 
 .mach-label-small {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: .04em;
-  opacity: .6;
+  font-size: 12px;
+  opacity: .8;
+  text-transform: none;
+  letter-spacing: normal;
 }
 
 .mach-name-input {
