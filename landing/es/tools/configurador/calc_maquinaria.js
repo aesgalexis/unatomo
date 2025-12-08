@@ -291,11 +291,6 @@
         const capSel  = document.getElementById('mach-fixed-cap');
         const mode = modeSel ? modeSel.value : 'auto';
 
-        const modeLabel =
-          mode === 'fixed'
-            ? `lavadoras de ${toNumber(capSel && capSel.value)} kg (base)`
-            : 'combinación automática de capacidades (base)';
-
         const coberturaTexto =
           pct < 100
             ? 'Estás por debajo del 100% (no cubierto). Usa “Calcular” o “Añadir lavadora”.'
@@ -341,7 +336,7 @@
     updateMachinerySummary();
   }
 
-  // ====== Botón "Calcular" (ajustar cobertura) ======
+  // ====== Botón "Calcular" (ajustar cobertura: añadir o quitar) ======
   function adjustCoverage() {
     const totalKg = getTotalKgPerDay();
     const hours = getHours();
@@ -350,41 +345,69 @@
       return;
     }
 
-    let installed = currentMachines.reduce(
-      (acc, m) => acc + capacityPerMachinePerDay(m, hours),
-      0
-    );
+    // Capacidad instalada actual por máquina
+    const machineCaps = currentMachines.map(m => ({
+      id: m.id,
+      ref: m,
+      capDay: capacityPerMachinePerDay(m, hours)
+    }));
 
-    if (installed >= totalKg) {
-      updateMachinerySummary();
-      return;
-    }
-
-    const remaining = totalKg - installed;
+    let installed = machineCaps.reduce((acc, x) => acc + x.capDay, 0);
 
     const modeSel = document.getElementById('mach-mode');
     const capSel  = document.getElementById('mach-fixed-cap');
     const mode = modeSel ? modeSel.value : 'auto';
 
-    let addComp = [];
-    if (mode === 'fixed') {
-      const cap = toNumber(capSel && capSel.value) || 30;
-      addComp = computeFixedComposition(remaining, hours, cap);
-    } else {
-      addComp = computeAutoComposition(remaining, hours);
+    // --- CASO 1: falta capacidad → añadimos máquinas sin tocar las existentes ---
+    if (installed < totalKg) {
+      const remaining = totalKg - installed;
+
+      let addComp = [];
+      if (mode === 'fixed') {
+        const cap = toNumber(capSel && capSel.value) || 30;
+        addComp = computeFixedComposition(remaining, hours, cap);
+      } else {
+        addComp = computeAutoComposition(remaining, hours);
+      }
+
+      addComp.forEach(item => {
+        for (let i = 0; i < item.n; i++) {
+          currentMachines.push({
+            id: ++machineSeq,
+            cap: item.cap,
+            washMin: DEFAULT_WASH_MIN,
+            name: ''
+          });
+        }
+      });
+
+      renderMachineList();
+      updateMachinerySummary();
+      return;
     }
 
-    addComp.forEach(item => {
-      for (let i = 0; i < item.n; i++) {
-        currentMachines.push({
-          id: ++machineSeq,
-          cap: item.cap,
-          washMin: DEFAULT_WASH_MIN,
-          name: ''
-        });
-      }
-    });
+    // --- CASO 2: sobra capacidad → quitamos máquinas si es posible sin bajar del 100% ---
+    if (installed > totalKg && currentMachines.length > 0) {
+      // Ordenamos de menor a mayor capacidad diaria para quitar primero las que menos aportan
+      machineCaps.sort((a, b) => a.capDay - b.capDay);
 
+      const toRemove = new Set();
+
+      for (const mc of machineCaps) {
+        const newInstalled = installed - mc.capDay;
+        // Solo quitamos si seguimos cubriendo los kilos
+        if (newInstalled >= totalKg) {
+          installed = newInstalled;
+          toRemove.add(mc.id);
+        }
+      }
+
+      if (toRemove.size > 0) {
+        currentMachines = currentMachines.filter(m => !toRemove.has(m.id));
+      }
+    }
+
+    // Si está exactamente en 100% o no hemos podido quitar nada más, solo refrescamos
     renderMachineList();
     updateMachinerySummary();
   }
