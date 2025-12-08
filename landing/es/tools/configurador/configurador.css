@@ -192,7 +192,6 @@ details.cfg-estimator > summary::-webkit-details-marker { display: none; }
   margin: 18px auto 0;
 }
 
-
 .cfg-machinery h2 {
   font-size: 18px;
   margin: 0 0 8px;
@@ -229,7 +228,7 @@ details.cfg-estimator > summary::-webkit-details-marker { display: none; }
   height: 38px;
   padding: 0 14px;
   font-size: 13px;
-  margin-left: auto;
+  /* sin margin-left aquí */
 }
 
 /* Botón verde (Añadir lavadora) */
@@ -237,6 +236,7 @@ details.cfg-estimator > summary::-webkit-details-marker { display: none; }
   background: #2da44e !important;
   border-color: #2da44e !important;
   color: #fff !important;
+  margin-left: auto; /* empuja el bloque de botones a la derecha */
 }
 .mach-add-btn:hover {
   background: #2c974b !important;
@@ -417,4 +417,3 @@ details.cfg-estimator > summary::-webkit-details-marker { display: none; }
     margin-left: 0;
   }
 }
-
