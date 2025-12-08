@@ -300,6 +300,11 @@
     </label>
   </div>
 
+  <!-- Lista de lavadoras individuales -->
+  <div class="mach-list" id="mach-list" aria-live="polite">
+    <!-- Se rellena por JS: Lavadora 1 (30kg), selector de ciclo, etc. -->
+  </div>
+
   <!-- Tabla resumen -->
   <div class="mach-table">
     <div class="cfg-grid mach-header">
@@ -324,8 +329,9 @@
   </p>
 
   <p class="cfg-note mach-note">
-    Cálculo orientativo: 1 ciclo/hora y carga al 100%. Ajusta la jornada o la capacidad
-    para ver escenarios de cobertura (&lt;100% no cubierto, &gt;100% con margen).
+    Cálculo orientativo: 1 ciclo/hora con el ajuste por defecto (55+5 min). Puedes ajustar la duración de
+    cada lavadora (30–90 min de lavado, siempre +5 min de carga/descarga). Si haces los ciclos más
+    lentos, baja la cobertura; si los haces más rápidos, sube.
   </p>
 </section>
 
