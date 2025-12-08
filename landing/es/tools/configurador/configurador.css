@@ -179,3 +179,79 @@ details.cfg-estimator > summary::-webkit-details-marker { display: none; }
 @media (max-width: 680px) {
   .est-grid { grid-template-columns: 1fr; }
 }
+/* ====== Maquinaria recomendada (solo lavado) ====== */
+.cfg-machinery {
+  margin-top: 18px;
+}
+
+.cfg-machinery h2 {
+  font-size: 18px;
+  margin: 0 0 8px;
+  letter-spacing: -.2px;
+}
+
+/* Controles de cálculo */
+.mach-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 10px 0 12px;
+}
+
+.mach-controls label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  opacity: .8;
+  min-width: 180px;
+}
+
+/* Tabla de maquinaria (usa misma grid base pero con 5 columnas) */
+.mach-table {
+  margin-top: 8px;
+}
+
+.mach-table .cfg-grid {
+  grid-template-columns: 1.6fr .9fr .9fr 1.2fr .8fr;
+}
+
+.mach-table .mach-header {
+  font-weight: 600;
+  font-size: 13px;
+  opacity: .8;
+}
+
+.mach-table .mach-row {
+  margin-top: 6px;
+  font-size: 14px;
+}
+
+.mach-label {
+  font-weight: 600;
+}
+
+#mach-cover-total.is-under {
+  color: #d14343;
+  font-weight: 600;
+}
+
+#mach-cover-total.is-over {
+  color: #0c7a43;
+  font-weight: 600;
+}
+
+.mach-legend {
+  margin-top: 10px;
+  font-size: 13px;
+}
+
+.mach-note {
+  margin-top: 8px;
+}
+
+@media (max-width: 720px) {
+  .mach-table .cfg-grid {
+    grid-template-columns: 1.5fr .8fr .8fr 1.1fr .8fr;
+  }
+}
