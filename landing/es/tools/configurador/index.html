@@ -276,8 +276,7 @@
   </p>
 
   <div class="mach-frame">
-        <!-- Controles de cálculo -->
-      <!-- Controles de cálculo -->
+    <!-- Controles de cálculo -->
     <div class="mach-controls">
       <label>
         Jornada de trabajo
@@ -301,18 +300,50 @@
         </select>
       </label>
 
-      <button id="mach-recalc" type="button" class="btn-ghost mach-recalc-btn">
-        Calcular
-      </button>
-
       <button id="mach-add" type="button" class="btn-primary mach-add-btn">
         Añadir lavadora
       </button>
 
-      <button id="mach-adjust" type="button" class="btn-primary mach-adjust-btn">
-        Ajustar cobertura
+      <button id="mach-adjust" type="button" class="btn-ghost mach-adjust-btn">
+        Calcular
       </button>
     </div>
+
+    <!-- Lista de lavadoras individuales -->
+    <div class="mach-list" id="mach-list" aria-live="polite">
+      <!-- Se rellena por JS -->
+    </div>
+
+    <!-- Tabla resumen -->
+    <div class="mach-table">
+      <div class="cfg-grid mach-header">
+        <div></div>
+        <div>Kilos/día</div>
+        <div>Lavadoras</div>
+        <div>Capacidad instalada</div>
+        <div>Cobertura</div>
+      </div>
+
+      <div class="cfg-grid mach-row">
+        <div class="mach-label">Total lavandería</div>
+        <div><output id="mach-kg-total">0</output> kg</div>
+        <div><output id="mach-machines-total">0</output> uds</div>
+        <div><output id="mach-cap-total">0</output> kg/día</div>
+        <div><output id="mach-cover-total">0%</output></div>
+      </div>
+    </div>
+  </div>
+
+  <p id="mach-legend" class="mach-legend cfg-muted">
+    Introduce kilos para ver la maquinaria recomendada.
+  </p>
+
+  <p class="cfg-note mach-note">
+    Cálculo orientativo con ciclos por defecto de 55+5 min. Puedes ajustar la capacidad y la duración
+    de cada lavadora. Si quedas por debajo del 100% de cobertura, pulsa <strong>Calcular</strong>
+    o añade equipos manualmente.
+  </p>
+</section>
 
 
 
