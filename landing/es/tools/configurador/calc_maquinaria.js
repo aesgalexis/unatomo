@@ -107,7 +107,7 @@
           id: ++machineSeq,
           cap: item.cap,
           washMin: DEFAULT_WASH_MIN,
-          name: '' // se rellena en el render si está vacío
+          name: ''
         });
       }
     });
@@ -135,16 +135,22 @@
       wrapper.className = 'mach-item';
 
       const defaultName = `Lavadora ${idx + 1}`;
-      if (!m.name) m.name = defaultName;
+      // Si el nombre era uno automático tipo "Lavadora X" o está vacío, lo renumeramos
+      if (!m.name || /^Lavadora\s+\d+$/i.test(m.name.trim())) {
+        m.name = defaultName;
+      }
 
       wrapper.innerHTML = `
         <div class="mach-item-header">
-          <input
-            class="cfg-input mach-name-input"
-            type="text"
-            data-id="${m.id}"
-            value="${m.name}"
-          >
+          <label>
+            <span class="mach-label-small">Equipo</span>
+            <input
+              class="cfg-input mach-name-input"
+              type="text"
+              data-id="${m.id}"
+              value="${m.name}"
+            >
+          </label>
         </div>
         <div class="mach-item-fields">
           <label>
@@ -159,19 +165,24 @@
             ≈ <span data-role="perday">0</span> kg/día
             · ciclo total: <span data-role="cyctime">0</span> min
           </div>
+          <button type="button" class="mach-remove-btn" data-id="${m.id}">
+            Quitar equipo
+          </button>
         </div>
       `;
 
-      const nameInput  = wrapper.querySelector('.mach-name-input');
-      const selectCap  = wrapper.querySelector('.mach-cap-select');
+      const nameInput   = wrapper.querySelector('.mach-name-input');
+      const selectCap   = wrapper.querySelector('.mach-cap-select');
       const selectCycle = wrapper.querySelector('.mach-cycle-select');
-      const perDaySpan = wrapper.querySelector('[data-role="perday"]');
-      const cycSpan    = wrapper.querySelector('[data-role="cyctime"]');
+      const perDaySpan  = wrapper.querySelector('[data-role="perday"]');
+      const cycSpan     = wrapper.querySelector('[data-role="cyctime"]');
+      const removeBtn   = wrapper.querySelector('.mach-remove-btn');
 
       // Nombre editable
       if (nameInput) {
         nameInput.addEventListener('input', () => {
-          m.name = nameInput.value.trim() || defaultName;
+          const val = nameInput.value.trim();
+          m.name = val || defaultName;
         });
       }
 
@@ -221,6 +232,15 @@
         refreshMachineInfo();
         updateMachinerySummary();
       });
+
+      // Quitar equipo
+      if (removeBtn) {
+        removeBtn.addEventListener('click', () => {
+          currentMachines = currentMachines.filter(x => x.id !== m.id);
+          renderMachineList();
+          updateMachinerySummary();
+        });
+      }
 
       refreshMachineInfo();
       listEl.appendChild(wrapper);
@@ -284,7 +304,7 @@
 
         const coberturaTexto =
           pct < 100
-            ? 'Estás por debajo del 100% (no cubierto). Usa “Ajustar cobertura” para añadir máquinas.'
+            ? 'Estás por debajo del 100% (no cubierto). Usa “Ajustar cobertura” o “Añadir lavadora”.'
             : (pct > 100
                ? 'Tienes margen por encima del 100%.'
                : 'Quedas exactamente al 100%.');
@@ -366,7 +386,7 @@
           id: ++machineSeq,
           cap: item.cap,
           washMin: DEFAULT_WASH_MIN,
-          name: '' // se asignará en el render
+          name: ''
         });
       }
     });
@@ -375,8 +395,24 @@
     updateMachinerySummary();
   }
 
-  // ====== Botón "Añadir lavadora" manual ======
+  // ====== Botón "Añadir lavadora" manual (hasta 150%) ======
   function addMachineManual() {
+    const totalKg = getTotalKgPerDay();
+    const hours   = getHours();
+
+    if (totalKg > 0 && hours > 0) {
+      const installed = currentMachines.reduce(
+        (acc, m) => acc + capacityPerMachinePerDay(m, hours),
+        0
+      );
+      const coverage = installed / totalKg;
+      if (coverage >= 1.5) {
+        // Límite 150% de cobertura
+        updateMachinerySummary();
+        return;
+      }
+    }
+
     const modeSel = document.getElementById('mach-mode');
     const capSel  = document.getElementById('mach-fixed-cap');
     const mode = modeSel ? modeSel.value : 'auto';
@@ -385,8 +421,7 @@
     if (mode === 'fixed') {
       cap = toNumber(capSel && capSel.value) || 30;
     } else {
-      // en modo auto, por defecto 30 kg (neutral)
-      cap = 30;
+      cap = 30; // valor neutro por defecto
     }
 
     currentMachines.push({
@@ -398,6 +433,11 @@
 
     renderMachineList();
     updateMachinerySummary();
+  }
+
+  // ====== Botón "Calcular" (refresh base) ======
+  function recalcBase() {
+    recomputeCompositionAndRender();
   }
 
   // ====== Enganches a cambios de datos de ropa ======
@@ -435,6 +475,7 @@
     const modeSel   = document.getElementById('mach-mode');
     const adjustBtn = document.getElementById('mach-adjust');
     const addBtn    = document.getElementById('mach-add');
+    const recalcBtn = document.getElementById('mach-recalc');
 
     // Horas (1..24)
     if (hoursSel && !hoursSel.options.length) {
@@ -459,11 +500,12 @@
     }
 
     // Listeners de controles generales
-    if (hoursSel) hoursSel.addEventListener('change', recomputeCompositionAndRender);
-    if (capSel)   capSel.addEventListener('change',  recomputeCompositionAndRender);
-    if (modeSel)  modeSel.addEventListener('change', recomputeCompositionAndRender);
-    if (adjustBtn) adjustBtn.addEventListener('click', adjustCoverage);
-    if (addBtn)    addBtn.addEventListener('click', addMachineManual);
+    if (hoursSel)  hoursSel.addEventListener('change',  recomputeCompositionAndRender);
+    if (capSel)    capSel.addEventListener('change',    recomputeCompositionAndRender);
+    if (modeSel)   modeSel.addEventListener('change',   recomputeCompositionAndRender);
+    if (adjustBtn) adjustBtn.addEventListener('click',  adjustCoverage);
+    if (addBtn)    addBtn.addEventListener('click',     addMachineManual);
+    if (recalcBtn) recalcBtn.addEventListener('click',  recalcBase);
 
     hookDataChanges();
 
