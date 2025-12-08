@@ -135,7 +135,6 @@
       wrapper.className = 'mach-item';
 
       const defaultName = `Lavadora ${idx + 1}`;
-      // Si el nombre era uno automático tipo "Lavadora X" o está vacío, lo renumeramos
       if (!m.name || /^Lavadora\s+\d+$/i.test(m.name.trim())) {
         m.name = defaultName;
       }
@@ -178,7 +177,6 @@
       const cycSpan     = wrapper.querySelector('[data-role="cyctime"]');
       const removeBtn   = wrapper.querySelector('.mach-remove-btn');
 
-      // Nombre editable
       if (nameInput) {
         nameInput.addEventListener('input', () => {
           const val = nameInput.value.trim();
@@ -212,7 +210,6 @@
         if (cycSpan) cycSpan.textContent = totalCycle;
       }
 
-      // Cambio de capacidad individual
       selectCap.addEventListener('change', () => {
         const cap = toNumber(selectCap.value);
         if (cap > 0) {
@@ -222,7 +219,6 @@
         }
       });
 
-      // Cambio de ciclo individual
       selectCycle.addEventListener('change', () => {
         const val = toNumber(selectCycle.value);
         let wash = val || DEFAULT_WASH_MIN;
@@ -233,7 +229,6 @@
         updateMachinerySummary();
       });
 
-      // Quitar equipo
       if (removeBtn) {
         removeBtn.addEventListener('click', () => {
           currentMachines = currentMachines.filter(x => x.id !== m.id);
@@ -259,7 +254,7 @@
     const legend = document.getElementById('mach-legend');
 
     let installedKgPerDay = 0;
-    const grouped = new Map(); // cap -> count
+    const grouped = new Map();
 
     currentMachines.forEach(m => {
       installedKgPerDay += capacityPerMachinePerDay(m, hours);
@@ -280,7 +275,6 @@
       covOut.classList.toggle('is-over',  pct >= 100 && totalKg > 0);
     }
 
-    // Breakdown tipo "2×30kg + 1×24kg"
     let breakdown = '—';
     if (grouped.size) {
       breakdown = Array.from(grouped.entries())
@@ -304,7 +298,7 @@
 
         const coberturaTexto =
           pct < 100
-            ? 'Estás por debajo del 100% (no cubierto). Usa “Ajustar cobertura” o “Añadir lavadora”.'
+            ? 'Estás por debajo del 100% (no cubierto). Usa “Calcular” o “Añadir lavadora”.'
             : (pct > 100
                ? 'Tienes margen por encima del 100%.'
                : 'Quedas exactamente al 100%.');
@@ -347,7 +341,7 @@
     updateMachinerySummary();
   }
 
-  // ====== Botón "Ajustar cobertura" ======
+  // ====== Botón "Calcular" (ajustar cobertura) ======
   function adjustCoverage() {
     const totalKg = getTotalKgPerDay();
     const hours = getHours();
@@ -395,7 +389,7 @@
     updateMachinerySummary();
   }
 
-  // ====== Botón "Añadir lavadora" manual (hasta 150%) ======
+  // ====== Botón "Añadir lavadora" manual (hasta ~150%) ======
   function addMachineManual() {
     const totalKg = getTotalKgPerDay();
     const hours   = getHours();
@@ -407,7 +401,6 @@
       );
       const coverage = installed / totalKg;
       if (coverage >= 1.5) {
-        // Límite 150% de cobertura
         updateMachinerySummary();
         return;
       }
@@ -421,7 +414,7 @@
     if (mode === 'fixed') {
       cap = toNumber(capSel && capSel.value) || 30;
     } else {
-      cap = 30; // valor neutro por defecto
+      cap = 30;
     }
 
     currentMachines.push({
@@ -433,11 +426,6 @@
 
     renderMachineList();
     updateMachinerySummary();
-  }
-
-  // ====== Botón "Calcular" (refresh base) ======
-  function recalcBase() {
-    recomputeCompositionAndRender();
   }
 
   // ====== Enganches a cambios de datos de ropa ======
@@ -475,7 +463,6 @@
     const modeSel   = document.getElementById('mach-mode');
     const adjustBtn = document.getElementById('mach-adjust');
     const addBtn    = document.getElementById('mach-add');
-    const recalcBtn = document.getElementById('mach-recalc');
 
     // Horas (1..24)
     if (hoursSel && !hoursSel.options.length) {
@@ -494,18 +481,16 @@
         const opt = document.createElement('option');
         opt.value = String(cap);
         opt.textContent = `${cap} kg`;
-        if (cap === 30) opt.selected = true; // base 30 kg
+        if (cap === 30) opt.selected = true;
         capSel.appendChild(opt);
       });
     }
 
-    // Listeners de controles generales
     if (hoursSel)  hoursSel.addEventListener('change',  recomputeCompositionAndRender);
     if (capSel)    capSel.addEventListener('change',    recomputeCompositionAndRender);
     if (modeSel)   modeSel.addEventListener('change',   recomputeCompositionAndRender);
     if (adjustBtn) adjustBtn.addEventListener('click',  adjustCoverage);
     if (addBtn)    addBtn.addEventListener('click',     addMachineManual);
-    if (recalcBtn) recalcBtn.addEventListener('click',  recalcBase);
 
     hookDataChanges();
 
