@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Política de privacidad · unatomo</title>
+  <meta name="robots" content="noindex, nofollow" />
+
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body class="page">
+  <button id="theme-toggle" type="button" aria-label="Cambiar tema">
+    ☾ / ☼
+  </button>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a href="/" class="topbar-logo-link">
+        <img
+          src="/static/img/logo-unatomo-v1.5.svg"
+          alt="unatomo"
+          class="topbar-logo"
+          loading="lazy"
+        />
+      </a>
+      <h2 class="topbar-title">Política de privacidad y cookies</h2>
+    </div>
+  </header>
+
+  <main class="shell page-shell">
+    <section class="page-section">
+      <h1>Política de privacidad y cookies</h1>
+      <h3>Introducción</h3>
+      <p>
+        Esta página es una plantilla estándar para la política de privacidad y cookies de UNATOMO CORE SL.
+        Aquí podrás ampliar, modificar y añadir todas las secciones que necesites más adelante.
+      </p>
+    </section>
+
+    <section class="page-section">
+      <h3>Responsable del tratamiento</h3>
+      <p>
+        UNATOMO CORE SL es la entidad responsable del tratamiento de los datos personales
+        recopilados a través de este sitio web.
+      </p>
+    </section>
+
+    <section class="page-section">
+      <h3>Uso de cookies</h3>
+      <p>
+        Este sitio utiliza cookies técnicas necesarias para su funcionamiento y, opcionalmente, cookies
+        analíticas, funcionales y de marketing, siempre de acuerdo con las preferencias que definas en la
+        pantalla de configuración de inicio.
+      </p>
+    </section>
+
+    <p id="legal-footer" class="legal-footer"></p>
+  </main>
+
+  <script src="/static/js/theme.js"></script>
+  <script>
+    (function () {
+      const legalFooter = document.getElementById("legal-footer");
+      if (legalFooter) {
+        const year = new Date().getFullYear();
+        legalFooter.textContent =
+          "© " + year + " UNATOMO CORE SL · Todos los derechos reservados.";
+      }
+    })();
+  </script>
+</body>
+</html>
