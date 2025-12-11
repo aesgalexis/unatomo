@@ -5,7 +5,14 @@
 
   const COPY = {
     es: {
-      subtitle: "Elige idioma y configura cookies",
+      subtitle: "Tu proceso, Nuestra visión",
+      introTitle: "Unatomo Core:",
+      intro1: "Nos dedicamos a la gestión de maquinaria y procesos de lavado de prendas textiles.",
+      intro2:
+        "Ofrecemos variedad de servicios enfocados principalmente a lavanderías industriales, hoteleras y tintorerías, desde la venta de maquinaria, instalación, mantenimiento, formación a personal operativo y técnico hasta estudios y auditorías a medida enfocadas en ayudar a quienes ya saben lo que hacen, a poder hacerlo un poco mejor.",
+      intro3:
+        "Tenemos una larga trayectoria y casos de éxito consolidados en lavanderías industriales de gran tamaño, líderes del sector en España.",
+      intro4: "Configura tus preferencias y accede al sitio para conocer más.",
       headingLang: "Idioma",
       headingTheme: "Tema",
       headingCookies: "Cookies",
@@ -21,7 +28,14 @@
       button: "Guardar y acceder"
     },
     en: {
-      subtitle: "Choose language and configure cookies",
+      subtitle: "Your process, Our insight",
+      introTitle: "Unatomo Core:",
+      intro1: "We manage machinery and washing processes for textile garments.",
+      intro2:
+        "We offer a range of services mainly focused on industrial laundries, hotel laundries and dry cleaners: from machinery sales, installation and maintenance, to training for operational and technical staff, as well as tailored studies and audits to help those who already know what they are doing do it a bit better.",
+      intro3:
+        "We have a long track record and solid success cases in large industrial laundries, leaders in the sector in Spain.",
+      intro4: "Set your preferences and access the site to learn more.",
       headingLang: "Language",
       headingTheme: "Theme",
       headingCookies: "Cookies",
@@ -71,6 +85,21 @@
 
     const subtitle = get("subtitle-main");
     if (subtitle) subtitle.textContent = t.subtitle;
+
+    const introTitle = get("intro-title");
+    if (introTitle) introTitle.textContent = t.introTitle;
+
+    const intro1 = get("intro-line-1");
+    if (intro1) intro1.textContent = t.intro1;
+
+    const intro2 = get("intro-line-2");
+    if (intro2) intro2.textContent = t.intro2;
+
+    const intro3 = get("intro-line-3");
+    if (intro3) intro3.textContent = t.intro3;
+
+    const intro4 = get("intro-line-4");
+    if (intro4) intro4.textContent = t.intro4;
 
     const headingLang = get("heading-lang");
     if (headingLang) headingLang.textContent = t.headingLang;
@@ -155,8 +184,10 @@
     let initialTheme = null;
     if (savedTheme === "light" || savedTheme === "dark") {
       initialTheme = savedTheme;
-    } else if (window.matchMedia &&
-               window.matchMedia("(prefers-color-scheme: dark)").matches) {
+    } else if (
+      window.matchMedia &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches
+    ) {
       initialTheme = "dark";
     } else {
       initialTheme = "light";
