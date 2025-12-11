@@ -56,7 +56,7 @@ body {
 
 .shell {
   width: 100%;
-  max-width: 640px;
+  max-width: 800px;
   padding: 2.5rem 1.5rem;
 }
 
@@ -206,8 +206,8 @@ body.page #theme-toggle {
 }
 
 .card {
-  margin-top: 3rem;
-  margin-bottom: 3rem;
+  max-width: 640px;
+  margin: 3rem auto;
   padding: 1rem 1.25rem 1.5rem;
   border-radius: 1.25rem;
   border: 1px solid var(--border-subtle);
