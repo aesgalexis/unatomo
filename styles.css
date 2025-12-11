@@ -281,6 +281,10 @@ body.page {
   text-align: left;
 }
 
+body.page p {
+  text-align: justify;
+}
+
 .page-shell {
   max-width: 800px;
   padding: 140px 1.5rem 2.5rem;
