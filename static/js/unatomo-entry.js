@@ -153,6 +153,17 @@
     const savedLang = localStorage.getItem(LANG_KEY);
     if (savedLang === "es" || savedLang === "en") {
       initialLang = savedLang;
+    } else {
+      const navLang =
+        (navigator.language || navigator.userLanguage || "").toLowerCase();
+
+      if (navLang.startsWith("en")) {
+        initialLang = "en";
+      } else if (navLang.startsWith("es")) {
+        initialLang = "es";
+      } else {
+        initialLang = "es";
+      }
     }
   } catch (e) {}
 
