@@ -5,7 +5,7 @@
 
   const COPY = {
     es: {
-      subtitle: "Your process, Our insight",
+      subtitle: "Elige idioma y configura cookies",
       headingLang: "Idioma",
       headingTheme: "Tema",
       headingCookies: "Cookies",
@@ -34,7 +34,7 @@
       marketingText: "More tailored content and communications.",
       themeLight: "Light",
       themeDark: "Dark",
-      button: "Save and continue"
+      button: "Not available yet"
     }
   };
 
@@ -198,6 +198,11 @@
     langInputs.forEach((input) => {
       if (input.checked) lang = input.value;
     });
+
+    if (lang === "en") {
+      alert("The English version of this site is not available yet.");
+      return;
+    }
 
     try {
       localStorage.setItem(LANG_KEY, lang);
