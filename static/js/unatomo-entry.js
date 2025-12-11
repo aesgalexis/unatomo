@@ -60,7 +60,13 @@
   const pathname = window.location.pathname || "/";
   const isRoot = pathname === "/" || pathname === "/index.html";
 
-  if (isRoot) {
+  let isSetupMode = false;
+  try {
+    const url = new URL(window.location.href);
+    isSetupMode = url.searchParams.get("setup") === "1";
+  } catch (e) {}
+
+  if (isRoot && !isSetupMode) {
     try {
       const savedLang = localStorage.getItem(LANG_KEY);
       const rawPrefs = localStorage.getItem(PREF_KEY);
