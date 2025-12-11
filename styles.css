@@ -288,6 +288,14 @@ body.page {
   text-align: left;
 }
 
+body.page h1,
+body.page h2,
+body.page h3,
+body.page h4,
+body.page h5 {
+  text-align: left;
+}
+
 body.page p {
   text-align: justify;
 }
