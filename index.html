@@ -21,11 +21,11 @@
       loading="lazy"
     />
 
-    <h1>unatomo</h1>
-    <h2>Elige idioma y configura cookies</h2>
+    <h1 id="title-main">unatomo</h1>
+    <h2 id="subtitle-main">Elige idioma y configura cookies</h2>
 
     <section class="card">
-      <h3>Idioma</h3>
+      <h3 id="heading-lang">Idioma</h3>
       <div class="lang-picker">
         <label>
           <input type="radio" name="lang" value="es" checked>
@@ -39,18 +39,31 @@
     </section>
 
     <section class="card">
-      <h3>Cookies opcionales</h3>
-      <p>
+      <h3 id="heading-theme">Tema</h3>
+      <div class="lang-picker theme-picker">
+        <label>
+          <input type="radio" name="theme" value="light">
+          <span id="theme-label-light">Claro</span>
+        </label>
+        <label>
+          <input type="radio" name="theme" value="dark">
+          <span id="theme-label-dark">Oscuro</span>
+        </label>
+      </div>
+    </section>
+
+    <section class="card">
+      <h3 id="heading-cookies">Cookies</h3>
+      <p id="cookies-intro">
         Todas las cookies opcionales están desactivadas por defecto.
-        Puedes activarlas cuando quieras.
       </p>
 
       <ul class="cookie-list">
         <li>
           <label class="cookie-row">
             <div class="cookie-text">
-              <h4>Analíticas</h4>
-              <p>Nos ayudan a entender cómo se usa la web.</p>
+              <h4 id="cookie-analytics-title">Analíticas</h4>
+              <p id="cookie-analytics-text">Nos ayudan a entender cómo se usa la web.</p>
             </div>
             <input type="checkbox" data-cookie-key="analytics">
           </label>
@@ -58,8 +71,8 @@
         <li>
           <label class="cookie-row">
             <div class="cookie-text">
-              <h4>Funcionales</h4>
-              <p>Recuerdan pequeñas preferencias (por ejemplo, idioma).</p>
+              <h4 id="cookie-functional-title">Funcionales</h4>
+              <p id="cookie-functional-text">Recuerdan pequeñas preferencias (por ejemplo, idioma).</p>
             </div>
             <input type="checkbox" data-cookie-key="functional">
           </label>
@@ -67,8 +80,8 @@
         <li>
           <label class="cookie-row">
             <div class="cookie-text">
-              <h4>Marketing</h4>
-              <p>Contenido y comunicaciones más ajustadas a ti.</p>
+              <h4 id="cookie-marketing-title">Marketing</h4>
+              <p id="cookie-marketing-text">Contenido y comunicaciones más ajustadas a ti.</p>
             </div>
             <input type="checkbox" data-cookie-key="marketing">
           </label>
