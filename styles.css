@@ -54,9 +54,10 @@ body {
 body {
   min-height: 100svh; /* mejor comportamiento en móviles */
   background: var(--bg);
-  color: var(--fg);
+  color: color-mix(in srgb, var(--fg) 85%, transparent);
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI",
                Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 0.95rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -80,41 +81,47 @@ body {
 }
 
 /* =========================================
-   2) TIPOGRAFÍAS (H1, H2, H3)
+   2) TIPOGRAFÍAS GLOBALES
+   Solo 3 estilos:
+   - H1: título principal (más grande)
+   - H2: títulos de sección
+   - H3: etiquetas/subtítulos (mismo color/tamaño base que el body)
    ========================================= */
 
 h1,
 h2,
-h3 {
+h3,
+p {
   margin: 0;
 }
 
 h1 {
-  font-size: clamp(2.5rem, 8vw, 4rem); /* 40px–64px aprox */
+  font-size: clamp(2.5rem, 8vw, 4rem); /* grande */
   letter-spacing: -0.04em;
+  color: var(--fg);
   margin-bottom: 0.5rem;
+  font-weight: 600;
 }
 
 h2 {
-  font-size: clamp(1.5rem, 5.5vw, 2.25rem);
-  font-weight: 500;
+  font-size: clamp(1.4rem, 5.2vw, 2rem); /* mediano */
+  color: var(--fg);
   margin-top: 1rem;
-  margin-bottom: 0.5rem;
-  opacity: 0.9;
+  margin-bottom: 0.25rem;
+  font-weight: 500;
 }
 
 h3 {
-  font-size: clamp(1.125rem, 4.2vw, 1.5rem);
-  font-weight: 500;
-  margin-top: 1.5rem;
-  opacity: 0.85;
+  font-size: 0.95rem; /* mismo tamaño base que el cuerpo */
+  color: color-mix(in srgb, var(--fg) 85%, transparent); /* mismo tono que body */
+  font-weight: 600;
+  margin-top: 1rem;
+  margin-bottom: 0.25rem;
 }
 
-/* Texto auxiliar */
-.muted {
-  margin: 0.75rem 0 0;
-  font-size: 0.9rem;
-  opacity: 0.8;
+/* Los párrafos heredan la configuración de body */
+p {
+  line-height: 1.5;
 }
 
 /* =========================================
@@ -165,7 +172,7 @@ h3 {
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem 1.25rem;
-  margin-top: 1rem;
+  margin-top: 0.75rem;
 }
 
 .lang-picker label {
@@ -173,14 +180,16 @@ h3 {
   align-items: center;
   gap: 0.4rem;
   cursor: pointer;
-  font-size: 0.95rem;
 }
 
 .lang-picker input[type="radio"] {
   accent-color: var(--fg);
 }
 
-/* Lista de cookies */
+/* =========================================
+   5) LISTA DE COOKIES Y BOTÓN PRINCIPAL
+   ========================================= */
+
 .cookie-list {
   list-style: none;
   margin: 1.25rem 0 0;
@@ -199,19 +208,19 @@ h3 {
 }
 
 .cookie-text p {
-  margin: 0.25rem 0 0;
-  font-size: 0.85rem;
-  opacity: 0.75;
+  margin-top: 0.15rem;
 }
 
+/* Checkbox "switch" simple */
 .cookie-row input[type="checkbox"] {
   width: 2.3rem;
   height: 1.3rem;
   accent-color: var(--fg);
 }
 
-/* Botón principal */
-.primary-btn {
+/* Botón principal reutilizable */
+button.primary-btn,
+a.primary-btn {
   margin-top: 2.5rem;
   padding: 0.75rem 1.75rem;
   border-radius: 999px;
@@ -226,14 +235,16 @@ h3 {
   justify-content: center;
   gap: 0.4rem;
   -webkit-tap-highlight-color: transparent;
+  text-decoration: none;
 }
 
-.primary-btn:hover {
+button.primary-btn:hover,
+a.primary-btn:hover {
   filter: brightness(1.03);
 }
 
 /* =========================================
-   5) AJUSTES MÓVIL
+   6) AJUSTES MÓVIL
    ========================================= */
 
 @media (max-width: 480px) {
