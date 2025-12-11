@@ -300,6 +300,15 @@ body.page p {
   text-align: justify;
 }
 
+body.page ul {
+  padding-left: 1.25rem;
+  list-style-position: outside;
+}
+
+body.page li {
+  text-align: left;
+}
+
 .page-shell {
   max-width: 800px;
   padding: 110px 1.5rem 2.5rem;
