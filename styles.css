@@ -302,7 +302,7 @@ body.page p {
 
 .page-shell {
   max-width: 800px;
-  padding: 140px 1.5rem 2.5rem;
+  padding: 110px 1.5rem 2.5rem;
   margin: 0 auto;
 }
 
@@ -311,7 +311,7 @@ body.page p {
   top: 0;
   left: 0;
   right: 0;
-  height: 100px;
+  height: 75px;
   background: color-mix(in srgb, var(--bg) 25%, transparent);
   border-bottom: 1px solid var(--border-subtle);
   backdrop-filter: blur(12px);
@@ -319,9 +319,8 @@ body.page p {
 }
 
 .topbar-inner {
-  max-width: 1024px;
   height: 100%;
-  margin: 0 auto;
+  margin: 0;
   padding: 0 1.5rem;
   display: flex;
   align-items: center;
