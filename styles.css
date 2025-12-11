@@ -1,13 +1,7 @@
-/* =========================================
-   0) VARIABLES DE TEMA
-   ========================================= */
 :root {
   color-scheme: light dark;
-
-  /* Tema base (LIGHT) */
   --bg: #ffffff;
   --fg: #111111;
-
   --border-subtle: color-mix(in srgb, var(--fg) 12%, transparent);
   --panel-bg: color-mix(in srgb, var(--bg) 92%, transparent);
 }
@@ -21,7 +15,6 @@
   }
 }
 
-/* Tema forzado por botón */
 :root[data-theme="light"] {
   --bg: #ffffff;
   --fg: #111111;
@@ -36,9 +29,6 @@
   --panel-bg: color-mix(in srgb, var(--bg) 80%, transparent);
 }
 
-/* =========================================
-   1) BASE / RESET SIMPLE
-   ========================================= */
 *,
 *::before,
 *::after {
@@ -52,7 +42,7 @@ body {
 }
 
 body {
-  min-height: 100svh; /* mejor comportamiento en móviles */
+  min-height: 100svh;
   background: var(--bg);
   color: color-mix(in srgb, var(--fg) 85%, transparent);
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI",
@@ -64,14 +54,12 @@ body {
   text-align: center;
 }
 
-/* Contenedor principal */
 .shell {
   width: 100%;
   max-width: 640px;
   padding: 2.5rem 1.5rem;
 }
 
-/* Logo */
 .logo {
   width: 100%;
   max-width: 180px;
@@ -79,14 +67,6 @@ body {
   margin: 0 auto 2rem;
   opacity: 0.9;
 }
-
-/* =========================================
-   2) TIPOGRAFÍAS GLOBALES
-   Solo 3 estilos:
-   - H1: título principal (más grande)
-   - H2: títulos de sección
-   - H3: etiquetas/subtítulos (mismo color/tamaño base que el body)
-   ========================================= */
 
 h1,
 h2,
@@ -96,7 +76,7 @@ p {
 }
 
 h1 {
-  font-size: clamp(2.5rem, 8vw, 4rem); /* grande */
+  font-size: clamp(2.5rem, 8vw, 4rem);
   letter-spacing: -0.04em;
   color: var(--fg);
   margin-bottom: 0.5rem;
@@ -104,7 +84,7 @@ h1 {
 }
 
 h2 {
-  font-size: clamp(1.4rem, 5.2vw, 2rem); /* mediano */
+  font-size: clamp(1.4rem, 5.2vw, 2rem);
   color: var(--fg);
   margin-top: 1rem;
   margin-bottom: 0.25rem;
@@ -112,21 +92,38 @@ h2 {
 }
 
 h3 {
-  font-size: 0.95rem; /* mismo tamaño base que el cuerpo */
-  color: color-mix(in srgb, var(--fg) 85%, transparent); /* mismo tono que body */
+  font-size: 0.95rem;
+  color: color-mix(in srgb, var(--fg) 85%, transparent);
   font-weight: 600;
   margin-top: 1rem;
   margin-bottom: 0.25rem;
 }
 
-/* Los párrafos heredan la configuración de body */
 p {
   line-height: 1.5;
 }
 
-/* =========================================
-   3) BOTÓN TEMA (LIGHT / DARK)
-   ========================================= */
+button {
+  margin-top: 2.5rem;
+  padding: 0.75rem 1.75rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--fg) 55%, transparent);
+  background: var(--fg);
+  color: var(--bg);
+  font: inherit;
+  font-size: 0.95rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  -webkit-tap-highlight-color: transparent;
+  text-decoration: none;
+}
+
+button:hover {
+  filter: brightness(1.03);
+}
 
 #theme-toggle {
   position: fixed;
@@ -134,11 +131,11 @@ p {
   left: 50%;
   transform: translateX(-50%);
   z-index: 1000;
-
+  margin: 0;
   padding: 6px 10px;
   min-width: 40px;
   min-height: 32px;
-  border-radius: 0.75rem; /* cuadrado con esquinas suaves */
+  border-radius: 0.75rem;
   border: 1px solid color-mix(in srgb, var(--fg) 55%, transparent);
   background: color-mix(in srgb, var(--bg) 80%, transparent);
   color: var(--fg);
@@ -152,11 +149,8 @@ p {
 
 #theme-toggle:hover {
   opacity: 1;
+  filter: none;
 }
-
-/* =========================================
-   4) TARJETAS (IDIOMA / COOKIES)
-   ========================================= */
 
 .card {
   margin-top: 2rem;
@@ -167,7 +161,6 @@ p {
   text-align: left;
 }
 
-/* Selector de idioma */
 .lang-picker {
   display: flex;
   flex-wrap: wrap;
@@ -185,10 +178,6 @@ p {
 .lang-picker input[type="radio"] {
   accent-color: var(--fg);
 }
-
-/* =========================================
-   5) LISTA DE COOKIES Y BOTÓN PRINCIPAL
-   ========================================= */
 
 .cookie-list {
   list-style: none;
@@ -211,41 +200,11 @@ p {
   margin-top: 0.15rem;
 }
 
-/* Checkbox "switch" simple */
 .cookie-row input[type="checkbox"] {
   width: 2.3rem;
   height: 1.3rem;
   accent-color: var(--fg);
 }
-
-/* Botón principal reutilizable */
-button.primary-btn,
-a.primary-btn {
-  margin-top: 2.5rem;
-  padding: 0.75rem 1.75rem;
-  border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--fg) 55%, transparent);
-  background: var(--fg);
-  color: var(--bg);
-  font: inherit;
-  font-size: 0.95rem;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.4rem;
-  -webkit-tap-highlight-color: transparent;
-  text-decoration: none;
-}
-
-button.primary-btn:hover,
-a.primary-btn:hover {
-  filter: brightness(1.03);
-}
-
-/* =========================================
-   6) AJUSTES MÓVIL
-   ========================================= */
 
 @media (max-width: 480px) {
   .shell {
