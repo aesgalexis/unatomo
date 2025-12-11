@@ -171,6 +171,12 @@ button:hover {
   filter: none;
 }
 
+.intro {
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  text-align: left;
+}
+
 .card {
   margin-top: 2rem;
   padding: 1rem 1.25rem 1.5rem;
