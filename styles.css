@@ -326,6 +326,13 @@ body.page p {
   opacity: 0.9;
 }
 
+.topbar-logo-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+}
+
 .topbar-title {
   font-size: clamp(1.3rem, 4vw, 1.8rem);
   color: var(--fg);
