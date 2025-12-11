@@ -78,7 +78,12 @@
   const themeInputs = document.querySelectorAll('input[name="theme"]');
   const cookieInputs = document.querySelectorAll("[data-cookie-key]");
   const enterBtn = document.getElementById("enter-site");
-
+  const legalFooter = document.getElementById("legal-footer");
+  if (legalFooter) {
+    const year = new Date().getFullYear();
+    legalFooter.textContent = "© " + year + " UNATOMO CORE SL · Todos los derechos reservados.";
+  }
+  
   function applyLanguage(lang) {
     const t = COPY[lang] || COPY.es;
     const get = (id) => document.getElementById(id);
