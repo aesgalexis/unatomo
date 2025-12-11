@@ -28,7 +28,7 @@
 
     <!-- Idioma -->
     <section class="card">
-      <h3>Idioma</h3>
+      <h2>Idioma</h2>
       <div class="lang-picker">
         <label>
           <input type="radio" name="lang" value="es" checked>
@@ -43,9 +43,9 @@
 
     <!-- Cookies -->
     <section class="card">
-      <h3>Cookies opcionales</h3>
-      <p class="muted">
-        Todas las cookies opcionales están <strong>desactivadas por defecto</strong>.
+      <h2>Cookies opcionales</h2>
+      <p>
+        Todas las cookies opcionales están desactivadas por defecto.
         Puedes activarlas cuando quieras.
       </p>
 
@@ -53,7 +53,7 @@
         <li>
           <label class="cookie-row">
             <div class="cookie-text">
-              <strong>Analíticas</strong>
+              <h3>Analíticas</h3>
               <p>Nos ayudan a entender cómo se usa la web.</p>
             </div>
             <input type="checkbox" data-cookie-key="analytics">
@@ -62,7 +62,7 @@
         <li>
           <label class="cookie-row">
             <div class="cookie-text">
-              <strong>Funcionales</strong>
+              <h3>Funcionales</h3>
               <p>Recuerdan pequeñas preferencias (por ejemplo, idioma).</p>
             </div>
             <input type="checkbox" data-cookie-key="functional">
@@ -71,7 +71,7 @@
         <li>
           <label class="cookie-row">
             <div class="cookie-text">
-              <strong>Marketing</strong>
+              <h3>Marketing</h3>
               <p>Contenido y comunicaciones más ajustadas a ti.</p>
             </div>
             <input type="checkbox" data-cookie-key="marketing">
@@ -86,7 +86,7 @@
   </main>
 
   <!-- Tema claro/oscuro -->
-  <script src="static/js/theme.js"></script>
+  <script src="/theme.js"></script>
 
   <!-- Lógica idioma + cookies -->
   <script>
@@ -113,9 +113,7 @@
             input.checked = input.value === savedLang;
           });
         }
-      } catch (e) {
-        // si peta localStorage, no pasa nada
-      }
+      } catch (e) {}
 
       // Cargar preferencias de cookies guardadas (si existen)
       try {
@@ -129,9 +127,7 @@
             }
           });
         }
-      } catch (e) {
-        // ignorar
-      }
+      } catch (e) {}
 
       enterBtn.addEventListener("click", () => {
         // Idioma seleccionado
