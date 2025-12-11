@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>unatomo</title>
+  <meta name="robots" content="noindex, nofollow" />
+
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <!-- Botón tema claro/oscuro -->
+  <button id="theme-toggle" type="button" aria-label="Cambiar tema">
+    ☾ / ☼
+  </button>
+
+  <main class="shell">
+    <img
+      src="/static/img/logo-unatomo-v1.5.svg"
+      alt="unatomo"
+      class="logo"
+      loading="lazy"
+    />
+
+    <h1>unatomo</h1>
+    <h2>Elige idioma y tus preferencias</h2>
+    <h3>Configuración inicial</h3>
+
+    <!-- Idioma -->
+    <section class="card">
+      <h3>Idioma</h3>
+      <div class="lang-picker">
+        <label>
+          <input type="radio" name="lang" value="es" checked>
+          <span>Español</span>
+        </label>
+        <label>
+          <input type="radio" name="lang" value="en">
+          <span>English</span>
+        </label>
+      </div>
+    </section>
+
+    <!-- Cookies -->
+    <section class="card">
+      <h3>Cookies opcionales</h3>
+      <p class="muted">
+        Todas las cookies opcionales están <strong>desactivadas por defecto</strong>.
+        Puedes activarlas cuando quieras.
+      </p>
+
+      <ul class="cookie-list">
+        <li>
+          <label class="cookie-row">
+            <div class="cookie-text">
+              <strong>Analíticas</strong>
+              <p>Nos ayudan a entender cómo se usa la web.</p>
+            </div>
+            <input type="checkbox" data-cookie-key="analytics">
+          </label>
+        </li>
+        <li>
+          <label class="cookie-row">
+            <div class="cookie-text">
+              <strong>Funcionales</strong>
+              <p>Recuerdan pequeñas preferencias (por ejemplo, idioma).</p>
+            </div>
+            <input type="checkbox" data-cookie-key="functional">
+          </label>
+        </li>
+        <li>
+          <label class="cookie-row">
+            <div class="cookie-text">
+              <strong>Marketing</strong>
+              <p>Contenido y comunicaciones más ajustadas a ti.</p>
+            </div>
+            <input type="checkbox" data-cookie-key="marketing">
+          </label>
+        </li>
+      </ul>
+    </section>
+
+    <button id="enter-site" type="button" class="primary-btn">
+      Guardar y acceder
+    </button>
+  </main>
+
+  <!-- Tema claro/oscuro -->
+  <script src="/theme.js"></script>
+
+  <!-- Lógica idioma + cookies -->
+  <script>
+    (function () {
+      const PREF_KEY = "cookiePrefs";
+      const LANG_KEY = "lang";
+      const defaultPrefs = {
+        analytics: false,
+        functional: false,
+        marketing: false,
+      };
+
+      const langInputs = document.querySelectorAll('input[name="lang"]');
+      const cookieInputs = document.querySelectorAll("[data-cookie-key]");
+      const enterBtn = document.getElementById("enter-site");
+
+      if (!enterBtn) return;
+
+      // Cargar idioma guardado (si existe)
+      try {
+        const savedLang = localStorage.getItem(LANG_KEY);
+        if (savedLang) {
+          langInputs.forEach((input) => {
+            input.checked = input.value === savedLang;
+          });
+        }
+      } catch (e) {
+        // si peta localStorage, no pasa nada
+      }
+
+      // Cargar preferencias de cookies guardadas (si existen)
+      try {
+        const raw = localStorage.getItem(PREF_KEY);
+        if (raw) {
+          const prefs = JSON.parse(raw);
+          cookieInputs.forEach((input) => {
+            const key = input.dataset.cookieKey;
+            if (key in prefs) {
+              input.checked = Boolean(prefs[key]);
+            }
+          });
+        }
+      } catch (e) {
+        // ignorar
+      }
+
+      enterBtn.addEventListener("click", () => {
+        // Idioma seleccionado
+        let lang = "es";
+        langInputs.forEach((input) => {
+          if (input.checked) lang = input.value;
+        });
+
+        // Guardar idioma
+        try {
+          localStorage.setItem(LANG_KEY, lang);
+        } catch (e) {}
+
+        // Recoger y guardar preferencias de cookies
+        const prefs = { ...defaultPrefs };
+        cookieInputs.forEach((input) => {
+          const key = input.dataset.cookieKey;
+          prefs[key] = input.checked;
+        });
+
+        try {
+          localStorage.setItem(PREF_KEY, JSON.stringify(prefs));
+        } catch (e) {}
+
+        // Redirección según idioma
+        const paths = {
+          es: "/es/index.html",
+          en: "/en/index.html",
+        };
+
+        const target = paths[lang] || paths.es;
+        window.location.href = target;
+      });
+    })();
+  </script>
+</body>
+</html>
