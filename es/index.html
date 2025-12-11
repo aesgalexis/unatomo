@@ -3,30 +3,64 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>unatomo</title>
-  <meta name="robots" content="noindex, nofollow" />
+  <title>unatomo · Gestión de maquinaria y procesos de lavado</title>
+  <meta name="description" content="UNATOMO CORE SL. Gestión de maquinaria y procesos de lavado para lavanderías industriales, hoteleras y tintorerías. Venta, instalación, mantenimiento, formación y auditorías a medida.">
+  <meta name="robots" content="index, follow" />
 
   <link rel="stylesheet" href="/styles.css">
 </head>
-<body>
-  <!-- Botón tema claro/oscuro -->
+<body class="page">
   <button id="theme-toggle" type="button" aria-label="Cambiar tema">
     ☾ / ☼
   </button>
 
-  <main class="shell">
-    <img
-      src="/static/img/logo-unatomo-v1.5.svg"
-      alt="unatomo"
-      class="logo"
-      loading="lazy"
-    />
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a href="/?setup=1" class="topbar-logo-link">
+        <img
+          src="/static/img/logo-unatomo-v1.5.svg"
+          alt="unatomo"
+          class="topbar-logo"
+          loading="lazy"
+        />
+        <h2 class="topbar-title">Política de privacidad y cookies</h2>
+      </a>
+    </div>
+  </header>
 
-    <h1>unatomo</h1>
-    <h2>Servicios profesionales para lavanderías</h2>
-    <h3>Ejemplo de subtítulo H3</h3>
+  <main class="shell page-shell">
+    <section class="page-section">
+      <h1>Política de privacidad y cookies</h1>
+      <p>
+        Aquí irá el contenido de la política de privacidad y cookies de UNATOMO CORE SL.
+        Puedes añadir, modificar o estructurar este texto en tantas secciones como necesites.
+      </p>
+    </section>
+
+    <div class="scroll-top-container">
+      <button id="scroll-top-button" class="scroll-top-button" type="button">
+        Arriba
+      </button>
+    </div>
+
+    <div id="legal-footer" class="legal-footer"></div>
+
+    <p class="footer-link">
+      <a href="/es/privacidad.html">Política de privacidad y cookies</a>
+    </p>
   </main>
 
   <script src="/static/js/theme.js"></script>
+  <script src="/static/js/functions.js"></script>
+  <script>
+    (function () {
+      const legalFooter = document.getElementById("legal-footer");
+      if (legalFooter) {
+        const year = new Date().getFullYear();
+        legalFooter.textContent =
+          "© " + year + " UNATOMO CORE SL · Todos los derechos reservados.";
+      }
+    })();
+  </script>
 </body>
 </html>
