@@ -5,7 +5,7 @@
 
   const COPY = {
     es: {
-      subtitle: "Elige idioma y configura cookies",
+      subtitle: "Your process, Our insight",
       headingLang: "Idioma",
       headingTheme: "Tema",
       headingCookies: "Cookies",
