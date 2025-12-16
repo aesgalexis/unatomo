@@ -383,6 +383,68 @@ body.page li {
   opacity: 0.9;
 }
 
+* - - - - - - - - - - - - - - - - - - - - - - - *
 
+.contact-form {
+  margin-top: 1.5rem;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem 1.5rem;
+  margin-top: 1rem;
+}
+
+.form-field label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-bottom: 0.3rem;
+  color: color-mix(in srgb, var(--fg) 90%, transparent);
+}
+
+.field {
+  width: 100%;
+  padding: 0.65rem 0.8rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--bg) 96%, transparent);
+  color: var(--fg);
+  font: inherit;
+  font-size: 0.95rem;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.field:focus {
+  outline: 2px solid color-mix(in srgb, var(--fg) 40%, transparent);
+  outline-offset: 1px;
+  border-color: color-mix(in srgb, var(--fg) 40%, transparent);
+  background: var(--bg);
+}
+
+.field::placeholder {
+  color: color-mix(in srgb, var(--fg) 45%, transparent);
+}
+
+textarea.field {
+  min-height: 160px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.form-field--full {
+  grid-column: 1 / -1;
+}
+
+.form-actions {
+  margin-top: 1.5rem;
+}
+
+.form-status {
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+}
 
 
