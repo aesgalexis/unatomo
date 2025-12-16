@@ -32,72 +32,74 @@
     <section class="page-section contacto" aria-label="Contacto">
       <h1>Contacto</h1>
       <p>
-        Si quieres contactar con UNATOMO CORE SL, rellena el siguiente formulario y te responderemos
-        lo antes posible.
+Si quieres ponerte en contacto, puedes hacerlo atreves del formulario. Te responderemos lo antes posible.
       </p>
 
-      <form class="contact-form" action="https://formspree.io/f/mkgqlvqj" method="POST" novalidate>
-        <!-- Honeypot antispam -->
-        <input
-          type="text"
-          name="_gotcha"
-          tabindex="-1"
-          autocomplete="off"
-          style="position:absolute; left:-5000px;"
-          aria-hidden="true"
-        >
+     <form class="contact-form" action="https://formspree.io/f/mkgqlvqj" method="POST" novalidate>
 
-        <div class="form-grid">
-          <div class="form-field">
-            <label for="nombre">Nombre<span aria-hidden="true"> *</span></label>
-            <input id="nombre" name="nombre" type="text" required class="field" autocomplete="name" />
-          </div>
+  <input
+    type="text"
+    name="_gotcha"
+    tabindex="-1"
+    autocomplete="off"
+    style="position:absolute; left:-5000px;"
+    aria-hidden="true"
+  >
 
-          <div class="form-field">
-            <label for="empresa">Empresa</label>
-            <input id="empresa" name="empresa" type="text" class="field" autocomplete="organization" />
-          </div>
+  <div class="form-grid">
 
-          <div class="form-field">
-            <label for="email">Correo electrónico<span aria-hidden="true"> *</span></label>
-            <input id="email" name="email" type="email" required class="field" autocomplete="email" />
-          </div>
+    <div class="form-field">
+      <label for="nombre">Nombre<span aria-hidden="true"> *</span></label>
+      <input id="nombre" name="nombre" type="text" required class="field" autocomplete="name" />
+    </div>
 
-          <div class="form-field">
-            <label for="telefono">Teléfono</label>
-            <input
-              id="telefono"
-              name="telefono"
-              type="tel"
-              class="field"
-              autocomplete="tel"
-              inputmode="tel"
-            />
-          </div>
+    <div class="form-field">
+      <label for="empresa">Empresa</label>
+      <input id="empresa" name="empresa" type="text" class="field" autocomplete="organization" />
+    </div>
 
-          <div class="form-field form-field--full">
-            <label for="asunto">Asunto<span aria-hidden="true"> *</span></label>
-            <select id="asunto" name="asunto" required class="field">
-              <option value="" disabled selected>Selecciona un asunto…</option>
-              <option>Consulta general</option>
-              <option>Maquinaria y procesos</option>
-              <option>Auditorías y estudios</option>
-              <option>Otros</option>
-            </select>
-          </div>
+    <div class="form-field">
+      <label for="email">Correo electrónico<span aria-hidden="true"> *</span></label>
+      <input id="email" name="email" type="email" required class="field" autocomplete="email" />
+    </div>
 
-          <div class="form-field form-field--full">
-            <label for="mensaje">Mensaje<span aria-hidden="true"> *</span></label>
-            <textarea id="mensaje" name="mensaje" rows="6" required class="field"></textarea>
-          </div>
-        </div>
+    <div class="form-field">
+      <label for="telefono">Teléfono</label>
+      <input
+        id="telefono"
+        name="telefono"
+        type="tel"
+        class="field"
+        autocomplete="tel"
+        inputmode="tel"
+      />
+    </div>
 
-        <div class="form-actions">
-          <button type="submit" class="btn-submit">Enviar</button>
-        </div>
+    <div class="form-field form-field--full">
+      <label for="asunto">Asunto<span aria-hidden="true"> *</span></label>
+      <select id="asunto" name="asunto" required class="field">
+        <option value="" disabled selected>Selecciona un asunto…</option>
+        <option>Consulta general</option>
+        <option>Maquinaria y procesos</option>
+        <option>Auditorías y estudios</option>
+        <option>Otros</option>
+      </select>
+    </div>
 
-        <p class="form-status" role="status" aria-live="polite" hidden></p>
-      </form>
+    <!-- Fila 4: Mensaje a lo ancho -->
+    <div class="form-field form-field--full">
+      <label for="mensaje">Mensaje<span aria-hidden="true"> *</span></label>
+      <textarea id="mensaje" name="mensaje" rows="6" required class="field"></textarea>
+    </div>
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" class="btn-submit">Enviar</button>
+  </div>
+
+  <p class="form-status" role="status" aria-live="polite" hidden></p>
+</form>
+
     </section>
 
     <div id="legal-footer" class="legal-footer"></div>
