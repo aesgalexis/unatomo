@@ -6,7 +6,7 @@
   const submitBtn = form.querySelector(".btn-submit");
   const honeypot = form.querySelector('input[name="_gotcha"]');
 
-  form.addEventListener("submit", async function (event) {
+  form.addEventListener("submit", function (event) {
     event.preventDefault();
 
     if (honeypot && honeypot.value) {
@@ -29,36 +29,37 @@
 
     const formData = new FormData(form);
 
-    try {
-      const response = await fetch(form.action, {
-        method: form.method || "POST",
-        body: formData,
-        headers: {
-          Accept: "application/json"
+    fetch(form.action, {
+      method: form.method || "POST",
+      body: formData,
+      headers: {
+        Accept: "application/json"
+      }
+    })
+      .then(function (response) {
+        if (response.ok) {
+          if (status) {
+            status.textContent =
+              "Mensaje enviado correctamente. Gracias por contactar con nosotros.";
+          }
+          form.reset();
+        } else {
+          if (status) {
+            status.textContent =
+              "Ha habido un problema al enviar el mensaje. Por favor, inténtalo de nuevo más tarde.";
+          }
+        }
+      })
+      .catch(function () {
+        if (status) {
+          status.textContent =
+            "Ha habido un problema de conexión. Por favor, inténtalo de nuevo.";
+        }
+      })
+      .finally(function () {
+        if (submitBtn) {
+          submitBtn.disabled = false;
         }
       });
-
-      if (response.ok) {
-        if (status) {
-          status.textContent =
-            "Mensaje enviado correctamente.";
-        }
-        form.reset();
-      } else {
-        if (status) {
-          status.textContent =
-            "Ha habido un problema al enviar el mensaje. Por favor, inténtalo de nuevo más tarde.";
-        }
-      }
-    } catch (error) {
-      if (status) {
-        status.textContent =
-          "Ha habido un problema de conexión. Por favor, inténtalo de nuevo.";
-      }
-    } finally {
-      if (submitBtn) {
-        submitBtn.disabled = false;
-      }
-    }
   });
 })();
