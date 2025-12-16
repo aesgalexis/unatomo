@@ -9,12 +9,10 @@
   form.addEventListener("submit", async function (event) {
     event.preventDefault();
 
-    // Si el honeypot tiene contenido, lo tratamos como spam y salimos en silencio
     if (honeypot && honeypot.value) {
       return;
     }
 
-    // Validación HTML5 manual (novalidate está activo)
     if (!form.checkValidity()) {
       form.reportValidity();
       return;
@@ -43,7 +41,7 @@
       if (response.ok) {
         if (status) {
           status.textContent =
-            "Mensaje enviado correctamente. Gracias por contactar con nosotros.";
+            "Mensaje enviado correctamente.";
         }
         form.reset();
       } else {
