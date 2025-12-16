@@ -1,75 +1,66 @@
-// /static/js/contacto.js
-(() => {
-  const form = document.querySelector('.contact-form');
+(function () {
+  const form = document.querySelector(".contact-form");
   if (!form) return;
 
-  const submitBtn = form.querySelector('button[type="submit"], [type="submit"]');
-  if (!submitBtn) return;
+  const status = form.querySelector(".form-status");
+  const submitBtn = form.querySelector(".btn-submit");
+  const honeypot = form.querySelector('input[name="_gotcha"]');
 
-  // Crear/colocar el mensaje a la IZQUIERDA del botón
-  let statusEl = form.querySelector('.form-status-inline');
-  if (!statusEl) {
-    statusEl = document.createElement('span');
-    statusEl.className = 'form-status-inline';
-    statusEl.setAttribute('role', 'status');
-    statusEl.setAttribute('aria-live', 'polite');
-    statusEl.hidden = true;
-  }
+  form.addEventListener("submit", async function (event) {
+    event.preventDefault();
 
-  // Asegurar contenedor en fila para status + botón
-  let actions = submitBtn.parentElement;
-  if (!actions || !actions.classList.contains('form-actions')) {
-    actions = document.createElement('div');
-    actions.className = 'form-actions';
-    submitBtn.replaceWith(actions);
-    actions.appendChild(statusEl);       // primero el mensaje
-    actions.appendChild(submitBtn);      // luego el botón
-  } else {
-    actions.insertBefore(statusEl, submitBtn);
-  }
+    // Si el honeypot tiene contenido, lo tratamos como spam y salimos en silencio
+    if (honeypot && honeypot.value) {
+      return;
+    }
 
-  async function handleSubmit(e) {
-    e.preventDefault();
+    // Validación HTML5 manual (novalidate está activo)
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
 
-    submitBtn.setAttribute('disabled', 'true');
-    const data = new FormData(form);
+    if (status) {
+      status.hidden = false;
+      status.textContent = "Enviando…";
+    }
+
+    if (submitBtn) {
+      submitBtn.disabled = true;
+    }
+
+    const formData = new FormData(form);
 
     try {
-      const res = await fetch(form.action, {
-        method: 'POST',
-        body: data,
-        headers: { 'Accept': 'application/json' } // evita redirección de Formspree
+      const response = await fetch(form.action, {
+        method: form.method || "POST",
+        body: formData,
+        headers: {
+          Accept: "application/json"
+        }
       });
 
-      if (res.ok) {
-        statusEl.textContent = 'Su mensaje ha sido enviado correctamente. Responderemos lo antes posible.';
-        statusEl.classList.remove('error');
-        statusEl.classList.add('success');
-        statusEl.hidden = false;
+      if (response.ok) {
+        if (status) {
+          status.textContent =
+            "Mensaje enviado correctamente. Gracias por contactar con nosotros.";
+        }
         form.reset();
-
-        // Ocultar a los 5s
-        setTimeout(() => { statusEl.hidden = true; }, 5000);
       } else {
-        let errText = 'Ha ocurrido un problema. Inténtelo de nuevo.';
-        try {
-          const j = await res.json();
-          if (j?.errors?.length) errText = j.errors.map(e => e.message).join(' · ');
-        } catch {}
-        statusEl.textContent = errText;
-        statusEl.classList.remove('success');
-        statusEl.classList.add('error');
-        statusEl.hidden = false;
+        if (status) {
+          status.textContent =
+            "Ha habido un problema al enviar el mensaje. Por favor, inténtalo de nuevo más tarde.";
+        }
       }
-    } catch {
-      statusEl.textContent = 'No hay conexión o el servicio no responde. Vuelva a intentarlo.';
-      statusEl.classList.remove('success');
-      statusEl.classList.add('error');
-      statusEl.hidden = false;
+    } catch (error) {
+      if (status) {
+        status.textContent =
+          "Ha habido un problema de conexión. Por favor, inténtalo de nuevo.";
+      }
     } finally {
-      submitBtn.removeAttribute('disabled');
+      if (submitBtn) {
+        submitBtn.disabled = false;
+      }
     }
-  }
-
-  form.addEventListener('submit', handleSubmit, { passive: false });
+  });
 })();
