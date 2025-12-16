@@ -80,14 +80,8 @@
 
       state.rows[key] = { row, units, kg, ppu };
 
-      if (units) {
-        if (!units.placeholder) units.placeholder = "0";
-        units.value = "";
-      }
-      if (kg) {
-        if (!kg.placeholder) kg.placeholder = "0.00";
-        kg.value = "";
-      }
+      if (units) units.value = "";
+      if (kg) kg.value = "";
 
       if (units) units.addEventListener("input", () => onUnitsChange(key));
       if (kg) kg.addEventListener("input", () => onKgChange(key));
@@ -208,14 +202,12 @@
       if (ppu && ppu.closest("#fam-otros")) markInvalid(ppu, false);
     });
 
-    const idsCounts = ["est-simples", "est-dobles", "est-suites", "est-cubiertos"];
-    idsCounts.forEach((id) => {
+    ["est-simples", "est-dobles", "est-suites", "est-cubiertos"].forEach((id) => {
       const el = document.getElementById(id);
       if (el) el.value = "";
     });
 
-    const idsFactors = ["est-factor-s", "est-factor-d", "est-factor-u", "est-factor-cub"];
-    idsFactors.forEach((id) => {
+    ["est-factor-s", "est-factor-d", "est-factor-u", "est-factor-cub"].forEach((id) => {
       const el = document.getElementById(id);
       if (el) el.value = "1";
     });
@@ -224,9 +216,8 @@
   }
 
   function getFactor(id) {
-    const globalFallback = parseNum(document.getElementById("est-factor")?.value) || 1;
     const v = parseNum(document.getElementById(id)?.value);
-    return Math.max(0, v || globalFallback || 1);
+    return Math.max(0, v || 1);
   }
 
   function applyEstimator() {
@@ -325,6 +316,7 @@
     const btnApply = document.getElementById("est-apply");
     const btnClear = document.getElementById("est-clear");
     const btnAddOther = document.getElementById("otros-add");
+
     if (btnApply) btnApply.addEventListener("click", applyEstimator);
     if (btnClear) btnClear.addEventListener("click", clearAllRows);
     if (btnAddOther) btnAddOther.addEventListener("click", () => addCustomItem());
