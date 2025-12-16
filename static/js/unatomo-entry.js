@@ -61,7 +61,7 @@
       intro4: "Ρύθμισε τις προτιμήσεις σου και μπες στον ιστότοπο για να μάθεις περισσότερα.",
       headingLang: "Γλώσσα",
       headingTheme: "Θέμα",
-      headingCookies: "Cookies",
+      headingCookies: "Κούκις",
       cookiesIntro: "Όλα τα προαιρετικά cookies είναι απενεργοποιημένα από προεπιλογή.",
       analyticsTitle: "Αναλυτικά",
       analyticsText: "Μας βοηθούν να καταλάβουμε πώς χρησιμοποιείται ο ιστότοπος.",
