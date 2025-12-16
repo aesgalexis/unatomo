@@ -1,52 +1,65 @@
 (function () {
   const root = document.documentElement;
-  const btn  = document.getElementById("theme-toggle");
+  const btn = document.getElementById("theme-toggle");
   if (!btn) return;
 
-  const prefersDark = window.matchMedia &&
-                      window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const getSystemTheme = () => {
+    const mq = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)");
+    return mq && mq.matches ? "dark" : "light";
+  };
 
-  // Lee (light|dark) de localStorage si existe
-  const saved = localStorage.getItem("theme");
-  const effective = saved || (prefersDark ? "dark" : "light");
+  let saved = null;
+  try {
+    saved = localStorage.getItem("theme");
+  } catch (e) {}
 
-  // Solo fijamos data-theme si el usuario ya eligió antes
   if (saved === "light" || saved === "dark") {
     root.setAttribute("data-theme", saved);
   }
 
-  setBtnLabel(getCurrentTheme());
+  syncUI(getCurrentTheme());
 
   btn.addEventListener("click", () => {
     const current = getCurrentTheme();
     const next = current === "dark" ? "light" : "dark";
     root.setAttribute("data-theme", next);
-    localStorage.setItem("theme", next);
-    setBtnLabel(next);
+
+    try {
+      localStorage.setItem("theme", next);
+    } catch (e) {}
+
+    syncUI(next);
   });
 
-  // Si el usuario cambia el tema del SO y NO hay elección guardada
   if (!saved && window.matchMedia) {
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
 
     const handler = (e) => {
-      // Volvemos a dejar que el sistema mande
       root.removeAttribute("data-theme");
-      setBtnLabel(e.matches ? "dark" : "light");
+      syncUI(e.matches ? "dark" : "light");
     };
 
-    if (mq.addEventListener) {
-      mq.addEventListener("change", handler);
-    } else if (mq.addListener) {
-      // Compatibilidad con navegadores antiguos
-      mq.addListener(handler);
-    }
+    if (mq.addEventListener) mq.addEventListener("change", handler);
+    else if (mq.addListener) mq.addListener(handler);
   }
 
   function getCurrentTheme() {
     const attr = root.getAttribute("data-theme");
     if (attr === "light" || attr === "dark") return attr;
-    return prefersDark ? "dark" : "light";
+    return getSystemTheme();
+  }
+
+  function syncUI(mode) {
+    setBtnLabel(mode);
+    syncThemeInputs(mode);
+  }
+
+  function syncThemeInputs(mode) {
+    const inputs = document.querySelectorAll('input[name="theme"]');
+    if (!inputs.length) return;
+    inputs.forEach((input) => {
+      input.checked = input.value === mode;
+    });
   }
 
   function setBtnLabel(mode) {
