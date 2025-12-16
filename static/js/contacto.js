@@ -40,7 +40,7 @@
         if (response.ok) {
           if (status) {
             status.textContent =
-              "Mensaje enviado correctamente. Gracias por contactar con nosotros.";
+              "Mensaje enviado correctamente.";
           }
           form.reset();
         } else {
