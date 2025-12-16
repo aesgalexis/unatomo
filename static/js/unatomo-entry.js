@@ -49,6 +49,29 @@
       themeLight: "Light",
       themeDark: "Dark",
       button: "Not available yet"
+    },
+    gr: {
+      subtitle: "Η διαδικασία σου, η δική μας οπτική",
+      introTitle: "Unatomo Core:",
+      intro1: "Ασχολούμαστε με τη διαχείριση μηχανημάτων και διαδικασιών πλύσης υφασμάτινων ειδών.",
+      intro2:
+        "Προσφέρουμε μια σειρά υπηρεσιών που εστιάζουν κυρίως σε βιομηχανικά πλυντήρια, πλυντήρια ξενοδοχείων και στεγνοκαθαριστήρια: από πώληση, εγκατάσταση και συντήρηση μηχανημάτων, μέχρι εκπαίδευση προσωπικού και μελέτες ή ελέγχους προσαρμοσμένους σε όσους ήδη ξέρουν τη δουλειά τους αλλά θέλουν να τη βελτιώσουν λίγο περισσότερο.",
+      intro3:
+        "Διαθέτουμε μακρά πορεία και αποδεδειγμένες επιτυχίες σε μεγάλα βιομηχανικά πλυντήρια, ηγέτες του κλάδου στην Ισπανία.",
+      intro4: "Ρύθμισε τις προτιμήσεις σου και μπες στον ιστότοπο για να μάθεις περισσότερα.",
+      headingLang: "Γλώσσα",
+      headingTheme: "Θέμα",
+      headingCookies: "Cookies",
+      cookiesIntro: "Όλα τα προαιρετικά cookies είναι απενεργοποιημένα από προεπιλογή.",
+      analyticsTitle: "Αναλυτικά",
+      analyticsText: "Μας βοηθούν να καταλάβουμε πώς χρησιμοποιείται ο ιστότοπος.",
+      functionalTitle: "Λειτουργικά",
+      functionalText: "Θυμούνται μικρές προτιμήσεις (για παράδειγμα, γλώσσα).",
+      marketingTitle: "Μάρκετινγκ",
+      marketingText: "Περιεχόμενο και επικοινωνίες πιο κοντά στα ενδιαφέροντά σου.",
+      themeLight: "Φωτεινό",
+      themeDark: "Σκοτεινό",
+      button: "Δεν είναι διαθέσιμο ακόμη"
     }
   };
 
@@ -85,9 +108,11 @@
   const cookieInputs = document.querySelectorAll("[data-cookie-key]");
   const enterBtn = document.getElementById("enter-site");
   const legalFooter = document.getElementById("legal-footer");
+
   if (legalFooter) {
     const year = new Date().getFullYear();
-    legalFooter.textContent = "© " + year + " UNATOMO CORE SL · Todos los derechos reservados.";
+    legalFooter.textContent =
+      "© " + year + " UNATOMO CORE SL · Todos los derechos reservados.";
   }
   
   function applyLanguage(lang) {
@@ -151,7 +176,7 @@
   let initialLang = "es";
   try {
     const savedLang = localStorage.getItem(LANG_KEY);
-    if (savedLang === "es" || savedLang === "en") {
+    if (savedLang === "es" || savedLang === "en" || savedLang === "gr") {
       initialLang = savedLang;
     } else {
       const navLang =
@@ -161,6 +186,8 @@
         initialLang = "en";
       } else if (navLang.startsWith("es")) {
         initialLang = "es";
+      } else if (navLang.startsWith("el")) {
+        initialLang = "gr";
       } else {
         initialLang = "es";
       }
@@ -176,7 +203,8 @@
   langInputs.forEach((input) => {
     input.addEventListener("change", () => {
       if (input.checked) {
-        const lang = input.value === "en" ? "en" : "es";
+        const value = input.value;
+        const lang = value === "en" || value === "gr" ? value : "es";
         applyLanguage(lang);
       }
     });
@@ -252,8 +280,8 @@
       if (input.checked) lang = input.value;
     });
 
-    if (lang === "en") {
-      alert("The English version of this site is not available yet.");
+    if (lang === "en" || lang === "gr") {
+      alert("The selected language version of this site is not available yet.");
       return;
     }
 
