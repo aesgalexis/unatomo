@@ -3,86 +3,89 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Configurador de Lavandería · unatomo</title>
+  <title>Configurador · unatomo</title>
   <meta name="robots" content="noindex, nofollow" />
-
   <link rel="stylesheet" href="/styles.css">
 </head>
-<body>
-  <header class="cfg-topbar" role="banner">
-    <div class="inner">
-      <a class="cfg-brand" href="/es/configurador.html" aria-label="Configurador de Lavandería">
-        <img class="cfg-logo" src="/static/img/logo-unatomo-v1.5.svg" alt="unatomo" />
-        <span class="cfg-title">Configurador de Lavandería</span>
-      </a>
 
-      <div class="cfg-actions">
-        <a class="cfg-link" href="/es/index.html">Inicio</a>
-      </div>
+<body class="page">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a href="/es/index.html" class="topbar-logo-link">
+        <img
+          src="/static/img/logo-unatomo-v1.5.svg"
+          alt="unatomo"
+          class="topbar-logo"
+          loading="lazy"
+        />
+        <h2 class="topbar-title">Configurador</h2>
+      </a>
     </div>
   </header>
 
-  <main class="cfg-page" role="main">
-    <section class="cfg-shell">
+  <main class="shell page-shell">
+    <section class="page-section" aria-label="Configurador">
 
-      <details class="cfg-card cfg-estimador" open>
-        <summary class="cfg-muted">Estimador por habitaciones</summary>
+      <section class="card">
+        <details open>
+          <summary class="cfg-muted">Estimador por habitaciones</summary>
 
-        <div class="cfg-card est-body">
-          <p class="cfg-muted" style="margin-top:0">
-            Introduce nº de habitaciones y su <strong>factor de reposición</strong>. Los resultados se meten en <strong>unidades</strong>; los <strong>kg</strong> se calculan solos.
-          </p>
+          <div class="cfg-card est-body">
+            <p class="cfg-muted" style="margin-top:0">
+              Introduce nº de habitaciones y factor de reposición. Los resultados se meten en unidades; los kilos se calculan solos.
+            </p>
 
-          <div class="est-grid">
-            <label class="est-field">
-              <span>Simples</span>
-              <input id="est-simples" class="cfg-input" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
-              <div class="est-subfield">
-                <small>Factor reposición</small>
-                <input id="est-factor-s" class="cfg-input" type="number" min="0" step="0.1" inputmode="decimal" value="1">
-              </div>
-            </label>
+            <div class="est-grid">
+              <label class="est-field">
+                <span>Simples</span>
+                <input id="est-simples" class="cfg-input" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+                <div class="est-subfield">
+                  <small>Factor reposición</small>
+                  <input id="est-factor-s" class="cfg-input" type="number" min="0" step="0.1" inputmode="decimal" value="1">
+                </div>
+              </label>
 
-            <label class="est-field">
-              <span>Dobles</span>
-              <input id="est-dobles" class="cfg-input" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
-              <div class="est-subfield">
-                <small>Factor reposición</small>
-                <input id="est-factor-d" class="cfg-input" type="number" min="0" step="0.1" inputmode="decimal" value="1">
-              </div>
-            </label>
+              <label class="est-field">
+                <span>Dobles</span>
+                <input id="est-dobles" class="cfg-input" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+                <div class="est-subfield">
+                  <small>Factor reposición</small>
+                  <input id="est-factor-d" class="cfg-input" type="number" min="0" step="0.1" inputmode="decimal" value="1">
+                </div>
+              </label>
 
-            <label class="est-field">
-              <span>Suites</span>
-              <input id="est-suites" class="cfg-input" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
-              <div class="est-subfield">
-                <small>Factor reposición</small>
-                <input id="est-factor-u" class="cfg-input" type="number" min="0" step="0.1" inputmode="decimal" value="1">
-              </div>
-            </label>
+              <label class="est-field">
+                <span>Suites</span>
+                <input id="est-suites" class="cfg-input" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+                <div class="est-subfield">
+                  <small>Factor reposición</small>
+                  <input id="est-factor-u" class="cfg-input" type="number" min="0" step="0.1" inputmode="decimal" value="1">
+                </div>
+              </label>
 
-            <label class="est-field">
-              <span>Cubiertos</span>
-              <input id="est-cubiertos" class="cfg-input" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
-              <div class="est-subfield">
-                <small>Factor reposición</small>
-                <input id="est-factor-cub" class="cfg-input" type="number" min="0" step="0.1" inputmode="decimal" value="1">
-              </div>
-            </label>
+              <label class="est-field">
+                <span>Cubiertos</span>
+                <input id="est-cubiertos" class="cfg-input" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+                <div class="est-subfield">
+                  <small>Factor reposición</small>
+                  <input id="est-factor-cub" class="cfg-input" type="number" min="0" step="0.1" inputmode="decimal" value="1">
+                </div>
+              </label>
+            </div>
+
+            <div class="est-actions">
+              <button id="est-apply" class="btn-primary" type="button">Aplicar</button>
+              <button id="est-clear" class="btn-ghost" type="button">Limpiar</button>
+            </div>
           </div>
+        </details>
+      </section>
 
-          <div class="est-actions">
-            <button id="est-apply" class="btn-primary" type="button">Aplicar</button>
-            <button id="est-clear" class="btn-ghost" type="button">Limpiar</button>
-          </div>
-        </div>
-      </details>
-
-      <section class="cfg-card cfg-main">
+      <section class="card">
         <div class="cfg-intro">
           <h1>Tabla de kilos y unidades</h1>
           <p class="cfg-muted">
-            Ajusta unidades o kilos y la otra columna se recalcula automáticamente. Puedes editar el <strong>peso por unidad</strong> para que encaje con tu textil.
+            Ajusta unidades o kilos y la otra columna se recalcula automáticamente. Puedes editar el peso por unidad para que encaje con tu textil.
           </p>
         </div>
 
@@ -98,23 +101,23 @@
 
           <div class="cfg-grid" data-key="sabanas_s" role="row">
             <div class="item-name">Sábana · <span class="item-sub">Individual</span></div>
-            <input class="cfg-input col-un" type="number" min="0" step="1" inputmode="numeric" placeholder="0" data-field="units" aria-label="Sábanas individual unidades" />
-            <input class="cfg-input" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" data-field="kg" aria-label="Sábanas individual kilos" />
-            <input class="cfg-input" type="number" min="0" step="0.01" inputmode="decimal" data-field="ppu" aria-label="Peso por unidad sábanas individual" />
+            <input class="cfg-input col-un" type="number" min="0" step="1" inputmode="numeric" placeholder="0" data-field="units" />
+            <input class="cfg-input" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" data-field="kg" />
+            <input class="cfg-input" type="number" min="0" step="0.01" inputmode="decimal" data-field="ppu" />
           </div>
 
           <div class="cfg-grid" data-key="sabanas_m" role="row">
             <div class="item-name">Sábana · <span class="item-sub">Doble/Queen</span></div>
-            <input class="cfg-input col-un" type="number" min="0" step="1" inputmode="numeric" placeholder="0" data-field="units" aria-label="Sábanas doble unidades" />
-            <input class="cfg-input" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" data-field="kg" aria-label="Sábanas doble kilos" />
-            <input class="cfg-input" type="number" min="0" step="0.01" inputmode="decimal" data-field="ppu" aria-label="Peso por unidad sábanas doble" />
+            <input class="cfg-input col-un" type="number" min="0" step="1" inputmode="numeric" placeholder="0" data-field="units" />
+            <input class="cfg-input" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" data-field="kg" />
+            <input class="cfg-input" type="number" min="0" step="0.01" inputmode="decimal" data-field="ppu" />
           </div>
 
           <div class="cfg-grid" data-key="sabanas_l" role="row">
             <div class="item-name">Sábana · <span class="item-sub">King</span></div>
-            <input class="cfg-input col-un" type="number" min="0" step="1" inputmode="numeric" placeholder="0" data-field="units" aria-label="Sábanas king unidades" />
-            <input class="cfg-input" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" data-field="kg" aria-label="Sábanas king kilos" />
-            <input class="cfg-input" type="number" min="0" step="0.01" inputmode="decimal" data-field="ppu" aria-label="Peso por unidad sábanas king" />
+            <input class="cfg-input col-un" type="number" min="0" step="1" inputmode="numeric" placeholder="0" data-field="units" />
+            <input class="cfg-input" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" data-field="kg" />
+            <input class="cfg-input" type="number" min="0" step="0.01" inputmode="decimal" data-field="ppu" />
           </div>
         </div>
 
@@ -123,21 +126,23 @@
 
           <div class="cfg-grid" data-key="nordico_s" role="row">
             <div class="item-name">Nórdico · <span class="item-sub">Individual</span></div>
-            <input class="cfg-input col-un" type="number" min="0" step="1" data-field="units" aria-label="Nórdico individual unidades" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="kg" aria-label="Nórdico individual kilos" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="ppu" aria-label="Peso por unidad nórdico individual" />
+            <input class="cfg-input col-un" type="number" min="0" step="1" data-field="units" />
+            <input class="cfg-input" type="number" min="0" step="0.01" data-field="kg" />
+            <input class="cfg-input" type="number" min="0" step="0.01" data-field="ppu" />
           </div>
+
           <div class="cfg-grid" data-key="nordico_m" role="row">
             <div class="item-name">Nórdico · <span class="item-sub">Doble/Queen</span></div>
-            <input class="cfg-input col-un" type="number" min="0" step="1" data-field="units" aria-label="Nórdico doble unidades" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="kg" aria-label="Nórdico doble kilos" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="ppu" aria-label="Peso por unidad nórdico doble" />
+            <input class="cfg-input col-un" type="number" min="0" step="1" data-field="units" />
+            <input class="cfg-input" type="number" min="0" step="0.01" data-field="kg" />
+            <input class="cfg-input" type="number" min="0" step="0.01" data-field="ppu" />
           </div>
+
           <div class="cfg-grid" data-key="nordico_l" role="row">
             <div class="item-name">Nórdico · <span class="item-sub">King</span></div>
-            <input class="cfg-input col-un" type="number" min="0" step="1" data-field="units" aria-label="Nórdico king unidades" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="kg" aria-label="Nórdico king kilos" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="ppu" aria-label="Peso por unidad nórdico king" />
+            <input class="cfg-input col-un" type="number" min="0" step="1" data-field="units" />
+            <input class="cfg-input" type="number" min="0" step="0.01" data-field="kg" />
+            <input class="cfg-input" type="number" min="0" step="0.01" data-field="ppu" />
           </div>
         </div>
 
@@ -145,37 +150,41 @@
           <div class="fam-title">Fundas de almohada</div>
           <div class="cfg-grid" data-key="fundas_std" role="row">
             <div class="item-name">Funda de almohada</div>
-            <input class="cfg-input col-un" type="number" min="0" step="1" data-field="units" aria-label="Fundas unidades" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="kg" aria-label="Fundas kilos" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="ppu" aria-label="Peso por unidad funda" />
+            <input class="cfg-input col-un" type="number" min="0" step="1" data-field="units" />
+            <input class="cfg-input" type="number" min="0" step="0.01" data-field="kg" />
+            <input class="cfg-input" type="number" min="0" step="0.01" data-field="ppu" />
           </div>
         </div>
 
         <div class="cfg-family" id="fam-toallas">
           <div class="fam-title">Toallas</div>
+
           <div class="cfg-grid" data-key="toalla_alfombrin" role="row">
             <div class="item-name">Alfombrín</div>
-            <input class="cfg-input col-un" type="number" min="0" step="1" data-field="units" aria-label="Alfombrines unidades" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="kg" aria-label="Alfombrines kilos" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="ppu" aria-label="Peso por unidad alfombrín" />
+            <input class="cfg-input col-un" type="number" min="0" step="1" data-field="units" />
+            <input class="cfg-input" type="number" min="0" step="0.01" data-field="kg" />
+            <input class="cfg-input" type="number" min="0" step="0.01" data-field="ppu" />
           </div>
+
           <div class="cfg-grid" data-key="toalla_manos" role="row">
             <div class="item-name">Toalla de manos</div>
-            <input class="cfg-input col-un" type="number" min="0" step="1" data-field="units" aria-label="Manos unidades" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="kg" aria-label="Manos kilos" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="ppu" aria-label="Peso por unidad manos" />
+            <input class="cfg-input col-un" type="number" min="0" step="1" data-field="units" />
+            <input class="cfg-input" type="number" min="0" step="0.01" data-field="kg" />
+            <input class="cfg-input" type="number" min="0" step="0.01" data-field="ppu" />
           </div>
+
           <div class="cfg-grid" data-key="toalla_bano" role="row">
             <div class="item-name">Toalla de baño</div>
-            <input class="cfg-input col-un" type="number" min="0" step="1" data-field="units" aria-label="Baño unidades" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="kg" aria-label="Baño kilos" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="ppu" aria-label="Peso por unidad baño" />
+            <input class="cfg-input col-un" type="number" min="0" step="1" data-field="units" />
+            <input class="cfg-input" type="number" min="0" step="0.01" data-field="kg" />
+            <input class="cfg-input" type="number" min="0" step="0.01" data-field="ppu" />
           </div>
+
           <div class="cfg-grid" data-key="toalla_piscina" role="row">
             <div class="item-name">Toalla de piscina</div>
-            <input class="cfg-input col-un" type="number" min="0" step="1" data-field="units" aria-label="Piscina unidades" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="kg" aria-label="Piscina kilos" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="ppu" aria-label="Peso por unidad piscina" />
+            <input class="cfg-input col-un" type="number" min="0" step="1" data-field="units" />
+            <input class="cfg-input" type="number" min="0" step="0.01" data-field="kg" />
+            <input class="cfg-input" type="number" min="0" step="0.01" data-field="ppu" />
           </div>
         </div>
 
@@ -183,25 +192,27 @@
           <div class="fam-title">Albornoces</div>
           <div class="cfg-grid" data-key="albornoz" role="row">
             <div class="item-name">Albornoz</div>
-            <input class="cfg-input col-un" type="number" min="0" step="1" data-field="units" aria-label="Albornoces unidades" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="kg" aria-label="Albornoces kilos" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="ppu" aria-label="Peso por unidad albornoz" />
+            <input class="cfg-input col-un" type="number" min="0" step="1" data-field="units" />
+            <input class="cfg-input" type="number" min="0" step="0.01" data-field="kg" />
+            <input class="cfg-input" type="number" min="0" step="0.01" data-field="ppu" />
           </div>
         </div>
 
         <div class="cfg-family" id="fam-manteleria">
           <div class="fam-title">Mantelería y servilletas</div>
+
           <div class="cfg-grid" data-key="mantel" role="row">
             <div class="item-name">Mantel</div>
-            <input class="cfg-input col-un" type="number" min="0" step="1" data-field="units" aria-label="Manteles unidades" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="kg" aria-label="Manteles kilos" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="ppu" aria-label="Peso por unidad mantel" />
+            <input class="cfg-input col-un" type="number" min="0" step="1" data-field="units" />
+            <input class="cfg-input" type="number" min="0" step="0.01" data-field="kg" />
+            <input class="cfg-input" type="number" min="0" step="0.01" data-field="ppu" />
           </div>
+
           <div class="cfg-grid" data-key="servilleta" role="row">
             <div class="item-name">Servilleta</div>
-            <input class="cfg-input col-un" type="number" min="0" step="1" data-field="units" aria-label="Servilletas unidades" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="kg" aria-label="Servilletas kilos" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="ppu" aria-label="Peso por unidad servilleta" />
+            <input class="cfg-input col-un" type="number" min="0" step="1" data-field="units" />
+            <input class="cfg-input" type="number" min="0" step="0.01" data-field="kg" />
+            <input class="cfg-input" type="number" min="0" step="0.01" data-field="ppu" />
           </div>
         </div>
 
@@ -216,10 +227,10 @@
         <div class="cfg-totals" aria-live="polite">
           <div class="sum">Total</div>
           <label>Unidades (uds)
-            <input class="cfg-input" id="total-units" type="number" readonly aria-label="Total unidades" />
+            <input class="cfg-input" id="total-units" type="number" readonly />
           </label>
           <label>Kilos (kg)
-            <input class="cfg-input" id="total-kg" type="number" readonly aria-label="Total kilos" />
+            <input class="cfg-input" id="total-kg" type="number" readonly />
           </label>
         </div>
 
@@ -228,85 +239,71 @@
           <div class="bd-grid">
             <div class="bd-row">
               <div>Ropa de cama</div>
-              <div><output id="pct-cama-kg">0%</output> <span class="bd-unit">kg</span></div>
+              <div><output id="pct-cama-kg">0%</output></div>
             </div>
             <div class="bd-row">
               <div>Rizo</div>
-              <div><output id="pct-rizo-kg">0%</output> <span class="bd-unit">kg</span></div>
+              <div><output id="pct-rizo-kg">0%</output></div>
             </div>
             <div class="bd-row">
               <div>Mantelería</div>
-              <div><output id="pct-mant-kg">0%</output> <span class="bd-unit">kg</span></div>
+              <div><output id="pct-mant-kg">0%</output></div>
             </div>
           </div>
         </div>
-
       </section>
 
-      <section class="cfg-card mach-card" id="mach-card">
+      <section class="card" id="mach-card">
         <div class="mach-head">
-          <h2>Recomendación de maquinaria</h2>
-          <p class="cfg-muted">Cálculo orientativo: lavadoras y secadoras necesarias para cubrir tus kilos/día.</p>
+          <h2>Recomendación de lavadoras</h2>
+          <p class="cfg-muted">Se basa en tus kilos totales, la jornada y los ciclos/capacidades.</p>
         </div>
 
-        <div class="mach-inputs">
-          <label class="mach-field">
-            <span>Kilos/día</span>
-            <input id="mach-kg" class="cfg-input" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00">
+        <div class="mach-controls">
+          <label>
+            Jornada
+            <select id="mach-hours" class="cfg-input"></select>
           </label>
 
-          <label class="mach-field">
-            <span>Horas productivas</span>
-            <input id="mach-hours" class="cfg-input" type="number" min="0" step="0.1" inputmode="decimal" value="8">
+          <label>
+            Modo
+            <select id="mach-mode" class="cfg-input">
+              <option value="auto" selected>Automático</option>
+              <option value="fixed">Fijo</option>
+            </select>
           </label>
 
-          <label class="mach-field">
-            <span>Factor carga</span>
-            <input id="mach-load" class="cfg-input" type="number" min="0" step="0.05" inputmode="decimal" value="0.90">
-          </label>
-
-          <button id="mach-calc" class="btn-primary" type="button">Calcular</button>
-          <button id="mach-clear" class="btn-ghost" type="button">Limpiar</button>
-        </div>
-
-        <div class="mach-grid">
-          <div class="mach-col">
-            <h3>Lavadoras</h3>
-            <div id="mach-washers" class="mach-list"></div>
-            <button id="mach-add-washer" class="btn-ghost" type="button">Añadir lavadora</button>
+          <div id="mach-fixed-wrapper" style="display:none">
+            <label>
+              Capacidad fija
+              <select id="mach-fixed-cap" class="cfg-input"></select>
+            </label>
           </div>
 
-          <div class="mach-col">
-            <h3>Secadoras</h3>
-            <div id="mach-dryers" class="mach-list"></div>
-            <button id="mach-add-dryer" class="btn-ghost" type="button">Añadir secadora</button>
+          <div class="mach-actions">
+            <button id="mach-adjust" class="btn-primary" type="button">Calcular</button>
+            <button id="mach-add" class="btn-ghost" type="button">Añadir lavadora</button>
           </div>
         </div>
 
         <div class="mach-summary">
-          <div class="mach-summary-grid">
-            <div class="mach-summary-row">
-              <div><strong>Total equipos</strong></div>
-              <div><strong>Capacidad total</strong></div>
-              <div><strong>Cobertura</strong></div>
-            </div>
-            <div class="mach-summary-row">
-              <div><output id="mach-machines-total">0</output> uds</div>
-              <div><output id="mach-cap-total">0</output> kg/día</div>
-              <div><output id="mach-cover-total">0%</output></div>
-            </div>
+          <div>
+            Kilos/día: <strong><output id="mach-kg-total">0</output></strong>
+          </div>
+          <div>
+            Total equipos: <strong><output id="mach-machines-total">0</output></strong>
+          </div>
+          <div>
+            Capacidad total: <strong><output id="mach-cap-total">0</output></strong> kg/día
+          </div>
+          <div>
+            Cobertura: <strong><output id="mach-cover-total">0%</output></strong>
           </div>
         </div>
 
-        <p id="mach-legend" class="mach-legend cfg-muted">
-          Introduce kilos para ver la maquinaria recomendada.
-        </p>
+        <p id="mach-legend" class="cfg-muted">Introduce kilos para ver la maquinaria recomendada.</p>
 
-        <p class="cfg-note mach-note">
-          Cálculo orientativo con ciclos por defecto de 55+5 min. Puedes ajustar la capacidad y la duración
-          de cada lavadora. Si quedas por debajo del 100% de cobertura, pulsa <strong>Calcular</strong>
-          o añade equipos manualmente.
-        </p>
+        <div id="mach-list"></div>
       </section>
 
     </section>
