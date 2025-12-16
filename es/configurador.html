@@ -32,50 +32,48 @@
     <section class="page-section" aria-label="Configurador">
 
       <section class="card">
-        <details open>
-          <summary>Estimador por habitaciones</summary>
+        <h3>Estimador por habitaciones</h3>
 
-          <div style="margin-top: 1rem;">
-            <p>
-              Introduce nº de habitaciones y factor de reposición. Al aplicar, se rellenan las unidades; los kilos se calculan solos.
-            </p>
+        <div style="margin-top: 1rem;">
+          <p>
+            Introduce nº de habitaciones y factor de reposición. Al aplicar, se rellenan las unidades; los kilos se calculan solos.
+          </p>
 
-            <div class="form-grid">
-              <div class="form-field">
-                <label for="est-simples">Simples</label>
-                <input id="est-simples" class="field" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
-                <label for="est-factor-s" style="margin-top:.5rem; display:block;">Factor reposición</label>
-                <input id="est-factor-s" class="field" type="number" min="0" step="0.1" inputmode="decimal" value="1">
-              </div>
-
-              <div class="form-field">
-                <label for="est-dobles">Dobles</label>
-                <input id="est-dobles" class="field" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
-                <label for="est-factor-d" style="margin-top:.5rem; display:block;">Factor reposición</label>
-                <input id="est-factor-d" class="field" type="number" min="0" step="0.1" inputmode="decimal" value="1">
-              </div>
-
-              <div class="form-field">
-                <label for="est-suites">Suites</label>
-                <input id="est-suites" class="field" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
-                <label for="est-factor-u" style="margin-top:.5rem; display:block;">Factor reposición</label>
-                <input id="est-factor-u" class="field" type="number" min="0" step="0.1" inputmode="decimal" value="1">
-              </div>
-
-              <div class="form-field">
-                <label for="est-cubiertos">Cubiertos</label>
-                <input id="est-cubiertos" class="field" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
-                <label for="est-factor-cub" style="margin-top:.5rem; display:block;">Factor reposición</label>
-                <input id="est-factor-cub" class="field" type="number" min="0" step="0.1" inputmode="decimal" value="1">
-              </div>
+          <div class="form-grid">
+            <div class="form-field">
+              <label for="est-simples">Simples</label>
+              <input id="est-simples" class="field" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+              <label for="est-factor-s" style="margin-top:.5rem; display:block;">Factor reposición</label>
+              <input id="est-factor-s" class="field" type="number" min="0" step="0.1" inputmode="decimal" value="1">
             </div>
 
-            <div class="form-actions" style="display:flex; justify-content:center; gap:.75rem; margin-top:1.25rem;">
-              <button id="est-apply" class="scroll-top-button" type="button">Aplicar</button>
-              <button id="est-clear" class="scroll-top-button" type="button">Limpiar</button>
+            <div class="form-field">
+              <label for="est-dobles">Dobles</label>
+              <input id="est-dobles" class="field" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+              <label for="est-factor-d" style="margin-top:.5rem; display:block;">Factor reposición</label>
+              <input id="est-factor-d" class="field" type="number" min="0" step="0.1" inputmode="decimal" value="1">
+            </div>
+
+            <div class="form-field">
+              <label for="est-suites">Suites</label>
+              <input id="est-suites" class="field" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+              <label for="est-factor-u" style="margin-top:.5rem; display:block;">Factor reposición</label>
+              <input id="est-factor-u" class="field" type="number" min="0" step="0.1" inputmode="decimal" value="1">
+            </div>
+
+            <div class="form-field">
+              <label for="est-cubiertos">Cubiertos</label>
+              <input id="est-cubiertos" class="field" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+              <label for="est-factor-cub" style="margin-top:.5rem; display:block;">Factor reposición</label>
+              <input id="est-factor-cub" class="field" type="number" min="0" step="0.1" inputmode="decimal" value="1">
             </div>
           </div>
-        </details>
+
+          <div class="form-actions" style="display:flex; justify-content:center; gap:.75rem; margin-top:1.25rem;">
+            <button id="est-apply" class="scroll-top-button" type="button">Aplicar</button>
+            <button id="est-clear" class="scroll-top-button" type="button">Limpiar</button>
+          </div>
+        </div>
       </section>
 
       <section class="card">
