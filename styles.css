@@ -207,7 +207,7 @@ body.page #theme-toggle {
 
 .card {
   max-width: 640px;
-  margin: 3rem auto;
+  margin: 2rem auto;
   padding: 1rem 1.25rem 1.5rem;
   border-radius: 1.25rem;
   border: 1px solid var(--border-subtle);
