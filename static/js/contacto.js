@@ -6,13 +6,15 @@
   const submitBtn = form.querySelector(".btn-submit");
   const honeypot = form.querySelector('input[name="_gotcha"]');
 
-  form.addEventListener("submit", function (event) {
+  form.addEventListener("submit", async function (event) {
     event.preventDefault();
 
+    // Si el honeypot tiene contenido, lo tratamos como spam y salimos en silencio
     if (honeypot && honeypot.value) {
       return;
     }
 
+    // Validación HTML5 manual (novalidate está activo)
     if (!form.checkValidity()) {
       form.reportValidity();
       return;
@@ -29,37 +31,36 @@
 
     const formData = new FormData(form);
 
-    fetch(form.action, {
-      method: form.method || "POST",
-      body: formData,
-      headers: {
-        Accept: "application/json"
-      }
-    })
-      .then(function (response) {
-        if (response.ok) {
-          if (status) {
-            status.textContent =
-              "Mensaje enviado correctamente.";
-          }
-          form.reset();
-        } else {
-          if (status) {
-            status.textContent =
-              "Ha habido un problema al enviar el mensaje. Por favor, inténtalo de nuevo más tarde.";
-          }
-        }
-      })
-      .catch(function () {
-        if (status) {
-          status.textContent =
-            "Ha habido un problema de conexión. Por favor, inténtalo de nuevo.";
-        }
-      })
-      .finally(function () {
-        if (submitBtn) {
-          submitBtn.disabled = false;
+    try {
+      const response = await fetch(form.action, {
+        method: form.method || "POST",
+        body: formData,
+        headers: {
+          Accept: "application/json"
         }
       });
+
+      if (response.ok) {
+        if (status) {
+          status.textContent =
+            "Mensaje enviado correctamente. Gracias por contactar con nosotros.";
+        }
+        form.reset();
+      } else {
+        if (status) {
+          status.textContent =
+            "Ha habido un problema al enviar el mensaje. Por favor, inténtalo de nuevo más tarde.";
+        }
+      }
+    } catch (error) {
+      if (status) {
+        status.textContent =
+          "Ha habido un problema de conexión. Por favor, inténtalo de nuevo.";
+      }
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+      }
+    }
   });
 })();
