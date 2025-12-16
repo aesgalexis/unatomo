@@ -5,13 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Configurador · unatomo</title>
   <meta name="robots" content="noindex, nofollow" />
+
   <link rel="stylesheet" href="/styles.css">
 </head>
 
 <body class="page">
+  <button id="theme-toggle" type="button" aria-label="Cambiar tema">
+    ☾ / ☼
+  </button>
+
   <header class="topbar">
     <div class="topbar-inner">
-      <a href="/es/index.html" class="topbar-logo-link">
+      <a href="/?setup=1" class="topbar-logo-link">
         <img
           src="/static/img/logo-unatomo-v1.5.svg"
           alt="unatomo"
@@ -28,286 +33,280 @@
 
       <section class="card">
         <details open>
-          <summary class="cfg-muted">Estimador por habitaciones</summary>
+          <summary>Estimador por habitaciones</summary>
 
-          <div class="cfg-card est-body">
-            <p class="cfg-muted" style="margin-top:0">
-              Introduce nº de habitaciones y factor de reposición. Los resultados se meten en unidades; los kilos se calculan solos.
+          <div style="margin-top: 1rem;">
+            <p>
+              Introduce nº de habitaciones y factor de reposición. Al aplicar, se rellenan las unidades; los kilos se calculan solos.
             </p>
 
-            <div class="est-grid">
-              <label class="est-field">
-                <span>Simples</span>
-                <input id="est-simples" class="cfg-input" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
-                <div class="est-subfield">
-                  <small>Factor reposición</small>
-                  <input id="est-factor-s" class="cfg-input" type="number" min="0" step="0.1" inputmode="decimal" value="1">
-                </div>
-              </label>
+            <div class="form-grid">
+              <div class="form-field">
+                <label for="est-simples">Simples</label>
+                <input id="est-simples" class="field" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+                <label for="est-factor-s" style="margin-top:.5rem; display:block;">Factor reposición</label>
+                <input id="est-factor-s" class="field" type="number" min="0" step="0.1" inputmode="decimal" value="1">
+              </div>
 
-              <label class="est-field">
-                <span>Dobles</span>
-                <input id="est-dobles" class="cfg-input" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
-                <div class="est-subfield">
-                  <small>Factor reposición</small>
-                  <input id="est-factor-d" class="cfg-input" type="number" min="0" step="0.1" inputmode="decimal" value="1">
-                </div>
-              </label>
+              <div class="form-field">
+                <label for="est-dobles">Dobles</label>
+                <input id="est-dobles" class="field" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+                <label for="est-factor-d" style="margin-top:.5rem; display:block;">Factor reposición</label>
+                <input id="est-factor-d" class="field" type="number" min="0" step="0.1" inputmode="decimal" value="1">
+              </div>
 
-              <label class="est-field">
-                <span>Suites</span>
-                <input id="est-suites" class="cfg-input" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
-                <div class="est-subfield">
-                  <small>Factor reposición</small>
-                  <input id="est-factor-u" class="cfg-input" type="number" min="0" step="0.1" inputmode="decimal" value="1">
-                </div>
-              </label>
+              <div class="form-field">
+                <label for="est-suites">Suites</label>
+                <input id="est-suites" class="field" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+                <label for="est-factor-u" style="margin-top:.5rem; display:block;">Factor reposición</label>
+                <input id="est-factor-u" class="field" type="number" min="0" step="0.1" inputmode="decimal" value="1">
+              </div>
 
-              <label class="est-field">
-                <span>Cubiertos</span>
-                <input id="est-cubiertos" class="cfg-input" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
-                <div class="est-subfield">
-                  <small>Factor reposición</small>
-                  <input id="est-factor-cub" class="cfg-input" type="number" min="0" step="0.1" inputmode="decimal" value="1">
-                </div>
-              </label>
+              <div class="form-field">
+                <label for="est-cubiertos">Cubiertos</label>
+                <input id="est-cubiertos" class="field" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+                <label for="est-factor-cub" style="margin-top:.5rem; display:block;">Factor reposición</label>
+                <input id="est-factor-cub" class="field" type="number" min="0" step="0.1" inputmode="decimal" value="1">
+              </div>
             </div>
 
-            <div class="est-actions">
-              <button id="est-apply" class="btn-primary" type="button">Aplicar</button>
-              <button id="est-clear" class="btn-ghost" type="button">Limpiar</button>
+            <div class="form-actions" style="display:flex; justify-content:center; gap:.75rem; margin-top:1.25rem;">
+              <button id="est-apply" class="btn-submit" type="button">Aplicar</button>
+              <button id="est-clear" class="scroll-top-button" type="button">Limpiar</button>
             </div>
           </div>
         </details>
       </section>
 
       <section class="card">
-        <div class="cfg-intro">
-          <h1>Tabla de kilos y unidades</h1>
-          <p class="cfg-muted">
-            Ajusta unidades o kilos y la otra columna se recalcula automáticamente. Puedes editar el peso por unidad para que encaje con tu textil.
-          </p>
-        </div>
+        <h3>Tabla de kilos y unidades</h3>
+        <p>
+          Ajusta unidades o kilos y la otra columna se recalcula automáticamente. Puedes editar el peso por unidad.
+        </p>
 
-        <div class="cfg-grid header" role="row">
+        <div class="cfg-grid header" role="row" style="margin-top: 1rem; display:grid; grid-template-columns: 2.2fr .9fr .9fr .9fr; gap:10px; align-items:center; font-weight:600;">
           <div>Artículo</div>
-          <div class="col-un">Unidades</div>
+          <div>Unidades</div>
           <div>Kilos</div>
           <div>Peso/ud (kg)</div>
         </div>
 
-        <div class="cfg-family" id="fam-sabanas">
-          <div class="fam-title">Sábanas</div>
+        <div class="cfg-family" id="fam-sabanas" style="margin-top: 1rem;">
+          <div class="fam-title" style="font-weight:700; margin: 12px 0 8px;">Sábanas</div>
 
-          <div class="cfg-grid" data-key="sabanas_s" role="row">
+          <div class="cfg-grid" data-key="sabanas_s" role="row" style="display:grid; grid-template-columns: 2.2fr .9fr .9fr .9fr; gap:10px; align-items:center; margin-top:8px;">
             <div class="item-name">Sábana · <span class="item-sub">Individual</span></div>
-            <input class="cfg-input col-un" type="number" min="0" step="1" inputmode="numeric" placeholder="0" data-field="units" />
-            <input class="cfg-input" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" data-field="kg" />
-            <input class="cfg-input" type="number" min="0" step="0.01" inputmode="decimal" data-field="ppu" />
+            <input class="field" type="number" min="0" step="1" inputmode="numeric" placeholder="0" data-field="units" />
+            <input class="field" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" data-field="kg" />
+            <input class="field" type="number" min="0" step="0.01" inputmode="decimal" data-field="ppu" />
           </div>
 
-          <div class="cfg-grid" data-key="sabanas_m" role="row">
+          <div class="cfg-grid" data-key="sabanas_m" role="row" style="display:grid; grid-template-columns: 2.2fr .9fr .9fr .9fr; gap:10px; align-items:center; margin-top:8px;">
             <div class="item-name">Sábana · <span class="item-sub">Doble/Queen</span></div>
-            <input class="cfg-input col-un" type="number" min="0" step="1" inputmode="numeric" placeholder="0" data-field="units" />
-            <input class="cfg-input" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" data-field="kg" />
-            <input class="cfg-input" type="number" min="0" step="0.01" inputmode="decimal" data-field="ppu" />
+            <input class="field" type="number" min="0" step="1" inputmode="numeric" placeholder="0" data-field="units" />
+            <input class="field" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" data-field="kg" />
+            <input class="field" type="number" min="0" step="0.01" inputmode="decimal" data-field="ppu" />
           </div>
 
-          <div class="cfg-grid" data-key="sabanas_l" role="row">
+          <div class="cfg-grid" data-key="sabanas_l" role="row" style="display:grid; grid-template-columns: 2.2fr .9fr .9fr .9fr; gap:10px; align-items:center; margin-top:8px;">
             <div class="item-name">Sábana · <span class="item-sub">King</span></div>
-            <input class="cfg-input col-un" type="number" min="0" step="1" inputmode="numeric" placeholder="0" data-field="units" />
-            <input class="cfg-input" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" data-field="kg" />
-            <input class="cfg-input" type="number" min="0" step="0.01" inputmode="decimal" data-field="ppu" />
+            <input class="field" type="number" min="0" step="1" inputmode="numeric" placeholder="0" data-field="units" />
+            <input class="field" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" data-field="kg" />
+            <input class="field" type="number" min="0" step="0.01" inputmode="decimal" data-field="ppu" />
           </div>
         </div>
 
-        <div class="cfg-family" id="fam-nordicos">
-          <div class="fam-title">Nórdicos</div>
+        <div class="cfg-family" id="fam-nordicos" style="margin-top: 1.25rem;">
+          <div class="fam-title" style="font-weight:700; margin: 12px 0 8px;">Nórdicos</div>
 
-          <div class="cfg-grid" data-key="nordico_s" role="row">
+          <div class="cfg-grid" data-key="nordico_s" role="row" style="display:grid; grid-template-columns: 2.2fr .9fr .9fr .9fr; gap:10px; align-items:center; margin-top:8px;">
             <div class="item-name">Nórdico · <span class="item-sub">Individual</span></div>
-            <input class="cfg-input col-un" type="number" min="0" step="1" data-field="units" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="kg" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="ppu" />
+            <input class="field" type="number" min="0" step="1" data-field="units" />
+            <input class="field" type="number" min="0" step="0.01" data-field="kg" />
+            <input class="field" type="number" min="0" step="0.01" data-field="ppu" />
           </div>
 
-          <div class="cfg-grid" data-key="nordico_m" role="row">
+          <div class="cfg-grid" data-key="nordico_m" role="row" style="display:grid; grid-template-columns: 2.2fr .9fr .9fr .9fr; gap:10px; align-items:center; margin-top:8px;">
             <div class="item-name">Nórdico · <span class="item-sub">Doble/Queen</span></div>
-            <input class="cfg-input col-un" type="number" min="0" step="1" data-field="units" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="kg" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="ppu" />
+            <input class="field" type="number" min="0" step="1" data-field="units" />
+            <input class="field" type="number" min="0" step="0.01" data-field="kg" />
+            <input class="field" type="number" min="0" step="0.01" data-field="ppu" />
           </div>
 
-          <div class="cfg-grid" data-key="nordico_l" role="row">
+          <div class="cfg-grid" data-key="nordico_l" role="row" style="display:grid; grid-template-columns: 2.2fr .9fr .9fr .9fr; gap:10px; align-items:center; margin-top:8px;">
             <div class="item-name">Nórdico · <span class="item-sub">King</span></div>
-            <input class="cfg-input col-un" type="number" min="0" step="1" data-field="units" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="kg" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="ppu" />
+            <input class="field" type="number" min="0" step="1" data-field="units" />
+            <input class="field" type="number" min="0" step="0.01" data-field="kg" />
+            <input class="field" type="number" min="0" step="0.01" data-field="ppu" />
           </div>
         </div>
 
-        <div class="cfg-family" id="fam-fundas">
-          <div class="fam-title">Fundas de almohada</div>
-          <div class="cfg-grid" data-key="fundas_std" role="row">
+        <div class="cfg-family" id="fam-fundas" style="margin-top: 1.25rem;">
+          <div class="fam-title" style="font-weight:700; margin: 12px 0 8px;">Fundas de almohada</div>
+
+          <div class="cfg-grid" data-key="fundas_std" role="row" style="display:grid; grid-template-columns: 2.2fr .9fr .9fr .9fr; gap:10px; align-items:center; margin-top:8px;">
             <div class="item-name">Funda de almohada</div>
-            <input class="cfg-input col-un" type="number" min="0" step="1" data-field="units" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="kg" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="ppu" />
+            <input class="field" type="number" min="0" step="1" data-field="units" />
+            <input class="field" type="number" min="0" step="0.01" data-field="kg" />
+            <input class="field" type="number" min="0" step="0.01" data-field="ppu" />
           </div>
         </div>
 
-        <div class="cfg-family" id="fam-toallas">
-          <div class="fam-title">Toallas</div>
+        <div class="cfg-family" id="fam-toallas" style="margin-top: 1.25rem;">
+          <div class="fam-title" style="font-weight:700; margin: 12px 0 8px;">Toallas</div>
 
-          <div class="cfg-grid" data-key="toalla_alfombrin" role="row">
+          <div class="cfg-grid" data-key="toalla_alfombrin" role="row" style="display:grid; grid-template-columns: 2.2fr .9fr .9fr .9fr; gap:10px; align-items:center; margin-top:8px;">
             <div class="item-name">Alfombrín</div>
-            <input class="cfg-input col-un" type="number" min="0" step="1" data-field="units" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="kg" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="ppu" />
+            <input class="field" type="number" min="0" step="1" data-field="units" />
+            <input class="field" type="number" min="0" step="0.01" data-field="kg" />
+            <input class="field" type="number" min="0" step="0.01" data-field="ppu" />
           </div>
 
-          <div class="cfg-grid" data-key="toalla_manos" role="row">
+          <div class="cfg-grid" data-key="toalla_manos" role="row" style="display:grid; grid-template-columns: 2.2fr .9fr .9fr .9fr; gap:10px; align-items:center; margin-top:8px;">
             <div class="item-name">Toalla de manos</div>
-            <input class="cfg-input col-un" type="number" min="0" step="1" data-field="units" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="kg" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="ppu" />
+            <input class="field" type="number" min="0" step="1" data-field="units" />
+            <input class="field" type="number" min="0" step="0.01" data-field="kg" />
+            <input class="field" type="number" min="0" step="0.01" data-field="ppu" />
           </div>
 
-          <div class="cfg-grid" data-key="toalla_bano" role="row">
+          <div class="cfg-grid" data-key="toalla_bano" role="row" style="display:grid; grid-template-columns: 2.2fr .9fr .9fr .9fr; gap:10px; align-items:center; margin-top:8px;">
             <div class="item-name">Toalla de baño</div>
-            <input class="cfg-input col-un" type="number" min="0" step="1" data-field="units" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="kg" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="ppu" />
+            <input class="field" type="number" min="0" step="1" data-field="units" />
+            <input class="field" type="number" min="0" step="0.01" data-field="kg" />
+            <input class="field" type="number" min="0" step="0.01" data-field="ppu" />
           </div>
 
-          <div class="cfg-grid" data-key="toalla_piscina" role="row">
+          <div class="cfg-grid" data-key="toalla_piscina" role="row" style="display:grid; grid-template-columns: 2.2fr .9fr .9fr .9fr; gap:10px; align-items:center; margin-top:8px;">
             <div class="item-name">Toalla de piscina</div>
-            <input class="cfg-input col-un" type="number" min="0" step="1" data-field="units" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="kg" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="ppu" />
+            <input class="field" type="number" min="0" step="1" data-field="units" />
+            <input class="field" type="number" min="0" step="0.01" data-field="kg" />
+            <input class="field" type="number" min="0" step="0.01" data-field="ppu" />
           </div>
         </div>
 
-        <div class="cfg-family" id="fam-albornoces">
-          <div class="fam-title">Albornoces</div>
-          <div class="cfg-grid" data-key="albornoz" role="row">
+        <div class="cfg-family" id="fam-albornoces" style="margin-top: 1.25rem;">
+          <div class="fam-title" style="font-weight:700; margin: 12px 0 8px;">Albornoces</div>
+
+          <div class="cfg-grid" data-key="albornoz" role="row" style="display:grid; grid-template-columns: 2.2fr .9fr .9fr .9fr; gap:10px; align-items:center; margin-top:8px;">
             <div class="item-name">Albornoz</div>
-            <input class="cfg-input col-un" type="number" min="0" step="1" data-field="units" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="kg" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="ppu" />
+            <input class="field" type="number" min="0" step="1" data-field="units" />
+            <input class="field" type="number" min="0" step="0.01" data-field="kg" />
+            <input class="field" type="number" min="0" step="0.01" data-field="ppu" />
           </div>
         </div>
 
-        <div class="cfg-family" id="fam-manteleria">
-          <div class="fam-title">Mantelería y servilletas</div>
+        <div class="cfg-family" id="fam-manteleria" style="margin-top: 1.25rem;">
+          <div class="fam-title" style="font-weight:700; margin: 12px 0 8px;">Mantelería y servilletas</div>
 
-          <div class="cfg-grid" data-key="mantel" role="row">
+          <div class="cfg-grid" data-key="mantel" role="row" style="display:grid; grid-template-columns: 2.2fr .9fr .9fr .9fr; gap:10px; align-items:center; margin-top:8px;">
             <div class="item-name">Mantel</div>
-            <input class="cfg-input col-un" type="number" min="0" step="1" data-field="units" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="kg" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="ppu" />
+            <input class="field" type="number" min="0" step="1" data-field="units" />
+            <input class="field" type="number" min="0" step="0.01" data-field="kg" />
+            <input class="field" type="number" min="0" step="0.01" data-field="ppu" />
           </div>
 
-          <div class="cfg-grid" data-key="servilleta" role="row">
+          <div class="cfg-grid" data-key="servilleta" role="row" style="display:grid; grid-template-columns: 2.2fr .9fr .9fr .9fr; gap:10px; align-items:center; margin-top:8px;">
             <div class="item-name">Servilleta</div>
-            <input class="cfg-input col-un" type="number" min="0" step="1" data-field="units" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="kg" />
-            <input class="cfg-input" type="number" min="0" step="0.01" data-field="ppu" />
+            <input class="field" type="number" min="0" step="1" data-field="units" />
+            <input class="field" type="number" min="0" step="0.01" data-field="kg" />
+            <input class="field" type="number" min="0" step="0.01" data-field="ppu" />
           </div>
         </div>
 
-        <div class="cfg-family" id="fam-otros">
-          <div class="fam-title">Otros</div>
+        <div class="cfg-family" id="fam-otros" style="margin-top: 1.25rem;">
+          <div class="fam-title" style="font-weight:700; margin: 12px 0 8px;">Otros</div>
           <div id="otros-rows"></div>
-          <div class="est-actions" style="margin-top:8px">
-            <button id="otros-add" type="button" class="btn-ghost">Añadir artículo</button>
+
+          <div class="form-actions" style="display:flex; justify-content:center; margin-top:1rem;">
+            <button id="otros-add" type="button" class="scroll-top-button">Añadir artículo</button>
           </div>
         </div>
 
-        <div class="cfg-totals" aria-live="polite">
-          <div class="sum">Total</div>
-          <label>Unidades (uds)
-            <input class="cfg-input" id="total-units" type="number" readonly />
-          </label>
-          <label>Kilos (kg)
-            <input class="cfg-input" id="total-kg" type="number" readonly />
-          </label>
-        </div>
-
-        <div class="cfg-breakdown" aria-live="polite">
-          <div class="bd-title">Porcentaje por categoría</div>
-          <div class="bd-grid">
-            <div class="bd-row">
-              <div>Ropa de cama</div>
-              <div><output id="pct-cama-kg">0%</output></div>
+        <div class="cfg-totals" aria-live="polite" style="margin-top:1.5rem;">
+          <h4>Total</h4>
+          <div class="form-grid">
+            <div class="form-field">
+              <label for="total-units">Unidades (uds)</label>
+              <input class="field" id="total-units" type="number" readonly />
             </div>
-            <div class="bd-row">
-              <div>Rizo</div>
-              <div><output id="pct-rizo-kg">0%</output></div>
-            </div>
-            <div class="bd-row">
-              <div>Mantelería</div>
-              <div><output id="pct-mant-kg">0%</output></div>
+            <div class="form-field">
+              <label for="total-kg">Kilos (kg)</label>
+              <input class="field" id="total-kg" type="number" readonly />
             </div>
           </div>
+        </div>
+
+        <div class="cfg-breakdown" aria-live="polite" style="margin-top:1.25rem;">
+          <h4>Porcentaje por categoría</h4>
+          <ul>
+            <li>Ropa de cama: <output id="pct-cama-kg">0%</output></li>
+            <li>Rizo: <output id="pct-rizo-kg">0%</output></li>
+            <li>Mantelería: <output id="pct-mant-kg">0%</output></li>
+          </ul>
         </div>
       </section>
 
       <section class="card" id="mach-card">
-        <div class="mach-head">
-          <h2>Recomendación de lavadoras</h2>
-          <p class="cfg-muted">Se basa en tus kilos totales, la jornada y los ciclos/capacidades.</p>
-        </div>
+        <h3>Recomendación de lavadoras</h3>
 
-        <div class="mach-controls">
-          <label>
-            Jornada
-            <select id="mach-hours" class="cfg-input"></select>
-          </label>
+        <div class="form-grid" style="margin-top:1rem;">
+          <div class="form-field">
+            <label for="mach-hours">Jornada</label>
+            <select id="mach-hours" class="field"></select>
+          </div>
 
-          <label>
-            Modo
-            <select id="mach-mode" class="cfg-input">
+          <div class="form-field">
+            <label for="mach-mode">Modo</label>
+            <select id="mach-mode" class="field">
               <option value="auto" selected>Automático</option>
               <option value="fixed">Fijo</option>
             </select>
-          </label>
-
-          <div id="mach-fixed-wrapper" style="display:none">
-            <label>
-              Capacidad fija
-              <select id="mach-fixed-cap" class="cfg-input"></select>
-            </label>
           </div>
 
-          <div class="mach-actions">
-            <button id="mach-adjust" class="btn-primary" type="button">Calcular</button>
-            <button id="mach-add" class="btn-ghost" type="button">Añadir lavadora</button>
+          <div class="form-field" id="mach-fixed-wrapper" style="display:none;">
+            <label for="mach-fixed-cap">Capacidad fija</label>
+            <select id="mach-fixed-cap" class="field"></select>
           </div>
         </div>
 
-        <div class="mach-summary">
-          <div>
-            Kilos/día: <strong><output id="mach-kg-total">0</output></strong>
-          </div>
-          <div>
-            Total equipos: <strong><output id="mach-machines-total">0</output></strong>
-          </div>
-          <div>
-            Capacidad total: <strong><output id="mach-cap-total">0</output></strong> kg/día
-          </div>
-          <div>
-            Cobertura: <strong><output id="mach-cover-total">0%</output></strong>
-          </div>
+        <div class="form-actions" style="display:flex; justify-content:center; gap:.75rem; margin-top:1.25rem;">
+          <button id="mach-adjust" class="btn-submit" type="button">Calcular</button>
+          <button id="mach-add" class="scroll-top-button" type="button">Añadir lavadora</button>
         </div>
 
-        <p id="mach-legend" class="cfg-muted">Introduce kilos para ver la maquinaria recomendada.</p>
+        <div style="margin-top:1.5rem;">
+          <p>Kilos/día: <strong><output id="mach-kg-total">0</output></strong></p>
+          <p>Total equipos: <strong><output id="mach-machines-total">0</output></strong></p>
+          <p>Capacidad total: <strong><output id="mach-cap-total">0</output></strong> kg/día</p>
+          <p>Cobertura: <strong><output id="mach-cover-total">0%</output></strong></p>
+        </div>
 
-        <div id="mach-list"></div>
+        <p id="mach-legend" style="margin-top:1rem; opacity:.8;">
+          Introduce kilos para ver la maquinaria recomendada.
+        </p>
+
+        <div id="mach-list" style="margin-top:1rem;"></div>
       </section>
 
     </section>
+
+    <div class="scroll-top-container">
+      <button id="scroll-top-button" class="scroll-top-button" type="button">
+        Arriba
+      </button>
+    </div>
+
+    <div id="legal-footer" class="legal-footer"></div>
+
+    <div class="footer-link">
+      <a href="/es/privacidad.html">Política de privacidad y cookies</a>
+    </div>
   </main>
+
+  <script src="/static/js/theme.js"></script>
+  <script src="/static/js/unatomo-entry.js"></script>
+  <script src="/static/js/functions.js"></script>
+  <script src="/static/js/footer.js"></script>
 
   <script src="/static/js/configurador/configurador.js"></script>
   <script src="/static/js/configurador/calc_maquinaria.js"></script>
