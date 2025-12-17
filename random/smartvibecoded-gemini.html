@@ -14,16 +14,17 @@
         button { cursor: pointer; font-weight: bold; }
         button:hover { background: var(--accent); color: #000; }
         a { color: var(--accent); text-decoration: none; opacity: 0.8; }
-        pre { background: #000; padding: 10px; border: 1px dashed #555; white-space: pre-wrap; font-size: 12px; }
-        #siteBox { display: none; border-color: var(--accent); }
+        pre { background: #000; padding: 10px; border: 1px dashed #555; white-space: pre-wrap; font-size: 11px; overflow-x: auto; }
+        #siteBox { display: none; border-color: var(--accent); background: rgba(0,255,65,0.05); }
     </style>
 </head>
 <body>
     <div id="siteBox" class="box">
-        <div style="display:flex; justify-content: space-between;">
-            <strong>[ <span id="siteTag"></span> ]</strong> <a href="/">[ manifest ]</a>
+        <div style="display:flex; justify-content: space-between; align-items: center;">
+            <strong>[ <span id="siteTag"></span> ]</strong> 
+            <a href="?">[ clear ]</a>
         </div>
-        <p style="font-size: 13px; color: var(--accent);">Status: Self-certified SmartVibeCoded project.</p>
+        <p style="font-size: 13px; color: var(--accent); margin: 5px 0 0 0;">Verified: Self-certified SmartVibeCoded project.</p>
     </div>
 
     <h1>SmartVibeCoded</h1>
@@ -42,6 +43,7 @@
         <label><input type="checkbox" id="c3" checked> It works</label><br><br>
         <button onclick="gen()">Generate Snippet</button>
         <pre id="out">Code will appear here...</pre>
+        <p id="preview" style="margin-top:10px; font-size: 12px;"></p>
     </div>
 
     <div class="box" style="opacity: 0.6; font-size: 14px;">
@@ -56,11 +58,17 @@
     <script>
         const p = new URLSearchParams(location.search);
         const s = p.get("site");
-        if(s) { document.getElementById('siteBox').style.display='block'; document.getElementById('siteTag').innerText=s; }
+        if(s) { 
+            document.getElementById('siteBox').style.display='block'; 
+            document.getElementById('siteTag').innerText = s; 
+        }
         function gen() {
             const d = document.getElementById('domain').value || 'example.com';
-            const snippet = `<a href="https://smartvibecoded.com/?site=${d}" style="opacity:0.7; font-family:monospace;">⚡ smartvibecoded</a>`;
+            // We use the current URL to test it locally
+            const baseUrl = window.location.href.split('?')[0];
+            const snippet = `<a href="${baseUrl}?site=${d}" style="opacity:0.7; font-family:monospace;">⚡ smartvibecoded</a>`;
             document.getElementById('out').innerText = snippet;
+            document.getElementById('preview').innerHTML = "Preview: " + snippet;
         }
     </script>
 </body>
