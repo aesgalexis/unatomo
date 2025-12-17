@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartVibeCoded | Shipped by vibes. Kept by taste.</title>
+    <style>
+        :root { --bg: #0d0d0d; --text: #e0e0e0; --accent: #00ff41; }
+        body { font-family: 'Courier New', Courier, monospace; background: var(--bg); color: var(--text); line-height: 1.6; padding: 2rem; max-width: 800px; margin: auto; }
+        h1 { color: var(--accent); border-bottom: 2px solid var(--accent); display: inline-block; }
+        .manifesto { background: #1a1a1a; padding: 1rem; border-left: 4px solid var(--accent); margin: 2rem 0; }
+        .generator { border: 1px solid #333; padding: 2rem; border-radius: 8px; }
+        input[type="text"] { background: #000; border: 1px solid var(--accent); color: var(--accent); padding: 10px; width: 100%; box-sizing: border-box; margin-bottom: 1rem; }
+        .checkbox-group { margin-bottom: 1rem; }
+        .badge-output { background: #000; padding: 1rem; display: none; margin-top: 1rem; border: 1px dashed var(--accent); }
+        a { color: var(--accent); text-decoration: none; }
+        .list { margin-top: 3rem; opacity: 0.7; }
+        button { background: var(--accent); color: #000; border: none; padding: 10px 20px; cursor: pointer; font-weight: bold; }
+        button:disabled { background: #333; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+
+    <h1>SmartVibeCoded™</h1>
+    <p><em>"Vibes to ship. Human taste to keep."</em></p>
+
+    <div class="manifesto">
+        <p><strong>¿Qué es esto?</strong> Un sello de autor para proyectos construidos con IA que <u>funcionan en el mundo real</u>.</p>
+        <p>No nos importa la elegancia del código. Nos importa que la máquina no se detenga.</p>
+    </div>
+
+    <div class="generator">
+        <h3>Obtén tu sello (Auto-certificación)</h3>
+        <input type="text" id="siteUrl" placeholder="tu-dominio.com">
+        <div class="checkbox-group">
+            <input type="checkbox" id="check1"> <label for="check1">Lo he construido usando IA.</label><br>
+            <input type="checkbox" id="check2"> <label for="check2">Está online y es funcional.</label><br>
+            <input type="checkbox" id="check3"> <label for="check3">He verificado que hace lo que dice.</label>
+        </div>
+        <button id="genBtn" disabled>Generar Badge</button>
+
+        <div id="output" class="badge-output">
+            <p>Copia este código en tu footer:</p>
+            <code id="codeSnippet"></code>
+        </div>
+    </div>
+
+    <div class="list">
+        <h3>Hall of (Useful) Crap</h3>
+        <ul>
+            <li><a href="https://gastrosat.com">gastrosat.com</a> - El buque insignia.</li>
+            <li><a href="https://unatomo.com">unatomo.com</a> - El laboratorio.</li>
+            <li><em>Tu proyecto aquí... (si funciona)</em></li>
+        </ul>
+    </div>
+
+    <script>
+        const btn = document.getElementById('genBtn');
+        const checks = [document.getElementById('check1'), document.getElementById('check2'), document.getElementById('check3')];
+        const output = document.getElementById('output');
+        const codeSnippet = document.getElementById('codeSnippet');
+        const siteUrl = document.getElementById('siteUrl');
+
+        checks.forEach(c => c.addEventListener('change', () => {
+            btn.disabled = !checks.every(curr => curr.checked);
+        }));
+
+        btn.onclick = () => {
+            const url = siteUrl.value || 'tu-web.com';
+            const snippet = `<a href="https://smartvibecoded.com" title="SmartVibeCoded: Shipped with vibes, kept by taste">⚡ smartvibecoded</a>`;
+            codeSnippet.innerText = snippet;
+            output.style.display = 'block';
+        };
+    </script>
+</body>
+</html>
