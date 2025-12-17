@@ -427,6 +427,10 @@ body.page li {
   margin-top: 1rem;
 }
 
+.form-grid--4 {
+  grid-template-columns: repeat(4, minmax(160px, 1fr));
+}
+
 .form-field label {
   display: block;
   font-size: 0.85rem;
