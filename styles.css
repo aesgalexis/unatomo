@@ -452,6 +452,16 @@ body.page li {
   appearance: none;
 }
 
+.field[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.field[type="number"]::-webkit-outer-spin-button,
+.field[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 .field:focus {
   outline: 2px solid color-mix(in srgb, var(--fg) 40%, transparent);
   outline-offset: 1px;
