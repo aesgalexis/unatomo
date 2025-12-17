@@ -129,7 +129,7 @@
           <label>
             <span class="mach-label-small">Equipo</span>
             <input
-              class="cfg-input mach-name-input"
+              class="field mach-name-input"
               type="text"
               data-id="${m.id}"
               value="${m.name}"
@@ -139,19 +139,17 @@
         <div class="mach-item-fields">
           <label>
             Capacidad
-            <select class="cfg-input mach-cap-select" data-id="${m.id}"></select>
+            <select class="field mach-cap-select" data-id="${m.id}"></select>
           </label>
           <label>
             Duración de lavado
-            <select class="cfg-input mach-cycle-select" data-id="${m.id}"></select>
+            <select class="field mach-cycle-select" data-id="${m.id}"></select>
           </label>
           <div class="mach-item-info cfg-note">
             ≈ <span data-role="perday">0</span> kg/día
             · ciclo total: <span data-role="cyctime">0</span> min
           </div>
-          <button type="button" class="mach-remove-btn" data-id="${m.id}">
-            Quitar equipo
-          </button>
+          <a href="#" class="mach-remove-link" data-id="${m.id}">Quitar equipo</a>
         </div>
       `;
 
@@ -160,7 +158,7 @@
       const selectCycle = wrapper.querySelector('.mach-cycle-select');
       const perDaySpan = wrapper.querySelector('[data-role="perday"]');
       const cycSpan = wrapper.querySelector('[data-role="cyctime"]');
-      const removeBtn = wrapper.querySelector('.mach-remove-btn');
+      const removeLink = wrapper.querySelector('.mach-remove-link');
 
       if (nameInput) {
         nameInput.addEventListener('input', () => {
@@ -212,8 +210,9 @@
         updateMachinerySummary();
       });
 
-      if (removeBtn) {
-        removeBtn.addEventListener('click', () => {
+      if (removeLink) {
+        removeLink.addEventListener('click', (e) => {
+          e.preventDefault();
           currentMachines = currentMachines.filter(x => x.id !== m.id);
           renderMachineList();
           updateMachinerySummary();
