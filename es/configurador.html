@@ -7,9 +7,10 @@
   <meta name="robots" content="noindex, nofollow" />
 
   <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/static/css/configurador.css">
 </head>
 
-<body class="page">
+<body class="page page-configurador">
   <button id="theme-toggle" type="button" aria-label="Cambiar tema">
     ☾ / ☼
   </button>
@@ -28,7 +29,7 @@
     </div>
   </header>
 
-  <main class="shell page-shell" style="max-width:1024px;">
+  <main class="shell page-shell">
     <section class="page-section" aria-label="Configurador">
 
       <section class="card card--wide">
@@ -39,7 +40,7 @@
             Introduce nº de habitaciones y factor de reposición. Al aplicar, se rellenan las unidades; los kilos se calculan solos.
           </p>
 
-        <div class="form-grid form-grid--4">
+          <div class="form-grid form-grid--4">
             <div class="form-field">
               <label for="est-simples">Simples</label>
               <input id="est-simples" class="field" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
