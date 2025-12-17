@@ -100,129 +100,130 @@
   }
 
   function renderMachineList() {
-    const listEl = document.getElementById('mach-list');
-    if (!listEl) return;
+  const listEl = document.getElementById('mach-list');
+  if (!listEl) return;
 
-    listEl.innerHTML = '';
+  listEl.innerHTML = '';
 
-    if (!currentMachines.length) {
-      const p = document.createElement('p');
-      p.className = 'mach-empty';
-      p.textContent = 'Sin lavadoras calculadas. Introduce kilos y jornada para ver una propuesta.';
-      listEl.appendChild(p);
-      return;
+  if (!currentMachines.length) {
+    const p = document.createElement('p');
+    p.className = 'mach-empty';
+    p.textContent = 'Sin lavadoras calculadas. Introduce kilos y jornada para ver una propuesta.';
+    listEl.appendChild(p);
+    return;
+  }
+
+  const hours = getHours();
+
+  currentMachines.forEach((m, idx) => {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'mach-item';
+    wrapper.style.cssText = 'margin-top:14px; padding-top:14px; border-top:1px solid rgba(127,127,127,.25);';
+
+    const defaultName = `Lavadora ${idx + 1}`;
+    if (!m.name || /^Lavadora\s+\d+$/i.test(m.name.trim())) {
+      m.name = defaultName;
     }
 
-    const hours = getHours();
+    wrapper.innerHTML = `
+      <div style="display:grid; grid-template-columns: 2.2fr 1fr 1.3fr auto; gap:10px; align-items:end;">
+        <label>
+          <span style="display:block; font-size:.9em; opacity:.8;">Equipo</span>
+          <input class="field" type="text" data-id="${m.id}" value="${m.name}">
+        </label>
 
-    currentMachines.forEach((m, idx) => {
-      const wrapper = document.createElement('div');
-      wrapper.className = 'mach-item';
-      wrapper.style.cssText = 'margin-top:14px; padding-top:14px; border-top:1px solid rgba(127,127,127,.25);';
+        <label>
+          Capacidad
+          <select class="field" data-role="cap" data-id="${m.id}"></select>
+        </label>
 
-      const defaultName = `Lavadora ${idx + 1}`;
-      if (!m.name || /^Lavadora\s+\d+$/i.test(m.name.trim())) {
-        m.name = defaultName;
-      }
+        <label>
+          Duración de lavado
+          <select class="field" data-role="cycle" data-id="${m.id}"></select>
+        </label>
 
-      wrapper.innerHTML = `
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; align-items:end;">
-          <label style="grid-column:1 / -1;">
-            <span style="display:block; font-size:.9em; opacity:.8;">Equipo</span>
-            <input class="field" type="text" data-id="${m.id}" value="${m.name}">
-          </label>
+        <a href="#" data-role="remove" data-id="${m.id}" style="white-space:nowrap; justify-self:end; align-self:end;">
+          Quitar equipo
+        </a>
 
-          <label>
-            Capacidad
-            <select class="field" data-role="cap" data-id="${m.id}"></select>
-          </label>
-
-          <label>
-            Duración de lavado
-            <select class="field" data-role="cycle" data-id="${m.id}"></select>
-          </label>
-
-          <div style="grid-column:1 / -1; display:flex; align-items:center; gap:12px; margin-top:6px;">
-            <div class="cfg-note">
-              ≈ <span data-role="perday">0</span> kg/día · ciclo total: <span data-role="cyctime">0</span> min
-            </div>
-            <a href="#" data-role="remove" data-id="${m.id}" style="margin-left:auto; white-space:nowrap;">
-              Quitar equipo
-            </a>
+        <div style="grid-column:1 / -1; display:flex; align-items:center; gap:12px; margin-top:6px;">
+          <div class="cfg-note">
+            ≈ <span data-role="perday">0</span> kg/día · ciclo total: <span data-role="cyctime">0</span> min
           </div>
         </div>
-      `;
+      </div>
+    `;
 
-      const nameInput = wrapper.querySelector('input.field[data-id]');
-      const selectCap = wrapper.querySelector('select[data-role="cap"]');
-      const selectCycle = wrapper.querySelector('select[data-role="cycle"]');
-      const perDaySpan = wrapper.querySelector('[data-role="perday"]');
-      const cycSpan = wrapper.querySelector('[data-role="cyctime"]');
-      const removeLink = wrapper.querySelector('a[data-role="remove"]');
+    const nameInput = wrapper.querySelector('input.field[data-id]');
+    const selectCap = wrapper.querySelector('select[data-role="cap"]');
+    const selectCycle = wrapper.querySelector('select[data-role="cycle"]');
+    const perDaySpan = wrapper.querySelector('[data-role="perday"]');
+    const cycSpan = wrapper.querySelector('[data-role="cyctime"]');
+    const removeLink = wrapper.querySelector('a[data-role="remove"]');
 
-      if (nameInput) {
-        nameInput.addEventListener('input', () => {
-          const val = nameInput.value.trim();
-          m.name = val || defaultName;
-        });
-      }
-
-      WASH_CAPACITIES.forEach(cap => {
-        const opt = document.createElement('option');
-        opt.value = String(cap);
-        opt.textContent = `${cap} kg`;
-        if (cap === m.cap) opt.selected = true;
-        selectCap.appendChild(opt);
+    if (nameInput) {
+      nameInput.addEventListener('input', () => {
+        const val = nameInput.value.trim();
+        m.name = val || defaultName;
       });
+    }
 
-      for (let t = MIN_WASH_MIN; t <= MAX_WASH_MIN; t += STEP_WASH_MIN) {
-        const opt = document.createElement('option');
-        opt.value = String(t);
-        const total = t + EXTRA_LOAD_UNLOAD;
-        opt.textContent = `${t} + 5 min (total ${total})`;
-        if (t === (m.washMin || DEFAULT_WASH_MIN)) opt.selected = true;
-        selectCycle.appendChild(opt);
-      }
+    WASH_CAPACITIES.forEach(cap => {
+      const opt = document.createElement('option');
+      opt.value = String(cap);
+      opt.textContent = `${cap} kg`;
+      if (cap === m.cap) opt.selected = true;
+      selectCap.appendChild(opt);
+    });
 
-      function refreshMachineInfo() {
-        const capDay = capacityPerMachinePerDay(m, hours);
-        if (perDaySpan) perDaySpan.textContent = capDay.toFixed(1).replace('.', ',');
-        const totalCycle = (m.washMin || DEFAULT_WASH_MIN) + EXTRA_LOAD_UNLOAD;
-        if (cycSpan) cycSpan.textContent = totalCycle;
-      }
+    for (let t = MIN_WASH_MIN; t <= MAX_WASH_MIN; t += STEP_WASH_MIN) {
+      const opt = document.createElement('option');
+      opt.value = String(t);
+      const total = t + EXTRA_LOAD_UNLOAD;
+      opt.textContent = `${t} + 5 min (total ${total})`;
+      if (t === (m.washMin || DEFAULT_WASH_MIN)) opt.selected = true;
+      selectCycle.appendChild(opt);
+    }
 
-      selectCap.addEventListener('change', () => {
-        const cap = toNumber(selectCap.value);
-        if (cap > 0) {
-          m.cap = cap;
-          refreshMachineInfo();
-          updateMachinerySummary();
-        }
-      });
+    function refreshMachineInfo() {
+      const capDay = capacityPerMachinePerDay(m, hours);
+      if (perDaySpan) perDaySpan.textContent = capDay.toFixed(1).replace('.', ',');
+      const totalCycle = (m.washMin || DEFAULT_WASH_MIN) + EXTRA_LOAD_UNLOAD;
+      if (cycSpan) cycSpan.textContent = totalCycle;
+    }
 
-      selectCycle.addEventListener('change', () => {
-        const val = toNumber(selectCycle.value);
-        let wash = val || DEFAULT_WASH_MIN;
-        if (wash < MIN_WASH_MIN) wash = MIN_WASH_MIN;
-        if (wash > MAX_WASH_MIN) wash = MAX_WASH_MIN;
-        m.washMin = wash;
+    selectCap.addEventListener('change', () => {
+      const cap = toNumber(selectCap.value);
+      if (cap > 0) {
+        m.cap = cap;
         refreshMachineInfo();
         updateMachinerySummary();
-      });
-
-      if (removeLink) {
-        removeLink.addEventListener('click', (e) => {
-          e.preventDefault();
-          currentMachines = currentMachines.filter(x => x.id !== m.id);
-          renderMachineList();
-          updateMachinerySummary();
-        });
       }
-
-      refreshMachineInfo();
-      listEl.appendChild(wrapper);
     });
-  }
+
+    selectCycle.addEventListener('change', () => {
+      const val = toNumber(selectCycle.value);
+      let wash = val || DEFAULT_WASH_MIN;
+      if (wash < MIN_WASH_MIN) wash = MIN_WASH_MIN;
+      if (wash > MAX_WASH_MIN) wash = MAX_WASH_MIN;
+      m.washMin = wash;
+      refreshMachineInfo();
+      updateMachinerySummary();
+    });
+
+    if (removeLink) {
+      removeLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        currentMachines = currentMachines.filter(x => x.id !== m.id);
+        renderMachineList();
+        updateMachinerySummary();
+      });
+    }
+
+    refreshMachineInfo();
+    listEl.appendChild(wrapper);
+  });
+}
 
   function updateMachinerySummary() {
     const totalKg = getTotalKgPerDay();
