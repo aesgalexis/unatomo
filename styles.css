@@ -315,6 +315,10 @@ body.page li {
   margin: 0 auto;
 }
 
+.page-shell--800 {
+  max-width: 800px;
+}
+
 .topbar {
   position: fixed;
   top: 0;
