@@ -215,6 +215,10 @@ body.page #theme-toggle {
   text-align: left;
 }
 
+.card--wide {
+  max-width: 800px;
+}
+
 .lang-picker {
   display: flex;
   flex-wrap: wrap;
@@ -313,10 +317,6 @@ body.page li {
   max-width: 800px;
   padding: 110px 1.5rem 2.5rem;
   margin: 0 auto;
-}
-
-.page-shell--800 {
-  max-width: 800px;
 }
 
 .topbar {
