@@ -125,34 +125,35 @@
       m.name = defaultName;
     }
 
-    wrapper.innerHTML = `
-      <div style="display:grid; grid-template-columns: 2.2fr 1fr 1.3fr auto; gap:10px; align-items:end;">
-        <label>
-          <span style="display:block; font-size:.9em; opacity:.8;">Equipo</span>
-          <input class="field" type="text" data-id="${m.id}" value="${m.name}">
-        </label>
+wrapper.innerHTML = `
+  <div style="display:grid; grid-template-columns: 2.2fr 1fr 1.3fr; gap:10px; align-items:end;">
+    <label>
+      <span style="display:block; font-size:.9em; opacity:.8;">Equipo</span>
+      <input class="field" type="text" data-id="${m.id}" value="${m.name}">
+    </label>
 
-        <label>
-          Capacidad
-          <select class="field" data-role="cap" data-id="${m.id}"></select>
-        </label>
+    <label>
+      Capacidad
+      <select class="field" data-role="cap" data-id="${m.id}"></select>
+    </label>
 
-        <label>
-          Duración de lavado
-          <select class="field" data-role="cycle" data-id="${m.id}"></select>
-        </label>
+    <label>
+      Duración de lavado
+      <select class="field" data-role="cycle" data-id="${m.id}"></select>
+    </label>
 
-        <a href="#" data-role="remove" data-id="${m.id}" style="white-space:nowrap; justify-self:end; align-self:end;">
-          Quitar equipo
-        </a>
-
-        <div style="grid-column:1 / -1; display:flex; align-items:center; gap:12px; margin-top:6px;">
-          <div class="cfg-note">
-            ≈ <span data-role="perday">0</span> kg/día · ciclo total: <span data-role="cyctime">0</span> min
-          </div>
-        </div>
+    <div style="grid-column:1 / -1; display:flex; align-items:center; gap:12px; margin-top:6px;">
+      <div class="cfg-note">
+        ≈ <span data-role="perday">0</span> kg/día · ciclo total: <span data-role="cyctime">0</span> min
       </div>
-    `;
+
+      <a href="#" data-role="remove" data-id="${m.id}" style="margin-left:auto; white-space:nowrap;">
+        Quitar equipo
+      </a>
+    </div>
+  </div>
+`;
+
 
     const nameInput = wrapper.querySelector('input.field[data-id]');
     const selectCap = wrapper.querySelector('select[data-role="cap"]');
