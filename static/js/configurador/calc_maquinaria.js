@@ -254,6 +254,10 @@ wrapper.innerHTML = `
 
     if (covOut) covOut.textContent = pct + '%';
 
+    if (covOut) {
+  covOut.classList.remove('is-under', 'is-over');
+  if (totalKg > 0) covOut.classList.add(pct < 100 ? 'is-under' : 'is-over');
+}
     let breakdown = '—';
     if (grouped.size) {
       breakdown = Array.from(grouped.entries())
