@@ -118,6 +118,7 @@
     currentMachines.forEach((m, idx) => {
       const wrapper = document.createElement('div');
       wrapper.className = 'mach-item';
+      wrapper.style.cssText = 'margin-top:14px; padding-top:14px; border-top:1px solid rgba(127,127,127,.25);';
 
       const defaultName = `Lavadora ${idx + 1}`;
       if (!m.name || /^Lavadora\s+\d+$/i.test(m.name.trim())) {
@@ -125,40 +126,39 @@
       }
 
       wrapper.innerHTML = `
-        <div class="mach-item-header">
-          <label>
-            <span class="mach-label-small">Equipo</span>
-            <input
-              class="field mach-name-input"
-              type="text"
-              data-id="${m.id}"
-              value="${m.name}"
-            >
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; align-items:end;">
+          <label style="grid-column:1 / -1;">
+            <span style="display:block; font-size:.9em; opacity:.8;">Equipo</span>
+            <input class="field" type="text" data-id="${m.id}" value="${m.name}">
           </label>
-        </div>
-        <div class="mach-item-fields">
+
           <label>
             Capacidad
-            <select class="field mach-cap-select" data-id="${m.id}"></select>
+            <select class="field" data-role="cap" data-id="${m.id}"></select>
           </label>
+
           <label>
             Duración de lavado
-            <select class="field mach-cycle-select" data-id="${m.id}"></select>
+            <select class="field" data-role="cycle" data-id="${m.id}"></select>
           </label>
-          <div class="mach-item-info cfg-note">
-            ≈ <span data-role="perday">0</span> kg/día
-            · ciclo total: <span data-role="cyctime">0</span> min
+
+          <div style="grid-column:1 / -1; display:flex; align-items:center; gap:12px; margin-top:6px;">
+            <div class="cfg-note">
+              ≈ <span data-role="perday">0</span> kg/día · ciclo total: <span data-role="cyctime">0</span> min
+            </div>
+            <a href="#" data-role="remove" data-id="${m.id}" style="margin-left:auto; white-space:nowrap;">
+              Quitar equipo
+            </a>
           </div>
-          <a href="#" class="mach-remove-link" data-id="${m.id}">Quitar equipo</a>
         </div>
       `;
 
-      const nameInput = wrapper.querySelector('.mach-name-input');
-      const selectCap = wrapper.querySelector('.mach-cap-select');
-      const selectCycle = wrapper.querySelector('.mach-cycle-select');
+      const nameInput = wrapper.querySelector('input.field[data-id]');
+      const selectCap = wrapper.querySelector('select[data-role="cap"]');
+      const selectCycle = wrapper.querySelector('select[data-role="cycle"]');
       const perDaySpan = wrapper.querySelector('[data-role="perday"]');
       const cycSpan = wrapper.querySelector('[data-role="cyctime"]');
-      const removeLink = wrapper.querySelector('.mach-remove-link');
+      const removeLink = wrapper.querySelector('a[data-role="remove"]');
 
       if (nameInput) {
         nameInput.addEventListener('input', () => {
