@@ -245,47 +245,47 @@
         </div>
       </section>
 
-      <section class="card card--wide" id="mach-card">
-        <h3>Recomendación de lavadoras</h3>
+     <section class="card card--wide" id="mach-card">
+  <h3>Equipos estimados</h3>
 
-        <div class="form-grid" style="margin-top:1rem;">
-          <div class="form-field">
-            <label for="mach-hours">Jornada</label>
-            <select id="mach-hours" class="field"></select>
-          </div>
+  <div class="form-grid" style="margin-top:1rem;">
+    <div class="form-field">
+      <label for="mach-hours">Jornada</label>
+      <select id="mach-hours" class="field"></select>
+    </div>
 
-          <div class="form-field">
-            <label for="mach-mode">Modo</label>
-            <select id="mach-mode" class="field">
-              <option value="auto" selected>Automático</option>
-              <option value="fixed">Fijo</option>
-            </select>
-          </div>
+    <div class="form-field">
+      <label for="mach-mode">Modo</label>
+      <select id="mach-mode" class="field">
+        <option value="auto" selected>Automático</option>
+        <option value="fixed">Fijo</option>
+      </select>
+    </div>
 
-          <div class="form-field" id="mach-fixed-wrapper" style="display:none;">
-            <label for="mach-fixed-cap">Capacidad fija</label>
-            <select id="mach-fixed-cap" class="field"></select>
-          </div>
-        </div>
+    <div class="form-field" id="mach-fixed-wrapper" style="display:none;">
+      <label for="mach-fixed-cap">Capacidad fija</label>
+      <select id="mach-fixed-cap" class="field"></select>
+    </div>
+  </div>
 
-        <div class="form-actions" style="display:flex; justify-content:center; gap:.75rem; margin-top:1.25rem;">
-          <button id="mach-adjust" class="scroll-top-button" type="button">Calcular</button>
-          <button id="mach-add" class="scroll-top-button" type="button">Añadir lavadora</button>
-        </div>
+  <div class="form-actions" style="display:flex; justify-content:center; gap:.75rem; margin-top:1.25rem;">
+    <button id="mach-adjust" class="scroll-top-button" type="button">Calcular</button>
+    <button id="mach-add" class="scroll-top-button" type="button">Añadir equipo</button>
+  </div>
 
-        <div style="margin-top:1.5rem;">
-          <p>Kilos/día: <strong><output id="mach-kg-total">0</output></strong></p>
-          <p>Total equipos: <strong><output id="mach-machines-total">0</output></strong></p>
-          <p>Capacidad total: <strong><output id="mach-cap-total">0</output></strong> kg/día</p>
-          <p>Cobertura: <strong><output id="mach-cover-total">0%</output></strong></p>
-        </div>
+  <div id="mach-list" style="margin-top:1rem;"></div>
 
-        <p id="mach-legend" style="margin-top:1rem; opacity:.8;">
-          Introduce kilos para ver la maquinaria recomendada.
-        </p>
+  <div style="margin-top:1.5rem;">
+    <p>Kilos/día: <strong><output id="mach-kg-total">0</output></strong></p>
+    <p>Total equipos: <strong><output id="mach-machines-total">0</output></strong></p>
+    <p>Capacidad total: <strong><output id="mach-cap-total">0</output></strong> kg/día</p>
+    <p>Cobertura: <strong><output id="mach-cover-total">0%</output></strong></p>
+  </div>
 
-        <div id="mach-list" style="margin-top:1rem;"></div>
-      </section>
+  <p id="mach-legend" style="margin-top:1rem; opacity:.8;">
+    Introduce kilos para ver la maquinaria recomendada.
+  </p>
+</section>
 
     </section>
 
