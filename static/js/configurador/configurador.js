@@ -265,11 +265,11 @@
     row.setAttribute("data-key", key);
     row.innerHTML = `
       <div class="item-name">
-        <input class="cfg-input" type="text" data-field="name" placeholder="Nombre del artículo" value="${prefillName}">
+        <input class="field" type="text" data-field="name" placeholder="Nombre del artículo" value="${prefillName}">
       </div>
-      <input class="cfg-input col-un" type="number" min="0" step="1" inputmode="numeric" placeholder="0" data-field="units">
-      <input class="cfg-input" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" data-field="kg">
-      <input class="cfg-input" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" data-field="ppu">
+      <input class="field col-un" type="number" min="0" step="1" inputmode="numeric" placeholder="0" data-field="units">
+      <input class="field" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" data-field="kg">
+      <input class="field" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" data-field="ppu">
     `;
 
     host.appendChild(row);
