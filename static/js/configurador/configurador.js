@@ -263,6 +263,9 @@
     const row = document.createElement("div");
     row.className = "cfg-grid";
     row.setAttribute("data-key", key);
+    row.style.cssText =
+      "display:grid; grid-template-columns: 2.2fr .9fr .9fr .9fr; gap:10px; align-items:center; margin-top:8px;";
+
     row.innerHTML = `
       <div class="item-name">
         <input class="field" type="text" data-field="name" placeholder="Nombre del artículo" value="${prefillName}">
