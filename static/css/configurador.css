@@ -2,7 +2,7 @@
 body.page.page-configurador .card--wide { max-width: 800px; }
 
 body.page.page-configurador .form-grid--4 {
-  grid-template-columns: repeat(4, minmax(160px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 }
 
 body.page.page-configurador .field[type="number"] {
