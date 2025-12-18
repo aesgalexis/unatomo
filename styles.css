@@ -427,10 +427,6 @@ body.page li {
   margin-top: 1rem;
 }
 
-.form-grid--4 {
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-}
-
 .form-field label {
   display: block;
   font-size: 0.85rem;
