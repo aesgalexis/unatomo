@@ -165,6 +165,45 @@ button:hover {
   filter: brightness(1.03);
 }
 
+.btn-primary,
+.btn-secondary {
+  margin-top: 2.5rem;
+  padding: 0.75rem 1.75rem;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.95rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  -webkit-tap-highlight-color: transparent;
+  text-decoration: none;
+}
+
+.btn-primary {
+  background: #2da44e;
+  border: 1px solid #2da44e;
+  color: #fff;
+}
+.btn-primary:hover {
+  background: #2c974b;
+  border-color: #2c974b;
+}
+.btn-primary:active {
+  background: #26863f;
+  border-color: #26863f;
+}
+
+.btn-secondary {
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--fg) 55%, transparent);
+  color: var(--fg);
+}
+.btn-secondary:hover {
+  opacity: 0.9;
+}
+
 #theme-toggle {
   position: fixed;
   top: 12px;
