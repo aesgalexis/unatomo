@@ -181,9 +181,9 @@ button.btn-secondary {
   text-decoration: none;
 }
 
-/* Alinear a la derecha dentro de páginas (cards, layout de contenido) */
-body.page button.btn-primary,
-body.page button.btn-secondary {
+/* Alinear a la derecha SOLO dentro de cards wide */
+body.page .card.card--wide button.btn-primary,
+body.page .card.card--wide button.btn-secondary {
   margin-left: auto;
 }
 
