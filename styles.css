@@ -273,6 +273,11 @@ body.page #theme-toggle {
   max-width: 876px;
 }
 
+.card.card--wide .card-cta {
+  display: flex;
+  justify-content: flex-end;
+}
+
 .lang-picker {
   display: flex;
   flex-wrap: wrap;
