@@ -95,6 +95,7 @@ h2,
 h3,
 h4,
 h5,
+h6,
 p {
   margin: 0;
 }
@@ -135,6 +136,14 @@ h5 {
   font-size: 0.95rem;
   color: var(--fg);
   font-weight: 400;
+  margin-top: 0.75rem;
+  margin-bottom: 0.25rem;
+}
+
+h6 {
+  font-size: 0.95rem;
+  color: var(--fg);
+  font-weight: 600;
   margin-top: 0.75rem;
   margin-bottom: 0.25rem;
 }
@@ -355,7 +364,8 @@ body.page h1,
 body.page h2,
 body.page h3,
 body.page h4,
-body.page h5 {
+body.page h5,
+body.page h6{
   text-align: left;
 }
 
