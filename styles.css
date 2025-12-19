@@ -165,11 +165,14 @@ button:hover {
   filter: brightness(1.03);
 }
 
+a.btn-primary,
+a.btn-secondary,
 button.btn-primary,
 button.btn-secondary {
-  margin-top: 2.5rem;
-  padding: 0.75rem 1.75rem;
-  border-radius: 999px;
+  margin-top: 1.75rem;
+  padding: 0.6rem 1.25rem;
+  border-radius: 0.75rem;
+  border: 1px solid transparent;
   font: inherit;
   font-size: 0.95rem;
   cursor: pointer;
@@ -181,38 +184,36 @@ button.btn-secondary {
   text-decoration: none;
 }
 
-/* Alinear a la derecha SOLO dentro de cards wide */
-body.page .card.card--wide button.btn-primary,
-body.page .card.card--wide button.btn-secondary {
-  margin-left: auto;
-}
-
-/* Primario (verde) */
+a.btn-primary,
 button.btn-primary {
   background: #2da44e;
-  border: 1px solid #2da44e;
+  border-color: #2da44e;
   color: #fff;
 }
 
+a.btn-primary:hover,
 button.btn-primary:hover {
   background: #2c974b;
   border-color: #2c974b;
   filter: none;
+  opacity: 1;
 }
 
+a.btn-primary:active,
 button.btn-primary:active {
   background: #26863f;
   border-color: #26863f;
   filter: none;
 }
 
-/* Secundario (transparente) */
+a.btn-secondary,
 button.btn-secondary {
   background: transparent;
-  border: 1px solid color-mix(in srgb, var(--fg) 55%, transparent);
+  border-color: color-mix(in srgb, var(--fg) 55%, transparent);
   color: var(--fg);
 }
 
+a.btn-secondary:hover,
 button.btn-secondary:hover {
   opacity: 0.9;
   filter: none;
@@ -332,7 +333,7 @@ body.page #theme-toggle {
   }
 }
 
-* - - - - - - - - - - - - - - - - - - - - - - - *
+/* - - - - - - - - - - - - - - - - - - - - - - - */
 
 body.page {
   min-height: 100vh;
@@ -440,7 +441,7 @@ body.page li {
   opacity: 0.9;
 }
 
-* - - - - - - - - - - - - - - - - - - - - - - - *
+/* - - - - - - - - - - - - - - - - - - - - - - - */
 
 .contact-info {
   margin-top: 1rem;
@@ -467,7 +468,7 @@ body.page li {
   fill: currentColor;
 }
 
-* - - - - - - - - - - - - - - - *
+/* - - - - - - - - - - - - - - - */
 
 .contact-form {
   margin-top: 1.5rem;
