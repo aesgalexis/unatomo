@@ -59,7 +59,7 @@
   const status = document.getElementById("reg-status");
   const btn = document.getElementById("google-register");
 
-  function setStatus(t) {
+  function setStatus(t){
     status.hidden = false;
     status.textContent = t;
   }
@@ -71,7 +71,7 @@
   } else {
     const check = await validateRegistrationCode(code);
     if (!check.valid) {
-      try { sessionStorage.removeItem("unatomo_access_code"); } catch (e) {}
+      try { sessionStorage.removeItem("unatomo_access_code"); } catch(e){}
       window.location.replace("/?setup=1");
     }
   }
@@ -98,6 +98,7 @@
     }
   });
 </script>
+
 
 
   
