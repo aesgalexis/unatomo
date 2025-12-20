@@ -16,14 +16,15 @@ const db = getFirestore(app);
 
 export async function validateRegistrationCode(code) {
   const normalized = (code ?? "").toString().trim().toUpperCase();
-  if (!normalized) return { valid: false };
+  if (!normalized) return { valid: false, reason: "empty" };
 
   const ref = doc(db, "registration_codes", normalized);
   const snap = await getDoc(ref);
-  if (!snap.exists()) return { valid: false };
+
+  if (!snap.exists()) return { valid: false, reason: "not_found", code: normalized };
 
   const data = snap.data() || {};
-  if (data.active === false) return { valid: false };
+  if (data.active === false) return { valid: false, reason: "inactive", code: normalized };
 
-  return { valid: true, code: normalized };
+  return { valid: true, code: normalized, data };
 }
