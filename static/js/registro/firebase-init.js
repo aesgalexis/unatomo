@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-functions.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBWsV-z0v90W9OxtHDx-m2N4SF-iUc9JNY",
@@ -12,6 +12,18 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const functions = getFunctions(app, "europe-west1");
+const db = getFirestore(app);
 
-export const validateRegistrationCode = httpsCallable(functions, "validateRegistrationCode");
+export async function validateRegistrationCode(code) {
+  const normalized = (code ?? "").toString().trim().toUpperCase();
+  if (!normalized) return { valid: false };
+
+  const ref = doc(db, "registration_codes", normalized);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) return { valid: false };
+
+  const data = snap.data() || {};
+  if (data.active === false) return { valid: false };
+
+  return { valid: true, code: normalized };
+}
