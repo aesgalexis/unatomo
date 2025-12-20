@@ -1,5 +1,3 @@
-import { validateRegistrationCode } from "/static/js/registro/firebase-init.js";
-
 (function () {
   const loginBtn = document.getElementById("go-login");
   const registerBtn = document.getElementById("go-register");
@@ -98,10 +96,16 @@ import { validateRegistrationCode } from "/static/js/registro/firebase-init.js";
         return;
       }
 
+      const api = window.unatomoFirebase;
+      if (!api || !api.validateRegistrationCode) {
+        error.textContent = "Registro no disponible.";
+        error.hidden = false;
+        return;
+      }
+
       try {
         submit.disabled = true;
-
-        const res = await validateRegistrationCode({ code });
+        const res = await api.validateRegistrationCode({ code });
         const valid = Boolean(res?.data?.valid);
 
         if (!valid) {
