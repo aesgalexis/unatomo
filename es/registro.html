@@ -125,6 +125,8 @@
       if (!res.valid) {
         try { sessionStorage.removeItem("unatomo_access_code"); } catch (e) {}
         window.location.replace("/?setup=1");
+      } else {
+        document.documentElement.style.visibility = "visible";
       }
     } catch (e) {
       window.location.replace("/?setup=1");
