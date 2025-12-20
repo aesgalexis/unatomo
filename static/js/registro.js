@@ -1,3 +1,5 @@
+import { validateRegistrationCode } from "/static/js/registro/firebase-init.js";
+
 (function () {
   const loginBtn = document.getElementById("go-login");
   const registerBtn = document.getElementById("go-register");
@@ -9,6 +11,22 @@
   }
 
   let registerBox = null;
+
+  function setStatus(el, text, type) {
+    el.hidden = false;
+    el.textContent = text;
+
+    if (type === "success") {
+      el.style.opacity = "1";
+      el.style.color = "var(--fg)";
+    } else if (type === "error") {
+      el.style.opacity = "1";
+      el.style.color = "var(--fg)";
+    } else {
+      el.style.opacity = "0.9";
+      el.style.color = "var(--fg)";
+    }
+  }
 
   function ensureRegisterBox() {
     if (registerBox) return registerBox;
@@ -29,13 +47,20 @@
     const text = document.createElement("p");
     text.textContent = "Introduce el código para registrarte.";
 
+    const formRow = document.createElement("div");
+    formRow.style.display = "flex";
+    formRow.style.gap = "0.75rem";
+    formRow.style.alignItems = "center";
+    formRow.style.marginTop = "0.85rem";
+    formRow.style.flexWrap = "nowrap";
+
     const input = document.createElement("input");
     input.type = "text";
     input.id = "register-code-input";
     input.autocomplete = "one-time-code";
     input.placeholder = "Código";
-    input.style.width = "100%";
-    input.style.marginTop = "0.75rem";
+    input.style.flex = "1";
+    input.style.minWidth = "0";
     input.style.padding = "0.65rem 0.85rem";
     input.style.borderRadius = "0.75rem";
     input.style.border = "1px solid color-mix(in srgb, var(--fg) 30%, transparent)";
@@ -44,19 +69,45 @@
     input.style.font = "inherit";
     input.style.fontSize = "0.95rem";
 
-    const row = document.createElement("div");
-    row.style.display = "flex";
-    row.style.gap = "0.75rem";
-    row.style.alignItems = "center";
-    row.style.justifyContent = "space-between";
-    row.style.marginTop = "0.85rem";
-    row.style.flexWrap = "wrap";
-
     const submit = document.createElement("button");
     submit.type = "button";
-    submit.className = "btn-pill btn-pill-solid";
     submit.id = "register-code-submit";
     submit.textContent = "Continuar";
+    submit.style.marginTop = "0";
+    submit.style.padding = "0.6rem 1.05rem";
+    submit.style.borderRadius = "0.75rem";
+    submit.style.border = "1px solid color-mix(in srgb, var(--fg) 55%, transparent)";
+    submit.style.background = "transparent";
+    submit.style.color = "var(--fg)";
+    submit.style.font = "inherit";
+    submit.style.fontSize = "0.95rem";
+    submit.style.cursor = "pointer";
+    submit.style.display = "inline-flex";
+    submit.style.alignItems = "center";
+    submit.style.justifyContent = "center";
+    submit.style.gap = "0.45rem";
+    submit.style.whiteSpace = "nowrap";
+    submit.style.webkitTapHighlightColor = "transparent";
+
+    const tick = document.createElement("span");
+    tick.textContent = "✓";
+    tick.style.display = "none";
+    tick.style.fontSize = "1rem";
+    tick.style.lineHeight = "1";
+    submit.appendChild(tick);
+
+    submit.addEventListener("mouseenter", () => {
+      if (!submit.disabled) submit.style.opacity = "0.9";
+    });
+    submit.addEventListener("mouseleave", () => {
+      submit.style.opacity = "1";
+    });
+
+    formRow.appendChild(input);
+    formRow.appendChild(submit);
+
+    const linkRow = document.createElement("div");
+    linkRow.style.marginTop = "0.85rem";
 
     const link = document.createElement("a");
     link.href = "/auth/request-code.html";
@@ -65,42 +116,70 @@
     link.style.color = "var(--fg)";
     link.style.fontSize = "0.95rem";
 
-    const error = document.createElement("p");
-    error.id = "register-code-error";
-    error.style.marginTop = "0.75rem";
-    error.style.marginBottom = "0";
-    error.style.fontSize = "0.95rem";
-    error.style.opacity = "0.9";
-    error.hidden = true;
+    linkRow.appendChild(link);
 
-    row.appendChild(submit);
-    row.appendChild(link);
+    const status = document.createElement("p");
+    status.id = "register-code-status";
+    status.style.marginTop = "0.85rem";
+    status.style.marginBottom = "0";
+    status.style.fontSize = "0.95rem";
+    status.style.opacity = "0.9";
+    status.hidden = true;
 
     registerBox.appendChild(title);
     registerBox.appendChild(text);
-    registerBox.appendChild(input);
-    registerBox.appendChild(row);
-    registerBox.appendChild(error);
+    registerBox.appendChild(formRow);
+    registerBox.appendChild(linkRow);
+    registerBox.appendChild(status);
 
     registerBtn.insertAdjacentElement("afterend", registerBox);
 
-    function go() {
-      const code = (input.value || "").trim();
-      error.hidden = true;
-      error.textContent = "";
+    async function go() {
+      const raw = (input.value || "").trim();
+      status.hidden = true;
+      status.textContent = "";
+      tick.style.display = "none";
 
-      if (!code) {
-        error.textContent = "Introduce un código válido.";
-        error.hidden = false;
+      if (!raw) {
+        setStatus(status, "Introduce un código válido.", "error");
         input.focus();
         return;
       }
 
       try {
-        sessionStorage.setItem("unatomo_access_code", code);
-      } catch (e) {}
+        submit.disabled = true;
+        submit.style.opacity = "0.7";
+        setStatus(status, "Validando código…", "info");
 
-      window.location.href = "/auth/register.html";
+        const res = await validateRegistrationCode(raw);
+
+        if (!res.valid) {
+          setStatus(status, "Código no válido.", "error");
+          input.focus();
+          return;
+        }
+
+        try {
+          sessionStorage.setItem("unatomo_access_code", res.code);
+        } catch (e) {}
+
+        tick.style.display = "inline-flex";
+        setStatus(status, "Código correcto. Redirigiendo…", "success");
+
+        setTimeout(() => {
+          window.location.href = "/auth/register.html";
+        }, 650);
+      } catch (e) {
+        const code = e && e.code ? String(e.code) : "";
+        if (code.includes("permission-denied")) {
+          setStatus(status, "Permiso denegado en Firestore (revisa Rules).", "error");
+        } else {
+          setStatus(status, "Error validando el código.", "error");
+        }
+      } finally {
+        submit.disabled = false;
+        submit.style.opacity = "1";
+      }
     }
 
     submit.addEventListener("click", go);
