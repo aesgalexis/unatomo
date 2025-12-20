@@ -19,17 +19,18 @@
 
     <h1 id="title-main">unatomo</h1>
     <h2 id="subtitle-main">Tu proceso, Nuestra visión</h2>
-<br>
-<div class="auth-actions" aria-label="Acceso">
-  <a class="btn btn-solid" href="/auth/login.html" id="go-login">Iniciar sesión</a>
-</div>
-<br><br>
-    
+
+    <div class="auth-actions" aria-label="Acceso">
+      <button type="button" class="btn-pill btn-pill-solid" id="go-login">
+        Iniciar sesión
+      </button>
+    </div>
+
     <section class="intro">
       <h5 id="intro-title">Unatomo Core:</h5>
       <h5 id="intro-line-1">
         Nos dedicamos a la gestión de maquinaria y procesos de lavado de prendas textiles.
-      </h5>    
+      </h5>
       <h5 id="intro-line-2">
         Ofrecemos variedad de servicios enfocados principalmente a lavanderías industriales, hoteleras y
         tintorerías, desde la venta de maquinaria, instalación, mantenimiento, formación a personal
@@ -113,19 +114,17 @@
         </li>
       </ul>
     </section>
-</div>
-      <a class="btn-primary" href="/auth/register.html" id="go-register">Registrarse</a>
 
-<div class="auth-actions" aria-label="Acceso">
-  <a class="btn btn-outline" href="/auth/register.html" id="go-register">Registrarse</a>
-</div>
-    
-<button id="enter-site" type="button" class="btn btn-outline">
-  Continuar como invitado
-</button>
+    <button type="button" class="btn-pill btn-pill-outline" id="go-register">
+      Registrarse
+    </button>
+
+    <button id="enter-site" type="button" class="btn-pill btn-pill-outline">
+      Continuar como invitado
+    </button>
 
     <p id="legal-footer" class="legal-footer"></p>
-        <p class="footer-link">
+    <p class="footer-link">
       <a href="/es/privacidad.html">Política de privacidad y cookies</a>
     </p>
   </main>
@@ -133,6 +132,15 @@
   <script src="/static/js/theme.js"></script>
   <script src="/static/js/unatomo-entry.js"></script>
   <script src="/static/js/footer.js"></script>
-  
+
+  <script>
+    document.getElementById("go-login")?.addEventListener("click", () => {
+      window.location.href = "/auth/login.html";
+    });
+
+    document.getElementById("go-register")?.addEventListener("click", () => {
+      window.location.href = "/auth/register.html";
+    });
+  </script>
 </body>
 </html>
