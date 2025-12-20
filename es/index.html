@@ -16,7 +16,7 @@
   </button>
 
   <header class="topbar">
-    <div class="topbar-inner">
+    <div class="topbar-inner" style="display:flex; align-items:center; justify-content:space-between; gap:1rem;">
       <a href="/?setup=1" class="topbar-logo-link">
         <img
           src="/static/img/logo-unatomo-v1.5.svg"
@@ -26,6 +26,18 @@
         />
         <h2 class="topbar-title">Inicio</h2>
       </a>
+
+      <div class="topbar-actions" aria-label="Sesión" style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap; justify-content:flex-end;">
+        <span id="session-badge" style="opacity:0.85; font-size:0.95rem;"></span>
+
+        <a id="session-login" class="btn-secondary" href="/auth/login.html" style="margin-top:0;">
+          Iniciar sesión
+        </a>
+
+        <button id="session-logout" class="btn-secondary" type="button" hidden style="margin-top:0;">
+          Cerrar sesión
+        </button>
+      </div>
     </div>
   </header>
 
@@ -164,4 +176,6 @@
   <script src="/static/js/functions.js"></script>
   <script src="/static/js/unatomo-entry.js"></script>
   <script src="/static/js/footer.js"></script>
+  <script type="module" src="/static/js/registro/session-ui.js"></script>
 </body>
+</html>
