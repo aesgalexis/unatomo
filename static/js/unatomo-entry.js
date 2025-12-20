@@ -25,7 +25,7 @@
       marketingText: "Contenido y comunicaciones más ajustadas a ti.",
       themeLight: "Claro",
       themeDark: "Oscuro",
-      button: "Guardar y acceder"
+      button: "Continuar como invitado"
     },
     en: {
       subtitle: "Your process, Our insight",
