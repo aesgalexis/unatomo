@@ -152,6 +152,8 @@ p {
   line-height: 1.5;
 }
 
+/* - - - - - - - - - - - - - - - - - - - - - - - */
+
 a.btn-pill,
 button.btn-pill {
   margin-top: 0;
@@ -211,6 +213,63 @@ button.btn-pill:focus-visible {
   gap: 0.75rem;
   flex-wrap: wrap;
 }
+
+a.btn-primary,
+a.btn-secondary,
+button.btn-primary,
+button.btn-secondary{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+
+  padding: 0.6rem 1.25rem;
+  border-radius: 0.75rem;
+  border: 1px solid transparent;
+
+  font: inherit;
+  font-size: 0.95rem;
+  cursor: pointer;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+a.btn-primary,
+button.btn-primary{
+  background: #2da44e;
+  border-color: #2da44e;
+  color: #fff;
+}
+
+a.btn-primary:hover,
+button.btn-primary:hover{
+  background: #2c974b;
+  border-color: #2c974b;
+  opacity: 1;
+  filter: none;
+}
+
+a.btn-primary:active,
+button.btn-primary:active{
+  background: #26863f;
+  border-color: #26863f;
+  filter: none;
+}
+
+a.btn-secondary,
+button.btn-secondary{
+  background: transparent;
+  border-color: color-mix(in srgb, var(--fg) 55%, transparent);
+  color: var(--fg);
+}
+
+a.btn-secondary:hover,
+button.btn-secondary:hover{
+  opacity: 0.9;
+  filter: none;
+}
+
+/* - - - - - - - - - - - - - - - - - - - - - - - */
 
 #theme-toggle {
   position: fixed;
