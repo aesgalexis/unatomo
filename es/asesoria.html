@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Asesoría de equipamiento · unatomo</title>
+  <meta name="description" content="Asesoría independiente de equipamiento para lavanderías industriales. Validamos compras (nuevas o usadas), revisamos fichas técnicas y te ayudamos a decidir con criterio técnico antes de cerrar la inversión.">
+  <meta name="robots" content="index, follow" />
+
+  <link rel="stylesheet" href="/styles.css">
+</head>
+
+<body class="page">
+  <button id="theme-toggle" type="button" aria-label="Cambiar tema">
+    ☾ / ☼
+  </button>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a href="/?setup=1" class="topbar-logo-link">
+        <img
+          src="/static/img/logo-unatomo-v1.5.svg"
+          alt="unatomo"
+          class="topbar-logo"
+          loading="lazy"
+        />
+        <h2 class="topbar-title">Asesoría</h2>
+      </a>
+    </div>
+  </header>
+
+  <main class="shell page-shell">
+    <section class="page-section" aria-label="Asesoría de equipamiento">
+
+      <section class="card" aria-label="Introducción">
+        <p>
+          Este formulario nos ayuda a entender qué vas a comprar (o qué te están ofreciendo) y en qué contexto va a trabajar la máquina.
+          Cuanta más información nos des, más fina será la validación técnica.
+        </p>
+      </section>
+
+      <section class="card" aria-label="Formulario de asesoría">
+        <form class="contact-form" action="https://formspree.io/f/mkgqlvqj" method="POST" enctype="multipart/form-data" novalidate>
+
+          <input
+            type="text"
+            name="_gotcha"
+            tabindex="-1"
+            autocomplete="off"
+            style="position:absolute; left:-5000px;"
+            aria-hidden="true"
+          >
+
+          <input type="hidden" name="asunto" value="Asesoría independiente de equipamiento" />
+
+          <div class="form-grid">
+
+            <div class="form-field">
+              <label for="nombre">Nombre<span aria-hidden="true"> *</span></label>
+              <input id="nombre" name="nombre" type="text" required class="field" autocomplete="name" />
+            </div>
+
+            <div class="form-field">
+              <label for="empresa">Empresa</label>
+              <input id="empresa" name="empresa" type="text" class="field" autocomplete="organization" />
+            </div>
+
+            <div class="form-field">
+              <label for="email">Correo electrónico<span aria-hidden="true"> *</span></label>
+              <input id="email" name="email" type="email" required class="field" autocomplete="email" />
+            </div>
+
+            <div class="form-field">
+              <label for="telefono">Teléfono</label>
+              <input
+                id="telefono"
+                name="telefono"
+                type="tel"
+                class="field"
+                autocomplete="tel"
+                inputmode="tel"
+              />
+            </div>
+
+            <div class="form-field form-field--full">
+              <label for="tipo">Tipo de compra<span aria-hidden="true"> *</span></label>
+              <select id="tipo" name="tipo" required class="field">
+                <option value="" disabled selected>Selecciona…</option>
+                <option value="nueva">Maquinaria nueva</option>
+                <option value="usada">Maquinaria usada</option>
+              </select>
+            </div>
+
+            <div class="form-field">
+              <label for="maquina">Máquina / Equipo<span aria-hidden="true"> *</span></label>
+              <input id="maquina" name="maquina" type="text" required class="field" placeholder="Ej: lavadora, secadora, calandra…" />
+            </div>
+
+            <div class="form-field">
+              <label for="marca_modelo">Marca / Modelo</label>
+              <input id="marca_modelo" name="marca_modelo" type="text" class="field" placeholder="Ej: Marca X, Modelo Y" />
+            </div>
+
+            <div class="form-field">
+              <label for="capacidad">Capacidad / Tamaño</label>
+              <input id="capacidad" name="capacidad" type="text" class="field" placeholder="Ej: 60 kg, 3 metros, etc." />
+            </div>
+
+            <div class="form-field">
+              <label for="cantidad">Unidades</label>
+              <input id="cantidad" name="cantidad" type="number" min="1" step="1" class="field" inputmode="numeric" />
+            </div>
+
+            <div class="form-field">
+              <label for="precio_compra">Precio de compra (sin impuestos)</label>
+              <input id="precio_compra" name="precio_compra" type="number" min="0" step="0.01" class="field" inputmode="decimal" placeholder="Ej: 45000" />
+            </div>
+
+            <div class="form-field">
+              <label for="plazo_compra">Plazo previsto para decidir</label>
+              <select id="plazo_compra" name="plazo_compra" class="field">
+                <option value="" selected>No lo tengo claro</option>
+                <option value="1-2_semanas">1–2 semanas</option>
+                <option value="3-4_semanas">3–4 semanas</option>
+                <option value="1-2_meses">1–2 meses</option>
+                <option value="3_meses_o_mas">3 meses o más</option>
+              </select>
+            </div>
+
+            <div class="form-field form-field--full">
+              <label for="objetivo">Objetivo principal<span aria-hidden="true"> *</span></label>
+              <select id="objetivo" name="objetivo" required class="field">
+                <option value="" disabled selected>Selecciona…</option>
+                <option value="aumentar_produccion">Aumentar producción</option>
+                <option value="reemplazo">Reemplazar un equipo existente</option>
+                <option value="mejorar_calidad">Mejorar calidad / acabados</option>
+                <option value="reducir_paradas">Reducir paradas / mejorar estabilidad</option>
+                <option value="nuevo_proceso">Nuevo proceso / nueva línea</option>
+                <option value="otro">Otro</option>
+              </select>
+            </div>
+
+            <div class="form-field form-field--full">
+              <label for="contexto">Contexto de planta (resumen)</label>
+              <textarea
+                id="contexto"
+                name="contexto"
+                rows="5"
+                class="field"
+                placeholder="Ej: tipo de clientes, turnos, mix de prendas, limitaciones de espacio, energía/vapor, etc."
+              ></textarea>
+            </div>
+
+            <div class="form-field form-field--full">
+              <label for="documentacion">Adjuntar documentación (ficha técnica, oferta, planos, etc.)</label>
+              <input
+                id="documentacion"
+                name="documentacion"
+                type="file"
+                class="field"
+                accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx,.xls,.xlsx,.txt"
+                multiple
+              />
+              <h5><em>(Si tu proveedor te pasó una oferta o ficha técnica en PDF, adjúntala aquí.)</em></h5>
+            </div>
+
+            <div id="used-only" class="form-field form-field--full" style="display:none;">
+              <h4>Datos adicionales (maquinaria usada)</h4>
+
+              <div class="form-grid" style="margin-top:0.75rem;">
+                <div class="form-field">
+                  <label for="ano">Año aproximado</label>
+                  <input id="ano" name="ano" type="number" min="1900" max="2100" step="1" class="field" inputmode="numeric" />
+                </div>
+
+                <div class="form-field">
+                  <label for="horas">Horas / ciclos (si lo sabes)</label>
+                  <input id="horas" name="horas" type="text" class="field" placeholder="Ej: 12.000 h / 80.000 ciclos" />
+                </div>
+
+                <div class="form-field">
+                  <label for="placa">Placa / Nº de serie</label>
+                  <input id="placa" name="placa" type="text" class="field" placeholder="Ej: SN, placa, referencia" />
+                </div>
+
+                <div class="form-field">
+                  <label for="ubicacion">Ubicación del equipo</label>
+                  <input id="ubicacion" name="ubicacion" type="text" class="field" placeholder="Ej: ciudad / país" />
+                </div>
+
+                <div class="form-field form-field--full">
+                  <label for="fotos">Fotos (placa, estado, cuadro eléctrico, etc.)</label>
+                  <input
+                    id="fotos"
+                    name="fotos"
+                    type="file"
+                    class="field"
+                    accept=".jpg,.jpeg,.png,.webp"
+                    multiple
+                  />
+                  <h5><em>(Si puedes: placa, interior, puntos de desgaste, y cualquier reparación visible.)</em></h5>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-field form-field--full">
+              <label for="preguntas">Qué necesitas que validemos (en 2–3 líneas)<span aria-hidden="true"> *</span></label>
+              <textarea
+                id="preguntas"
+                name="preguntas"
+                rows="4"
+                required
+                class="field"
+                placeholder="Ej: si encaja en nuestro flujo, puntos débiles, repuestos/postventa, alternativas equivalentes, etc."
+              ></textarea>
+            </div>
+
+          </div>
+
+          <p class="form-status" role="status" aria-live="polite" hidden></p>
+
+          <div class="form-actions" style="display:flex; justify-content:center;">
+            <button type="submit" class="btn-primary">Enviar</button>
+          </div>
+        </form>
+      </section>
+    </section>
+
+    <div class="scroll-top-container">
+      <button id="back-button" class="scroll-top-button" type="button" onclick="window.location.href='/es/index.html'">
+        Volver
+      </button>
+      <button id="scroll-top-button" class="scroll-top-button" type="button">
+        Arriba
+      </button>
+    </div>
+
+    <div id="legal-footer" class="legal-footer"></div>
+
+    <div class="footer-link">
+      <a href="/es/privacidad.html">Política de privacidad y cookies</a>
+    </div>
+  </main>
+
+  <script src="/static/js/theme.js"></script>
+  <script src="/static/js/unatomo-entry.js"></script>
+  <script src="/static/js/footer.js"></script>
+  <script src="/static/js/functions.js"></script>
+
+  <script>
+    (function () {
+      const tipo = document.getElementById("tipo");
+      const usedOnly = document.getElementById("used-only");
+      if (!tipo || !usedOnly) return;
+
+      function sync() {
+        const isUsed = tipo.value === "usada";
+        usedOnly.style.display = isUsed ? "block" : "none";
+
+        const placa = document.getElementById("placa");
+        const fotos = document.getElementById("fotos");
+        if (placa) placa.required = false;
+        if (fotos) fotos.required = false;
+      }
+
+      tipo.addEventListener("change", sync);
+      sync();
+    })();
+  </script>
+</body>
+</html>
