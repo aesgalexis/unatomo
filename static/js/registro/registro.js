@@ -67,7 +67,7 @@ import { validateRegistrationCode } from "/static/js/registro/firebase-init.js";
       setStatus("Código correcto. Redirigiendo…");
 
       setTimeout(() => {
-        window.location.href = "/auth/register.html";
+        window.location.href = "/es/registro.html";
       }, 650);
     } catch (e) {
       setStatus("Error validando el código.");
