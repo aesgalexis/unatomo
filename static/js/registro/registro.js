@@ -102,8 +102,12 @@ import { validateRegistrationCode } from "/static/js/registro/firebase-init.js";
         submit.disabled = true;
 
         const res = await validateRegistrationCode(raw);
+        console.log("validateRegistrationCode:", res);
+
         if (!res.valid) {
-          error.textContent = "Código no válido.";
+          if (res.reason === "not_found") error.textContent = "Código no válido.";
+          else if (res.reason === "inactive") error.textContent = "Código desactivado.";
+          else error.textContent = "Código no válido.";
           error.hidden = false;
           input.focus();
           return;
@@ -115,7 +119,13 @@ import { validateRegistrationCode } from "/static/js/registro/firebase-init.js";
 
         window.location.href = "/auth/register.html";
       } catch (e) {
-        error.textContent = "Error validando el código.";
+        console.error("validateRegistrationCode error:", e);
+        const code = (e && e.code) ? String(e.code) : "";
+        if (code.includes("permission-denied")) {
+          error.textContent = "Permiso denegado en Firestore (revisa Rules).";
+        } else {
+          error.textContent = "Error validando el código.";
+        }
         error.hidden = false;
       } finally {
         submit.disabled = false;
