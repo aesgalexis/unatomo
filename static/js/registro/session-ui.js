@@ -27,7 +27,7 @@ actionBtn?.addEventListener("click", async () => {
   const state = actionBtn.dataset.state || "guest";
 
   if (state === "guest") {
-    window.location.href = "/auth/login.html";
+    window.location.href = "/es/auth/login.html";
     return;
   }
 
