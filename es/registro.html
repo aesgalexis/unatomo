@@ -54,26 +54,51 @@
   <script src="/static/js/footer.js"></script>
 
 <script type="module">
-  import { validateRegistrationCode } from "/static/js/registro/firebase-init.js";
+  import { validateRegistrationCode, signInWithGoogleAndCreateProfile } from "/static/js/registro/firebase-init.js";
+
+  const status = document.getElementById("reg-status");
+  const btn = document.getElementById("google-register");
+
+  function setStatus(t) {
+    status.hidden = false;
+    status.textContent = t;
+  }
 
   const code = (sessionStorage.getItem("unatomo_access_code") || "").trim();
 
   if (!code) {
     window.location.replace("/?setup=1");
   } else {
-    try {
-      const res = await validateRegistrationCode(code);
-      if (!res.valid) {
-        try { sessionStorage.removeItem("unatomo_access_code"); } catch (e) {}
-        window.location.replace("/?setup=1");
-      } else {
-        document.documentElement.style.visibility = "visible";
-      }
-    } catch (e) {
+    const check = await validateRegistrationCode(code);
+    if (!check.valid) {
+      try { sessionStorage.removeItem("unatomo_access_code"); } catch (e) {}
       window.location.replace("/?setup=1");
     }
   }
+
+  btn?.addEventListener("click", async () => {
+    try {
+      btn.disabled = true;
+      setStatus("Conectando con Google…");
+
+      const res = await signInWithGoogleAndCreateProfile(code);
+      if (!res.ok) {
+        setStatus("No se pudo completar el registro.");
+        return;
+      }
+
+      setStatus("Registro completado. Redirigiendo…");
+      setTimeout(() => {
+        window.location.href = "/es/index.html";
+      }, 650);
+    } catch (e) {
+      setStatus("Error en el registro con Google.");
+    } finally {
+      btn.disabled = false;
+    }
+  });
 </script>
+
 
   
 </body>
