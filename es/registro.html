@@ -4,11 +4,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Registro · unatomo</title>
-  <meta name="description" content="Registro en unatomo." />
   <meta name="robots" content="noindex, nofollow" />
-
   <link rel="stylesheet" href="/styles.css">
-
   <style>html{visibility:hidden}</style>
 </head>
 
@@ -20,12 +17,7 @@
   <header class="topbar">
     <div class="topbar-inner">
       <a href="/?setup=1" class="topbar-logo-link">
-        <img
-          src="/static/img/logo-unatomo-v1.5.svg"
-          alt="unatomo"
-          class="topbar-logo"
-          loading="lazy"
-        />
+        <img src="/static/img/logo-unatomo-v1.5.svg" alt="unatomo" class="topbar-logo" loading="lazy" />
         <h2 class="topbar-title">Registro</h2>
       </a>
     </div>
@@ -33,17 +25,63 @@
 
   <main class="shell page-shell">
     <section class="page-section" aria-label="Registro">
-      <section class="card card--wide" aria-label="Formulario de registro">
-        <button type="button" class="btn-secondary" id="google-register">
-  Continuar con Google
-</button>
+      <section class="card card--wide" aria-label="Crear cuenta">
+        <h3>Crear cuenta</h3>
+        <p>Continúa con Google o crea una cuenta con correo y contraseña.</p>
 
-<p id="reg-status" class="form-status" role="status" aria-live="polite" hidden></p>
+        <div class="form-actions" style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
+          <button type="button" class="btn-secondary" id="btn-google">
+            Continuar con Google
+          </button>
+        </div>
 
+        <br>
+
+        <form id="register-email-form" class="contact-form" novalidate>
+          <div class="form-grid">
+            <div class="form-field">
+              <label for="nombre">Nombre</label>
+              <input id="nombre" name="nombre" type="text" class="field" autocomplete="name" />
+            </div>
+
+            <div class="form-field">
+              <label for="email">Correo electrónico<span aria-hidden="true"> *</span></label>
+              <input id="email" name="email" type="email" required class="field" autocomplete="email" />
+            </div>
+
+            <div class="form-field">
+              <label for="password">Contraseña<span aria-hidden="true"> *</span></label>
+              <input id="password" name="password" type="password" required class="field" autocomplete="new-password" />
+            </div>
+
+            <div class="form-field">
+              <label for="password2">Repetir contraseña<span aria-hidden="true"> *</span></label>
+              <input id="password2" name="password2" type="password" required class="field" autocomplete="new-password" />
+            </div>
+          </div>
+
+          <p id="reg-status" class="form-status" role="status" aria-live="polite" hidden></p>
+
+          <div class="form-actions" style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
+            <a class="btn-secondary" href="/auth/request-code.html">Solicitar código</a>
+            <button type="submit" class="btn-primary" id="btn-email">
+              Crear cuenta
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <div class="scroll-top-container">
+        <button id="back-button" class="scroll-top-button" type="button" onclick="window.location.href='/?setup=1'">
+          Volver
+        </button>
+        <button id="scroll-top-button" class="scroll-top-button" type="button">
+          Arriba
+        </button>
+      </div>
     </section>
 
     <div id="legal-footer" class="legal-footer"></div>
-
     <div class="footer-link">
       <a href="/es/privacidad.html">Política de privacidad y cookies</a>
     </div>
@@ -52,55 +90,6 @@
   <script src="/static/js/theme.js"></script>
   <script src="/static/js/functions.js"></script>
   <script src="/static/js/footer.js"></script>
-
-<script type="module">
-  import { validateRegistrationCode, signInWithGoogleAndCreateProfile } from "/static/js/registro/firebase-init.js";
-
-  const status = document.getElementById("reg-status");
-  const btn = document.getElementById("google-register");
-
-  function setStatus(t){
-    status.hidden = false;
-    status.textContent = t;
-  }
-
-  const code = (sessionStorage.getItem("unatomo_access_code") || "").trim();
-
-  if (!code) {
-    window.location.replace("/?setup=1");
-  } else {
-    const check = await validateRegistrationCode(code);
-    if (!check.valid) {
-      try { sessionStorage.removeItem("unatomo_access_code"); } catch(e){}
-      window.location.replace("/?setup=1");
-    }
-  }
-
-  btn?.addEventListener("click", async () => {
-    try {
-      btn.disabled = true;
-      setStatus("Conectando con Google…");
-
-      const res = await signInWithGoogleAndCreateProfile(code);
-      if (!res.ok) {
-        setStatus("No se pudo completar el registro.");
-        return;
-      }
-
-      setStatus("Registro completado. Redirigiendo…");
-      setTimeout(() => {
-        window.location.href = "/es/index.html";
-      }, 650);
-    } catch (e) {
-      setStatus("Error en el registro con Google.");
-    } finally {
-      btn.disabled = false;
-    }
-  });
-</script>
-
-
-
-  
+  <script type="module" src="/static/js/registro/register-page.js"></script>
 </body>
 </html>
