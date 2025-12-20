@@ -12,20 +12,9 @@ import { validateRegistrationCode } from "/static/js/registro/firebase-init.js";
 
   let registerBox = null;
 
-  function setStatus(el, text, type) {
+  function setStatus(el, text) {
     el.hidden = false;
     el.textContent = text;
-
-    if (type === "success") {
-      el.style.opacity = "1";
-      el.style.color = "var(--fg)";
-    } else if (type === "error") {
-      el.style.opacity = "1";
-      el.style.color = "var(--fg)";
-    } else {
-      el.style.opacity = "0.9";
-      el.style.color = "var(--fg)";
-    }
   }
 
   function ensureRegisterBox() {
@@ -71,37 +60,15 @@ import { validateRegistrationCode } from "/static/js/registro/firebase-init.js";
 
     const submit = document.createElement("button");
     submit.type = "button";
+    submit.className = "btn-secondary";
     submit.id = "register-code-submit";
     submit.textContent = "Continuar";
     submit.style.marginTop = "0";
-    submit.style.padding = "0.6rem 1.05rem";
-    submit.style.borderRadius = "0.75rem";
-    submit.style.border = "1px solid color-mix(in srgb, var(--fg) 55%, transparent)";
-    submit.style.background = "transparent";
-    submit.style.color = "var(--fg)";
-    submit.style.font = "inherit";
-    submit.style.fontSize = "0.95rem";
-    submit.style.cursor = "pointer";
-    submit.style.display = "inline-flex";
-    submit.style.alignItems = "center";
-    submit.style.justifyContent = "center";
-    submit.style.gap = "0.45rem";
-    submit.style.whiteSpace = "nowrap";
-    submit.style.webkitTapHighlightColor = "transparent";
 
     const tick = document.createElement("span");
-    tick.textContent = "✓";
+    tick.textContent = " ✓";
     tick.style.display = "none";
-    tick.style.fontSize = "1rem";
-    tick.style.lineHeight = "1";
     submit.appendChild(tick);
-
-    submit.addEventListener("mouseenter", () => {
-      if (!submit.disabled) submit.style.opacity = "0.9";
-    });
-    submit.addEventListener("mouseleave", () => {
-      submit.style.opacity = "1";
-    });
 
     formRow.appendChild(input);
     formRow.appendChild(submit);
@@ -141,7 +108,7 @@ import { validateRegistrationCode } from "/static/js/registro/firebase-init.js";
       tick.style.display = "none";
 
       if (!raw) {
-        setStatus(status, "Introduce un código válido.", "error");
+        setStatus(status, "Introduce un código válido.");
         input.focus();
         return;
       }
@@ -149,12 +116,12 @@ import { validateRegistrationCode } from "/static/js/registro/firebase-init.js";
       try {
         submit.disabled = true;
         submit.style.opacity = "0.7";
-        setStatus(status, "Validando código…", "info");
+        setStatus(status, "Validando código…");
 
         const res = await validateRegistrationCode(raw);
 
         if (!res.valid) {
-          setStatus(status, "Código no válido.", "error");
+          setStatus(status, "Código no válido.");
           input.focus();
           return;
         }
@@ -163,8 +130,8 @@ import { validateRegistrationCode } from "/static/js/registro/firebase-init.js";
           sessionStorage.setItem("unatomo_access_code", res.code);
         } catch (e) {}
 
-        tick.style.display = "inline-flex";
-        setStatus(status, "Código correcto. Redirigiendo…", "success");
+        tick.style.display = "inline";
+        setStatus(status, "Código correcto. Redirigiendo…");
 
         setTimeout(() => {
           window.location.href = "/auth/register.html";
@@ -172,9 +139,9 @@ import { validateRegistrationCode } from "/static/js/registro/firebase-init.js";
       } catch (e) {
         const code = e && e.code ? String(e.code) : "";
         if (code.includes("permission-denied")) {
-          setStatus(status, "Permiso denegado en Firestore (revisa Rules).", "error");
+          setStatus(status, "Permiso denegado en Firestore (revisa Rules).");
         } else {
-          setStatus(status, "Error validando el código.", "error");
+          setStatus(status, "Error validando el código.");
         }
       } finally {
         submit.disabled = false;
