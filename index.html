@@ -30,13 +30,14 @@
         Registrarse
       </button>
 
-    <section id="register-code-box" class="card" hidden>
+<section id="register-code-box" class="card" hidden>
   <h3>Código de acceso</h3>
   <p>Introduce el código para registrarte.</p>
 
-  <div>
+  <div class="inline-field-row">
     <input
       id="register-code-input"
+      class="field"
       type="text"
       placeholder="Código"
       autocomplete="one-time-code"
@@ -46,13 +47,12 @@
     </button>
   </div>
 
-  <p id="register-code-status" hidden></p>
+  <p id="register-code-status" class="form-status" role="status" aria-live="polite" hidden></p>
 
   <p class="footer-link">
     <a href="/auth/request-code.html">Solicitar código si no lo tienes</a>
   </p>
 </section>
-
 
     <section class="intro">
       <h5 id="intro-title">Unatomo Core:</h5>
