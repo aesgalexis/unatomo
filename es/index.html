@@ -10,36 +10,35 @@
   <link rel="stylesheet" href="/styles.css">
 </head>
 
-<body class="page">
-  <button id="theme-toggle" type="button" aria-label="Cambiar tema">
-    ☾ / ☼
-  </button>
+<header class="topbar">
+  <div class="topbar-inner" style="display:flex; align-items:center; justify-content:space-between; gap:1rem;">
+    <a href="/?setup=1" class="topbar-logo-link">
+      <img
+        src="/static/img/logo-unatomo-v1.5.svg"
+        alt="unatomo"
+        class="topbar-logo"
+        loading="lazy"
+      />
+      <h2 class="topbar-title">Inicio</h2>
+    </a>
 
-  <header class="topbar">
-    <div class="topbar-inner" style="display:flex; align-items:center; justify-content:space-between; gap:1rem;">
-      <a href="/?setup=1" class="topbar-logo-link">
-        <img
-          src="/static/img/logo-unatomo-v1.5.svg"
-          alt="unatomo"
-          class="topbar-logo"
-          loading="lazy"
-        />
-        <h2 class="topbar-title">Inicio</h2>
+    <div class="topbar-actions" aria-label="Sesión" style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap; justify-content:flex-end;">
+      <button id="theme-toggle" type="button" aria-label="Cambiar tema" style="margin-top:0;">
+        ☾ / ☼
+      </button>
+
+      <span id="session-badge" style="opacity:0.85; font-size:0.95rem;"></span>
+
+      <a id="session-login" class="btn-secondary" href="/auth/login.html" style="margin-top:0;">
+        Iniciar sesión
       </a>
 
-      <div class="topbar-actions" aria-label="Sesión" style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap; justify-content:flex-end;">
-        <span id="session-badge" style="opacity:0.85; font-size:0.95rem;"></span>
-
-        <a id="session-login" class="btn-secondary" href="/auth/login.html" style="margin-top:0;">
-          Iniciar sesión
-        </a>
-
-        <button id="session-logout" class="btn-secondary" type="button" hidden style="margin-top:0;">
-          Cerrar sesión
-        </button>
-      </div>
+      <button id="session-logout" class="btn-secondary" type="button" hidden style="margin-top:0;">
+        Cerrar sesión
+      </button>
     </div>
-  </header>
+  </div>
+</header>
 
   <main class="shell page-shell">
     <section class="page-section">
