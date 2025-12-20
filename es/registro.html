@@ -111,5 +111,27 @@
   <script src="/static/js/theme.js"></script>
   <script src="/static/js/functions.js"></script>
   <script src="/static/js/footer.js"></script>
+
+<script type="module">
+  import { validateRegistrationCode } from "/static/js/registro/firebase-init.js";
+
+  const code = (sessionStorage.getItem("unatomo_access_code") || "").trim();
+
+  if (!code) {
+    window.location.replace("/?setup=1");
+  } else {
+    try {
+      const res = await validateRegistrationCode(code);
+      if (!res.valid) {
+        try { sessionStorage.removeItem("unatomo_access_code"); } catch (e) {}
+        window.location.replace("/?setup=1");
+      }
+    } catch (e) {
+      window.location.replace("/?setup=1");
+    }
+  }
+</script>
+
+  
 </body>
 </html>
