@@ -1,5 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBWsV-z0v90W9OxtHDx-m2N4SF-iUc9JNY",
@@ -12,7 +13,9 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+
+export const db = getFirestore(app);
+export const auth = getAuth(app);
 
 export async function validateRegistrationCode(code) {
   const normalized = (code ?? "").toString().trim().toUpperCase();
@@ -27,4 +30,28 @@ export async function validateRegistrationCode(code) {
   if (data.active === false) return { valid: false, reason: "inactive", code: normalized };
 
   return { valid: true, code: normalized, data };
+}
+
+export async function signInWithGoogleAndCreateProfile(regCode) {
+  const code = (regCode ?? "").toString().trim().toUpperCase();
+  if (!code) return { ok: false };
+
+  const provider = new GoogleAuthProvider();
+  const result = await signInWithPopup(auth, provider);
+
+  const user = result.user;
+  if (!user) return { ok: false };
+
+  const userRef = doc(db, "users", user.uid);
+
+  await setDoc(userRef, {
+    uid: user.uid,
+    email: user.email || "",
+    displayName: user.displayName || "",
+    photoURL: user.photoURL || "",
+    regCode: code,
+    createdAt: serverTimestamp()
+  }, { merge: true });
+
+  return { ok: true, uid: user.uid };
 }
