@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Iniciar sesión · unatomo</title>
+  <meta name="robots" content="noindex, nofollow" />
+
+  <link rel="stylesheet" href="/styles.css">
+  <style>html{visibility:hidden}</style>
+</head>
+
+<body class="page">
+  <button id="theme-toggle" type="button" aria-label="Cambiar tema">
+    ☾ / ☼
+  </button>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a href="/?setup=1" class="topbar-logo-link">
+        <img
+          src="/static/img/logo-unatomo-v1.5.svg"
+          alt="unatomo"
+          class="topbar-logo"
+          loading="lazy"
+        />
+        <h2 class="topbar-title">Iniciar sesión</h2>
+      </a>
+    </div>
+  </header>
+
+  <main class="shell page-shell">
+    <section class="page-section" aria-label="Iniciar sesión">
+      <section class="card card--wide" aria-label="Acceso">
+        <h3>Acceder</h3>
+        <p>Continúa con Google o accede con correo y contraseña.</p>
+
+        <div class="form-actions" style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
+          <button type="button" class="btn-secondary" id="btn-google-login">
+            Continuar con Google
+          </button>
+        </div>
+
+        <br>
+
+        <form id="login-email-form" class="contact-form" novalidate>
+          <div class="form-grid">
+            <div class="form-field form-field--full">
+              <label for="email">Correo electrónico<span aria-hidden="true"> *</span></label>
+              <input id="email" name="email" type="email" required class="field" autocomplete="email" />
+            </div>
+
+            <div class="form-field form-field--full">
+              <label for="password">Contraseña<span aria-hidden="true"> *</span></label>
+              <input id="password" name="password" type="password" required class="field" autocomplete="current-password" />
+            </div>
+          </div>
+
+          <p id="login-status" class="form-status" role="status" aria-live="polite" hidden></p>
+
+          <div class="form-actions" style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
+            <button type="submit" class="btn-primary" id="btn-email-login">
+              Iniciar sesión
+            </button>
+            <a class="btn-secondary" href="/?setup=1">Registrarse</a>
+          </div>
+        </form>
+      </section>
+
+      <div class="scroll-top-container">
+        <button id="back-button" class="scroll-top-button" type="button" onclick="window.location.href='/?setup=1'">
+          Volver
+        </button>
+        <button id="scroll-top-button" class="scroll-top-button" type="button">
+          Arriba
+        </button>
+      </div>
+    </section>
+
+    <div id="legal-footer" class="legal-footer"></div>
+
+    <div class="footer-link">
+      <a href="/es/privacidad.html">Política de privacidad y cookies</a>
+    </div>
+  </main>
+
+  <script src="/static/js/theme.js"></script>
+  <script src="/static/js/functions.js"></script>
+  <script src="/static/js/footer.js"></script>
+  <script type="module" src="/static/js/registro/login-page.js"></script>
+</body>
+</html>
