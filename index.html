@@ -30,6 +30,30 @@
         Registrarse
       </button>
 
+    <section id="register-code-box" class="card" hidden>
+  <h3>Código de acceso</h3>
+  <p>Introduce el código para registrarte.</p>
+
+  <div>
+    <input
+      id="register-code-input"
+      type="text"
+      placeholder="Código"
+      autocomplete="one-time-code"
+    >
+    <button id="register-code-submit" type="button" class="btn-secondary">
+      Continuar
+    </button>
+  </div>
+
+  <p id="register-code-status" hidden></p>
+
+  <p class="footer-link">
+    <a href="/auth/request-code.html">Solicitar código si no lo tienes</a>
+  </p>
+</section>
+
+
     <section class="intro">
       <h5 id="intro-title">Unatomo Core:</h5>
       <h5 id="intro-line-1">
