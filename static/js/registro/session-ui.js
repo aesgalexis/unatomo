@@ -4,43 +4,39 @@ import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/
 const badge = document.getElementById("session-badge");
 const actionBtn = document.getElementById("session-action");
 
-function setGuest() {
-  if (badge) {
-    badge.hidden = false;
-    badge.textContent = "Invitado";
-  }
+let mode = "guest";
 
-  if (actionBtn) {
-    actionBtn.textContent = "Iniciar sesión";
-    actionBtn.onclick = () => {
-      window.location.href = "/auth/login.html";
-    };
-  }
+function renderGuest() {
+  mode = "guest";
+  if (badge) badge.textContent = "Invitado";
+  if (actionBtn) actionBtn.textContent = "Iniciar sesión";
 }
 
-function setUser(user) {
-  const label = user?.displayName || user?.email || "Sesión iniciada";
-
-  if (badge) {
-    badge.hidden = false;
-    badge.textContent = label;
-  }
-
-  if (actionBtn) {
-    actionBtn.textContent = "Cerrar sesión";
-    actionBtn.onclick = async () => {
-      try {
-        actionBtn.disabled = true;
-        await signOut(auth);
-        window.location.href = "/?setup=1";
-      } catch (e) {
-        actionBtn.disabled = false;
-      }
-    };
-  }
+function renderUser(user) {
+  mode = "user";
+  const label = user?.displayName || user?.email || "Usuario";
+  if (badge) badge.textContent = label;
+  if (actionBtn) actionBtn.textContent = "Cerrar sesión";
 }
+
+renderGuest();
+
+actionBtn?.addEventListener("click", async (e) => {
+  if (mode === "guest") {
+    window.location.href = "/auth/login.html";
+    return;
+  }
+
+  try {
+    actionBtn.disabled = true;
+    await signOut(auth);
+    window.location.href = "/?setup=1";
+  } catch (err) {
+    actionBtn.disabled = false;
+  }
+});
 
 onAuthStateChanged(auth, (user) => {
-  if (user) setUser(user);
-  else setGuest();
+  if (user) renderUser(user);
+  else renderGuest();
 });
