@@ -1,3 +1,5 @@
+import { validateRegistrationCode } from "/static/js/registro/firebase-init.js";
+
 (function () {
   const loginBtn = document.getElementById("go-login");
   const registerBtn = document.getElementById("go-register");
@@ -85,30 +87,22 @@
     registerBtn.insertAdjacentElement("afterend", registerBox);
 
     async function go() {
-      const code = (input.value || "").trim();
+      const raw = (input.value || "").trim();
       error.hidden = true;
       error.textContent = "";
 
-      if (!code) {
+      if (!raw) {
         error.textContent = "Introduce un código válido.";
         error.hidden = false;
         input.focus();
         return;
       }
 
-      const api = window.unatomoFirebase;
-      if (!api || !api.validateRegistrationCode) {
-        error.textContent = "Registro no disponible.";
-        error.hidden = false;
-        return;
-      }
-
       try {
         submit.disabled = true;
-        const res = await api.validateRegistrationCode({ code });
-        const valid = Boolean(res?.data?.valid);
 
-        if (!valid) {
+        const res = await validateRegistrationCode(raw);
+        if (!res.valid) {
           error.textContent = "Código no válido.";
           error.hidden = false;
           input.focus();
@@ -116,7 +110,7 @@
         }
 
         try {
-          sessionStorage.setItem("unatomo_access_code", code.trim().toUpperCase());
+          sessionStorage.setItem("unatomo_access_code", res.code);
         } catch (e) {}
 
         window.location.href = "/auth/register.html";
