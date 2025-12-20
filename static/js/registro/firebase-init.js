@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
 import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBWsV-z0v90W9OxtHDx-m2N4SF-iUc9JNY",
@@ -32,7 +32,21 @@ export async function validateRegistrationCode(code) {
   return { valid: true, code: normalized, data };
 }
 
-export async function signInWithGoogleAndCreateProfile(regCode) {
+async function upsertUserProfile(user, regCode) {
+  const userRef = doc(db, "users", user.uid);
+
+  await setDoc(userRef, {
+    uid: user.uid,
+    email: user.email || "",
+    displayName: user.displayName || "",
+    photoURL: user.photoURL || "",
+    regCode: regCode,
+    updatedAt: serverTimestamp(),
+    createdAt: serverTimestamp()
+  }, { merge: true });
+}
+
+export async function registerWithGoogle(regCode) {
   const code = (regCode ?? "").toString().trim().toUpperCase();
   if (!code) return { ok: false };
 
@@ -42,16 +56,38 @@ export async function signInWithGoogleAndCreateProfile(regCode) {
   const user = result.user;
   if (!user) return { ok: false };
 
-  const userRef = doc(db, "users", user.uid);
-
-  await setDoc(userRef, {
-    uid: user.uid,
-    email: user.email || "",
-    displayName: user.displayName || "",
-    photoURL: user.photoURL || "",
-    regCode: code,
-    createdAt: serverTimestamp()
-  }, { merge: true });
-
+  await upsertUserProfile(user, code);
   return { ok: true, uid: user.uid };
+}
+
+export async function registerWithEmail(regCode, email, password, displayName) {
+  const code = (regCode ?? "").toString().trim().toUpperCase();
+  const em = (email ?? "").toString().trim();
+  const pw = (password ?? "").toString();
+
+  if (!code || !em || !pw) return { ok: false };
+
+  const cred = await createUserWithEmailAndPassword(auth, em, pw);
+
+  if (displayName && cred.user) {
+    await updateProfile(cred.user, { displayName: displayName.toString().trim() });
+  }
+
+  await upsertUserProfile(cred.user, code);
+  return { ok: true, uid: cred.user.uid };
+}
+
+export async function loginWithGoogle() {
+  const provider = new GoogleAuthProvider();
+  const result = await signInWithPopup(auth, provider);
+  if (!result.user) return { ok: false };
+  return { ok: true, uid: result.user.uid };
+}
+
+export async function loginWithEmail(email, password) {
+  const em = (email ?? "").toString().trim();
+  const pw = (password ?? "").toString();
+  const cred = await signInWithEmailAndPassword(auth, em, pw);
+  if (!cred.user) return { ok: false };
+  return { ok: true, uid: cred.user.uid };
 }
