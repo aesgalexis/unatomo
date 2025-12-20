@@ -4,25 +4,29 @@ import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/
 const badge = document.getElementById("session-badge");
 const actionBtn = document.getElementById("session-action");
 
-let mode = "guest";
-
-function renderGuest() {
-  mode = "guest";
+function setGuest() {
   if (badge) badge.textContent = "Invitado";
-  if (actionBtn) actionBtn.textContent = "Iniciar sesión";
+  if (actionBtn) {
+    actionBtn.textContent = "Iniciar sesión";
+    actionBtn.dataset.state = "guest";
+  }
 }
 
-function renderUser(user) {
-  mode = "user";
+function setUser(user) {
   const label = user?.displayName || user?.email || "Usuario";
   if (badge) badge.textContent = label;
-  if (actionBtn) actionBtn.textContent = "Cerrar sesión";
+  if (actionBtn) {
+    actionBtn.textContent = "Cerrar sesión";
+    actionBtn.dataset.state = "user";
+  }
 }
 
-renderGuest();
+setGuest();
 
-actionBtn?.addEventListener("click", async (e) => {
-  if (mode === "guest") {
+actionBtn?.addEventListener("click", async () => {
+  const state = actionBtn.dataset.state || "guest";
+
+  if (state === "guest") {
     window.location.href = "/auth/login.html";
     return;
   }
@@ -31,12 +35,12 @@ actionBtn?.addEventListener("click", async (e) => {
     actionBtn.disabled = true;
     await signOut(auth);
     window.location.href = "/?setup=1";
-  } catch (err) {
+  } catch (e) {
     actionBtn.disabled = false;
   }
 });
 
 onAuthStateChanged(auth, (user) => {
-  if (user) renderUser(user);
-  else renderGuest();
+  if (user) setUser(user);
+  else setGuest();
 });
