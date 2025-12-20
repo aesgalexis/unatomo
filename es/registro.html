@@ -34,73 +34,12 @@
   <main class="shell page-shell">
     <section class="page-section" aria-label="Registro">
       <section class="card card--wide" aria-label="Formulario de registro">
-        <h3>Crear cuenta</h3>
-        <p>
-          Introduce tus datos para crear una cuenta.
-        </p>
+        <button type="button" class="btn-secondary" id="google-register">
+  Continuar con Google
+</button>
 
-        <form id="register-form" class="contact-form" novalidate>
-          <div class="form-grid">
-            <div class="form-field form-field--full">
-              <label for="codigo">Código<span aria-hidden="true"> *</span></label>
-              <input id="codigo" name="codigo" type="text" required class="field" autocomplete="one-time-code" />
-            </div>
+<p id="reg-status" class="form-status" role="status" aria-live="polite" hidden></p>
 
-            <div class="form-field">
-              <label for="nombre">Nombre<span aria-hidden="true"> *</span></label>
-              <input id="nombre" name="nombre" type="text" required class="field" autocomplete="name" />
-            </div>
-
-            <div class="form-field">
-              <label for="empresa">Empresa</label>
-              <input id="empresa" name="empresa" type="text" class="field" autocomplete="organization" />
-            </div>
-
-            <div class="form-field">
-              <label for="email">Correo electrónico<span aria-hidden="true"> *</span></label>
-              <input id="email" name="email" type="email" required class="field" autocomplete="email" />
-            </div>
-
-            <div class="form-field">
-              <label for="telefono">Teléfono</label>
-              <input id="telefono" name="telefono" type="tel" class="field" autocomplete="tel" inputmode="tel" />
-            </div>
-
-            <div class="form-field">
-              <label for="password">Contraseña<span aria-hidden="true"> *</span></label>
-              <input id="password" name="password" type="password" required class="field" autocomplete="new-password" />
-            </div>
-
-            <div class="form-field">
-              <label for="password2">Repetir contraseña<span aria-hidden="true"> *</span></label>
-              <input id="password2" name="password2" type="password" required class="field" autocomplete="new-password" />
-            </div>
-
-            <div class="form-field form-field--full">
-              <label for="acepto">
-                <input id="acepto" name="acepto" type="checkbox" required>
-                Acepto la <a href="/es/privacidad.html">política de privacidad</a>
-              </label>
-            </div>
-          </div>
-
-          <p class="form-status" role="status" aria-live="polite" hidden></p>
-
-          <div class="form-actions" style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
-            <a class="btn-secondary" href="/auth/request-code.html">Solicitar código</a>
-            <button type="submit" class="btn-primary">Crear cuenta</button>
-          </div>
-        </form>
-      </section>
-
-      <div class="scroll-top-container">
-        <button id="back-button" class="scroll-top-button" type="button" onclick="window.location.href='/?setup=1'">
-          Volver
-        </button>
-        <button id="scroll-top-button" class="scroll-top-button" type="button">
-          Arriba
-        </button>
-      </div>
     </section>
 
     <div id="legal-footer" class="legal-footer"></div>
