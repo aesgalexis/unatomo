@@ -10,32 +10,32 @@
   <link rel="stylesheet" href="/styles.css">
 </head>
 
-<header class="topbar">
-  <div class="topbar-inner" style="display:flex; align-items:center; justify-content:space-between; gap:1rem;">
-    <a href="/?setup=1" class="topbar-logo-link">
-      <img
-        src="/static/img/logo-unatomo-v1.5.svg"
-        alt="unatomo"
-        class="topbar-logo"
-        loading="lazy"
-      />
-      <h2 class="topbar-title">Inicio</h2>
-    </a>
+<body class="page">
+  <header class="topbar">
+    <div class="topbar-inner" style="display:flex; align-items:center; justify-content:space-between; gap:1rem;">
+      <a href="/?setup=1" class="topbar-logo-link">
+        <img
+          src="/static/img/logo-unatomo-v1.5.svg"
+          alt="unatomo"
+          class="topbar-logo"
+          loading="lazy"
+        />
+        <h2 class="topbar-title">Inicio</h2>
+      </a>
 
-    <div class="topbar-actions" aria-label="Sesión" style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap; justify-content:flex-end;">
-      <button id="theme-toggle" type="button" aria-label="Cambiar tema" style="margin-top:0;">
-        ☾ / ☼
-      </button>
+      <div class="topbar-actions" aria-label="Sesión" style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap; justify-content:flex-end;">
+        <button id="theme-toggle" type="button" aria-label="Cambiar tema" style="margin-top:0;">
+          ☾ / ☼
+        </button>
 
-      <span id="session-badge" style="opacity:0.85; font-size:0.95rem;" hidden></span>
+        <span id="session-badge" style="opacity:0.85; font-size:0.95rem;" hidden></span>
 
-      <button id="session-action" class="btn-secondary" type="button" style="margin-top:0;">
-        Iniciar sesión
-      </button>
+        <button id="session-action" class="btn-secondary" type="button" style="margin-top:0;">
+          Iniciar sesión
+        </button>
+      </div>
     </div>
-  </div>
-</header>
-
+  </header>
 
   <main class="shell page-shell">
     <section class="page-section">
