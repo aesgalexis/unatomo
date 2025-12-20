@@ -20,8 +20,9 @@ function goHome() {
   window.location.href = "/es/index.html";
 }
 
+document.documentElement.style.visibility = "visible";
+
 onAuthStateChanged(auth, (user) => {
-  document.documentElement.style.visibility = "visible";
   if (user) goHome();
 });
 
