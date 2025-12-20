@@ -20,11 +20,45 @@
     <h1 id="title-main">unatomo</h1>
     <h2 id="subtitle-main">Tu proceso, Nuestra visión</h2>
 <br><br>
-    <div class="auth-actions" aria-label="Acceso">
-      <button type="button" class="btn-pill btn-pill-solid" id="go-login">
-        Iniciar sesión
-      </button>
+<div class="auth-actions" aria-label="Acceso">
+  <button type="button" class="btn-pill btn-pill-solid" id="go-login">
+    Iniciar sesión
+  </button>
+</div>
+  <section id="login-box" class="card" hidden>
+  <h3>Iniciar sesión</h3>
+  <p>Accede con Google o con tu correo y contraseña.</p>
+
+  <div class="form-actions" style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
+    <button type="button" class="btn-secondary" id="login-google">
+      Continuar con Google
+    </button>
+  </div>
+
+  <br>
+
+  <form id="login-email-form" class="contact-form" novalidate>
+    <div class="form-grid">
+      <div class="form-field form-field--full">
+        <label for="login-email">Correo electrónico<span aria-hidden="true"> *</span></label>
+        <input id="login-email" name="email" type="email" required class="field" autocomplete="email" />
+      </div>
+
+      <div class="form-field form-field--full">
+        <label for="login-password">Contraseña<span aria-hidden="true"> *</span></label>
+        <input id="login-password" name="password" type="password" required class="field" autocomplete="current-password" />
+      </div>
     </div>
+
+    <p id="login-status" class="form-status" role="status" aria-live="polite" hidden></p>
+
+    <div class="form-actions" style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
+      <button type="submit" class="btn-primary" id="login-email-submit">Entrar</button>
+      <a class="btn-secondary" href="/auth/reset.html">Olvidé mi contraseña</a>
+    </div>
+  </form>
+</section>
+
       <br>
       <button type="button" class="btn-pill btn-pill-outline" id="go-register">
         Registrarse
