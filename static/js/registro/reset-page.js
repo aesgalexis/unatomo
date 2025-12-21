@@ -1,3 +1,4 @@
+// FILE: static/js/registro/reset-page.js
 import { sendPasswordReset } from "/static/js/registro/firebase-init.js";
 
 const form = document.getElementById("reset-form");
@@ -15,26 +16,33 @@ function clearStatus() {
   status.textContent = "";
 }
 
-document.documentElement.style.visibility = "visible";
-
 form?.addEventListener("submit", async (e) => {
   e.preventDefault();
   clearStatus();
 
-  const email = (document.getElementById("email")?.value || "").trim();
-  if (!email) return setStatus("Introduce un correo válido.");
+  const email = (form.querySelector("#email")?.value ?? "").toString().trim();
+  if (!email) return setStatus("Escribe tu correo.");
 
   try {
     if (submit) submit.disabled = true;
     setStatus("Enviando enlace…");
 
-    const res = await sendPasswordReset(email);
-    if (!res.ok) return setStatus("No se pudo enviar el correo. Revisa el email e inténtalo de nuevo.");
+    await sendPasswordReset(email);
 
-    setStatus("Enviado, recibirás un email con el enlace. (Si no aparece revisa en Spam)");
+    setStatus("Si el correo está registrado, recibirás un email con el enlace. (Revisa también Spam)");
     form.reset();
-  } catch {
-    setStatus("Error enviando el correo. Inténtalo más tarde.");
+  } catch (err) {
+    const code = err?.code || "";
+    if (code === "auth/invalid-email") {
+      setStatus("El correo no parece válido.");
+      return;
+    }
+    if (code === "auth/too-many-requests") {
+      setStatus("Demasiados intentos. Inténtalo más tarde.");
+      return;
+    }
+    setStatus("Si el correo está registrado, recibirás un email con el enlace. (Revisa también Spam)");
+    form.reset();
   } finally {
     if (submit) submit.disabled = false;
   }
