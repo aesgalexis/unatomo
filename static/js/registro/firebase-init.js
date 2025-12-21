@@ -99,3 +99,11 @@ export async function loginWithEmail(email, password) {
   if (!cred.user) return { ok: false };
   return { ok: true, uid: cred.user.uid };
 }
+
+export async function sendPasswordReset(email) {
+  const em = (email ?? "").toString().trim();
+  if (!em) return { ok: false };
+  await sendPasswordResetEmail(auth, em);
+  return { ok: true };
+}
+
