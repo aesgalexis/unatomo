@@ -1,73 +1,276 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>unatomo</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>unatomo · Gestión de maquinaria y procesos de lavado</title>
+  <meta name="description" content="UNATOMO CORE SL. Gestión de maquinaria y procesos de lavado para lavanderías industriales, hoteleras y tintorerías. Venta, instalación, mantenimiento, formación y auditorías a medida.">
+  <meta name="robots" content="index, follow" />
+
   <link rel="stylesheet" href="/styles.css">
 </head>
 
 <body class="page">
-  <div class="topbar">
-    <div class="topbar-inner">
-      <a href="/es/" class="topbar-logo-link" aria-label="Inicio">
-        <img src="/static/img/logo-unatomo-v1.5.svg" class="topbar-logo" alt="unatomo">
-        <span class="topbar-title">unatomo</span>
+  <header class="topbar">
+    <div class="topbar-inner" style="display:flex; align-items:center; justify-content:space-between; gap:1rem;">
+      <a href="/?setup=1" class="topbar-logo-link">
+        <img
+          src="/static/img/logo-unatomo-v1.5.svg"
+          alt="unatomo"
+          class="topbar-logo"
+          loading="lazy"
+        />
+        <h2 class="topbar-title">Inicio</h2>
       </a>
-      <button id="theme-toggle" type="button" aria-label="Cambiar tema">Tema</button>
-    </div>
-  </div>
 
-  <main class="page-shell">
-    <section class="page-section">
-      <h1>unatomo</h1>
-      <p>
-        Nos dedicamos a la gestión de maquinaria y procesos de lavado de prendas textiles.
-      </p>
-      <p>
-        Ofrecemos variedad de servicios enfocados principalmente a lavanderías industriales, hoteleras y
-        tintorerías, desde la venta de maquinaria, instalación, mantenimiento, formación a personal operativo
-        y técnico hasta estudios y auditorías a medida enfocadas en ayudar a quienes ya saben lo que hacen,
-        a poder hacerlo un poco mejor.
-      </p>
-      <p>
-        Tenemos una larga trayectoria y casos de éxito consolidados en lavanderías industriales de gran tamaño,
-        líderes del sector en España.
-      </p>
-    </section>
+      <div class="topbar-actions" aria-label="Sesión"
+           style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap; justify-content:flex-end;">
 
-    <section class="card card--wide">
-      <h2>Acceso</h2>
-      <p>
-        Esta sección es de uso interno. Configura tus preferencias en la portada si quieres cambiar idioma/tema/cookies.
-      </p>
-      <div class="card-cta">
-        <a class="btn-pill btn-pill-outline" href="/">Volver a portada</a>
+        <div id="session-menu-wrap" style="position:relative; display:inline-flex; margin-right:0.5rem;">
+          <button
+            id="session-menu-btn"
+            type="button"
+            aria-label="Menú de usuario"
+            aria-haspopup="menu"
+            aria-expanded="false"
+            style="
+              margin-top:0;
+              padding: 6px 10px;
+              min-width: 40px;
+              min-height: 32px;
+              border-radius: 0.75rem;
+              border: 1px solid color-mix(in srgb, var(--fg) 55%, transparent);
+              background: color-mix(in srgb, var(--bg) 80%, transparent);
+              color: var(--fg);
+              font: inherit;
+              font-size: 0.9rem;
+              cursor: pointer;
+              opacity: 0.9;
+              backdrop-filter: blur(8px);
+              -webkit-tap-highlight-color: transparent;
+              appearance: none;
+              -webkit-appearance: none;
+              box-shadow: none;
+              filter: none;
+              display: inline-flex;
+              align-items: center;
+              justify-content: center;
+              line-height: 1;
+            "
+          >
+            <svg
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              focusable="false"
+              style="width:18px; height:18px; display:block;"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="8" r="4"></circle>
+              <path d="M4 21c1.8-4 5-6 8-6s6.2 2 8 6"></path>
+            </svg>
+          </button>
+
+          <div
+            id="session-menu"
+            role="menu"
+            hidden
+            style="
+              position:absolute;
+              right:0;
+              top:calc(100% + 8px);
+              min-width: 210px;
+              background: var(--panel-bg);
+              border: 1px solid var(--border-subtle);
+              border-radius: 14px;
+              padding: 10px;
+              text-align:left;
+              box-shadow: 0 10px 30px rgba(0,0,0,.18);
+              z-index: 999;
+            "
+          >
+            <div
+              id="session-menu-label"
+              style="
+                font-size: 0.95rem;
+                opacity: .85;
+                padding: 6px 8px 10px 8px;
+                border-bottom: 1px solid var(--border-subtle);
+                margin-bottom: 10px;
+                word-break: break-word;
+              "
+            >
+              Invitado
+            </div>
+
+            <button
+              id="session-menu-action"
+              type="button"
+              role="menuitem"
+              class="btn-secondary"
+              style="width:100%; margin:0; justify-content:center;"
+            >
+              Iniciar sesión
+            </button>
+          </div>
+        </div>
+
+        <button
+          id="theme-toggle"
+          type="button"
+          aria-label="Cambiar tema"
+          style="
+            margin-top:0;
+            position:static;
+            top:auto; right:auto; left:auto;
+            transform:none;
+          "
+        >
+          ☾ / ☼
+        </button>
+
       </div>
+    </div>
+  </header>
+
+  <main class="shell page-shell">
+    <section class="page-section">
+      <h1>Qué hacemos</h1>
+
+      <section class="card card--wide">
+        <h3>Auditoría técnica y de procesos</h3>
+        <br>
+
+        <p>
+          Detección de puntos críticos para optimizar el rendimiento de planta. Realizamos una inspección integral para
+          identificar dónde se está perdiendo rendimiento y cómo se podría evitar. Nos centramos en corregir cuellos de botella,
+          fallos recurrentes y desajustes operativos que lastran la producción en el día a día.
+        </p>
+
+        <p>
+          Realizamos un informe técnico por secciones con prioridades claras sobre en qué urge intervenir, qué mejoras programar
+          y qué inversiones pueden resultar más rentables.
+        </p>
+
+        <p>
+          Ponemos el foco en el análisis de los flujos de producción, mantenimiento preventivo, recambios críticos y hábitos de trabajo.
+        </p>
+
+        <br>
+        <h6>Desde 1790 €/día</h6>
+        <h5><em>(Informe incluido en el precio)</em></h5>
+
+        <div class="card-cta">
+          <a class="btn-primary" href="/es/precios.html">Contratar</a>
+        </div>
+      </section>
+
+      <section class="card card--wide">
+        <h3>Asesoría independiente de equipamiento</h3>
+        <br>
+
+        <p>
+          Validación técnica de inversiones sin conflictos de interés. Aportamos perspectiva técnica antes de que cierren su próxima compra.
+          No representamos marcas ni cobramos comisiones de fabricantes. Nuestro objetivo es asegurar que el equipo sea el adecuado para su operativa real.
+        </p>
+
+        <p>
+          Realizamos un análisis exhaustivo de idoneidad, virtudes, limitaciones y flexibilidad de la máquina a medio-largo plazo.
+        </p>
+
+        <p>
+          Evaluamos el servicio postventa y mantenimiento: dependencia de repuestos, facilidad de servicio técnico y vida útil esperable.
+        </p>
+
+        <p>
+          Acompañamiento: revisión del pliego técnico y comparativa de alternativas antes de la decisión final.
+        </p>
+
+        <br>
+        <h6>Desde 1,5% del coste de la inversión</h6>
+
+        <div class="card-cta">
+          <a class="btn-primary" href="/es/asesoria.html">Solicitar</a>
+        </div>
+      </section>
+
+      <section class="card card--wide">
+        <h3>Control de productividad y captura de datos</h3>
+        <br>
+
+        <p>
+          Software adaptado para recabar datos de todo lo que se pueda considerar relevante para la producción. Implementamos soluciones de monitorización
+          que captura, traduce y representa el trabajo de la lavandería en datos útiles para el control diario y la toma de decisiones.
+          Nos integramos en su ecosistema actual (ERP, bases de datos o sistemas locales) con incidencia mínima en la operativa del día a día.
+        </p>
+
+        <p>
+          Métricas de planta: contadores por línea/cliente/artículo, equivalencias a kilos, control de rechazos y reprocesos.
+        </p>
+
+        <p>
+          Información relevante: datos para identificar paradas, tiempos muertos y pérdidas de productividad.
+        </p>
+
+        <p>
+          Simplicidad: sistemas diseñados para ser funcionales, no para generar burocracia.
+        </p>
+        <br>
+
+        <div class="card-cta">
+          <a class="btn-secondary" href="/es/contacto.html">Consultar</a>
+        </div>
+      </section>
+
+      <section class="card card--wide">
+        <h3>Asistencia técnica</h3>
+        <br>
+
+        <p>
+          En este caso vamos más allá de la avería y ajuste fino de maquinaria. Intervenimos cuando el problema requiere una visión técnica extra más profunda
+          o menos contaminada. Hacemos lo posible por resolver fallos puntuales y estabilizamos el equipo con parametrización, calibración, ajustes o lo que requiera.
+        </p>
+
+        <p>
+          Optimización: ajustes mecánicos y de programación para mejorar estabilidad y rendimiento.
+        </p>
+
+        <p>
+          Diagnóstico “causa-raíz”: reducimos la recurrencia actuando sobre el origen del problema.
+        </p>
+        <br>
+
+        <div class="card-cta">
+          <a class="btn-secondary" href="/es/contacto.html">Consultar</a>
+        </div>
+      </section>
     </section>
 
-    <section class="card card--wide">
-      <h2>Secciones</h2>
-      <ul>
-        <li><a href="/es/asesoria.html">Asesoría</a></li>
-        <li><a href="/es/configurador.html">Configurador</a></li>
-        <li><a href="/es/contacto.html">Contacto</a></li>
-        <li><a href="/es/privacidad.html">Privacidad y cookies</a></li>
-        <li><a href="/es/registro.html">Registro</a></li>
-      </ul>
+    <section class="page-section">
+      <a href="/es/contacto.html">Contacto</a>
     </section>
 
     <div class="scroll-top-container">
-      <button class="scroll-top-button" type="button" id="scrollTop">Subir</button>
+      <button id="scroll-top-button" class="scroll-top-button" type="button">
+        Arriba
+      </button>
     </div>
 
-    <p id="legal-footer" class="legal-footer"></p>
+    <div id="legal-footer" class="legal-footer"></div>
+
+    <div class="footer-link">
+      <a href="/es/privacidad.html">Política de privacidad y cookies</a>
+    </div>
   </main>
 
   <script src="/static/js/theme.js"></script>
+  <script src="/static/js/functions.js"></script>
+  <script src="/static/js/unatomo-entry.js"></script>
   <script src="/static/js/footer.js"></script>
-  <script>
-    document.getElementById('scrollTop')?.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
-  </script>
+  <script type="module" src="/static/js/registro/app.js"></script>
+  <script type="module" src="/static/js/registro/session-menu.js"></script>
 </body>
 </html>
