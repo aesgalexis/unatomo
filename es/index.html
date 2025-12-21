@@ -1,3 +1,4 @@
+<!-- FILE: es/index.html -->
 <!doctype html>
 <html lang="es">
 <head>
@@ -131,7 +132,6 @@
         >
           ☾ / ☼
         </button>
-
       </div>
     </div>
   </header>
@@ -164,7 +164,7 @@
         <h5><em>(Informe incluido en el precio)</em></h5>
 
         <div class="card-cta">
-          <a class="btn-primary" href="/es/precios.html">Contratar</a>
+          <a class="btn-primary" href="/es/precios.html" data-requires-auth="1" data-auth-msg="Para contratar necesitas iniciar sesión.">Contratar</a>
         </div>
       </section>
 
@@ -193,7 +193,7 @@
         <h6>Desde 1,5% del coste de la inversión</h6>
 
         <div class="card-cta">
-          <a class="btn-primary" href="/es/asesoria.html">Solicitar</a>
+          <a class="btn-primary" href="/es/asesoria.html" data-requires-auth="1" data-auth-msg="Para solicitar asesoría necesitas iniciar sesión.">Solicitar</a>
         </div>
       </section>
 
@@ -219,7 +219,6 @@
           Simplicidad: sistemas diseñados para ser funcionales, no para generar burocracia.
         </p>
         <br>
-
         <div class="card-cta">
           <a class="btn-secondary" href="/es/contacto.html">Consultar</a>
         </div>
@@ -242,7 +241,6 @@
           Diagnóstico “causa-raíz”: reducimos la recurrencia actuando sobre el origen del problema.
         </p>
         <br>
-
         <div class="card-cta">
           <a class="btn-secondary" href="/es/contacto.html">Consultar</a>
         </div>
@@ -272,5 +270,6 @@
   <script src="/static/js/footer.js"></script>
   <script type="module" src="/static/js/registro/app.js"></script>
   <script type="module" src="/static/js/registro/session-menu.js"></script>
+  <script type="module" src="/static/js/registro/auth-gate.js"></script>
 </body>
 </html>
