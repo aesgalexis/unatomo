@@ -4,8 +4,14 @@ import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/
 const badge = document.getElementById("session-badge");
 const actionBtn = document.getElementById("session-action");
 
+function setBadge(text) {
+  if (!badge) return;
+  badge.hidden = false;
+  badge.textContent = text;
+}
+
 function setGuest() {
-  if (badge) badge.textContent = "Invitado";
+  setBadge("Invitado");
   if (actionBtn) {
     actionBtn.textContent = "Iniciar sesión";
     actionBtn.dataset.state = "guest";
@@ -14,7 +20,7 @@ function setGuest() {
 
 function setUser(user) {
   const label = user?.displayName || user?.email || "Usuario";
-  if (badge) badge.textContent = label;
+  setBadge(label);
   if (actionBtn) {
     actionBtn.textContent = "Cerrar sesión";
     actionBtn.dataset.state = "user";
