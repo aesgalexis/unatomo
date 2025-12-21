@@ -25,7 +25,7 @@
 
   <main class="shell page-shell">
     <section class="page-section" aria-label="Registro">
-      <section class="card" aria-label="Crear cuenta">
+      <section class="card card--wide" aria-label="Crear cuenta">
         <h3>Crear cuenta</h3>
         <p>Continúa con Google o crea una cuenta con correo y contraseña.</p>
 
@@ -69,18 +69,10 @@
           </div>
         </form>
       </section>
-
-      <div class="scroll-top-container">
-        <button id="back-button" class="scroll-top-button" type="button" onclick="window.location.href='/?setup=1'">
-          Volver
-        </button>
-        <button id="scroll-top-button" class="scroll-top-button" type="button">
-          Arriba
-        </button>
-      </div>
     </section>
 
     <div id="legal-footer" class="legal-footer"></div>
+
     <div class="footer-link">
       <a href="/es/privacidad.html">Política de privacidad y cookies</a>
     </div>
@@ -88,7 +80,8 @@
 
   <script src="/static/js/theme.js"></script>
   <script src="/static/js/functions.js"></script>
+  <script src="/static/js/unatomo-entry.js"></script>
   <script src="/static/js/footer.js"></script>
-  <script type="module" src="/static/js/registro/app.js"></script>
+  <script type="module" src="/static/js/registro/session-ui.js"></script>
 </body>
 </html>
