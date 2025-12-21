@@ -9,46 +9,50 @@
   <style>html{visibility:hidden}</style>
 </head>
 
-<body class="page">
-  <button id="theme-toggle" type="button" aria-label="Cambiar tema">☾ / ☼</button>
-
-  <header class="topbar">
-    <div class="topbar-inner">
-      <a href="/?setup=1" class="topbar-logo-link">
-        <img src="/static/img/logo-unatomo-v1.5.svg" alt="unatomo" class="topbar-logo" loading="lazy" />
-        <h2 class="topbar-title">Recuperar contraseña</h2>
-      </a>
-    </div>
-  </header>
+<body>
+  <button id="theme-toggle" type="button" aria-label="Cambiar tema">
+    ☾ / ☼
+  </button>
 
   <main class="shell">
-    <section class="page-section" aria-label="Recuperar contraseña">
-      <section class="card" aria-label="Restablecer">
-        <h3>Restablecer contraseña</h3>
-        <p>Introduce tu correo y te enviaremos un enlace para crear una contraseña nueva.</p>
+    <img
+      src="/static/img/logo-unatomo-v1.5.svg"
+      alt="unatomo"
+      class="logo"
+      loading="lazy"
+    />
 
-        <form id="reset-form" class="contact-form" novalidate>
-          <div class="form-grid">
-            <div class="form-field form-field--full">
-              <label for="email">Correo electrónico<span aria-hidden="true"> *</span></label>
-              <input id="email" name="email" type="email" required class="field" autocomplete="email" />
-            </div>
+    <h1>unatomo</h1>
+    <h2>Recuperar contraseña</h2>
+
+    <section class="card" aria-label="Restablecer">
+      <h3>Restablecer contraseña</h3>
+      <p>Introduce tu correo y te enviaremos un enlace para crear una contraseña nueva.</p>
+
+      <form id="reset-form" class="contact-form" novalidate>
+        <div class="form-grid">
+          <div class="form-field form-field--full">
+            <label for="email">Correo electrónico<span aria-hidden="true"> *</span></label>
+            <input id="email" name="email" type="email" required class="field" autocomplete="email" />
           </div>
+        </div>
 
-          <p id="reset-status" class="form-status" role="status" aria-live="polite" hidden></p>
+        <p id="reset-status" class="form-status" role="status" aria-live="polite" hidden></p>
 
-          <div class="form-actions" style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
-            <button type="submit" class="btn-primary" id="reset-submit">Enviar enlace</button>
-            <a class="btn-secondary" href="/es/auth/login.html">Volver a iniciar sesión</a>
-          </div>
-        </form>
-      </section>
+        <div class="form-actions" style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
+          <button type="submit" class="btn-primary" id="reset-submit">Enviar enlace</button>
+        </div>
+
+        <p class="footer-link" style="text-align:center; margin-top:0.75rem;">
+          <a href="/es/auth/login.html">Volver a iniciar sesión</a>
+        </p>
+      </form>
     </section>
 
     <div id="legal-footer" class="legal-footer"></div>
-    <div class="footer-link">
+    <p class="footer-link">
       <a href="/es/privacidad.html">Política de privacidad y cookies</a>
-    </div>
+    </p>
   </main>
 
   <script src="/static/js/theme.js"></script>
