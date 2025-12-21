@@ -5,45 +5,65 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Recuperar contraseña · unatomo</title>
   <meta name="robots" content="noindex, nofollow" />
+
   <link rel="stylesheet" href="/styles.css">
   <style>html{visibility:hidden}</style>
 </head>
 
-<body>
+<body class="page">
   <button id="theme-toggle" type="button" aria-label="Cambiar tema">
     ☾ / ☼
   </button>
 
-  <main class="shell">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a href="/?setup=1" class="topbar-logo-link">
+        <img
+          src="/static/img/logo-unatomo-v1.5.svg"
+          alt="unatomo"
+          class="topbar-logo"
+          loading="lazy"
+        />
+        <h2 class="topbar-title">Recuperar contraseña</h2>
+      </a>
+    </div>
+  </header>
 
-    <section class="card" aria-label="Restablecer">
-      <h3>Restablecer contraseña</h3>
-      <p>Introduce tu correo y te enviaremos un enlace para crear una contraseña nueva.</p>
+  <!-- IMPORTANTE: este padding evita que la topbar (fixed) tape la card -->
+  <main class="shell" style="padding-top:110px;">
+    <section class="page-section" aria-label="Recuperar contraseña">
+      <section class="card" aria-label="Restablecer">
+        <h3>Restablecer contraseña</h3>
+        <p>Introduce tu correo y te enviaremos un enlace para crear una contraseña nueva.</p>
 
-      <form id="reset-form" class="contact-form" novalidate>
-        <div class="form-grid">
-          <div class="form-field form-field--full">
-            <label for="email">Correo electrónico<span aria-hidden="true"> *</span></label>
-            <input id="email" name="email" type="email" required class="field" autocomplete="email" />
+        <form id="reset-form" class="contact-form" novalidate>
+          <div class="form-grid">
+            <div class="form-field form-field--full">
+              <label for="email">Correo electrónico<span aria-hidden="true"> *</span></label>
+              <input id="email" name="email" type="email" required class="field" autocomplete="email" />
+            </div>
           </div>
-        </div>
 
-        <p id="reset-status" class="form-status" role="status" aria-live="polite" hidden></p>
+          <p id="reset-status" class="form-status" role="status" aria-live="polite" hidden></p>
 
-        <div class="form-actions" style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
-          <button type="submit" class="btn-primary" id="reset-submit">Enviar enlace</button>
-        </div>
+          <div class="form-actions" style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
+            <button type="submit" class="btn-primary" id="reset-submit">
+              Enviar enlace
+            </button>
+          </div>
 
-        <p class="footer-link" style="text-align:center; margin-top:0.75rem;">
-          <a href="/es/auth/login.html">Volver a iniciar sesión</a>
-        </p>
-      </form>
+          <p class="footer-link" style="text-align:center; margin-top:0.75rem;">
+            <a href="/es/auth/login.html">Volver a iniciar sesión</a>
+          </p>
+        </form>
+      </section>
     </section>
 
     <div id="legal-footer" class="legal-footer"></div>
-    <p class="footer-link">
+
+    <div class="footer-link">
       <a href="/es/privacidad.html">Política de privacidad y cookies</a>
-    </p>
+    </div>
   </main>
 
   <script src="/static/js/theme.js"></script>
