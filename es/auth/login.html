@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Iniciar sesión · unatomo</title>
   <meta name="robots" content="noindex, nofollow" />
-
   <link rel="stylesheet" href="/styles.css">
   <style>html{visibility:hidden}</style>
 </head>
@@ -18,12 +17,7 @@
   <header class="topbar">
     <div class="topbar-inner">
       <a href="/?setup=1" class="topbar-logo-link">
-        <img
-          src="/static/img/logo-unatomo-v1.5.svg"
-          alt="unatomo"
-          class="topbar-logo"
-          loading="lazy"
-        />
+        <img src="/static/img/logo-unatomo-v1.5.svg" alt="unatomo" class="topbar-logo" loading="lazy" />
         <h2 class="topbar-title">Iniciar sesión</h2>
       </a>
     </div>
@@ -31,7 +25,7 @@
 
   <main class="shell page-shell">
     <section class="page-section" aria-label="Iniciar sesión">
-      <section class="card" aria-label="Acceso">
+      <section class="card card--wide" aria-label="Acceso">
         <h3>Acceder</h3>
         <p>Continúa con Google o accede con correo y contraseña.</p>
 
@@ -62,17 +56,20 @@
             <button type="submit" class="btn-primary" id="btn-email-login">
               Iniciar sesión
             </button>
-            <br><br>
-            <p class="footer-link" style="text-align:center; margin-top:0.75rem;">
-  <a href="/es/auth/reset.html">Olvidé mi contraseña</a>
-</p>
           </div>
+
+          <p class="footer-link" style="text-align:center; margin-top:0.75rem;">
+            <a href="/es/auth/reset.html">Olvidé mi contraseña</a>
+          </p>
         </form>
       </section>
     </section>
-
+<div class="scroll-top-container">
+  <button id="back-button" class="scroll-top-button" type="button" onclick="window.location.href='/es/index.html'">
+    Volver
+  </button>
+    </div>
     <div id="legal-footer" class="legal-footer"></div>
-
     <div class="footer-link">
       <a href="/es/privacidad.html">Política de privacidad y cookies</a>
     </div>
