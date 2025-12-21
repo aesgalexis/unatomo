@@ -1,3 +1,4 @@
+<!-- FILE: es/auth/login.html -->
 <!doctype html>
 <html lang="es">
 <head>
@@ -10,18 +11,32 @@
 </head>
 
 <body class="page">
-  <button id="theme-toggle" type="button" aria-label="Cambiar tema">☾ / ☼</button>
-
   <header class="topbar">
-    <div class="topbar-inner">
+    <div class="topbar-inner" style="display:flex; align-items:center; justify-content:space-between; gap:1rem;">
       <a href="/?setup=1" class="topbar-logo-link">
         <img src="/static/img/logo-unatomo-v1.5.svg" alt="unatomo" class="topbar-logo" loading="lazy" />
         <h2 class="topbar-title">Iniciar sesión</h2>
       </a>
+
+      <div class="topbar-actions" aria-label="Preferencias" style="display:flex; align-items:center; gap:0.5rem; justify-content:flex-end;">
+        <button
+          id="theme-toggle"
+          type="button"
+          aria-label="Cambiar tema"
+          style="
+            margin-top:0;
+            position:static;
+            top:auto; right:auto; left:auto;
+            transform:none;
+          "
+        >
+          ☾ / ☼
+        </button>
+      </div>
     </div>
   </header>
 
-  <main class="shell" style="padding-top:110px; margin:0 auto;">
+  <main class="shell page-shell">
     <section class="page-section" aria-label="Iniciar sesión">
       <section class="card" aria-label="Acceso">
         <h3>Acceder</h3>
@@ -62,11 +77,13 @@
         </form>
       </section>
     </section>
-<div class="scroll-top-container">
-  <button id="back-button" class="scroll-top-button" type="button" onclick="window.location.href='/es/index.html'">
-    Volver
-  </button>
+
+    <div class="scroll-top-container">
+      <button id="back-button" class="scroll-top-button" type="button" onclick="window.location.href='/es/index.html'">
+        Volver
+      </button>
     </div>
+
     <div id="legal-footer" class="legal-footer"></div>
     <div class="footer-link">
       <a href="/es/privacidad.html">Política de privacidad y cookies</a>
