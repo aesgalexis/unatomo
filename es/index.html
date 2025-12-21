@@ -28,14 +28,62 @@
           ☾ / ☼
         </button>
 
-<span id="session-badge" style="opacity:0.85; font-size:0.95rem;">Invitado</span>
+<div id="session-menu-wrap" style="position:relative; display:inline-flex;">
+  <button
+    id="session-menu-btn"
+    type="button"
+    aria-label="Menú de usuario"
+    aria-haspopup="menu"
+    aria-expanded="false"
+    style="margin-top:0;"
+  >
+    👤
+  </button>
 
-
-        <button id="session-action" class="btn-secondary" type="button" style="margin-top:0;">
-          Iniciar sesión
-        </button>
-      </div>
+  <div
+    id="session-menu"
+    role="menu"
+    hidden
+    style="
+      position:absolute;
+      right:0;
+      top:calc(100% + 8px);
+      min-width: 210px;
+      background: var(--panel-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 10px;
+      text-align:left;
+      box-shadow: 0 10px 30px rgba(0,0,0,.18);
+      z-index: 999;
+    "
+  >
+    <div
+      id="session-menu-label"
+      style="
+        font-size: 0.95rem;
+        opacity: .85;
+        padding: 6px 8px 10px 8px;
+        border-bottom: 1px solid var(--border-subtle);
+        margin-bottom: 10px;
+        word-break: break-word;
+      "
+    >
+      Invitado
     </div>
+
+    <button
+      id="session-menu-action"
+      type="button"
+      role="menuitem"
+      class="btn-secondary"
+      style="width:100%; margin:0; justify-content:center;"
+    >
+      Iniciar sesión
+    </button>
+  </div>
+</div>
+
   </header>
 
   <main class="shell page-shell">
