@@ -1,19 +1,13 @@
 import { validateRegistrationCode } from "/static/js/registro/firebase-init.js";
 
 (function () {
-  const loginBtn = document.getElementById("go-login");
+
   const registerBtn = document.getElementById("go-register");
 
   const box = document.getElementById("register-code-box");
   const input = document.getElementById("register-code-input");
   const submit = document.getElementById("register-code-submit");
   const status = document.getElementById("register-code-status");
-
-  if (loginBtn) {
-    loginBtn.addEventListener("click", () => {
-      window.location.href = "/auth/login.html";
-    });
-  }
 
   function clearStatus() {
     if (!status) return;
