@@ -1,3 +1,3051 @@
+Omitir e ir al contenido
+Historial del chat
+
+
+Tú dijiste:
+aesgalexis-unatomo-8a5edab282632443.txt
+Documento
+Tengo este sitio, y algunos problemas, dime si puedes leerlo todo y te pido algunos cambios
+ChatGPT Plus
+
+Pensó durante 12s
+Sí — puedo leerlo entero (todos los archivos que has subido) y decirte exactamente qué tocar y dónde. Tengo el árbol del sitio y el contenido de los HTML/CSS/JS disponibles en el paquete. 
+aesgalexis-unatomo-8a5edab28263…
+
+
+De hecho, en una pasada rápida ya veo posibles problemas típicos:
+
+Logo probablemente roto en la portada: en /index.html cargas /static/img/logo-unatomo-v1.5.svg, pero en el árbol que has subido no aparece ese SVG dentro de /static/img/. Si no está en el repo real, ese <img> va a fallar. 
+aesgalexis-unatomo-8a5edab28263…
+
+
+Enlaces de “auth” que no existen en la estructura subida: en /index.html apuntas a /auth/reset.html y /auth/request-code.html, pero lo que veo es /es/auth/login.html (y no veo una carpeta /auth/ en raíz). Eso suele acabar en 404. 
+aesgalexis-unatomo-8a5edab28263…
+
+
+Tu home en raíz está marcada como no indexable: en /index.html tienes <meta name="robots" content="noindex, nofollow" />. Si quieres que Google la indexe, esto lo bloquea. 
+aesgalexis-unatomo-8a5edab28263…
+
+
+404 hace redirect inmediato a /es/: correcto si es lo que quieres, pero si esperabas un 404 “real” o páginas por idioma, esto lo fuerza siempre. 
+aesgalexis-unatomo-8a5edab28263…
+
+
+Dime los “problemas” que notas tú (en plan: “en móvil X se descuadra”, “no me funciona login”, “quiero que al entrar vaya a /es/ directamente”, etc.) y los “cambios” que quieres, y te devuelvo:
+
+lista de causas,
+
+cambios concretos por archivo (con fragmentos exactos),
+
+si quieres, un diff listo para copiar/pegar.
+
+Si me dices por cuál empezamos, lo resolvemos de forma quirúrgica.
+
+
+Fuentes
+Tú dijiste:
+tengo problemas con el auth. Cuando pincho iniciar secion desde el setup (primer index de unatomo.com), se salta todo y me lleva directamente a la pagina.. de hecho sin iniciar sesion
+ChatGPT Plus
+
+Pensó durante 30s
+Sí, lo que te pasa está clarísimo en tu código: en el setup (/index.html) tienes dos scripts que están escuchando el mismo botón #go-login, y uno de ellos te manda a una URL que no existe → cae en tu 404.html → y tu 404.html redirige automáticamente a /es/, por eso “se salta todo” y acabas dentro del sitio sin haber iniciado sesión.
+
+Qué está pasando exactamente
+En el setup, login-setup.js hace lo que esperas: al hacer click en Iniciar sesión abre/cierra la caja de login dentro del setup. 
+aesgalexis-unatomo-8a5edab28263…
+
+
+Pero a la vez, static/js/registro/registro.js también añade un click a #go-login que hace esto:
+
+window.location.href = "/auth/login.html";
+…y esa ruta no existe en tu estructura (la que existe es /es/auth/login.html).
+
+Entonces entras en 404 y tu 404.html hace redirect inmediato a /es/ (y eso te lleva al sitio como “invitado”).
+
+Arreglo (recomendado): deja el login embebido en el setup
+En static/js/registro/registro.js, borra este bloque:
+
+const loginBtn = document.getElementById("go-login");
+
+if (loginBtn) {
+  loginBtn.addEventListener("click", () => {
+    window.location.href = "/auth/login.html";
+  });
+}
+Así, el botón Iniciar sesión solo lo controla login-setup.js (y ya no “salta” a ningún sitio). 
+aesgalexis-unatomo-8a5edab28263…
+
+
+Alternativa: si quieres que “Iniciar sesión” vaya a una página de login
+En vez de borrar, cambia la ruta a la correcta:
+
+window.location.href = "/es/auth/login.html";
+(esa página sí existe).
+
+Nota importante (para que no te vuelva a confundir)
+Ahora mismo /es/index.html no está protegido: aunque no haya sesión, se ve igual y solo muestra “Invitado” arriba. Eso es normal con tu session-ui.js tal como está.
+
+Si tú quieres que sin login no se pueda entrar al sitio, dímelo y te paso el “guard” exacto (un onAuthStateChanged que, si no hay user, redirige a /es/auth/login.html o al setup).
+
+Si quieres, te digo también (porque te va a pegar otro salto parecido) que en el setup tienes links a /auth/reset.html y /auth/request-code.html que tampoco existen, así que también te harán el mismo “404 → /es/”.
+
+
+Fuentes
+Tú dijiste:
+es posible juntar todos los JS de la carpeta de registro en un solo archivo (a excepcion de firebase-init.js) ?
+ChatGPT Plus
+
+Pensó durante 55s
+Sí: puedes juntar todos los JS de static/js/registro/ en un solo archivo (dejando firebase-init.js aparte). Y de paso te quitas el conflicto que ahora mismo te rompe el flujo del botón “Iniciar sesión” en el setup.
+
+Por qué ahora se “salta todo” en el setup
+En index.html cargas dos módulos: login-setup.js y registro.js. 
+aesgalexis-unatomo-8a5edab28263…
+
+
+Pero static/js/registro/registro.js engancha el botón #go-login para redirigir a /auth/login.html (en vez de abrir el cuadro del login), así que pisa el comportamiento del setup. 
+aesgalexis-unatomo-8a5edab28263…
+
+
+Solución: un único app.js (manteniendo firebase-init.js)
+Crea este archivo:
+
+/static/js/registro/app.js
+
+import {
+  auth,
+  loginWithGoogle,
+  loginWithEmail,
+  validateRegistrationCode,
+  registerWithGoogle,
+  registerWithEmail
+} from "/static/js/registro/firebase-init.js";
+
+import {
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+
+/**
+ * SETUP ( /index.html )
+ * - Login en caja desplegable
+ * - Registro por código
+ */
+function initSetupLogin() {
+  const btnOpen = document.getElementById("go-login");
+  const box = document.getElementById("login-box");
+
+  const btnGoogle = document.getElementById("login-google");
+  const form = document.getElementById("login-email-form");
+  const btnEmail = document.getElementById("login-email-submit");
+
+  const status = document.getElementById("login-status");
+  const emailInput = document.getElementById("login-email");
+  const passInput = document.getElementById("login-password");
+
+  if (!btnOpen || !box) return; // no es la página setup
+
+  function showStatus(t) {
+    if (!status) return;
+    status.hidden = false;
+    status.textContent = t;
+  }
+  function clearStatus() {
+    if (!status) return;
+    status.hidden = true;
+    status.textContent = "";
+  }
+  function toggleBox() {
+    box.hidden = !box.hidden;
+    clearStatus();
+    if (!box.hidden) emailInput?.focus();
+  }
+
+  btnOpen.addEventListener("click", toggleBox);
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) window.location.href = "/es/index.html";
+  });
+
+  btnGoogle?.addEventListener("click", async () => {
+    clearStatus();
+    try {
+      btnGoogle.disabled = true;
+      showStatus("Conectando con Google…");
+
+      const res = await loginWithGoogle();
+      if (!res.ok) return showStatus("No se pudo iniciar sesión.");
+
+      showStatus("Sesión iniciada. Redirigiendo…");
+      setTimeout(() => (window.location.href = "/es/index.html"), 650);
+    } catch {
+      showStatus("Error en el inicio de sesión con Google.");
+    } finally {
+      btnGoogle.disabled = false;
+    }
+  });
+
+  form?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    clearStatus();
+
+    const email = (emailInput?.value || "").trim();
+    const pw = passInput?.value || "";
+    if (!email || !pw) return showStatus("Completa los campos obligatorios.");
+
+    try {
+      if (btnEmail) btnEmail.disabled = true;
+      showStatus("Iniciando sesión…");
+
+      const res = await loginWithEmail(email, pw);
+      if (!res.ok) return showStatus("No se pudo iniciar sesión.");
+
+      showStatus("Sesión iniciada. Redirigiendo…");
+      setTimeout(() => (window.location.href = "/es/index.html"), 650);
+    } catch (e2) {
+      const code = String(e2?.code || "");
+      if (
+        code.includes("auth/invalid-credential") ||
+        code.includes("auth/wrong-password") ||
+        code.includes("auth/user-not-found")
+      ) showStatus("Correo o contraseña incorrectos.");
+      else if (code.includes("auth/invalid-email")) showStatus("Correo no válido.");
+      else if (code.includes("auth/too-many-requests")) showStatus("Demasiados intentos. Prueba más tarde.");
+      else showStatus("Error iniciando sesión.");
+    } finally {
+      if (btnEmail) btnEmail.disabled = false;
+    }
+  });
+}
+
+function initSetupRegisterCode() {
+  const registerBtn = document.getElementById("go-register");
+  const box = document.getElementById("register-code-box");
+  const input = document.getElementById("register-code-input");
+  const submit = document.getElementById("register-code-submit");
+  const status = document.getElementById("register-code-status");
+
+  if (!registerBtn || !box || !input || !submit || !status) return; // no es la página setup
+
+  function clearStatus() {
+    status.hidden = true;
+    status.textContent = "";
+  }
+  function setStatus(text) {
+    status.hidden = false;
+    status.textContent = text;
+  }
+  function toggleBox() {
+    box.hidden = !box.hidden;
+    clearStatus();
+    if (!box.hidden) input.focus();
+  }
+
+  registerBtn.addEventListener("click", toggleBox);
+
+  async function go() {
+    clearStatus();
+
+    const raw = (input.value || "").trim();
+    if (!raw) {
+      setStatus("Introduce un código válido.");
+      input.focus();
+      return;
+    }
+
+    try {
+      submit.disabled = true;
+      setStatus("Validando código…");
+
+      const res = await validateRegistrationCode(raw);
+      if (!res.valid) {
+        setStatus("Código no válido.");
+        input.focus();
+        return;
+      }
+
+      try {
+        sessionStorage.setItem("unatomo_access_code", res.code);
+      } catch {}
+
+      setStatus("Código correcto. Redirigiendo…");
+      setTimeout(() => (window.location.href = "/es/registro.html"), 650);
+    } catch {
+      setStatus("Error validando el código.");
+    } finally {
+      submit.disabled = false;
+    }
+  }
+
+  submit.addEventListener("click", go);
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") go();
+  });
+}
+
+/**
+ * LOGIN PAGE ( /es/auth/login.html )
+ */
+function initLoginPage() {
+  const btnGoogle = document.getElementById("btn-google-login");
+  const form = document.getElementById("login-email-form");
+  const btnEmail = document.getElementById("btn-email-login");
+  const status = document.getElementById("login-status");
+
+  // Señal de que estamos en esa página:
+  if (!form || !status || (!btnGoogle && !btnEmail)) return;
+
+  function setStatus(t) {
+    status.hidden = false;
+    status.textContent = t;
+  }
+  function clearStatus() {
+    status.hidden = true;
+    status.textContent = "";
+  }
+  function goHome() {
+    window.location.href = "/es/index.html";
+  }
+
+  document.documentElement.style.visibility = "visible";
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) goHome();
+  });
+
+  btnGoogle?.addEventListener("click", async () => {
+    clearStatus();
+    try {
+      btnGoogle.disabled = true;
+      setStatus("Conectando con Google…");
+
+      const res = await loginWithGoogle();
+      if (!res.ok) return setStatus("No se pudo iniciar sesión.");
+
+      setStatus("Sesión iniciada. Redirigiendo…");
+      setTimeout(goHome, 650);
+    } catch {
+      setStatus("Error en el inicio de sesión con Google.");
+    } finally {
+      btnGoogle.disabled = false;
+    }
+  });
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    clearStatus();
+
+    const email = (document.getElementById("email")?.value || "").trim();
+    const password = document.getElementById("password")?.value || "";
+    if (!email || !password) return setStatus("Completa los campos obligatorios.");
+
+    try {
+      if (btnEmail) btnEmail.disabled = true;
+      setStatus("Iniciando sesión…");
+
+      const res = await loginWithEmail(email, password);
+      if (!res.ok) return setStatus("No se pudo iniciar sesión.");
+
+      setStatus("Sesión iniciada. Redirigiendo…");
+      setTimeout(goHome, 650);
+    } catch (e2) {
+      const code = String(e2?.code || "");
+      if (
+        code.includes("auth/invalid-credential") ||
+        code.includes("auth/wrong-password") ||
+        code.includes("auth/user-not-found")
+      ) setStatus("Correo o contraseña incorrectos.");
+      else if (code.includes("auth/invalid-email")) setStatus("Correo no válido.");
+      else if (code.includes("auth/too-many-requests")) setStatus("Demasiados intentos. Prueba más tarde.");
+      else setStatus("Error iniciando sesión.");
+    } finally {
+      if (btnEmail) btnEmail.disabled = false;
+    }
+  });
+}
+
+/**
+ * REGISTER PAGE ( /es/registro.html )
+ */
+function initRegisterPage() {
+  const status = document.getElementById("reg-status");
+  const btnGoogle = document.getElementById("btn-google");
+  const btnEmail = document.getElementById("btn-email");
+  const form = document.getElementById("register-email-form");
+
+  if (!status || !form) return;
+
+  function setStatus(t) {
+    status.hidden = false;
+    status.textContent = t;
+  }
+  function clearStatus() {
+    status.hidden = true;
+    status.textContent = "";
+  }
+
+  (async () => {
+    const code = (sessionStorage.getItem("unatomo_access_code") || "").trim();
+
+    if (!code) return window.location.replace("/?setup=1");
+
+    const check = await validateRegistrationCode(code);
+    if (!check.valid) {
+      try { sessionStorage.removeItem("unatomo_access_code"); } catch {}
+      return window.location.replace("/?setup=1");
+    }
+
+    document.documentElement.style.visibility = "visible";
+
+    btnGoogle?.addEventListener("click", async () => {
+      clearStatus();
+      try {
+        btnGoogle.disabled = true;
+        setStatus("Conectando con Google…");
+
+        const res = await registerWithGoogle(code);
+        if (!res.ok) return setStatus("No se pudo completar el registro.");
+
+        setStatus("Registro completado. Redirigiendo…");
+        setTimeout(() => (window.location.href = "/es/index.html"), 650);
+      } catch {
+        setStatus("Error en el registro con Google.");
+      } finally {
+        btnGoogle.disabled = false;
+      }
+    });
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      clearStatus();
+
+      const nombre = (document.getElementById("nombre")?.value || "").trim();
+      const email = (document.getElementById("email")?.value || "").trim();
+      const p1 = document.getElementById("password")?.value || "";
+      const p2 = document.getElementById("password2")?.value || "";
+
+      if (!email || !p1 || !p2) return setStatus("Completa los campos obligatorios.");
+      if (p1.length < 8) return setStatus("La contraseña debe tener al menos 8 caracteres.");
+      if (p1 !== p2) return setStatus("Las contraseñas no coinciden.");
+
+      try {
+        if (btnEmail) btnEmail.disabled = true;
+        setStatus("Creando cuenta…");
+
+        const res = await registerWithEmail(code, email, p1, nombre);
+        if (!res.ok) return setStatus("No se pudo completar el registro.");
+
+        setStatus("Registro completado. Redirigiendo…");
+        setTimeout(() => (window.location.href = "/es/index.html"), 650);
+      } catch (e2) {
+        const msg = String(e2?.code || "");
+        if (msg.includes("auth/email-already-in-use")) setStatus("Ese correo ya tiene cuenta.");
+        else if (msg.includes("auth/invalid-email")) setStatus("Correo no válido.");
+        else if (msg.includes("auth/weak-password")) setStatus("Contraseña demasiado débil.");
+        else setStatus("Error creando la cuenta.");
+      } finally {
+        if (btnEmail) btnEmail.disabled = false;
+      }
+    });
+  })().catch(() => {
+    // Si algo falla, no dejamos la página “oculta” para siempre.
+    document.documentElement.style.visibility = "visible";
+  });
+}
+
+/**
+ * SESSION UI ( /es/index.html y otras donde lo metas )
+ */
+function initSessionUI() {
+  const badge = document.getElementById("session-badge");
+  const actionBtn = document.getElementById("session-action");
+  if (!badge || !actionBtn) return;
+
+  function setBadge(text) {
+    badge.hidden = false;
+    badge.textContent = text;
+  }
+  function setGuest() {
+    setBadge("Invitado");
+    actionBtn.textContent = "Iniciar sesión";
+    actionBtn.dataset.state = "guest";
+  }
+  function setUser(user) {
+    const label = user?.displayName || user?.email || "Usuario";
+    setBadge(label);
+    actionBtn.textContent = "Cerrar sesión";
+    actionBtn.dataset.state = "user";
+  }
+
+  setGuest();
+
+  actionBtn.addEventListener("click", async () => {
+    const state = actionBtn.dataset.state || "guest";
+
+    if (state === "guest") {
+      window.location.href = "/es/auth/login.html";
+      return;
+    }
+
+    try {
+      actionBtn.disabled = true;
+      await signOut(auth);
+      window.location.href = "/?setup=1";
+    } catch {
+      actionBtn.disabled = false;
+    }
+  });
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) setUser(user);
+    else setGuest();
+  });
+}
+
+// Inicializa lo que toque según la página (por presencia de elementos)
+initSetupLogin();
+initSetupRegisterCode();
+initLoginPage();
+initRegisterPage();
+initSessionUI();
+Cambios en HTML (reemplazar scripts)
+1) Setup /index.html
+Ahora cargas login-setup.js y registro.js. 
+aesgalexis-unatomo-8a5edab28263…
+
+
+Déjalo en uno solo:
+
+<script type="module" src="/static/js/registro/app.js"></script>
+2) Login /es/auth/login.html
+Sustituye:
+
+<script type="module" src="/static/js/registro/login-page.js"></script>
+por:
+
+<script type="module" src="/static/js/registro/app.js"></script>
+(ahí está ahora mismo el script viejo). 
+aesgalexis-unatomo-8a5edab28263…
+
+
+3) Registro /es/registro.html
+Sustituye:
+
+<script type="module" src="/static/js/registro/register-page.js"></script>
+por:
+
+<script type="module" src="/static/js/registro/app.js"></script>
+
+aesgalexis-unatomo-8a5edab28263…
+
+
+4) Sesión /es/index.html
+Sustituye:
+
+<script type="module" src="/static/js/registro/session-ui.js"></script>
+por:
+
+<script type="module" src="/static/js/registro/app.js"></script>
+
+aesgalexis-unatomo-8a5edab28263…
+
+
+Resultado
+Un solo JS para todo el flujo de auth/registro (excepto firebase-init.js). 
+aesgalexis-unatomo-8a5edab28263…
+
+
+Se elimina el choque de listeners del setup que te estaba mandando a login “saltándose” el cuadro.
+
+Si quieres, en el siguiente paso te digo exactamente qué archivo/función está dejando entrar como invitado sin sesión (el “me lleva a la página sin iniciar sesión”), porque ahí ya entra el tema de gating en /es/index.html (ahora mismo parece permitido por diseño).
+
+
+Fuentes
+Tú dijiste:
+hay algo que esta forzando que cargue es/index sin que yo haga nada cuando entro a unatomo.com. 
+ChatGPT Plus
+
+Pensó durante 17s
+Sí. En tu repo hay dos cosas que pueden forzar que acabes en /es/… “sin hacer nada”, y una de ellas explica exactamente lo que describes.
+
+1) El culpable principal: static/js/unatomo-entry.js
+Tu index.html (la landing/setup en /) carga /static/js/unatomo-entry.js.
+Dentro de ese JS tienes este comportamiento:
+
+Si estás en / o /index.html
+
+y NO vienes con ?setup=1
+
+y existen en localStorage un idioma guardado + preferencias guardadas
+→ te redirige automáticamente a /es/index.html.
+
+Es decir: con que alguna vez hayas guardado esas preferencias, a partir de ahí entrar a unatomo.com te manda solo a /es/index.html.
+
+Soluciones rápidas
+Para comprobarlo ya: entra a unatomo.com/?setup=1 (eso desactiva ese redirect).
+
+O borra el localStorage del dominio (en DevTools → Application → Local Storage).
+
+Solución “definitiva” (si quieres que NO redirija nunca solo)
+En unatomo-entry.js, elimina o comenta este bloque:
+
+if (isRoot && !isSetupMode) {
+  ...
+  window.location.href = target;
+  return;
+}
+(Es el bloque que te está teletransportando a /es/index.html).
+
+Solución “fina” (redirigir solo si el usuario lo eligió explícitamente)
+En vez de basarte en “hay prefs”, usa una flag clara, por ejemplo localStorage.setItem("skip_setup","1") solo cuando pulse “Continuar”, y en el inicio checks skip_setup === "1".
+
+2) El “otro” forzador: 404.html
+Tu 404.html hace redirect inmediato a /es/ con meta refresh y con JS:
+
+<meta http-equiv="refresh" content="0; url=/es/">
+<script>location.replace('/es/');</script>
+Esto hace que cualquier ruta que no exista (por ejemplo /auth/login.html) termine en /es/ sí o sí.
+
+Qué haría yo en tu caso (mínimo y limpio)
+Ajustar el redirect automático en unatomo-entry.js para que no ocurra solo por tener prefs, sino solo si tú lo quieres.
+
+Cambiar 404.html para que no te “camufle” errores como “todo bien” llevándote a /es/ (porque te está escondiendo 404 reales del auth).
+
+Si quieres, dime cuál es el comportamiento deseado exactamente:
+
+A) siempre mostrar setup en /
+
+B) mostrar setup la primera vez y luego entrar directo a /es/
+
+C) entrar directo a /es/ siempre
+
+…y te digo los cambios exactos (código) en 2 minutos con la opción que elijas.
+
+Tú dijiste:
+en el setup, olvide mi contraseña deberia ser un enlace (como el de solicitar codigo), no un boton. Y deberiamos programar que debe hacer, teniendo en cuenta que en teoria el acceso por correo lo hacemos con firebase también, por que ahora mismo lo que hace es acceder al sitio como invitado.
+ChatGPT Plus
+
+Pensó durante 28s
+Sí. Ahora mismo “Olvidé mi contraseña” te está llevando a una ruta que no existe (/auth/reset.html), eso cae en tu 404.html que redirige automáticamente a /es/, y por eso terminas dentro como Invitado (sin haber hecho login).
+
+Te propongo este arreglo limpio:
+
+1) En el setup: que sea un enlace “normal” (no botón) y que apunte a una página real
+En index.html (setup), ahora lo tienes dentro de los botones:
+
+<div class="form-actions" ...>
+  <button ...>Entrar</button>
+  <a class="btn-secondary" href="/auth/reset.html">Olvidé mi contraseña</a>
+</div>
+Cámbialo por esto (deja el “Entrar” como botón y el “Olvidé…” como link tipo “Solicitar código”):
+
+<div class="form-actions" style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
+  <button type="submit" class="btn-primary" id="login-email-submit">Entrar</button>
+</div>
+
+<p class="footer-link" style="text-align:center; margin-top:0.75rem;">
+  <a href="/es/auth/reset.html">Olvidé mi contraseña</a>
+</p>
+Claves:
+
+Ya no es “botón”.
+
+Ya no apunta a /auth/reset.html (que no existe), sino a /es/auth/reset.html (la creamos en el paso 2). 
+aesgalexis-unatomo-8a5edab28263…
+
+
+2) Crear la página /es/auth/reset.html
+Crea este archivo nuevo: es/auth/reset.html
+
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Recuperar contraseña · unatomo</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="stylesheet" href="/styles.css">
+  <style>html{visibility:hidden}</style>
+</head>
+
+<body class="page">
+  <button id="theme-toggle" type="button" aria-label="Cambiar tema">☾ / ☼</button>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a href="/?setup=1" class="topbar-logo-link">
+        <img src="/static/img/logo-unatomo-v1.5.svg" alt="unatomo" class="topbar-logo" loading="lazy" />
+        <h2 class="topbar-title">Recuperar contraseña</h2>
+      </a>
+    </div>
+  </header>
+
+  <main class="shell page-shell">
+    <section class="page-section" aria-label="Recuperar contraseña">
+      <section class="card" aria-label="Restablecer">
+        <h3>Restablecer contraseña</h3>
+        <p>Introduce tu correo y te enviaremos un enlace para crear una contraseña nueva.</p>
+
+        <form id="reset-form" class="contact-form" novalidate>
+          <div class="form-grid">
+            <div class="form-field form-field--full">
+              <label for="email">Correo electrónico<span aria-hidden="true"> *</span></label>
+              <input id="email" name="email" type="email" required class="field" autocomplete="email" />
+            </div>
+          </div>
+
+          <p id="reset-status" class="form-status" role="status" aria-live="polite" hidden></p>
+
+          <div class="form-actions" style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
+            <button type="submit" class="btn-primary" id="reset-submit">Enviar enlace</button>
+            <a class="btn-secondary" href="/es/auth/login.html">Volver a iniciar sesión</a>
+          </div>
+        </form>
+      </section>
+    </section>
+
+    <div id="legal-footer" class="legal-footer"></div>
+    <div class="footer-link">
+      <a href="/es/privacidad.html">Política de privacidad y cookies</a>
+    </div>
+  </main>
+
+  <script src="/static/js/theme.js"></script>
+  <script src="/static/js/functions.js"></script>
+  <script src="/static/js/footer.js"></script>
+  <script type="module" src="/static/js/registro/reset-page.js"></script>
+</body>
+</html>
+3) Crear el JS static/js/registro/reset-page.js
+Crea este archivo nuevo: static/js/registro/reset-page.js
+
+import { sendPasswordReset } from "/static/js/registro/firebase-init.js";
+
+const form = document.getElementById("reset-form");
+const status = document.getElementById("reset-status");
+const submit = document.getElementById("reset-submit");
+
+function setStatus(t) {
+  if (!status) return;
+  status.hidden = false;
+  status.textContent = t;
+}
+function clearStatus() {
+  if (!status) return;
+  status.hidden = true;
+  status.textContent = "";
+}
+
+document.documentElement.style.visibility = "visible";
+
+form?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  clearStatus();
+
+  const email = (document.getElementById("email")?.value || "").trim();
+  if (!email) return setStatus("Introduce un correo válido.");
+
+  try {
+    if (submit) submit.disabled = true;
+    setStatus("Enviando enlace…");
+
+    const res = await sendPasswordReset(email);
+    if (!res.ok) return setStatus("No se pudo enviar el correo. Revisa el email e inténtalo de nuevo.");
+
+    setStatus("Listo. Si el correo existe, recibirás un email con el enlace.");
+    form.reset();
+  } catch {
+    setStatus("Error enviando el correo. Inténtalo más tarde.");
+  } finally {
+    if (submit) submit.disabled = false;
+  }
+});
+4) Añadir la función a Firebase (firebase-init.js)
+Ahora mismo tu firebase-init.js no importa sendPasswordResetEmail ni expone nada para resetear contraseña. 
+aesgalexis-unatomo-8a5edab28263…
+
+
+4.1 Modifica el import:
+Cambia:
+
+import { getAuth, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+por:
+
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile,
+  sendPasswordResetEmail
+} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+4.2 Añade al final:
+export async function sendPasswordReset(email) {
+  const em = (email ?? "").toString().trim();
+  if (!em) return { ok: false };
+  await sendPasswordResetEmail(auth, em);
+  return { ok: true };
+}
+Resultado
+“Olvidé mi contraseña” ya no te manda a una ruta inexistente (y por tanto ya no te “mete” en /es/ como invitado por el 404.html).
+
+El reset funciona “como debe ser” con Firebase email/password.
+
+Si además quieres que /es/index.html sea inaccesible sin sesión, eso es otro cambio (un “guard” en es/index.html / session-ui.js), pero lo de arriba ya te arregla el bug exacto del reset que ahora te está camuflando como acceso “de invitado”.
+
+
+Fuentes
+Tú dijiste:
+y funciona realmente?, permitimos resetear el pasword sin mas?, que seguridad tiene eso?
+ChatGPT Plus
+
+Pensó durante 30s
+Sí, funciona de verdad (si tienes activado Email/Password en Firebase Auth) y no es “resetear sin más” en el sentido peligroso.
+
+Lo que hace sendPasswordResetEmail(...) es:
+
+Tú escribes un email.
+
+Firebase envía un correo a ese buzón con un enlace de acción (lleva un oobCode).
+
+Solo quien tenga acceso a ese email puede abrir el enlace y definir una nueva contraseña. (No hay manera de “cambiar la contraseña” solo por escribir el correo). 
+Firebase
++1
+
+¿Qué seguridad tiene?
+1) El control real es el buzón de correo.
+El atacante necesitaría acceso a la bandeja de entrada de la víctima. Sin eso, no puede completar el reset.
+
+2) El enlace es un “código de acción” (oobCode).
+Firebase genera enlaces de acción con parámetros (incluido ese código) y tu handler/página de acción lo procesa. 
+Firebase
+
+3) Protección contra “enumeración” (descubrir si un correo existe).
+Aquí está el punto fino: si tu UI o tu API responden diferente cuando el correo existe vs no existe, un atacante puede ir probando emails.
+Google/Firebase tiene una opción específica para esto: Email enumeration protection. Actívala en la consola. 
+Google Cloud Documentation
+
+Tu texto ideal en UI es exactamente lo que te puse: “Si el correo existe, recibirás un email…” (misma respuesta siempre).
+
+4) Al cambiar contraseña, las sesiones se pueden invalidar.
+Firebase considera el cambio de contraseña un “cambio grande de cuenta” y eso afecta a sesiones/refresh tokens según la gestión de sesiones. 
+Firebase
+
+¿Entonces permitimos reset sin más?
+Sí, es el estándar en cualquier sistema con email/password: “introduce tu email y te mando un enlace”. La seguridad está en:
+
+que el enlace vaya solo al propietario del buzón,
+
+que no reveles si el email existe,
+
+y que tus datos estén protegidos por reglas (no por “ocultar pantallas”).
+
+Lo que te estaba pasando a ti (y por qué parecía inseguro)
+En tu caso, el “reset” no estaba reseteando nada: estaba apuntando a una ruta inexistente, caía en tu 404.html, y tu 404 te redirige a /es/, con lo que parecía “entra sin login”, pero en realidad entraba como Invitado porque no hay guard. (Eso es UX mala + 404 camuflador, no un agujero de reset).
+
+Recomendación mínima para dejarlo bien
+Crear /es/auth/reset.html y usar sendPasswordResetEmail (como te propuse). 
+Firebase
+
+Activar Email Enumeration Protection en Firebase console. 
+Google Cloud Documentation
+
+(Muy recomendado) Quitar el redirect automático en 404.html o al menos que no te mande siempre a /es/, porque te esconde errores reales y confunde el flujo.
+
+Si me dices si quieres que /es/index.html sea accesible como invitado o obligue login, te doy el “guard” exacto (2–3 líneas) y dónde ponerlo para que no haya ninguna pantalla “protegida por intención”.
+
+Tú dijiste:
+Y si pongo un correo que no esta registrado que ocurre? por que el mensaje en mi web dice listo, te enviamos un codigo.. aunque recien puse un correo que no tiene una cuenta creada
+ChatGPT Plus
+
+Pensó durante 27s
+Cuando pones un correo que no está registrado, lo normal (y lo más seguro) es esto:
+
+Firebase NO envía ningún email si ese correo no existe.
+
+Pero tu web puede (y debería) decir igualmente algo tipo “Listo, si el correo existe recibirás un enlace” para que nadie pueda usar tu formulario para “adivinar” qué emails están registrados (email enumeration). 
+Google Cloud Documentation
++1
+
+Por qué te sale “Listo…” aunque el correo no exista
+Si tienes activada la Email enumeration protection (y en proyectos creados desde 15 Sep 2023 suele venir activada por defecto), Firebase cambia el comportamiento:
+
+En PASSWORD_RESET, solo se manda email si el correo existe,
+
+pero no devuelve errores específicos cuando no se manda,
+
+así que desde el frontend no puedes distinguir “existe / no existe” aunque quisieras. 
+Google Cloud Documentation
++1
+
+Esto es exactamente lo que estás viendo: tu UI dice “listo” y, si el correo era inventado, simplemente no llega nada (como debe ser).
+
+Qué texto deberías poner
+Tu mensaje actual “te enviamos un código” es confuso: Firebase envía un enlace, no un código (aunque por debajo use un oobCode).
+
+Recomendación de copy:
+
+Listo. Si existe una cuenta con ese correo, te enviaremos un enlace para restablecer la contraseña.
+
+Y puedes añadir:
+
+Revisa spam / promociones.
+
+¿Y si NO tuvieras esa protección activada?
+Entonces sendPasswordResetEmail podría devolverte un error tipo auth/user-not-found (depende de configuración), pero mostrar ese error sería mala idea porque permite enumerar usuarios. Por eso Google recomienda activar esa protección. 
+Firebase
++1
+
+Cómo comprobarlo en tu Firebase
+En consola: Authentication → Settings → User actions → Email enumeration protection. (Ahí verás si está activada). 
+Google Cloud Documentation
+
+Si quieres, dime si tu proyecto es nuevo o antiguo (antes/después de 2023) y te digo cuál es el comportamiento exacto que deberías esperar en tu caso, y cómo dejar el mensaje/flujo perfecto sin filtrar información.
+
+Tú dijiste:
+aesgalexis-unatomo-8a5edab282632443 (1).txt
+Documento
+te doy el repositorio actualizado. Por que la tajeta de recuperacion de contraseña es mas ancha que las tarjetas del setup?
+ChatGPT Plus
+
+Pensó durante 1m 9s
+Porque en reset.html el <main> tiene dos clases a la vez:
+
+<main class="shell page-shell">
+Y en tu styles.css pasa esto:
+
+.shell { max-width: 600px; ... }
+
+más abajo (misma especificidad, pero aparece después) .page-shell { max-width: 800px; ... }
+
+Así que gana page-shell y el contenedor de la página pasa a ser de 800px, mientras que en el setup solo es 600px.
+
+Aunque tu .card tiene max-width: 600px, visualmente se nota “más ancha / más aire / más layout de página” porque el marco general (la “mesa”) es más ancho en reset que en setup.
+
+Arreglo simple (para que reset tenga el mismo ancho que el setup)
+Opción A (la más limpia): quita shell o quita el max-width de page-shell.
+
+Recomendada: deja .shell como quien manda el ancho y convierte .page-shell en “solo padding de página”:
+
+/* antes: .page-shell { max-width: 800px; ... } */
+.page-shell {
+  /* quita max-width */
+  padding: 110px 1.5rem 2.5rem;
+  margin: 0 auto;
+}
+Así todas las páginas con class="shell page-shell" se quedan en 600px como el setup. 
+aesgalexis-unatomo-8a5edab28263…
+
+
+Si quieres conservar páginas “anchas” (ej. registro) y que reset sea estrecha
+Crea un modificador:
+
+.page-shell { padding: 110px 1.5rem 2.5rem; margin: 0 auto; }
+.page-shell--wide { max-width: 800px; }
+Y en las páginas:
+
+reset/login: <main class="shell page-shell">
+
+páginas que quieras anchas: <main class="shell page-shell page-shell--wide">
+
+Si me dices qué páginas quieres “wide” y cuáles “narrow”, te lo dejo consistente en todo el repo sin romper nada.
+
+
+Fuentes
+Tú dijiste:
+No tengo que cambiar css sino clases en el html. Quiero que la tarjeta de reset password se vea igual de ancha las tarjetas del setup. Pongamos la misma clase que el setup en reset.html
+ChatGPT Plus
+
+Pensó durante 16s
+Perfecto: en el setup tu contenedor es:
+
+<main class="shell">
+
+aesgalexis-unatomo-8a5edab28263…
+
+
+Y en reset.html lo tienes así:
+
+<main class="shell page-shell">
+
+aesgalexis-unatomo-8a5edab28263…
+
+
+Como page-shell te da un layout más “ancho”, la forma más directa (sin tocar CSS) es poner exactamente la misma clase que en el setup.
+
+Cambio en es/auth/reset.html
+Reemplaza:
+
+<main class="shell page-shell">
+por:
+
+<main class="shell">
+Con eso, la tarjeta de “Recuperar contraseña” va a caer en el mismo “marco” que las tarjetas del setup, y se verá igual de ancha.
+
+
+Fuentes
+Tú dijiste:
+en cuanto al badge de usuario, que muestra nombre de usuario y iniciar sesion si estas como invitado, cerrar sesion si estas iniciado. Podemos meter todo eso en un boton con menu desplegable tipo el thogle para cambiar de tema?, mismas dimenciones.. con algun icono alusivo, y que se abra un pequeño menu, primera linea el nombre de usuario o invitado, y segunda linea iniciar sesion si es invitado, cerrar sesion si estamos iniciados.. deberiamos quizas crear un js para todo esto.. 
+ChatGPT Plus
+
+Pensó durante 1m 8s
+Sí. Ahora mismo tu “badge + botón” son:
+
+#session-badge (span) + #session-action (button) en el header de es/index.html 
+aesgalexis-unatomo-8a5edab28263…
+
+
+y el JS static/js/registro/session-ui.js está escrito exactamente para esos 2 IDs 
+aesgalexis-unatomo-8a5edab28263…
+
+
+La idea es: reemplazar esos 2 elementos por un único botón (mismo tamaño que #theme-toggle) y un menú desplegable, y crear un JS nuevo para manejarlo.
+
+1) Cambia el HTML del header (donde ahora están badge + botón)
+En es/index.html (y en cualquier otra página donde tengas ese bloque), sustituye esto:
+
+<span id="session-badge">Invitado</span>
+<button id="session-action" class="btn-secondary" type="button">Iniciar sesión</button>
+por esto (dentro del mismo <div class="topbar-actions" ...> donde está el theme toggle) 
+aesgalexis-unatomo-8a5edab28263…
+
+:
+
+<div id="session-menu-wrap" style="position:relative; display:inline-flex;">
+  <button
+    id="session-menu-btn"
+    type="button"
+    aria-label="Menú de usuario"
+    aria-haspopup="menu"
+    aria-expanded="false"
+    style="margin-top:0;"
+  >
+    👤
+  </button>
+
+  <div
+    id="session-menu"
+    role="menu"
+    hidden
+    style="
+      position:absolute;
+      right:0;
+      top:calc(100% + 8px);
+      min-width: 210px;
+      background: var(--panel-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 10px;
+      text-align:left;
+      box-shadow: 0 10px 30px rgba(0,0,0,.18);
+      z-index: 999;
+    "
+  >
+    <div
+      id="session-menu-label"
+      style="
+        font-size: 0.95rem;
+        opacity: .85;
+        padding: 6px 8px 10px 8px;
+        border-bottom: 1px solid var(--border-subtle);
+        margin-bottom: 10px;
+        word-break: break-word;
+      "
+    >
+      Invitado
+    </div>
+
+    <button
+      id="session-menu-action"
+      type="button"
+      role="menuitem"
+      class="btn-secondary"
+      style="width:100%; margin:0; justify-content:center;"
+    >
+      Iniciar sesión
+    </button>
+  </div>
+</div>
+📌 Nota: no toco tu CSS, todo va con estilos inline, y el tamaño lo igualamos por JS copiando las dimensiones reales del #theme-toggle.
+
+2) Crea un JS nuevo: static/js/registro/session-menu.js
+Crea este archivo:
+
+import { auth } from "/static/js/registro/firebase-init.js";
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+
+const btn = document.getElementById("session-menu-btn");
+const menu = document.getElementById("session-menu");
+const label = document.getElementById("session-menu-label");
+const action = document.getElementById("session-menu-action");
+const themeToggle = document.getElementById("theme-toggle");
+
+if (!btn || !menu || !label || !action) {
+  // Si alguna página no tiene el menú, no hacemos nada.
+} else {
+  let state = "guest"; // "guest" | "user"
+
+  function setLabel(text) {
+    label.textContent = text;
+  }
+
+  function setGuest() {
+    state = "guest";
+    setLabel("Invitado");
+    action.textContent = "Iniciar sesión";
+  }
+
+  function setUser(user) {
+    state = "user";
+    const t = user?.displayName || user?.email || "Usuario";
+    setLabel(t);
+    action.textContent = "Cerrar sesión";
+  }
+
+  function openMenu() {
+    menu.hidden = false;
+    btn.setAttribute("aria-expanded", "true");
+  }
+
+  function closeMenu() {
+    menu.hidden = true;
+    btn.setAttribute("aria-expanded", "false");
+  }
+
+  function toggleMenu() {
+    if (menu.hidden) openMenu();
+    else closeMenu();
+  }
+
+  // Igualar tamaño EXACTO al botón de tema (sin tocar CSS)
+  function syncSizeToThemeToggle() {
+    if (!themeToggle) return;
+    const r = themeToggle.getBoundingClientRect();
+    if (r.width && r.height) {
+      btn.style.width = `${r.width}px`;
+      btn.style.height = `${r.height}px`;
+      // opcional: misma “sensación” de botón
+      btn.style.display = "inline-flex";
+      btn.style.alignItems = "center";
+      btn.style.justifyContent = "center";
+    }
+  }
+
+  syncSizeToThemeToggle();
+  window.addEventListener("resize", syncSizeToThemeToggle);
+
+  // Eventos UI
+  btn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    toggleMenu();
+  });
+
+  // Cerrar clic fuera
+  document.addEventListener("click", () => closeMenu());
+
+  // Escape
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeMenu();
+  });
+
+  // Acción: login / logout
+  action.addEventListener("click", async (e) => {
+    e.preventDefault();
+
+    if (state === "guest") {
+      closeMenu();
+      window.location.href = "/es/auth/login.html";
+      return;
+    }
+
+    try {
+      action.disabled = true;
+      await signOut(auth);
+      closeMenu();
+      window.location.href = "/?setup=1";
+    } catch {
+      action.disabled = false;
+    }
+  });
+
+  // Estado auth (igual que tu session-ui.js original, pero aplicado al menú)
+  setGuest();
+  onAuthStateChanged(auth, (user) => {
+    if (user) setUser(user);
+    else setGuest();
+  });
+}
+Esto reemplaza la lógica actual de session-ui.js (que depende de #session-badge + #session-action) 
+aesgalexis-unatomo-8a5edab28263…
+
+
+3) Cambia el script en la(s) página(s) donde cargabas session-ui.js
+En es/index.html tienes al final:
+
+<script type="module" src="/static/js/registro/session-ui.js"></script>
+Cámbialo por:
+
+<script type="module" src="/static/js/registro/session-menu.js"></script>
+(En tu repo también aparece ese include en otras páginas tipo es/privacidad.html, así que donde esté, mismo cambio.) 
+aesgalexis-unatomo-8a5edab28263…
+
+
+Si quieres, en el siguiente mensaje me dices en qué páginas además de es/index.html estás mostrando ese bloque “Sesión” y te dejo el reemplazo exacto para todas (pero con esto ya tienes el patrón completo).
+
+
+Fuentes
+Tú dijiste:
+Se me superpone con el boton para cambiar de tema.. deberia estar mas a la izquierda..
+ChatGPT Plus
+Vale: te ocurre porque ahora el botón nuevo no está “reservando” espacio como lo hacía el badge+botón, y al estar en el mismo contenedor de acciones, acaba montándose encima del #theme-toggle.
+
+Sin tocar CSS global, lo arreglamos solo en HTML (ubicación) y con una regla inline mínima para separación.
+
+Opción recomendada (HTML): pon el menú a la izquierda del botón de tema
+En el header (donde tengas algo como #theme-toggle dentro de topbar-actions), deja el orden así:
+
+<div class="topbar-actions">
+  <!-- 1) Menú de sesión primero -->
+  <div id="session-menu-wrap" style="position:relative; display:inline-flex; margin-right:10px;">
+    <button
+      id="session-menu-btn"
+      type="button"
+      aria-label="Menú de usuario"
+      aria-haspopup="menu"
+      aria-expanded="false"
+      style="margin-top:0;"
+    >
+      👤
+    </button>
+
+    <div id="session-menu" role="menu" hidden
+      style="position:absolute; right:0; top:calc(100% + 8px); min-width:210px; background: var(--panel-bg); border: 1px solid var(--border-subtle); border-radius: 14px; padding: 10px; text-align:left; box-shadow: 0 10px 30px rgba(0,0,0,.18); z-index: 999;">
+      <div id="session-menu-label"
+        style="font-size:0.95rem; opacity:.85; padding:6px 8px 10px 8px; border-bottom: 1px solid var(--border-subtle); margin-bottom: 10px; word-break: break-word;">
+        Invitado
+      </div>
+
+      <button id="session-menu-action" type="button" role="menuitem" class="btn-secondary"
+        style="width:100%; margin:0; justify-content:center;">
+        Iniciar sesión
+      </button>
+    </div>
+  </div>
+
+  <!-- 2) Botón tema después -->
+  <button id="theme-toggle" type="button" aria-label="Cambiar tema">☾ / ☼</button>
+</div>
+La clave es:
+
+orden (session primero, tema después)
+
+margin-right:10px; en el wrapper para separar
+
+Con esto ya no se pisan y además queda “más a la izquierda” como pedías.
+
+Si aun así se solapa (por layout muy estrecho)
+Hay un fix extra sin CSS global: fuerza el contenedor a “gap” con inline:
+
+<div class="topbar-actions" style="display:flex; align-items:center; gap:10px;">
+(Esto solo afecta a ese header, no al resto del sitio.)
+
+Si me pegas el trozo exacto de tu topbar-actions actual (solo esas 5–10 líneas), te digo el reemplazo exacto para que quede perfecto sin tocar nada más.
+
+Tú dijiste:
+integralo en mi index por favor:
+
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>unatomo · Gestión de maquinaria y procesos de lavado</title>
+  <meta name="description" content="UNATOMO CORE SL. Gestión de maquinaria y procesos de lavado para lavanderías industriales, hoteleras y tintorerías. Venta, instalación, mantenimiento, formación y auditorías a medida.">
+  <meta name="robots" content="index, follow" />
+
+  <link rel="stylesheet" href="/styles.css">
+</head>
+
+<body class="page">
+  <header class="topbar">
+    <div class="topbar-inner" style="display:flex; align-items:center; justify-content:space-between; gap:1rem;">
+      <a href="/?setup=1" class="topbar-logo-link">
+        <img
+          src="/static/img/logo-unatomo-v1.5.svg"
+          alt="unatomo"
+          class="topbar-logo"
+          loading="lazy"
+        />
+        <h2 class="topbar-title">Inicio</h2>
+      </a>
+
+      <div class="topbar-actions" aria-label="Sesión" style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap; justify-content:flex-end;">
+        <button id="theme-toggle" type="button" aria-label="Cambiar tema" style="margin-top:0;">
+          ☾ / ☼
+        </button>
+
+<div id="session-menu-wrap" style="position:relative; display:inline-flex;">
+  <button
+    id="session-menu-btn"
+    type="button"
+    aria-label="Menú de usuario"
+    aria-haspopup="menu"
+    aria-expanded="false"
+    style="margin-top:0;"
+  >
+    👤
+  </button>
+
+  <div
+    id="session-menu"
+    role="menu"
+    hidden
+    style="
+      position:absolute;
+      right:0;
+      top:calc(100% + 8px);
+      min-width: 210px;
+      background: var(--panel-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 10px;
+      text-align:left;
+      box-shadow: 0 10px 30px rgba(0,0,0,.18);
+      z-index: 999;
+    "
+  >
+    <div
+      id="session-menu-label"
+      style="
+        font-size: 0.95rem;
+        opacity: .85;
+        padding: 6px 8px 10px 8px;
+        border-bottom: 1px solid var(--border-subtle);
+        margin-bottom: 10px;
+        word-break: break-word;
+      "
+    >
+      Invitado
+    </div>
+
+    <button
+      id="session-menu-action"
+      type="button"
+      role="menuitem"
+      class="btn-secondary"
+      style="width:100%; margin:0; justify-content:center;"
+    >
+      Iniciar sesión
+    </button>
+  </div>
+</div>
+
+  </header>
+
+  <main class="shell page-shell">
+    <section class="page-section">
+      <h1>Qué hacemos</h1>
+
+      <section class="card card--wide">
+        <h3>Auditoría técnica y de procesos</h3>
+        <br>
+
+        <p>
+          Detección de puntos críticos para optimizar el rendimiento de planta. Realizamos una inspección integral para
+          identificar dónde se está perdiendo rendimiento y cómo se podría evitar. Nos centramos en corregir cuellos de botella,
+          fallos recurrentes y desajustes operativos que lastran la producción en el día a día.
+        </p>
+
+        <p>
+          Realizamos un informe técnico por secciones con prioridades claras sobre en qué urge intervenir, qué mejoras programar
+          y qué inversiones pueden resultar más rentables.
+        </p>
+
+        <p>
+          Ponemos el foco en el análisis de los flujos de producción, mantenimiento preventivo, recambios críticos y hábitos de trabajo.
+        </p>
+
+        <br>
+        <h6>Desde 2225 €/día</h6>
+        <h5><em>(Informe incluido en el precio)</em></h5>
+
+        <div class="card-cta">
+          <a class="btn-primary" href="/es/precios.html">Contratar</a>
+        </div>
+      </section>
+
+      <section class="card card--wide">
+        <h3>Asesoría independiente de equipamiento</h3>
+        <br>
+
+        <p>
+          Validación técnica de inversiones sin conflictos de interés. Aportamos perspectiva técnica antes de que cierren su próxima compra.
+          No representamos marcas ni cobramos comisiones de fabricantes. Nuestro objetivo es asegurar que el equipo sea el adecuado para su operativa real.
+        </p>
+
+        <p>
+          Realizamos un análisis exhaustivo de idoneidad, virtudes, limitaciones y flexibilidad de la máquina a medio-largo plazo.
+        </p>
+
+        <p>
+          Evaluamos el servicio postventa y mantenimiento: dependencia de repuestos, facilidad de servicio técnico y vida útil esperable.
+        </p>
+
+        <p>
+          Acompañamiento: revisión del pliego técnico y comparativa de alternativas antes de la decisión final.
+        </p>
+
+        <br>
+        <h6>Desde 1,5% del coste de la inversión</h6>
+
+        <div class="card-cta">
+          <a class="btn-primary" href="/es/asesoria.html">Solicitar</a>
+        </div>
+      </section>
+
+      <section class="card card--wide">
+        <h3>Control de productividad y captura de datos</h3>
+        <br>
+
+        <p>
+          Software adaptado para recabar datos de todo lo que se pueda considerar relevante para la producción. Implementamos soluciones de monitorización
+          que captura, traduce y representa el trabajo de la lavandería en datos útiles para el control diario y la toma de decisiones.
+          Nos integramos en su ecosistema actual (ERP, bases de datos o sistemas locales) con incidencia mínima en la operativa del día a día.
+        </p>
+
+        <p>
+          Métricas de planta: contadores por línea/cliente/artículo, equivalencias a kilos, control de rechazos y reprocesos.
+        </p>
+
+        <p>
+          Información relevante: datos para identificar paradas, tiempos muertos y pérdidas de productividad.
+        </p>
+
+        <p>
+          Simplicidad: sistemas diseñados para ser funcionales, no para generar burocracia.
+        </p>
+
+        <div class="card-cta">
+          <a class="btn-secondary" href="/es/contacto.html">Consultar</a>
+        </div>
+      </section>
+
+      <section class="card card--wide">
+        <h3>Asistencia técnica</h3>
+        <br>
+
+        <p>
+          En este caso vamos más allá de la avería y ajuste fino de maquinaria. Intervenimos cuando el problema requiere una visión técnica extra más profunda
+          o menos contaminada. Hacemos lo posible por resolver fallos puntuales y estabilizamos el equipo con parametrización, calibración, ajustes o lo que requiera.
+        </p>
+
+        <p>
+          Optimización: ajustes mecánicos y de programación para mejorar estabilidad y rendimiento.
+        </p>
+
+        <p>
+          Diagnóstico “causa-raíz”: reducimos la recurrencia actuando sobre el origen del problema.
+        </p>
+
+        <br>
+        <h5><em>(Servicio bajo consulta según alcance y complejidad técnica)</em></h5>
+
+        <div class="card-cta">
+          <a class="btn-secondary" href="/es/contacto.html">Consultar</a>
+        </div>
+      </section>
+    </section>
+
+    <section class="page-section">
+      <a href="/es/contacto.html">Contacto</a>
+    </section>
+
+    <div class="scroll-top-container">
+      <button id="scroll-top-button" class="scroll-top-button" type="button">
+        Arriba
+      </button>
+    </div>
+
+    <div id="legal-footer" class="legal-footer"></div>
+
+    <div class="footer-link">
+      <a href="/es/privacidad.html">Política de privacidad y cookies</a>
+    </div>
+  </main>
+
+  <script src="/static/js/theme.js"></script>
+  <script src="/static/js/functions.js"></script>
+  <script src="/static/js/unatomo-entry.js"></script>
+  <script src="/static/js/footer.js"></script>
+  <script type="module" src="/static/js/registro/app.js"></script>
+        <script type="module" src="/static/js/registro/session-menu.js"></script>
+
+</body>
+</html>
+ChatGPT Plus
+Aquí lo tienes integrado y corregido (te faltaba cerrar el <div class="topbar-actions"> y estabas dejando el menú después del botón de tema, lo que favorece el solape). Lo he dejado a la izquierda del toggle de tema y con un margin-right para separarlo.
+
+También he alineado scripts al final (tu session-menu.js sobra si ya lo integraste dentro de app.js; pero como ahora lo estás cargando, lo dejo. Si tu app.js ya contiene initSessionUI() o initSessionMenu(), entonces quita el script duplicado para no tener doble listener.)
+
+es/index.html (versión integrada)
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>unatomo · Gestión de maquinaria y procesos de lavado</title>
+  <meta name="description" content="UNATOMO CORE SL. Gestión de maquinaria y procesos de lavado para lavanderías industriales, hoteleras y tintorerías. Venta, instalación, mantenimiento, formación y auditorías a medida.">
+  <meta name="robots" content="index, follow" />
+
+  <link rel="stylesheet" href="/styles.css">
+</head>
+
+<body class="page">
+  <header class="topbar">
+    <div class="topbar-inner" style="display:flex; align-items:center; justify-content:space-between; gap:1rem;">
+      <a href="/?setup=1" class="topbar-logo-link">
+        <img
+          src="/static/img/logo-unatomo-v1.5.svg"
+          alt="unatomo"
+          class="topbar-logo"
+          loading="lazy"
+        />
+        <h2 class="topbar-title">Inicio</h2>
+      </a>
+
+      <div class="topbar-actions" aria-label="Sesión"
+           style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap; justify-content:flex-end;">
+
+        <!-- Menú sesión (a la izquierda del theme toggle) -->
+        <div id="session-menu-wrap" style="position:relative; display:inline-flex; margin-right:0.5rem;">
+          <button
+            id="session-menu-btn"
+            type="button"
+            aria-label="Menú de usuario"
+            aria-haspopup="menu"
+            aria-expanded="false"
+            style="margin-top:0;"
+          >
+            👤
+          </button>
+
+          <div
+            id="session-menu"
+            role="menu"
+            hidden
+            style="
+              position:absolute;
+              right:0;
+              top:calc(100% + 8px);
+              min-width: 210px;
+              background: var(--panel-bg);
+              border: 1px solid var(--border-subtle);
+              border-radius: 14px;
+              padding: 10px;
+              text-align:left;
+              box-shadow: 0 10px 30px rgba(0,0,0,.18);
+              z-index: 999;
+            "
+          >
+            <div
+              id="session-menu-label"
+              style="
+                font-size: 0.95rem;
+                opacity: .85;
+                padding: 6px 8px 10px 8px;
+                border-bottom: 1px solid var(--border-subtle);
+                margin-bottom: 10px;
+                word-break: break-word;
+              "
+            >
+              Invitado
+            </div>
+
+            <button
+              id="session-menu-action"
+              type="button"
+              role="menuitem"
+              class="btn-secondary"
+              style="width:100%; margin:0; justify-content:center;"
+            >
+              Iniciar sesión
+            </button>
+          </div>
+        </div>
+
+        <!-- Theme toggle -->
+        <button id="theme-toggle" type="button" aria-label="Cambiar tema" style="margin-top:0;">
+          ☾ / ☼
+        </button>
+
+      </div>
+    </div>
+  </header>
+
+  <main class="shell page-shell">
+    <section class="page-section">
+      <h1>Qué hacemos</h1>
+
+      <section class="card card--wide">
+        <h3>Auditoría técnica y de procesos</h3>
+        <br>
+
+        <p>
+          Detección de puntos críticos para optimizar el rendimiento de planta. Realizamos una inspección integral para
+          identificar dónde se está perdiendo rendimiento y cómo se podría evitar. Nos centramos en corregir cuellos de botella,
+          fallos recurrentes y desajustes operativos que lastran la producción en el día a día.
+        </p>
+
+        <p>
+          Realizamos un informe técnico por secciones con prioridades claras sobre en qué urge intervenir, qué mejoras programar
+          y qué inversiones pueden resultar más rentables.
+        </p>
+
+        <p>
+          Ponemos el foco en el análisis de los flujos de producción, mantenimiento preventivo, recambios críticos y hábitos de trabajo.
+        </p>
+
+        <br>
+        <h6>Desde 2225 €/día</h6>
+        <h5><em>(Informe incluido en el precio)</em></h5>
+
+        <div class="card-cta">
+          <a class="btn-primary" href="/es/precios.html">Contratar</a>
+        </div>
+      </section>
+
+      <section class="card card--wide">
+        <h3>Asesoría independiente de equipamiento</h3>
+        <br>
+
+        <p>
+          Validación técnica de inversiones sin conflictos de interés. Aportamos perspectiva técnica antes de que cierren su próxima compra.
+          No representamos marcas ni cobramos comisiones de fabricantes. Nuestro objetivo es asegurar que el equipo sea el adecuado para su operativa real.
+        </p>
+
+        <p>
+          Realizamos un análisis exhaustivo de idoneidad, virtudes, limitaciones y flexibilidad de la máquina a medio-largo plazo.
+        </p>
+
+        <p>
+          Evaluamos el servicio postventa y mantenimiento: dependencia de repuestos, facilidad de servicio técnico y vida útil esperable.
+        </p>
+
+        <p>
+          Acompañamiento: revisión del pliego técnico y comparativa de alternativas antes de la decisión final.
+        </p>
+
+        <br>
+        <h6>Desde 1,5% del coste de la inversión</h6>
+
+        <div class="card-cta">
+          <a class="btn-primary" href="/es/asesoria.html">Solicitar</a>
+        </div>
+      </section>
+
+      <section class="card card--wide">
+        <h3>Control de productividad y captura de datos</h3>
+        <br>
+
+        <p>
+          Software adaptado para recabar datos de todo lo que se pueda considerar relevante para la producción. Implementamos soluciones de monitorización
+          que captura, traduce y representa el trabajo de la lavandería en datos útiles para el control diario y la toma de decisiones.
+          Nos integramos en su ecosistema actual (ERP, bases de datos o sistemas locales) con incidencia mínima en la operativa del día a día.
+        </p>
+
+        <p>
+          Métricas de planta: contadores por línea/cliente/artículo, equivalencias a kilos, control de rechazos y reprocesos.
+        </p>
+
+        <p>
+          Información relevante: datos para identificar paradas, tiempos muertos y pérdidas de productividad.
+        </p>
+
+        <p>
+          Simplicidad: sistemas diseñados para ser funcionales, no para generar burocracia.
+        </p>
+
+        <div class="card-cta">
+          <a class="btn-secondary" href="/es/contacto.html">Consultar</a>
+        </div>
+      </section>
+
+      <section class="card card--wide">
+        <h3>Asistencia técnica</h3>
+        <br>
+
+        <p>
+          En este caso vamos más allá de la avería y ajuste fino de maquinaria. Intervenimos cuando el problema requiere una visión técnica extra más profunda
+          o menos contaminada. Hacemos lo posible por resolver fallos puntuales y estabilizamos el equipo con parametrización, calibración, ajustes o lo que requiera.
+        </p>
+
+        <p>
+          Optimización: ajustes mecánicos y de programación para mejorar estabilidad y rendimiento.
+        </p>
+
+        <p>
+          Diagnóstico “causa-raíz”: reducimos la recurrencia actuando sobre el origen del problema.
+        </p>
+
+        <br>
+        <h5><em>(Servicio bajo consulta según alcance y complejidad técnica)</em></h5>
+
+        <div class="card-cta">
+          <a class="btn-secondary" href="/es/contacto.html">Consultar</a>
+        </div>
+      </section>
+    </section>
+
+    <section class="page-section">
+      <a href="/es/contacto.html">Contacto</a>
+    </section>
+
+    <div class="scroll-top-container">
+      <button id="scroll-top-button" class="scroll-top-button" type="button">
+        Arriba
+      </button>
+    </div>
+
+    <div id="legal-footer" class="legal-footer"></div>
+
+    <div class="footer-link">
+      <a href="/es/privacidad.html">Política de privacidad y cookies</a>
+    </div>
+  </main>
+
+  <script src="/static/js/theme.js"></script>
+  <script src="/static/js/functions.js"></script>
+  <script src="/static/js/unatomo-entry.js"></script>
+  <script src="/static/js/footer.js"></script>
+
+  <!-- OJO: si tu app.js ya incluye el menú de sesión, quita session-menu.js -->
+  <script type="module" src="/static/js/registro/app.js"></script>
+  <script type="module" src="/static/js/registro/session-menu.js"></script>
+</body>
+</html>
+Dos detalles rápidos para evitar problemas
+Antes te faltaba cerrar el <div class="topbar-actions"> (y el topbar-inner) antes del </header>. Eso te podía romper el layout y provocar solapes “fantasma”. Aquí ya está correcto.
+
+Si app.js ya contiene inicialización de sesión y además cargas session-menu.js, tendrás doble lógica. Si notas clicks raros/doble toggle, quita uno.
+
+Si me dices si tu app.js ya lleva el código del menú de sesión o no, te digo cuál script debes dejar (uno solo).
+
+Tú dijiste:
+se sigue superponiendo, como si el thogle no estubiese dentro del top-bar?.. por otra parte el estilo del boton de usuario deberia ser mas parecido al thogle, mismo tamaño, mismo estilo (transparente)
+ChatGPT Plus
+
+Pensó durante 26s
+Te pasa por CSS, no por tu HTML: tu #theme-toggle está definido como position: fixed (y en body.page además lo fuerza arriba a la derecha), así que sale del flujo del header aunque lo metas dentro de .topbar-actions. Por eso parece “como si no estuviera dentro del top-bar” y se te superpone.
+
+La solución sin tocar tu CSS global es pisar esa posición desde el propio HTML (inline style gana a la regla del CSS), y ya de paso darle al botón de usuario el mismo look/tamaño que el toggle.
+
+Cambia SOLO este bloque en tu es/index.html
+Dentro de:
+
+<div class="topbar-actions" ...>
+  ...
+</div>
+pon esto (fíjate que:
+
+el menú usuario va a la izquierda
+
+el theme-toggle va des-fijado con position:static
+
+el botón usuario copia el estilo “transparente” del theme-toggle
+
+subo el z-index del menú para que no lo tape nada)
+
+<div class="topbar-actions" aria-label="Sesión"
+     style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap; justify-content:flex-end;">
+
+  <!-- Usuario (izquierda) -->
+  <div id="session-menu-wrap" style="position:relative; display:inline-flex; margin-right:0.5rem;">
+    <button
+      id="session-menu-btn"
+      type="button"
+      aria-label="Menú de usuario"
+      aria-haspopup="menu"
+      aria-expanded="false"
+      style="
+        margin-top:0;
+        padding: 6px 10px;
+        min-width: 40px;
+        min-height: 32px;
+        border-radius: 0.75rem;
+        border: 1px solid color-mix(in srgb, var(--fg) 55%, transparent);
+        background: color-mix(in srgb, var(--bg) 80%, transparent);
+        color: var(--fg);
+        font: inherit;
+        font-size: 0.9rem;
+        cursor: pointer;
+        opacity: 0.9;
+        backdrop-filter: blur(8px);
+        -webkit-tap-highlight-color: transparent;
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+      "
+    >
+      👤
+    </button>
+
+    <div
+      id="session-menu"
+      role="menu"
+      hidden
+      style="
+        position:absolute;
+        right:0;
+        top:calc(100% + 8px);
+        min-width:210px;
+        background: var(--panel-bg);
+        border: 1px solid var(--border-subtle);
+        border-radius: 14px;
+        padding: 10px;
+        text-align:left;
+        box-shadow: 0 10px 30px rgba(0,0,0,.18);
+        z-index: 1200;
+      "
+    >
+      <div
+        id="session-menu-label"
+        style="
+          font-size: 0.95rem;
+          opacity: .85;
+          padding: 6px 8px 10px 8px;
+          border-bottom: 1px solid var(--border-subtle);
+          margin-bottom: 10px;
+          word-break: break-word;
+        "
+      >
+        Invitado
+      </div>
+
+      <button
+        id="session-menu-action"
+        type="button"
+        role="menuitem"
+        class="btn-secondary"
+        style="width:100%; margin:0; justify-content:center;"
+      >
+        Iniciar sesión
+      </button>
+    </div>
+  </div>
+
+  <!-- Theme toggle (derecha) — IMPORTANTE: desactivar el fixed -->
+  <button
+    id="theme-toggle"
+    type="button"
+    aria-label="Cambiar tema"
+    style="
+      margin-top:0;
+      position:static;
+      top:auto; right:auto; left:auto;
+      transform:none;
+    "
+  >
+    ☾ / ☼
+  </button>
+
+</div>
+Con esto:
+
+el toggle deja de flotar (ya no se superpone) aunque tu CSS lo tenga en fixed, porque lo estás sobrescribiendo inline.
+
+el botón de usuario queda mismo estilo/tamaño que el theme toggle.
+
+Nota rápida (por si te sorprende en otras páginas)
+Veo que en varias páginas tú pones el #theme-toggle fuera del header (directo en <body>), y con tu CSS actual eso tiene sentido porque lo quieres siempre flotante. 
+aesgalexis-unatomo-8a5edab28263…
+
+
+En es/index.html tú lo metiste en el header, pero tu CSS lo sigue forzando fijo, por eso el comportamiento.
+
+Si quieres, te dejo también el patrón “correcto” para que en todas las páginas el toggle sea coherente (o flotante siempre, o dentro del topbar siempre), pero con lo de arriba ya te queda bien sin tocar el CSS.
+
+
+Fuentes
+Tú dijiste:
+faltaria que el icono de la personita fuera negro, ni violeta ni azul en movil, negro o blanco directamente, dependiendo del tema, asi como tengo los emojis de la seccion de contacto
+ChatGPT Plus
+
+Pensó durante 8s
+Eso es porque “👤” es un emoji y en móvil (sobre todo iOS/Android) se renderiza con fuente emoji a color, y no respeta color: var(--fg) como un carácter normal. Por eso te sale violeta/azul.
+
+Tienes dos soluciones. La robusta es la del SVG.
+
+Solución robusta: cambia el emoji por un icono SVG que herede currentColor
+En tu botón, reemplaza:
+
+👤
+por esto:
+
+
+Y deja el botón con color: var(--fg); (como ya lo tienes). Con eso el icono será negro en tema claro / blanco en tema oscuro automáticamente, igual que el resto del texto del sitio.
+
+✅ Ventaja: 100% consistente en todos los móviles y navegadores.
+✅ No necesitas tocar CSS global.
+
+Solución rápida (menos fiable): forzar “texto” en vez de emoji
+Puedes probar a poner el selector de presentación de texto (U+FE0E). Quedaría así (ojo que parece igual, pero no lo es):
+
+👤︎
+En algunos sistemas lo vuelve monocromo, pero no es garantizado (en iOS a veces seguirá siendo emoji a color).
+
+Si quieres, te dejo el bloque completo del <button id="session-menu-btn"> ya con el SVG integrado y el padding/centrado exactos como el theme-toggle.
+
+Tú dijiste:
+mira los de la seccion de contacto:
+
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Contacto · unatomo</title>
+  <meta name="description" content="Formulario de contacto de UNATOMO CORE SL. Envíanos tus consultas sobre maquinaria y procesos de lavado para lavanderías industriales, hoteleras y tintorerías.">
+  <meta name="robots" content="index, follow" />
+
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body class="page">
+  <button id="theme-toggle" type="button" aria-label="Cambiar tema">
+    ☾ / ☼
+  </button>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a href="/?setup=1" class="topbar-logo-link">
+        <img
+          src="/static/img/logo-unatomo-v1.5.svg"
+          alt="unatomo"
+          class="topbar-logo"
+          loading="lazy"
+        />
+        <h2 class="topbar-title">Contacto</h2>
+      </a>
+    </div>
+  </header>
+
+  <main class="shell page-shell">
+    <section class="page-section contacto" aria-label="Contacto">
+
+      <section class="card" aria-label="Datos de contacto">
+        <div class="contact-info">
+          <div class="contact-info-item">
+            <span class="contact-info-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zm0 2v.01L12 13 20 6.01V6H4zm0 12h16V8l-8 7-8-7v10z" />
+              </svg>
+            </span>
+            <p>
+              <strong>Correo electrónico:</strong>
+              <a href="mailto:info@unatomo.com">info@unatomo.com</a>
+            </p>
+          </div>
+
+          <div class="contact-info-item">
+            <span class="contact-info-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24 11.36 11.36 0 003.56.57 1 1 0 011 1V20a2 2 0 01-2 2A17 17 0 013 5a2 2 0 012-2h2.5a1 1 0 011 1 11.36 11.36 0 00.57 3.56 1 1 0 01-.24 1.01l-2.21 2.22z" />
+              </svg>
+            </span>
+            <p>
+              <strong>Teléfono:</strong>
+              <a href="tel:+34871252049">+34 871 25 20 49</a>
+            </p>
+          </div>
+
+          <div class="contact-info-item">
+            <span class="contact-info-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M12 2a10 10 0 1010 10A10.011 10.011 0 0012 2zm0 18a8 8 0 118-8 8.009 8.009 0 01-8 8zm.5-13h-1v6l5 3 .5-.86-4.5-2.64z" />
+              </svg>
+            </span>
+            <p>
+              <strong>Horario de atención:</strong>
+              De lunes a viernes, de 09:00 a 15:00 (Horario de España / CET).
+            </p>
+          </div>
+
+          <div class="contact-info-item">
+            <span class="contact-info-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M12 2a7 7 0 00-7 7c0 4.25 5.13 10.21 6.38 11.57a1 1 0 001.48 0C13.87 19.21 19 13.25 19 9a7 7 0 00-7-7zm0 9.5A2.5 2.5 0 1114.5 9 2.5 2.5 0 0112 11.5z" />
+              </svg>
+            </span>
+            <p>
+              <strong>Dirección:</strong>
+              CL. Lluna 2 1, 07440 Muro, Mallorca, España
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" aria-label="Formulario de contacto">
+        <p>
+          Si lo prefieres puedes usar el formulario de contacto. Te responderemos lo antes posible.
+        </p>
+
+        <form class="contact-form" action="https://formspree.io/f/mkgqlvqj" method="POST" novalidate>
+          <input
+            type="text"
+            name="_gotcha"
+            tabindex="-1"
+            autocomplete="off"
+            style="position:absolute; left:-5000px;"
+            aria-hidden="true"
+          >
+
+          <div class="form-grid">
+            <div class="form-field">
+              <label for="nombre">Nombre<span aria-hidden="true"> *</span></label>
+              <input id="nombre" name="nombre" type="text" required class="field" autocomplete="name" />
+            </div>
+
+            <div class="form-field">
+              <label for="empresa">Empresa</label>
+              <input id="empresa" name="empresa" type="text" class="field" autocomplete="organization" />
+            </div>
+
+            <div class="form-field">
+              <label for="email">Correo electrónico<span aria-hidden="true"> *</span></label>
+              <input id="email" name="email" type="email" required class="field" autocomplete="email" />
+            </div>
+
+            <div class="form-field">
+              <label for="telefono">Teléfono</label>
+              <input
+                id="telefono"
+                name="telefono"
+                type="tel"
+                class="field"
+                autocomplete="tel"
+                inputmode="tel"
+              />
+            </div>
+
+            <div class="form-field form-field--full">
+              <label for="asunto">Asunto<span aria-hidden="true"> *</span></label>
+              <select id="asunto" name="asunto" required class="field">
+                <option value="" disabled selected>Selecciona un asunto…</option>
+                <option>Consulta general</option>
+                <option>Maquinaria y procesos</option>
+                <option>Auditorías y estudios</option>
+                <option>Otros</option>
+              </select>
+            </div>
+
+            <div class="form-field form-field--full">
+              <label for="mensaje">Mensaje<span aria-hidden="true"> *</span></label>
+              <textarea id="mensaje" name="mensaje" rows="6" required class="field"></textarea>
+            </div>
+          </div>
+
+          <p class="form-status" role="status" aria-live="polite" hidden></p>
+
+          <div class="form-actions" style="display:flex; justify-content:center;">
+            <button type="submit" class="btn-primary">Enviar</button>
+          </div>
+        </form>
+      </section>
+
+    </section>
+<div class="scroll-top-container">
+  <button id="back-button" class="scroll-top-button" type="button" onclick="window.location.href='/es/index.html'">
+    Volver
+  </button>
+      <button id="scroll-top-button" class="scroll-top-button" type="button">
+        Arriba
+      </button>
+</div>
+    <div id="legal-footer" class="legal-footer"></div>
+
+    <div class="footer-link">
+      <a href="/es/privacidad.html">Política de privacidad y cookies</a>
+    </div>
+  </main>
+
+  <script src="/static/js/theme.js"></script>
+  <script src="/static/js/unatomo-entry.js"></script>
+  <script src="/static/js/footer.js"></script>
+  <script src="/static/js/functions.js"></script>
+  <script src="/static/js/contacto.js"></script>
+</body>
+</html>
+
+No puede ser algo asi?
+ChatGPT Plus
+Sí, exactamente: lo que tienes en Contacto funciona porque no es un emoji, es un SVG, y tu CSS lo pinta monocromo (normalmente con fill: currentColor o similar), así que respeta el tema.
+
+Haz lo mismo en el botón de usuario: cambia el emoji 👤 por un SVG como los de contacto.
+
+1) Sustituye el contenido del botón
+En tu es/index.html, dentro de:
+
+<button id="session-menu-btn" ...> 👤 </button>
+cámbialo por esto:
+
+<button
+  id="session-menu-btn"
+  type="button"
+  aria-label="Menú de usuario"
+  aria-haspopup="menu"
+  aria-expanded="false"
+  style="margin-top:0;"
+>
+  <svg viewBox="0 0 24 24" aria-hidden="true" style="width:18px; height:18px; display:block;">
+    <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm0 2c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5z"/>
+  </svg>
+</button>
+Ese SVG es “usuario” y se comporta igual que los de contacto.
+
+2) Asegura que hereda color (sin tocar CSS global)
+Como en Contacto tú no pones fill en el SVG, lo habitual es que tu CSS ya esté metiendo fill: currentColor; a esos iconos.
+Pero por si acaso, puedes dejarlo explícito en el propio SVG (cero CSS global):
+
+
+Con eso será negro en tema claro / blanco en oscuro, siempre.
+
+Bonus: que el botón usuario tenga exactamente el mismo “look” que el toggle
+El emoji te obligaba a estilos raros. Con SVG ya puedes igualarlo bien. Si tu #theme-toggle ya tiene estilo “botón flotante”, entonces lo más simple es reutilizar sus estilos inline en el user button (si estás sobreescribiendo el fixed con inline):
+
+<button id="session-menu-btn" type="button" aria-label="Menú de usuario"
+  aria-haspopup="menu" aria-expanded="false"
+  style="margin-top:0; position:static; top:auto; right:auto; left:auto; transform:none;"
+>
+Y el tamaño lo seguirá igualando tu JS (el syncSizeToThemeToggle() que te pasé).
+
+Si me pegas el HTML exacto de tu session-menu-btn actual (con los inline styles que le pusimos para “parecer toggle”), te lo devuelvo ya con el SVG metido y sin romper el tamaño.
+
+Tú dijiste:
+Necesito que login.html, se vea como el index setup, ancho de tarjetas, centradas, etc.. dime por que no funciona:
+
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Iniciar sesión · unatomo</title>
+  <meta name="robots" content="noindex, nofollow" />
+
+  <link rel="stylesheet" href="/styles.css">
+  <style>html{visibility:hidden}</style>
+</head>
+
+<body class="page">
+  <button id="theme-toggle" type="button" aria-label="Cambiar tema">
+    ☾ / ☼
+  </button>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a href="/?setup=1" class="topbar-logo-link">
+        <img
+          src="/static/img/logo-unatomo-v1.5.svg"
+          alt="unatomo"
+          class="topbar-logo"
+          loading="lazy"
+        />
+        <h2 class="topbar-title">Iniciar sesión</h2>
+      </a>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="page-section" aria-label="Iniciar sesión">
+      <section class="card" aria-label="Acceso">
+        <h3>Acceder</h3>
+        <p>Continúa con Google o accede con correo y contraseña.</p>
+
+        <div class="form-actions" style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
+          <button type="button" class="btn-secondary" id="btn-google-login">
+            Continuar con Google
+          </button>
+        </div>
+
+        <br>
+
+        <form id="login-email-form" class="contact-form" novalidate>
+          <div class="form-grid">
+            <div class="form-field form-field--full">
+              <label for="email">Correo electrónico<span aria-hidden="true"> *</span></label>
+              <input id="email" name="email" type="email" required class="field" autocomplete="email" />
+            </div>
+
+            <div class="form-field form-field--full">
+              <label for="password">Contraseña<span aria-hidden="true"> *</span></label>
+              <input id="password" name="password" type="password" required class="field" autocomplete="current-password" />
+            </div>
+          </div>
+
+          <p id="login-status" class="form-status" role="status" aria-live="polite" hidden></p>
+
+          <div class="form-actions" style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
+            <button type="submit" class="btn-primary" id="btn-email-login">
+              Iniciar sesión
+            </button>
+            <br><br>
+            <p class="footer-link" style="text-align:center; margin-top:0.75rem;">
+  <a href="/es/auth/reset.html">Olvidé mi contraseña</a>
+</p>
+          </div>
+        </form>
+      </section>
+
+    <div id="legal-footer" class="legal-footer"></div>
+
+    <div class="footer-link">
+      <a href="/es/privacidad.html">Política de privacidad y cookies</a>
+    </div>
+  </main>
+
+  <script src="/static/js/theme.js"></script>
+  <script src="/static/js/functions.js"></script>
+  <script src="/static/js/footer.js"></script>
+  <script type="module" src="/static/js/registro/app.js"></script>
+</body>
+</html>
+
+
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>unatomo</title>
+  <meta name="robots" content="noindex, nofollow" />
+
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main class="shell">
+    <img
+      src="/static/img/logo-unatomo-v1.5.svg"
+      alt="unatomo"
+      class="logo"
+      loading="lazy"
+    />
+
+    <h1 id="title-main">unatomo</h1>
+    <h2 id="subtitle-main">Tu proceso, Nuestra visión</h2>
+<br><br>
+<div class="auth-actions" aria-label="Acceso">
+  <button type="button" class="btn-pill btn-pill-solid" id="go-login">
+    Iniciar sesión
+  </button>
+</div>
+  <section id="login-box" class="card" hidden>
+  <h3>Iniciar sesión</h3>
+  <p>Accede con Google o con tu correo y contraseña.</p>
+
+  <div class="form-actions" style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
+    <button type="button" class="btn-secondary" id="login-google">
+      Continuar con Google
+    </button>
+  </div>
+
+  <br>
+
+  <form id="login-email-form" class="contact-form" novalidate>
+    <div class="form-grid">
+      <div class="form-field form-field--full">
+        <label for="login-email">Correo electrónico<span aria-hidden="true"> *</span></label>
+        <input id="login-email" name="email" type="email" required class="field" autocomplete="email" />
+      </div>
+
+      <div class="form-field form-field--full">
+        <label for="login-password">Contraseña<span aria-hidden="true"> *</span></label>
+        <input id="login-password" name="password" type="password" required class="field" autocomplete="current-password" />
+      </div>
+    </div>
+
+    <p id="login-status" class="form-status" role="status" aria-live="polite" hidden></p>
+
+<div class="form-actions" style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
+  <button type="submit" class="btn-primary" id="login-email-submit">Entrar</button>
+</div>
+
+<p class="footer-link" style="text-align:center; margin-top:0.75rem;">
+  <a href="/es/auth/reset.html">Olvidé mi contraseña</a>
+</p>
+
+  </form>
+</section>
+
+      <br>
+      <button type="button" class="btn-pill btn-pill-outline" id="go-register">
+        Registrarse
+      </button>
+
+<section id="register-code-box" class="card" hidden>
+  <h3>Código de acceso</h3>
+  <p>Introduce el código de invitacón para registrarte.</p>
+<br>
+  <div class="inline-field-row">
+    <input
+      id="register-code-input"
+      class="field"
+      type="text"
+      placeholder="Código"
+      autocomplete="one-time-code"
+    >
+    <button id="register-code-submit" type="button" class="btn-secondary">
+      Continuar
+    </button>
+  </div>
+
+  <p id="register-code-status" class="form-status" role="status" aria-live="polite" hidden></p>
+
+  <p class="footer-link">
+    <a href="/auth/request-code.html">Solicitar código</a>
+  </p>
+</section>
+
+    <section class="intro">
+      <h5 id="intro-title">Unatomo Core:</h5>
+      <h5 id="intro-line-1">
+        Nos dedicamos a la gestión de maquinaria y procesos de lavado de prendas textiles.
+      </h5>
+      <h5 id="intro-line-2">
+        Ofrecemos variedad de servicios enfocados principalmente a lavanderías industriales, hoteleras y
+        tintorerías, desde la venta de maquinaria, instalación, mantenimiento, formación a personal
+        operativo y técnico hasta estudios y auditorias a medida enfocadas en ayudar a quienes ya saben
+        lo que hacen, a poder hacerlo un poco mejor.
+      </h5>
+      <h5 id="intro-line-3">
+        Tenemos una larga trayectoria y casos de éxito consolidados en lavanderías industriales de gran tamaño,
+        líderes del sector en España.
+      </h5>
+      <h5 id="intro-line-4">
+        Configura tus preferencias y accede al sitio para conocer más.
+      </h5>
+    </section>
+
+    <section class="card">
+      <h3 id="heading-lang">Idioma</h3>
+      <div class="lang-picker">
+        <label>
+          <input type="radio" name="lang" value="es" checked>
+          <span>Español</span>
+        </label>
+        <label>
+          <input type="radio" name="lang" value="en">
+          <span>English</span>
+        </label>
+        <label>
+          <input type="radio" name="lang" value="gr">
+          <span>Ελληνικά</span>
+        </label>
+      </div>
+    </section>
+
+    <section class="card">
+      <h3 id="heading-theme">Tema</h3>
+      <div class="lang-picker theme-picker">
+        <label>
+          <input type="radio" name="theme" value="light">
+          <span id="theme-label-light">Claro</span>
+        </label>
+        <label>
+          <input type="radio" name="theme" value="dark">
+          <span id="theme-label-dark">Oscuro</span>
+        </label>
+      </div>
+    </section>
+
+    <section class="card">
+      <h3 id="heading-cookies">Cookies</h3>
+      <p id="cookies-intro">
+        Todas las cookies opcionales están desactivadas por defecto.
+      </p>
+
+      <ul class="cookie-list">
+        <li>
+          <label class="cookie-row">
+            <div class="cookie-text">
+              <h4 id="cookie-analytics-title">Analíticas</h4>
+              <p id="cookie-analytics-text">Nos ayudan a entender cómo se usa la web.</p>
+            </div>
+            <input type="checkbox" data-cookie-key="analytics">
+          </label>
+        </li>
+        <li>
+          <label class="cookie-row">
+            <div class="cookie-text">
+              <h4 id="cookie-functional-title">Funcionales</h4>
+              <p id="cookie-functional-text">Recuerdan pequeñas preferencias (por ejemplo, idioma).</p>
+            </div>
+            <input type="checkbox" data-cookie-key="functional">
+          </label>
+        </li>
+        <li>
+          <label class="cookie-row">
+            <div class="cookie-text">
+              <h4 id="cookie-marketing-title">Marketing</h4>
+              <p id="cookie-marketing-text">Contenido y comunicaciones más ajustadas a ti.</p>
+            </div>
+            <input type="checkbox" data-cookie-key="marketing">
+          </label>
+        </li>
+      </ul>
+    </section>
+
+<button id="enter-site" type="button" class="btn-pill btn-pill-outline">
+  Continuar como invitado
+</button>
+
+    <p id="legal-footer" class="legal-footer"></p>
+    <p class="footer-link">
+      <a href="/es/privacidad.html">Política de privacidad y cookies</a>
+    </p>
+  </main>
+
+  <script src="/static/js/theme.js"></script>
+  <script src="/static/js/unatomo-entry.js"></script>
+  <script type="module" src="/static/js/registro/app.js"></script>
+  <script src="/static/js/footer.js"></script>
+
+</body>
+</html>
+ChatGPT Plus
+
+Pensó durante 37s
+No te está “fallando” por el formulario: te falla el layout base.
+
+Por qué no se ve como el setup (index)
+En tu CSS, el setup (tu index.html raíz) funciona centrado porque el <body> NO tiene class="page", y entonces se aplica el estilo base:
+
+body { display:flex; align-items:center; justify-content:center; text-align:center; } 
+aesgalexis-unatomo-8a5edab28263…
+
+
+.shell no tiene margin:auto, así que depende de ese flex del body para quedar centrado.
+
+En login.html tú tienes:
+
+<body class="page">
+Eso activa esta regla:
+
+body.page { display:block; text-align:left; } 
+aesgalexis-unatomo-8a5edab28263…
+
+
+Resultado: se pierde el centrado y la .shell se queda “normal” (arriba / a la izquierda), porque .shell por sí sola no centra. 
+aesgalexis-unatomo-8a5edab28263…
+
+
+Además, si estás usando page-shell (en el repo aparece así), eso mete padding y un ancho distinto de página.
+
+Solución (solo clases/HTML, sin tocar CSS)
+Si quieres que es/auth/login.html se vea igual que el setup, tienes que hacerlo “modo setup”:
+
+Quitar class="page" del body
+
+Quitar la topbar (porque el setup no tiene topbar y además tu topbar es position:fixed) 
+aesgalexis-unatomo-8a5edab28263…
+
+
+Dejar solo <main class="shell"> y dentro una .card centrada (como en el setup).
+
+Te dejo un login.html ya listo, con el mismo patrón que el setup (logo + títulos + card), y con el “Olvidé mi contraseña” como link fuera de los botones:
+
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Iniciar sesión · unatomo</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="stylesheet" href="/styles.css">
+  <style>html{visibility:hidden}</style>
+</head>
+
+<body>
+  <button id="theme-toggle" type="button" aria-label="Cambiar tema">
+    ☾ / ☼
+  </button>
+
+  <main class="shell">
+    <img
+      src="/static/img/logo-unatomo-v1.5.svg"
+      alt="unatomo"
+      class="logo"
+      loading="lazy"
+    />
+
+    <h1>unatomo</h1>
+    <h2>Iniciar sesión</h2>
+
+    <section class="card" aria-label="Acceso">
+      <h3>Acceder</h3>
+      <p>Continúa con Google o accede con correo y contraseña.</p>
+
+      <div class="form-actions" style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
+        <button type="button" class="btn-secondary" id="btn-google-login">
+          Continuar con Google
+        </button>
+      </div>
+
+      <br>
+
+      <form id="login-email-form" class="contact-form" novalidate>
+        <div class="form-grid">
+          <div class="form-field form-field--full">
+            <label for="email">Correo electrónico<span aria-hidden="true"> *</span></label>
+            <input id="email" name="email" type="email" required class="field" autocomplete="email" />
+          </div>
+
+          <div class="form-field form-field--full">
+            <label for="password">Contraseña<span aria-hidden="true"> *</span></label>
+            <input id="password" name="password" type="password" required class="field" autocomplete="current-password" />
+          </div>
+        </div>
+
+        <p id="login-status" class="form-status" role="status" aria-live="polite" hidden></p>
+
+        <div class="form-actions" style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
+          <button type="submit" class="btn-primary" id="btn-email-login">
+            Iniciar sesión
+          </button>
+        </div>
+
+        <p class="footer-link" style="text-align:center; margin-top:0.75rem;">
+          <a href="/es/auth/reset.html">Olvidé mi contraseña</a>
+        </p>
+      </form>
+    </section>
+
+    <div id="legal-footer" class="legal-footer"></div>
+    <p class="footer-link">
+      <a href="/es/privacidad.html">Política de privacidad y cookies</a>
+    </p>
+  </main>
+
+  <script src="/static/js/theme.js"></script>
+  <script src="/static/js/functions.js"></script>
+  <script src="/static/js/footer.js"></script>
+  <script type="module" src="/static/js/registro/app.js"></script>
+</body>
+</html>
+Extra: en tu login original también hay HTML “mal cerrado”
+En el que pegaste arriba te falta cerrar varios contenedores (</section>, </div>, etc.). Eso puede romper el layout de formas raras (aunque el motivo principal del ancho/centrado es el body.page).
+
+Si quieres mantener la topbar y aun así que quede como setup, se puede, pero entonces ya no es “igual que el index setup” porque el setup depende del body flex y la topbar fija cambia el juego.
+
+
+Fuentes
+Tú dijiste:
+y necesito lo mismo para reset.html
+
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Recuperar contraseña · unatomo</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="stylesheet" href="/styles.css">
+  <style>html{visibility:hidden}</style>
+</head>
+
+<body class="page">
+  <button id="theme-toggle" type="button" aria-label="Cambiar tema">☾ / ☼</button>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a href="/?setup=1" class="topbar-logo-link">
+        <img src="/static/img/logo-unatomo-v1.5.svg" alt="unatomo" class="topbar-logo" loading="lazy" />
+        <h2 class="topbar-title">Recuperar contraseña</h2>
+      </a>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="page-section" aria-label="Recuperar contraseña">
+      <section class="card" aria-label="Restablecer">
+        <h3>Restablecer contraseña</h3>
+        <p>Introduce tu correo y te enviaremos un enlace para crear una contraseña nueva.</p>
+
+        <form id="reset-form" class="contact-form" novalidate>
+          <div class="form-grid">
+            <div class="form-field form-field--full">
+              <label for="email">Correo electrónico<span aria-hidden="true"> *</span></label>
+              <input id="email" name="email" type="email" required class="field" autocomplete="email" />
+            </div>
+          </div>
+
+          <p id="reset-status" class="form-status" role="status" aria-live="polite" hidden></p>
+
+          <div class="form-actions" style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
+            <button type="submit" class="btn-primary" id="reset-submit">Enviar enlace</button>
+            <a class="btn-secondary" href="/es/auth/login.html">Volver a iniciar sesión</a>
+          </div>
+        </form>
+      </section>
+    </section>
+
+    <div id="legal-footer" class="legal-footer"></div>
+    <div class="footer-link">
+      <a href="/es/privacidad.html">Política de privacidad y cookies</a>
+    </div>
+  </main>
+
+  <script src="/static/js/theme.js"></script>
+  <script src="/static/js/functions.js"></script>
+  <script src="/static/js/footer.js"></script>
+  <script type="module" src="/static/js/registro/reset-page.js"></script>
+</body>
+</html>
+ChatGPT Plus
+Perfecto: para reset.html te pasa lo mismo que con login.html.
+
+Por qué no se ve como el setup
+Tu setup funciona centrado porque el <body> no lleva class="page" y el CSS base hace el centrado con flex. En reset.html tienes:
+
+<body class="page">
+Eso activa body.page { display:block; ... } y pierdes el centrado “modo setup”.
+
+Además, la topbar es fija y cambia el layout (el setup no la usa).
+
+Reset como el setup (mismo ancho, centrado, sin topbar)
+Aquí tienes es/auth/reset.html reescrito en “modo setup”, igual que el patrón que te di para login.html:
+
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Recuperar contraseña · unatomo</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="stylesheet" href="/styles.css">
+  <style>html{visibility:hidden}</style>
+</head>
+
+<body>
+  <button id="theme-toggle" type="button" aria-label="Cambiar tema">
+    ☾ / ☼
+  </button>
+
+  <main class="shell">
+    <img
+      src="/static/img/logo-unatomo-v1.5.svg"
+      alt="unatomo"
+      class="logo"
+      loading="lazy"
+    />
+
+    <h1>unatomo</h1>
+    <h2>Recuperar contraseña</h2>
+
+    <section class="card" aria-label="Restablecer">
+      <h3>Restablecer contraseña</h3>
+      <p>Introduce tu correo y te enviaremos un enlace para crear una contraseña nueva.</p>
+
+      <form id="reset-form" class="contact-form" novalidate>
+        <div class="form-grid">
+          <div class="form-field form-field--full">
+            <label for="email">Correo electrónico<span aria-hidden="true"> *</span></label>
+            <input id="email" name="email" type="email" required class="field" autocomplete="email" />
+          </div>
+        </div>
+
+        <p id="reset-status" class="form-status" role="status" aria-live="polite" hidden></p>
+
+        <div class="form-actions" style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
+          <button type="submit" class="btn-primary" id="reset-submit">Enviar enlace</button>
+        </div>
+
+        <p class="footer-link" style="text-align:center; margin-top:0.75rem;">
+          <a href="/es/auth/login.html">Volver a iniciar sesión</a>
+        </p>
+      </form>
+    </section>
+
+    <div id="legal-footer" class="legal-footer"></div>
+    <p class="footer-link">
+      <a href="/es/privacidad.html">Política de privacidad y cookies</a>
+    </p>
+  </main>
+
+  <script src="/static/js/theme.js"></script>
+  <script src="/static/js/functions.js"></script>
+  <script src="/static/js/footer.js"></script>
+  <script type="module" src="/static/js/registro/reset-page.js"></script>
+</body>
+</html>
+Qué cambia respecto a tu versión
+body sin class="page" → vuelve el centrado tipo setup.
+
+sin <header class="topbar"> → queda igual que el setup visualmente.
+
+misma estructura: logo + H1/H2 + card.
+
+Si tú quieres mantener la topbar en login/reset pero que parezca “setup”, se puede, pero entonces no será idéntico porque el setup depende del layout flex del body; habría que pasar a un layout “page” centrado con padding (eso ya implica CSS o más inline).
+
+Tú dijiste:
+Me referia igual en caracteristicas generales, concretamente en estilo de card y ancho. Has añadido elementos que no estaban, como el logo, etc.. dame los dos codigos para login html y reset
+ChatGPT Plus
+Entendido: sin añadir logo ni H1/H2, solo que la card y el ancho/centrado se comporten como en el setup.
+
+El motivo de que no te cuadre es siempre el mismo: body class="page" te quita el centrado del setup. Así que la forma más limpia (sin tocar CSS) es:
+
+dejar body sin class="page" (modo setup)
+
+y conservar tu contenido tal cual (topbar opcional; yo la quito porque en modo setup la topbar fija estorba al centrado, pero si quieres mantenerla te la dejo también)
+
+Te doy dos versiones para cada página:
+
+A (recomendada): igual “setup feel”: centrado real + card centrada.
+
+B (mantiene topbar): mantiene tu topbar pero con layout similar (sin CSS global, usando inline mínimo).
+
+1) es/auth/login.html
+A) Login centrado tipo setup (sin topbar, sin elementos extra)
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Iniciar sesión · unatomo</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="stylesheet" href="/styles.css">
+  <style>html{visibility:hidden}</style>
+</head>
+
+<body>
+  <button id="theme-toggle" type="button" aria-label="Cambiar tema">☾ / ☼</button>
+
+  <main class="shell">
+    <section class="card" aria-label="Acceso">
+      <h3>Acceder</h3>
+      <p>Continúa con Google o accede con correo y contraseña.</p>
+
+      <div class="form-actions" style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
+        <button type="button" class="btn-secondary" id="btn-google-login">Continuar con Google</button>
+      </div>
+
+      <br>
+
+      <form id="login-email-form" class="contact-form" novalidate>
+        <div class="form-grid">
+          <div class="form-field form-field--full">
+            <label for="email">Correo electrónico<span aria-hidden="true"> *</span></label>
+            <input id="email" name="email" type="email" required class="field" autocomplete="email" />
+          </div>
+
+          <div class="form-field form-field--full">
+            <label for="password">Contraseña<span aria-hidden="true"> *</span></label>
+            <input id="password" name="password" type="password" required class="field" autocomplete="current-password" />
+          </div>
+        </div>
+
+        <p id="login-status" class="form-status" role="status" aria-live="polite" hidden></p>
+
+        <div class="form-actions" style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
+          <button type="submit" class="btn-primary" id="btn-email-login">Iniciar sesión</button>
+        </div>
+
+        <p class="footer-link" style="text-align:center; margin-top:0.75rem;">
+          <a href="/es/auth/reset.html">Olvidé mi contraseña</a>
+        </p>
+      </form>
+    </section>
+
+    <div id="legal-footer" class="legal-footer"></div>
+    <p class="footer-link">
+      <a href="/es/privacidad.html">Política de privacidad y cookies</a>
+    </p>
+  </main>
+
+  <script src="/static/js/theme.js"></script>
+  <script src="/static/js/functions.js"></script>
+  <script src="/static/js/footer.js"></script>
+  <script type="module" src="/static/js/registro/app.js"></script>
+</body>
+</html>
+B) Login con topbar (manteniendo tu header, pero sin “page”)
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Iniciar sesión · unatomo</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="stylesheet" href="/styles.css">
+  <style>html{visibility:hidden}</style>
+</head>
+
+<body>
+  <button id="theme-toggle" type="button" aria-label="Cambiar tema">☾ / ☼</button>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a href="/?setup=1" class="topbar-logo-link">
+        <img src="/static/img/logo-unatomo-v1.5.svg" alt="unatomo" class="topbar-logo" loading="lazy" />
+        <h2 class="topbar-title">Iniciar sesión</h2>
+      </a>
+    </div>
+  </header>
+
+  <!-- Empujamos el contenido para que la topbar fija no lo tape -->
+  <main class="shell" style="padding-top:110px;">
+    <section class="card" aria-label="Acceso">
+      <h3>Acceder</h3>
+      <p>Continúa con Google o accede con correo y contraseña.</p>
+
+      <div class="form-actions" style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
+        <button type="button" class="btn-secondary" id="btn-google-login">Continuar con Google</button>
+      </div>
+
+      <br>
+
+      <form id="login-email-form" class="contact-form" novalidate>
+        <div class="form-grid">
+          <div class="form-field form-field--full">
+            <label for="email">Correo electrónico<span aria-hidden="true"> *</span></label>
+            <input id="email" name="email" type="email" required class="field" autocomplete="email" />
+          </div>
+
+          <div class="form-field form-field--full">
+            <label for="password">Contraseña<span aria-hidden="true"> *</span></label>
+            <input id="password" name="password" type="password" required class="field" autocomplete="current-password" />
+          </div>
+        </div>
+
+        <p id="login-status" class="form-status" role="status" aria-live="polite" hidden></p>
+
+        <div class="form-actions" style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
+          <button type="submit" class="btn-primary" id="btn-email-login">Iniciar sesión</button>
+        </div>
+
+        <p class="footer-link" style="text-align:center; margin-top:0.75rem;">
+          <a href="/es/auth/reset.html">Olvidé mi contraseña</a>
+        </p>
+      </form>
+    </section>
+
+    <div id="legal-footer" class="legal-footer"></div>
+    <p class="footer-link">
+      <a href="/es/privacidad.html">Política de privacidad y cookies</a>
+    </p>
+  </main>
+
+  <script src="/static/js/theme.js"></script>
+  <script src="/static/js/functions.js"></script>
+  <script src="/static/js/footer.js"></script>
+  <script type="module" src="/static/js/registro/app.js"></script>
+</body>
+</html>
+2) es/auth/reset.html
+A) Reset centrado tipo setup (sin topbar, sin elementos extra)
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Recuperar contraseña · unatomo</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="stylesheet" href="/styles.css">
+  <style>html{visibility:hidden}</style>
+</head>
+
+<body>
+  <button id="theme-toggle" type="button" aria-label="Cambiar tema">☾ / ☼</button>
+
+  <main class="shell">
+    <section class="card" aria-label="Restablecer">
+      <h3>Restablecer contraseña</h3>
+      <p>Introduce tu correo y te enviaremos un enlace para crear una contraseña nueva.</p>
+
+      <form id="reset-form" class="contact-form" novalidate>
+        <div class="form-grid">
+          <div class="form-field form-field--full">
+            <label for="email">Correo electrónico<span aria-hidden="true"> *</span></label>
+            <input id="email" name="email" type="email" required class="field" autocomplete="email" />
+          </div>
+        </div>
+
+        <p id="reset-status" class="form-status" role="status" aria-live="polite" hidden></p>
+
+        <div class="form-actions" style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
+          <button type="submit" class="btn-primary" id="reset-submit">Enviar enlace</button>
+        </div>
+
+        <p class="footer-link" style="text-align:center; margin-top:0.75rem;">
+          <a href="/es/auth/login.html">Volver a iniciar sesión</a>
+        </p>
+      </form>
+    </section>
+
+    <div id="legal-footer" class="legal-footer"></div>
+    <p class="footer-link">
+      <a href="/es/privacidad.html">Política de privacidad y cookies</a>
+    </p>
+  </main>
+
+  <script src="/static/js/theme.js"></script>
+  <script src="/static/js/functions.js"></script>
+  <script src="/static/js/footer.js"></script>
+  <script type="module" src="/static/js/registro/reset-page.js"></script>
+</body>
+</html>
+B) Reset con topbar (manteniendo tu header, pero sin “page”)
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Recuperar contraseña · unatomo</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="stylesheet" href="/styles.css">
+  <style>html{visibility:hidden}</style>
+</head>
+
+<body>
+  <button id="theme-toggle" type="button" aria-label="Cambiar tema">☾ / ☼</button>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a href="/?setup=1" class="topbar-logo-link">
+        <img src="/static/img/logo-unatomo-v1.5.svg" alt="unatomo" class="topbar-logo" loading="lazy" />
+        <h2 class="topbar-title">Recuperar contraseña</h2>
+      </a>
+    </div>
+  </header>
+
+  <main class="shell" style="padding-top:110px;">
+    <section class="card" aria-label="Restablecer">
+      <h3>Restablecer contraseña</h3>
+      <p>Introduce tu correo y te enviaremos un enlace para crear una contraseña nueva.</p>
+
+      <form id="reset-form" class="contact-form" novalidate>
+        <div class="form-grid">
+          <div class="form-field form-field--full">
+            <label for="email">Correo electrónico<span aria-hidden="true"> *</span></label>
+            <input id="email" name="email" type="email" required class="field" autocomplete="email" />
+          </div>
+        </div>
+
+        <p id="reset-status" class="form-status" role="status" aria-live="polite" hidden></p>
+
+        <div class="form-actions" style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
+          <button type="submit" class="btn-primary" id="reset-submit">Enviar enlace</button>
+          <a class="btn-secondary" href="/es/auth/login.html">Volver a iniciar sesión</a>
+        </div>
+      </form>
+    </section>
+
+    <div id="legal-footer" class="legal-footer"></div>
+    <p class="footer-link">
+      <a href="/es/privacidad.html">Política de privacidad y cookies</a>
+    </p>
+  </main>
+
+  <script src="/static/js/theme.js"></script>
+  <script src="/static/js/functions.js"></script>
+  <script src="/static/js/footer.js"></script>
+  <script type="module" src="/static/js/registro/reset-page.js"></script>
+</body>
+</html>
+Si quieres que quede idéntico al setup pero manteniendo topbar, no se puede sin tocar CSS porque el setup depende de body { display:flex; ... } y la topbar es fija. Con estas versiones, lo que tienes es: misma card, mismo ancho, centrado real (A) o mismo ancho y card pero con topbar (B).
+
+Tú dijiste:
+quiero ambos con topbar
+ChatGPT Plus
+Aquí van los dos con topbar, manteniendo ancho tipo setup (usando main.shell como en el setup) y evitando que la topbar fija te tape el contenido con padding-top:110px; (mismo padding que usas en page-shell). No añado logos/títulos extra.
+
+es/auth/login.html (con topbar)
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Iniciar sesión · unatomo</title>
+  <meta name="robots" content="noindex, nofollow" />
+
+  <link rel="stylesheet" href="/styles.css">
+  <style>html{visibility:hidden}</style>
+</head>
+
+<body class="page">
+  <button id="theme-toggle" type="button" aria-label="Cambiar tema">
+    ☾ / ☼
+  </button>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a href="/?setup=1" class="topbar-logo-link">
+        <img
+          src="/static/img/logo-unatomo-v1.5.svg"
+          alt="unatomo"
+          class="topbar-logo"
+          loading="lazy"
+        />
+        <h2 class="topbar-title">Iniciar sesión</h2>
+      </a>
+    </div>
+  </header>
+
+  <!-- IMPORTANTE: este padding evita que la topbar (fixed) tape la card -->
+  <main class="shell" style="padding-top:110px;">
+    <section class="page-section" aria-label="Iniciar sesión">
+      <section class="card" aria-label="Acceso">
+        <h3>Acceder</h3>
+        <p>Continúa con Google o accede con correo y contraseña.</p>
+
+        <div class="form-actions" style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
+          <button type="button" class="btn-secondary" id="btn-google-login">
+            Continuar con Google
+          </button>
+        </div>
+
+        <br>
+
+        <form id="login-email-form" class="contact-form" novalidate>
+          <div class="form-grid">
+            <div class="form-field form-field--full">
+              <label for="email">Correo electrónico<span aria-hidden="true"> *</span></label>
+              <input id="email" name="email" type="email" required class="field" autocomplete="email" />
+            </div>
+
+            <div class="form-field form-field--full">
+              <label for="password">Contraseña<span aria-hidden="true"> *</span></label>
+              <input id="password" name="password" type="password" required class="field" autocomplete="current-password" />
+            </div>
+          </div>
+
+          <p id="login-status" class="form-status" role="status" aria-live="polite" hidden></p>
+
+          <div class="form-actions" style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
+            <button type="submit" class="btn-primary" id="btn-email-login">
+              Iniciar sesión
+            </button>
+          </div>
+
+          <p class="footer-link" style="text-align:center; margin-top:0.75rem;">
+            <a href="/es/auth/reset.html">Olvidé mi contraseña</a>
+          </p>
+        </form>
+      </section>
+    </section>
+
+    <div id="legal-footer" class="legal-footer"></div>
+
+    <div class="footer-link">
+      <a href="/es/privacidad.html">Política de privacidad y cookies</a>
+    </div>
+  </main>
+
+  <script src="/static/js/theme.js"></script>
+  <script src="/static/js/functions.js"></script>
+  <script src="/static/js/footer.js"></script>
+  <script type="module" src="/static/js/registro/app.js"></script>
+</body>
+</html>
+es/auth/reset.html (con topbar)
 <!doctype html>
 <html lang="es">
 <head>
@@ -72,3 +3120,168 @@
   <script type="module" src="/static/js/registro/reset-page.js"></script>
 </body>
 </html>
+Detalle importante sobre el “ancho tipo setup”
+Esto te deja misma clase shell y mismo estilo de card. Si aún notas diferencias, normalmente es porque en el setup estás metiendo la card directamente bajo main.shell (sin page-section) y aquí hay un wrapper extra. Si quieres que sea clavadísimo, te lo dejo aún más idéntico quitando page-section también (no cambia la semántica, solo elimina posibles márgenes).
+
+Tú dijiste:
+Y asi, vuelvo a tener el problema de que la tarjeta ya no esta centrada en la pantalla..
+ChatGPT Plus
+
+Pensó durante 15s
+Eso pasa porque al volver a body class="page" pierdes el centrado automático (el setup se centra porque el body “normal” está en display:flex). Con body.page, tu <main class="shell"> se queda en el flujo normal y, como .shell no tiene margin: 0 auto, se pega a la izquierda.
+
+La solución sin tocar CSS es simple: centrar el main.shell con margin: 0 auto; (y mantener el padding-top para que la topbar fija no lo tape).
+
+Aplícalo en login y reset así:
+
+es/auth/login.html (topbar + card centrada)
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Iniciar sesión · unatomo</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="stylesheet" href="/styles.css">
+  <style>html{visibility:hidden}</style>
+</head>
+
+<body class="page">
+  <button id="theme-toggle" type="button" aria-label="Cambiar tema">☾ / ☼</button>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a href="/?setup=1" class="topbar-logo-link">
+        <img src="/static/img/logo-unatomo-v1.5.svg" alt="unatomo" class="topbar-logo" loading="lazy" />
+        <h2 class="topbar-title">Iniciar sesión</h2>
+      </a>
+    </div>
+  </header>
+
+  <!-- CLAVE: margin:0 auto para centrar el shell (y padding-top para topbar fixed) -->
+  <main class="shell" style="padding-top:110px; margin:0 auto;">
+    <section class="page-section" aria-label="Iniciar sesión">
+      <section class="card" aria-label="Acceso">
+        <h3>Acceder</h3>
+        <p>Continúa con Google o accede con correo y contraseña.</p>
+
+        <div class="form-actions" style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
+          <button type="button" class="btn-secondary" id="btn-google-login">
+            Continuar con Google
+          </button>
+        </div>
+
+        <br>
+
+        <form id="login-email-form" class="contact-form" novalidate>
+          <div class="form-grid">
+            <div class="form-field form-field--full">
+              <label for="email">Correo electrónico<span aria-hidden="true"> *</span></label>
+              <input id="email" name="email" type="email" required class="field" autocomplete="email" />
+            </div>
+
+            <div class="form-field form-field--full">
+              <label for="password">Contraseña<span aria-hidden="true"> *</span></label>
+              <input id="password" name="password" type="password" required class="field" autocomplete="current-password" />
+            </div>
+          </div>
+
+          <p id="login-status" class="form-status" role="status" aria-live="polite" hidden></p>
+
+          <div class="form-actions" style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
+            <button type="submit" class="btn-primary" id="btn-email-login">
+              Iniciar sesión
+            </button>
+          </div>
+
+          <p class="footer-link" style="text-align:center; margin-top:0.75rem;">
+            <a href="/es/auth/reset.html">Olvidé mi contraseña</a>
+          </p>
+        </form>
+      </section>
+    </section>
+
+    <div id="legal-footer" class="legal-footer"></div>
+    <div class="footer-link">
+      <a href="/es/privacidad.html">Política de privacidad y cookies</a>
+    </div>
+  </main>
+
+  <script src="/static/js/theme.js"></script>
+  <script src="/static/js/functions.js"></script>
+  <script src="/static/js/footer.js"></script>
+  <script type="module" src="/static/js/registro/app.js"></script>
+</body>
+</html>
+es/auth/reset.html (topbar + card centrada)
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Recuperar contraseña · unatomo</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="stylesheet" href="/styles.css">
+  <style>html{visibility:hidden}</style>
+</head>
+
+<body class="page">
+  <button id="theme-toggle" type="button" aria-label="Cambiar tema">☾ / ☼</button>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a href="/?setup=1" class="topbar-logo-link">
+        <img src="/static/img/logo-unatomo-v1.5.svg" alt="unatomo" class="topbar-logo" loading="lazy" />
+        <h2 class="topbar-title">Recuperar contraseña</h2>
+      </a>
+    </div>
+  </header>
+
+  <!-- CLAVE: margin:0 auto para centrar el shell (y padding-top para topbar fixed) -->
+  <main class="shell" style="padding-top:110px; margin:0 auto;">
+    <section class="page-section" aria-label="Recuperar contraseña">
+      <section class="card" aria-label="Restablecer">
+        <h3>Restablecer contraseña</h3>
+        <p>Introduce tu correo y te enviaremos un enlace para crear una contraseña nueva.</p>
+
+        <form id="reset-form" class="contact-form" novalidate>
+          <div class="form-grid">
+            <div class="form-field form-field--full">
+              <label for="email">Correo electrónico<span aria-hidden="true"> *</span></label>
+              <input id="email" name="email" type="email" required class="field" autocomplete="email" />
+            </div>
+          </div>
+
+          <p id="reset-status" class="form-status" role="status" aria-live="polite" hidden></p>
+
+          <div class="form-actions" style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
+            <button type="submit" class="btn-primary" id="reset-submit">Enviar enlace</button>
+          </div>
+
+          <p class="footer-link" style="text-align:center; margin-top:0.75rem;">
+            <a href="/es/auth/login.html">Volver a iniciar sesión</a>
+          </p>
+        </form>
+      </section>
+    </section>
+
+    <div id="legal-footer" class="legal-footer"></div>
+    <div class="footer-link">
+      <a href="/es/privacidad.html">Política de privacidad y cookies</a>
+    </div>
+  </main>
+
+  <script src="/static/js/theme.js"></script>
+  <script src="/static/js/functions.js"></script>
+  <script src="/static/js/footer.js"></script>
+  <script type="module" src="/static/js/registro/reset-page.js"></script>
+</body>
+</html>
+Si aún la ves descentrada, casi seguro es porque .shell en tu CSS tiene max-width pero no tiene width:100% (o algún contenedor le mete float/position). En ese caso te doy el “plan B” sin CSS: añadir style="width:100%; max-width:600px; margin:0 auto;" al <main>.
+
+
+
+
+
+Ningún archivo seleccionadoNingún archivo seleccionado
+ChatGPT puede cometer errores. Considera verificar la información importante. Ver preferencias de cookies.
