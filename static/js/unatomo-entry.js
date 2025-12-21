@@ -92,20 +92,6 @@ const forceSetup = params.get("setup") === "1";
     isSetupMode = url.searchParams.get("setup") === "1";
   } catch (e) {}
 
-  if (isRoot && !isSetupMode) {
-    try {
-      const savedLang = localStorage.getItem(LANG_KEY);
-      const rawPrefs = localStorage.getItem(PREF_KEY);
-
-      if (savedLang && rawPrefs) {
-        JSON.parse(rawPrefs);
-        const target = paths[savedLang] || paths.es;
-        window.location.href = target;
-        return;
-      }
-    } catch (e) {}
-  }
-
   const langInputs = document.querySelectorAll('input[name="lang"]');
   const themeInputs = document.querySelectorAll('input[name="theme"]');
   const cookieInputs = document.querySelectorAll("[data-cookie-key]");
