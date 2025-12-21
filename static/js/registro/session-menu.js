@@ -1,3 +1,4 @@
+// FILE: static/js/registro/session-menu.js
 import { auth } from "/static/js/registro/firebase-init.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 
@@ -5,27 +6,56 @@ const btn = document.getElementById("session-menu-btn");
 const menu = document.getElementById("session-menu");
 const label = document.getElementById("session-menu-label");
 const action = document.getElementById("session-menu-action");
-const themeToggle = document.getElementById("theme-toggle");
 
 if (!btn || !menu || !label || !action) {
+  // Esta página no usa el menú de sesión.
 } else {
   let state = "guest";
 
-  function setLabel(text) {
-    label.textContent = text;
+  const FG = "var(--fg)";
+  const ACCENT = "var(--accent)";
+
+  function setAuthState(nextState) {
+    state = nextState;
+    document.documentElement.dataset.auth = state; // "guest" | "user"
+    window.dispatchEvent(new CustomEvent("unatomo:auth", { detail: { state } }));
+  }
+
+  function applyButtonColor() {
+    btn.style.color = state === "user" ? ACCENT : FG;
   }
 
   function setGuest() {
-    state = "guest";
-    setLabel("Invitado");
+    setAuthState("guest");
+    label.textContent = "Invitado";
     action.textContent = "Iniciar sesión";
+    action.classList.remove("btn-secondary");
+    action.classList.add("btn-primary");
+    action.onclick = () => {
+      closeMenu();
+      window.location.href = "/?setup=1";
+    };
+    applyButtonColor();
   }
 
   function setUser(user) {
-    state = "user";
-    const t = user?.displayName || user?.email || "Usuario";
-    setLabel(t);
+    setAuthState("user");
+    const name = (user?.displayName || user?.email || "Usuario").toString();
+    label.textContent = name;
     action.textContent = "Cerrar sesión";
+    action.classList.remove("btn-primary");
+    action.classList.add("btn-secondary");
+    action.onclick = async () => {
+      try {
+        action.disabled = true;
+        await signOut(auth);
+        closeMenu();
+        window.location.href = "/es/index.html";
+      } finally {
+        action.disabled = false;
+      }
+    };
+    applyButtonColor();
   }
 
   function openMenu() {
@@ -38,56 +68,22 @@ if (!btn || !menu || !label || !action) {
     btn.setAttribute("aria-expanded", "false");
   }
 
-  function toggleMenu() {
-    if (menu.hidden) openMenu();
-    else closeMenu();
-  }
-
-  function syncSizeToThemeToggle() {
-    if (!themeToggle) return;
-    const r = themeToggle.getBoundingClientRect();
-    if (r.width && r.height) {
-      btn.style.width = `${r.width}px`;
-      btn.style.height = `${r.height}px`;
-      btn.style.display = "inline-flex";
-      btn.style.alignItems = "center";
-      btn.style.justifyContent = "center";
-    }
-  }
-
-  syncSizeToThemeToggle();
-  window.addEventListener("resize", syncSizeToThemeToggle);
-
   btn.addEventListener("click", (e) => {
     e.stopPropagation();
-    toggleMenu();
+    if (menu.hidden) openMenu();
+    else closeMenu();
   });
 
-  document.addEventListener("click", () => closeMenu());
+  document.addEventListener("click", (e) => {
+    if (!menu.hidden && !menu.contains(e.target) && e.target !== btn) closeMenu();
+  });
+
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") closeMenu();
   });
 
-  action.addEventListener("click", async (e) => {
-    e.preventDefault();
-
-    if (state === "guest") {
-      closeMenu();
-      window.location.href = "/es/auth/login.html";
-      return;
-    }
-
-    try {
-      action.disabled = true;
-      await signOut(auth);
-      closeMenu();
-      window.location.href = "/?setup=1";
-    } catch {
-      action.disabled = false;
-    }
-  });
-
   setGuest();
+
   onAuthStateChanged(auth, (user) => {
     if (user) setUser(user);
     else setGuest();
