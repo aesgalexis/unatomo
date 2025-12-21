@@ -75,6 +75,9 @@
     }
   };
 
+const params = new URLSearchParams(window.location.search);
+const forceSetup = params.get("setup") === "1";
+  
   const paths = {
     es: "/es/index.html",
     en: "/en/index.html"
