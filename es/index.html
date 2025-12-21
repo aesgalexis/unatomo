@@ -23,92 +23,17 @@
         <h2 class="topbar-title">Inicio</h2>
       </a>
 
-      <div class="topbar-actions" aria-label="Sesión"
-           style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap; justify-content:flex-end;">
-
-        <div id="session-menu-wrap" style="position:relative; display:inline-flex; margin-right:0.5rem;">
-          <button
-            id="session-menu-btn"
-            type="button"
-            aria-label="Menú de usuario"
-            aria-haspopup="menu"
-            aria-expanded="false"
-            style="
-              margin-top:0;
-              padding: 6px 10px;
-              min-width: 40px;
-              min-height: 32px;
-              border-radius: 0.75rem;
-              border: 1px solid color-mix(in srgb, var(--fg) 55%, transparent);
-              background: color-mix(in srgb, var(--bg) 80%, transparent);
-              color: var(--fg);
-              font: inherit;
-              font-size: 0.9rem;
-              cursor: pointer;
-              opacity: 0.9;
-              backdrop-filter: blur(8px);
-              -webkit-tap-highlight-color: transparent;
-              appearance: none;
-              -webkit-appearance: none;
-              box-shadow: none;
-              filter: none;
-              display: inline-flex;
-              align-items: center;
-              justify-content: center;
-              line-height: 1;
-            "
-          >
-            👤
-          </button>
-
-          <div
-            id="session-menu"
-            role="menu"
-            hidden
-            style="
-              position:absolute;
-              right:0;
-              top:calc(100% + 8px);
-              min-width: 210px;
-              background: var(--panel-bg);
-              border: 1px solid var(--border-subtle);
-              border-radius: 14px;
-              padding: 10px;
-              text-align:left;
-              box-shadow: 0 10px 30px rgba(0,0,0,.18);
-              z-index: 999;
-            "
-          >
-            <div
-              id="session-menu-label"
-              style="
-                font-size: 0.95rem;
-                opacity: .85;
-                padding: 6px 8px 10px 8px;
-                border-bottom: 1px solid var(--border-subtle);
-                margin-bottom: 10px;
-                word-break: break-word;
-              "
-            >
-              Invitado
-            </div>
-
-            <button
-              id="session-menu-action"
-              type="button"
-              role="menuitem"
-              class="btn-secondary"
-              style="width:100%; margin:0; justify-content:center;"
-            >
-              Iniciar sesión
-            </button>
-          </div>
-        </div>
-
+      <div class="topbar-actions" aria-label="Sesión" style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap; justify-content:flex-end;">
         <button id="theme-toggle" type="button" aria-label="Cambiar tema" style="margin-top:0;">
           ☾ / ☼
         </button>
 
+<span id="session-badge" style="opacity:0.85; font-size:0.95rem;">Invitado</span>
+
+
+        <button id="session-action" class="btn-secondary" type="button" style="margin-top:0;">
+          Iniciar sesión
+        </button>
       </div>
     </div>
   </header>
@@ -248,6 +173,6 @@
   <script src="/static/js/functions.js"></script>
   <script src="/static/js/unatomo-entry.js"></script>
   <script src="/static/js/footer.js"></script>
-  <script type="module" src="/static/js/registro/session-ui.js"></script>
+  <script type="module" src="/static/js/registro/app.js"></script>
 </body>
 </html>
