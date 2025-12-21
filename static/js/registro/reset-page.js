@@ -31,7 +31,7 @@ form?.addEventListener("submit", async (e) => {
     const res = await sendPasswordReset(email);
     if (!res.ok) return setStatus("No se pudo enviar el correo. Revisa el email e inténtalo de nuevo.");
 
-    setStatus("Listo. Si el correo existe, recibirás un email con el enlace.");
+    setStatus("Enviado, recibirás un email con el enlace. (Si no aparece revisa en Spam)");
     form.reset();
   } catch {
     setStatus("Error enviando el correo. Inténtalo más tarde.");
