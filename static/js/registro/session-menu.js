@@ -1,3 +1,4 @@
+// FILE: static/js/registro/session-menu.js
 import { auth } from "/static/js/registro/firebase-init.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 
@@ -5,8 +6,10 @@ const btn = document.getElementById("session-menu-btn");
 const menu = document.getElementById("session-menu");
 const label = document.getElementById("session-menu-label");
 const action = document.getElementById("session-menu-action");
+const registerBtn = document.getElementById("session-menu-register");
 
 if (!btn || !menu || !label || !action) {
+  // Esta página no usa el menú de sesión.
 } else {
   let state = "guest";
 
@@ -15,7 +18,7 @@ if (!btn || !menu || !label || !action) {
 
   function setAuthState(nextState) {
     state = nextState;
-    document.documentElement.dataset.auth = state;
+    document.documentElement.dataset.auth = state; // "guest" | "user"
     window.dispatchEvent(new CustomEvent("unatomo:auth", { detail: { state } }));
   }
 
@@ -23,9 +26,20 @@ if (!btn || !menu || !label || !action) {
     btn.style.color = state === "user" ? ACCENT : FG;
   }
 
+  function openMenu() {
+    menu.hidden = false;
+    btn.setAttribute("aria-expanded", "true");
+  }
+
+  function closeMenu() {
+    menu.hidden = true;
+    btn.setAttribute("aria-expanded", "false");
+  }
+
   function setGuest() {
     setAuthState("guest");
     label.textContent = "Invitado";
+
     action.textContent = "Iniciar sesión";
     action.classList.remove("btn-secondary");
     action.classList.add("btn-primary");
@@ -33,6 +47,15 @@ if (!btn || !menu || !label || !action) {
       closeMenu();
       window.location.href = "/es/auth/login.html";
     };
+
+    if (registerBtn) {
+      registerBtn.hidden = false;
+      registerBtn.onclick = () => {
+        closeMenu();
+        window.location.href = "/?setup=1&register=1";
+      };
+    }
+
     applyButtonColor();
   }
 
@@ -40,6 +63,7 @@ if (!btn || !menu || !label || !action) {
     setAuthState("user");
     const name = (user?.displayName || user?.email || "Usuario").toString();
     label.textContent = name;
+
     action.textContent = "Cerrar sesión";
     action.classList.remove("btn-primary");
     action.classList.add("btn-secondary");
@@ -53,17 +77,13 @@ if (!btn || !menu || !label || !action) {
         action.disabled = false;
       }
     };
+
+    if (registerBtn) {
+      registerBtn.hidden = true;
+      registerBtn.onclick = null;
+    }
+
     applyButtonColor();
-  }
-
-  function openMenu() {
-    menu.hidden = false;
-    btn.setAttribute("aria-expanded", "true");
-  }
-
-  function closeMenu() {
-    menu.hidden = true;
-    btn.setAttribute("aria-expanded", "false");
   }
 
   btn.addEventListener("click", (e) => {
