@@ -342,18 +342,18 @@ body.page #theme-toggle {
 
 .card-icon{
   float:right;
-  margin-left:14px;
-  margin-bottom:6px;
-  width:150px;
-  height:150px;
+  width:125px;
+  height:125px;
+  margin-left:18px;
+  margin-bottom:10px;
   line-height:0;
+  color:var(--fg);
 }
 .card-icon svg{
+  width:125px;
+  height:125px;
   display:block;
-  width:150px;
-  height:150px;
 }
-
 
 .lang-picker {
   display: flex;
