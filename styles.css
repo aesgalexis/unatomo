@@ -315,7 +315,7 @@ body.page #theme-toggle {
   max-width: 600px;
   margin: 2rem auto;
   padding: 1rem 1.25rem 1.5rem;
-  border-radius: 1.25rem;
+  border-radius: 0rem;
   border: 1px solid var(--border-subtle);
   background: var(--panel-bg);
   text-align: left;
