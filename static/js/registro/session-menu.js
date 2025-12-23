@@ -1,4 +1,3 @@
-// FILE: static/js/registro/session-menu.js
 import { auth } from "/static/js/registro/firebase-init.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 
@@ -8,7 +7,6 @@ const label = document.getElementById("session-menu-label");
 const action = document.getElementById("session-menu-action");
 
 if (!btn || !menu || !label || !action) {
-  // Esta página no usa el menú de sesión.
 } else {
   let state = "guest";
 
@@ -17,7 +15,7 @@ if (!btn || !menu || !label || !action) {
 
   function setAuthState(nextState) {
     state = nextState;
-    document.documentElement.dataset.auth = state; // "guest" | "user"
+    document.documentElement.dataset.auth = state;
     window.dispatchEvent(new CustomEvent("unatomo:auth", { detail: { state } }));
   }
 
@@ -33,7 +31,7 @@ if (!btn || !menu || !label || !action) {
     action.classList.add("btn-primary");
     action.onclick = () => {
       closeMenu();
-      window.location.href = "/?setup=1";
+      window.location.href = "/es/auth/login.html";
     };
     applyButtonColor();
   }
