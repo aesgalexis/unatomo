@@ -145,12 +145,12 @@ function initSetupRegisterCode() {
         return;
       }
 
-      try {
-        sessionStorage.setItem("unatomo_access_code", res.code);
-      } catch {}
+      try { sessionStorage.setItem("unatomo_access_code", res.code); } catch {}
+      try { localStorage.setItem("unatomo_access_code", res.code); } catch {}
 
       setStatus("Código correcto. Redirigiendo…");
-      setTimeout(() => (window.location.href = "/es/registro.html"), 650);
+      const target = `/es/registro.html?code=${encodeURIComponent(res.code)}`;
+      setTimeout(() => (window.location.href = target), 650);
     } catch {
       setStatus("Error validando el código.");
     } finally {
@@ -259,13 +259,35 @@ function initRegisterPage() {
   }
 
   (async () => {
-    const code = (sessionStorage.getItem("unatomo_access_code") || "").trim();
+    let code = "";
+
+    try { code = (sessionStorage.getItem("unatomo_access_code") || "").trim(); } catch {}
+
+    if (!code) {
+      code = (new URLSearchParams(window.location.search).get("code") || "").trim();
+    }
+
+    if (!code) {
+      try { code = (localStorage.getItem("unatomo_access_code") || "").trim(); } catch {}
+    }
 
     if (!code) return window.location.replace("/?setup=1");
+
+    try { sessionStorage.setItem("unatomo_access_code", code); } catch {}
+    try { localStorage.setItem("unatomo_access_code", code); } catch {}
+
+    try {
+      const url = new URL(window.location.href);
+      if (url.searchParams.has("code")) {
+        url.searchParams.delete("code");
+        history.replaceState({}, "", url.pathname + url.search);
+      }
+    } catch {}
 
     const check = await validateRegistrationCode(code);
     if (!check.valid) {
       try { sessionStorage.removeItem("unatomo_access_code"); } catch {}
+      try { localStorage.removeItem("unatomo_access_code"); } catch {}
       return window.location.replace("/?setup=1");
     }
 
