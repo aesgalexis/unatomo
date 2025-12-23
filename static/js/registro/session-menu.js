@@ -1,4 +1,3 @@
-// FILE: static/js/registro/session-menu.js
 import { auth } from "/static/js/registro/firebase-init.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 
@@ -9,7 +8,6 @@ const action = document.getElementById("session-menu-action");
 const registerBtn = document.getElementById("session-menu-register");
 
 if (!btn || !menu || !label || !action) {
-  // Esta página no usa el menú de sesión.
 } else {
   let state = "guest";
 
