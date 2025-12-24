@@ -12,10 +12,13 @@ if (mount) {
   if (topBtn) {
     topBtn.type = "button";
 
+    const topWrap = topBtn.closest(".scroll-top-container") || topBtn;
+
     const updateTopBtnVisibility = () => {
       const doc = document.documentElement;
       const overflow = doc.scrollHeight - doc.clientHeight;
-      topBtn.hidden = overflow <= 80;
+      const needsScroll = overflow > 16;
+      topWrap.hidden = !needsScroll;
     };
 
     updateTopBtnVisibility();
