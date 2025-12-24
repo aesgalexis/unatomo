@@ -6,27 +6,12 @@
   <title>Contacto · unatomo</title>
   <meta name="description" content="Formulario de contacto de UNATOMO CORE SL. Envíanos tus consultas sobre maquinaria y procesos de lavado para lavanderías industriales, hoteleras y tintorerías.">
   <meta name="robots" content="index, follow" />
-
   <link rel="stylesheet" href="/styles.css">
 </head>
-<body class="page">
-  <button id="theme-toggle" type="button" aria-label="Cambiar tema">
-    ☾ / ☼
-  </button>
 
-  <header class="topbar">
-    <div class="topbar-inner">
-      <a href="/?setup=1" class="topbar-logo-link">
-        <img
-          src="/static/img/logo-unatomo-v1.5.svg"
-          alt="unatomo"
-          class="topbar-logo"
-          loading="lazy"
-        />
-        <h2 class="topbar-title">Contacto</h2>
-      </a>
-    </div>
-  </header>
+<body class="page" data-topbar-title="Contacto">
+  <div id="topbar-mount"></div>
+  <script type="module" src="/static/js/topbar.js"></script>
 
   <main class="shell page-shell">
     <section class="page-section contacto" aria-label="Contacto">
@@ -153,14 +138,16 @@
       </section>
 
     </section>
-<div class="scroll-top-container">
-  <button id="back-button" class="scroll-top-button" type="button" onclick="window.location.href='/es/index.html'">
-    Volver
-  </button>
+
+    <div class="scroll-top-container">
+      <button id="back-button" class="scroll-top-button" type="button" onclick="window.location.href='/es/index.html'">
+        Volver
+      </button>
       <button id="scroll-top-button" class="scroll-top-button" type="button">
         Arriba
       </button>
-</div>
+    </div>
+
     <div id="legal-footer" class="legal-footer"></div>
 
     <div class="footer-link">
@@ -168,12 +155,9 @@
     </div>
   </main>
 
-  <script src="/static/js/theme.js"></script>
+  <script src="/static/js/functions.js"></script>
   <script src="/static/js/unatomo-entry.js"></script>
   <script src="/static/js/footer.js"></script>
-  <script src="/static/js/functions.js"></script>
   <script src="/static/js/contacto.js"></script>
-  <script type="module" src="/static/js/registro/session-menu.js"></script>
-
 </body>
 </html>
