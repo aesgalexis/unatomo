@@ -16,7 +16,7 @@ if (!btn || !menu || !label || !action) {
 
   function setAuthState(nextState) {
     state = nextState;
-    document.documentElement.dataset.auth = state; // "guest" | "user"
+    document.documentElement.dataset.auth = state;
     window.dispatchEvent(new CustomEvent("unatomo:auth", { detail: { state } }));
   }
 
