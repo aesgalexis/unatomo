@@ -50,7 +50,7 @@ if (!btn || !menu || !label || !action) {
       registerBtn.hidden = false;
       registerBtn.onclick = () => {
         closeMenu();
-        window.location.href = "/?setup=1&register=1";
+        window.location.href = "/es/auth/registro.html";
       };
     }
 
