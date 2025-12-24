@@ -149,7 +149,7 @@ function initSetupRegisterCode() {
       try { localStorage.setItem("unatomo_access_code", res.code); } catch {}
 
       setStatus("Código correcto. Redirigiendo…");
-      const target = `/es/registro.html?code=${encodeURIComponent(res.code)}`;
+const target = `/es/auth/registro.html?code=${encodeURIComponent(res.code)}`;
       setTimeout(() => (window.location.href = target), 650);
     } catch {
       setStatus("Error validando el código.");
