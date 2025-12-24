@@ -8,7 +8,7 @@ const mount =
   })();
 
 try {
-  const res = await fetch("/es/topbar.html", { cache: "no-store" });
+  const res = await fetch("/es/ui/topbar.html", { cache: "no-store" });
   if (!res.ok) throw new Error("topbar fetch failed");
   mount.innerHTML = await res.text();
 } catch {
