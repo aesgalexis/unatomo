@@ -8,30 +8,43 @@ if (mount) {
     mount.innerHTML = "";
   }
 
-  const topBtn = document.getElementById("scroll-top-button");
+  const topBtn = mount.querySelector("#scroll-top-button");
   if (topBtn) {
-    const updateTopBtnVisibility = () => {
-      const needsScroll =
-        document.documentElement.scrollHeight >
-        document.documentElement.clientHeight + 8;
+    topBtn.type = "button";
 
-      topBtn.hidden = !needsScroll;
+    const updateTopBtnVisibility = () => {
+      const doc = document.documentElement;
+      const overflow = doc.scrollHeight - doc.clientHeight;
+      topBtn.hidden = overflow <= 80;
     };
 
     updateTopBtnVisibility();
     window.addEventListener("resize", updateTopBtnVisibility, { passive: true });
-    window.addEventListener("load", updateTopBtnVisibility, { once: true });
+    window.addEventListener(
+      "load",
+      () => requestAnimationFrame(() => requestAnimationFrame(updateTopBtnVisibility)),
+      { once: true }
+    );
+    setTimeout(updateTopBtnVisibility, 250);
+
+    if ("ResizeObserver" in window) {
+      const ro = new ResizeObserver(updateTopBtnVisibility);
+      ro.observe(document.documentElement);
+      if (document.body) ro.observe(document.body);
+    }
 
     topBtn.addEventListener("click", () => {
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
   }
 
-  const backBtn = document.getElementById("back-button");
+  const backBtn = mount.querySelector("#back-button");
   const backHref = (document.body?.dataset?.backHref || "").trim();
   const backMode = (document.body?.dataset?.backMode || "").trim();
 
   if (backBtn) {
+    backBtn.type = "button";
+
     if (backHref) {
       backBtn.hidden = false;
       backBtn.addEventListener("click", () => (window.location.href = backHref));
