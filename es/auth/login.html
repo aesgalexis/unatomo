@@ -6,24 +6,22 @@
   <title>Iniciar sesión · unatomo</title>
   <meta name="robots" content="noindex, nofollow" />
   <link rel="stylesheet" href="/styles.css">
-  <style>html{visibility:hidden}</style>
+  <style>
+    html{visibility:hidden}
+
+    main.shell.login-shell{
+      max-width: 600px;   
+      padding: 110px 1.5rem 2.5rem; 
+      margin: 0 auto;
+    }
+  </style>
 </head>
 
-<body class="page">
-  <button id="theme-toggle" type="button" aria-label="Cambiar tema">
-    ☾ / ☼
-  </button>
+<body class="page" data-topbar-title="Iniciar sesión">
+  <div id="topbar-mount"></div>
+  <script type="module" src="/static/js/topbar.js"></script>
 
-  <header class="topbar">
-    <div class="topbar-inner">
-      <a href="/?setup=1" class="topbar-logo-link">
-        <img src="/static/img/logo-unatomo-v1.5.svg" alt="unatomo" class="topbar-logo" loading="lazy" />
-        <h2 class="topbar-title">Iniciar sesión</h2>
-      </a>
-    </div>
-  </header>
-
-  <main class="shell page-shell">
+  <main class="shell login-shell">
     <section class="page-section" aria-label="Iniciar sesión">
       <section class="card" aria-label="Acceso">
         <h3>Acceder</h3>
@@ -64,18 +62,20 @@
         </form>
       </section>
     </section>
-<div class="scroll-top-container">
-  <button id="back-button" class="scroll-top-button" type="button" onclick="window.location.href='/es/index.html'">
-    Volver
-  </button>
+
+    <div class="scroll-top-container">
+      <button id="back-button" class="scroll-top-button" type="button" onclick="window.location.href='/es/index.html'">
+        Volver
+      </button>
     </div>
+
     <div id="legal-footer" class="legal-footer"></div>
+
     <div class="footer-link">
       <a href="/es/privacidad.html">Política de privacidad y cookies</a>
     </div>
   </main>
 
-  <script src="/static/js/theme.js"></script>
   <script src="/static/js/functions.js"></script>
   <script src="/static/js/footer.js"></script>
   <script type="module" src="/static/js/registro/app.js"></script>
