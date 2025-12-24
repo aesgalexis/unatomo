@@ -9,17 +9,24 @@ if (mount) {
   }
 
   const topBtn = document.getElementById("scroll-top-button");
+  const navBox =
+    (topBtn && topBtn.closest(".scroll-top-container")) ||
+    mount.querySelector(".scroll-top-container") ||
+    mount;
+
   if (topBtn) {
-    const topWrap = topBtn.closest(".scroll-top-container") || topBtn;
+    topBtn.type = "button";
 
     const updateTopBtnVisibility = () => {
-      topWrap.hidden = true;
+      const prevDisplay = navBox.style.display;
+      navBox.style.display = "none";
 
       const doc = document.documentElement;
       const overflow = doc.scrollHeight - doc.clientHeight;
-      const needsScroll = overflow > 8;
 
-      topWrap.hidden = !needsScroll;
+      navBox.style.display = prevDisplay;
+
+      topBtn.hidden = overflow <= 8;
     };
 
     updateTopBtnVisibility();
