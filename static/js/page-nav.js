@@ -10,6 +10,18 @@ if (mount) {
 
   const topBtn = document.getElementById("scroll-top-button");
   if (topBtn) {
+    const updateTopBtnVisibility = () => {
+      const needsScroll =
+        document.documentElement.scrollHeight >
+        document.documentElement.clientHeight + 8;
+
+      topBtn.hidden = !needsScroll;
+    };
+
+    updateTopBtnVisibility();
+    window.addEventListener("resize", updateTopBtnVisibility, { passive: true });
+    window.addEventListener("load", updateTopBtnVisibility, { once: true });
+
     topBtn.addEventListener("click", () => {
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
