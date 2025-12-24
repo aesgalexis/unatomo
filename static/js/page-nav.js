@@ -10,16 +10,28 @@ if (mount) {
 
   const topBtn = document.getElementById("scroll-top-button");
   if (topBtn) {
+    const topWrap = topBtn.closest(".scroll-top-container") || topBtn;
+
     const updateTopBtnVisibility = () => {
+      topWrap.hidden = true;
+
       const doc = document.documentElement;
       const overflow = doc.scrollHeight - doc.clientHeight;
-      topBtn.hidden = overflow <= 8;
+      const needsScroll = overflow > 8;
+
+      topWrap.hidden = !needsScroll;
     };
 
     updateTopBtnVisibility();
     window.addEventListener("resize", updateTopBtnVisibility, { passive: true });
     window.addEventListener("load", updateTopBtnVisibility, { once: true });
-    setTimeout(updateTopBtnVisibility, 200);
+    setTimeout(updateTopBtnVisibility, 250);
+
+    if ("ResizeObserver" in window) {
+      const ro = new ResizeObserver(updateTopBtnVisibility);
+      ro.observe(document.documentElement);
+      if (document.body) ro.observe(document.body);
+    }
 
     topBtn.addEventListener("click", () => {
       window.scrollTo({ top: 0, behavior: "smooth" });
