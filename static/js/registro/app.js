@@ -123,7 +123,13 @@ function initSetupRegisterCode() {
   }
 
   registerBtn.addEventListener("click", toggleBox);
-
+try {
+  const flag = sessionStorage.getItem("unatomo_open_register") === "1";
+  if (flag) {
+    sessionStorage.removeItem("unatomo_open_register");
+    if (box.hidden) toggleBox();
+  }
+} catch {}
   async function go() {
     clearStatus();
 
