@@ -108,3 +108,176 @@
 
     const intro2 = get("intro-line-2");
     if (intro2) intro2.textContent = t.intro2;
+
+    const intro3 = get("intro-line-3");
+    if (intro3) intro3.textContent = t.intro3;
+
+    const intro4 = get("intro-line-4");
+    if (intro4) intro4.textContent = t.intro4;
+
+    const headingLang = get("heading-lang");
+    if (headingLang) headingLang.textContent = t.headingLang;
+
+    const headingTheme = get("heading-theme");
+    if (headingTheme) headingTheme.textContent = t.headingTheme;
+
+    const headingCookies = get("heading-cookies");
+    if (headingCookies) headingCookies.textContent = t.headingCookies;
+
+    const cookiesIntro = get("cookies-intro");
+    if (cookiesIntro) cookiesIntro.textContent = t.cookiesIntro;
+
+    const aTitle = get("cookie-analytics-title");
+    if (aTitle) aTitle.textContent = t.analyticsTitle;
+    const aText = get("cookie-analytics-text");
+    if (aText) aText.textContent = t.analyticsText;
+
+    const fTitle = get("cookie-functional-title");
+    if (fTitle) fTitle.textContent = t.functionalTitle;
+    const fText = get("cookie-functional-text");
+    if (fText) fText.textContent = t.functionalText;
+
+    const mTitle = get("cookie-marketing-title");
+    if (mTitle) mTitle.textContent = t.marketingTitle;
+    const mText = get("cookie-marketing-text");
+    if (mText) mText.textContent = t.marketingText;
+
+    const themeLight = get("theme-label-light");
+    if (themeLight) themeLight.textContent = t.themeLight;
+
+    const themeDark = get("theme-label-dark");
+    if (themeDark) themeDark.textContent = t.themeDark;
+
+    if (enterBtn) enterBtn.textContent = t.button;
+  }
+
+  let initialLang = "es";
+  try {
+    const savedLang = localStorage.getItem(LANG_KEY);
+    if (savedLang === "es" || savedLang === "en" || savedLang === "gr") {
+      initialLang = savedLang;
+    } else {
+      const navLang =
+        (navigator.language || navigator.userLanguage || "").toLowerCase();
+
+      if (navLang.startsWith("en")) {
+        initialLang = "en";
+      } else if (navLang.startsWith("es")) {
+        initialLang = "es";
+      } else if (navLang.startsWith("el")) {
+        initialLang = "gr";
+      } else {
+        initialLang = "es";
+      }
+    }
+  } catch (e) {}
+
+  function getSelectedLang() {
+    const checked = document.querySelector('input[name="lang"]:checked');
+    const value = checked ? checked.value : "es";
+    return (value === "en" || value === "gr") ? value : "es";
+  }
+
+  langInputs.forEach((input) => {
+    input.checked = input.value === initialLang;
+  });
+
+  applyLanguage(initialLang);
+
+  langInputs.forEach((input) => {
+    input.addEventListener("change", () => {
+      const lang = getSelectedLang();
+      applyLanguage(lang);
+    });
+  });
+
+  try {
+    const raw = localStorage.getItem(PREF_KEY);
+    if (raw) {
+      const prefs = JSON.parse(raw);
+      cookieInputs.forEach((input) => {
+        const key = input.dataset.cookieKey;
+        if (key in prefs) {
+          input.checked = Boolean(prefs[key]);
+        }
+      });
+    }
+  } catch (e) {}
+
+  function initThemeControls() {
+    if (!themeInputs.length) return;
+
+    let savedTheme = null;
+    try {
+      savedTheme = localStorage.getItem(THEME_KEY);
+    } catch (e) {}
+
+    let initialTheme = null;
+    if (savedTheme === "light" || savedTheme === "dark") {
+      initialTheme = savedTheme;
+    } else if (
+      window.matchMedia &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches
+    ) {
+      initialTheme = "dark";
+    } else {
+      initialTheme = "light";
+    }
+
+    themeInputs.forEach((input) => {
+      input.checked = input.value === initialTheme;
+    });
+
+    themeInputs.forEach((input) => {
+      input.addEventListener("change", () => {
+        if (!input.checked) return;
+        const mode = input.value === "dark" ? "dark" : "light";
+        document.documentElement.setAttribute("data-theme", mode);
+        try {
+          localStorage.setItem(THEME_KEY, mode);
+        } catch (e) {}
+
+        const btn = document.getElementById("theme-toggle");
+        if (btn) {
+          if (mode === "dark") {
+            btn.textContent = "☼";
+            btn.setAttribute("aria-label", "Cambiar a modo claro");
+          } else {
+            btn.textContent = "☾";
+            btn.setAttribute("aria-label", "Cambiar a modo oscuro");
+          }
+        }
+      });
+    });
+  }
+
+  initThemeControls();
+
+  if (!enterBtn) return;
+
+  enterBtn.addEventListener("click", () => {
+    const lang = getSelectedLang();
+
+    try {
+      localStorage.setItem(LANG_KEY, lang);
+    } catch (e) {}
+
+    const defaultPrefs = {
+      analytics: false,
+      functional: false,
+      marketing: false
+    };
+    const prefs = { ...defaultPrefs };
+    cookieInputs.forEach((input) => {
+      const key = input.dataset.cookieKey;
+      prefs[key] = input.checked;
+    });
+
+    try {
+      localStorage.setItem(PREF_KEY, JSON.stringify(prefs));
+    } catch (e) {}
+
+    const target = contactPaths[lang] || contactPaths.es;
+    window.location.href = target;
+  });
+})();
