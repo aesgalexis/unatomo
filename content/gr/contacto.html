@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="el">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Επικοινωνία · unatomo</title>
+  <meta name="description" content="Φόρμα επικοινωνίας της UNATOMO CORE SL. Στείλτε μας τις ερωτήσεις σας σχετικά με μηχανήματα και διαδικασίες πλύσης για βιομηχανικά πλυντήρια, πλυντήρια ξενοδοχείων και στεγνοκαθαριστήρια.">
+  <meta name="robots" content="index, follow" />
+  <link rel="stylesheet" href="/styles.css">
+</head>
+
+<body class="page" data-topbar-title="Επικοινωνία" data-back-mode="history">
+  <div id="topbar-mount"></div>
+  <script type="module" src="/static/js/topbar.js"></script>
+
+  <main class="shell page-shell">
+    <section class="page-section contacto" aria-label="Επικοινωνία">
+
+      <section class="card" aria-label="Στοιχεία επικοινωνίας">
+        <div class="contact-info">
+          <div class="contact-info-item">
+            <span class="contact-info-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zm0 2v.01L12 13 20 6.01V6H4zm0 12h16V8l-8 7-8-7v10z" />
+              </svg>
+            </span>
+            <p>
+              <strong>Email:</strong>
+              <a href="mailto:info@unatomo.com">info@unatomo.com</a>
+            </p>
+          </div>
+
+          <div class="contact-info-item">
+            <span class="contact-info-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.01-.24 11.36 11.36 0 003.56.57 1 1 0 011 1V20a2 2 0 01-2 2A17 17 0 013 5a2 2 0 012-2h2.5a1 1 0 011 1 11.36 11.36 0 00.57 3.56 1 1 0 01-.24 1.01l-2.21 2.22z" />
+              </svg>
+            </span>
+            <p>
+              <strong>Τηλέφωνο:</strong>
+              <a href="tel:+34871252049">+34 871 25 20 49</a>
+            </p>
+          </div>
+
+          <div class="contact-info-item">
+            <span class="contact-info-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M12 2a10 10 0 1010 10A10.011 10.011 0 0012 2zm0 18a8 8 0 118-8 8.009 8.009 0 01-8 8zm.5-13h-1v6l5 3 .5-.86-4.5-2.64z" />
+              </svg>
+            </span>
+            <p>
+              <strong>Ώρες εξυπηρέτησης:</strong>
+              Δευτέρα έως Παρασκευή, 09:00 έως 15:00 (Ώρα Ισπανίας / CET).
+            </p>
+          </div>
+
+          <div class="contact-info-item">
+            <span class="contact-info-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M12 2a7 7 0 00-7 7c0 4.25 5.13 10.21 6.38 11.57a1 1 0 001.48 0C13.87 19.21 19 13.25 19 9a7 7 0 00-7-7zm0 9.5A2.5 2.5 0 1114.5 9 2.5 2.5 0 0112 11.5z" />
+              </svg>
+            </span>
+            <p>
+              <strong>Διεύθυνση:</strong>
+              CL. Lluna 2 1, 07440 Muro, Mallorca, Ισπανία
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" aria-label="Φόρμα επικοινωνίας">
+        <p>
+          Φόρμα επικοινωνίας
+        </p>
+
+        <form class="contact-form" action="https://formspree.io/f/mkgqlvqj" method="POST" novalidate>
+          <input
+            type="text"
+            name="_gotcha"
+            tabindex="-1"
+            autocomplete="off"
+            style="position:absolute; left:-5000px;"
+            aria-hidden="true"
+          >
+
+          <div class="form-grid">
+            <div class="form-field">
+              <label for="nombre">Όνομα<span aria-hidden="true"> *</span></label>
+              <input id="nombre" name="nombre" type="text" required class="field" autocomplete="name" />
+            </div>
+
+            <div class="form-field">
+              <label for="empresa">Εταιρεία</label>
+              <input id="empresa" name="empresa" type="text" class="field" autocomplete="organization" />
+            </div>
+
+            <div class="form-field">
+              <label for="email">Email<span aria-hidden="true"> *</span></label>
+              <input id="email" name="email" type="email" required class="field" autocomplete="email" />
+            </div>
+
+            <div class="form-field">
+              <label for="telefono">Τηλέφωνο</label>
+              <input
+                id="telefono"
+                name="telefono"
+                type="tel"
+                class="field"
+                autocomplete="tel"
+                inputmode="tel"
+              />
+            </div>
+
+            <div class="form-field form-field--full">
+              <label for="asunto">Θέμα<span aria-hidden="true"> *</span></label>
+              <select id="asunto" name="asunto" required class="field">
+                <option value="" disabled selected>Επιλέξτε θέμα…</option>
+                <option>Γενική ερώτηση</option>
+                <option>Εγγραφή</option>
+                <option>Τεχνικός & διαδικαστικός έλεγχος</option>
+                <option>Ανεξάρτητη συμβουλευτική εξοπλισμού</option>
+                <option>Άλλο</option>
+              </select>
+            </div>
+
+            <div class="form-field form-field--full">
+              <label for="mensaje">Μήνυμα<span aria-hidden="true"> *</span></label>
+              <textarea id="mensaje" name="mensaje" rows="6" required class="field"></textarea>
+            </div>
+          </div>
+
+          <p class="form-status" role="status" aria-live="polite" hidden></p>
+
+          <div class="form-actions" style="display:flex; justify-content:center;">
+            <button type="submit" class="btn-primary">Αποστολή</button>
+          </div>
+        </form>
+      </section>
+
+    </section>
+
+    <div id="page-nav-mount"></div>
+    <script type="module" src="/static/js/page-nav.js"></script>
+
+    <div id="legal-footer" class="legal-footer"></div>
+
+    <div class="footer-link">
+      <a href="/gr/privacidad.html">Πολιτική απορρήτου & cookies</a>
+    </div>
+  </main>
+
+  <script src="/static/js/footer.js"></script>
+  <script src="/static/js/contacto.js"></script>
+</body>
+</html>
