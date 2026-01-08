@@ -77,8 +77,8 @@
 
   const contactPaths = {
     es: "/es/contacto.html",
-    en: "/es/contacto.html",
-    gr: "/es/contacto.html"
+    en: "/content/en/contacto.html",
+    gr: "/content/gr/contacto.html"
   };
 
   const langInputs = document.querySelectorAll('input[name="lang"]');
