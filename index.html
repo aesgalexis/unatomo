@@ -19,78 +19,82 @@
 
     <h1 id="title-main">unatomo</h1>
     <h2 id="subtitle-main">Tu proceso, Nuestra visión</h2>
-<br><br>
-<div class="auth-actions" aria-label="Acceso">
-  <button type="button" class="btn-pill btn-pill-solid" id="go-login">
-    Iniciar sesión
-  </button>
-</div>
-  <section id="login-box" class="card" hidden>
-  <h3>Iniciar sesión</h3>
-  <p>Accede con Google o con tu correo y contraseña.</p>
 
-  <div class="form-actions" style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
-    <button type="button" class="btn-secondary" id="login-google">
-      Continuar con Google
-    </button>
-  </div>
+    <br><br>
 
-  <br>
-
-  <form id="login-email-form" class="contact-form" novalidate>
-    <div class="form-grid">
-      <div class="form-field form-field--full">
-        <label for="login-email">Correo electrónico<span aria-hidden="true"> *</span></label>
-        <input id="login-email" name="email" type="email" required class="field" autocomplete="email" />
-      </div>
-
-      <div class="form-field form-field--full">
-        <label for="login-password">Contraseña<span aria-hidden="true"> *</span></label>
-        <input id="login-password" name="password" type="password" required class="field" autocomplete="current-password" />
-      </div>
+    <div class="auth-actions" aria-label="Acceso">
+      <button type="button" class="btn-pill btn-pill-solid" id="go-login">
+        Iniciar sesión
+      </button>
     </div>
 
-    <p id="login-status" class="form-status" role="status" aria-live="polite" hidden></p>
+    <section id="login-box" class="card" hidden>
+      <h3>Iniciar sesión</h3>
+      <p>Accede con Google o con tu correo y contraseña.</p>
 
-<div class="form-actions" style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
-  <button type="submit" class="btn-primary" id="login-email-submit">Entrar</button>
-</div>
-
-<p class="footer-link" style="text-align:center; margin-top:0.75rem;">
-  <a href="/es/auth/reset.html">Olvidé mi contraseña</a>
-</p>
-
-  </form>
-</section>
+      <div class="form-actions" style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
+        <button type="button" class="btn-secondary" id="login-google">
+          Continuar con Google
+        </button>
+      </div>
 
       <br>
-      <button type="button" class="btn-pill btn-pill-outline" id="go-register">
-        Registrarse
-      </button>
 
-<section id="register-code-box" class="card" hidden>
-  <h3>Código de acceso</h3>
-  <p>Introduce el código de invitacón para registrarte.</p>
-<br>
-  <div class="inline-field-row">
-    <input
-      id="register-code-input"
-      class="field"
-      type="text"
-      placeholder="Código"
-      autocomplete="one-time-code"
-    >
-    <button id="register-code-submit" type="button" class="btn-secondary">
-      Continuar
+      <form id="login-email-form" class="contact-form" novalidate>
+        <div class="form-grid">
+          <div class="form-field form-field--full">
+            <label for="login-email">Correo electrónico<span aria-hidden="true"> *</span></label>
+            <input id="login-email" name="email" type="email" required class="field" autocomplete="email" />
+          </div>
+
+          <div class="form-field form-field--full">
+            <label for="login-password">Contraseña<span aria-hidden="true"> *</span></label>
+            <input id="login-password" name="password" type="password" required class="field" autocomplete="current-password" />
+          </div>
+        </div>
+
+        <p id="login-status" class="form-status" role="status" aria-live="polite" hidden></p>
+
+        <div class="form-actions" style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
+          <button type="submit" class="btn-primary" id="login-email-submit">Entrar</button>
+        </div>
+
+        <p class="footer-link" style="text-align:center; margin-top:0.75rem;">
+          <a href="/es/auth/reset.html">Olvidé mi contraseña</a>
+        </p>
+      </form>
+    </section>
+
+    <br>
+
+    <button type="button" class="btn-pill btn-pill-outline" id="go-register">
+      Registrarse
     </button>
-  </div>
 
-  <p id="register-code-status" class="form-status" role="status" aria-live="polite" hidden></p>
+    <section id="register-code-box" class="card" hidden>
+      <h3>Código de acceso</h3>
+      <p>Introduce el código de invitacón para registrarte.</p>
+      <br>
 
-  <p class="footer-link">
-    <a href="/auth/request-code.html">Solicitar código</a>
-  </p>
-</section>
+      <div class="inline-field-row">
+        <input
+          id="register-code-input"
+          class="field"
+          type="text"
+          placeholder="Código"
+          autocomplete="one-time-code"
+        >
+        <button id="register-code-submit" type="button" class="btn-secondary">
+          Continuar
+        </button>
+      </div>
+
+      <p id="register-code-status" class="form-status" role="status" aria-live="polite" hidden></p>
+
+      <p class="footer-link">
+        <a href="/auth/request-code.html">Solicitar código</a>
+      </p>
+    </section>
 
     <section class="intro">
       <h5 id="intro-title">Unatomo Core:</h5>
@@ -106,9 +110,6 @@
       <h5 id="intro-line-3">
         Tenemos una larga trayectoria y casos de éxito consolidados en lavanderías industriales de gran tamaño,
         líderes del sector en España.
-      </h5>
-      <h5 id="intro-line-4">
-        Configura tus preferencias y accede al sitio para conocer más.
       </h5>
     </section>
 
@@ -143,9 +144,10 @@
         </label>
       </div>
     </section>
-    
-<a href="/es/contacto.html" class="btn-pill btn-pill-outline">Contactar</a>
 
+    <button id="enter-site" type="button" class="btn-pill btn-pill-outline">
+      Contactar
+    </button>
 
     <p id="legal-footer" class="legal-footer"></p>
     <p class="footer-link">
@@ -157,6 +159,5 @@
   <script src="/static/js/setup.js"></script>
   <script type="module" src="/static/js/registro/app.js"></script>
   <script src="/static/js/footer.js"></script>
-
 </body>
 </html>
