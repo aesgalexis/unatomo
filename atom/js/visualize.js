@@ -1,6 +1,5 @@
 (function(){
   const SELECTORS = {
-    // Fallbacks por si tus ABs no llevan clase/atributo propio:
     ab: ['.AB', '.ab', '[data-ab]', '[data-type="ab"]', '#listA > *', '#listB > *', '#listL > *'],
     containers: {
       main:    ['#frameA', '#main', '.main', '[data-area="main"]', 'main'],
@@ -17,11 +16,9 @@
   }
 
   function getTitle(el){
-  // 1) Título real del AB: el texto del botón .btn (ya viene con timestamp si aplica)
   const btn = el.querySelector('.btn');
   if (btn) return (btn.textContent || '').trim();
 
-  // 2) Fallbacks por si algún AB no tiene .btn renderizado
   const tEl = el.querySelector('[data-title], .ab-title, .title, h3, h4, input[type="text"]');
   let title = '';
   if (tEl) title = (tEl.value || tEl.innerText || tEl.textContent || '').trim();
@@ -31,15 +28,12 @@
 }
 
   function getBody(el){
-    // Preferimos textarea si existe:
     const ta = el.querySelector('textarea');
     if (ta && typeof ta.value === 'string') {
       return ta.value.trim();
     }
-    // Otras opciones comunes:
     const bEl = el.querySelector('[data-body], .ab-body, .content, p');
     if (bEl) return (bEl.innerText || bEl.textContent || '').trim();
-    // Último recurso: texto del propio nodo, limitado
     return (el.innerText || el.textContent || '').trim();
   }
 
@@ -50,7 +44,7 @@
     nodes.forEach(el => {
       const where = classify(el);
       const title = getTitle(el);
-      const isDefault = /^a?t{1,2}omic button$/i.test(title); // Atomic/Attomic
+      const isDefault = /^a?t{1,2}omic button$/i.test(title); 
       const body  = getBody(el);
       arr.push({ where, title, body, isDefault });
     });
@@ -70,7 +64,6 @@
       data.exportTotal = Number.isFinite(exportTotalParsed) ? exportTotalParsed : undefined;
 
       try { sessionStorage.setItem('atomABData', JSON.stringify(data)); } catch(_) {}
-      // misma pestaña para conservar sessionStorage
       location.href = 'atom.html';
     });
   }

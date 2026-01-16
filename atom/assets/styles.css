@@ -1,5 +1,4 @@
 :root {
-  /* Paleta base: azul / cyan / indigo + pizarra */
   --bg: #0b1020;
   --panel: #0f172a;
   --panel-2: #0b1224;
@@ -10,31 +9,25 @@
   --outline: #1e293b;
   --outline-2: #263247;
 
-  --accent: #22d3ee;  /* cyan */
-  --accent-2: #6366f1; /* indigo */
-  --accent-3: #38bdf8; /* light cyan */
+  --accent: #22d3ee;
+  --accent-2: #6366f1;
+  --accent-3: #38bdf8;
 
-  /* Gradientes principales */
-  --grad-main-1: #0ea5e9; /* sky-500 */
-  --grad-main-2: #6366f1; /* indigo-500 */
+  --grad-main-1: #0ea5e9;
+  --grad-main-2: #6366f1;
 
-  /* Superficies secundarias (Side) más discretas */
   --subtle-1: #0a0f1e;
   --subtle-2: #0a1020;
 
-  /* Tarjetas en Main */
   --card-main-1: #1b2a4a;
   --card-main-2: #162238;
 
-  /* Tarjetas en Side (muted) */
   --card-sub-1: #0f172a;
   --card-sub-2: #0d1426;
 
-  /* Historial / Orbit */
   --hist-bg: #0e1424;
   --hist-border: #2a3753;
 
-  /* Safe space para la barra de estado fija */
   --safe-bottom: 75px;
 }
 
@@ -46,12 +39,10 @@ body {
   background:
     radial-gradient(1400px 800px at 80% -10%, #0b1330, var(--bg));
   display: grid;
-  /* anclado arriba, centrado horizontalmente */
   place-items: start center;
   align-content: start;
   min-height: 100svh;
   padding: 24px;
-  /* evita que la status bar tape el contenido */
   padding-bottom: calc(24px + 44px);
 }
 
@@ -63,28 +54,21 @@ body.is-atomviewer {
 body.is-atomviewer canvas { display: block; }
 html.is-atomviewer { overflow: hidden; }
 
-/* Layout principal — 3 columnas con centro flexible */
 .layout {
   display: grid;
-  grid-template-columns: 260px minmax(640px, 1fr) 260px; /* centro crece con 1fr */
+  grid-template-columns: 260px minmax(640px, 1fr) 260px;
   gap: 16px;
   width: 100%;
-  max-width: 1400px; /* ya lo subiste; ajusta si quieres más ancho */
+  max-width: 1400px;
   align-items: start;
 }
-
-/* Evita que el contenido interno “empuje” el ancho de la columna */
 .app,
 .historial,
 .orbit {
   min-width: 0;
-  /* aire extra al final para no quedar oculto tras la status bar */
   margin-bottom: var(--safe-bottom);
 }
 
-/* =========================
-   Historial (columna izquierda)
-   ========================= */
 .historial {
   background: var(--hist-bg);
   border: 1px solid var(--hist-border);
@@ -96,7 +80,6 @@ html.is-atomviewer { overflow: hidden; }
   font-size: 14px; margin:0 0 10px; color: var(--muted);
 }
 
-/* Historial: sin scroll forzado, que crezca y scrollee la página */
 .hist-list {
   display: flex;
   flex-direction: column;
@@ -105,7 +88,6 @@ html.is-atomviewer { overflow: hidden; }
   padding-right: 0;
 }
 
-/* Enlace Clear bajo el título del historial */
 .hist-clear {
   display: inline-block;
   margin: 6px 0 10px;
@@ -123,11 +105,10 @@ html.is-atomviewer { overflow: hidden; }
   transform: translateY(-1px);
 }
 
-/* Historial: gris por defecto, verde suave al hover (alineado y más discreto) */
 .hist-item {
   display: flex;
   align-items: center;
-  padding: 6px 12px 6px 16px; /* + aire a la izquierda */
+  padding: 6px 12px 6px 16px;
   border-radius: 8px;
   background: linear-gradient(180deg, #1f2937, #111827);
   border: 1px solid #374151;
@@ -143,14 +124,12 @@ html.is-atomviewer { overflow: hidden; }
   border-color: #047857;
   transform: translateY(-1px);
 }
-/* Hover violeta solo dentro del panel Orbit */
 .orbit .hist-item:hover {
   background: linear-gradient(180deg, #6d28d9, #4c1d95);
   border-color: #8b5cf6;
   transform: translateY(-1px);
 }
 
-/* Panel del historial */
 .hist-panel {
   display: none;
   font-size: 12px;
@@ -168,9 +147,6 @@ html.is-atomviewer { overflow: hidden; }
 .hist-panel .hist-note { font-size: 12px; }
 .hist-panel .hist-note.empty { font-style: italic; opacity: 0.6; }
 
-/* =========================
-   App (columna central)
-   ========================= */
 .app {
   background: rgba(255,255,255,0.02);
   border: 1px solid var(--outline);
@@ -219,9 +195,6 @@ header {
 
 main { padding:16px 20px; }
 
-/* === Marcos === */
-
-/* MAIN (destacado) */
 #frameA.frame {
   background:
     linear-gradient(180deg, rgba(14,165,233,0.08), rgba(99,102,241,0.08)),
@@ -239,15 +212,12 @@ main { padding:16px 20px; }
   font-size:14px; color: var(--text); margin:0 0 8px;
   letter-spacing:.2px;
 }
-
-/* Borde “glow” sutil en hover para Main */
 #frameA.frame:hover {
   box-shadow:
     inset 0 0 0 1px rgba(99,102,241,0.35),
     0 14px 34px rgba(56,189,248,0.16);
 }
 
-/* SIDE (más contenido) */
 #frameB.frame.alt {
   background: linear-gradient(180deg, var(--subtle-1), var(--subtle-2));
   border:1px solid var(--outline-2);
@@ -260,7 +230,6 @@ main { padding:16px 20px; }
   font-size:14px; color: var(--muted); margin:0 0 8px;
 }
 
-/* LANDING (pista de aterrizaje) — discreto y compacto */
 #frameL.frame.landing {
   background: linear-gradient(180deg, var(--subtle-1), var(--subtle-2));
   border: 1px solid var(--outline-2);
@@ -272,7 +241,6 @@ main { padding:16px 20px; }
   opacity: .96;
 }
 
-/* Glow violeta cuando hay elementos */
 #frameL.has-items{
   background:
     linear-gradient(180deg, rgba(139,92,246,0.10), rgba(99,102,241,0.10)),
@@ -283,7 +251,6 @@ main { padding:16px 20px; }
     0 12px 28px rgba(139,92,246,0.22);
 }
 
-/* Título de Landing, como Side (muted) */
 #frameL.frame.landing h2 {
   font-size: 14px;
   color: var(--muted);
@@ -291,10 +258,8 @@ main { padding:16px 20px; }
   letter-spacing: .2px;
 }
 
-/* No aplicar efectos en hover a Landing */
 #frameL.frame.landing:hover { box-shadow: none; }
 
-/* Empty state específico para Landing — más bajo */
 #listL:empty {
   min-height: 48px;
   display: grid;
@@ -311,10 +276,8 @@ main { padding:16px 20px; }
   letter-spacing: .2px;
 }
 
-/* Listas */
 .list { display:flex; flex-direction:column; gap:8px; }
 
-/* === Items (tarjetas) === */
 .item {
   display:grid; grid-template-columns:40px 1fr 136px; gap:6px;
   padding:8px; border:1px solid var(--outline);
@@ -322,7 +285,6 @@ main { padding:16px 20px; }
   transition: box-shadow .12s ease, transform .08s ease, border-color .12s ease, filter .12s ease;
 }
 
-/* Main: tarjetas más vivas */
 #frameA .item {
   background: linear-gradient(180deg, var(--card-main-1), var(--card-main-2));
   border-color: rgba(56,189,248,0.25);
@@ -333,7 +295,6 @@ main { padding:16px 20px; }
   transform: translateY(-1px);
 }
 
-/* Side: tarjetas más discretas */
 #frameB .item,
 .item.in-alt {
   background: linear-gradient(180deg, var(--card-sub-1), var(--card-sub-2));
@@ -344,7 +305,6 @@ main { padding:16px 20px; }
   transform: translateY(-1px);
 }
 
-/* Asa de arrastre */
 .grab {
   display:grid; place-content:center;
   border:1px dashed var(--outline);
@@ -352,7 +312,6 @@ main { padding:16px 20px; }
   user-select:none;
 }
 
-/* Botón principal del ítem */
 .btn {
   border:1px solid #1b2540; border-radius:8px;
   background: linear-gradient(180deg, #1f2a44, #172036);
@@ -361,7 +320,6 @@ main { padding:16px 20px; }
 #frameA .btn { border-color: rgba(56,189,248,0.25); }
 #frameA .btn:hover { filter: brightness(1.05); }
 
-/* Herramientas */
 .tools { display:flex; gap:4px; align-items:center; }
 .tbtn {
   background:#0a0f20; border:1px solid var(--outline);
@@ -375,7 +333,6 @@ main { padding:16px 20px; }
   border-color: rgba(56,189,248,0.35);
 }
 
-/* Panel de notas */
 .panel { grid-column:1/-1; display:none; margin-top:6px; }
 .panel.open {
   display:block;
@@ -387,36 +344,29 @@ main { padding:16px 20px; }
 }
 .panel textarea {
   width: 100%;
-  min-height: 150px;   /* antes 60px → ahora el doble */
+  min-height: 150px; 
   border-radius: 8px;
   border: 1px solid var(--outline);
   background: #0a0f20;
   color: var(--text);
   padding: 6px;
 
-  resize: vertical;    /* solo se puede ampliar en vertical */
-  overflow: auto;      /* muestra scroll si hace falta */
-  max-width: 100%;     /* evita “estirar” horizontal en layouts raros */
+  resize: vertical;
+  overflow: auto; 
+  max-width: 100%;    
 }
 
-
-/* Dragging feedback sutil */
 .item.dragging {
   opacity: .88;
   outline: 1px dashed rgba(56,189,248,0.6);
   outline-offset: 2px;
   filter: saturate(1.05);
 }
-/* Cuando no se puede arrastrar desde Landing porque A y B están llenos */
 .item.no-drag .grab {
   cursor: not-allowed;
   opacity: 0.6;
 }
 
-
-/* =========================
-   Orbit (columna derecha)
-   ========================= */
 .orbit {
   background: var(--hist-bg);
   border: 1px solid var(--hist-border);
@@ -436,7 +386,6 @@ main { padding:16px 20px; }
   overflow: visible;
   padding-right: 0;
 }
-/* Estado vacío opcional para Orbit */
 .orbit-list:empty {
   min-height: 80px;
   display: grid;
@@ -459,16 +408,14 @@ footer {
   font-size: 12px;
   color: var(--muted);
   display: grid;
-  grid-template-columns: 1fr auto 1fr; /* izq | centro | der */
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
 }
 
-/* coloca cada bloque en su sitio */
-footer > :first-child { justify-self: start; }   /* "Total" a la izquierda */
-footer a.link-soft    { justify-self: center; }  /* "Empty" centrado */
-footer .right         { justify-self: end; }     /* unatomo # a la derecha */
+footer > :first-child { justify-self: start; } 
+footer a.link-soft    { justify-self: center; } 
+footer .right         { justify-self: end; } 
 
-/* ===== Status bar ===== */
 .statusbar {
   position: fixed;
   left: 0;
@@ -477,7 +424,7 @@ footer .right         { justify-self: end; }     /* unatomo # a la derecha */
   height: 44px;
   display: flex;
   align-items: center;
-  justify-content: center;   /* ← centra el único hijo */
+  justify-content: center; 
   padding: 0 16px;
   background: rgba(17, 24, 39, 0.85);
   backdrop-filter: blur(8px);
@@ -490,10 +437,9 @@ footer .right         { justify-self: end; }     /* unatomo # a la derecha */
   font-size: 12.5px;
   color: var(--muted);
   letter-spacing: 0.2px;
-  text-align: center;         /* por si el texto ocupa 2 líneas */
+  text-align: center; 
 }
 
-/* Pequeños ajustes responsive */
 @media (max-width: 900px) {
   .layout { grid-template-columns: 1fr; }
   .app { order: 1; }
@@ -501,12 +447,10 @@ footer .right         { justify-self: end; }     /* unatomo # a la derecha */
   .orbit { order: 3; }
   .item { grid-template-columns: 36px 1fr 120px; }
 
-  /* Historial aún más compacto en móvil */
   .hist-panel { font-size: 11.5px; }
   .hist-panel .hist-meta { font-size: 10.5px; }
 }
 
-/* Empty states genéricos para A/B */
 .list:empty {
   min-height: 80px;
   display: grid;
@@ -525,25 +469,21 @@ footer .right         { justify-self: end; }     /* unatomo # a la derecha */
 #listA:empty::before { content: "Add something"; }
 #listB:empty::before { content: "Drag something"; }
 
-/* Placeholder del textarea: tenue e itálico */
 .panel textarea::placeholder {
   font-style: italic;
   color: rgb(148 163 184 / 0.45);
 }
 
-/* === Fondo sólido en toda la página (sin banda azul) === */
 html, body {
   background: var(--bg) !important;
   background-image: none !important;
 }
 
-/* (opcional) iguala la barra de estado al mismo color */
 .statusbar {
   background: var(--bg) !important;
   background: rgba(17, 24, 39, 0.66) !important; /
   backdrop-filter: blur(8px);
 }
-/* Match Landing placeholder size with Main/Side */
 #listL:empty {
   min-height: 80px;
   padding: 12px;
@@ -551,11 +491,9 @@ html, body {
 .element-name {
   color: orange;
 }
-/* Título clicable: fuerza cursor de enlace */
 .app header h1 {
   cursor: pointer !important;
 }
-/* Fila bajo el header: input + +Add (entre dos líneas) */
 .app .createbar {
   display: flex;
   align-items: center;
@@ -564,15 +502,12 @@ html, body {
   background: rgba(17, 24, 39, 0.45);  
   border-bottom: 1px solid var(--outline);  
 }
-
-/* este bloque se va a la derecha y mantiene el estilo de botones */
 .app .createbar .right {
   margin-left: auto;          
   display: flex;
   align-items: center;
   gap: 8px;
 }
-/* Enlace suave tipo "Clear / Erase" */
 .link-soft {
   display: inline-block;
   font-size: 12.5px;
@@ -594,10 +529,8 @@ html, body {
   border-radius: 4px;
 }
 
-
-/* Mantén el ancho estable para evitar saltos al cambiar el texto */
 .import-label {
-  min-width: 84px;           /* ajusta si tu botón es más ancho */
+  min-width: 84px;
   justify-content: center;
 }
 
@@ -612,34 +545,32 @@ html, body {
   transform: none !important;
 }
 
-/* Anula cualquier hover/active/focus cuando estén deshabilitados */
 #exportBtn:disabled:is(:hover, :active, :focus),
 #createBtn:disabled:is(:hover, :active, :focus) {
   box-shadow: none !important;
   transform: none !important;
 }
-/* Create disponible → verde estilo GitHub "Commit changes" */
 #createBtn.is-hot {
-  background-color: #2da44e;   /* commit green */
-  background-image: none;      /* por si tu tema usa gradiente en .is-hot */
+  background-color: #2da44e; 
+  background-image: none;
   border-color: #2a8a49;
   color: #fff;
   transition: background-color .15s ease, border-color .15s ease, box-shadow .15s ease;
 }
 
 #createBtn.is-hot:hover {
-  background-color: #2c974b;   /* hover */
+  background-color: #2c974b;
   border-color: #2a8a49;
 }
 
 #createBtn.is-hot:active {
-  background-color: #298e46;   /* active/pressed */
+  background-color: #298e46;
   border-color: #267a40;
 }
 
 #createBtn.is-hot:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(46, 164, 79, 0.35); /* anillo accesible */
+  box-shadow: 0 0 0 3px rgba(46, 164, 79, 0.35);
 }
 .controls .btn:disabled {
 opacity: 0.45 !important;

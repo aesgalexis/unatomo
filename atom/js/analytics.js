@@ -1,6 +1,4 @@
-// analytics.js — Firestore (contador global) con imports dinámicos
 
-// --- Config Firebase (la tuya) ---
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyBwSla3hdkIIB9gmVfvv7c_0j90IDiCqVU",
   authDomain: "unatomo-f5537.firebaseapp.com",
@@ -11,10 +9,8 @@ const FIREBASE_CONFIG = {
   measurementId: "G-DLBTXQBYXC",
 };
 
-// Documento donde guardamos el total global
 const DOC_PATH = ["metrics", "exports"];
 
-// reCAPTCHA v3 (App Check) — opcional
 const RECAPTCHA_SITE_KEY = "6LfGMLorAAAAAGW3LUS1XRvgx6wdQ7eFMkGQ5Rrq";
 
 let _initPromise = null;
@@ -31,7 +27,6 @@ async function ensureFirebase() {
 
     const app = appMod.initializeApp(FIREBASE_CONFIG);
 
-    // App Check (opcional). Si falla, seguimos sin él.
     try {
       if (appCheckMod.initializeAppCheck && appCheckMod.ReCaptchaV3Provider) {
         appCheckMod.initializeAppCheck(app, {
@@ -45,7 +40,6 @@ async function ensureFirebase() {
 
     const db = fsMod.getFirestore(app);
 
-    // Re-exportamos helpers de Firestore que usamos
     const fs = {
       doc: fsMod.doc,
       getDoc: fsMod.getDoc,
@@ -61,7 +55,6 @@ async function ensureFirebase() {
   return _initPromise;
 }
 
-// Lee el total global (si falla, usa fallback local)
 export async function getGlobalExportCount() {
   try {
     const { db, fs } = await ensureFirebase();
@@ -76,8 +69,6 @@ export async function getGlobalExportCount() {
   }
 }
 
-// Incrementa el contador global en +1 y devuelve el nuevo total.
-// Si falla red, usa fallback local; también emite el evento 'global-export-count'.
 export async function incrementGlobalExportCounter() {
   try {
     const { db, fs } = await ensureFirebase();

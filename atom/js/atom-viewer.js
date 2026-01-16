@@ -1,6 +1,5 @@
 "use strict";
 (function(){
-  // ===== Datos desde sessionStorage =====
   var stored = null; try { stored = sessionStorage.getItem('atomABData'); } catch(e) {}
   var abData = null; try { abData = stored ? JSON.parse(stored) : null; } catch(e) { abData = null; }
   var abList = (abData && Array.isArray(abData.ab)) ? abData.ab : [];
@@ -33,7 +32,6 @@
     infos.push({ color: COLOR.main, title:"Atomic Button", body: "Sin datos de AB — usa el botón Visualize en index.", isDefault:true });
   }
 
-  // ===== UI =====
   var uiRoot = document.getElementById('ui-root') || document.body;
   
   var siteTitle = (abData && abData.siteTitle && String(abData.siteTitle).trim()) || (localStorage.getItem('app-title') || '').trim() || 'unátomo';
@@ -47,8 +45,6 @@
   '<div class="hud" style="position:fixed;right:12px;top:12px;display:flex;gap:8px;align-items:center;background:rgba(17,24,39,55);border:1px solid #263247;padding:8px 10px;border-radius:10px;z-index:10"><button id="backBtn" style="background:#18223a;color:#e5e7eb;border:1px solid #334155;border-radius:8px;padding:6px 10px;cursor:pointer;font-weight:600">← Back</button></div>'
 );
 
-
-  // ===== THREE =====
   var scene = new THREE.Scene(); scene.ground = new THREE.Color(0x0b1020);
   var camera = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 2000); camera.position.set(0,0,20);
   var renderer = new THREE.WebGLRenderer({antialias:true});
@@ -67,7 +63,6 @@
   var ringMat = new THREE.MeshBasicMaterial({ color: 0x8b5cf6, wireframe:true, transparent:true, opacity:0.35 });
   var electronMat = new THREE.MeshPhongMaterial({ color: 0x22d3ee, emissive: 0x0ea5e9, emissiveIntensity: 0.85 });
 
-  // ===== Núcleo =====
   var protons = [];
   function setNucleusFromInfos(arr){
     while(nucleus.children.length>1){
@@ -99,7 +94,6 @@
   }
   setNucleusFromInfos(infos);
 
-  // ===== Órbitas + 3 electrones (5/6/7 s) =====
   var orbits = [];
   function createOrbit(radius, periodSec){
     var pivot = new THREE.Object3D();
@@ -118,23 +112,20 @@
   orbits.push(createOrbit(BASE+1*GAP,6.0));
   orbits.push(createOrbit(BASE+2*GAP,7.0));
 
-  // ===== Interacción: panel 400x400 (sin scroll, se ajusta texto) =====
   var raycaster = new THREE.Raycaster();
   var mouse = new THREE.Vector2();
   var hoverProton = null;
   var panelEl = null, panelTarget = null, nucleusPaused = false;
 
-  // Cerrar panel reutilizable
   function closePanel(){
   if(panelEl){ panelEl.remove(); panelEl = null; }
   panelTarget = null;
   nucleusPaused = false;
   }
 
-  // Cerrar si se hace click fuera del panel (listener único)
   document.addEventListener('mousedown', function(e){
   if(!panelEl) return;
-  if(panelEl.contains(e.target)) return; // clic dentro → lo gestiona la “×”
+  if(panelEl.contains(e.target)) return;
   closePanel();
   }, true);
 
@@ -167,7 +158,7 @@
 
   function showPanelFor(proton){
   var pos = projectToScreen(proton), c = clampPos(pos.x, pos.y);
-  closePanel(); // cierra si había uno
+  closePanel(); 
 
   panelEl = document.createElement('div');
   panelEl.style.cssText = [
@@ -182,8 +173,8 @@
   ].join(';');
 
   var payload = (proton.userData && proton.userData.payload) ? proton.userData.payload : {title:'AB', body:''};
-  var title = payload.title || 'AB';       // TÍTULO EXACTO del AB
-  var body  = (payload.body || '').trim(); // textarea del AB
+  var title = payload.title || 'AB';
+  var body  = (payload.body || '').trim();
 
   panelEl.innerHTML =
   '<header style="display:flex;align-items:center;justify-content:space-between;height:36px;padding:0 10px;background:rgba(15,23,42,.4)">'+
@@ -196,7 +187,6 @@
 
   var cont = document.getElementById('panelContent');
 
-  // Ajuste sin scroll (recorte con “…” hasta que quepa)
   function fits(){ return cont.scrollHeight <= cont.clientHeight + 1; }
   function setTxt(t){ cont.textContent = t; }
 
@@ -221,28 +211,24 @@
   panelTarget = proton;
   nucleusPaused = true;
 }
-
-  // ===== Rotación/zoom/reset =====
   var draggingAtom=false, lastX=0,lastY=0; var atomVelX=0, atomVelY=0; var FRICTION=0.965;
 
   renderer.domElement.addEventListener('mousedown', function(e){
-  if(e.button !== 0) return; // solo botón izquierdo
-  ndc(e); // actualiza mouse.x/y en NDC
+  if(e.button !== 0) return; 
+  ndc(e);
 
   var hits = hitProtons();
   if(hits.length){
-    // Abrir/sustituir panel para el protón clicado
+    
     showPanelFor(hits[0].object);
     return;
   }
 
-  // Si hay panel abierto y haces clic en el canvas (fuera del panel), ciérralo
   if(panelEl){
     closePanel();
     return;
   }
 
-  // Si no hay panel y no has clicado un protón → rotación con inercia
   draggingAtom = true;
   lastX = e.clientX; lastY = e.clientY;
   atomVelX = 0; atomVelY = 0;
@@ -254,7 +240,6 @@
   renderer.domElement.addEventListener('wheel', function(e){ e.preventDefault(); camDist*=(1+Math.sign(e.deltaY)*0.08); camDist=Math.max(5,Math.min(70,camDist)); var dirV=camera.position.clone().normalize(); camera.position.copy(dirV.multiplyScalar(camDist)); camera.lookAt(0,0,0); }, {passive:false});
   window.addEventListener('keydown', function(e){ if(e.key && e.key.toLowerCase()==='r'){ camera.position.set(0,7,20); camera.lookAt(0,0,0); camDist=20; atom.rotation.set(0,0,0); atomVelX=0; atomVelY=0; for(var i=0;i<orbits.length;i++){ orbits[i].pivot.rotation.set(0,0,0); orbits[i].rotator.rotation.set(0,0,0); } nucleusPaused=false; if(panelEl){ panelEl.remove(); panelEl=null; panelTarget=null; } } });
 
-  // ===== Loop =====
   var clock=new THREE.Clock();
   function animate(){
     var dt=clock.getDelta(); var t=performance.now()*0.001;
@@ -267,7 +252,6 @@
   }
   animate();
 
-  // ===== Back + resize =====
   var back = document.getElementById('backBtn'); if(back) back.addEventListener('click', function(){ history.back(); });
   window.addEventListener('resize', function(){ camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); });
 })();

@@ -1,4 +1,3 @@
-// Drag & Drop con placeholder. A/B aceptan drop; L solo origen (no drop).
 let dropCallback = null;
 let draggingId = null;
 let placeholder = null;
@@ -21,7 +20,6 @@ function removePlaceholder() {
 }
 
 function getDragAfterElement(container, y) {
-  // Devuelve el .item inmediatamente posterior al punto Y (excluye el que arrastras y el placeholder)
   const els = [...container.querySelectorAll(".item")].filter(
     (el) => !el.classList.contains("dragging")
   );
@@ -37,7 +35,6 @@ function getDragAfterElement(container, y) {
 }
 
 function indexFromPlaceholder(listEl) {
-  // Cuenta cuántos .item hay antes del placeholder
   let index = 0;
   for (const node of listEl.children) {
     if (node === placeholder) break;
@@ -53,7 +50,6 @@ function bindZone(zoneEl, listEl, whereKey, dropEnabled = true) {
 
   if (!listEl.style.minHeight) listEl.style.minHeight = "32px";
 
-  // Iniciar arrastre (siempre permitido para poder empezar desde la zona)
   zoneEl.addEventListener("dragstart", (e) => {
     const item = e.target.closest(".item");
     if (!item) return;
@@ -63,7 +59,6 @@ function bindZone(zoneEl, listEl, whereKey, dropEnabled = true) {
     item.classList.add("dragging");
   });
 
-  // Fin arrastre
   zoneEl.addEventListener("dragend", (e) => {
     const item = e.target.closest(".item");
     if (item) item.classList.remove("dragging");
@@ -71,9 +66,8 @@ function bindZone(zoneEl, listEl, whereKey, dropEnabled = true) {
     removePlaceholder();
   });
 
-  if (!dropEnabled) return; // Landing no acepta drop
+  if (!dropEnabled) return; 
 
-  // Al entrar, pon el placeholder si no está
   zoneEl.addEventListener("dragenter", (e) => {
     e.preventDefault();
     if (!draggingId) return;
@@ -81,7 +75,6 @@ function bindZone(zoneEl, listEl, whereKey, dropEnabled = true) {
     if (!listEl.contains(ph)) listEl.appendChild(ph);
   });
 
-  // Recoloca el placeholder en tiempo real
   zoneEl.addEventListener("dragover", (e) => {
     e.preventDefault();
     if (e.dataTransfer) e.dataTransfer.dropEffect = "move";
@@ -93,14 +86,12 @@ function bindZone(zoneEl, listEl, whereKey, dropEnabled = true) {
     else listEl.appendChild(ph);
   });
 
-  // Soltar: índice exacto = nº de .item antes del placeholder
   zoneEl.addEventListener("drop", (e) => {
     e.preventDefault();
     const id =
       (e.dataTransfer && e.dataTransfer.getData("text/plain")) || draggingId;
     if (!id) return;
 
-    // Si por lo que sea no está el placeholder, colócalo ahora
     const ph = ensurePlaceholder();
     if (!listEl.contains(ph)) {
       const after = getDragAfterElement(listEl, e.clientY);
@@ -124,7 +115,6 @@ export function enableDragAndDrop({ listL, listA, listB, onDrop }) {
   const frameB = listB?.closest?.(".frame") || listB;
   const frameL = listL?.closest?.(".frame") || listL;
 
-  // A y B: arrastrar/soltar (lista + marco para ampliar zona)
   if (listA) {
     bindZone(listA, listA, "A", true);
     if (frameA && frameA !== listA) bindZone(frameA, listA, "A", true);
@@ -134,7 +124,6 @@ export function enableDragAndDrop({ listL, listA, listB, onDrop }) {
     if (frameB && frameB !== listB) bindZone(frameB, listB, "B", true);
   }
 
-  // L: solo origen (no drop)
   if (listL) {
     bindZone(listL, listL, "L", false);
     if (frameL && frameL !== listL) bindZone(frameL, listL, "L", false);
