@@ -4,8 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "vite"
+  "dev": "vite",
+  "build": "node scripts/build-static.mjs",
+  "preview": "vite preview"
   },
   "repository": {
     "type": "git",
