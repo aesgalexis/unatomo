@@ -382,6 +382,12 @@ function refreshIsotopeNumber() {
 }
 
 export function bindGlobalHandlers() {
+  window.addEventListener("atom-defaults-loaded", () => {
+    render();
+    updateActionButtons();
+    refreshIsotopeNumber();
+  });
+
   if (input) {
     input.spellcheck = false;
     input.setAttribute("autocorrect", "off");
