@@ -88,7 +88,7 @@
   '<div class="tip" style="position:fixed;left:12px;top:12px;font-size:12px;opacity:.9;background:rgba(17,24,39,.55);border:1px solid #263247;padding:8px 10px;border-radius:10px;z-index:10">'
     + siteTitleText +
   '</div>' +
-  '<div class="hud" style="position:fixed;right:12px;top:12px;display:flex;gap:8px;align-items:center;background:rgba(17,24,39,55);border:1px solid #263247;padding:8px 10px;border-radius:10px;z-index:10"><button id="backBtn" style="background:#18223a;color:#e5e7eb;border:1px solid #334155;border-radius:8px;padding:6px 10px;cursor:pointer;font-weight:600">← Back</button></div>'
+  '<div class="hud" style="position:fixed;right:12px;top:12px;display:flex;gap:8px;align-items:center;background:rgba(17,24,39,55);border:1px solid #263247;padding:8px 10px;border-radius:10px;z-index:10"><button id="backBtn" style="background:#18223a;color:#e5e7eb;border:1px solid #334155;border-radius:8px;padding:6px 10px;cursor:pointer;font-weight:600">Edit</button></div>'
 );
 
   var scene = new THREE.Scene(); scene.ground = new THREE.Color(0x0b1020);
@@ -162,6 +162,51 @@
   var mouse = new THREE.Vector2();
   var hoverProton = null;
   var panelEl = null, panelTarget = null, nucleusPaused = false;
+  var hoverTip = null;
+  var lastPointer = { x: 0, y: 0 };
+
+  function ensureHoverTip() {
+    if (hoverTip) return hoverTip;
+    hoverTip = document.createElement("div");
+    hoverTip.style.cssText = [
+      "position:fixed",
+      "max-width:220px",
+      "padding:6px 8px",
+      "font-size:12px",
+      "color:#e5e7eb",
+      "background:rgba(15,23,42,.9)",
+      "border:1px solid #334155",
+      "border-radius:8px",
+      "pointer-events:none",
+      "z-index:30",
+      "opacity:0",
+      "transition:opacity .12s ease",
+    ].join(";");
+    document.body.appendChild(hoverTip);
+    return hoverTip;
+  }
+
+  function setHoverTip(text) {
+    var tip = ensureHoverTip();
+    if (!text) {
+      tip.style.opacity = "0";
+      return;
+    }
+    tip.textContent = text;
+    tip.style.opacity = "1";
+    positionHoverTip();
+  }
+
+  function positionHoverTip() {
+    if (!hoverTip || hoverTip.style.opacity !== "1") return;
+    var rect = hoverTip.getBoundingClientRect();
+    var x = Math.min(lastPointer.x + 12, innerWidth - rect.width - 8);
+    var y = Math.min(lastPointer.y + 12, innerHeight - rect.height - 8);
+    x = Math.max(8, x);
+    y = Math.max(8, y);
+    hoverTip.style.left = x + "px";
+    hoverTip.style.top = y + "px";
+  }
 
   function closePanel(){
   if(panelEl){ panelEl.remove(); panelEl = null; }
@@ -178,15 +223,31 @@
   function ndc(e){ var r=renderer.domElement.getBoundingClientRect(); mouse.x=((e.clientX-r.left)/r.width)*2-1; mouse.y=-((e.clientY-r.top)/r.height)*2+1; }
   function hitProtons(){ raycaster.setFromCamera(mouse,camera); return raycaster.intersectObjects(protons,false); }
   renderer.domElement.addEventListener('mousemove', function(e){
+    lastPointer.x = e.clientX;
+    lastPointer.y = e.clientY;
     ndc(e);
     var hits = hitProtons();
     hoverProton = (hits && hits[0]) ? hits[0].object : null;
     renderer.domElement.style.cursor = hoverProton ? 'pointer' : 'default';
+    if (hoverProton && hoverProton.userData && hoverProton.userData.payload) {
+      setHoverTip(hoverProton.userData.payload.title || "AB");
+    } else {
+      setHoverTip("");
+    }
+  }, {passive:true});
+  renderer.domElement.addEventListener('mouseleave', function(){
+    hoverProton = null;
+    setHoverTip("");
+    renderer.domElement.style.cursor = 'default';
   }, {passive:true});
 
   function projectToScreen(obj){ var v=new THREE.Vector3(); obj.getWorldPosition(v); v.project(camera); return { x:(v.x*0.5+0.5)*innerWidth, y:(-v.y*0.5+0.5)*innerHeight }; }
-  function clampPos(x,y){
-    var w=500, h=500;
+  function getPanelSize(){
+    var w = Math.min(420, Math.max(0, innerWidth - 24));
+    var h = Math.min(420, Math.max(0, innerHeight - 24));
+    return { w: w, h: h };
+  }
+  function clampPos(x,y,w,h){
     return {
       x: Math.max(0, Math.min(x, innerWidth  - w)),
       y: Math.max(0, Math.min(y, innerHeight - h))
@@ -203,13 +264,15 @@
   }
 
   function showPanelFor(proton){
-  var pos = projectToScreen(proton), c = clampPos(pos.x, pos.y);
-  closePanel(); 
+  var pos = projectToScreen(proton);
+  var size = getPanelSize();
+  var c = clampPos(pos.x, pos.y, size.w, size.h);
+  closePanel();
 
   panelEl = document.createElement('div');
   panelEl.style.cssText = [
     'position:fixed',
-    'width:400px','height:400px',
+    'width:'+size.w+'px','height:'+size.h+'px',
     'background:rgba(0,0,0,.55)',
     'border:1px solid #263247','border-radius:12px',
     'drop-filter:blur(2px)','z-index:20',
@@ -227,7 +290,7 @@
     '<div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:320px">'+ title +'</div>'+
     '<button class="close" aria-label="Cerrar" style="all:unset;display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border:1px solid #334155;border-radius:8px;cursor:pointer;font-size:16px;line-height:1;">×</button>'+
   '</header>'+
-  '<div id="panelContent" style="padding:10px;font-size:12px;color:#cbd5e1;white-space:pre-wrap;overflow:hidden;height:calc(400px - 36px);line-height:1.35"></div>';
+  '<div id="panelContent" style="padding:10px;font-size:12px;color:#cbd5e1;white-space:pre-wrap;overflow:hidden;height:calc(' + size.h + 'px - 36px);line-height:1.35"></div>';
 
   document.body.appendChild(panelEl);
 
@@ -293,11 +356,33 @@
     glow.intensity=0.5+0.15*Math.sin(t*1.1);
     if(!draggingAtom){ atom.rotation.x+=atomVelX*dt; atom.rotation.y+=atomVelY*dt; atomVelX*=FRICTION; atomVelY*=FRICTION; if(Math.abs(atomVelX)<1e-4) atomVelX=0; if(Math.abs(atomVelY)<1e-4) atomVelY=0; }
     for (var j=0; j<orbits.length; j++){ var o=orbits[j]; o.pivot.rotation.y+=o.precessSpeed*dt; var wob=0.05*Math.sin(t*0.6 + o.wobblePhase); o.pivot.rotation.x+=(wob - o.pivot.rotation.x)*0.02; o.pivot.rotation.z+=(wob*0.6 - o.pivot.rotation.z)*0.02; o.rotator.rotation.z+=o.omega*dt; }
-    if(panelEl && panelTarget){ var p=projectToScreen(panelTarget), c=clampPos(p.x,p.y); panelEl.style.left=c.x+'px'; panelEl.style.top=c.y+'px'; }
+    if(panelEl && panelTarget){
+      var size = getPanelSize();
+      var p=projectToScreen(panelTarget), c=clampPos(p.x,p.y,size.w,size.h);
+      panelEl.style.left=c.x+'px'; panelEl.style.top=c.y+'px';
+    }
     renderer.render(scene,camera); requestAnimationFrame(animate);
   }
   animate();
 
-  var back = document.getElementById('backBtn'); if(back) back.addEventListener('click', function(){ history.back(); });
-  window.addEventListener('resize', function(){ camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); });
+  var back = document.getElementById('backBtn'); if(back) back.addEventListener('click', function(){ location.href = "edit.html"; });
+  window.addEventListener('resize', function(){
+    camera.aspect=innerWidth/innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(innerWidth,innerHeight);
+    if(panelEl){
+      var size = getPanelSize();
+      panelEl.style.width = size.w + 'px';
+      panelEl.style.height = size.h + 'px';
+      var cont = document.getElementById('panelContent');
+      if (cont) cont.style.height = 'calc(' + size.h + 'px - 36px)';
+      if (panelTarget) {
+        var p = projectToScreen(panelTarget);
+        var c = clampPos(p.x, p.y, size.w, size.h);
+        panelEl.style.left = c.x + 'px';
+        panelEl.style.top = c.y + 'px';
+      }
+    }
+    positionHoverTip();
+  });
 })();
