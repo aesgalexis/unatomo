@@ -12,13 +12,38 @@ export const makeEmptyState = () => ({
   isotope: 0,
 });
 
+const DEFAULT_AB_COUNT = 5;
+
+function makeDefaultState() {
+  const base = makeEmptyState();
+  const now = new Date().toISOString();
+  for (let i = 1; i <= DEFAULT_AB_COUNT; i += 1) {
+    base.items.push({
+      id: i,
+      where: "A",
+      label: `AB${i}`,
+      note: `text${i}`,
+      open: false,
+      createdAt: now,
+    });
+  }
+  base.idSeq = DEFAULT_AB_COUNT + 1;
+  return base;
+}
+
 export let state = load();
 
 function load() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     const base = makeEmptyState();
-    if (!raw) return base;
+    if (!raw) {
+      const seeded = makeDefaultState();
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(seeded));
+      } catch {}
+      return seeded;
+    }
 
     const parsed = JSON.parse(raw);
 
