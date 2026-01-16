@@ -1,9 +1,55 @@
 "use strict";
-(function(){
+(async function(){
+  var DEFAULT_AB_COUNT = 5;
+  var DEFAULT_FALLBACKS = Array.from({ length: DEFAULT_AB_COUNT }, function(_, idx) {
+    return { title: "AB" + (idx + 1), text: "text" + (idx + 1) };
+  });
+
+  function getFieldValue(el) {
+    if (!el) return "";
+    if ("value" in el) return String(el.value || "").trim();
+    return String(el.textContent || "").trim();
+  }
+
+  async function loadDefaultDefs() {
+    try {
+      var res = await fetch("./default.html", { cache: "no-store" });
+      if (!res.ok) throw new Error("default fetch failed");
+      var html = await res.text();
+      var doc = new DOMParser().parseFromString(html, "text/html");
+      var defs = [];
+      for (var i = 1; i <= DEFAULT_AB_COUNT; i++) {
+        var titleEl = doc.querySelector('[data-default-title="' + i + '"]');
+        var textEl = doc.querySelector('[data-default-text="' + i + '"]');
+        var title = getFieldValue(titleEl);
+        var text = getFieldValue(textEl);
+        if (title || text) defs.push({ title: title, text: text });
+      }
+      return defs.length ? defs : DEFAULT_FALLBACKS;
+    } catch (e) {
+      return DEFAULT_FALLBACKS;
+    }
+  }
+
   var stored = null; try { stored = sessionStorage.getItem('atomABData'); } catch(e) {}
   var abData = null; try { abData = stored ? JSON.parse(stored) : null; } catch(e) { abData = null; }
   var abList = (abData && Array.isArray(abData.ab)) ? abData.ab : [];
   var abTs = (abData && abData.ts) ? abData.ts : Date.now();
+
+  if (!abList.length) {
+    var defs = await loadDefaultDefs();
+    if (defs && defs.length) {
+      abList = defs.map(function(def, idx) {
+        return {
+          title: def.title || ("AB" + (idx + 1)),
+          body: def.text || ("text" + (idx + 1)),
+          where: "A",
+          isDefault: true,
+        };
+      });
+      abTs = Date.now();
+    }
+  }
   
   (function(){
   var el = document.getElementById('exportCounter');
