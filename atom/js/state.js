@@ -13,37 +13,19 @@ export const makeEmptyState = () => ({
 });
 
 const DEFAULT_AB_COUNT = 5;
-
-function makeDefaultState() {
-  const base = makeEmptyState();
-  const now = new Date().toISOString();
-  for (let i = 1; i <= DEFAULT_AB_COUNT; i += 1) {
-    base.items.push({
-      id: i,
-      where: "A",
-      label: `AB${i}`,
-      note: `text${i}`,
-      open: false,
-      createdAt: now,
-    });
-  }
-  base.idSeq = DEFAULT_AB_COUNT + 1;
-  return base;
-}
+const DEFAULT_FALLBACKS = Array.from({ length: DEFAULT_AB_COUNT }, (_, idx) => ({
+  title: `AB${idx + 1}`,
+  text: `text${idx + 1}`,
+}));
 
 export let state = load();
+seedDefaultsIfEmpty();
 
 function load() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     const base = makeEmptyState();
-    if (!raw) {
-      const seeded = makeDefaultState();
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(seeded));
-      } catch {}
-      return seeded;
-    }
+    if (!raw) return base;
 
     const parsed = JSON.parse(raw);
 
@@ -115,6 +97,55 @@ function load() {
   } catch {
     return makeEmptyState();
   }
+}
+
+function getFieldValue(el) {
+  if (!el) return "";
+  if ("value" in el) return String(el.value || "").trim();
+  return String(el.textContent || "").trim();
+}
+
+async function loadDefaultDefs() {
+  try {
+    const res = await fetch("./default.html", { cache: "no-store" });
+    if (!res.ok) throw new Error("default fetch failed");
+    const html = await res.text();
+    const doc = new DOMParser().parseFromString(html, "text/html");
+    const defs = [];
+    for (let i = 1; i <= DEFAULT_AB_COUNT; i += 1) {
+      const titleEl = doc.querySelector(`[data-default-title="${i}"]`);
+      const textEl = doc.querySelector(`[data-default-text="${i}"]`);
+      const title = getFieldValue(titleEl);
+      const text = getFieldValue(textEl);
+      if (title || text) defs.push({ title, text });
+    }
+    return defs.length ? defs : DEFAULT_FALLBACKS;
+  } catch {
+    return DEFAULT_FALLBACKS;
+  }
+}
+
+async function seedDefaultsIfEmpty() {
+  let raw = null;
+  try {
+    raw = localStorage.getItem(STORAGE_KEY);
+  } catch {}
+  if (raw) return;
+  if (state.items.length || state.history.length || state.orbit.length) return;
+
+  const defs = await loadDefaultDefs();
+  const now = new Date().toISOString();
+  state.items = defs.map((def, idx) => ({
+    id: idx + 1,
+    where: "A",
+    label: def.title || `AB${idx + 1}`,
+    note: def.text || `text${idx + 1}`,
+    open: false,
+    createdAt: now,
+  }));
+  state.idSeq = state.items.length + 1;
+  save();
+  window.dispatchEvent(new CustomEvent("atom-defaults-loaded"));
 }
 
 export function delayOrbit(id, addDays) {
