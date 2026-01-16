@@ -8,17 +8,16 @@ import {
   resolveItem,
   exportJson,
   importJson,
-  moveItem, // para fijar orden en drop
+  moveItem,
   clearAll,
   clearHistory,
-  sendToOrbit,   // NUEVO
-  landDueOrbits, // NUEVO
-  delayOrbit,    // NUEVO
+  sendToOrbit,
+  landDueOrbits,
+  delayOrbit,
 } from "./state.js";
 import { enableDragAndDrop } from "./dragdrop.js";
 import { getGlobalExportCount } from "./analytics.js";
 
-// === Tabla periódica: número atómico → nombre ===
 const ELEMENTS = {
   1: "Hydrogen", 2: "Helium", 3: "Lithium", 4: "Beryllium", 5: "Boron",
   6: "Carbon", 7: "Nitrogen", 8: "Oxygen", 9: "Fluorine", 10: "Neon",
@@ -46,23 +45,19 @@ const ELEMENTS = {
   114: "Flerovium", 115: "Moscovium", 116: "Livermorium", 117: "Tennessine", 118: "Oganesson"
 };
 
-// Status bar elements
 const exportCounterEl = document.getElementById("exportCounter");
 const atomNoEl = document.getElementById("atomNo");
 const isotopeEl = document.getElementById("isotopeNo");
 
-// Límites por marco
 const MAX_A = 8;
 const MAX_B = 16;
 
-// Visibilidad / cupos de UI
 const LANDING_MAX = 94;
 const ORBIT_VISIBLE_MAX = 32;
 const HISTORY_VISIBLE_MAX = 32;
 
 const clearHistoryBtn = document.getElementById("clearHistoryBtn");
 
-// Elementos raíz
 const listL = document.getElementById("listL");
 const frameL = document.getElementById("frameL");
 const listA = document.getElementById("listA");
@@ -79,37 +74,30 @@ const importBtn = document.getElementById("importBtn");
 const ejectBtn  = document.getElementById("ejectBtn");
 const visualizeBtn = document.getElementById("visualizeAtom");
 
-// Orbit (columna derecha)
 const orbitList = document.getElementById("orbitList");
 const orbitTitle = document.getElementById("orbitTitle");
 
-// Títulos de marcos
 const frameATitle = document.querySelector("#frameA h2");
 const frameBTitle = document.querySelector("#frameB h2");
 const histTitle  = document.querySelector(".historial h2");
 const landingTitle = document.querySelector("#frameL h2");
 const appTitleEl = document.querySelector(".app header h1");
 
-// Timer de aterrizaje / refresco
 let orbitTimer = null;
 
 export function render() {
-  // Limpiar listas
   if (listL) listL.innerHTML = "";
   listA.innerHTML = "";
   listB.innerHTML = "";
   histList.innerHTML = "";
   if (orbitList) orbitList.innerHTML = "";
 
-  // Items por marco
   const itemsL = state.items.filter((x) => x.where === "L");
   const itemsA = state.items.filter((x) => x.where === "A");
   const itemsB = state.items.filter((x) => x.where === "B");
 
-  // ¿A y B llenos?
   const isABFull = (itemsA.length >= MAX_A) && (itemsB.length >= MAX_B);
 
-  // Orbit ordenado por retorno (total ilimitado)
   const orbitsAll = (state.orbit || [])
     .slice()
     .sort((a, b) => Date.parse(a.returnAt) - Date.parse(b.returnAt));
@@ -117,10 +105,8 @@ export function render() {
   const orbitCount = orbitsAll.length;
   const landingCount = itemsL.length;
 
-  // Glow violeta en Landing si contiene elementos
   if (frameL) frameL.classList.toggle("has-items", landingCount > 0);
 
-  // Pintar Landing/Main/Side
   for (const it of itemsL) {
     const node = renderItem(it, true, !isABFull);
     listL?.appendChild(node);
@@ -128,7 +114,6 @@ export function render() {
   for (const it of itemsA) listA.appendChild(renderItem(it));
   for (const it of itemsB) listB.appendChild(renderItem(it, true));
 
-  // ===== ORBIT (mostrar hasta 32) =====
   if (orbitList) {
     const toShow = orbitsAll.slice(0, ORBIT_VISIBLE_MAX);
     orbitList.innerHTML = "";
@@ -177,7 +162,6 @@ export function render() {
     }
   }
 
-  // ===== Historial (visible 32) =====
   const historyTotal = state.history.length;
   const historyVisible = state.history.slice(0, HISTORY_VISIBLE_MAX);
 
@@ -213,7 +197,6 @@ export function render() {
     histList.appendChild(card);
   }
 
-  // Contadores por marco en el título
   if (frameATitle) frameATitle.textContent = `Main (${itemsA.length}/${MAX_A})`;
   if (frameBTitle) frameBTitle.textContent = `Side (${itemsB.length}/${MAX_B})`;
   if (histTitle) {
@@ -224,17 +207,14 @@ export function render() {
     landingTitle.textContent = `Landing (${landingCount}/${LANDING_MAX})`;
   }
 
-  // Desactivar/activar +Crear según límite A
   if (addBtn) addBtn.disabled = itemsA.length >= MAX_A;
 
-  // Exclusión: un panel abierto por zona
   enforceSingleOpen(listL, ".panel");
   enforceSingleOpen(listA, ".panel");
   enforceSingleOpen(listB, ".panel");
   enforceSingleOpen(histList, ".hist-panel");
   enforceSingleOpen(orbitList, ".hist-panel");
 
-  // === Total con elemento químico ===
   const total = itemsA.length + itemsB.length + itemsL.length;
   countEl.textContent = `${total}`;
   const elementName = ELEMENTS[total] || "";
@@ -244,10 +224,8 @@ export function render() {
     countEl.textContent = total;
   }
 
-  // DnD
   enableDragAndDrop({ listA, listB, listL, onDrop: onDragDrop });
   
-  // Mantener los botones sincronizados con el contenido
   updateActionButtons();
   }
 function renderItem(it, inAlt = false, allowDrag = true) {
@@ -288,7 +266,6 @@ function renderItem(it, inAlt = false, allowDrag = true) {
   btn.textContent = labelWithStamp(it);
   textarea.value = it.note || "";
 
-  // Abrir/cerrar panel de notas
   btn.addEventListener("click", () => {
     const container = item.parentElement;
     const willOpen = !panel.classList.contains("open");
@@ -300,7 +277,6 @@ function renderItem(it, inAlt = false, allowDrag = true) {
     updateItem(it.id, { open: willOpen });
   });
 
-  // Renombrar
   item.querySelector(".rename").addEventListener("click", () => {
     const nuevo = prompt("Rename Attomic Button:", btn.textContent.trim());
     if (nuevo == null) return;
@@ -310,7 +286,6 @@ function renderItem(it, inAlt = false, allowDrag = true) {
     render();
   });
 
-  // Enviar a órbita (≫) — días 1..365
   item.querySelector(".orbit-btn").addEventListener("click", () => {
     const raw = prompt("How many days must it orbit before returning? (1–365)", "3");
     if (raw == null) return;
@@ -323,7 +298,6 @@ function renderItem(it, inAlt = false, allowDrag = true) {
     render();
   });
 
-  // Editar nota
   textarea.addEventListener("input", () => {
     updateItem(it.id, { note: textarea.value });
   });
@@ -335,7 +309,6 @@ function renderItem(it, inAlt = false, allowDrag = true) {
     }, 0);
   });
 
-  // Subir/Bajar
   item.querySelector(".up").addEventListener("click", () => {
     moveBy(it.id, -1);
     render();
@@ -345,7 +318,6 @@ function renderItem(it, inAlt = false, allowDrag = true) {
     render();
   });
 
-  // Marcar como resuelto
   item.querySelector(".done").addEventListener("click", () => {
     resolveItem(it.id);
     render();
@@ -368,42 +340,34 @@ function onDragDrop({ id, where, index }) {
 function updateActionButtons() {
   const hasAtom = Number.isInteger(state?.atomNumber) && state.atomNumber > 0;
 
-  // Create: activo solo si NO hay atom
   if (createBtn) {
     createBtn.disabled = hasAtom;
     createBtn.classList.toggle("is-hot", !hasAtom);
   }
 
-  // Save (antes Export): activo solo si SÍ hay atom
   if (exportBtn) {
     exportBtn.disabled = !hasAtom;
     exportBtn.classList.toggle("is-hot", hasAtom);
     exportBtn.textContent = "Save";
   }
 
-  // Import: NO si hay atom
   if (importBtn) {
     importBtn.disabled = hasAtom;
     importBtn.classList.toggle("is-hot", !hasAtom);
   }
 
-  // Eject: solo si hay atom
   if (ejectBtn) {
     ejectBtn.disabled = !hasAtom;
     ejectBtn.classList.toggle("is-hot", hasAtom);
   }
-
-  // Visualize: solo si hay ≥1 AB en A/B/L
   
-  const vBtns = document.querySelectorAll('#visualizeAtom'); // maneja duplicados
+  const vBtns = document.querySelectorAll('#visualizeAtom');
   const hasAB = Array.isArray(state.items) && state.items.some(x => x.where === 'A' || x.where === 'B' || x.where === 'L');
   const off = !hasAB;
 
   vBtns.forEach(btn => {
     if (!btn) return;
-    // estado funcional
     btn.disabled = off;
-    // estado visual
     btn.classList.toggle('disabled', off);
     btn.classList.toggle('is-disabled', off);
     btn.setAttribute('aria-disabled', off ? 'true' : 'false');
@@ -418,14 +382,12 @@ function refreshIsotopeNumber() {
 }
 
 export function bindGlobalHandlers() {
-  // Desactivar corrector y ayudas en el input superior
   if (input) {
     input.spellcheck = false;
     input.setAttribute("autocorrect", "off");
     input.setAttribute("autocapitalize", "off");
     input.autocomplete = "off";
   }
-  // Renombrar título con prompt (máx. 10 chars)
   if (appTitleEl) {
     appTitleEl.style.cursor = "pointer";
     appTitleEl.setAttribute("role", "button");
@@ -462,13 +424,11 @@ export function bindGlobalHandlers() {
       }
     });
   }
-// Create (solo si NO hay atomNumber)
 createBtn?.addEventListener("click", () => {
   if (createBtn.disabled) return; 
   exportJson();                
 });
 
-  // Crear en Main respetando límite
   addBtn.addEventListener("click", () => {
     const countA = state.items.filter((x) => x.where === "A").length;
     if (countA >= MAX_A) {
@@ -482,7 +442,6 @@ createBtn?.addEventListener("click", () => {
     render();
   });
 
-  // Borrar historial
   clearHistoryBtn?.addEventListener("click", (e) => {
     e.preventDefault();
     if (!confirm("Clear history?")) return;
@@ -490,17 +449,15 @@ createBtn?.addEventListener("click", () => {
     render();
   });
 
-  // Enter para crear
   input.addEventListener("keydown", (e) => {
     if (e.key === "Enter") addBtn.click();
   });
 
-// --- Export (seguro, sin duplicados) ---
 let exporting = false;
 
 if (exportBtn) {
   exportBtn.onclick = async () => {
-    if (exportBtn.disabled || exporting) return; // respeta el estado y evita doble click
+    if (exportBtn.disabled || exporting) return;
     exporting = true;
     try {
       await exportJson();
@@ -510,7 +467,6 @@ if (exportBtn) {
     }
   };
 }
-  // Botón Import → abre el file dialog del input oculto
 if (importBtn && importInput) {
   importBtn.addEventListener("click", () => {
     if (importBtn.disabled) return;
@@ -518,7 +474,6 @@ if (importBtn && importInput) {
   });
 }
 
-// Botón Eject → usa tu performEject() con confirm personalizado
 if (ejectBtn) {
   ejectBtn.addEventListener("click", () => {
     if (ejectBtn.disabled) return;
@@ -526,22 +481,18 @@ if (ejectBtn) {
   });
 }
 
-// Asegura el texto "Save" en el botón de export
 if (exportBtn) exportBtn.textContent = "Save";
 
 
-  // Importar
   importInput.addEventListener("change", async () => {
     const file = importInput.files?.[0];
     if (!file) return;
     try {
       await importJson(file);
 
-      // Título importado
       const importedTitle = localStorage.getItem("app-title") || "unátomo";
       if (appTitleEl) appTitleEl.textContent = importedTitle;
 
-      // Atom No.: si vino en el JSON se reflejará; si no, queda "?"
       refreshAtomNumber();
       updateActionButtons();
       refreshIsotopeNumber();
@@ -553,7 +504,6 @@ if (exportBtn) exportBtn.textContent = "Save";
     }
   });
 
-// Vaciar todo (enlace del footer)
 const clearAllBtn = document.getElementById("clearAll");
 if (clearAllBtn) {
   clearAllBtn.addEventListener("click", (e) => {
@@ -561,25 +511,19 @@ if (clearAllBtn) {
     e.stopPropagation();
     if (!confirm("¿Clear all?")) return;
 
-    // Limpiar estado sin tocar título ni atomNumber
     state.items = [];
     state.history = [];
     state.orbit = [];
-    state.idSeq = 1;              // opcional: reinicia IDs
+    state.idSeq = 1;
 
     save();
     render();
-    // refresca la barra si la tienes
     try { typeof refreshAtomNumber === "function" && refreshAtomNumber(); } catch {}
   });
 }
-
-
-  // Aterrizaje inmediato al arrancar
   landDueOrbits();
   render();
 
-  // Timer: aterrizajes y refresco de días
   if (orbitTimer) clearInterval(orbitTimer);
   orbitTimer = setInterval(() => {
     const landed = landDueOrbits();
@@ -588,7 +532,6 @@ if (clearAllBtn) {
     }
   }, 60_000);
 
-  // Status bar: Exports y Atom No.
   refreshExportCounter(); 
   refreshAtomNumber();   
   updateActionButtons();        
@@ -606,7 +549,6 @@ if (clearAllBtn) {
   }
 });
 
-  // UI reacciona cuando state.js fija el número tras el primer export
   window.addEventListener("atom-number-changed", (e) => {
     const v = e.detail?.value;
     if (atomNoEl) {
@@ -617,35 +559,25 @@ if (clearAllBtn) {
   });
 }
 
-/* ================== Helpers ================== */
-
-// Hace lo del link EMPTY pero con su propio diálogo, además
-// borra unatomo# y resetea el título a su valor por defecto.
 function performEject() {
-  // 0) Confirmación propia de Eject (cámbiale el texto cuando quieras)
   const EJECT_CONFIRM_TEXT = "Unsaved changes will be lost";
   if (!confirm(EJECT_CONFIRM_TEXT)) return;
 
-  // 1) Vaciar como EMPTY (sin usar el click del enlace para evitar su confirm())
   state.items = [];
   state.history = [];
   state.orbit = [];
   state.idSeq = 1;
   save();
 
-  // 2) Quitar el número de unatomo#
   state.atomNumber = null;
   save();
-  // 2b) Resetear contador de isótopo (saves/exports del archivo)
   state.isotope = 0;
   save();
   
-  // 3) Resetear el título (y persistirlo)
-  const defaultTitle = "unátomo"; // cámbialo si quieres otro por defecto
+  const defaultTitle = "unátomo";
   if (appTitleEl) appTitleEl.textContent = defaultTitle;
   try { localStorage.setItem("app-title", defaultTitle); } catch {}
 
-  // 4) Refrescar UI
   if (typeof refreshAtomNumber === "function") refreshAtomNumber();
   if (typeof refreshIsotopeNumber === "function") refreshIsotopeNumber();
   if (typeof updateActionButtons === "function") updateActionButtons();
@@ -705,7 +637,6 @@ function formatStamp(iso) {
   }
 }
 
-// Exports (global)
 async function refreshExportCounter() {
   if (!exportCounterEl) return;
   try {
@@ -716,9 +647,6 @@ async function refreshExportCounter() {
   }
 }
 
-// Atom No.:
-// - Si hay state.atomNumber (>0), lo muestra.
-// - Si no, muestra "?" (no adelantamos exports+1 hasta el primer export real).
 function refreshAtomNumber() {
   if (!atomNoEl) return;
   const n = state?.atomNumber;

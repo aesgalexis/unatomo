@@ -8,14 +8,12 @@
   </head>
   <body>
     <div class="layout">
-      <!-- Columna izquierda -->
       <aside class="historial">
         <h2>History</h2>
         <a id="clearHistoryBtn" href="#" class="hist-clear">Clear</a>
         <div class="hist-list" id="histList"></div>
       </aside>
 
-      <!-- Columna central -->
       <div class="app">
 <header>
   <h1>unatomo</h1>
@@ -29,7 +27,7 @@
   <div class="controls right">
 <input id="importInput" type="file" accept="application/json" style="display:none" />
 <button id="createBtn" class="btn">Create</button>
-<button id="exportBtn" class="btn">Save</button>   <!-- era “Export”, solo cambia el texto -->
+<button id="exportBtn" class="btn">Save</button> 
 <button id="importBtn" class="btn">Import</button>
 <button id="visualizeAtom" class="btn" type="button">Visualize</button>
 <button id="ejectBtn"  class="btn">Eject</button>
@@ -67,14 +65,12 @@
 
       </div>
 
-      <!-- Columna derecha (OPUESTA al historial) -->
       <aside class="orbit">
         <h2 id="orbitTitle">Orbit</h2>
         <div class="orbit-list" id="orbitList"></div>
       </aside>
     </div>
 
-    <!-- Status bar (ancho completo, fija abajo) -->
     <div class="statusbar" id="statusbar">
       <div class="status-left">
         ©2025 unatomo.com v0.1 (beta) | Some rights reserved | Total number of atoms created: <span id="exportCounter">loading..</span>
