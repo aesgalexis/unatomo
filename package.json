@@ -4,9 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-  "dev": "vite",
-  "build": "node scripts/build-static.mjs",
-  "preview": "vite preview"
+    "dev": "vite",
+    "build": "node scripts/build-static.mjs",
+    "preview": "vite preview",
+    "site:publish": "node scripts/site-publish.mjs"
   },
   "repository": {
     "type": "git",
