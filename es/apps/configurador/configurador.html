@@ -39,35 +39,35 @@
 
         <div class="card-body" style="margin-top: 1rem;">
           <p>
-            Introduce n? de habitaciones y factor de reposici?n. Al aplicar, se rellenan las unidades; los kilos se calculan solos.
+            Introduce nº de habitaciones y factor de reposición. Al aplicar, se rellenan las unidades; los kilos se calculan solos.
           </p>
 
           <div class="form-grid form-grid--4">
             <div class="form-field">
               <label for="est-simples">Simples</label>
               <input id="est-simples" class="field" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
-              <label for="est-factor-s" style="margin-top:.5rem; display:block;">Factor reposici?n</label>
+              <label for="est-factor-s" style="margin-top:.5rem; display:block;">Factor reposición</label>
               <input id="est-factor-s" class="field" type="number" min="0" step="0.1" inputmode="decimal" value="1">
             </div>
 
             <div class="form-field">
               <label for="est-dobles">Dobles</label>
               <input id="est-dobles" class="field" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
-              <label for="est-factor-d" style="margin-top:.5rem; display:block;">Factor reposici?n</label>
+              <label for="est-factor-d" style="margin-top:.5rem; display:block;">Factor reposición</label>
               <input id="est-factor-d" class="field" type="number" min="0" step="0.1" inputmode="decimal" value="1">
             </div>
 
             <div class="form-field">
               <label for="est-suites">Suites</label>
               <input id="est-suites" class="field" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
-              <label for="est-factor-u" style="margin-top:.5rem; display:block;">Factor reposici?n</label>
+              <label for="est-factor-u" style="margin-top:.5rem; display:block;">Factor reposición</label>
               <input id="est-factor-u" class="field" type="number" min="0" step="0.1" inputmode="decimal" value="1">
             </div>
 
             <div class="form-field">
               <label for="est-cubiertos">Cubiertos</label>
               <input id="est-cubiertos" class="field" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
-              <label for="est-factor-cub" style="margin-top:.5rem; display:block;">Factor reposici?n</label>
+              <label for="est-factor-cub" style="margin-top:.5rem; display:block;">Factor reposición</label>
               <input id="est-factor-cub" class="field" type="number" min="0" step="0.1" inputmode="decimal" value="1">
             </div>
           </div>
@@ -85,35 +85,35 @@
         </div>
         <div class="card-body">
           <p>
-            Ajusta unidades o kilos y la otra columna se recalcula autom?ticamente. Puedes editar el peso por unidad.
+            Ajusta unidades o kilos y la otra columna se recalcula automáticamente. Puedes editar el peso por unidad.
           </p>
 
           <div class="cfg-grid header" role="row" style="margin-top: 1rem; display:grid; grid-template-columns: 2.2fr .9fr .9fr .9fr; gap:10px; align-items:center; font-weight:600;">
-            <div>Art?culo</div>
+            <div>Artículo</div>
             <div>Unidades</div>
             <div>Kilos</div>
             <div>Peso/ud (kg)</div>
           </div>
 
           <div class="cfg-family" id="fam-sabanas" style="margin-top: 1rem;">
-            <div style="font-weight:700; margin: 12px 0 8px;">S?banas</div>
+            <div style="font-weight:700; margin: 12px 0 8px;">Sábanas</div>
 
             <div class="cfg-grid" data-key="sabanas_s" role="row" style="display:grid; grid-template-columns: 2.2fr .9fr .9fr .9fr; gap:10px; align-items:center; margin-top:8px;">
-              <div>S?bana ? <span style="opacity:.8;">Individual</span></div>
+              <div>Sábana · <span style="opacity:.8;">Individual</span></div>
               <input class="field" type="number" min="0" step="1" inputmode="numeric" placeholder="0" data-field="units" />
               <input class="field" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" data-field="kg" />
               <input class="field" type="number" min="0" step="0.01" inputmode="decimal" data-field="ppu" />
             </div>
 
             <div class="cfg-grid" data-key="sabanas_m" role="row" style="display:grid; grid-template-columns: 2.2fr .9fr .9fr .9fr; gap:10px; align-items:center; margin-top:8px;">
-              <div>S?bana ? <span style="opacity:.8;">Doble/Queen</span></div>
+              <div>Sábana · <span style="opacity:.8;">Doble/Queen</span></div>
               <input class="field" type="number" min="0" step="1" inputmode="numeric" placeholder="0" data-field="units" />
               <input class="field" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" data-field="kg" />
               <input class="field" type="number" min="0" step="0.01" inputmode="decimal" data-field="ppu" />
             </div>
 
             <div class="cfg-grid" data-key="sabanas_l" role="row" style="display:grid; grid-template-columns: 2.2fr .9fr .9fr .9fr; gap:10px; align-items:center; margin-top:8px;">
-              <div>S?bana ? <span style="opacity:.8;">King</span></div>
+              <div>Sábana · <span style="opacity:.8;">King</span></div>
               <input class="field" type="number" min="0" step="1" inputmode="numeric" placeholder="0" data-field="units" />
               <input class="field" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" data-field="kg" />
               <input class="field" type="number" min="0" step="0.01" inputmode="decimal" data-field="ppu" />
@@ -121,24 +121,24 @@
           </div>
 
           <div class="cfg-family" id="fam-nordicos" style="margin-top: 1.25rem;">
-            <div style="font-weight:700; margin: 12px 0 8px;">N?rdicos</div>
+            <div style="font-weight:700; margin: 12px 0 8px;">Nórdicos</div>
 
             <div class="cfg-grid" data-key="nordico_s" role="row" style="display:grid; grid-template-columns: 2.2fr .9fr .9fr .9fr; gap:10px; align-items:center; margin-top:8px;">
-              <div>N?rdico ? <span style="opacity:.8;">Individual</span></div>
+              <div>Nórdico · <span style="opacity:.8;">Individual</span></div>
               <input class="field" type="number" min="0" step="1" data-field="units" />
               <input class="field" type="number" min="0" step="0.01" data-field="kg" />
               <input class="field" type="number" min="0" step="0.01" data-field="ppu" />
             </div>
 
             <div class="cfg-grid" data-key="nordico_m" role="row" style="display:grid; grid-template-columns: 2.2fr .9fr .9fr .9fr; gap:10px; align-items:center; margin-top:8px;">
-              <div>N?rdico ? <span style="opacity:.8;">Doble/Queen</span></div>
+              <div>Nórdico · <span style="opacity:.8;">Doble/Queen</span></div>
               <input class="field" type="number" min="0" step="1" data-field="units" />
               <input class="field" type="number" min="0" step="0.01" data-field="kg" />
               <input class="field" type="number" min="0" step="0.01" data-field="ppu" />
             </div>
 
             <div class="cfg-grid" data-key="nordico_l" role="row" style="display:grid; grid-template-columns: 2.2fr .9fr .9fr .9fr; gap:10px; align-items:center; margin-top:8px;">
-              <div>N?rdico ? <span style="opacity:.8;">King</span></div>
+              <div>Nórdico · <span style="opacity:.8;">King</span></div>
               <input class="field" type="number" min="0" step="1" data-field="units" />
               <input class="field" type="number" min="0" step="0.01" data-field="kg" />
               <input class="field" type="number" min="0" step="0.01" data-field="ppu" />
@@ -160,7 +160,7 @@
             <div style="font-weight:700; margin: 12px 0 8px;">Toallas</div>
 
             <div class="cfg-grid" data-key="toalla_alfombrin" role="row" style="display:grid; grid-template-columns: 2.2fr .9fr .9fr .9fr; gap:10px; align-items:center; margin-top:8px;">
-              <div>Alfombr?n</div>
+              <div>Alfombrín</div>
               <input class="field" type="number" min="0" step="1" data-field="units" />
               <input class="field" type="number" min="0" step="0.01" data-field="kg" />
               <input class="field" type="number" min="0" step="0.01" data-field="ppu" />
@@ -174,7 +174,7 @@
             </div>
 
             <div class="cfg-grid" data-key="toalla_bano" role="row" style="display:grid; grid-template-columns: 2.2fr .9fr .9fr .9fr; gap:10px; align-items:center; margin-top:8px;">
-              <div>Toalla de ba?o</div>
+              <div>Toalla de baño</div>
               <input class="field" type="number" min="0" step="1" data-field="units" />
               <input class="field" type="number" min="0" step="0.01" data-field="kg" />
               <input class="field" type="number" min="0" step="0.01" data-field="ppu" />
@@ -200,7 +200,7 @@
           </div>
 
           <div class="cfg-family" id="fam-manteleria" style="margin-top: 1.25rem;">
-            <div style="font-weight:700; margin: 12px 0 8px;">Manteler?a y servilletas</div>
+            <div style="font-weight:700; margin: 12px 0 8px;">Mantelería y servilletas</div>
 
             <div class="cfg-grid" data-key="mantel" role="row" style="display:grid; grid-template-columns: 2.2fr .9fr .9fr .9fr; gap:10px; align-items:center; margin-top:8px;">
               <div>Mantel</div>
@@ -222,7 +222,7 @@
             <div id="otros-rows"></div>
 
             <div class="form-actions" style="display:flex; justify-content:center; margin-top:1rem;">
-              <button id="otros-add" type="button" class="scroll-top-button">A?adir art?culo</button>
+              <button id="otros-add" type="button" class="scroll-top-button">Añadir artículo</button>
             </div>
           </div>
 
@@ -241,11 +241,11 @@
           </div>
 
           <div class="cfg-breakdown" aria-live="polite" style="margin-top:1.25rem;">
-            <h4>Porcentaje por categor?a</h4>
+            <h4>Porcentaje por categoría</h4>
             <ul style="margin:0; padding-left:0; list-style:none;">
               <li>Ropa de cama: <output id="pct-cama-kg">0%</output></li>
               <li>Rizo: <output id="pct-rizo-kg">0%</output></li>
-              <li>Manteler?a: <output id="pct-mant-kg">0%</output></li>
+              <li>Mantelería: <output id="pct-mant-kg">0%</output></li>
             </ul>
             <input id="total-kg-rizo" type="number" readonly hidden />
           </div>
@@ -253,7 +253,7 @@
       </section>
       <section class="card card--wide card-collapsible" id="workday-card" data-collapsible>
         <div class="card-header">
-          <h3>Duraci?n jornada de trabajo</h3>
+          <h3>Duración jornada de trabajo</h3>
           <button class="card-toggle" type="button" aria-expanded="true">Ocultar</button>
         </div>
         <div class="card-body" style="margin-top:1rem;">
@@ -276,7 +276,7 @@
             <div class="form-field">
               <label for="mach-mode">Modo</label>
               <select id="mach-mode" class="field">
-                <option value="auto" selected>Autom?tico</option>
+                <option value="auto" selected>Automático</option>
                 <option value="fixed">Fijo</option>
               </select>
             </div>
@@ -289,15 +289,15 @@
 
           <div class="form-actions" style="display:flex; justify-content:center; gap:.75rem; margin-top:1.25rem;">
             <button id="mach-adjust" class="scroll-top-button" type="button">Actualizar</button>
-            <button id="mach-add" class="scroll-top-button" type="button">A?adir equipo</button>
+            <button id="mach-add" class="scroll-top-button" type="button">Añadir equipo</button>
           </div>
 
           <div id="mach-list" style="margin-top:1rem;"></div>
 
           <div style="margin-top:1.5rem;">
-            <p>Kilos/d?a: <strong><output id="mach-kg-total">0</output></strong></p>
+            <p>Kilos/día: <strong><output id="mach-kg-total">0</output></strong></p>
             <p>Total equipos: <strong><output id="mach-machines-total">0</output></strong></p>
-            <p>Capacidad total: <strong><output id="mach-cap-total">0</output></strong> kg/d?a</p>
+            <p>Capacidad total: <strong><output id="mach-cap-total">0</output></strong> kg/día</p>
             <p>Cobertura: <strong><output id="mach-cover-total">0%</output></strong></p>
           </div>
 
@@ -317,7 +317,7 @@
             <div class="form-field">
               <label for="dry-mode">Modo</label>
               <select id="dry-mode" class="field">
-                <option value="auto" selected>Autom?tico</option>
+                <option value="auto" selected>Automático</option>
                 <option value="fixed">Fijo</option>
               </select>
             </div>
@@ -330,15 +330,15 @@
 
           <div class="form-actions" style="display:flex; justify-content:center; gap:.75rem; margin-top:1.25rem;">
             <button id="dry-adjust" class="scroll-top-button" type="button">Actualizar</button>
-            <button id="dry-add" class="scroll-top-button" type="button">A?adir equipo</button>
+            <button id="dry-add" class="scroll-top-button" type="button">Añadir equipo</button>
           </div>
 
           <div id="dry-list" style="margin-top:1rem;"></div>
 
           <div style="margin-top:1.5rem;">
-            <p>Kilos/d?a: <strong><output id="dry-kg-total">0</output></strong></p>
+            <p>Kilos/día: <strong><output id="dry-kg-total">0</output></strong></p>
             <p>Total equipos: <strong><output id="dry-machines-total">0</output></strong></p>
-            <p>Capacidad total: <strong><output id="dry-cap-total">0</output></strong> kg/d?a</p>
+            <p>Capacidad total: <strong><output id="dry-cap-total">0</output></strong> kg/día</p>
             <p>Cobertura: <strong><output id="dry-cover-total">0%</output></strong></p>
           </div>
 
@@ -354,7 +354,7 @@
           <button class="card-toggle" type="button" aria-expanded="true">Ocultar</button>
         </div>
         <div class="card-body" style="margin-top:1rem;">
-          <p>Genera un PDF con la informaci?n actual del configurador.</p>
+          <p>Genera un PDF con la información actual del configurador.</p>
           <div class="form-actions" style="display:flex; justify-content:center; gap:.75rem; margin-top:1.25rem;">
             <button id="export-pdf" class="scroll-top-button" type="button">Exportar PDF</button>
           </div>
