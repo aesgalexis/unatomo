@@ -64,7 +64,7 @@
       data.exportTotal = Number.isFinite(exportTotalParsed) ? exportTotalParsed : undefined;
 
       try { sessionStorage.setItem('atomABData', JSON.stringify(data)); } catch(_) {}
-      location.href = 'atom.html';
+      location.href = 'index.html';
     });
   }
 
