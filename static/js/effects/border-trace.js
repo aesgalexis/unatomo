@@ -35,14 +35,21 @@
       }
       .border-trace-dot{
         position:absolute;
-        width:12px;
-        height:12px;
+        width:28px;
+        height:28px;
         border-radius:50%;
-        background:#d4af37;
-        box-shadow:0 0 8px rgba(212,175,55,.65);
+        background:transparent;
         transform:translate(-50%,-50%);
         pointer-events:auto;
         cursor:grab;
+      }
+      .border-trace-dot::before{
+        content:"";
+        position:absolute;
+        inset:8px;
+        border-radius:50%;
+        background:#d4af37;
+        box-shadow:0 0 10px rgba(212,175,55,1);
       }
       .border-trace-dot.is-dragging{
         cursor:grabbing;
