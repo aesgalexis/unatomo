@@ -183,6 +183,9 @@
     setText("pct-cama-kg", pct(kgCama, totalKg));
     setText("pct-rizo-kg", pct(kgRizo, totalKg));
     setText("pct-mant-kg", pct(kgMant, totalKg));
+
+    const rizoOut = document.getElementById("total-kg-rizo");
+    if (rizoOut) rizoOut.value = kgRizo.toFixed(2);
   }
 
   function setUnitsForKey(key, units) {
@@ -313,15 +316,43 @@
     updateTotals();
   }
 
+  function setCollapsed(card, collapsed) {
+    if (!card) return;
+    const body = card.querySelector(".card-body");
+    const toggle = card.querySelector(".card-toggle");
+    card.classList.toggle("is-collapsed", collapsed);
+    if (toggle) {
+      toggle.setAttribute("aria-expanded", (!collapsed).toString());
+      toggle.textContent = collapsed ? "Mostrar" : "Ocultar";
+    }
+    if (body) body.style.display = collapsed ? "none" : "";
+  }
+
   window.addEventListener("DOMContentLoaded", () => {
     initRows();
 
     const btnApply = document.getElementById("est-apply");
     const btnClear = document.getElementById("est-clear");
     const btnAddOther = document.getElementById("otros-add");
+    const estimatorCard = document.getElementById("estimator-card");
 
-    if (btnApply) btnApply.addEventListener("click", applyEstimator);
+    if (btnApply) btnApply.addEventListener("click", () => {
+      applyEstimator();
+      setCollapsed(estimatorCard, true);
+    });
     if (btnClear) btnClear.addEventListener("click", clearAllRows);
     if (btnAddOther) btnAddOther.addEventListener("click", () => addCustomItem());
+
+    const collapsibles = qsa("[data-collapsible]");
+    collapsibles.forEach((card) => {
+      const toggle = card.querySelector(".card-toggle");
+      const body = card.querySelector(".card-body");
+      if (!toggle || !body) return;
+
+      setCollapsed(card, card.classList.contains("is-collapsed"));
+      toggle.addEventListener("click", () => {
+        setCollapsed(card, !card.classList.contains("is-collapsed"));
+      });
+    });
   });
 })();
