@@ -1,4 +1,4 @@
-import { initThemeToggle } from "/static/js/theme-toggle.js";
+import { initThemeToggle } from "/static/js/theme/theme-toggle.js";
 
 const mount =
   document.getElementById("topbar-mount") ||
