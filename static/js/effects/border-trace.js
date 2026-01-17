@@ -1,13 +1,16 @@
 (function () {
   const TARGET_SELECTOR = "#index-content-mount .card";
-  const INSET = 8;
-  const TRAIL_RATIO = 0.2;
+  const INSET = -2;
+  const TRAIL_RATIO = 0.4;
   const SPEED_PX = 120;
 
   let card;
   let overlay;
   let svg;
   let trailPath;
+  let trailGradient;
+  let trailStopHead;
+  let trailStopTail;
   let dot;
   let perimeter = 0;
   let width = 0;
@@ -26,8 +29,9 @@
       .border-trace-overlay{
         position:absolute;
         inset:0;
-        pointer-events:none;
+        pointer-events:auto;
         z-index:2;
+        overflow:visible;
       }
       .border-trace-dot{
         position:absolute;
@@ -35,7 +39,7 @@
         height:12px;
         border-radius:50%;
         background:#d4af37;
-        box-shadow:0 0 6px rgba(212,175,55,.6);
+        box-shadow:0 0 8px rgba(212,175,55,.65);
         transform:translate(-50%,-50%);
         pointer-events:auto;
         cursor:grab;
@@ -43,6 +47,10 @@
       .border-trace-dot.is-dragging{
         cursor:grabbing;
         box-shadow:0 0 4px rgba(212,175,55,.35);
+      }
+      .border-trace-trail{
+        pointer-events:stroke;
+        cursor:pointer;
       }
     `;
     document.head.appendChild(style);
@@ -68,11 +76,33 @@
     svg.setAttribute("height", "100%");
     svg.setAttribute("viewBox", "0 0 100 100");
 
+    const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+    trailGradient = document.createElementNS("http://www.w3.org/2000/svg", "linearGradient");
+    trailGradient.setAttribute("id", "border-trace-gradient");
+    trailGradient.setAttribute("gradientUnits", "userSpaceOnUse");
+
+    trailStopTail = document.createElementNS("http://www.w3.org/2000/svg", "stop");
+    trailStopTail.setAttribute("offset", "0%");
+    trailStopTail.setAttribute("stop-color", "rgba(212,175,55,0)");
+
+    const trailStopMid = document.createElementNS("http://www.w3.org/2000/svg", "stop");
+    trailStopMid.setAttribute("offset", "70%");
+    trailStopMid.setAttribute("stop-color", "rgba(212,175,55,0.75)");
+
+    trailStopHead = document.createElementNS("http://www.w3.org/2000/svg", "stop");
+    trailStopHead.setAttribute("offset", "100%");
+    trailStopHead.setAttribute("stop-color", "rgba(255,255,255,0.9)");
+
+    trailGradient.append(trailStopTail, trailStopMid, trailStopHead);
+    defs.appendChild(trailGradient);
+    svg.appendChild(defs);
+
     trailPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
     trailPath.setAttribute("fill", "none");
-    trailPath.setAttribute("stroke", "rgba(212,175,55,0.8)");
+    trailPath.setAttribute("stroke", "url(#border-trace-gradient)");
     trailPath.setAttribute("stroke-width", "2");
     trailPath.setAttribute("stroke-linecap", "round");
+    trailPath.setAttribute("class", "border-trace-trail");
     trailPath.style.filter = "drop-shadow(0 0 6px rgba(212,175,55,.5))";
 
     svg.appendChild(trailPath);
@@ -91,10 +121,6 @@
     const w = card.clientWidth;
     const h = card.clientHeight;
     svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
-    trailPath.setAttribute(
-      "d",
-      `M ${INSET} ${INSET} H ${w - INSET} V ${h - INSET} H ${INSET} Z`
-    );
     getRectMetrics();
   }
 
@@ -148,8 +174,12 @@
     }
     const trailLength = perimeter * TRAIL_RATIO;
     trailPath.style.opacity = "1";
-    trailPath.style.strokeDasharray = `${trailLength} ${perimeter - trailLength}`;
-    trailPath.style.strokeDashoffset = `${-(distance - trailLength)}`;
+    const tail = (distance - trailLength + perimeter) % perimeter;
+    const head = distance;
+    trailPath.setAttribute("d", buildSegmentPath(tail, head));
+    const tailPos = getPointAtDistance(tail);
+    const headPos = getPointAtDistance(head);
+    updateGradient(tailPos, headPos);
   }
 
   function tick(ts) {
@@ -190,6 +220,56 @@
     return { x: left, y };
   }
 
+  function updateGradient(tail, head) {
+    if (!trailGradient) return;
+    trailGradient.setAttribute("x1", tail.x);
+    trailGradient.setAttribute("y1", tail.y);
+    trailGradient.setAttribute("x2", head.x);
+    trailGradient.setAttribute("y2", head.y);
+  }
+
+  function buildSegmentPath(tailDist, headDist) {
+    const points = [];
+    const corners = [
+      { d: 0, x: INSET, y: INSET },
+      { d: width, x: INSET + width, y: INSET },
+      { d: width + height, x: INSET + width, y: INSET + height },
+      { d: width + height + width, x: INSET, y: INSET + height },
+      { d: perimeter, x: INSET, y: INSET },
+    ];
+
+    const addPointAt = (d) => points.push(getPointAtDistance(d));
+    addPointAt(tailDist);
+
+    const forward = (start, end) => {
+      corners.forEach((corner) => {
+        if (corner.d > start && corner.d < end) points.push({ x: corner.x, y: corner.y });
+      });
+      addPointAt(end);
+    };
+
+    if (tailDist <= headDist) {
+      forward(tailDist, headDist);
+    } else {
+      forward(tailDist, perimeter);
+      forward(0, headDist);
+    }
+
+    return points.map((p, i) => `${i ? "L" : "M"} ${p.x} ${p.y}`).join(" ");
+  }
+
+  function setReturnTrail(from, to) {
+    const dx = to.x - from.x;
+    const dy = to.y - from.y;
+    const dist = Math.max(1, Math.hypot(dx, dy));
+    const trailLen = Math.min(perimeter * TRAIL_RATIO, dist);
+    const tx = to.x - (dx / dist) * trailLen;
+    const ty = to.y - (dy / dist) * trailLen;
+    trailPath.setAttribute("d", `M ${tx} ${ty} L ${to.x} ${to.y}`);
+    updateGradient({ x: tx, y: ty }, to);
+    trailPath.style.opacity = "1";
+  }
+
   function returnToBorder(target, done) {
     returning = true;
     const startX = parseFloat(dot.style.left || "0");
@@ -202,11 +282,15 @@
     function animate(now) {
       const t = clamp((now - start) / dur, 0, 1);
       const eased = t * (2 - t);
-      dot.style.left = `${startX + dx * eased}px`;
-      dot.style.top = `${startY + dy * eased}px`;
+      const cx = startX + dx * eased;
+      const cy = startY + dy * eased;
+      dot.style.left = `${cx}px`;
+      dot.style.top = `${cy}px`;
+      setReturnTrail({ x: cx, y: cy }, target);
       if (t < 1) requestAnimationFrame(animate);
       else {
         returning = false;
+        trailPath.style.opacity = "1";
         done();
       }
     }
