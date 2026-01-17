@@ -51,19 +51,36 @@
     }
   }
   
-  (function(){
+  function updateStatusYear(){
+  var el = document.querySelector('.status-left');
+  if (!el) return;
+  var year = String(new Date().getFullYear());
+  el.innerHTML = el.innerHTML.replace(/\b20\d{2}\b/, year);
+}
+
+async function updateExportCounter(){
   var el = document.getElementById('exportCounter');
   if (!el) return;
 
   var v = abData && Number(abData.exportTotal);
   if (Number.isFinite(v)) {
     el.textContent = v.toLocaleString('es-ES');
-  } else {
-    
-    var fallback = Number(localStorage.getItem('fallback-exports') || '');
-    el.textContent = Number.isFinite(fallback) ? fallback.toLocaleString('es-ES') : '—';
+    return;
   }
-})();
+
+  try {
+    var mod = await import("./analytics.js");
+    var total = await mod.getGlobalExportCount();
+    el.textContent = Number.isFinite(total) ? total.toLocaleString('es-ES') : "0";
+  } catch (e) {
+    var fallback = Number(localStorage.getItem('fallback-exports') || '');
+    el.textContent = Number.isFinite(fallback) ? fallback.toLocaleString('es-ES') : "0";
+  }
+}
+
+updateStatusYear();
+updateExportCounter();
+;
   var COLOR = {main: 0xff6b6b, side: 0x9aa4b2, landing: 0xffffff,A: 0xff6b6b, B: 0x9aa4b2, L: 0xffffff};
   var infos = [];
   for (var i=0; i<Math.min(abList.length,118); i++){
@@ -98,6 +115,7 @@
   renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
   renderer.setSize(innerWidth, innerHeight);
   document.body.appendChild(renderer.domElement);
+  renderer.domElement.style.touchAction = "none";
 
   scene.add(new THREE.AmbientLight(0xffffff, 0.35));
   var dir = new THREE.DirectionalLight(0xffffff, 1.0); dir.position.set(5,7,3); scene.add(dir);
@@ -240,6 +258,85 @@
     setHoverTip("");
     renderer.domElement.style.cursor = 'default';
   }, {passive:true});
+
+  function touchDist(t1, t2){
+    var dx = t1.clientX - t2.clientX;
+    var dy = t1.clientY - t2.clientY;
+    return Math.sqrt(dx*dx + dy*dy);
+  }
+
+  var touchPinching = false;
+  var lastPinchDist = 0;
+
+  renderer.domElement.addEventListener('touchstart', function(e){
+    if (!e.touches || !e.touches.length) return;
+    e.preventDefault();
+    setHoverTip("");
+
+    if (e.touches.length === 2) {
+      touchPinching = true;
+      lastPinchDist = touchDist(e.touches[0], e.touches[1]);
+      draggingAtom = false;
+      return;
+    }
+
+    touchPinching = false;
+    var t = e.touches[0];
+    ndc(t);
+    var hits = hitProtons();
+    if (hits.length) {
+      showPanelFor(hits[0].object);
+      return;
+    }
+    if (panelEl) {
+      closePanel();
+      return;
+    }
+    draggingAtom = true;
+    lastX = t.clientX;
+    lastY = t.clientY;
+    atomVelX = 0;
+    atomVelY = 0;
+  }, {passive:false});
+
+  renderer.domElement.addEventListener('touchmove', function(e){
+    if (!e.touches || !e.touches.length) return;
+    e.preventDefault();
+
+    if (touchPinching && e.touches.length === 2) {
+      var dist = touchDist(e.touches[0], e.touches[1]);
+      if (lastPinchDist > 0) {
+        var scale = lastPinchDist / dist;
+        camDist = camDist * scale;
+        camDist = Math.max(5, Math.min(70, camDist));
+        var dirV = camera.position.clone().normalize();
+        camera.position.copy(dirV.multiplyScalar(camDist));
+        camera.lookAt(0,0,0);
+      }
+      lastPinchDist = dist;
+      return;
+    }
+
+    if (!draggingAtom || e.touches.length !== 1) return;
+    var t = e.touches[0];
+    var dx = t.clientX - lastX;
+    var dy = t.clientY - lastY;
+    lastX = t.clientX;
+    lastY = t.clientY;
+    var k = 0.005;
+    atom.rotation.y += dx * k;
+    atom.rotation.x += dy * k;
+    atomVelY = dx * k * 60;
+    atomVelX = dy * k * 60;
+  }, {passive:false});
+
+  renderer.domElement.addEventListener('touchend', function(e){
+    if (!e.touches || !e.touches.length) {
+      draggingAtom = false;
+      touchPinching = false;
+      lastPinchDist = 0;
+    }
+  }, {passive:false});
 
   function projectToScreen(obj){ var v=new THREE.Vector3(); obj.getWorldPosition(v); v.project(camera); return { x:(v.x*0.5+0.5)*innerWidth, y:(-v.y*0.5+0.5)*innerHeight }; }
   function getPanelSize(){
