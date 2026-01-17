@@ -8,6 +8,7 @@
   let overlay;
   let svg;
   let trailPath;
+  let hitPath;
   let trailGradient;
   let trailStopHead;
   let trailStopTail;
@@ -20,6 +21,7 @@
   let paused = false;
   let dragging = false;
   let returning = false;
+  let mode = "card";
 
   function ensureStyles() {
     if (document.getElementById("border-trace-styles")) return;
@@ -67,9 +69,18 @@
     return Math.max(min, Math.min(max, v));
   }
 
+  function getBounds() {
+    if (mode === "window") {
+      return { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight };
+    }
+    const rect = card.getBoundingClientRect();
+    return { left: rect.left, top: rect.top, width: rect.width, height: rect.height };
+  }
+
   function getRectMetrics() {
-    width = Math.max(0, card.clientWidth - INSET * 2);
-    height = Math.max(0, card.clientHeight - INSET * 2);
+    const bounds = getBounds();
+    width = Math.max(0, bounds.width - INSET * 2);
+    height = Math.max(0, bounds.height - INSET * 2);
     perimeter = 2 * (width + height);
   }
 
@@ -112,7 +123,16 @@
     trailPath.setAttribute("class", "border-trace-trail");
     trailPath.style.filter = "drop-shadow(0 0 6px rgba(212,175,55,.5))";
 
+    hitPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    hitPath.setAttribute("fill", "none");
+    hitPath.setAttribute("stroke", "transparent");
+    hitPath.setAttribute("stroke-width", "14");
+    hitPath.setAttribute("stroke-linecap", "round");
+    hitPath.style.pointerEvents = "stroke";
+    hitPath.style.cursor = "grab";
+
     svg.appendChild(trailPath);
+    svg.appendChild(hitPath);
     overlay.appendChild(svg);
 
     dot = document.createElement("div");
@@ -125,8 +145,9 @@
   }
 
   function updatePath() {
-    const w = card.clientWidth;
-    const h = card.clientHeight;
+    const bounds = getBounds();
+    const w = bounds.width;
+    const h = bounds.height;
     svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
     getRectMetrics();
   }
@@ -183,7 +204,9 @@
     trailPath.style.opacity = "1";
     const tail = (distance - trailLength + perimeter) % perimeter;
     const head = distance;
-    trailPath.setAttribute("d", buildSegmentPath(tail, head));
+    const pathD = buildSegmentPath(tail, head);
+    trailPath.setAttribute("d", pathD);
+    hitPath.setAttribute("d", pathD);
     const tailPos = getPointAtDistance(tail);
     const headPos = getPointAtDistance(head);
     updateGradient(tailPos, headPos);
@@ -206,11 +229,11 @@
   }
 
   function closestPointOnBorder(clientX, clientY) {
-    const rect = card.getBoundingClientRect();
-    const left = rect.left + INSET;
-    const right = rect.right - INSET;
-    const top = rect.top + INSET;
-    const bottom = rect.bottom - INSET;
+    const bounds = getBounds();
+    const left = bounds.left + INSET;
+    const right = bounds.left + bounds.width - INSET;
+    const top = bounds.top + INSET;
+    const bottom = bounds.top + bounds.height - INSET;
 
     const x = clamp(clientX, left, right);
     const y = clamp(clientY, top, bottom);
@@ -305,47 +328,92 @@
   }
 
   function bindDrag() {
-    dot.addEventListener("pointerdown", (e) => {
+    const startDrag = (e, captureEl) => {
       e.preventDefault();
-      dot.setPointerCapture(e.pointerId);
+      const rect = getBounds();
+      if (mode === "card") {
+        dot.style.position = "fixed";
+      }
       paused = true;
       dragging = true;
       dot.classList.add("is-dragging");
       trailPath.style.opacity = "0";
+      dot.style.left = `${e.clientX}px`;
+      dot.style.top = `${e.clientY}px`;
+
+      const move = (ev) => {
+        if (!dragging) return;
+        dot.style.left = `${ev.clientX}px`;
+        dot.style.top = `${ev.clientY}px`;
+      };
+      const end = (ev) => {
+        if (!dragging) return;
+        dragging = false;
+        dot.classList.remove("is-dragging");
+        window.removeEventListener("pointermove", move);
+        window.removeEventListener("pointerup", end);
+        if (isOverLogo(ev.clientX, ev.clientY)) {
+          setMode("window");
+        }
+        const target = closestPointOnBorder(ev.clientX, ev.clientY);
+        returnToBorder(target, () => {
+          const bounds = getBounds();
+          if (mode === "card") {
+            dot.style.position = "absolute";
+            dot.style.left = `${target.x - bounds.left}px`;
+            dot.style.top = `${target.y - bounds.top}px`;
+          } else {
+            dot.style.position = "fixed";
+            dot.style.left = `${target.x}px`;
+            dot.style.top = `${target.y}px`;
+          }
+          const distance = getDistanceAtPoint(target.x - bounds.left, target.y - bounds.top);
+          progress = perimeter > 0 ? distance / perimeter : 0;
+          paused = false;
+        });
+      };
+
+      if (captureEl && captureEl.setPointerCapture) {
+        captureEl.setPointerCapture(e.pointerId);
+      }
+      window.addEventListener("pointermove", move);
+      window.addEventListener("pointerup", end, { once: true });
+    };
+
+    dot.addEventListener("pointerdown", (e) => startDrag(e, dot));
+    hitPath.addEventListener("pointerdown", (e) => startDrag(e, hitPath));
+  }
+
+  function setMode(nextMode) {
+    if (mode === nextMode) return;
+    mode = nextMode;
+    if (mode === "window") {
+      document.body.appendChild(overlay);
+      overlay.style.position = "fixed";
+      overlay.style.inset = "0";
       dot.style.position = "fixed";
-      dot.style.left = `${e.clientX}px`;
-      dot.style.top = `${e.clientY}px`;
-    });
+    } else {
+      card.appendChild(overlay);
+      overlay.style.position = "absolute";
+      overlay.style.inset = "0";
+      dot.style.position = "absolute";
+    }
+    updatePath();
+  }
 
-    dot.addEventListener("pointermove", (e) => {
-      if (!dragging) return;
-      dot.style.left = `${e.clientX}px`;
-      dot.style.top = `${e.clientY}px`;
-    });
-
-    dot.addEventListener("pointerup", (e) => {
-      if (!dragging) return;
-      dragging = false;
-      dot.classList.remove("is-dragging");
-      dot.releasePointerCapture(e.pointerId);
-
-      const target = closestPointOnBorder(e.clientX, e.clientY);
-      returnToBorder(target, () => {
-        const rect = card.getBoundingClientRect();
-        dot.style.position = "absolute";
-        dot.style.left = `${target.x - rect.left}px`;
-        dot.style.top = `${target.y - rect.top}px`;
-        const distance = getDistanceAtPoint(target.x - rect.left, target.y - rect.top);
-        progress = perimeter > 0 ? distance / perimeter : 0;
-        paused = false;
-      });
-    });
+  function isOverLogo(x, y) {
+    const el = document.querySelector(".topbar-logo, .topbar-logo-link");
+    if (!el) return false;
+    const rect = el.getBoundingClientRect();
+    return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
   }
 
   function init(target) {
     card = target;
     ensureStyles();
     buildOverlay();
+    overlay.style.position = "absolute";
+    overlay.style.inset = "0";
     updatePath();
     bindDrag();
     requestAnimationFrame(tick);
