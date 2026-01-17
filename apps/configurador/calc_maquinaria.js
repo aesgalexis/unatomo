@@ -153,12 +153,12 @@ wrapper.innerHTML = `
     </label>
 
     <label>
-      Capacidad
+      <span style="display:block; font-size:.9em; opacity:.8;">Capacidad</span>
       <select class="field" data-role="cap" data-id="${m.id}"></select>
     </label>
 
     <label>
-      Duración de lavado
+      <span style="display:block; font-size:.9em; opacity:.8;">Duración del ciclo</span>
       <select class="field" data-role="cycle" data-id="${m.id}"></select>
     </label>
 
@@ -294,12 +294,12 @@ wrapper.innerHTML = `
     </label>
 
     <label>
-      Capacidad
+      <span style="display:block; font-size:.9em; opacity:.8;">Capacidad</span>
       <select class="field" data-role="cap" data-id="${m.id}"></select>
     </label>
 
     <label>
-      Duración de secado
+      <span style="display:block; font-size:.9em; opacity:.8;">Duración del ciclo</span>
       <select class="field" data-role="cycle" data-id="${m.id}"></select>
     </label>
 
