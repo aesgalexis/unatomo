@@ -24,7 +24,8 @@ body.page.page-configurador .cfg-note {
   opacity: .75;
 }
 
-body.page.page-configurador #mach-cover-total {
+body.page.page-configurador #mach-cover-total,
+body.page.page-configurador #dry-cover-total {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -36,28 +37,36 @@ body.page.page-configurador #mach-cover-total {
   font-size: 14px;
 }
 
-body.page.page-configurador #mach-cover-total.is-under {
+body.page.page-configurador #mach-cover-total.is-under,
+body.page.page-configurador #dry-cover-total.is-under {
   color: #d14343;
   border-color: #d14343;
   background: rgba(209, 67, 67, 0.06);
 }
 
-body.page.page-configurador #mach-cover-total.is-over {
+body.page.page-configurador #mach-cover-total.is-over,
+body.page.page-configurador #dry-cover-total.is-over {
   color: #0c7a43;
   border-color: #0c7a43;
   background: rgba(12, 122, 67, 0.06);
 }
 
-body.page.page-configurador #mach-add.scroll-top-button {
+body.page.page-configurador #mach-add.scroll-top-button,
+body.page.page-configurador #dry-add.scroll-top-button,
+body.page.page-configurador #est-apply.scroll-top-button {
   background: #2da44e;
   border-color: #2da44e;
   color: #fff;
 }
-body.page.page-configurador #mach-add.scroll-top-button:hover {
+body.page.page-configurador #mach-add.scroll-top-button:hover,
+body.page.page-configurador #dry-add.scroll-top-button:hover,
+body.page.page-configurador #est-apply.scroll-top-button:hover {
   background: #2c974b;
   border-color: #2c974b;
 }
-body.page.page-configurador #mach-add.scroll-top-button:active {
+body.page.page-configurador #mach-add.scroll-top-button:active,
+body.page.page-configurador #dry-add.scroll-top-button:active,
+body.page.page-configurador #est-apply.scroll-top-button:active {
   background: #26863f;
   border-color: #26863f;
 }
@@ -70,4 +79,26 @@ body.page.page-configurador .mach-item {
 }
 body.page.page-configurador .mach-item + .mach-item {
   margin-top: 10px;
+}
+
+body.page.page-configurador .card-collapsible .card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+body.page.page-configurador .card-collapsible .card-toggle {
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--fg) 30%, transparent);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+body.page.page-configurador .card-collapsible .card-toggle:hover {
+  border-color: color-mix(in srgb, var(--fg) 45%, transparent);
 }
