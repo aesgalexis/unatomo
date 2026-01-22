@@ -1,0 +1,10 @@
+.dashboard-wrap {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+}
+
+.dashboard-rect {
+  width: 100%;
+  height: 680px;
+  background: color-mix(in srgb, var(--fg) 50%, var(--bg));
+}
