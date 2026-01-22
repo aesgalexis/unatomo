@@ -3,12 +3,9 @@ import { selectSelectedItem } from "../selectors.js";
 import { equipmentTypes } from "../types.js";
 
 export const createInspector = (store) => {
-  const overlay = document.createElement("div");
-  overlay.className = "dashboard-modal-overlay";
-  overlay.hidden = true;
-
   const modal = document.createElement("div");
   modal.className = "dashboard-modal";
+  modal.hidden = true;
 
   const header = document.createElement("div");
   header.className = "dashboard-modal-header";
@@ -17,13 +14,22 @@ export const createInspector = (store) => {
   title.className = "dashboard-modal-title";
   title.textContent = "Equipo";
 
+  const actionsWrap = document.createElement("div");
+  actionsWrap.className = "dashboard-modal-actions";
+
   const closeBtn = document.createElement("button");
   closeBtn.type = "button";
   closeBtn.className = "btn-secondary";
-  closeBtn.textContent = "Cerrar";
-  const tryClose = () => {
+  closeBtn.textContent = "Cancelar";
+
+  const saveBtn = document.createElement("button");
+  saveBtn.type = "button";
+  saveBtn.className = "btn-primary";
+  saveBtn.textContent = "Guardar";
+
+  const tryClose = (force) => {
     const item = selectSelectedItem(store.getState());
-    if (!item || !item.params?.capacityKg) {
+    if (!force && (!item || !item.params?.capacityKg)) {
       errorText.textContent = "La capacidad es obligatoria.";
       capacityInput.classList.add("is-invalid");
       return;
@@ -31,10 +37,14 @@ export const createInspector = (store) => {
     store.dispatch(actions.setModalOpen(false));
   };
 
-  closeBtn.addEventListener("click", tryClose);
+  closeBtn.addEventListener("click", () => tryClose(true));
+  saveBtn.addEventListener("click", () => tryClose(false));
+
+  actionsWrap.appendChild(saveBtn);
+  actionsWrap.appendChild(closeBtn);
 
   header.appendChild(title);
-  header.appendChild(closeBtn);
+  header.appendChild(actionsWrap);
 
   const tabs = document.createElement("div");
   tabs.className = "dashboard-tabs";
@@ -130,15 +140,13 @@ export const createInspector = (store) => {
   modal.appendChild(header);
   modal.appendChild(tabs);
   modal.appendChild(content);
-  overlay.appendChild(modal);
 
   const render = () => {
     const state = store.getState();
     const item = selectSelectedItem(state);
 
     if (!state.ui.isModalOpen || !item) {
-      overlay.hidden = true;
-      overlay.style.pointerEvents = "none";
+      modal.hidden = true;
       return;
     }
 
@@ -149,24 +157,22 @@ export const createInspector = (store) => {
       errorText.textContent = "La capacidad es obligatoria.";
       capacityInput.classList.add("is-invalid");
     }
-    overlay.hidden = false;
-    overlay.style.pointerEvents = "auto";
-  };
-
-  overlay.addEventListener("click", (event) => {
-    if (event.target === overlay) {
-      tryClose();
+    const anchor = state.ui.modalAnchor;
+    if (anchor) {
+      modal.style.left = `${anchor.x}px`;
+      modal.style.top = `${anchor.y}px`;
     }
-  });
+    modal.hidden = false;
+  };
 
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
-      tryClose();
+      tryClose(true);
     }
   });
 
   store.subscribe(render);
   render();
 
-  return overlay;
+  return modal;
 };
