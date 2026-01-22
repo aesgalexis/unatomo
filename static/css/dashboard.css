@@ -6,5 +6,82 @@
 .dashboard-rect {
   width: 100%;
   height: 680px;
-  background: color-mix(in srgb, var(--fg) 50%, var(--bg));
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(to right, color-mix(in srgb, var(--fg) 18%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--fg) 18%, transparent) 1px, transparent 1px),
+    color-mix(in srgb, var(--fg) 50%, var(--bg));
+  background-size: 14px 14px;
+}
+
+.dashboard-toolbar {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 2;
+}
+
+.dashboard-add-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--fg) 55%, transparent);
+  background: color-mix(in srgb, var(--bg) 85%, transparent);
+  color: var(--fg);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font: inherit;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.dashboard-menu {
+  margin-top: 8px;
+  min-width: 220px;
+  border-radius: 14px;
+  border: 1px solid var(--border-subtle);
+  background: var(--panel-bg);
+  padding: 10px;
+  text-align: left;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+}
+
+.dashboard-menu[hidden] {
+  display: none;
+}
+
+.dashboard-menu-label {
+  font-size: 0.9rem;
+  opacity: 0.85;
+  padding: 6px 8px 8px;
+}
+
+.dashboard-menu-group {
+  padding: 6px 8px 8px;
+  border-bottom: 1px solid var(--border-subtle);
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.dashboard-menu button {
+  width: 100%;
+  margin: 0;
+  justify-content: flex-start;
+}
+
+.dashboard-items {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.dashboard-item {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  border: 2px solid color-mix(in srgb, var(--fg) 55%, transparent);
+  background: transparent;
+  box-sizing: border-box;
 }
