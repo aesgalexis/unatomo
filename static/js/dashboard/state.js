@@ -22,8 +22,8 @@ export const reducer = (state, action) => {
         items: [...state.items, action.payload],
         ui: {
           ...state.ui,
-          selectedId: state.ui.selectedId,
-          isModalOpen: state.ui.isModalOpen,
+          selectedId: action.payload.id,
+          isModalOpen: true,
         },
       };
     case ActionTypes.SELECT_ITEM:
