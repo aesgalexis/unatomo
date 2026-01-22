@@ -43,6 +43,7 @@ export const createContextMenu = (store) => {
             type,
             position: null,
             name: `${equipmentTypes[type].label} ${count}`,
+            anchor: null,
             params: { ...equipmentTypes[type].defaults },
           })
         );

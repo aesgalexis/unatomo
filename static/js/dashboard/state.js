@@ -11,6 +11,7 @@ export const createInitialState = (overrides = {}) => ({
   ui: {
     selectedId: null,
     isModalOpen: false,
+    modalAnchor: null,
   },
   ...overrides,
 });
@@ -25,6 +26,7 @@ export const reducer = (state, action) => {
           ...state.ui,
           selectedId: action.payload.id,
           isModalOpen: true,
+          modalAnchor: action.payload.anchor || null,
         },
       };
     case ActionTypes.SELECT_ITEM:
@@ -32,8 +34,9 @@ export const reducer = (state, action) => {
         ...state,
         ui: {
           ...state.ui,
-          selectedId: action.payload,
-          isModalOpen: Boolean(action.payload),
+          selectedId: action.payload?.id || null,
+          isModalOpen: Boolean(action.payload?.id),
+          modalAnchor: action.payload?.anchor || null,
         },
       };
     case ActionTypes.UPDATE_ITEM:
@@ -60,6 +63,7 @@ export const reducer = (state, action) => {
           ...state.ui,
           isModalOpen: action.payload,
           selectedId: action.payload ? state.ui.selectedId : null,
+          modalAnchor: action.payload ? state.ui.modalAnchor : null,
         },
       };
     default:
@@ -69,7 +73,7 @@ export const reducer = (state, action) => {
 
 export const actions = {
   addItem: (payload) => ({ type: ActionTypes.ADD_ITEM, payload }),
-  selectItem: (id) => ({ type: ActionTypes.SELECT_ITEM, payload: id }),
+  selectItem: (payload) => ({ type: ActionTypes.SELECT_ITEM, payload }),
   updateItem: (id, changes) => ({
     type: ActionTypes.UPDATE_ITEM,
     payload: { id, changes },

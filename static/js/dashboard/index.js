@@ -24,7 +24,7 @@ if (mount) {
   const inspector = createInspector(store);
 
   rect.appendChild(toolbar);
-  rect.appendChild(inspector);
+  mount.appendChild(inspector);
 
   store.subscribe(() => {
     localStorageAdapter.save(store.getState());
