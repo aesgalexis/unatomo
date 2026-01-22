@@ -20,10 +20,10 @@ if (mount) {
   const store = createStore(reducer, initialState);
 
   const { rect } = createCanvas(store, mount);
-  const toolbar = createContextMenu(store);
+  const toolbar = createContextMenu(store, rect);
   const inspector = createInspector(store);
 
-  rect.prepend(toolbar);
+  rect.appendChild(toolbar);
   mount.appendChild(inspector);
 
   store.subscribe(() => {
