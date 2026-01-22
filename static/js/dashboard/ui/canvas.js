@@ -5,7 +5,7 @@ const GRID_SIZE = 14;
 const RESERVED_ROWS = 4;
 
 const buildSections = (cols) => {
-  const ratios = [1, 2, 2, 3];
+  const ratios = [1, 2, 1];
   const total = ratios.reduce((sum, value) => sum + value, 0);
   const baseCols = ratios.map((ratio) => Math.floor((ratio / total) * cols));
   let remaining = cols - baseCols.reduce((sum, value) => sum + value, 0);
@@ -28,8 +28,8 @@ const buildSections = (cols) => {
 const createGrid = (rows, cols) => Array.from({ length: rows }, () => Array(cols).fill(false));
 
 const canPlace = (grid, x, y, w, h) => {
-  for (let row = y; row < y + h; row += 1) {
-    for (let col = x; col < x + w; col += 1) {
+  for (let row = y - 1; row < y + h + 1; row += 1) {
+    for (let col = x - 1; col < x + w + 1; col += 1) {
       if (!grid[row] || grid[row][col]) {
         return false;
       }
@@ -39,9 +39,11 @@ const canPlace = (grid, x, y, w, h) => {
 };
 
 const markGrid = (grid, x, y, w, h) => {
-  for (let row = y; row < y + h; row += 1) {
-    for (let col = x; col < x + w; col += 1) {
-      grid[row][col] = true;
+  for (let row = y - 1; row < y + h + 1; row += 1) {
+    for (let col = x - 1; col < x + w + 1; col += 1) {
+      if (grid[row]) {
+        grid[row][col] = true;
+      }
     }
   }
 };
@@ -130,6 +132,11 @@ export const createCanvas = (store, mount) => {
       node.addEventListener("click", () => {
         store.dispatch(actions.selectItem(item.id));
       });
+
+      const capacityBadge = document.createElement("div");
+      capacityBadge.className = "dashboard-item-capacity";
+      capacityBadge.textContent = item.params?.capacityKg ? `${item.params.capacityKg} kg` : "";
+      node.appendChild(capacityBadge);
 
       itemsLayer.appendChild(node);
     });
