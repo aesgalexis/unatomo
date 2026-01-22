@@ -19,34 +19,49 @@ export const createContextMenu = (store) => {
   menuLabel.className = "dashboard-menu-label";
   menuLabel.textContent = "Añadir";
 
-  const menuGroup = document.createElement("div");
-  menuGroup.className = "dashboard-menu-group";
-  menuGroup.textContent = "Equipo";
+  const menuRow = document.createElement("div");
+  menuRow.className = "dashboard-menu-row";
 
-  const createOption = (type) => {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "btn-secondary";
-    btn.textContent = equipmentTypes[type].label;
-    btn.addEventListener("click", () => {
-      const items = store.getState().items;
-      const count = items.filter((item) => item.type === type).length + 1;
-      store.dispatch(
-        actions.addItem({
-          id: `${type}-${crypto.randomUUID()}`,
-          type,
-          position: null,
-          name: `${equipmentTypes[type].label} ${count}`,
-          params: { ...equipmentTypes[type].defaults },
-        })
-      );
-      menu.hidden = true;
-    });
-    return btn;
+  const menuItem = document.createElement("div");
+  menuItem.className = "dashboard-menu-item";
+  menuItem.textContent = "Equipo";
+
+  const subMenu = document.createElement("div");
+  subMenu.className = "dashboard-submenu";
+
+  const createSubItem = (label, type, enabled) => {
+    const item = document.createElement("div");
+    item.className = `dashboard-submenu-item${enabled ? "" : " is-disabled"}`;
+    item.textContent = label;
+    if (enabled) {
+      item.addEventListener("click", () => {
+        const items = store.getState().items;
+        const count = items.filter((entry) => entry.type === type).length + 1;
+        store.dispatch(
+          actions.addItem({
+            id: `${type}-${crypto.randomUUID()}`,
+            type,
+            position: null,
+            name: `${equipmentTypes[type].label} ${count}`,
+            params: { ...equipmentTypes[type].defaults },
+          })
+        );
+        menu.hidden = true;
+      });
+    }
+    return item;
   };
 
-  const washerBtn = createOption("lavadora");
-  const dryerBtn = createOption("secadora");
+  subMenu.appendChild(createSubItem("Lavadora", "lavadora", true));
+  subMenu.appendChild(createSubItem("Secadora", "secadora", true));
+  subMenu.appendChild(createSubItem("Túnel", "tunel", false));
+  subMenu.appendChild(createSubItem("Calandra", "calandra", false));
+  subMenu.appendChild(createSubItem("Plegador", "plegador", false));
+  subMenu.appendChild(createSubItem("Introductor", "introductor", false));
+  subMenu.appendChild(createSubItem("Empaquetadora", "empaquetadora", false));
+
+  menuRow.appendChild(menuItem);
+  menuRow.appendChild(subMenu);
 
   addBtn.addEventListener("click", () => {
     menu.hidden = !menu.hidden;
@@ -59,9 +74,7 @@ export const createContextMenu = (store) => {
   });
 
   menu.appendChild(menuLabel);
-  menu.appendChild(menuGroup);
-  menu.appendChild(washerBtn);
-  menu.appendChild(dryerBtn);
+  menu.appendChild(menuRow);
   toolbar.appendChild(addBtn);
   toolbar.appendChild(menu);
 
