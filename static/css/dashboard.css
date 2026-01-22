@@ -1,11 +1,12 @@
 .dashboard-wrap {
   width: 100vw;
   margin-left: calc(50% - 50vw);
+  overflow-x: hidden;
 }
 
 .dashboard-rect {
   width: 100%;
-  height: 680px;
+  height: 580px;
   position: relative;
   overflow: hidden;
   background:
@@ -83,6 +84,24 @@
   background: transparent;
   box-sizing: border-box;
   cursor: pointer;
+}
+
+.dashboard-item-capacity {
+  width: 28px;
+  height: 28px;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  padding: 0.25rem;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  font-size: 0.75rem;
+  color: var(--fg);
+}
+
+body.page {
+  overflow-x: hidden;
 }
 
 .dashboard-modal-overlay {
