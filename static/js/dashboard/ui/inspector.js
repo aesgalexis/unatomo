@@ -96,7 +96,19 @@ export const createInspector = (store) => {
   form.appendChild(capacityInput);
   form.appendChild(errorText);
   generalPane.appendChild(form);
-  detailsPane.textContent = "Más parámetros próximamente.";
+  const deleteBtn = document.createElement("button");
+  deleteBtn.type = "button";
+  deleteBtn.className = "dashboard-link-danger";
+  deleteBtn.textContent = "Eliminar equipo";
+  deleteBtn.addEventListener("click", () => {
+    const item = selectSelectedItem(store.getState());
+    if (!item) return;
+    if (window.confirm("¿Seguro que quieres eliminar este equipo?")) {
+      store.dispatch(actions.removeItem(item.id));
+    }
+  });
+
+  detailsPane.appendChild(deleteBtn);
 
   content.appendChild(generalPane);
   content.appendChild(detailsPane);
@@ -131,7 +143,7 @@ export const createInspector = (store) => {
     }
 
     const type = equipmentTypes[item.type];
-    title.textContent = type.label;
+    title.textContent = item.name || type.label;
     capacityInput.value = item.params?.capacityKg ?? "";
     if (!capacityInput.value) {
       errorText.textContent = "La capacidad es obligatoria.";
