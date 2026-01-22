@@ -2,14 +2,20 @@ import { actions } from "../state.js";
 import { equipmentTypes } from "../types.js";
 
 export const createContextMenu = (store) => {
-  const toolbar = document.createElement("div");
+  const existingToolbar = document.getElementById("dashboard-toolbar");
+  const toolbar = existingToolbar || document.createElement("div");
   toolbar.className = "dashboard-toolbar";
 
-  const addBtn = document.createElement("button");
+  const existingBtn = document.getElementById("dashboard-add-btn");
+  const addBtn = existingBtn || document.createElement("button");
   addBtn.type = "button";
   addBtn.className = "dashboard-add-btn is-add";
   addBtn.setAttribute("aria-label", "Add");
   addBtn.textContent = "add";
+
+  if (!existingBtn) {
+    toolbar.appendChild(addBtn);
+  }
 
   const menu = document.createElement("div");
   menu.className = "dashboard-menu";
@@ -76,7 +82,6 @@ export const createContextMenu = (store) => {
 
   menu.appendChild(menuLabel);
   menu.appendChild(menuRow);
-  toolbar.appendChild(addBtn);
   toolbar.appendChild(menu);
 
   return toolbar;
