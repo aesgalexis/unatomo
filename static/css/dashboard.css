@@ -95,6 +95,10 @@
   padding: 1.5rem;
 }
 
+.dashboard-modal-overlay[hidden] {
+  display: none;
+}
+
 .dashboard-modal {
   width: min(480px, 90vw);
   background: var(--panel-bg);
