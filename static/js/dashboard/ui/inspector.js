@@ -110,6 +110,7 @@ export const createInspector = (store) => {
 
     if (!state.ui.isModalOpen || !item) {
       overlay.hidden = true;
+      overlay.style.pointerEvents = "none";
       return;
     }
 
@@ -117,6 +118,7 @@ export const createInspector = (store) => {
     title.textContent = type.label;
     capacityInput.value = item.params?.capacityKg ?? "";
     overlay.hidden = false;
+    overlay.style.pointerEvents = "auto";
   };
 
   overlay.addEventListener("click", (event) => {
