@@ -1,12 +1,11 @@
 .dashboard-wrap {
-  width: 100%;
-  display: flex;
-  justify-content: center;
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
   overflow-x: hidden;
 }
 
 .dashboard-rect {
-  width: min(1200px, 95vw);
+  width: 100%;
   height: 420px;
   position: relative;
   overflow: hidden;
