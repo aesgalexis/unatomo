@@ -21,9 +21,17 @@ export const createInspector = (store) => {
   closeBtn.type = "button";
   closeBtn.className = "btn-secondary";
   closeBtn.textContent = "Cerrar";
-  closeBtn.addEventListener("click", () => {
+  const tryClose = () => {
+    const item = selectSelectedItem(store.getState());
+    if (!item || !item.params?.capacityKg) {
+      errorText.textContent = "La capacidad es obligatoria.";
+      capacityInput.classList.add("is-invalid");
+      return;
+    }
     store.dispatch(actions.setModalOpen(false));
-  });
+  };
+
+  closeBtn.addEventListener("click", tryClose);
 
   header.appendChild(title);
   header.appendChild(closeBtn);
@@ -63,10 +71,17 @@ export const createInspector = (store) => {
   capacityInput.type = "number";
   capacityInput.className = "field";
   capacityInput.placeholder = "0";
+  capacityInput.required = true;
+
+  const errorText = document.createElement("div");
+  errorText.className = "dashboard-form-error";
+  errorText.textContent = "";
 
   capacityInput.addEventListener("input", () => {
     const item = selectSelectedItem(store.getState());
     if (!item) return;
+    capacityInput.classList.remove("is-invalid");
+    errorText.textContent = "";
     store.dispatch(
       actions.updateItem(item.id, {
         params: {
@@ -79,6 +94,7 @@ export const createInspector = (store) => {
 
   form.appendChild(capacityLabel);
   form.appendChild(capacityInput);
+  form.appendChild(errorText);
   generalPane.appendChild(form);
   detailsPane.textContent = "Más parámetros próximamente.";
 
@@ -117,19 +133,23 @@ export const createInspector = (store) => {
     const type = equipmentTypes[item.type];
     title.textContent = type.label;
     capacityInput.value = item.params?.capacityKg ?? "";
+    if (!capacityInput.value) {
+      errorText.textContent = "La capacidad es obligatoria.";
+      capacityInput.classList.add("is-invalid");
+    }
     overlay.hidden = false;
     overlay.style.pointerEvents = "auto";
   };
 
   overlay.addEventListener("click", (event) => {
     if (event.target === overlay) {
-      store.dispatch(actions.setModalOpen(false));
+      tryClose();
     }
   });
 
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
-      store.dispatch(actions.setModalOpen(false));
+      tryClose();
     }
   });
 
