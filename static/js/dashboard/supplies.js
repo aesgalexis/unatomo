@@ -14,7 +14,6 @@ if (mount) {
     "Agua",
     "Electricidad",
     "Gas",
-    "Producto químico",
     "Químicos",
   ];
 
