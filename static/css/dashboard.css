@@ -229,6 +229,19 @@
   color: color-mix(in srgb, var(--fg) 90%, transparent);
 }
 
+.dashboard-checkbox-row {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.dashboard-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+}
+
 .dashboard-form-error {
   font-size: 0.85rem;
   color: #dc2626;

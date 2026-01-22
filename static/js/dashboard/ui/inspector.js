@@ -92,6 +92,7 @@ export const createInspector = (store) => {
   capacityInput.placeholder = "0";
   capacityInput.required = true;
   capacityInput.maxLength = 4;
+  capacityInput.style.width = "6ch";
   capacityInput.inputMode = "numeric";
   capacityInput.pattern = "\\d{0,4}";
 
@@ -115,10 +116,70 @@ export const createInspector = (store) => {
     );
   });
 
+  vaporInput.addEventListener("change", () => {
+    const item = selectSelectedItem(store.getState());
+    if (!item) return;
+    store.dispatch(
+      actions.updateItem(item.id, {
+        params: {
+          ...item.params,
+          heatingVapor: vaporInput.checked,
+        },
+      })
+    );
+  });
+
+  resistInput.addEventListener("change", () => {
+    const item = selectSelectedItem(store.getState());
+    if (!item) return;
+    store.dispatch(
+      actions.updateItem(item.id, {
+        params: {
+          ...item.params,
+          heatingResist: resistInput.checked,
+        },
+      })
+    );
+  });
+
   form.appendChild(capacityLabel);
   form.appendChild(capacityInput);
   form.appendChild(errorText);
   generalPane.appendChild(form);
+
+  const heatingGroup = document.createElement("div");
+  heatingGroup.className = "dashboard-form";
+
+  const heatingLabel = document.createElement("label");
+  heatingLabel.textContent = "Calefacción";
+
+  const heatingRow = document.createElement("div");
+  heatingRow.className = "dashboard-checkbox-row";
+
+  const vaporWrap = document.createElement("label");
+  vaporWrap.className = "dashboard-checkbox";
+  const vaporInput = document.createElement("input");
+  vaporInput.type = "checkbox";
+  const vaporText = document.createElement("span");
+  vaporText.textContent = "Vapor";
+  vaporWrap.appendChild(vaporInput);
+  vaporWrap.appendChild(vaporText);
+
+  const resistWrap = document.createElement("label");
+  resistWrap.className = "dashboard-checkbox";
+  const resistInput = document.createElement("input");
+  resistInput.type = "checkbox";
+  const resistText = document.createElement("span");
+  resistText.textContent = "Resistencias";
+  resistWrap.appendChild(resistInput);
+  resistWrap.appendChild(resistText);
+
+  heatingRow.appendChild(vaporWrap);
+  heatingRow.appendChild(resistWrap);
+  heatingGroup.appendChild(heatingLabel);
+  heatingGroup.appendChild(heatingRow);
+
+  generalPane.appendChild(heatingGroup);
   const deleteBtn = document.createElement("button");
   deleteBtn.type = "button";
   deleteBtn.className = "dashboard-link-danger";
@@ -179,6 +240,12 @@ export const createInspector = (store) => {
     const type = equipmentTypes[item.type];
     title.textContent = item.name || type.label;
     capacityInput.value = item.params?.capacityKg ?? "";
+    const showHeating = item.type === "lavadora";
+    heatingGroup.style.display = showHeating ? "grid" : "none";
+    if (showHeating) {
+      vaporInput.checked = Boolean(item.params?.heatingVapor);
+      resistInput.checked = Boolean(item.params?.heatingResist);
+    }
     if (!capacityInput.value) {
       errorText.textContent = "La capacidad es obligatoria.";
       capacityInput.classList.add("is-invalid");
