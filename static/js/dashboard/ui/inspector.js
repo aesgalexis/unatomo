@@ -125,6 +125,12 @@ export const createInspector = (store) => {
     }
   });
 
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      store.dispatch(actions.setModalOpen(false));
+    }
+  });
+
   store.subscribe(render);
   render();
 
