@@ -38,6 +38,8 @@
   cursor: pointer;
   padding: 0.4rem 0.9rem;
   text-transform: lowercase;
+  flex: 0 0 auto;
+  width: fit-content;
 }
 
 .dashboard-add-btn.is-add {
