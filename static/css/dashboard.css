@@ -1,12 +1,13 @@
 .dashboard-wrap {
-  width: 100vw;
-  margin-left: calc(50% - 50vw);
+  width: 100%;
+  display: flex;
+  justify-content: center;
   overflow-x: hidden;
 }
 
 .dashboard-rect {
-  width: 100%;
-  height: 280px;
+  width: min(1200px, 95vw);
+  height: 420px;
   position: relative;
   overflow: hidden;
   background:
@@ -24,8 +25,6 @@
 }
 
 .dashboard-add-btn {
-  width: 36px;
-  height: 36px;
   border-radius: 999px;
   border: 1px solid color-mix(in srgb, var(--fg) 55%, transparent);
   background: color-mix(in srgb, var(--bg) 85%, transparent);
@@ -34,8 +33,16 @@
   align-items: center;
   justify-content: center;
   font: inherit;
-  font-size: 1.1rem;
+  font-size: 0.9rem;
   cursor: pointer;
+  padding: 0.4rem 0.9rem;
+  text-transform: lowercase;
+}
+
+.dashboard-add-btn.is-add {
+  background: #2da44e;
+  border-color: #2da44e;
+  color: #fff;
 }
 
 .dashboard-menu {
@@ -138,10 +145,6 @@
   overflow: hidden;
 }
 
-body.page {
-  overflow-x: hidden;
-}
-
 .dashboard-link-danger {
   border: none;
   background: transparent;
@@ -150,52 +153,6 @@ body.page {
   font: inherit;
   cursor: pointer;
   text-decoration: underline;
-}
-
-.supplies-wrap {
-  width: 100vw;
-  margin-left: calc(50% - 50vw);
-  overflow-x: hidden;
-}
-
-.supplies-rect {
-  width: 100%;
-  height: 560px;
-  border: none;
-  background: transparent;
-  padding: 1rem 1.25rem;
-}
-
-.supplies-grid {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: nowrap;
-  align-items: stretch;
-}
-
-.supplies-card {
-  width: 140px;
-  aspect-ratio: 1 / 1;
-  border: 1px solid var(--border-subtle);
-  background: var(--panel-bg);
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 0.75rem;
-}
-
-.supplies-card-title {
-  font-weight: 600;
-  color: var(--fg);
-  font-size: 0.95rem;
-}
-
-@media (max-width: 720px) {
-  .supplies-grid {
-    flex-wrap: wrap;
-  }
 }
 
 .dashboard-modal {
