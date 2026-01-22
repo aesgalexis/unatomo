@@ -9,7 +9,14 @@ const mount = document.getElementById("dashboard-mount");
 
 if (mount) {
   const persisted = localStorageAdapter.load();
-  const initialState = createInitialState(persisted || {});
+  const initialState = createInitialState({
+    ...(persisted || {}),
+    ui: {
+      ...(persisted?.ui || {}),
+      isModalOpen: false,
+      selectedId: null,
+    },
+  });
   const store = createStore(reducer, initialState);
 
   const { rect } = createCanvas(store, mount);
