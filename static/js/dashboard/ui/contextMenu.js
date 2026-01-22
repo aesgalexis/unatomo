@@ -1,21 +1,9 @@
 import { actions } from "../state.js";
 import { equipmentTypes } from "../types.js";
 
-export const createContextMenu = (store) => {
+export const createContextMenu = (store, rect) => {
   const toolbar = document.createElement("div");
   toolbar.className = "dashboard-toolbar";
-  toolbar.style.display = "inline-flex";
-  toolbar.style.zIndex = "5";
-  toolbar.style.top = "16px";
-  toolbar.style.left = "16px";
-
-  const addBtn = document.createElement("button");
-  addBtn.type = "button";
-  addBtn.className = "dashboard-add-btn is-add";
-  addBtn.setAttribute("aria-label", "Add");
-  addBtn.textContent = "add";
-
-  toolbar.appendChild(addBtn);
 
   const menu = document.createElement("div");
   menu.className = "dashboard-menu";
@@ -70,19 +58,37 @@ export const createContextMenu = (store) => {
   menuRow.appendChild(menuItem);
   menuRow.appendChild(subMenu);
 
-  addBtn.addEventListener("click", () => {
-    menu.hidden = !menu.hidden;
+  menu.appendChild(menuLabel);
+  menu.appendChild(menuRow);
+  toolbar.appendChild(menu);
+
+  const openAt = (x, y) => {
+    menu.hidden = false;
+    menu.style.left = `${x}px`;
+    menu.style.top = `${y}px`;
+  };
+
+  const closeMenu = () => {
+    menu.hidden = true;
+  };
+
+  rect.addEventListener("contextmenu", (event) => {
+    event.preventDefault();
+    const bounds = rect.getBoundingClientRect();
+    openAt(event.clientX - bounds.left, event.clientY - bounds.top);
   });
 
   document.addEventListener("click", (event) => {
     if (!toolbar.contains(event.target)) {
-      menu.hidden = true;
+      closeMenu();
     }
   });
 
-  menu.appendChild(menuLabel);
-  menu.appendChild(menuRow);
-  toolbar.appendChild(menu);
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      closeMenu();
+    }
+  });
 
   return toolbar;
 };
