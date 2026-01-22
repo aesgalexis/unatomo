@@ -7,9 +7,9 @@ export const createContextMenu = (store) => {
 
   const addBtn = document.createElement("button");
   addBtn.type = "button";
-  addBtn.className = "dashboard-add-btn";
-  addBtn.setAttribute("aria-label", "Añadir equipo");
-  addBtn.textContent = "+";
+  addBtn.className = "dashboard-add-btn is-add";
+  addBtn.setAttribute("aria-label", "Add");
+  addBtn.textContent = "add";
 
   const menu = document.createElement("div");
   menu.className = "dashboard-menu";
