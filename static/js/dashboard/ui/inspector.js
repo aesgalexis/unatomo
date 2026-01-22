@@ -116,32 +116,6 @@ export const createInspector = (store) => {
     );
   });
 
-  vaporInput.addEventListener("change", () => {
-    const item = selectSelectedItem(store.getState());
-    if (!item) return;
-    store.dispatch(
-      actions.updateItem(item.id, {
-        params: {
-          ...item.params,
-          heatingVapor: vaporInput.checked,
-        },
-      })
-    );
-  });
-
-  resistInput.addEventListener("change", () => {
-    const item = selectSelectedItem(store.getState());
-    if (!item) return;
-    store.dispatch(
-      actions.updateItem(item.id, {
-        params: {
-          ...item.params,
-          heatingResist: resistInput.checked,
-        },
-      })
-    );
-  });
-
   form.appendChild(capacityLabel);
   form.appendChild(capacityInput);
   form.appendChild(errorText);
@@ -178,6 +152,32 @@ export const createInspector = (store) => {
   heatingRow.appendChild(resistWrap);
   heatingGroup.appendChild(heatingLabel);
   heatingGroup.appendChild(heatingRow);
+
+  vaporInput.addEventListener("change", () => {
+    const item = selectSelectedItem(store.getState());
+    if (!item) return;
+    store.dispatch(
+      actions.updateItem(item.id, {
+        params: {
+          ...item.params,
+          heatingVapor: vaporInput.checked,
+        },
+      })
+    );
+  });
+
+  resistInput.addEventListener("change", () => {
+    const item = selectSelectedItem(store.getState());
+    if (!item) return;
+    store.dispatch(
+      actions.updateItem(item.id, {
+        params: {
+          ...item.params,
+          heatingResist: resistInput.checked,
+        },
+      })
+    );
+  });
 
   generalPane.appendChild(heatingGroup);
   const deleteBtn = document.createElement("button");
