@@ -135,8 +135,8 @@ export const createCanvas = (store, mount) => {
           actions.selectItem({
             id: item.id,
             anchor: {
-              x: rectBox.left,
-              y: rectBox.top,
+              x: rectBox.right,
+              y: rectBox.bottom,
             },
           })
         );
@@ -159,7 +159,7 @@ export const createCanvas = (store, mount) => {
         store.dispatch(
           actions.selectItem({
             id: state.ui.selectedId,
-            anchor: { x: rectBox.left, y: rectBox.top },
+            anchor: { x: rectBox.right, y: rectBox.bottom },
           })
         );
       }
