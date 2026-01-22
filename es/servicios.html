@@ -8,24 +8,23 @@
   <meta name="robots" content="index, follow" />
   <script src="/static/js/theme/theme-init.js"></script>
   <link rel="stylesheet" href="/styles.css">
-  <link rel="stylesheet" href="/static/css/dashboard.css">
   <link rel="icon" href="/static/img/favicon/favicon.ico" sizes="any">
 </head>
 
-<body class="page" data-topbar-title="Dashboard" data-back-mode="history">
+<body class="page" data-topbar-title="Servicios" data-back-mode="history">
   <div id="topbar-mount"></div>
   <script type="module" src="/static/js/topbar.js"></script>
 
   <main class="shell page-shell">
     <section class="page-section">
-      <div id="dashboard-mount"></div>
-      <script src="/static/js/dashboard/dashboard.js"></script>
+      <div id="servicios-content-mount" data-include-html="/content/es/index_content.html"></div>
+      <script type="module" src="/static/js/content-mount.js"></script>
+      <script src="/static/js/effects/border-trace.js"></script>
     </section>
 
     <section class="page-section">
       <a href="/es/contacto.html">Contacto</a>
       <a href="/es/configurador.html">Configurador</a>
-
     </section>
 
     <div id="page-nav-mount"></div>
