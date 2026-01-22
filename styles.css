@@ -330,6 +330,18 @@ body.page #theme-toggle {
   justify-content: flex-end;
 }
 
+.card-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.card-row .card {
+  margin: 0;
+  max-width: none;
+}
+
 .card :is(h1,h2,h3,h4,h5,h6){
   margin-top: 0;
 }
@@ -412,6 +424,12 @@ body.page #theme-toggle {
 
   .card {
     padding: 1.25rem 1rem;
+  }
+}
+
+@media (max-width: 720px) {
+  .card-row {
+    grid-template-columns: 1fr;
   }
 }
 
