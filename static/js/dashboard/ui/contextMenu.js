@@ -4,6 +4,10 @@ import { equipmentTypes } from "../types.js";
 export const createContextMenu = (store) => {
   const toolbar = document.createElement("div");
   toolbar.className = "dashboard-toolbar";
+  toolbar.style.display = "inline-flex";
+  toolbar.style.zIndex = "5";
+  toolbar.style.top = "16px";
+  toolbar.style.left = "16px";
 
   const addBtn = document.createElement("button");
   addBtn.type = "button";
