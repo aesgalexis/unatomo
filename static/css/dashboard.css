@@ -98,10 +98,23 @@
   justify-content: flex-start;
   font-size: 0.75rem;
   color: var(--fg);
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 body.page {
   overflow-x: hidden;
+}
+
+.dashboard-link-danger {
+  border: none;
+  background: transparent;
+  color: #dc2626;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  text-decoration: underline;
 }
 
 .dashboard-modal-overlay {

@@ -29,11 +29,14 @@ export const createContextMenu = (store) => {
     btn.className = "btn-secondary";
     btn.textContent = equipmentTypes[type].label;
     btn.addEventListener("click", () => {
+      const items = store.getState().items;
+      const count = items.filter((item) => item.type === type).length + 1;
       store.dispatch(
         actions.addItem({
           id: `${type}-${crypto.randomUUID()}`,
           type,
           position: null,
+          name: `${equipmentTypes[type].label} ${count}`,
           params: { ...equipmentTypes[type].defaults },
         })
       );

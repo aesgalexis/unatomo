@@ -2,6 +2,7 @@ export const ActionTypes = {
   ADD_ITEM: "ADD_ITEM",
   SELECT_ITEM: "SELECT_ITEM",
   UPDATE_ITEM: "UPDATE_ITEM",
+  REMOVE_ITEM: "REMOVE_ITEM",
   SET_MODAL_OPEN: "SET_MODAL_OPEN",
 };
 
@@ -42,6 +43,16 @@ export const reducer = (state, action) => {
           item.id === action.payload.id ? { ...item, ...action.payload.changes } : item
         ),
       };
+    case ActionTypes.REMOVE_ITEM:
+      return {
+        ...state,
+        items: state.items.filter((item) => item.id !== action.payload),
+        ui: {
+          ...state.ui,
+          selectedId: state.ui.selectedId === action.payload ? null : state.ui.selectedId,
+          isModalOpen: state.ui.selectedId === action.payload ? false : state.ui.isModalOpen,
+        },
+      };
     case ActionTypes.SET_MODAL_OPEN:
       return {
         ...state,
@@ -63,5 +74,6 @@ export const actions = {
     type: ActionTypes.UPDATE_ITEM,
     payload: { id, changes },
   }),
+  removeItem: (id) => ({ type: ActionTypes.REMOVE_ITEM, payload: id }),
   setModalOpen: (open) => ({ type: ActionTypes.SET_MODAL_OPEN, payload: open }),
 };
