@@ -23,7 +23,7 @@ if (mount) {
   const toolbar = createContextMenu(store);
   const inspector = createInspector(store);
 
-  rect.appendChild(toolbar);
+  rect.prepend(toolbar);
   mount.appendChild(inspector);
 
   store.subscribe(() => {
