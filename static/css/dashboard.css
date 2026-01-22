@@ -20,7 +20,9 @@
   position: absolute;
   top: 16px;
   left: 16px;
-  z-index: 2;
+  z-index: 5;
+  display: inline-flex;
+  pointer-events: auto;
 }
 
 .dashboard-add-btn {
