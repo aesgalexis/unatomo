@@ -18,38 +18,14 @@
 
 .dashboard-toolbar {
   position: absolute;
-  top: 16px;
-  left: 16px;
+  inset: 0;
+  pointer-events: none;
   z-index: 5;
-  display: inline-flex;
-  pointer-events: auto;
-}
-
-.dashboard-add-btn {
-  border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--fg) 55%, transparent);
-  background: color-mix(in srgb, var(--bg) 85%, transparent);
-  color: var(--fg);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font: inherit;
-  font-size: 0.9rem;
-  cursor: pointer;
-  padding: 0.4rem 0.9rem;
-  text-transform: lowercase;
-  flex: 0 0 auto;
-  width: fit-content;
-}
-
-.dashboard-add-btn.is-add {
-  background: #2da44e;
-  border-color: #2da44e;
-  color: #fff;
 }
 
 .dashboard-menu {
-  margin-top: 8px;
+  position: absolute;
+  margin-top: 0;
   min-width: 220px;
   border-radius: 14px;
   border: 1px solid var(--border-subtle);
