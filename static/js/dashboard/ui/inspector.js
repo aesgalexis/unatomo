@@ -59,8 +59,14 @@ export const createInspector = (store) => {
   tabDetails.className = "dashboard-tab";
   tabDetails.textContent = "Detalles";
 
+  const tabRegister = document.createElement("button");
+  tabRegister.type = "button";
+  tabRegister.className = "dashboard-tab";
+  tabRegister.textContent = "Registro";
+
   tabs.appendChild(tabGeneral);
   tabs.appendChild(tabDetails);
+  tabs.appendChild(tabRegister);
 
   const content = document.createElement("div");
   content.className = "dashboard-tab-content";
@@ -70,6 +76,9 @@ export const createInspector = (store) => {
 
   const detailsPane = document.createElement("div");
   detailsPane.className = "dashboard-pane";
+
+  const registerPane = document.createElement("div");
+  registerPane.className = "dashboard-pane";
 
   const form = document.createElement("div");
   form.className = "dashboard-form";
@@ -82,6 +91,9 @@ export const createInspector = (store) => {
   capacityInput.className = "field";
   capacityInput.placeholder = "0";
   capacityInput.required = true;
+  capacityInput.maxLength = 4;
+  capacityInput.inputMode = "numeric";
+  capacityInput.pattern = "\\d{0,4}";
 
   const errorText = document.createElement("div");
   errorText.className = "dashboard-form-error";
@@ -90,6 +102,7 @@ export const createInspector = (store) => {
   capacityInput.addEventListener("input", () => {
     const item = selectSelectedItem(store.getState());
     if (!item) return;
+    capacityInput.value = capacityInput.value.replace(/\D/g, "").slice(0, 4);
     capacityInput.classList.remove("is-invalid");
     errorText.textContent = "";
     store.dispatch(
@@ -119,9 +132,11 @@ export const createInspector = (store) => {
   });
 
   detailsPane.appendChild(deleteBtn);
+  registerPane.textContent = "Registro pendiente.";
 
   content.appendChild(generalPane);
   content.appendChild(detailsPane);
+  content.appendChild(registerPane);
 
   tabGeneral.addEventListener("click", () => {
     tabGeneral.classList.add("is-active");
@@ -133,8 +148,19 @@ export const createInspector = (store) => {
   tabDetails.addEventListener("click", () => {
     tabDetails.classList.add("is-active");
     tabGeneral.classList.remove("is-active");
+    tabRegister.classList.remove("is-active");
     detailsPane.classList.add("is-active");
     generalPane.classList.remove("is-active");
+    registerPane.classList.remove("is-active");
+  });
+
+  tabRegister.addEventListener("click", () => {
+    tabRegister.classList.add("is-active");
+    tabGeneral.classList.remove("is-active");
+    tabDetails.classList.remove("is-active");
+    registerPane.classList.add("is-active");
+    generalPane.classList.remove("is-active");
+    detailsPane.classList.remove("is-active");
   });
 
   modal.appendChild(header);
