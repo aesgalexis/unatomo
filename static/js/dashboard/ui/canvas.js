@@ -123,13 +123,23 @@ export const createCanvas = (store, mount) => {
       node.type = "button";
       node.className = "dashboard-item";
       node.setAttribute("data-type", item.type);
+      node.setAttribute("data-id", item.id);
       node.setAttribute("aria-label", type.label);
       node.style.left = `${position.col * GRID_SIZE}px`;
       node.style.top = `${position.row * GRID_SIZE}px`;
       node.style.width = `${size.w * GRID_SIZE}px`;
       node.style.height = `${size.h * GRID_SIZE}px`;
       node.addEventListener("click", () => {
-        store.dispatch(actions.selectItem(item.id));
+        const rectBox = node.getBoundingClientRect();
+        store.dispatch(
+          actions.selectItem({
+            id: item.id,
+            anchor: {
+              x: rectBox.left,
+              y: rectBox.top,
+            },
+          })
+        );
       });
 
       const capacityBadge = document.createElement("div");
@@ -139,6 +149,21 @@ export const createCanvas = (store, mount) => {
 
       itemsLayer.appendChild(node);
     });
+
+    if (state.ui.isModalOpen && state.ui.selectedId && !state.ui.modalAnchor) {
+      const selectedNode = Array.from(itemsLayer.children).find(
+        (child) => child.getAttribute("data-id") === state.ui.selectedId
+      );
+      if (selectedNode) {
+        const rectBox = selectedNode.getBoundingClientRect();
+        store.dispatch(
+          actions.selectItem({
+            id: state.ui.selectedId,
+            anchor: { x: rectBox.left, y: rectBox.top },
+          })
+        );
+      }
+    }
   };
 
   const handleResize = () => render();
