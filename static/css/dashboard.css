@@ -79,9 +79,83 @@
 
 .dashboard-item {
   position: absolute;
-  width: 28px;
-  height: 28px;
   border: 2px solid color-mix(in srgb, var(--fg) 55%, transparent);
   background: transparent;
   box-sizing: border-box;
+  cursor: pointer;
+}
+
+.dashboard-modal-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--bg) 40%, transparent);
+  z-index: 3;
+  padding: 1.5rem;
+}
+
+.dashboard-modal {
+  width: min(480px, 90vw);
+  background: var(--panel-bg);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  box-shadow: 0 18px 40px rgba(0,0,0,0.22);
+  padding: 1rem 1.25rem 1.25rem;
+}
+
+.dashboard-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.dashboard-modal-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--fg);
+}
+
+.dashboard-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.dashboard-tab {
+  border: 1px solid var(--border-subtle);
+  background: transparent;
+  color: var(--fg);
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.dashboard-tab.is-active {
+  background: color-mix(in srgb, var(--fg) 12%, transparent);
+}
+
+.dashboard-tab-content {
+  margin-top: 1rem;
+}
+
+.dashboard-pane {
+  display: none;
+}
+
+.dashboard-pane.is-active {
+  display: block;
+}
+
+.dashboard-form {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.dashboard-form label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: color-mix(in srgb, var(--fg) 90%, transparent);
 }
