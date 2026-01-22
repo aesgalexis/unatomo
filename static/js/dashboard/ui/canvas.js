@@ -46,12 +46,20 @@ const markGrid = (grid, x, y, w, h) => {
   }
 };
 
-const findSpot = (grid, cols, rows, w, h) => {
-  const sections = buildSections(cols);
+const findSpotInSection = (grid, rows, section, w, h, align) => {
+  const usableStart = section.start + 1;
+  const usableEnd = section.end - 1;
+  if (usableEnd - usableStart < w) return null;
 
-  for (const section of sections) {
-    for (let row = RESERVED_ROWS; row <= rows - h; row += 1) {
-      for (let col = section.start; col <= section.end - w; col += 1) {
+  for (let row = RESERVED_ROWS; row <= rows - h; row += 1) {
+    if (align === "right") {
+      for (let col = usableEnd - w; col >= usableStart; col -= 1) {
+        if (canPlace(grid, col, row, w, h)) {
+          return { col, row };
+        }
+      }
+    } else {
+      for (let col = usableStart; col <= usableEnd - w; col += 1) {
         if (canPlace(grid, col, row, w, h)) {
           return { col, row };
         }
@@ -88,7 +96,19 @@ export const createCanvas = (store, mount) => {
       let position = item.position;
 
       if (!position || position.cols !== cols || position.rows !== rows) {
-        const spot = findSpot(grid, cols, rows, size.w, size.h);
+        const sections = buildSections(cols);
+        const washerSection = sections[0];
+        const dryerSection = sections[1];
+        let spot = null;
+
+        if (item.type === "lavadora" && washerSection) {
+          spot = findSpotInSection(grid, rows, washerSection, size.w, size.h, "right");
+        }
+
+        if (item.type === "secadora" && dryerSection) {
+          spot = findSpotInSection(grid, rows, dryerSection, size.w, size.h, "left");
+        }
+
         if (!spot) {
           return;
         }

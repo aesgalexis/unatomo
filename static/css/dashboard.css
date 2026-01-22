@@ -163,3 +163,14 @@
   font-weight: 500;
   color: color-mix(in srgb, var(--fg) 90%, transparent);
 }
+
+.dashboard-form-error {
+  font-size: 0.85rem;
+  color: #dc2626;
+}
+
+.field.is-invalid {
+  border-color: #dc2626;
+  outline: 2px solid color-mix(in srgb, #dc2626 35%, transparent);
+  outline-offset: 1px;
+}

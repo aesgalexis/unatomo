@@ -2,13 +2,13 @@ export const equipmentTypes = {
   lavadora: {
     id: "lavadora",
     label: "Lavadora",
-    size: { w: 2, h: 2 },
+    size: { w: 4, h: 4 },
     defaults: { capacityKg: "" },
   },
   secadora: {
     id: "secadora",
     label: "Secadora",
-    size: { w: 2, h: 3 },
+    size: { w: 4, h: 6 },
     defaults: { capacityKg: "" },
   },
 };
