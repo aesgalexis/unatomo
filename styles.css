@@ -325,6 +325,14 @@ body.page #theme-toggle {
   max-width: 876px;
 }
 
+.card-cta {
+  margin-top: 1.25rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
 .card.card--wide .card-cta {
   display: flex;
   justify-content: flex-end;
