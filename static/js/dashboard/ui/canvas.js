@@ -89,67 +89,33 @@ export const createCanvas = (store, mount) => {
     itemsLayer.replaceChildren();
 
     const cols = Math.max(1, Math.floor(rect.clientWidth / GRID_SIZE));
-    let rows = Math.max(RESERVED_ROWS + 10, Math.floor(rect.clientHeight / GRID_SIZE));
-    let placed = false;
-    let attempts = 0;
-
-    while (!placed && attempts < 20) {
-      const grid = createGrid(rows, cols);
-      let failed = false;
-      let maxRow = RESERVED_ROWS;
-
-      items.forEach((item) => {
-        const type = equipmentTypes[item.type];
-        const size = type.size;
-        let position = item.position;
-
-        if (!position || position.cols !== cols || position.rows !== rows) {
-          const sections = buildSections(cols);
-          const washerSection = sections[0];
-          const dryerSection = sections[1];
-          let spot = null;
-
-          if (item.type === "lavadora" && washerSection) {
-            spot = findSpotInSection(grid, rows, washerSection, size.w, size.h, "right");
-          }
-
-          if (item.type === "secadora" && dryerSection) {
-            spot = findSpotInSection(grid, rows, dryerSection, size.w, size.h, "left");
-          }
-
-          if (!spot) {
-            failed = true;
-            return;
-          }
-          position = { ...spot, cols, rows };
-          store.dispatch(actions.updateItem(item.id, { position }));
-        }
-
-        markGrid(grid, position.col, position.row, size.w, size.h);
-        maxRow = Math.max(maxRow, position.row + size.h);
-      });
-
-      if (failed) {
-        rows += 6;
-        attempts += 1;
-      } else {
-        const neededRows = maxRow + 4;
-        if (rows !== neededRows) {
-          rows = neededRows;
-          rect.style.height = `${rows * GRID_SIZE}px`;
-          attempts += 1;
-        } else {
-          placed = true;
-        }
-      }
-    }
-
+    const rows = Math.max(1, Math.floor(rect.clientHeight / GRID_SIZE));
     const finalGrid = createGrid(rows, cols);
     items.forEach((item) => {
       const type = equipmentTypes[item.type];
       const size = type.size;
-      const position = item.position;
-      if (!position) return;
+      let position = item.position;
+
+      if (!position || position.cols !== cols || position.rows !== rows) {
+        const sections = buildSections(cols);
+        const washerSection = sections[0];
+        const dryerSection = sections[1];
+        let spot = null;
+
+        if (item.type === "lavadora" && washerSection) {
+          spot = findSpotInSection(finalGrid, rows, washerSection, size.w, size.h, "right");
+        }
+
+        if (item.type === "secadora" && dryerSection) {
+          spot = findSpotInSection(finalGrid, rows, dryerSection, size.w, size.h, "left");
+        }
+
+        if (!spot) {
+          return;
+        }
+        position = { ...spot, cols, rows };
+        store.dispatch(actions.updateItem(item.id, { position }));
+      }
 
       markGrid(finalGrid, position.col, position.row, size.w, size.h);
 
