@@ -12,7 +12,6 @@ const buildTemplate = () => {
           <button class="mc-tab is-active" data-tab="general" type="button">General</button>
           <button class="mc-tab" data-tab="historial" type="button">Historial</button>
           <button class="mc-tab" data-tab="configuracion" type="button">Configuración</button>
-          <button class="mc-tab" data-tab="respaldo" type="button">Respaldo</button>
         </div>
         <div class="mc-panel" data-panel="general"></div>
       </div>
@@ -49,17 +48,25 @@ const renderGeneral = (panel, machine) => {
   });
 };
 
-const renderHistorial = (panel, machine) => {
+const renderHistorial = (panel, machine, hooks) => {
   panel.innerHTML = "";
-  if (!machine.logs || !machine.logs.length) {
+  const total = machine.logs ? machine.logs.length : 0;
+  if (!total) {
     panel.textContent = "Sin registros.";
     return;
   }
+  const header = document.createElement("div");
+  header.className = "mc-log-header";
+  const visibleCount = Math.min(16, total);
+  header.textContent = `${visibleCount}/${total}`;
+  panel.appendChild(header);
+
   const list = document.createElement("div");
   list.className = "mc-log-list";
   [...machine.logs]
     .slice()
     .reverse()
+    .slice(0, 16)
     .forEach((log) => {
       if (log.type !== "status") return;
       const item = document.createElement("div");
@@ -70,12 +77,22 @@ const renderHistorial = (panel, machine) => {
       list.appendChild(item);
     });
   panel.appendChild(list);
+
+  const download = document.createElement("button");
+  download.type = "button";
+  download.className = "mc-log-download";
+  download.textContent = "Descargar registro completo";
+  download.addEventListener("click", (event) => {
+    event.stopPropagation();
+    if (hooks.onDownloadLogs) hooks.onDownloadLogs(machine);
+  });
+  panel.appendChild(download);
 };
 
-const TAB_RENDER = {
-  general: renderGeneral,
-  historial: renderHistorial,
-  configuracion: (panel, machine, hooks) => {
+  const TAB_RENDER = {
+    general: renderGeneral,
+    historial: renderHistorial,
+    configuracion: (panel, machine, hooks) => {
     panel.innerHTML = "";
 
     const urlRow = document.createElement("div");
@@ -148,7 +165,7 @@ const TAB_RENDER = {
     addBtn.textContent = "Añadir usuario";
     addBtn.addEventListener("click", (event) => {
       event.stopPropagation();
-      if (hooks.onAddUser) hooks.onAddUser(machine.id, userInput, passInput);
+      if (hooks.onAddUser) hooks.onAddUser(machine.id, userInput, passInput, addBtn);
     });
 
     const addControls = document.createElement("div");
@@ -191,7 +208,7 @@ const TAB_RENDER = {
       const remove = document.createElement("button");
       remove.type = "button";
       remove.className = "mc-user-remove";
-      remove.textContent = "Eliminar usuario";
+      remove.textContent = "Eliminar";
       remove.addEventListener("click", (event) => {
         event.stopPropagation();
         if (hooks.onRemoveUser) hooks.onRemoveUser(machine.id, user.id);
@@ -208,9 +225,6 @@ const TAB_RENDER = {
     panel.appendChild(addRow);
     panel.appendChild(list);
   },
-  respaldo: (panel) => {
-    panel.textContent = "Respaldo pendiente de integración.";
-  }
 };
 
 export const createMachineCard = (machine) => {
@@ -237,21 +251,25 @@ export const createMachineCard = (machine) => {
     onCopyUrl: null,
     onAddUser: null,
     onUpdateUserRole: null,
-    onRemoveUser: null
+    onRemoveUser: null,
+    onDownloadLogs: null
   };
 
-  card.addEventListener("click", () => {
+  header.addEventListener("click", (event) => {
+    if (event.target.closest("button, input, select, textarea, a")) return;
     if (hooks.onToggleExpand) hooks.onToggleExpand(card);
   });
 
-  card.addEventListener("keydown", (event) => {
+  header.addEventListener("keydown", (event) => {
+    if (event.target.closest("button, input, select, textarea, a")) return;
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
       if (hooks.onToggleExpand) hooks.onToggleExpand(card);
     }
   });
 
-  statusBtn.addEventListener("click", () => {
+  statusBtn.addEventListener("click", (event) => {
+    event.stopPropagation();
     if (hooks.onStatusToggle) hooks.onStatusToggle(card);
   });
 

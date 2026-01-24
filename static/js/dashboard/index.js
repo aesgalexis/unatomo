@@ -9,7 +9,9 @@ const mount = document.getElementById("dashboard-mount");
 
 if (mount) {
   const state = {
-    machines: loadMachines()
+    machines: loadMachines(),
+    expandedById: [],
+    selectedTabById: {}
   };
 
   const addBar = document.createElement("div");
@@ -76,10 +78,12 @@ if (mount) {
   const addUser = (id, username, password) => {
     const trimmed = username.trim();
     if (!trimmed || !password.trim()) return { ok: false, reason: "empty" };
+    let duplicated = false;
     const next = state.machines.map((m) => {
       if (m.id !== id) return m;
       const users = Array.isArray(m.users) ? [...m.users] : [];
       if (users.some((u) => u.username === trimmed)) {
+        duplicated = true;
         return m;
       }
       users.push({
@@ -91,6 +95,7 @@ if (mount) {
       });
       return { ...m, users };
     });
+    if (duplicated) return { ok: false, reason: "duplicate" };
     state.machines = next;
     saveMachines(next);
     return { ok: true };
@@ -145,6 +150,9 @@ if (mount) {
       return;
     }
 
+    const expandedById = new Set(state.expandedById || []);
+    const selectedTabById = state.selectedTabById || {};
+
     state.machines.forEach((machine) => {
       const { card, hooks } = createMachineCard(machine);
       card.style.maxHeight = `${COLLAPSED_HEIGHT}px`;
@@ -153,13 +161,18 @@ if (mount) {
         if (node.classList.contains("is-dragging")) return;
         const isExpanded = node.dataset.expanded === "true";
         if (isExpanded) {
+          expandedById.delete(machine.id);
           collapseCard(node);
         } else {
+          expandedById.add(machine.id);
           expandCard(node);
         }
+        state.expandedById = Array.from(expandedById);
       };
 
-      hooks.onSelectTab = (node) => {
+      hooks.onSelectTab = (node, tabId) => {
+        if (!state.selectedTabById) state.selectedTabById = {};
+        state.selectedTabById[machine.id] = tabId || "general";
         if (node.dataset.expanded === "true") {
           recalcHeight(node);
         }
@@ -180,13 +193,8 @@ if (mount) {
         });
         renderCards();
         if (keepExpanded) {
-          const target = list.querySelector(
-            `.machine-card[data-machine-id="${machine.id}"]`
-          );
-          if (target) {
-            target.dataset.expanded = "true";
-            recalcHeight(target);
-          }
+          expandedById.add(machine.id);
+          state.expandedById = Array.from(expandedById);
         }
       };
 
@@ -196,6 +204,8 @@ if (mount) {
 
       hooks.onGenerateUrl = (id) => {
         generateUrl(id);
+        if (!state.selectedTabById) state.selectedTabById = {};
+        state.selectedTabById[id] = "configuracion";
         renderCards();
       };
 
@@ -203,29 +213,83 @@ if (mount) {
         copyUrl(id, btn, input);
       };
 
-      hooks.onAddUser = (id, userInput, passInput) => {
+      hooks.onAddUser = (id, userInput, passInput, addBtn) => {
         const result = addUser(id, userInput.value, passInput.value);
         if (!result.ok) {
           userInput.value = userInput.value.trim();
           userInput.setAttribute("aria-invalid", "true");
+          if (addBtn) {
+            const prev = addBtn.textContent;
+            addBtn.textContent = "Revisa los datos";
+            setTimeout(() => {
+              addBtn.textContent = prev;
+            }, 1000);
+          }
           return;
         }
         userInput.value = "";
         passInput.value = "";
+        if (!state.selectedTabById) state.selectedTabById = {};
+        state.selectedTabById[id] = "configuracion";
         renderCards();
       };
 
       hooks.onUpdateUserRole = (id, userId, role) => {
         updateUserRole(id, userId, role);
+        if (!state.selectedTabById) state.selectedTabById = {};
+        state.selectedTabById[id] = "configuracion";
         renderCards();
       };
 
       hooks.onRemoveUser = (id, userId) => {
         removeUser(id, userId);
+        if (!state.selectedTabById) state.selectedTabById = {};
+        state.selectedTabById[id] = "configuracion";
         renderCards();
       };
 
+      hooks.onDownloadLogs = (machineData) => {
+        const logs = machineData.logs || [];
+        const lines = logs.map((log) => {
+          const time = new Date(log.ts).toLocaleString("es-ES");
+          const value = log.value === "operativa"
+            ? "Operativa"
+            : log.value === "fuera_de_servicio"
+            ? "Fuera de servicio"
+            : "Desconectada";
+          return `[${time}] Estado -> ${value}`;
+        });
+        const blob = new Blob([lines.join("\n")], { type: "text/plain;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        const safeTitle = (machineData.title || machineData.id || "registro")
+          .replace(/\s+/g, "_")
+          .replace(/[^\w\-]/g, "");
+        a.href = url;
+        a.download = `registro_${safeTitle}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      };
+
       list.appendChild(card);
+
+      let desiredTab = selectedTabById[machine.id] || "general";
+      let tabBtn = card.querySelector(`.mc-tab[data-tab="${desiredTab}"]`);
+      if (!tabBtn) {
+        desiredTab = "general";
+        tabBtn = card.querySelector('.mc-tab[data-tab="general"]');
+        if (state.selectedTabById) state.selectedTabById[machine.id] = "general";
+      }
+      if (desiredTab !== "general" && tabBtn) {
+        tabBtn.click();
+      }
+
+      if (expandedById.has(machine.id)) {
+        card.dataset.expanded = "true";
+        recalcHeight(card);
+      }
     });
   };
 

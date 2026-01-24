@@ -129,7 +129,7 @@
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
-  margin-bottom: 0.75rem;
+  margin-bottom: 12px;
 }
 
 .mc-tab {
@@ -148,6 +148,15 @@
 
 .mc-panel {
   color: color-mix(in srgb, var(--fg) 85%, transparent);
+  padding-top: 8px;
+}
+
+.mc-expand button,
+.mc-expand select,
+.mc-expand input {
+  background: color-mix(in srgb, var(--bg) 96%, transparent);
+  color: var(--fg);
+  border: 1px solid var(--border-subtle);
 }
 
 .mc-row {
@@ -174,6 +183,23 @@
 .mc-log-item {
   font-size: 0.9rem;
   color: color-mix(in srgb, var(--fg) 85%, transparent);
+}
+
+.mc-log-header {
+  font-size: 0.85rem;
+  color: color-mix(in srgb, var(--fg) 70%, transparent);
+  margin-bottom: 0.4rem;
+}
+
+.mc-log-download {
+  margin-top: 0.6rem;
+  border: none;
+  background: transparent;
+  color: color-mix(in srgb, var(--fg) 70%, transparent);
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 0;
 }
 
 .mc-config-row {
@@ -215,7 +241,8 @@
   height: 38px;
   border-radius: 0.5rem;
   border: 1px solid var(--border-subtle);
-  background: transparent;
+  background: color-mix(in srgb, var(--bg) 96%, transparent);
+  color: var(--fg);
   cursor: pointer;
   font: inherit;
 }
@@ -224,7 +251,8 @@
 .mc-user-add {
   border-radius: 0.6rem;
   border: 1px solid var(--border-subtle);
-  background: transparent;
+  background: color-mix(in srgb, var(--bg) 96%, transparent);
+  color: var(--fg);
   padding: 0.35rem 0.7rem;
   font: inherit;
   cursor: pointer;
@@ -253,14 +281,25 @@
   border-radius: 0.5rem;
   padding: 0.2rem 0.4rem;
   font: inherit;
-  background: transparent;
+  background: color-mix(in srgb, var(--bg) 96%, transparent);
+  color: var(--fg);
+  appearance: none;
+}
+
+.mc-expand select option {
+  background: var(--bg);
+  color: var(--fg);
 }
 
 .mc-user-remove {
   border: none;
   background: transparent;
-  color: color-mix(in srgb, var(--fg) 70%, transparent);
-  text-decoration: underline;
+  color: var(--danger, #d33);
+  font-size: 12px;
+  text-decoration: none;
   cursor: pointer;
-  font-size: 0.85rem;
+}
+
+.mc-user-remove:hover {
+  text-decoration: underline;
 }
