@@ -106,6 +106,7 @@ if (mount) {
         const currentStatus = current?.status || "operativa";
         const idx = statusOrder.indexOf(currentStatus);
         const nextStatus = statusOrder[(idx + 1) % statusOrder.length];
+        const keepExpanded = node.dataset.expanded === "true";
         updateMachine(machine.id, { status: nextStatus });
         appendLog(machine.id, {
           ts: new Date().toISOString(),
@@ -113,6 +114,15 @@ if (mount) {
           value: nextStatus
         });
         renderCards();
+        if (keepExpanded) {
+          const target = list.querySelector(
+            `.machine-card[data-machine-id="${machine.id}"]`
+          );
+          if (target) {
+            target.dataset.expanded = "true";
+            recalcHeight(target);
+          }
+        }
       };
 
       hooks.onTitleUpdate = (node, nextTitle) => {
