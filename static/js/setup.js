@@ -86,6 +86,6 @@
       localStorage.setItem(PREF_KEY, JSON.stringify(prefs));
     } catch (e) {}
 
-    window.location.href = "/es/contacto.html";
+    window.location.href = "/es/index.html#/";
   });
 })();
