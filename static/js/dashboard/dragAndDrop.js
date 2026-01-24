@@ -15,17 +15,20 @@ const getDragAfterElement = (container, y) => {
 
 export const initDragAndDrop = (listEl, getMachines, setMachinesAndPersist, rerender) => {
   let draggedId = null;
+  let placeholder = null;
 
   listEl.addEventListener("dragstart", (event) => {
-    const handle = event.target.closest(".mc-drag-handle");
-    if (!handle) return;
-    const card = handle.closest(".machine-card");
+    const card = event.target.closest(".machine-card");
     if (!card) return;
 
     draggedId = card.dataset.machineId;
     event.dataTransfer.setData("text/plain", draggedId);
     event.dataTransfer.effectAllowed = "move";
     card.classList.add("is-dragging");
+
+    placeholder = document.createElement("div");
+    placeholder.className = "machine-drop-placeholder";
+    placeholder.style.height = `${card.offsetHeight}px`;
   });
 
   listEl.addEventListener("dragend", () => {
@@ -34,6 +37,10 @@ export const initDragAndDrop = (listEl, getMachines, setMachinesAndPersist, rere
     listEl.querySelectorAll(".machine-card.is-over").forEach((node) => {
       node.classList.remove("is-over");
     });
+    if (placeholder && placeholder.parentNode) {
+      placeholder.parentNode.removeChild(placeholder);
+    }
+    placeholder = null;
     draggedId = null;
   });
 
@@ -50,16 +57,23 @@ export const initDragAndDrop = (listEl, getMachines, setMachinesAndPersist, rere
     const afterElement = getDragAfterElement(listEl, event.clientY);
     const dragging = listEl.querySelector(".machine-card.is-dragging");
     if (!dragging) return;
-    if (afterElement == null) {
-      listEl.appendChild(dragging);
-    } else {
-      listEl.insertBefore(dragging, afterElement);
+    if (placeholder) {
+      if (afterElement == null) {
+        listEl.appendChild(placeholder);
+      } else {
+        listEl.insertBefore(placeholder, afterElement);
+      }
     }
   });
 
   listEl.addEventListener("drop", (event) => {
     event.preventDefault();
     if (!draggedId) return;
+    const dragging = listEl.querySelector(".machine-card.is-dragging");
+    if (dragging && placeholder) {
+      listEl.insertBefore(dragging, placeholder);
+      placeholder.parentNode.removeChild(placeholder);
+    }
     const order = [...listEl.querySelectorAll(".machine-card")]
       .map((card) => card.dataset.machineId)
       .filter(Boolean);
