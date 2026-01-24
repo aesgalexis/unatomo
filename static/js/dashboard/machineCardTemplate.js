@@ -3,6 +3,7 @@ const buildTemplate = () => {
   wrapper.innerHTML = `
     <article class="machine-card" data-expanded="false">
       <header class="mc-header" role="button" tabindex="0">
+        <button class="mc-drag-handle" aria-label="Reordenar" draggable="true" type="button">⋮⋮</button>
         <div class="mc-title"></div>
         <span class="mc-badge"></span>
         <span class="mc-chevron" aria-hidden="true">▾</span>
@@ -30,6 +31,7 @@ const TAB_CONTENT = {
 
 export const createMachineCard = (machine) => {
   const card = buildTemplate();
+  card.dataset.machineId = machine.id;
   const title = card.querySelector(".mc-title");
   const badge = card.querySelector(".mc-badge");
   const header = card.querySelector(".mc-header");

@@ -41,12 +41,36 @@
   margin-bottom: 1rem;
 }
 
+.machine-card.is-dragging {
+  opacity: 0.6;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.15);
+}
+
+.machine-card.is-over {
+  outline: 2px dashed color-mix(in srgb, var(--fg) 40%, transparent);
+  outline-offset: -6px;
+}
+
 .mc-header {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   padding: 0.9rem 1.25rem;
   cursor: pointer;
+}
+
+.mc-drag-handle {
+  border: none;
+  background: transparent;
+  color: color-mix(in srgb, var(--fg) 70%, transparent);
+  cursor: grab;
+  font: inherit;
+  padding: 0.2rem 0.4rem;
+  line-height: 1;
+}
+
+.mc-drag-handle:active {
+  cursor: grabbing;
 }
 
 .mc-title {
