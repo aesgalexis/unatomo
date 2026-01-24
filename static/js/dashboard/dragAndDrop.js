@@ -18,6 +18,7 @@ export const initDragAndDrop = (listEl, getMachines, setMachinesAndPersist, rere
   let placeholder = null;
 
   listEl.addEventListener("dragstart", (event) => {
+    if (event.target.closest("button, input, select, textarea, a")) return;
     const card = event.target.closest(".machine-card");
     if (!card) return;
 
