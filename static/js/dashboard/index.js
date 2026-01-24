@@ -111,6 +111,12 @@ if (mount) {
     saveMachines(next);
   };
 
+  const removeMachine = (id) => {
+    const next = state.machines.filter((m) => m.id !== id);
+    state.machines = next;
+    saveMachines(next);
+  };
+
   const removeUser = (id, userId) => {
     const next = state.machines.map((m) => {
       if (m.id !== id) return m;
@@ -271,6 +277,13 @@ if (mount) {
         a.click();
         a.remove();
         URL.revokeObjectURL(url);
+      };
+
+      hooks.onRemoveMachine = (machineData) => {
+        const ok = window.confirm("¿Seguro que quieres eliminar esta máquina?");
+        if (!ok) return;
+        removeMachine(machineData.id);
+        renderCards();
       };
 
       list.appendChild(card);
