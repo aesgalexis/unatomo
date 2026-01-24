@@ -1,5 +1,6 @@
 import { loadMachines, addMachine, saveMachines } from "./machineStore.js";
 import { createMachineCard } from "./machineCardTemplate.js";
+import { initDragAndDrop } from "./dragAndDrop.js";
 
 const COLLAPSED_HEIGHT = 96;
 const EXPAND_FACTOR = 2.5;
@@ -68,6 +69,7 @@ if (mount) {
       card.style.maxHeight = `${COLLAPSED_HEIGHT}px`;
 
       hooks.onToggleExpand = (node) => {
+        if (node.classList.contains("is-dragging")) return;
         const isExpanded = node.dataset.expanded === "true";
         if (isExpanded) {
           collapseCard(node);
@@ -86,6 +88,11 @@ if (mount) {
     });
   };
 
+  const setMachinesAndPersist = (next) => {
+    state.machines = next;
+    saveMachines(next);
+  };
+
   addBtn.addEventListener("click", () => {
     const result = addMachine(state.machines);
     state.machines = result.list;
@@ -93,4 +100,11 @@ if (mount) {
   });
 
   renderCards();
+
+  initDragAndDrop(
+    list,
+    () => state.machines,
+    (next) => setMachinesAndPersist(next),
+    renderCards
+  );
 }
