@@ -175,3 +175,92 @@
   font-size: 0.9rem;
   color: color-mix(in srgb, var(--fg) 85%, transparent);
 }
+
+.mc-config-row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.mc-config-label {
+  min-width: 90px;
+  color: color-mix(in srgb, var(--fg) 70%, transparent);
+  font-size: 0.9rem;
+}
+
+.mc-config-controls {
+  display: flex;
+  gap: 0.5rem;
+  flex: 1;
+  flex-wrap: wrap;
+}
+
+.mc-url-input,
+.mc-user-username,
+.mc-user-password {
+  flex: 1 1 180px;
+  min-width: 160px;
+  padding: 0.35rem 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--bg) 96%, transparent);
+  color: var(--fg);
+  font: inherit;
+}
+
+.mc-url-copy {
+  width: 38px;
+  height: 38px;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-subtle);
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+}
+
+.mc-url-generate,
+.mc-user-add {
+  border-radius: 0.6rem;
+  border: 1px solid var(--border-subtle);
+  background: transparent;
+  padding: 0.35rem 0.7rem;
+  font: inherit;
+  cursor: pointer;
+}
+
+.mc-sep {
+  border: none;
+  border-top: 1px solid var(--border-subtle);
+  margin: 0.75rem 0 0.75rem;
+}
+
+.mc-user-list {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.mc-user-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.mc-user-role {
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.5rem;
+  padding: 0.2rem 0.4rem;
+  font: inherit;
+  background: transparent;
+}
+
+.mc-user-remove {
+  border: none;
+  background: transparent;
+  color: color-mix(in srgb, var(--fg) 70%, transparent);
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 0.85rem;
+}

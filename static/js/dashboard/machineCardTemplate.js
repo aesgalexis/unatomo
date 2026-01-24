@@ -75,8 +75,138 @@ const renderHistorial = (panel, machine) => {
 const TAB_RENDER = {
   general: renderGeneral,
   historial: renderHistorial,
-  configuracion: (panel) => {
-    panel.textContent = "Configuración pendiente de integración.";
+  configuracion: (panel, machine, hooks) => {
+    panel.innerHTML = "";
+
+    const urlRow = document.createElement("div");
+    urlRow.className = "mc-config-row";
+
+    const urlLabel = document.createElement("span");
+    urlLabel.className = "mc-config-label";
+    urlLabel.textContent = "URL";
+
+    const urlInput = document.createElement("input");
+    urlInput.className = "mc-url-input";
+    urlInput.type = "text";
+    urlInput.readOnly = true;
+    urlInput.value = machine.url || "";
+    urlInput.addEventListener("click", (event) => event.stopPropagation());
+
+    const copyBtn = document.createElement("button");
+    copyBtn.type = "button";
+    copyBtn.className = "mc-url-copy";
+    copyBtn.setAttribute("title", "Copiar");
+    copyBtn.textContent = "⧉";
+    copyBtn.addEventListener("click", (event) => {
+      event.stopPropagation();
+      if (hooks.onCopyUrl) hooks.onCopyUrl(machine.id, copyBtn, urlInput);
+    });
+
+    const genBtn = document.createElement("button");
+    genBtn.type = "button";
+    genBtn.className = "mc-url-generate";
+    genBtn.textContent = "Generar URL";
+    genBtn.addEventListener("click", (event) => {
+      event.stopPropagation();
+      if (hooks.onGenerateUrl) hooks.onGenerateUrl(machine.id);
+    });
+
+    const urlControls = document.createElement("div");
+    urlControls.className = "mc-config-controls";
+    urlControls.appendChild(urlInput);
+    urlControls.appendChild(copyBtn);
+    urlControls.appendChild(genBtn);
+
+    urlRow.appendChild(urlLabel);
+    urlRow.appendChild(urlControls);
+
+    const sep = document.createElement("hr");
+    sep.className = "mc-sep";
+
+    const addRow = document.createElement("div");
+    addRow.className = "mc-config-row";
+
+    const addLabel = document.createElement("span");
+    addLabel.className = "mc-config-label";
+    addLabel.textContent = "Añadir usuario";
+
+    const userInput = document.createElement("input");
+    userInput.className = "mc-user-username";
+    userInput.type = "text";
+    userInput.placeholder = "Usuario";
+    userInput.addEventListener("click", (event) => event.stopPropagation());
+
+    const passInput = document.createElement("input");
+    passInput.className = "mc-user-password";
+    passInput.type = "password";
+    passInput.placeholder = "Contraseña";
+    passInput.addEventListener("click", (event) => event.stopPropagation());
+
+    const addBtn = document.createElement("button");
+    addBtn.type = "button";
+    addBtn.className = "mc-user-add";
+    addBtn.textContent = "Añadir usuario";
+    addBtn.addEventListener("click", (event) => {
+      event.stopPropagation();
+      if (hooks.onAddUser) hooks.onAddUser(machine.id, userInput, passInput);
+    });
+
+    const addControls = document.createElement("div");
+    addControls.className = "mc-config-controls";
+    addControls.appendChild(userInput);
+    addControls.appendChild(passInput);
+    addControls.appendChild(addBtn);
+
+    addRow.appendChild(addLabel);
+    addRow.appendChild(addControls);
+
+    const list = document.createElement("div");
+    list.className = "mc-user-list";
+
+    (machine.users || []).forEach((user) => {
+      const row = document.createElement("div");
+      row.className = "mc-user-row";
+
+      const name = document.createElement("span");
+      name.className = "mc-user-name";
+      name.textContent = user.username;
+
+      const role = document.createElement("select");
+      role.className = "mc-user-role";
+      ["administrador", "usuario", "externo"].forEach((opt) => {
+        const option = document.createElement("option");
+        option.value = opt;
+        option.textContent = opt;
+        if (user.role === opt) option.selected = true;
+        role.appendChild(option);
+      });
+      role.addEventListener("click", (event) => event.stopPropagation());
+      role.addEventListener("change", (event) => {
+        event.stopPropagation();
+        if (hooks.onUpdateUserRole) {
+          hooks.onUpdateUserRole(machine.id, user.id, role.value);
+        }
+      });
+
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.className = "mc-user-remove";
+      remove.textContent = "Eliminar usuario";
+      remove.addEventListener("click", (event) => {
+        event.stopPropagation();
+        if (hooks.onRemoveUser) hooks.onRemoveUser(machine.id, user.id);
+      });
+
+      row.appendChild(name);
+      row.appendChild(role);
+      row.appendChild(remove);
+      list.appendChild(row);
+    });
+
+    panel.appendChild(urlRow);
+    panel.appendChild(sep);
+    panel.appendChild(addRow);
+    panel.appendChild(list);
   },
   respaldo: (panel) => {
     panel.textContent = "Respaldo pendiente de integración.";
@@ -102,7 +232,12 @@ export const createMachineCard = (machine) => {
     onToggleExpand: null,
     onSelectTab: null,
     onStatusToggle: null,
-    onTitleUpdate: null
+    onTitleUpdate: null,
+    onGenerateUrl: null,
+    onCopyUrl: null,
+    onAddUser: null,
+    onUpdateUserRole: null,
+    onRemoveUser: null
   };
 
   card.addEventListener("click", () => {
@@ -165,7 +300,7 @@ export const createMachineCard = (machine) => {
       tab.classList.add("is-active");
       const key = tab.dataset.tab;
       const render = TAB_RENDER[key] || TAB_RENDER.general;
-      render(panel, machine);
+      render(panel, machine, hooks);
       panel.dataset.panel = key;
       if (hooks.onSelectTab) hooks.onSelectTab(card, key);
     });

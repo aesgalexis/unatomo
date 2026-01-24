@@ -33,7 +33,9 @@ const addMachine = (list) => {
     model: "",
     year: null,
     status: "operativa",
-    logs: []
+    logs: [],
+    url: "",
+    users: []
   };
   const next = [machine, ...list];
   saveMachines(next);
