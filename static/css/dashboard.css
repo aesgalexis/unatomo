@@ -1,125 +1,98 @@
-.dashboard-header {
-  margin-bottom: 1.5rem;
+.add-bar {
+  margin: 0.5rem 0 1rem;
+  display: flex;
+  justify-content: flex-start;
 }
 
-.dashboard-subtitle {
-  margin-top: 0.4rem;
+.btn-add {
+  background: linear-gradient(135deg, #2da44e, #2c974b);
+  border: 1px solid #2c974b;
+  color: #fff;
+  padding: 0.55rem 1.2rem;
+  border-radius: 0.75rem;
+  font: inherit;
+  font-size: 0.95rem;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn-add:hover {
+  opacity: 0.95;
+}
+
+.machine-placeholder {
+  border: 2px dashed color-mix(in srgb, var(--fg) 25%, transparent);
+  border-radius: 1rem;
+  padding: 1.25rem 1.5rem;
+  min-height: 96px;
+  display: flex;
+  align-items: center;
   color: color-mix(in srgb, var(--fg) 70%, transparent);
-}
-
-.machine-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1rem;
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
 }
 
 .machine-card {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  padding: 1rem 1.25rem;
-  border-radius: 1rem;
   border: 1px solid var(--border-subtle);
+  border-radius: 1rem;
   background: var(--panel-bg);
-  text-decoration: none;
-  color: inherit;
+  overflow: hidden;
+  max-height: 96px;
+  transition: max-height 240ms ease;
+  margin-bottom: 1rem;
 }
 
-.machine-card h3 {
-  margin: 0;
+.mc-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.9rem 1.25rem;
+  cursor: pointer;
 }
 
-.machine-meta {
-  margin: 0;
-  color: color-mix(in srgb, var(--fg) 70%, transparent);
-  font-size: 0.9rem;
+.mc-title {
+  font-weight: 600;
+  color: var(--fg);
 }
 
-.machine-status {
-  align-self: flex-start;
-  font-size: 0.85rem;
+.mc-badge {
+  font-size: 0.8rem;
   padding: 0.2rem 0.6rem;
   border-radius: 999px;
   border: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--fg) 10%, transparent);
 }
 
-.machine-status.is-ok {
-  color: #15803d;
-  border-color: color-mix(in srgb, #15803d 40%, transparent);
-  background: color-mix(in srgb, #15803d 12%, transparent);
+.mc-chevron {
+  margin-left: auto;
+  opacity: 0.6;
 }
 
-.machine-status.is-stop {
-  color: #b91c1c;
-  border-color: color-mix(in srgb, #b91c1c 40%, transparent);
-  background: color-mix(in srgb, #b91c1c 12%, transparent);
+.mc-expand {
+  padding: 0 1.25rem 1.25rem;
+  opacity: 1;
 }
 
-.machine-header {
-  margin-bottom: 1rem;
-}
-
-.machine-subtitle {
-  margin-top: 0.4rem;
-  color: color-mix(in srgb, var(--fg) 70%, transparent);
-}
-
-.machine-actions {
-  margin-top: 1rem;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-}
-
-.machine-tabs {
+.mc-tabs {
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
-  margin-top: 1rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
 }
 
-.machine-tab {
-  padding: 0.35rem 0.8rem;
+.mc-tab {
+  padding: 0.35rem 0.75rem;
   border-radius: 999px;
   border: 1px solid var(--border-subtle);
-  text-decoration: none;
-  color: inherit;
+  background: transparent;
+  color: var(--fg);
+  font: inherit;
+  cursor: pointer;
 }
 
-.machine-tab.is-active {
+.mc-tab.is-active {
   background: color-mix(in srgb, var(--fg) 12%, transparent);
 }
 
-.machine-panel {
-  border: 1px solid var(--border-subtle);
-  border-radius: 1rem;
-  padding: 1rem 1.25rem;
-  background: var(--panel-bg);
-}
-
-.machine-info {
-  display: grid;
-  gap: 0.6rem;
-}
-
-.machine-info-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.machine-info-label {
-  color: color-mix(in srgb, var(--fg) 70%, transparent);
-  font-size: 0.9rem;
-}
-
-.machine-info-value {
-  font-weight: 500;
-}
-
-.machine-empty {
-  padding: 1rem 1.25rem;
-  border: 1px dashed var(--border-subtle);
-  border-radius: 1rem;
+.mc-panel {
+  color: color-mix(in srgb, var(--fg) 85%, transparent);
 }
