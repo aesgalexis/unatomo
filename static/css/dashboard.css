@@ -202,6 +202,19 @@
   padding: 0;
 }
 
+.mc-remove-machine {
+  display: inline-block;
+  margin-top: 0.75rem;
+  color: var(--danger, #d33);
+  font-size: 0.85rem;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.mc-remove-machine:hover {
+  text-decoration: underline;
+}
+
 .mc-config-row {
   display: flex;
   gap: 0.75rem;

@@ -78,11 +78,12 @@ const renderHistorial = (panel, machine, hooks) => {
     });
   panel.appendChild(list);
 
-  const download = document.createElement("button");
-  download.type = "button";
+  const download = document.createElement("a");
   download.className = "mc-log-download";
   download.textContent = "Descargar registro completo";
+  download.href = "#";
   download.addEventListener("click", (event) => {
+    event.preventDefault();
     event.stopPropagation();
     if (hooks.onDownloadLogs) hooks.onDownloadLogs(machine);
   });
@@ -205,11 +206,12 @@ const renderHistorial = (panel, machine, hooks) => {
         }
       });
 
-      const remove = document.createElement("button");
-      remove.type = "button";
+      const remove = document.createElement("a");
       remove.className = "mc-user-remove";
       remove.textContent = "Eliminar";
+      remove.href = "#";
       remove.addEventListener("click", (event) => {
+        event.preventDefault();
         event.stopPropagation();
         if (hooks.onRemoveUser) hooks.onRemoveUser(machine.id, user.id);
       });
@@ -252,7 +254,8 @@ export const createMachineCard = (machine) => {
     onAddUser: null,
     onUpdateUserRole: null,
     onRemoveUser: null,
-    onDownloadLogs: null
+    onDownloadLogs: null,
+    onRemoveMachine: null
   };
 
   header.addEventListener("click", (event) => {
@@ -323,6 +326,19 @@ export const createMachineCard = (machine) => {
       if (hooks.onSelectTab) hooks.onSelectTab(card, key);
     });
   });
+
+  const removeLink = document.createElement("a");
+  removeLink.className = "mc-remove-machine";
+  removeLink.href = "#";
+  removeLink.textContent = "Eliminar equipo";
+  removeLink.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (hooks.onRemoveMachine) hooks.onRemoveMachine(machine);
+  });
+
+  const expand = card.querySelector(".mc-expand");
+  expand.appendChild(removeLink);
 
   return { card, hooks };
 };
