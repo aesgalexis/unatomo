@@ -57,6 +57,22 @@ if (mount) {
     recalcHeight(card);
   };
 
+  const updateMachine = (id, patch) => {
+    const next = state.machines.map((m) => (m.id === id ? { ...m, ...patch } : m));
+    state.machines = next;
+    saveMachines(next);
+  };
+
+  const appendLog = (id, entry) => {
+    const next = state.machines.map((m) => {
+      if (m.id !== id) return m;
+      const logs = Array.isArray(m.logs) ? [...m.logs, entry] : [entry];
+      return { ...m, logs };
+    });
+    state.machines = next;
+    saveMachines(next);
+  };
+
   const renderCards = () => {
     list.innerHTML = "";
     if (!state.machines.length) {
@@ -82,6 +98,25 @@ if (mount) {
         if (node.dataset.expanded === "true") {
           recalcHeight(node);
         }
+      };
+
+      hooks.onStatusToggle = (node) => {
+        const statusOrder = ["operativa", "fuera_de_servicio", "desconectada"];
+        const current = state.machines.find((m) => m.id === machine.id);
+        const currentStatus = current?.status || "operativa";
+        const idx = statusOrder.indexOf(currentStatus);
+        const nextStatus = statusOrder[(idx + 1) % statusOrder.length];
+        updateMachine(machine.id, { status: nextStatus });
+        appendLog(machine.id, {
+          ts: new Date().toISOString(),
+          type: "status",
+          value: nextStatus
+        });
+        renderCards();
+      };
+
+      hooks.onTitleUpdate = (node, nextTitle) => {
+        updateMachine(machine.id, { title: nextTitle });
       };
 
       list.appendChild(card);
