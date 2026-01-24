@@ -317,6 +317,9 @@ export const createMachineCard = (machine) => {
 
   tabs.forEach((tab) => {
     tab.addEventListener("click", () => {
+      if (card.dataset.expanded !== "true" && hooks.onToggleExpand) {
+        hooks.onToggleExpand(card);
+      }
       tabs.forEach((t) => t.classList.remove("is-active"));
       tab.classList.add("is-active");
       const key = tab.dataset.tab;
