@@ -212,6 +212,7 @@ if (mount) {
         generateUrl(id);
         if (!state.selectedTabById) state.selectedTabById = {};
         state.selectedTabById[id] = "configuracion";
+        state.expandedById = Array.from(expandedById);
         renderCards();
       };
 
@@ -237,6 +238,7 @@ if (mount) {
         passInput.value = "";
         if (!state.selectedTabById) state.selectedTabById = {};
         state.selectedTabById[id] = "configuracion";
+        state.expandedById = Array.from(expandedById);
         renderCards();
       };
 
@@ -244,6 +246,7 @@ if (mount) {
         updateUserRole(id, userId, role);
         if (!state.selectedTabById) state.selectedTabById = {};
         state.selectedTabById[id] = "configuracion";
+        state.expandedById = Array.from(expandedById);
         renderCards();
       };
 
@@ -251,6 +254,7 @@ if (mount) {
         removeUser(id, userId);
         if (!state.selectedTabById) state.selectedTabById = {};
         state.selectedTabById[id] = "configuracion";
+        state.expandedById = Array.from(expandedById);
         renderCards();
       };
 
