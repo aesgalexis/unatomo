@@ -78,6 +78,41 @@
   color: var(--fg);
 }
 
+.mc-title-input {
+  font: inherit;
+  font-weight: 600;
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.5rem;
+  padding: 0.15rem 0.4rem;
+  max-width: 160px;
+}
+
+.mc-status {
+  border: 2px solid color-mix(in srgb, var(--fg) 40%, transparent);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--fg);
+  font: inherit;
+  font-size: 0.8rem;
+  padding: 0.2rem 0.6rem;
+  cursor: pointer;
+}
+
+.mc-status[data-status="operativa"] {
+  border-color: #16a34a;
+  color: #16a34a;
+}
+
+.mc-status[data-status="fuera_de_servicio"] {
+  border-color: #dc2626;
+  color: #dc2626;
+}
+
+.mc-status[data-status="desconectada"] {
+  border-color: #6b7280;
+  color: #6b7280;
+}
+
 .mc-badge {
   font-size: 0.8rem;
   padding: 0.2rem 0.6rem;
@@ -118,5 +153,31 @@
 }
 
 .mc-panel {
+  color: color-mix(in srgb, var(--fg) 85%, transparent);
+}
+
+.mc-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.25rem 0;
+}
+
+.mc-row-label {
+  color: color-mix(in srgb, var(--fg) 70%, transparent);
+  font-size: 0.9rem;
+}
+
+.mc-row-value {
+  font-weight: 500;
+}
+
+.mc-log-list {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.mc-log-item {
+  font-size: 0.9rem;
   color: color-mix(in srgb, var(--fg) 85%, transparent);
 }
