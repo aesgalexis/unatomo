@@ -1,0 +1,125 @@
+.dashboard-header {
+  margin-bottom: 1.5rem;
+}
+
+.dashboard-subtitle {
+  margin-top: 0.4rem;
+  color: color-mix(in srgb, var(--fg) 70%, transparent);
+}
+
+.machine-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.machine-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 1rem 1.25rem;
+  border-radius: 1rem;
+  border: 1px solid var(--border-subtle);
+  background: var(--panel-bg);
+  text-decoration: none;
+  color: inherit;
+}
+
+.machine-card h3 {
+  margin: 0;
+}
+
+.machine-meta {
+  margin: 0;
+  color: color-mix(in srgb, var(--fg) 70%, transparent);
+  font-size: 0.9rem;
+}
+
+.machine-status {
+  align-self: flex-start;
+  font-size: 0.85rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-subtle);
+}
+
+.machine-status.is-ok {
+  color: #15803d;
+  border-color: color-mix(in srgb, #15803d 40%, transparent);
+  background: color-mix(in srgb, #15803d 12%, transparent);
+}
+
+.machine-status.is-stop {
+  color: #b91c1c;
+  border-color: color-mix(in srgb, #b91c1c 40%, transparent);
+  background: color-mix(in srgb, #b91c1c 12%, transparent);
+}
+
+.machine-header {
+  margin-bottom: 1rem;
+}
+
+.machine-subtitle {
+  margin-top: 0.4rem;
+  color: color-mix(in srgb, var(--fg) 70%, transparent);
+}
+
+.machine-actions {
+  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.machine-tabs {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.machine-tab {
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-subtle);
+  text-decoration: none;
+  color: inherit;
+}
+
+.machine-tab.is-active {
+  background: color-mix(in srgb, var(--fg) 12%, transparent);
+}
+
+.machine-panel {
+  border: 1px solid var(--border-subtle);
+  border-radius: 1rem;
+  padding: 1rem 1.25rem;
+  background: var(--panel-bg);
+}
+
+.machine-info {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.machine-info-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.machine-info-label {
+  color: color-mix(in srgb, var(--fg) 70%, transparent);
+  font-size: 0.9rem;
+}
+
+.machine-info-value {
+  font-weight: 500;
+}
+
+.machine-empty {
+  padding: 1rem 1.25rem;
+  border: 1px dashed var(--border-subtle);
+  border-radius: 1rem;
+}
