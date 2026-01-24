@@ -51,6 +51,13 @@
   outline-offset: -6px;
 }
 
+.machine-drop-placeholder {
+  border: 2px dashed color-mix(in srgb, var(--fg) 35%, transparent);
+  border-radius: 1rem;
+  margin-bottom: 1rem;
+  background: color-mix(in srgb, var(--bg) 96%, transparent);
+}
+
 .mc-header {
   display: flex;
   align-items: center;
@@ -59,19 +66,6 @@
   cursor: pointer;
 }
 
-.mc-drag-handle {
-  border: none;
-  background: transparent;
-  color: color-mix(in srgb, var(--fg) 70%, transparent);
-  cursor: grab;
-  font: inherit;
-  padding: 0.2rem 0.4rem;
-  line-height: 1;
-}
-
-.mc-drag-handle:active {
-  cursor: grabbing;
-}
 
 .mc-title {
   font-weight: 600;

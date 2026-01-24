@@ -1,9 +1,8 @@
 const buildTemplate = () => {
   const wrapper = document.createElement("div");
   wrapper.innerHTML = `
-    <article class="machine-card" data-expanded="false">
+    <article class="machine-card" data-expanded="false" draggable="true">
       <header class="mc-header" role="button" tabindex="0">
-        <button class="mc-drag-handle" aria-label="Reordenar" draggable="true" type="button">⋮⋮</button>
         <div class="mc-title"></div>
         <button class="mc-status" type="button"></button>
         <span class="mc-chevron" aria-hidden="true">▾</span>
@@ -106,19 +105,18 @@ export const createMachineCard = (machine) => {
     onTitleUpdate: null
   };
 
-  header.addEventListener("click", () => {
+  card.addEventListener("click", () => {
     if (hooks.onToggleExpand) hooks.onToggleExpand(card);
   });
 
-  header.addEventListener("keydown", (event) => {
+  card.addEventListener("keydown", (event) => {
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
       if (hooks.onToggleExpand) hooks.onToggleExpand(card);
     }
   });
 
-  statusBtn.addEventListener("click", (event) => {
-    event.stopPropagation();
+  statusBtn.addEventListener("click", () => {
     if (hooks.onStatusToggle) hooks.onStatusToggle(card);
   });
 
