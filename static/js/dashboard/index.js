@@ -73,6 +73,71 @@ if (mount) {
     saveMachines(next);
   };
 
+  const addUser = (id, username, password) => {
+    const trimmed = username.trim();
+    if (!trimmed || !password.trim()) return { ok: false, reason: "empty" };
+    const next = state.machines.map((m) => {
+      if (m.id !== id) return m;
+      const users = Array.isArray(m.users) ? [...m.users] : [];
+      if (users.some((u) => u.username === trimmed)) {
+        return m;
+      }
+      users.push({
+        id: (window.crypto?.randomUUID && window.crypto.randomUUID()) || `u_${Date.now()}`,
+        username: trimmed,
+        password,
+        role: "usuario",
+        createdAt: new Date().toISOString()
+      });
+      return { ...m, users };
+    });
+    state.machines = next;
+    saveMachines(next);
+    return { ok: true };
+  };
+
+  const updateUserRole = (id, userId, role) => {
+    const next = state.machines.map((m) => {
+      if (m.id !== id) return m;
+      const users = (m.users || []).map((u) => (u.id === userId ? { ...u, role } : u));
+      return { ...m, users };
+    });
+    state.machines = next;
+    saveMachines(next);
+  };
+
+  const removeUser = (id, userId) => {
+    const next = state.machines.map((m) => {
+      if (m.id !== id) return m;
+      const users = (m.users || []).filter((u) => u.id !== userId);
+      return { ...m, users };
+    });
+    state.machines = next;
+    saveMachines(next);
+  };
+
+  const generateUrl = (id) => {
+    const url = `${window.location.origin}/es/index.html#/m/${id}`;
+    updateMachine(id, { url });
+  };
+
+  const copyUrl = async (id, btn, input) => {
+    const current = state.machines.find((m) => m.id === id);
+    if (!current?.url) {
+      btn.textContent = "Primero genera la URL";
+      setTimeout(() => (btn.textContent = "⧉"), 1000);
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(current.url);
+    } catch {
+      input.select();
+      document.execCommand("copy");
+    }
+    btn.textContent = "Copiado";
+    setTimeout(() => (btn.textContent = "⧉"), 1000);
+  };
+
   const renderCards = () => {
     list.innerHTML = "";
     if (!state.machines.length) {
@@ -127,6 +192,37 @@ if (mount) {
 
       hooks.onTitleUpdate = (node, nextTitle) => {
         updateMachine(machine.id, { title: nextTitle });
+      };
+
+      hooks.onGenerateUrl = (id) => {
+        generateUrl(id);
+        renderCards();
+      };
+
+      hooks.onCopyUrl = (id, btn, input) => {
+        copyUrl(id, btn, input);
+      };
+
+      hooks.onAddUser = (id, userInput, passInput) => {
+        const result = addUser(id, userInput.value, passInput.value);
+        if (!result.ok) {
+          userInput.value = userInput.value.trim();
+          userInput.setAttribute("aria-invalid", "true");
+          return;
+        }
+        userInput.value = "";
+        passInput.value = "";
+        renderCards();
+      };
+
+      hooks.onUpdateUserRole = (id, userId, role) => {
+        updateUserRole(id, userId, role);
+        renderCards();
+      };
+
+      hooks.onRemoveUser = (id, userId) => {
+        removeUser(id, userId);
+        renderCards();
       };
 
       list.appendChild(card);
