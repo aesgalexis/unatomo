@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "node scripts/build-static.mjs",
     "preview": "vite preview",
-    "site:publish": "node scripts/site-publish.mjs"
+    "site:publish": "node scripts/site-publish.mjs",
+    "lint:links": "node scripts/lint-links.mjs"
   },
   "repository": {
     "type": "git",
