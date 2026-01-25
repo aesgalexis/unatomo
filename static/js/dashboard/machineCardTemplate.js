@@ -14,7 +14,7 @@ const buildTemplate = () => {
           <button class="mc-tab" data-tab="historial" type="button">Historial</button>
           <button class="mc-tab" data-tab="configuracion" type="button">Configuración</button>
         </div>
-        <div class="mc-panel" data-panel="general"></div>
+        <div class="mc-panel" data-panel="quehaceres"></div>
       </div>
     </article>
   `;
@@ -343,8 +343,6 @@ export const createMachineCard = (machine) => {
   statusBtn.textContent = statusLabels[machine.status] || "Operativa";
   statusBtn.dataset.status = machine.status || "operativa";
 
-  renderQuehaceres(panel, machine, hooks);
-
   const hooks = {
     onToggleExpand: null,
     onSelectTab: null,
@@ -360,6 +358,8 @@ export const createMachineCard = (machine) => {
     onAddTask: null,
     onRemoveTask: null
   };
+
+  renderQuehaceres(panel, machine, hooks);
 
   header.addEventListener("click", (event) => {
     if (event.target.closest("button, input, select, textarea, a")) return;
