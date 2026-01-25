@@ -150,6 +150,10 @@ const renderHistorial = (panel, machine, hooks) => {
   header.textContent = `${visibleCount}/${total}`;
   panel.appendChild(header);
 
+  const sepTop = document.createElement("hr");
+  sepTop.className = "mc-sep";
+  panel.appendChild(sepTop);
+
   const list = document.createElement("div");
   list.className = "mc-log-list";
   [...machine.logs]
