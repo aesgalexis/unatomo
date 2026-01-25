@@ -317,6 +317,10 @@ const TAB_RENDER = {
     panel.appendChild(addRow);
     panel.appendChild(list);
 
+    const sep2 = document.createElement("hr");
+    sep2.className = "mc-sep";
+    panel.appendChild(sep2);
+
     const removeLink = document.createElement("a");
     removeLink.className = "mc-remove-machine";
     removeLink.href = "#";
