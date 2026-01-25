@@ -56,7 +56,7 @@ const renderTareas = (panel, machine, hooks) => {
       const text = document.createElement("span");
       text.className = "task-text";
       const freq = frequencyLabels[task.frequency] || task.frequency;
-      text.textContent = `${task.title} — ${freq}`;
+      text.textContent = `${task.title} (${freq})`;
 
       const remove = document.createElement("button");
       remove.type = "button";
@@ -84,7 +84,7 @@ const renderTareas = (panel, machine, hooks) => {
   titleInput.className = "task-title-input";
   titleInput.type = "text";
   titleInput.placeholder = "Descripción de la tarea";
-  titleInput.maxLength = 32;
+  titleInput.maxLength = 255;
   titleInput.addEventListener("click", (event) => event.stopPropagation());
 
   const freqSelect = document.createElement("select");

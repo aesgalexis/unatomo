@@ -186,6 +186,12 @@ if (mount) {
     }
 
     const expandedById = new Set(state.expandedById || []);
+    if (expandedById.size > 1) {
+      const [first] = expandedById;
+      expandedById.clear();
+      expandedById.add(first);
+      state.expandedById = [first];
+    }
     const selectedTabById = state.selectedTabById || {};
 
     state.machines.forEach((machine) => {
@@ -199,7 +205,11 @@ if (mount) {
           expandedById.delete(machine.id);
           collapseCard(node);
         } else {
+          expandedById.clear();
           expandedById.add(machine.id);
+          list.querySelectorAll(".machine-card").forEach((cardEl) => {
+            if (cardEl !== node) collapseCard(cardEl);
+          });
           expandCard(node);
         }
         state.expandedById = Array.from(expandedById);
