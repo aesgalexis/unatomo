@@ -101,6 +101,35 @@ if (mount) {
     return { ok: true };
   };
 
+  const addTask = (id, title, frequency) => {
+    const trimmed = title.trim();
+    if (!trimmed) return { ok: false };
+    const next = state.machines.map((m) => {
+      if (m.id !== id) return m;
+      const tasks = Array.isArray(m.tasks) ? [...m.tasks] : [];
+      tasks.unshift({
+        id: (window.crypto?.randomUUID && window.crypto.randomUUID()) || `t_${Date.now()}`,
+        title: trimmed,
+        frequency,
+        createdAt: new Date().toISOString()
+      });
+      return { ...m, tasks };
+    });
+    state.machines = next;
+    saveMachines(next);
+    return { ok: true };
+  };
+
+  const removeTask = (id, taskId) => {
+    const next = state.machines.map((m) => {
+      if (m.id !== id) return m;
+      const tasks = (m.tasks || []).filter((t) => t.id !== taskId);
+      return { ...m, tasks };
+    });
+    state.machines = next;
+    saveMachines(next);
+  };
+
   const updateUserRole = (id, userId, role) => {
     const next = state.machines.map((m) => {
       if (m.id !== id) return m;
@@ -178,7 +207,7 @@ if (mount) {
 
       hooks.onSelectTab = (node, tabId) => {
         if (!state.selectedTabById) state.selectedTabById = {};
-        state.selectedTabById[machine.id] = tabId || "general";
+        state.selectedTabById[machine.id] = tabId || "quehaceres";
         if (node.dataset.expanded === "true") {
           recalcHeight(node);
         }
@@ -290,16 +319,42 @@ if (mount) {
         renderCards();
       };
 
+      hooks.onAddTask = (id, titleInput, freqSelect, btn) => {
+        const result = addTask(id, titleInput.value, freqSelect.value);
+        if (!result.ok) {
+          titleInput.setAttribute("aria-invalid", "true");
+          if (btn) {
+            const prev = btn.textContent;
+            btn.textContent = "Revisa el título";
+            setTimeout(() => (btn.textContent = prev), 1000);
+          }
+          return;
+        }
+        titleInput.value = "";
+        if (!state.selectedTabById) state.selectedTabById = {};
+        state.selectedTabById[id] = "quehaceres";
+        state.expandedById = Array.from(expandedById);
+        renderCards();
+      };
+
+      hooks.onRemoveTask = (id, taskId) => {
+        removeTask(id, taskId);
+        if (!state.selectedTabById) state.selectedTabById = {};
+        state.selectedTabById[id] = "quehaceres";
+        state.expandedById = Array.from(expandedById);
+        renderCards();
+      };
+
       list.appendChild(card);
 
-      let desiredTab = selectedTabById[machine.id] || "general";
+      let desiredTab = selectedTabById[machine.id] || "quehaceres";
       let tabBtn = card.querySelector(`.mc-tab[data-tab="${desiredTab}"]`);
       if (!tabBtn) {
-        desiredTab = "general";
-        tabBtn = card.querySelector('.mc-tab[data-tab="general"]');
-        if (state.selectedTabById) state.selectedTabById[machine.id] = "general";
+        desiredTab = "quehaceres";
+        tabBtn = card.querySelector('.mc-tab[data-tab="quehaceres"]');
+        if (state.selectedTabById) state.selectedTabById[machine.id] = "quehaceres";
       }
-      if (desiredTab !== "general" && tabBtn) {
+      if (desiredTab !== "quehaceres" && tabBtn) {
         tabBtn.click();
       }
 
