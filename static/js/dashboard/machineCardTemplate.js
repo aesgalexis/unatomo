@@ -9,7 +9,8 @@ const buildTemplate = () => {
       </header>
       <div class="mc-expand">
         <div class="mc-tabs" role="tablist">
-          <button class="mc-tab is-active" data-tab="general" type="button">General</button>
+          <button class="mc-tab is-active" data-tab="quehaceres" type="button">Quehaceres</button>
+          <button class="mc-tab" data-tab="general" type="button">General</button>
           <button class="mc-tab" data-tab="historial" type="button">Historial</button>
           <button class="mc-tab" data-tab="configuracion" type="button">Configuración</button>
         </div>
@@ -24,6 +25,94 @@ const statusLabels = {
   operativa: "Operativa",
   fuera_de_servicio: "Fuera de servicio",
   desconectada: "Desconectada"
+};
+
+const frequencyLabels = {
+  diaria: "Diaria",
+  semanal: "Semanal",
+  mensual: "Mensual",
+  trimestral: "Trimestral",
+  semestral: "Semestral",
+  anual: "Anual"
+};
+
+const renderQuehaceres = (panel, machine, hooks) => {
+  panel.innerHTML = "";
+
+  const list = document.createElement("div");
+  list.className = "task-list";
+
+  const tasks = machine.tasks || [];
+  if (!tasks.length) {
+    const empty = document.createElement("div");
+    empty.className = "task-empty";
+    empty.textContent = "Sin tareas.";
+    list.appendChild(empty);
+  } else {
+    tasks.forEach((task) => {
+      const item = document.createElement("div");
+      item.className = "task-item";
+
+      const text = document.createElement("span");
+      text.className = "task-text";
+      const freq = frequencyLabels[task.frequency] || task.frequency;
+      text.textContent = `${task.title} — ${freq}`;
+
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.className = "task-remove";
+      remove.setAttribute("aria-label", "Eliminar tarea");
+      remove.textContent = "×";
+      remove.addEventListener("click", (event) => {
+        event.stopPropagation();
+        if (hooks.onRemoveTask) hooks.onRemoveTask(machine.id, task.id);
+      });
+
+      item.appendChild(text);
+      item.appendChild(remove);
+      list.appendChild(item);
+    });
+  }
+
+  const sep = document.createElement("hr");
+  sep.className = "mc-sep";
+
+  const formRow = document.createElement("div");
+  formRow.className = "task-form";
+
+  const titleInput = document.createElement("input");
+  titleInput.className = "task-title-input";
+  titleInput.type = "text";
+  titleInput.placeholder = "Título de la tarea";
+  titleInput.maxLength = 32;
+  titleInput.addEventListener("click", (event) => event.stopPropagation());
+
+  const freqSelect = document.createElement("select");
+  freqSelect.className = "task-frequency-select";
+  ["diaria", "semanal", "mensual", "trimestral", "semestral", "anual"].forEach((key) => {
+    const option = document.createElement("option");
+    option.value = key;
+    option.textContent = frequencyLabels[key];
+    freqSelect.appendChild(option);
+  });
+  freqSelect.addEventListener("click", (event) => event.stopPropagation());
+
+  const createBtn = document.createElement("button");
+  createBtn.type = "button";
+  createBtn.className = "task-create-btn";
+  createBtn.textContent = "Crear";
+  createBtn.addEventListener("click", (event) => {
+    event.stopPropagation();
+    if (hooks.onAddTask) hooks.onAddTask(machine.id, titleInput, freqSelect, createBtn);
+  });
+
+  formRow.appendChild(titleInput);
+  formRow.appendChild(freqSelect);
+  formRow.appendChild(createBtn);
+
+  panel.appendChild(list);
+  panel.appendChild(sep);
+  panel.appendChild(formRow);
 };
 
 const renderGeneral = (panel, machine) => {
@@ -90,10 +179,11 @@ const renderHistorial = (panel, machine, hooks) => {
   panel.appendChild(download);
 };
 
-  const TAB_RENDER = {
-    general: renderGeneral,
-    historial: renderHistorial,
-    configuracion: (panel, machine, hooks) => {
+const TAB_RENDER = {
+  quehaceres: renderQuehaceres,
+  general: renderGeneral,
+  historial: renderHistorial,
+  configuracion: (panel, machine, hooks) => {
     panel.innerHTML = "";
 
     const urlRow = document.createElement("div");
@@ -226,6 +316,17 @@ const renderHistorial = (panel, machine, hooks) => {
     panel.appendChild(sep);
     panel.appendChild(addRow);
     panel.appendChild(list);
+
+    const removeLink = document.createElement("a");
+    removeLink.className = "mc-remove-machine";
+    removeLink.href = "#";
+    removeLink.textContent = "Eliminar equipo";
+    removeLink.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (hooks.onRemoveMachine) hooks.onRemoveMachine(machine);
+    });
+    panel.appendChild(removeLink);
   },
 };
 
@@ -242,7 +343,7 @@ export const createMachineCard = (machine) => {
   statusBtn.textContent = statusLabels[machine.status] || "Operativa";
   statusBtn.dataset.status = machine.status || "operativa";
 
-  renderGeneral(panel, machine);
+  renderQuehaceres(panel, machine, hooks);
 
   const hooks = {
     onToggleExpand: null,
@@ -255,7 +356,9 @@ export const createMachineCard = (machine) => {
     onUpdateUserRole: null,
     onRemoveUser: null,
     onDownloadLogs: null,
-    onRemoveMachine: null
+    onRemoveMachine: null,
+    onAddTask: null,
+    onRemoveTask: null
   };
 
   header.addEventListener("click", (event) => {
@@ -329,19 +432,6 @@ export const createMachineCard = (machine) => {
       if (hooks.onSelectTab) hooks.onSelectTab(card, key);
     });
   });
-
-  const removeLink = document.createElement("a");
-  removeLink.className = "mc-remove-machine";
-  removeLink.href = "#";
-  removeLink.textContent = "Eliminar equipo";
-  removeLink.addEventListener("click", (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    if (hooks.onRemoveMachine) hooks.onRemoveMachine(machine);
-  });
-
-  const expand = card.querySelector(".mc-expand");
-  expand.appendChild(removeLink);
 
   return { card, hooks };
 };
