@@ -9,7 +9,7 @@ const buildTemplate = () => {
       </header>
       <div class="mc-expand">
         <div class="mc-tabs" role="tablist">
-          <button class="mc-tab is-active" data-tab="quehaceres" type="button">Quehaceres</button>
+          <button class="mc-tab is-active" data-tab="quehaceres" type="button">Tareas</button>
           <button class="mc-tab" data-tab="general" type="button">General</button>
           <button class="mc-tab" data-tab="historial" type="button">Historial</button>
           <button class="mc-tab" data-tab="configuracion" type="button">Configuración</button>
@@ -36,7 +36,7 @@ const frequencyLabels = {
   anual: "Anual"
 };
 
-const renderQuehaceres = (panel, machine, hooks) => {
+const renderTareas = (panel, machine, hooks) => {
   panel.innerHTML = "";
 
   const list = document.createElement("div");
@@ -83,7 +83,7 @@ const renderQuehaceres = (panel, machine, hooks) => {
   const titleInput = document.createElement("input");
   titleInput.className = "task-title-input";
   titleInput.type = "text";
-  titleInput.placeholder = "Título de la tarea";
+  titleInput.placeholder = "Descripción de la tarea";
   titleInput.maxLength = 32;
   titleInput.addEventListener("click", (event) => event.stopPropagation());
 
@@ -180,7 +180,7 @@ const renderHistorial = (panel, machine, hooks) => {
 };
 
 const TAB_RENDER = {
-  quehaceres: renderQuehaceres,
+  quehaceres: renderTareas,
   general: renderGeneral,
   historial: renderHistorial,
   configuracion: (panel, machine, hooks) => {
@@ -359,7 +359,7 @@ export const createMachineCard = (machine) => {
     onRemoveTask: null
   };
 
-  renderQuehaceres(panel, machine, hooks);
+  renderTareas(panel, machine, hooks);
 
   header.addEventListener("click", (event) => {
     if (event.target.closest("button, input, select, textarea, a")) return;
@@ -435,3 +435,4 @@ export const createMachineCard = (machine) => {
 
   return { card, hooks };
 };
+
