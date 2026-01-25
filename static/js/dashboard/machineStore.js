@@ -1,11 +1,30 @@
 const STORAGE_KEY = "unatomo_machines_v1";
 
+const normalizeMachine = (raw, index) => {
+  if (!raw || typeof raw !== "object") return null;
+  return {
+    id: raw.id || generateId(),
+    title: raw.title || raw.nombre || `Equipo ${index + 1}`,
+    brand: typeof raw.brand === "string" ? raw.brand : "",
+    model: typeof raw.model === "string" ? raw.model : "",
+    year: typeof raw.year === "number" ? raw.year : null,
+    status: raw.status || "operativa",
+    logs: Array.isArray(raw.logs) ? raw.logs : [],
+    url: typeof raw.url === "string" ? raw.url : "",
+    users: Array.isArray(raw.users) ? raw.users : [],
+    tasks: Array.isArray(raw.tasks) ? raw.tasks : []
+  };
+};
+
 const loadMachines = () => {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .map((item, idx) => normalizeMachine(item, idx))
+      .filter(Boolean);
   } catch {
     return [];
   }
