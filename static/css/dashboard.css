@@ -187,7 +187,7 @@
 
 .mc-log-header {
   font-size: 0.85rem;
-  color: color-mix(in srgb, var(--fg) 70%, transparent);
+  color: var(--fg);
   margin-bottom: 0.4rem;
 }
 
