@@ -167,6 +167,10 @@ const renderHistorial = (panel, machine, hooks) => {
     });
   panel.appendChild(list);
 
+  const sep = document.createElement("hr");
+  sep.className = "mc-sep";
+  panel.appendChild(sep);
+
   const download = document.createElement("a");
   download.className = "mc-log-download";
   download.textContent = "Descargar registro completo";
