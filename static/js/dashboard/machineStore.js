@@ -28,14 +28,15 @@ const addMachine = (list) => {
   const count = list.length + 1;
   const machine = {
     id: generateId(),
-    title: `Máquina ${count}`,
+    title: `Equipo ${count}`,
     brand: "",
     model: "",
     year: null,
     status: "operativa",
     logs: [],
     url: "",
-    users: []
+    users: [],
+    tasks: []
   };
   const next = [machine, ...list];
   saveMachines(next);
