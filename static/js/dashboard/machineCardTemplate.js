@@ -36,7 +36,7 @@ const frequencyLabels = {
   anual: "Anual"
 };
 
-const renderTareas = (panel, machine, hooks) => {
+const renderTareas = (panel, machine, hooks, options = {}) => {
   panel.innerHTML = "";
 
   const list = document.createElement("div");
@@ -115,7 +115,7 @@ const renderTareas = (panel, machine, hooks) => {
   panel.appendChild(formRow);
 };
 
-const renderGeneral = (panel, machine) => {
+const renderGeneral = (panel, machine, hooks, options = {}) => {
   panel.innerHTML = "";
   const rows = [
     ["Marca", machine.brand || "—"],
@@ -137,7 +137,7 @@ const renderGeneral = (panel, machine) => {
   });
 };
 
-const renderHistorial = (panel, machine, hooks) => {
+const renderHistorial = (panel, machine, hooks, options = {}) => {
   panel.innerHTML = "";
   const total = machine.logs ? machine.logs.length : 0;
   if (!total) {
@@ -191,50 +191,98 @@ const TAB_RENDER = {
   quehaceres: renderTareas,
   general: renderGeneral,
   historial: renderHistorial,
-  configuracion: (panel, machine, hooks) => {
+  configuracion: (panel, machine, hooks, options = {}) => {
     panel.innerHTML = "";
+    const tagRow = document.createElement("div");
+    tagRow.className = "mc-config-row";
 
-    const urlRow = document.createElement("div");
-    urlRow.className = "mc-config-row";
+    const tagLabel = document.createElement("span");
+    tagLabel.className = "mc-config-label";
+    tagLabel.textContent = "Tag ID";
 
-    const urlLabel = document.createElement("span");
-    urlLabel.className = "mc-config-label";
-    urlLabel.textContent = "URL";
+    const tagInput = document.createElement("input");
+    tagInput.className = "mc-tag-input";
+    tagInput.type = "text";
+    tagInput.placeholder = "Ej: TAG_TEST_001";
+    tagInput.value = machine.tagId || "";
+    tagInput.addEventListener("click", (event) => event.stopPropagation());
 
-    const urlInput = document.createElement("input");
-    urlInput.className = "mc-url-input";
-    urlInput.type = "text";
-    urlInput.readOnly = true;
-    urlInput.value = machine.url || "";
-    urlInput.addEventListener("click", (event) => event.stopPropagation());
-
-    const copyBtn = document.createElement("button");
-    copyBtn.type = "button";
-    copyBtn.className = "mc-url-copy";
-    copyBtn.setAttribute("title", "Copiar");
-    copyBtn.textContent = "⧉";
-    copyBtn.addEventListener("click", (event) => {
+    const tagBtn = document.createElement("button");
+    tagBtn.type = "button";
+    tagBtn.className = "mc-tag-connect";
+    tagBtn.textContent = "Conectar";
+    tagBtn.disabled = !tagInput.value.trim();
+    tagBtn.addEventListener("click", (event) => {
       event.stopPropagation();
-      if (hooks.onCopyUrl) hooks.onCopyUrl(machine.id, copyBtn, urlInput);
+      if (hooks.onConnectTag) hooks.onConnectTag(machine.id, tagInput, tagStatus);
     });
 
-    const genBtn = document.createElement("button");
-    genBtn.type = "button";
-    genBtn.className = "mc-url-generate";
-    genBtn.textContent = "Generar URL";
-    genBtn.addEventListener("click", (event) => {
+    tagInput.addEventListener("input", (event) => {
       event.stopPropagation();
-      if (hooks.onGenerateUrl) hooks.onGenerateUrl(machine.id);
+      const hasValue = !!tagInput.value.trim();
+      tagBtn.disabled = !hasValue;
+      if (!hasValue) {
+        tagStatus.textContent = "";
+        tagStatus.dataset.state = "";
+        accessRow.style.display = "none";
+      }
     });
 
-    const urlControls = document.createElement("div");
-    urlControls.className = "mc-config-controls";
-    urlControls.appendChild(urlInput);
-    urlControls.appendChild(copyBtn);
-    urlControls.appendChild(genBtn);
+    const tagControls = document.createElement("div");
+    tagControls.className = "mc-config-controls";
+    tagControls.appendChild(tagInput);
+    tagControls.appendChild(tagBtn);
 
-    urlRow.appendChild(urlLabel);
-    urlRow.appendChild(urlControls);
+    tagRow.appendChild(tagLabel);
+    tagRow.appendChild(tagControls);
+
+    const tagStatus = document.createElement("div");
+    tagStatus.className = "mc-tag-status";
+    if (options.tagStatus?.text) {
+      tagStatus.textContent = options.tagStatus.text;
+      tagStatus.dataset.state = options.tagStatus.state || "";
+    }
+
+    const accessRow = document.createElement("div");
+    accessRow.className = "mc-config-row";
+    accessRow.style.display = machine.tagId ? "" : "none";
+
+    const accessLabel = document.createElement("span");
+    accessLabel.className = "mc-config-label";
+    accessLabel.textContent = "URL de acceso";
+
+    const accessInput = document.createElement("input");
+    accessInput.className = "mc-url-input";
+    accessInput.type = "text";
+    accessInput.readOnly = true;
+    accessInput.value = machine.tagId
+      ? `${window.location.origin}/es/m.html?tag=${encodeURIComponent(machine.tagId)}`
+      : "";
+    accessInput.addEventListener("click", (event) => event.stopPropagation());
+
+    const accessCopy = document.createElement("button");
+    accessCopy.type = "button";
+    accessCopy.className = "mc-url-copy";
+    accessCopy.setAttribute("title", "Copiar");
+    accessCopy.textContent = "Copiar";
+    accessCopy.addEventListener("click", (event) => {
+      event.stopPropagation();
+      if (hooks.onCopyTagUrl) hooks.onCopyTagUrl(machine.id, accessCopy, accessInput);
+    });
+
+    const accessControls = document.createElement("div");
+    accessControls.className = "mc-config-controls";
+    accessControls.appendChild(accessInput);
+    accessControls.appendChild(accessCopy);
+
+    accessRow.appendChild(accessLabel);
+    accessRow.appendChild(accessControls);
+
+    if (options.disableConfigActions) {
+      tagInput.readOnly = true;
+      tagBtn.disabled = true;
+      accessCopy.disabled = true;
+    }
 
     const sep = document.createElement("hr");
     sep.className = "mc-sep";
@@ -266,6 +314,12 @@ const TAB_RENDER = {
       event.stopPropagation();
       if (hooks.onAddUser) hooks.onAddUser(machine.id, userInput, passInput, addBtn);
     });
+
+    if (options.disableConfigActions) {
+      userInput.disabled = true;
+      passInput.disabled = true;
+      addBtn.disabled = true;
+    }
 
     const addControls = document.createElement("div");
     addControls.className = "mc-config-controls";
@@ -303,6 +357,9 @@ const TAB_RENDER = {
           hooks.onUpdateUserRole(machine.id, user.id, role.value);
         }
       });
+      if (options.disableConfigActions) {
+        role.disabled = true;
+      }
 
       const remove = document.createElement("a");
       remove.className = "mc-user-remove";
@@ -313,6 +370,11 @@ const TAB_RENDER = {
         event.stopPropagation();
         if (hooks.onRemoveUser) hooks.onRemoveUser(machine.id, user.id);
       });
+      if (options.disableConfigActions) {
+        remove.setAttribute("aria-disabled", "true");
+        remove.style.pointerEvents = "none";
+        remove.style.opacity = "0.6";
+      }
 
       row.appendChild(name);
       row.appendChild(role);
@@ -320,7 +382,9 @@ const TAB_RENDER = {
       list.appendChild(row);
     });
 
-    panel.appendChild(urlRow);
+    panel.appendChild(tagRow);
+    panel.appendChild(tagStatus);
+    panel.appendChild(accessRow);
     panel.appendChild(sep);
     panel.appendChild(addRow);
     panel.appendChild(list);
@@ -339,12 +403,16 @@ const TAB_RENDER = {
       if (hooks.onRemoveMachine) hooks.onRemoveMachine(machine);
     });
     panel.appendChild(removeLink);
+    if (options.disableConfigActions) {
+      removeLink.style.display = "none";
+    }
   },
 };
 
-export const createMachineCard = (machine) => {
+export const createMachineCard = (machine, options = {}) => {
   const card = buildTemplate();
   card.dataset.machineId = machine.id;
+  if (options.disableDrag) card.draggable = false;
   const title = card.querySelector(".mc-title");
   const statusBtn = card.querySelector(".mc-status");
   const header = card.querySelector(".mc-header");
@@ -360,8 +428,8 @@ export const createMachineCard = (machine) => {
     onSelectTab: null,
     onStatusToggle: null,
     onTitleUpdate: null,
-    onGenerateUrl: null,
-    onCopyUrl: null,
+    onConnectTag: null,
+    onCopyTagUrl: null,
     onAddUser: null,
     onUpdateUserRole: null,
     onRemoveUser: null,
@@ -371,7 +439,12 @@ export const createMachineCard = (machine) => {
     onRemoveTask: null
   };
 
-  renderTareas(panel, machine, hooks);
+  if (options.hideConfig) {
+    const configTab = card.querySelector('.mc-tab[data-tab="configuracion"]');
+    if (configTab) configTab.remove();
+  }
+
+  renderTareas(panel, machine, hooks, options);
 
   header.addEventListener("click", (event) => {
     if (event.target.closest("button, input, select, textarea, a")) return;
@@ -425,10 +498,12 @@ export const createMachineCard = (machine) => {
     input.select();
   };
 
-  title.addEventListener("click", (event) => {
-    event.stopPropagation();
-    startTitleEdit();
-  });
+  if (!options.disableTitleEdit) {
+    title.addEventListener("click", (event) => {
+      event.stopPropagation();
+      startTitleEdit();
+    });
+  }
 
   tabs.forEach((tab) => {
     tab.addEventListener("click", () => {
@@ -439,7 +514,7 @@ export const createMachineCard = (machine) => {
       tab.classList.add("is-active");
       const key = tab.dataset.tab;
       const render = TAB_RENDER[key] || TAB_RENDER.general;
-      render(panel, machine, hooks);
+      render(panel, machine, hooks, options);
       panel.dataset.panel = key;
       if (hooks.onSelectTab) hooks.onSelectTab(card, key);
     });
@@ -447,4 +522,6 @@ export const createMachineCard = (machine) => {
 
   return { card, hooks };
 };
+
+
 
