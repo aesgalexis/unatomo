@@ -1,6 +1,14 @@
 import { fetchMachineAccess, updateMachineAccess } from "/static/js/dashboard/machineAccessRepo.js";
 import { createMachineCard } from "/static/js/dashboard/machineCardTemplate.js";
 import { hashPassword } from "/static/js/utils/crypto.js";
+import { initAutoSave } from "/static/js/dashboard/autoSave.js";
+import {
+  canSeeTab,
+  canEditStatus,
+  canEditTasks,
+  canDownloadHistory,
+  canSeeConfig
+} from "./permissions.js";
 
 const COLLAPSED_HEIGHT = 96;
 const EXPAND_FACTOR = 2.5;
@@ -13,17 +21,9 @@ if (!mount) {
 const addBar = document.createElement("div");
 addBar.className = "add-bar";
 
-const saveBtn = document.createElement("button");
-saveBtn.type = "button";
-saveBtn.id = "saveChangesBtn";
-saveBtn.className = "btn-save";
-saveBtn.textContent = "Guardar cambios";
-saveBtn.disabled = true;
-
 const saveStatus = document.createElement("span");
 saveStatus.className = "save-status";
 
-addBar.appendChild(saveBtn);
 addBar.appendChild(saveStatus);
 
 const list = document.createElement("div");
@@ -32,9 +32,15 @@ list.id = "machineList";
 mount.appendChild(addBar);
 mount.appendChild(list);
 
-const updateSaveState = (dirty, message = "") => {
-  saveBtn.disabled = !dirty;
+let statusTimeout = null;
+const updateSaveState = (message = "") => {
+  if (statusTimeout) clearTimeout(statusTimeout);
   saveStatus.textContent = message;
+  if (message && message !== "Guardando...") {
+    statusTimeout = setTimeout(() => {
+      saveStatus.textContent = "";
+    }, 1600);
+  }
 };
 
 const renderMessage = (text) => {
@@ -127,9 +133,23 @@ const showLogin = (machine, tagId, onSuccess) => {
 const state = {
   tagId: null,
   session: null,
-  draft: null,
-  dirty: false
+  draft: null
 };
+
+const autoSave = initAutoSave({
+  notify: updateSaveState,
+  saveFn: async () => {
+    await updateMachineAccess(
+      state.tagId,
+      {
+        status: state.draft.status,
+        logs: state.draft.logs || [],
+        tasks: state.draft.tasks || []
+      },
+      `machineUser:${state.session?.username || "unknown"}`
+    );
+  }
+});
 
 const init = async () => {
   const tagId = getTagId();
@@ -178,19 +198,24 @@ const init = async () => {
 
 const renderMachine = () => {
   const machineDoc = state.draft;
-  const tagId = state.tagId;
   const session = state.session;
   list.innerHTML = "";
-  const draft = machineDoc;
-  updateSaveState(state.dirty, "");
 
   const role = session?.role || "usuario";
-  const allowConfig = role === "administrador";
+  const visibleTabs = ["quehaceres", "general", "historial"].filter((tab) =>
+    canSeeTab(role, tab)
+  );
 
-  const { card, hooks } = createMachineCard(draft, {
+  const { card, hooks } = createMachineCard(machineDoc, {
+    mode: "single",
     disableDrag: true,
-    hideConfig: !allowConfig,
-    disableConfigActions: true,
+    hideConfig: !canSeeConfig(role),
+    canEditStatus: canEditStatus(role),
+    canEditTasks: canEditTasks(role),
+    canDownloadHistory: canDownloadHistory(role),
+    canEditGeneral: false,
+    canEditConfig: false,
+    visibleTabs,
     disableTitleEdit: true
   });
 
@@ -207,36 +232,26 @@ const renderMachine = () => {
   };
   recalcHeight();
 
-  hooks.onToggleExpand = () => {
-    const isExpanded = card.dataset.expanded === "true";
-    if (isExpanded) {
-      card.dataset.expanded = "false";
-      card.style.maxHeight = `${COLLAPSED_HEIGHT}px`;
-    } else {
-      card.dataset.expanded = "true";
-      recalcHeight();
-    }
-  };
-
   hooks.onSelectTab = () => {
-    if (card.dataset.expanded === "true") recalcHeight();
+    recalcHeight();
   };
 
   hooks.onStatusToggle = () => {
+    if (!canEditStatus(role)) return;
     const statusOrder = ["operativa", "fuera_de_servicio", "desconectada"];
-    const idx = statusOrder.indexOf(draft.status || "operativa");
+    const idx = statusOrder.indexOf(machineDoc.status || "operativa");
     const nextStatus = statusOrder[(idx + 1) % statusOrder.length];
     state.draft = {
-      ...draft,
+      ...machineDoc,
       status: nextStatus,
-      logs: [...(draft.logs || []), { ts: new Date().toISOString(), type: "status", value: nextStatus }]
+      logs: [...(machineDoc.logs || []), { ts: new Date().toISOString(), type: "status", value: nextStatus }]
     };
-    state.dirty = true;
-    updateSaveState(state.dirty, "");
     renderMachine();
+    autoSave.saveNow(state.tagId, "status");
   };
 
   hooks.onAddTask = (id, titleInput, freqSelect, btn) => {
+    if (!canEditTasks(role)) return;
     const title = titleInput.value.trim();
     if (!title) {
       titleInput.setAttribute("aria-invalid", "true");
@@ -248,7 +263,7 @@ const renderMachine = () => {
       return;
     }
     state.draft = {
-      ...draft,
+      ...machineDoc,
       tasks: [
         {
           id: (window.crypto?.randomUUID && window.crypto.randomUUID()) || `t_${Date.now()}`,
@@ -256,47 +271,25 @@ const renderMachine = () => {
           frequency: freqSelect.value,
           createdAt: new Date().toISOString()
         },
-        ...(draft.tasks || [])
+        ...(machineDoc.tasks || [])
       ]
     };
     titleInput.value = "";
-    state.dirty = true;
-    updateSaveState(state.dirty, "");
     renderMachine();
+    autoSave.saveNow(state.tagId, "add-task");
   };
 
   hooks.onRemoveTask = (id, taskId) => {
+    if (!canEditTasks(role)) return;
     state.draft = {
-      ...draft,
-      tasks: (draft.tasks || []).filter((t) => t.id !== taskId)
+      ...machineDoc,
+      tasks: (machineDoc.tasks || []).filter((t) => t.id !== taskId)
     };
-    state.dirty = true;
-    updateSaveState(state.dirty, "");
     renderMachine();
+    autoSave.saveNow(state.tagId, "remove-task");
   };
 
   list.appendChild(card);
-
-  saveBtn.onclick = async () => {
-    if (!state.dirty) return;
-    updateSaveState(true, "Guardando...");
-    try {
-      await updateMachineAccess(
-        tagId,
-        {
-          status: state.draft.status,
-          logs: state.draft.logs || [],
-          tasks: state.draft.tasks || []
-        },
-        `machineUser:${session?.username || "unknown"}`
-      );
-      state.dirty = false;
-      updateSaveState(state.dirty, "Guardado");
-      setTimeout(() => updateSaveState(state.dirty, ""), 1500);
-    } catch {
-      updateSaveState(true, "Error al guardar");
-    }
-  };
 };
 
 init();

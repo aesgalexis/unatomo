@@ -4,7 +4,9 @@ import {
   doc,
   getDocs,
   serverTimestamp,
-  writeBatch
+  writeBatch,
+  setDoc,
+  deleteDoc
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
 const machinesCollection = (uid) => collection(db, "tenants", uid, "machines");
@@ -48,4 +50,31 @@ export const commitChanges = async (uid, { creates, updates, deletes }) => {
   });
 
   await batch.commit();
+};
+
+export const upsertMachine = async (uid, machine) => {
+  const ref = doc(db, "tenants", uid, "machines", machine.id);
+  const payload = {
+    title: machine.title,
+    brand: machine.brand,
+    model: machine.model,
+    year: machine.year ?? null,
+    status: machine.status,
+    tagId: machine.tagId ?? null,
+    logs: machine.logs || [],
+    tasks: machine.tasks || [],
+    order: typeof machine.order === "number" ? machine.order : 0,
+    users: machine.users || [],
+    updatedAt: serverTimestamp(),
+    updatedBy: uid
+  };
+  if (machine.isNew) {
+    payload.createdAt = serverTimestamp();
+  }
+  await setDoc(ref, payload, { merge: true });
+};
+
+export const deleteMachine = async (uid, machineId) => {
+  const ref = doc(db, "tenants", uid, "machines", machineId);
+  await deleteDoc(ref);
 };

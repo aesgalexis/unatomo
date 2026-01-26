@@ -1,12 +1,13 @@
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 import { auth } from "/static/js/firebase/firebaseApp.js";
-import { fetchMachines, commitChanges } from "./firestoreRepo.js";
+import { fetchMachines, upsertMachine, deleteMachine } from "./firestoreRepo.js";
 import { validateTag, assignTag } from "./tagRepo.js";
 import { upsertMachineAccessFromMachine } from "./machineAccessRepo.js";
 import { createMachineCard } from "./machineCardTemplate.js";
 import { initDragAndDrop } from "./dragAndDrop.js";
 import { cloneMachines, normalizeMachine, createDraftMachine } from "./machineStore.js";
 import { generateSaltBase64, hashPassword } from "/static/js/utils/crypto.js";
+import { initAutoSave } from "./autoSave.js";
 
 const COLLAPSED_HEIGHT = 96;
 const EXPAND_FACTOR = 2.5;
@@ -16,14 +17,12 @@ const mount = document.getElementById("dashboard-mount");
 if (mount) {
   const state = {
     uid: null,
+    adminLabel: "",
     remoteMachines: [],
     draftMachines: [],
-    dirtyById: new Set(),
-    deletedIds: new Set(),
     expandedById: [],
     selectedTabById: {},
-    tagStatusById: {},
-    saving: false
+    tagStatusById: {}
   };
 
   const addBar = document.createElement("div");
@@ -35,18 +34,10 @@ if (mount) {
   addBtn.className = "btn-add";
   addBtn.textContent = "Añadir";
 
-  const saveBtn = document.createElement("button");
-  saveBtn.type = "button";
-  saveBtn.id = "saveChangesBtn";
-  saveBtn.className = "btn-save";
-  saveBtn.textContent = "Guardar cambios";
-  saveBtn.disabled = true;
-
   const saveStatus = document.createElement("span");
   saveStatus.className = "save-status";
 
   addBar.appendChild(addBtn);
-  addBar.appendChild(saveBtn);
   addBar.appendChild(saveStatus);
 
   const list = document.createElement("div");
@@ -55,13 +46,15 @@ if (mount) {
   mount.appendChild(addBar);
   mount.appendChild(list);
 
+  let statusTimeout = null;
   const updateSaveState = (message = "") => {
-    const dirty =
-      state.dirtyById.size > 0 ||
-      state.deletedIds.size > 0 ||
-      state.draftMachines.some((m) => m.isNew);
-    saveBtn.disabled = !dirty || state.saving;
+    if (statusTimeout) clearTimeout(statusTimeout);
     saveStatus.textContent = message;
+    if (message && message !== "Guardando...") {
+      statusTimeout = setTimeout(() => {
+        saveStatus.textContent = "";
+      }, 1600);
+    }
   };
 
   const renderPlaceholder = () => {
@@ -96,41 +89,26 @@ if (mount) {
   const setRemote = (remote) => {
     state.remoteMachines = cloneMachines(remote);
     state.draftMachines = cloneMachines(remote);
-    state.dirtyById.clear();
-    state.deletedIds.clear();
     state.tagStatusById = {};
-    updateSaveState("");
   };
 
   const getDraftIndex = (id) => state.draftMachines.findIndex((m) => m.id === id);
-  const getRemoteById = (id) => state.remoteMachines.find((m) => m.id === id);
-
-  const markDirty = (id) => {
-    if (!id) return;
-    state.dirtyById.add(id);
-    updateSaveState("");
-  };
+  const getDraftById = (id) => state.draftMachines.find((m) => m.id === id);
 
   const updateMachine = (id, patch) => {
     const idx = getDraftIndex(id);
     if (idx === -1) return;
     state.draftMachines[idx] = { ...state.draftMachines[idx], ...patch };
-    markDirty(id);
   };
 
   const replaceMachine = (id, next) => {
     const idx = getDraftIndex(id);
     if (idx === -1) return;
     state.draftMachines[idx] = next;
-    markDirty(id);
   };
 
-  const removeMachine = (id) => {
-    if (!id) return;
-    state.deletedIds.add(id);
+  const removeMachineFromState = (id) => {
     state.draftMachines = state.draftMachines.filter((m) => m.id !== id);
-    state.dirtyById.delete(id);
-    updateSaveState("");
   };
 
   const computeNextOrder = () => {
@@ -140,6 +118,36 @@ if (mount) {
     );
     return maxOrder + 1;
   };
+
+  const autoSave = initAutoSave({
+    notify: updateSaveState,
+    saveFn: async (machineId) => {
+      if (!state.uid) throw new Error("no-auth");
+      const machine = getDraftById(machineId);
+      if (!machine) return;
+      if (machine.tagId) {
+        const res = await validateTag(machine.tagId);
+        if (!res.exists) {
+          state.tagStatusById[machine.id] = { text: "Tag no existe", state: "error" };
+          renderCards();
+          throw new Error("tag-missing");
+        }
+        if (res.machineId && res.machineId !== machine.id) {
+          state.tagStatusById[machine.id] = { text: "Tag ya está asignado", state: "error" };
+          renderCards();
+          throw new Error("tag-assigned");
+        }
+      }
+      await upsertMachine(state.uid, machine);
+      machine.isNew = false;
+      if (machine.tagId) {
+        await assignTag(machine.tagId, state.uid, machine.id);
+        await upsertMachineAccessFromMachine(state.uid, machine);
+      }
+      state.tagStatusById[machine.id] = { text: "Guardado", state: "ok" };
+      renderCards();
+    }
+  });
 
   const renderCards = () => {
     list.innerHTML = "";
@@ -164,7 +172,16 @@ if (mount) {
       .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
       .forEach((machine) => {
         const { card, hooks } = createMachineCard(machine, {
-          tagStatus: state.tagStatusById[machine.id]
+          tagStatus: state.tagStatusById[machine.id],
+          adminLabel: state.adminLabel,
+          mode: "dashboard",
+          canEditTasks: true,
+          canEditStatus: true,
+          canEditGeneral: true,
+          canDownloadHistory: true,
+          canEditConfig: true,
+          visibleTabs: ["quehaceres", "general", "historial", "configuracion"],
+          userRoles: ["usuario", "tecnico", "externo"]
         });
         card.style.maxHeight = `${COLLAPSED_HEIGHT}px`;
 
@@ -195,20 +212,21 @@ if (mount) {
 
         hooks.onStatusToggle = (node) => {
           const statusOrder = ["operativa", "fuera_de_servicio", "desconectada"];
-          const current = state.draftMachines.find((m) => m.id === machine.id);
+          const current = getDraftById(machine.id);
           const currentStatus = current?.status || "operativa";
           const idx = statusOrder.indexOf(currentStatus);
           const nextStatus = statusOrder[(idx + 1) % statusOrder.length];
           const keepExpanded = node.dataset.expanded === "true";
-          updateMachine(machine.id, { status: nextStatus });
           replaceMachine(machine.id, {
-            ...state.draftMachines.find((m) => m.id === machine.id),
+            ...current,
+            status: nextStatus,
             logs: [
               ...(current?.logs || []),
               { ts: new Date().toISOString(), type: "status", value: nextStatus }
             ]
           });
           renderCards();
+          autoSave.saveNow(machine.id, "status");
           if (keepExpanded) {
             expandedById.add(machine.id);
             state.expandedById = Array.from(expandedById);
@@ -217,6 +235,25 @@ if (mount) {
 
         hooks.onTitleUpdate = (node, nextTitle) => {
           updateMachine(machine.id, { title: nextTitle });
+          autoSave.scheduleSave(machine.id, "title");
+        };
+
+        hooks.onUpdateGeneral = (id, field, value, input, errorEl) => {
+          if (field === "year") {
+            const currentYear = new Date().getFullYear();
+            const parsed = value ? Number(value) : null;
+            if (parsed !== null && (Number.isNaN(parsed) || parsed > currentYear || parsed < currentYear - 50)) {
+              if (errorEl) errorEl.textContent = `Año inválido (entre ${currentYear - 50} y ${currentYear}).`;
+              if (input) input.setAttribute("aria-invalid", "true");
+              return;
+            }
+            if (errorEl) errorEl.textContent = "";
+            if (input) input.removeAttribute("aria-invalid");
+            updateMachine(id, { year: parsed });
+          } else {
+            updateMachine(id, { [field]: value });
+          }
+          autoSave.scheduleSave(id, `general:${field}`);
         };
 
         hooks.onConnectTag = async (id, tagInput, statusEl) => {
@@ -242,6 +279,7 @@ if (mount) {
             state.selectedTabById[id] = "configuracion";
             state.expandedById = Array.from(expandedById);
             renderCards();
+            autoSave.saveNow(id, "tag");
           } catch {
             statusEl.textContent = "Error al validar el tag";
             statusEl.dataset.state = "error";
@@ -275,7 +313,7 @@ if (mount) {
             }
             return;
           }
-          const current = state.draftMachines.find((m) => m.id === id);
+          const current = getDraftById(id);
           const users = Array.isArray(current?.users) ? [...current.users] : [];
           if (users.some((u) => u.username === username)) {
             if (addBtn) {
@@ -311,10 +349,11 @@ if (mount) {
           state.selectedTabById[id] = "configuracion";
           state.expandedById = Array.from(expandedById);
           renderCards();
+          autoSave.saveNow(id, "add-user");
         };
 
         hooks.onUpdateUserRole = (id, userId, role) => {
-          const current = state.draftMachines.find((m) => m.id === id);
+          const current = getDraftById(id);
           const users = (current?.users || []).map((u) =>
             u.id === userId ? { ...u, role } : u
           );
@@ -323,16 +362,18 @@ if (mount) {
           state.selectedTabById[id] = "configuracion";
           state.expandedById = Array.from(expandedById);
           renderCards();
+          autoSave.scheduleSave(id, "role");
         };
 
         hooks.onRemoveUser = (id, userId) => {
-          const current = state.draftMachines.find((m) => m.id === id);
+          const current = getDraftById(id);
           const users = (current?.users || []).filter((u) => u.id !== userId);
           updateMachine(id, { users });
           if (!state.selectedTabById) state.selectedTabById = {};
           state.selectedTabById[id] = "configuracion";
           state.expandedById = Array.from(expandedById);
           renderCards();
+          autoSave.saveNow(id, "remove-user");
         };
 
         hooks.onDownloadLogs = (machineData) => {
@@ -366,8 +407,11 @@ if (mount) {
         hooks.onRemoveMachine = (machineData) => {
           const ok = window.confirm("¿Seguro que quieres eliminar este equipo?");
           if (!ok) return;
-          removeMachine(machineData.id);
+          removeMachineFromState(machineData.id);
           renderCards();
+          autoSave.saveNow(machineData.id, "delete", async () => {
+            await deleteMachine(state.uid, machineData.id);
+          });
         };
 
         hooks.onAddTask = (id, titleInput, freqSelect, btn) => {
@@ -381,7 +425,7 @@ if (mount) {
             }
             return;
           }
-          const current = state.draftMachines.find((m) => m.id === id);
+          const current = getDraftById(id);
           const tasks = Array.isArray(current?.tasks) ? [...current.tasks] : [];
           tasks.unshift({
             id: (window.crypto?.randomUUID && window.crypto.randomUUID()) || `t_${Date.now()}`,
@@ -395,16 +439,18 @@ if (mount) {
           state.selectedTabById[id] = "quehaceres";
           state.expandedById = Array.from(expandedById);
           renderCards();
+          autoSave.saveNow(id, "add-task");
         };
 
         hooks.onRemoveTask = (id, taskId) => {
-          const current = state.draftMachines.find((m) => m.id === id);
+          const current = getDraftById(id);
           const tasks = (current?.tasks || []).filter((t) => t.id !== taskId);
           updateMachine(id, { tasks });
           if (!state.selectedTabById) state.selectedTabById = {};
           state.selectedTabById[id] = "quehaceres";
           state.expandedById = Array.from(expandedById);
           renderCards();
+          autoSave.saveNow(id, "remove-task");
         };
 
         list.appendChild(card);
@@ -430,148 +476,26 @@ if (mount) {
   const handleReorder = (orderIds) => {
     const updated = [];
     orderIds.forEach((id, idx) => {
-      const current = state.draftMachines.find((m) => m.id === id);
+      const current = getDraftById(id);
       if (!current) return;
       updated.push({ ...current, order: idx });
-      markDirty(id);
+      autoSave.scheduleSave(id, "order");
     });
     state.draftMachines = updated;
     renderCards();
-  };
-
-  const buildCommitPayload = () => {
-    const creates = [];
-    const updates = [];
-    const deletes = Array.from(state.deletedIds);
-
-    state.draftMachines.forEach((m) => {
-      const base = {
-        id: m.id,
-        title: m.title,
-        brand: m.brand,
-        model: m.model,
-        year: m.year ?? null,
-        status: m.status,
-        tagId: m.tagId ?? null,
-        logs: m.logs || [],
-        tasks: m.tasks || [],
-        order: typeof m.order === "number" ? m.order : 0,
-        // TODO: passwordHash pendiente en fase Functions.
-        users: (m.users || []).map((u) => ({
-          id: u.id,
-          username: u.username,
-          role: u.role,
-          createdAt: u.createdAt,
-          saltBase64: u.saltBase64,
-          passwordHashBase64: u.passwordHashBase64
-        }))
-      };
-
-      if (m.isNew) {
-        creates.push(base);
-        return;
-      }
-      if (state.dirtyById.has(m.id)) {
-        updates.push(base);
-      }
-    });
-
-    return { creates, updates, deletes };
-  };
-
-  const saveChanges = async () => {
-    if (!state.uid || state.saving) return;
-    const payload = buildCommitPayload();
-    if (
-      !payload.creates.length &&
-      !payload.updates.length &&
-      !payload.deletes.length
-    ) {
-      updateSaveState("");
-      return;
-    }
-    const machinesNeedingTagCheck = state.draftMachines.filter((m) => {
-      if (!m.tagId) return false;
-      const remote = getRemoteById(m.id);
-      const changed = (remote?.tagId || null) !== m.tagId;
-      return m.isNew || state.dirtyById.has(m.id) || changed;
-    });
-    if (machinesNeedingTagCheck.length) {
-      for (const machine of machinesNeedingTagCheck) {
-        try {
-          const res = await validateTag(machine.tagId);
-          if (!res.exists) {
-            state.tagStatusById[machine.id] = {
-              text: "Tag no existe",
-              state: "error"
-            };
-            renderCards();
-            updateSaveState("Error al guardar");
-            return;
-          }
-          if (res.machineId && res.machineId !== machine.id) {
-            state.tagStatusById[machine.id] = {
-              text: "Tag ya está asignado",
-              state: "error"
-            };
-            renderCards();
-            updateSaveState("Error al guardar");
-            return;
-          }
-        } catch {
-          state.tagStatusById[machine.id] = {
-            text: "Error al validar el tag",
-            state: "error"
-          };
-          renderCards();
-          updateSaveState("Error al guardar");
-          return;
-        }
-      }
-    }
-    state.saving = true;
-    updateSaveState("Guardando...");
-    try {
-      await commitChanges(state.uid, payload);
-      const syncTargets = state.draftMachines.filter(
-        (m) => m.tagId && !state.deletedIds.has(m.id)
-      );
-      await Promise.all(
-        syncTargets.map((machine) =>
-          upsertMachineAccessFromMachine(state.uid, machine)
-        )
-      );
-      await Promise.all(
-        syncTargets.map((machine) => assignTag(machine.tagId, state.uid, machine.id))
-      );
-      const refreshed = state.draftMachines.map((m) => ({
-        ...m,
-        isNew: false
-      }));
-      setRemote(refreshed);
-      updateSaveState("Guardado");
-      setTimeout(() => updateSaveState(""), 1500);
-    } catch {
-      updateSaveState("Error al guardar");
-    } finally {
-      state.saving = false;
-    }
   };
 
   addBtn.addEventListener("click", () => {
     const order = computeNextOrder();
     const machine = createDraftMachine(state.draftMachines.length + 1, order);
     state.draftMachines = [machine, ...state.draftMachines];
-    updateSaveState("");
     renderCards();
+    autoSave.saveNow(machine.id, "create");
   });
 
-  saveBtn.addEventListener("click", () => {
-    saveChanges();
-  });
-
-  const initDashboard = async (uid) => {
+  const initDashboard = async (uid, user) => {
     state.uid = uid;
+    state.adminLabel = user.displayName || user.email || "Administrador";
     const remote = await fetchMachines(uid);
     const normalized = remote
       .map((m, idx) => normalizeMachine(m, idx))
@@ -586,6 +510,6 @@ if (mount) {
       window.location.href = "/es/auth/login.html";
       return;
     }
-    initDashboard(user.uid);
+    initDashboard(user.uid, user);
   });
 }
