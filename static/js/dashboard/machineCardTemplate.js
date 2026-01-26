@@ -590,7 +590,7 @@ export const createMachineCard = (machine, options = {}) => {
   };
 
   if (!options.disableTitleEdit) {
-    title.addEventListener("click", (event) => {
+    title.addEventListener("dblclick", (event) => {
       event.stopPropagation();
       startTitleEdit();
     });
