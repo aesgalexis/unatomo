@@ -13,7 +13,7 @@ const getDragAfterElement = (container, y) => {
   ).element;
 };
 
-export const initDragAndDrop = (listEl, getMachines, setMachinesAndPersist, rerender) => {
+export const initDragAndDrop = (listEl, onReorder) => {
   let draggedId = null;
   let placeholder = null;
 
@@ -78,11 +78,6 @@ export const initDragAndDrop = (listEl, getMachines, setMachinesAndPersist, rere
     const order = [...listEl.querySelectorAll(".machine-card")]
       .map((card) => card.dataset.machineId)
       .filter(Boolean);
-    const current = getMachines();
-    const next = order
-      .map((id) => current.find((machine) => machine.id === id))
-      .filter(Boolean);
-    setMachinesAndPersist(next);
-    rerender();
+    if (onReorder) onReorder(order);
   });
 };
