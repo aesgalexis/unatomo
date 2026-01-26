@@ -2,6 +2,9 @@
   margin: 0.5rem 0 1rem;
   display: flex;
   justify-content: flex-start;
+  gap: 0.6rem;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .btn-add {
@@ -18,6 +21,28 @@
 
 .btn-add:hover {
   opacity: 0.95;
+}
+
+.btn-save {
+  background: color-mix(in srgb, var(--bg) 90%, transparent);
+  border: 1px solid var(--border-subtle);
+  color: var(--fg);
+  padding: 0.55rem 1.2rem;
+  border-radius: 0.75rem;
+  font: inherit;
+  font-size: 0.95rem;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn-save:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.save-status {
+  font-size: 0.85rem;
+  color: color-mix(in srgb, var(--fg) 70%, transparent);
 }
 
 .machine-placeholder {

@@ -1,6 +1,14 @@
-const STORAGE_KEY = "unatomo_machines_v1";
+const generateId = () => {
+  if (window.crypto?.randomUUID) return window.crypto.randomUUID();
+  return `m_${Math.random().toString(36).slice(2, 10)}`;
+};
 
-const normalizeMachine = (raw, index) => {
+export const cloneMachines = (list) => {
+  if (typeof structuredClone === "function") return structuredClone(list);
+  return JSON.parse(JSON.stringify(list || []));
+};
+
+export const normalizeMachine = (raw, index = 0) => {
   if (!raw || typeof raw !== "object") return null;
   return {
     id: raw.id || generateId(),
@@ -9,57 +17,30 @@ const normalizeMachine = (raw, index) => {
     model: typeof raw.model === "string" ? raw.model : "",
     year: typeof raw.year === "number" ? raw.year : null,
     status: raw.status || "operativa",
+    tagId: typeof raw.tagId === "string" ? raw.tagId : null,
     logs: Array.isArray(raw.logs) ? raw.logs : [],
+    tasks: Array.isArray(raw.tasks) ? raw.tasks : [],
     url: typeof raw.url === "string" ? raw.url : "",
     users: Array.isArray(raw.users) ? raw.users : [],
-    tasks: Array.isArray(raw.tasks) ? raw.tasks : []
+    order: typeof raw.order === "number" ? raw.order : index,
+    isNew: !!raw.isNew
   };
 };
 
-const loadMachines = () => {
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    return parsed
-      .map((item, idx) => normalizeMachine(item, idx))
-      .filter(Boolean);
-  } catch {
-    return [];
-  }
-};
-
-const saveMachines = (list) => {
-  try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-  } catch {
-    // ignore
-  }
-};
-
-const generateId = () => {
-  if (window.crypto?.randomUUID) return window.crypto.randomUUID();
-  return `m_${Math.random().toString(36).slice(2, 10)}`;
-};
-
-const addMachine = (list) => {
-  const count = list.length + 1;
-  const machine = {
+export const createDraftMachine = (count, order) => {
+  return {
     id: generateId(),
     title: `Equipo ${count}`,
     brand: "",
     model: "",
     year: null,
     status: "operativa",
+    tagId: null,
     logs: [],
+    tasks: [],
     url: "",
     users: [],
-    tasks: []
+    order,
+    isNew: true
   };
-  const next = [machine, ...list];
-  saveMachines(next);
-  return { machine, list: next };
 };
-
-export { loadMachines, saveMachines, addMachine };
