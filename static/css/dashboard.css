@@ -88,7 +88,15 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.9rem 1.25rem;
+}
+
+.mc-header-toggle {
+  margin-left: auto;
+  border: none;
+  background: transparent;
+  color: inherit;
   cursor: pointer;
+  padding: 0.2rem 0.4rem;
 }
 
 
@@ -146,7 +154,6 @@
 }
 
 .mc-chevron {
-  margin-left: auto;
   opacity: 0.6;
 }
 
@@ -549,3 +556,5 @@
   color: var(--danger, #d33);
   font-size: 0.85rem;
 }
+
+
