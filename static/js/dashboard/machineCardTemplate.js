@@ -22,7 +22,7 @@ const buildTemplate = () => {
 };
 
 const statusLabels = {
-  operativa: "Operativa",
+  operativa: "Operativo",
   fuera_de_servicio: "Fuera de servicio",
   desconectada: "Desconectada"
 };
@@ -125,15 +125,18 @@ const renderGeneral = (panel, machine, hooks, options = {}) => {
   panel.innerHTML = "";
   const canEditGeneral = options.canEditGeneral !== false;
 
-  const rows = [
-    { key: "brand", label: "Marca", value: machine.brand || "" },
-    { key: "model", label: "Modelo", value: machine.model || "" },
-    { key: "year", label: "Año", value: machine.year ?? "" }
+  const row = document.createElement("div");
+  row.className = "mc-row mc-row-input mc-row-inline";
+
+  const fields = [
+    { key: "brand", label: "Marca", value: machine.brand || "", type: "text" },
+    { key: "model", label: "Modelo", value: machine.model || "", type: "text" },
+    { key: "year", label: "Año", value: machine.year ?? "", type: "number" }
   ];
 
-  rows.forEach(({ key, label, value }) => {
-    const row = document.createElement("div");
-    row.className = "mc-row mc-row-input";
+  fields.forEach(({ key, label, value, type }) => {
+    const wrap = document.createElement("div");
+    wrap.className = "mc-field";
 
     const name = document.createElement("span");
     name.className = "mc-row-label";
@@ -141,7 +144,7 @@ const renderGeneral = (panel, machine, hooks, options = {}) => {
 
     const input = document.createElement("input");
     input.className = "mc-row-input-field";
-    input.type = key === "year" ? "number" : "text";
+    input.type = type;
     if (key === "year") {
       input.inputMode = "numeric";
       input.placeholder = "YYYY";
@@ -155,14 +158,16 @@ const renderGeneral = (panel, machine, hooks, options = {}) => {
       }
     });
 
-    const error = document.createElement("div");
-    error.className = "mc-field-error";
-
-    row.appendChild(name);
-    row.appendChild(input);
-    row.appendChild(error);
-    panel.appendChild(row);
+    wrap.appendChild(name);
+    wrap.appendChild(input);
+    row.appendChild(wrap);
   });
+
+  const error = document.createElement("div");
+  error.className = "mc-tag-status";
+
+  panel.appendChild(row);
+  panel.appendChild(error);
 };
 
 const renderHistorial = (panel, machine, hooks, options = {}) => {
@@ -472,7 +477,7 @@ export const createMachineCard = (machine, options = {}) => {
   const panel = card.querySelector(".mc-panel");
 
   title.textContent = machine.title;
-  statusBtn.textContent = statusLabels[machine.status] || "Operativa";
+  statusBtn.textContent = statusLabels[machine.status] || "Operativo";
   statusBtn.dataset.status = machine.status || "operativa";
   if (options.canEditStatus === false) {
     statusBtn.disabled = true;
