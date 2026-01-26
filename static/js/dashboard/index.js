@@ -149,6 +149,12 @@ if (mount) {
     }
   });
 
+  const heightRAF = new Map();
+  const scheduleHeightSync = (id, fn) => {
+    if (heightRAF.has(id)) cancelAnimationFrame(heightRAF.get(id));
+    heightRAF.set(id, requestAnimationFrame(fn));
+  };
+
   const renderCards = () => {
     list.innerHTML = "";
     const machines = Array.isArray(state.draftMachines) ? state.draftMachines : [];
@@ -206,7 +212,7 @@ if (mount) {
           if (!state.selectedTabById) state.selectedTabById = {};
           state.selectedTabById[machine.id] = tabId || "quehaceres";
           if (node.dataset.expanded === "true") {
-            recalcHeight(node);
+            scheduleHeightSync(machine.id, () => recalcHeight(node));
           }
         };
 
@@ -468,13 +474,15 @@ if (mount) {
           tabBtn = card.querySelector('.mc-tab[data-tab="quehaceres"]');
           if (state.selectedTabById) state.selectedTabById[machine.id] = "quehaceres";
         }
-        if (desiredTab !== "quehaceres" && tabBtn) {
-          tabBtn.click();
+        if (tabBtn) {
+          card.querySelectorAll(".mc-tab").forEach((t) => t.classList.remove("is-active"));
+          tabBtn.classList.add("is-active");
+          if (hooks.renderTab) hooks.renderTab(desiredTab);
         }
 
         if (expandedById.has(machine.id)) {
           card.dataset.expanded = "true";
-          recalcHeight(card);
+          scheduleHeightSync(machine.id, () => recalcHeight(card));
         }
       });
   };

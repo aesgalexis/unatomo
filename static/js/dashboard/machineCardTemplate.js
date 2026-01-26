@@ -2,10 +2,12 @@ const buildTemplate = () => {
   const wrapper = document.createElement("div");
   wrapper.innerHTML = `
     <article class="machine-card" data-expanded="false" draggable="true">
-      <header class="mc-header" role="button" tabindex="0">
+      <header class="mc-header">
         <div class="mc-title"></div>
         <button class="mc-status" type="button"></button>
-        <span class="mc-chevron" aria-hidden="true">▾</span>
+        <button class="mc-header-toggle" type="button" aria-label="Expandir">
+          <span class="mc-chevron" aria-hidden="true">▾</span>
+        </button>
       </header>
       <div class="mc-expand">
         <div class="mc-tabs" role="tablist">
@@ -473,7 +475,7 @@ export const createMachineCard = (machine, options = {}) => {
 
   const title = card.querySelector(".mc-title");
   const statusBtn = card.querySelector(".mc-status");
-  const header = card.querySelector(".mc-header");
+  const headerToggle = card.querySelector(".mc-header-toggle");
   const panel = card.querySelector(".mc-panel");
 
   title.textContent = machine.title;
@@ -486,6 +488,7 @@ export const createMachineCard = (machine, options = {}) => {
   if (options.mode === "single") {
     const chevron = card.querySelector(".mc-chevron");
     if (chevron) chevron.style.display = "none";
+    if (headerToggle) headerToggle.style.display = "none";
   }
 
   const hooks = {
@@ -516,27 +519,25 @@ export const createMachineCard = (machine, options = {}) => {
     if (configTab) configTab.remove();
   }
 
+  const renderTab = (key) => {
+    const render = TAB_RENDER[key] || TAB_RENDER.general;
+    render(panel, machine, hooks, options);
+    panel.dataset.panel = key;
+  };
+
+  hooks.renderTab = renderTab;
+
   const firstTab = card.querySelector(".mc-tab");
   if (firstTab) {
     card.querySelectorAll(".mc-tab").forEach((tab) => tab.classList.remove("is-active"));
     firstTab.classList.add("is-active");
-    const render = TAB_RENDER[firstTab.dataset.tab] || TAB_RENDER.general;
-    render(panel, machine, hooks, options);
-    panel.dataset.panel = firstTab.dataset.tab;
+    renderTab(firstTab.dataset.tab);
   }
 
-  if (options.mode !== "single") {
-    header.addEventListener("click", (event) => {
-      if (event.target.closest("button, input, select, textarea, a")) return;
+  if (options.mode !== "single" && headerToggle) {
+    headerToggle.addEventListener("click", (event) => {
+      event.stopPropagation();
       if (hooks.onToggleExpand) hooks.onToggleExpand(card);
-    });
-
-    header.addEventListener("keydown", (event) => {
-      if (event.target.closest("button, input, select, textarea, a")) return;
-      if (event.key === "Enter" || event.key === " ") {
-        event.preventDefault();
-        if (hooks.onToggleExpand) hooks.onToggleExpand(card);
-      }
     });
   }
 
@@ -587,17 +588,27 @@ export const createMachineCard = (machine, options = {}) => {
     });
   }
 
+  card.addEventListener(
+    "click",
+    (event) => {
+      if (event.target.closest(".mc-header-toggle")) return;
+      if (event.target.closest("button, a, input, select, textarea, label")) {
+        event.stopPropagation();
+      }
+    },
+    true
+  );
+
   card.querySelectorAll(".mc-tab").forEach((tab) => {
-    tab.addEventListener("click", () => {
+    tab.addEventListener("click", (event) => {
+      event.stopPropagation();
       if (card.dataset.expanded !== "true" && hooks.onToggleExpand) {
         hooks.onToggleExpand(card);
       }
       card.querySelectorAll(".mc-tab").forEach((t) => t.classList.remove("is-active"));
       tab.classList.add("is-active");
       const key = tab.dataset.tab;
-      const render = TAB_RENDER[key] || TAB_RENDER.general;
-      render(panel, machine, hooks, options);
-      panel.dataset.panel = key;
+      renderTab(key);
       if (hooks.onSelectTab) hooks.onSelectTab(card, key);
     });
   });
