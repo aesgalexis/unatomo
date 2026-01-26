@@ -475,6 +475,7 @@ export const createMachineCard = (machine, options = {}) => {
 
   const title = card.querySelector(".mc-title");
   const statusBtn = card.querySelector(".mc-status");
+  const header = card.querySelector(".mc-header");
   const headerToggle = card.querySelector(".mc-header-toggle");
   const panel = card.querySelector(".mc-panel");
 
@@ -537,6 +538,13 @@ export const createMachineCard = (machine, options = {}) => {
   if (options.mode !== "single" && headerToggle) {
     headerToggle.addEventListener("click", (event) => {
       event.stopPropagation();
+      if (hooks.onToggleExpand) hooks.onToggleExpand(card);
+    });
+  }
+
+  if (options.mode !== "single" && header) {
+    header.addEventListener("click", (event) => {
+      if (event.target.closest("button, a, input, select, textarea, label")) return;
       if (hooks.onToggleExpand) hooks.onToggleExpand(card);
     });
   }
