@@ -79,7 +79,7 @@ const renderTabContent = (machine, activeTab) => {
     ["Modelo", machine.modelo],
     ["Nº serie", machine.serie],
     ["Ubicación", machine.ubicacion],
-    ["Estado", machine.estado === "ok" ? "Operativa" : "Parada"],
+    ["Estado", machine.estado === "ok" ? "Operativo" : "Parada"],
     ["Última intervención", machine.ultimaIntervencion]
   ];
 
