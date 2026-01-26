@@ -117,6 +117,11 @@
   cursor: pointer;
 }
 
+.mc-status:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .mc-status[data-status="operativa"] {
   border-color: #16a34a;
   color: #16a34a;
@@ -189,6 +194,27 @@
   justify-content: space-between;
   gap: 1rem;
   padding: 0.25rem 0;
+}
+
+.mc-row-input {
+  align-items: center;
+}
+
+.mc-row-input-field {
+  flex: 1;
+  min-width: 160px;
+  padding: 0.35rem 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--bg) 96%, transparent);
+  color: var(--fg);
+  font: inherit;
+}
+
+.mc-field-error {
+  font-size: 0.75rem;
+  color: var(--danger, #d33);
+  margin-left: auto;
 }
 
 .mc-row-label {
@@ -345,6 +371,15 @@
   align-items: center;
 }
 
+.mc-user-admin {
+  grid-template-columns: 1fr auto;
+}
+
+.mc-user-role-label {
+  font-size: 0.85rem;
+  color: color-mix(in srgb, var(--fg) 70%, transparent);
+}
+
 .mc-user-role {
   border: 1px solid var(--border-subtle);
   border-radius: 0.5rem;
@@ -388,6 +423,8 @@
   justify-content: space-between;
   gap: 0.75rem;
   font-size: 0.9rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .task-text {
