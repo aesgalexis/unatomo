@@ -200,6 +200,19 @@
   align-items: center;
 }
 
+.mc-row-inline {
+  gap: 1rem;
+  align-items: flex-end;
+}
+
+.mc-field {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
 .mc-row-input-field {
   flex: 1;
   min-width: 160px;
@@ -214,7 +227,12 @@
 .mc-field-error {
   font-size: 0.75rem;
   color: var(--danger, #d33);
-  margin-left: auto;
+  margin-top: 0.35rem;
+}
+
+.mc-form-status {
+  width: 100%;
+  color: color-mix(in srgb, var(--fg) 70%, transparent);
 }
 
 .mc-row-label {

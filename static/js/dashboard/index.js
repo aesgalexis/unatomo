@@ -243,11 +243,17 @@ if (mount) {
             const currentYear = new Date().getFullYear();
             const parsed = value ? Number(value) : null;
             if (parsed !== null && (Number.isNaN(parsed) || parsed > currentYear || parsed < currentYear - 50)) {
-              if (errorEl) errorEl.textContent = `Año inválido (entre ${currentYear - 50} y ${currentYear}).`;
+              if (errorEl) {
+                errorEl.textContent = `Año inválido (entre ${currentYear - 50} y ${currentYear}).`;
+                errorEl.dataset.state = "error";
+              }
               if (input) input.setAttribute("aria-invalid", "true");
               return;
             }
-            if (errorEl) errorEl.textContent = "";
+            if (errorEl) {
+              errorEl.textContent = "";
+              errorEl.dataset.state = "";
+            }
             if (input) input.removeAttribute("aria-invalid");
             updateMachine(id, { year: parsed });
           } else {
@@ -382,7 +388,7 @@ if (mount) {
             const time = new Date(log.ts).toLocaleString("es-ES");
             const value =
               log.value === "operativa"
-                ? "Operativa"
+                ? "Operativo"
                 : log.value === "fuera_de_servicio"
                 ? "Fuera de servicio"
                 : "Desconectada";
