@@ -1,9 +1,12 @@
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 import { auth } from "/static/js/firebase/firebaseApp.js";
 import { fetchMachines, commitChanges } from "./firestoreRepo.js";
+import { validateTag, assignTag } from "./tagRepo.js";
+import { upsertMachineAccessFromMachine } from "./machineAccessRepo.js";
 import { createMachineCard } from "./machineCardTemplate.js";
 import { initDragAndDrop } from "./dragAndDrop.js";
 import { cloneMachines, normalizeMachine, createDraftMachine } from "./machineStore.js";
+import { generateSaltBase64, hashPassword } from "/static/js/utils/crypto.js";
 
 const COLLAPSED_HEIGHT = 96;
 const EXPAND_FACTOR = 2.5;
@@ -19,6 +22,7 @@ if (mount) {
     deletedIds: new Set(),
     expandedById: [],
     selectedTabById: {},
+    tagStatusById: {},
     saving: false
   };
 
@@ -94,10 +98,12 @@ if (mount) {
     state.draftMachines = cloneMachines(remote);
     state.dirtyById.clear();
     state.deletedIds.clear();
+    state.tagStatusById = {};
     updateSaveState("");
   };
 
   const getDraftIndex = (id) => state.draftMachines.findIndex((m) => m.id === id);
+  const getRemoteById = (id) => state.remoteMachines.find((m) => m.id === id);
 
   const markDirty = (id) => {
     if (!id) return;
@@ -157,7 +163,9 @@ if (mount) {
       .slice()
       .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
       .forEach((machine) => {
-        const { card, hooks } = createMachineCard(machine);
+        const { card, hooks } = createMachineCard(machine, {
+          tagStatus: state.tagStatusById[machine.id]
+        });
         card.style.maxHeight = `${COLLAPSED_HEIGHT}px`;
 
         hooks.onToggleExpand = (node) => {
@@ -211,35 +219,51 @@ if (mount) {
           updateMachine(machine.id, { title: nextTitle });
         };
 
-        hooks.onGenerateUrl = (id) => {
-          const url = `${window.location.origin}/es/index.html#/m/${id}`;
-          updateMachine(id, { url });
-          if (!state.selectedTabById) state.selectedTabById = {};
-          state.selectedTabById[id] = "configuracion";
-          state.expandedById = Array.from(expandedById);
-          renderCards();
+        hooks.onConnectTag = async (id, tagInput, statusEl) => {
+          const tagId = tagInput.value.trim();
+          if (!tagId) return;
+          statusEl.textContent = "Comprobando...";
+          statusEl.dataset.state = "neutral";
+          try {
+            const res = await validateTag(tagId);
+            if (!res.exists) {
+              statusEl.textContent = "Tag no existe";
+              statusEl.dataset.state = "error";
+              return;
+            }
+            if (res.machineId && res.machineId !== id) {
+              statusEl.textContent = "Tag ya está asignado";
+              statusEl.dataset.state = "error";
+              return;
+            }
+            updateMachine(id, { tagId });
+            state.tagStatusById[id] = { text: "Tag enlazado", state: "ok" };
+            if (!state.selectedTabById) state.selectedTabById = {};
+            state.selectedTabById[id] = "configuracion";
+            state.expandedById = Array.from(expandedById);
+            renderCards();
+          } catch {
+            statusEl.textContent = "Error al validar el tag";
+            statusEl.dataset.state = "error";
+          }
         };
 
-        hooks.onCopyUrl = (id, btn, input) => {
-          const current = state.draftMachines.find((m) => m.id === id);
-          if (!current?.url) {
-            btn.textContent = "Primero genera la URL";
-            setTimeout(() => (btn.textContent = "⧉"), 1000);
-            return;
-          }
+        hooks.onCopyTagUrl = (id, btn, input) => {
+          if (!input.value) return;
           navigator.clipboard
-            .writeText(current.url)
+            .writeText(input.value)
             .catch(() => {
               input.select();
               document.execCommand("copy");
             })
             .finally(() => {
+              const prev = btn.textContent;
               btn.textContent = "Copiado";
-              setTimeout(() => (btn.textContent = "⧉"), 1000);
+              setTimeout(() => (btn.textContent = prev), 1000);
             });
         };
 
-        hooks.onAddUser = (id, userInput, passInput, addBtn) => {
+        hooks.onAddUser = async (id, userInput, passInput, addBtn) => {
           const username = userInput.value.trim();
           const password = passInput.value.trim();
           if (!username || !password) {
@@ -261,16 +285,28 @@ if (mount) {
             }
             return;
           }
-          users.push({
-            id: (window.crypto?.randomUUID && window.crypto.randomUUID()) || `u_${Date.now()}`,
-            username,
-            password,
-            role: "usuario",
-            createdAt: new Date().toISOString()
-          });
-          updateMachine(id, { users });
-          userInput.value = "";
-          passInput.value = "";
+          try {
+            const saltBase64 = generateSaltBase64();
+            const passwordHashBase64 = await hashPassword(password, saltBase64);
+            users.push({
+              id: (window.crypto?.randomUUID && window.crypto.randomUUID()) || `u_${Date.now()}`,
+              username,
+              role: "usuario",
+              createdAt: new Date().toISOString(),
+              saltBase64,
+              passwordHashBase64
+            });
+            updateMachine(id, { users });
+            userInput.value = "";
+            passInput.value = "";
+          } catch {
+            if (addBtn) {
+              const prev = addBtn.textContent;
+              addBtn.textContent = "Error al cifrar";
+              setTimeout(() => (addBtn.textContent = prev), 1000);
+            }
+            return;
+          }
           if (!state.selectedTabById) state.selectedTabById = {};
           state.selectedTabById[id] = "configuracion";
           state.expandedById = Array.from(expandedById);
@@ -419,14 +455,15 @@ if (mount) {
         tagId: m.tagId ?? null,
         logs: m.logs || [],
         tasks: m.tasks || [],
-        url: m.url || null,
         order: typeof m.order === "number" ? m.order : 0,
         // TODO: passwordHash pendiente en fase Functions.
         users: (m.users || []).map((u) => ({
           id: u.id,
           username: u.username,
           role: u.role,
-          createdAt: u.createdAt
+          createdAt: u.createdAt,
+          saltBase64: u.saltBase64,
+          passwordHashBase64: u.passwordHashBase64
         }))
       };
 
@@ -453,10 +490,60 @@ if (mount) {
       updateSaveState("");
       return;
     }
+    const machinesNeedingTagCheck = state.draftMachines.filter((m) => {
+      if (!m.tagId) return false;
+      const remote = getRemoteById(m.id);
+      const changed = (remote?.tagId || null) !== m.tagId;
+      return m.isNew || state.dirtyById.has(m.id) || changed;
+    });
+    if (machinesNeedingTagCheck.length) {
+      for (const machine of machinesNeedingTagCheck) {
+        try {
+          const res = await validateTag(machine.tagId);
+          if (!res.exists) {
+            state.tagStatusById[machine.id] = {
+              text: "Tag no existe",
+              state: "error"
+            };
+            renderCards();
+            updateSaveState("Error al guardar");
+            return;
+          }
+          if (res.machineId && res.machineId !== machine.id) {
+            state.tagStatusById[machine.id] = {
+              text: "Tag ya está asignado",
+              state: "error"
+            };
+            renderCards();
+            updateSaveState("Error al guardar");
+            return;
+          }
+        } catch {
+          state.tagStatusById[machine.id] = {
+            text: "Error al validar el tag",
+            state: "error"
+          };
+          renderCards();
+          updateSaveState("Error al guardar");
+          return;
+        }
+      }
+    }
     state.saving = true;
     updateSaveState("Guardando...");
     try {
       await commitChanges(state.uid, payload);
+      const syncTargets = state.draftMachines.filter(
+        (m) => m.tagId && !state.deletedIds.has(m.id)
+      );
+      await Promise.all(
+        syncTargets.map((machine) =>
+          upsertMachineAccessFromMachine(state.uid, machine)
+        )
+      );
+      await Promise.all(
+        syncTargets.map((machine) => assignTag(machine.tagId, state.uid, machine.id))
+      );
       const refreshed = state.draftMachines.map((m) => ({
         ...m,
         isNew: false

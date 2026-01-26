@@ -20,7 +20,6 @@ export const normalizeMachine = (raw, index = 0) => {
     tagId: typeof raw.tagId === "string" ? raw.tagId : null,
     logs: Array.isArray(raw.logs) ? raw.logs : [],
     tasks: Array.isArray(raw.tasks) ? raw.tasks : [],
-    url: typeof raw.url === "string" ? raw.url : "",
     users: Array.isArray(raw.users) ? raw.users : [],
     order: typeof raw.order === "number" ? raw.order : index,
     isNew: !!raw.isNew
@@ -38,7 +37,6 @@ export const createDraftMachine = (count, order) => {
     tagId: null,
     logs: [],
     tasks: [],
-    url: "",
     users: [],
     order,
     isNew: true
