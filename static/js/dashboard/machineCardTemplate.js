@@ -600,7 +600,8 @@ export const createMachineCard = (machine, options = {}) => {
     "click",
     (event) => {
       if (event.target.closest(".mc-header-toggle")) return;
-      if (event.target.closest("button, a, input, select, textarea, label")) {
+      const inPanel = event.target.closest(".mc-panel") || event.target.closest(".mc-tabs");
+      if (inPanel && event.target.closest("button, a, input, select, textarea, label")) {
         event.stopPropagation();
       }
     },
