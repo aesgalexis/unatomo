@@ -8,6 +8,7 @@ import { initDragAndDrop } from "./dragAndDrop.js";
 import { cloneMachines, normalizeMachine, createDraftMachine } from "./machineStore.js";
 import { generateSaltBase64, hashPassword } from "/static/js/utils/crypto.js";
 import { initAutoSave } from "./autoSave.js";
+import { normalizeTasks } from "/static/js/tasks/tasksModel.js";
 
 const COLLAPSED_HEIGHT = 96;
 const EXPAND_FACTOR = 2.5;
@@ -207,12 +208,14 @@ if (mount) {
           adminLabel: state.adminLabel,
           mode: "dashboard",
           canEditTasks: true,
+          canCompleteTasks: true,
           canEditStatus: true,
           canEditGeneral: true,
           canDownloadHistory: true,
           canEditConfig: true,
           visibleTabs: ["quehaceres", "general", "historial", "configuracion"],
-          userRoles: ["usuario", "tecnico", "externo"]
+          userRoles: ["usuario", "tecnico", "externo"],
+          createdBy: state.adminLabel || null
         });
         card.style.maxHeight = `${COLLAPSED_HEIGHT}px`;
 
@@ -438,6 +441,11 @@ if (mount) {
           const logs = machineData.logs || [];
           const lines = logs.map((log) => {
             const time = new Date(log.ts).toLocaleString("es-ES");
+            if (log.type === "task") {
+              const title = log.title || "Tarea";
+              const user = log.user ? ` - por ${log.user}` : "";
+              return `[${time}] Tarea completada: ${title}${user}`;
+            }
             const value =
               log.value === "operativa"
                 ? "Operativo"
@@ -472,27 +480,11 @@ if (mount) {
           });
         };
 
-        hooks.onAddTask = (id, titleInput, freqSelect, btn) => {
-          const title = titleInput.value.trim();
-          if (!title) {
-            titleInput.setAttribute("aria-invalid", "true");
-            if (btn) {
-              const prev = btn.textContent;
-              btn.textContent = "Revisa el título";
-              setTimeout(() => (btn.textContent = prev), 1000);
-            }
-            return;
-          }
+        hooks.onAddTask = (id, task) => {
           const current = getDraftById(id);
           const tasks = Array.isArray(current?.tasks) ? [...current.tasks] : [];
-          tasks.unshift({
-            id: (window.crypto?.randomUUID && window.crypto.randomUUID()) || `t_${Date.now()}`,
-            title,
-            frequency: freqSelect.value,
-            createdAt: new Date().toISOString()
-          });
+          tasks.unshift(task);
           updateMachine(id, { tasks });
-          titleInput.value = "";
           if (!state.selectedTabById) state.selectedTabById = {};
           state.selectedTabById[id] = "quehaceres";
           state.expandedById = Array.from(expandedById);
@@ -509,6 +501,30 @@ if (mount) {
           state.expandedById = Array.from(expandedById);
           renderCards({ preserveScroll: true });
           autoSave.saveNow(id, "remove-task");
+        };
+
+        hooks.onCompleteTask = (id, taskId) => {
+          const current = getDraftById(id);
+          const tasks = normalizeTasks(current?.tasks || []).map((t) =>
+            t.id === taskId ? { ...t, lastCompletedAt: new Date().toISOString() } : t
+          );
+          const task = tasks.find((t) => t.id === taskId);
+          const user = state.adminLabel || "Administrador";
+          const logs = [
+            ...(current?.logs || []),
+            {
+              ts: new Date().toISOString(),
+              type: "task",
+              title: task?.title || "Tarea",
+              user
+            }
+          ];
+          updateMachine(id, { tasks, logs });
+          if (!state.selectedTabById) state.selectedTabById = {};
+          state.selectedTabById[id] = "quehaceres";
+          state.expandedById = Array.from(expandedById);
+          renderCards({ preserveScroll: true });
+          autoSave.saveNow(id, "task-complete");
         };
 
         list.appendChild(card);
