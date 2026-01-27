@@ -609,6 +609,9 @@ export const createMachineCard = (machine, options = {}) => {
     tab.addEventListener("click", (event) => {
       event.stopPropagation();
       const key = tab.dataset.tab;
+      if (card.dataset.expanded !== "true" && hooks.onToggleExpand) {
+        hooks.onToggleExpand(card);
+      }
       hooks.setActiveTab(key, { notify: true });
     });
   });
