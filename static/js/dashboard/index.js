@@ -132,7 +132,7 @@ if (mount) {
     const status = state.tagStatusById[id];
     const card = list.querySelector(`.machine-card[data-machine-id="${id}"]`);
     if (!card) return;
-    const statusEl = card.querySelector(".mc-tag-status");
+    const statusEl = card.querySelector('.mc-panel[data-panel="configuracion"] .mc-tag-status');
     if (!statusEl) return;
     statusEl.textContent = status?.text || "";
     statusEl.dataset.state = status?.state || "";
