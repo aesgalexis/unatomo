@@ -596,29 +596,20 @@ export const createMachineCard = (machine, options = {}) => {
     });
   }
 
-  card.addEventListener(
-    "click",
-    (event) => {
-      if (event.target.closest(".mc-header-toggle")) return;
-      const inPanel = event.target.closest(".mc-panel") || event.target.closest(".mc-tabs");
-      if (inPanel && event.target.closest("button, a, input, select, textarea, label")) {
-        event.stopPropagation();
-      }
-    },
-    true
-  );
+  hooks.setActiveTab = (tabId, { notify = true } = {}) => {
+    const tab = card.querySelector(`.mc-tab[data-tab="${tabId}"]`);
+    if (!tab) return;
+    card.querySelectorAll(".mc-tab").forEach((t) => t.classList.remove("is-active"));
+    tab.classList.add("is-active");
+    renderTab(tabId);
+    if (notify && hooks.onSelectTab) hooks.onSelectTab(card, tabId);
+  };
 
   card.querySelectorAll(".mc-tab").forEach((tab) => {
     tab.addEventListener("click", (event) => {
       event.stopPropagation();
-      if (card.dataset.expanded !== "true" && hooks.onToggleExpand) {
-        hooks.onToggleExpand(card);
-      }
-      card.querySelectorAll(".mc-tab").forEach((t) => t.classList.remove("is-active"));
-      tab.classList.add("is-active");
       const key = tab.dataset.tab;
-      renderTab(key);
-      if (hooks.onSelectTab) hooks.onSelectTab(card, key);
+      hooks.setActiveTab(key, { notify: true });
     });
   });
 
