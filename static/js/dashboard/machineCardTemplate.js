@@ -375,19 +375,7 @@ const renderConfiguracion = (panel, machine, hooks, options = {}) => {
   const list = document.createElement("div");
   list.className = "mc-user-list";
 
-  if (options.adminLabel) {
-    const adminRow = document.createElement("div");
-    adminRow.className = "mc-user-row mc-user-admin";
-    const adminName = document.createElement("span");
-    adminName.className = "mc-user-name";
-    adminName.textContent = options.adminLabel;
-    const adminRole = document.createElement("span");
-    adminRole.className = "mc-user-role-label";
-    adminRole.textContent = "Administrador";
-    adminRow.appendChild(adminName);
-    adminRow.appendChild(adminRole);
-    list.appendChild(adminRow);
-  }
+  // No mostramos el administrador actual en el listado.
 
   const roles = options.userRoles || ["usuario", "tecnico", "externo"];
   const labels = { usuario: "Usuario", tecnico: "Técnico", externo: "Externo" };
