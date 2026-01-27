@@ -127,6 +127,16 @@ if (mount) {
     return maxOrder + 1;
   };
 
+  const updateTagStatusUI = (id) => {
+    const status = state.tagStatusById[id];
+    const card = list.querySelector(`.machine-card[data-machine-id="${id}"]`);
+    if (!card) return;
+    const statusEl = card.querySelector(".mc-tag-status");
+    if (!statusEl) return;
+    statusEl.textContent = status?.text || "";
+    statusEl.dataset.state = status?.state || "";
+  };
+
   const autoSave = initAutoSave({
     notify: updateSaveState,
     saveFn: async (machineId) => {
@@ -137,12 +147,12 @@ if (mount) {
         const res = await validateTag(machine.tagId);
         if (!res.exists) {
           state.tagStatusById[machine.id] = { text: "Tag no existe", state: "error" };
-          renderCards();
+          updateTagStatusUI(machine.id);
           throw new Error("tag-missing");
         }
         if (res.machineId && res.machineId !== machine.id) {
           state.tagStatusById[machine.id] = { text: "Tag ya está asignado", state: "error" };
-          renderCards();
+          updateTagStatusUI(machine.id);
           throw new Error("tag-assigned");
         }
       }
@@ -153,7 +163,7 @@ if (mount) {
         await upsertMachineAccessFromMachine(state.uid, machine);
         state.tagStatusById[machine.id] = { text: "Tag enlazado", state: "ok" };
       }
-      renderCards();
+      updateTagStatusUI(machine.id);
     }
   });
 
@@ -163,11 +173,15 @@ if (mount) {
     heightRAF.set(id, requestAnimationFrame(fn));
   };
 
-  const renderCards = () => {
+  const renderCards = ({ preserveScroll = false } = {}) => {
+    const prevScrollY = preserveScroll ? window.scrollY : null;
     list.innerHTML = "";
     const machines = Array.isArray(state.draftMachines) ? state.draftMachines : [];
     if (!machines.length) {
       renderPlaceholder();
+      if (preserveScroll) {
+        requestAnimationFrame(() => window.scrollTo(0, prevScrollY || 0));
+      }
       return;
     }
 
@@ -242,7 +256,7 @@ if (mount) {
               { ts: new Date().toISOString(), type: "status", value: nextStatus }
             ]
           });
-          renderCards();
+          renderCards({ preserveScroll: true });
           autoSave.saveNow(machine.id, "status");
           if (keepExpanded) {
             expandedById.add(machine.id);
@@ -251,8 +265,19 @@ if (mount) {
         };
 
         hooks.onTitleUpdate = (node, nextTitle) => {
-          updateMachine(machine.id, { title: nextTitle });
+          const trimmed = (nextTitle || "").trim();
+          const normalized = trimmed.toLowerCase();
+          if (!normalized) return false;
+          const duplicate = state.draftMachines.some(
+            (m) => m.id !== machine.id && (m.title || "").trim().toLowerCase() === normalized
+          );
+          if (duplicate) {
+            updateSaveState("Nombre duplicado");
+            return false;
+          }
+          updateMachine(machine.id, { title: trimmed });
           autoSave.scheduleSave(machine.id, "title");
+          return true;
         };
 
         hooks.onUpdateGeneral = (id, field, value, input, errorEl) => {
@@ -301,7 +326,7 @@ if (mount) {
             if (!state.selectedTabById) state.selectedTabById = {};
             state.selectedTabById[id] = "configuracion";
             state.expandedById = Array.from(expandedById);
-            renderCards();
+            renderCards({ preserveScroll: true });
             autoSave.saveNow(id, "tag");
           } catch {
             statusEl.textContent = "Error al validar el tag";
@@ -315,7 +340,7 @@ if (mount) {
           if (!state.selectedTabById) state.selectedTabById = {};
           state.selectedTabById[id] = "configuracion";
           state.expandedById = Array.from(expandedById);
-          renderCards();
+          renderCards({ preserveScroll: true });
           autoSave.saveNow(id, "tag-disconnect");
         };
 
@@ -381,7 +406,7 @@ if (mount) {
           if (!state.selectedTabById) state.selectedTabById = {};
           state.selectedTabById[id] = "configuracion";
           state.expandedById = Array.from(expandedById);
-          renderCards();
+          renderCards({ preserveScroll: true });
           autoSave.saveNow(id, "add-user");
         };
 
@@ -394,7 +419,7 @@ if (mount) {
           if (!state.selectedTabById) state.selectedTabById = {};
           state.selectedTabById[id] = "configuracion";
           state.expandedById = Array.from(expandedById);
-          renderCards();
+          renderCards({ preserveScroll: true });
           autoSave.scheduleSave(id, "role");
         };
 
@@ -405,7 +430,7 @@ if (mount) {
           if (!state.selectedTabById) state.selectedTabById = {};
           state.selectedTabById[id] = "configuracion";
           state.expandedById = Array.from(expandedById);
-          renderCards();
+          renderCards({ preserveScroll: true });
           autoSave.saveNow(id, "remove-user");
         };
 
@@ -471,7 +496,7 @@ if (mount) {
           if (!state.selectedTabById) state.selectedTabById = {};
           state.selectedTabById[id] = "quehaceres";
           state.expandedById = Array.from(expandedById);
-          renderCards();
+          renderCards({ preserveScroll: true });
           autoSave.saveNow(id, "add-task");
         };
 
@@ -482,7 +507,7 @@ if (mount) {
           if (!state.selectedTabById) state.selectedTabById = {};
           state.selectedTabById[id] = "quehaceres";
           state.expandedById = Array.from(expandedById);
-          renderCards();
+          renderCards({ preserveScroll: true });
           autoSave.saveNow(id, "remove-task");
         };
 
@@ -508,6 +533,9 @@ if (mount) {
           scheduleHeightSync(machine.id, () => recalcHeight(card));
         }
       });
+    if (preserveScroll) {
+      requestAnimationFrame(() => window.scrollTo(0, prevScrollY || 0));
+    }
   };
 
   const handleReorder = (orderIds) => {
@@ -522,9 +550,23 @@ if (mount) {
     renderCards();
   };
 
+  const getUniqueTitle = () => {
+    const existing = new Set(
+      state.draftMachines.map((m) => (m.title || "").trim().toLowerCase())
+    );
+    let idx = 1;
+    let title = `Equipo ${idx}`;
+    while (existing.has(title.toLowerCase())) {
+      idx += 1;
+      title = `Equipo ${idx}`;
+    }
+    return title;
+  };
+
   addBtn.addEventListener("click", () => {
     const order = computeNextOrder();
     const machine = createDraftMachine(state.draftMachines.length + 1, order);
+    machine.title = getUniqueTitle();
     state.draftMachines = [machine, ...state.draftMachines];
     renderCards();
     autoSave.saveNow(machine.id, "create");
