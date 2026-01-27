@@ -76,14 +76,22 @@ if (mount) {
     card.style.maxHeight = `${target}px`;
   };
 
-  const collapseCard = (card) => {
+  const collapseCard = (card, options = {}) => {
     card.dataset.expanded = "false";
     card.style.maxHeight = `${COLLAPSED_HEIGHT}px`;
+    if (options.suppressAnimation) {
+      card.classList.add("mc-no-anim");
+      requestAnimationFrame(() => card.classList.remove("mc-no-anim"));
+    }
   };
 
-  const expandCard = (card) => {
+  const expandCard = (card, options = {}) => {
     card.dataset.expanded = "true";
     recalcHeight(card);
+    if (options.suppressAnimation) {
+      card.classList.add("mc-no-anim");
+      requestAnimationFrame(() => card.classList.remove("mc-no-anim"));
+    }
   };
 
   const setRemote = (remote) => {
@@ -482,11 +490,9 @@ if (mount) {
 
         const isExpanded = expandedById.has(machine.id);
         if (isExpanded) {
-          card.dataset.expanded = "true";
-          expandCard(card);
+          expandCard(card, { suppressAnimation: true });
         } else {
-          card.dataset.expanded = "false";
-          collapseCard(card);
+          collapseCard(card, { suppressAnimation: true });
         }
 
         let desiredTab = selectedTabById[machine.id] || "quehaceres";
