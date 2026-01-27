@@ -48,6 +48,8 @@ if (!btn || !menu || !label || !action) {
 
     if (registerBtn) {
       registerBtn.hidden = false;
+      registerBtn.style.display = "";
+      registerBtn.setAttribute("aria-hidden", "false");
       registerBtn.onclick = () => {
         closeMenu();
         window.location.href = "/es/auth/registro.html";
@@ -78,6 +80,8 @@ if (!btn || !menu || !label || !action) {
 
     if (registerBtn) {
       registerBtn.hidden = true;
+      registerBtn.style.display = "none";
+      registerBtn.setAttribute("aria-hidden", "true");
       registerBtn.onclick = null;
     }
 
