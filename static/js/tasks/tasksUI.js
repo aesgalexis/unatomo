@@ -66,9 +66,6 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
       desc.textContent = task.description || "";
       line2.appendChild(desc);
 
-      item.appendChild(line1);
-      item.appendChild(line2);
-
       if (canEditTasks) {
         const remove = document.createElement("a");
         remove.className = "task-remove-link";
@@ -79,8 +76,11 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
           event.stopPropagation();
           if (hooks.onRemoveTask) hooks.onRemoveTask(machine.id, task.id);
         });
-        item.appendChild(remove);
+        meta.appendChild(remove);
       }
+
+      item.appendChild(line1);
+      item.appendChild(line2);
 
       list.appendChild(item);
     });
@@ -98,14 +98,14 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
     const titleInput = document.createElement("input");
     titleInput.className = "task-title-input";
     titleInput.type = "text";
-    titleInput.placeholder = "T?tulo (m?x 64 caracteres)";
+    titleInput.placeholder = "Tarea";
     titleInput.maxLength = MAX_TASK_TITLE;
     titleInput.addEventListener("click", (event) => event.stopPropagation());
 
     const descInput = document.createElement("input");
     descInput.className = "task-desc-input";
     descInput.type = "text";
-    descInput.placeholder = "Descripci?n de la tarea";
+    descInput.placeholder = "Descripción";
     descInput.maxLength = 255;
     descInput.addEventListener("click", (event) => event.stopPropagation());
 
@@ -145,7 +145,7 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
       if (error) {
         titleInput.setAttribute("aria-invalid", "true");
         const prev = createBtn.textContent;
-        createBtn.textContent = "Revisa el t?tulo";
+        createBtn.textContent = "Revisa el título";
         setTimeout(() => (createBtn.textContent = prev), 1000);
         return;
       }

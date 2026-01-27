@@ -115,13 +115,13 @@ const renderHistorial = (panel, machine, hooks, options = {}) => {
       const time = new Date(log.ts).toLocaleString("es-ES");
       if (log.type === "task") {
         const title = log.title || "Tarea";
-        const user = log.user ? ` ? por ${log.user}` : "";
-        item.textContent = `${time} ? Tarea completada: ${title}${user}`;
+        const user = log.user ? ` - por ${log.user}` : "";
+        item.textContent = `${time} - Tarea completada: ${title}${user}`;
       } else if (log.type === "status") {
         const label = statusLabels[log.value] || log.value;
-        item.textContent = `${time} ? Estado ? ${label}`;
+        item.textContent = `${time} - Estado -> ${label}`;
       } else {
-        item.textContent = `${time} ? ${log.type || "Evento"}`;
+        item.textContent = `${time} - ${log.type || "Evento"}`;
       }
       list.appendChild(item);
     });
