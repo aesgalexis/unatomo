@@ -467,21 +467,25 @@ if (mount) {
 
         list.appendChild(card);
 
-        let desiredTab = selectedTabById[machine.id] || "quehaceres";
-        let tabBtn = card.querySelector(`.mc-tab[data-tab="${desiredTab}"]`);
-        if (!tabBtn) {
-          desiredTab = "quehaceres";
-          tabBtn = card.querySelector('.mc-tab[data-tab="quehaceres"]');
-          if (state.selectedTabById) state.selectedTabById[machine.id] = "quehaceres";
-        }
-        if (tabBtn) {
-          card.querySelectorAll(".mc-tab").forEach((t) => t.classList.remove("is-active"));
-          tabBtn.classList.add("is-active");
-          if (hooks.renderTab) hooks.renderTab(desiredTab);
+        const isExpanded = expandedById.has(machine.id);
+        if (isExpanded) {
+          card.dataset.expanded = "true";
+          expandCard(card);
+        } else {
+          card.dataset.expanded = "false";
+          collapseCard(card);
         }
 
-        if (expandedById.has(machine.id)) {
-          card.dataset.expanded = "true";
+        let desiredTab = selectedTabById[machine.id] || "quehaceres";
+        if (!card.querySelector(`.mc-tab[data-tab="${desiredTab}"]`)) {
+          desiredTab = "quehaceres";
+          if (state.selectedTabById) state.selectedTabById[machine.id] = "quehaceres";
+        }
+        if (hooks.setActiveTab) {
+          hooks.setActiveTab(desiredTab, { notify: false });
+        }
+
+        if (isExpanded) {
           scheduleHeightSync(machine.id, () => recalcHeight(card));
         }
       });
