@@ -572,10 +572,14 @@ export const createMachineCard = (machine, options = {}) => {
     });
     input.addEventListener("blur", () => {
       const next = input.value.trim();
-      title.textContent = next || current;
+      let nextTitle = next || current;
       if (hooks.onTitleUpdate) {
-        hooks.onTitleUpdate(card, next || current);
+        const ok = hooks.onTitleUpdate(card, nextTitle);
+        if (ok === false) {
+          nextTitle = current;
+        }
       }
+      title.textContent = nextTitle;
       title.style.display = "";
       input.remove();
     });
@@ -586,7 +590,7 @@ export const createMachineCard = (machine, options = {}) => {
   };
 
   if (!options.disableTitleEdit) {
-    title.addEventListener("dblclick", (event) => {
+    title.addEventListener("click", (event) => {
       event.stopPropagation();
       startTitleEdit();
     });
