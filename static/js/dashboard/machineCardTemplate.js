@@ -1,3 +1,5 @@
+import { renderTasksPanel } from "/static/js/tasks/tasksUI.js";
+
 const buildTemplate = () => {
   const wrapper = document.createElement("div");
   wrapper.innerHTML = `
@@ -29,98 +31,10 @@ const statusLabels = {
   desconectada: "Desconectada"
 };
 
-const frequencyLabels = {
-  diaria: "Diaria",
-  semanal: "Semanal",
-  mensual: "Mensual",
-  trimestral: "Trimestral",
-  semestral: "Semestral",
-  anual: "Anual"
-};
-
 const renderTareas = (panel, machine, hooks, options = {}) => {
-  panel.innerHTML = "";
-  const canEditTasks = options.canEditTasks !== false;
-
-  const list = document.createElement("div");
-  list.className = "task-list";
-
-  const tasks = machine.tasks || [];
-  if (!tasks.length) {
-    const empty = document.createElement("div");
-    empty.className = "task-empty";
-    empty.textContent = "Sin tareas.";
-    list.appendChild(empty);
-  } else {
-    tasks.forEach((task) => {
-      const item = document.createElement("div");
-      item.className = "task-item";
-
-      const text = document.createElement("span");
-      text.className = "task-text";
-      const freq = frequencyLabels[task.frequency] || task.frequency;
-      text.textContent = `${task.title} (${freq})`;
-      item.appendChild(text);
-
-      if (canEditTasks) {
-        const remove = document.createElement("button");
-        remove.type = "button";
-        remove.className = "task-remove";
-        remove.setAttribute("aria-label", "Eliminar tarea");
-        remove.textContent = "×";
-        remove.addEventListener("click", (event) => {
-          event.stopPropagation();
-          if (hooks.onRemoveTask) hooks.onRemoveTask(machine.id, task.id);
-        });
-        item.appendChild(remove);
-      }
-
-      list.appendChild(item);
-    });
-  }
-
-  panel.appendChild(list);
-
-  if (canEditTasks) {
-    const sep = document.createElement("hr");
-    sep.className = "mc-sep";
-
-    const formRow = document.createElement("div");
-    formRow.className = "task-form";
-
-    const titleInput = document.createElement("input");
-    titleInput.className = "task-title-input";
-    titleInput.type = "text";
-    titleInput.placeholder = "Descripción de la tarea";
-    titleInput.maxLength = 255;
-    titleInput.addEventListener("click", (event) => event.stopPropagation());
-
-    const freqSelect = document.createElement("select");
-    freqSelect.className = "task-frequency-select";
-    ["diaria", "semanal", "mensual", "trimestral", "semestral", "anual"].forEach((key) => {
-      const option = document.createElement("option");
-      option.value = key;
-      option.textContent = frequencyLabels[key];
-      freqSelect.appendChild(option);
-    });
-    freqSelect.addEventListener("click", (event) => event.stopPropagation());
-
-    const createBtn = document.createElement("button");
-    createBtn.type = "button";
-    createBtn.className = "task-create-btn";
-    createBtn.textContent = "Crear";
-    createBtn.addEventListener("click", (event) => {
-      event.stopPropagation();
-      if (hooks.onAddTask) hooks.onAddTask(machine.id, titleInput, freqSelect, createBtn);
-    });
-
-    formRow.appendChild(titleInput);
-    formRow.appendChild(freqSelect);
-    formRow.appendChild(createBtn);
-
-    panel.appendChild(sep);
-    panel.appendChild(formRow);
-  }
+  renderTasksPanel(panel, machine, hooks, options, {
+    createdBy: options.createdBy || null
+  });
 };
 
 const renderGeneral = (panel, machine, hooks, options = {}) => {
@@ -196,12 +110,19 @@ const renderHistorial = (panel, machine, hooks, options = {}) => {
     .reverse()
     .slice(0, 16)
     .forEach((log) => {
-      if (log.type !== "status") return;
       const item = document.createElement("div");
       item.className = "mc-log-item";
       const time = new Date(log.ts).toLocaleString("es-ES");
-      const label = statusLabels[log.value] || log.value;
-      item.textContent = `${time} · Estado → ${label}`;
+      if (log.type === "task") {
+        const title = log.title || "Tarea";
+        const user = log.user ? ` ? por ${log.user}` : "";
+        item.textContent = `${time} ? Tarea completada: ${title}${user}`;
+      } else if (log.type === "status") {
+        const label = statusLabels[log.value] || log.value;
+        item.textContent = `${time} ? Estado ? ${label}`;
+      } else {
+        item.textContent = `${time} ? ${log.type || "Evento"}`;
+      }
       list.appendChild(item);
     });
   panel.appendChild(list);
@@ -502,7 +423,8 @@ export const createMachineCard = (machine, options = {}) => {
     onDownloadLogs: null,
     onRemoveMachine: null,
     onAddTask: null,
-    onRemoveTask: null
+    onRemoveTask: null,
+    onCompleteTask: null
   };
 
   const visibleTabs = Array.isArray(options.visibleTabs) ? options.visibleTabs : null;
