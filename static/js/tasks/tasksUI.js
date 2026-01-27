@@ -66,6 +66,9 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
       desc.textContent = task.description || "";
       line2.appendChild(desc);
 
+      item.appendChild(line1);
+      item.appendChild(line2);
+
       if (canEditTasks) {
         const remove = document.createElement("a");
         remove.className = "task-remove-link";
@@ -76,11 +79,8 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
           event.stopPropagation();
           if (hooks.onRemoveTask) hooks.onRemoveTask(machine.id, task.id);
         });
-        meta.appendChild(remove);
+        item.appendChild(remove);
       }
-
-      item.appendChild(line1);
-      item.appendChild(line2);
 
       list.appendChild(item);
     });
