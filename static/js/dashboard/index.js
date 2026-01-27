@@ -177,6 +177,9 @@ if (mount) {
       .slice()
       .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
       .forEach((machine) => {
+        if (machine.tagId && !state.tagStatusById[machine.id]) {
+          state.tagStatusById[machine.id] = { text: "Tag enlazado", state: "ok" };
+        }
         const { card, hooks } = createMachineCard(machine, {
           tagStatus: state.tagStatusById[machine.id],
           adminLabel: state.adminLabel,
@@ -296,6 +299,16 @@ if (mount) {
             statusEl.textContent = "Error al validar el tag";
             statusEl.dataset.state = "error";
           }
+        };
+
+        hooks.onDisconnectTag = (id) => {
+          updateMachine(id, { tagId: null });
+          state.tagStatusById[id] = { text: "Tag desconectado", state: "" };
+          if (!state.selectedTabById) state.selectedTabById = {};
+          state.selectedTabById[id] = "configuracion";
+          state.expandedById = Array.from(expandedById);
+          renderCards();
+          autoSave.saveNow(id, "tag-disconnect");
         };
 
         hooks.onCopyTagUrl = (id, btn, input) => {
