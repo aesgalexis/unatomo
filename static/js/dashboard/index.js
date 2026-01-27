@@ -151,8 +151,8 @@ if (mount) {
       if (machine.tagId) {
         await assignTag(machine.tagId, state.uid, machine.id);
         await upsertMachineAccessFromMachine(state.uid, machine);
+        state.tagStatusById[machine.id] = { text: "Tag enlazado", state: "ok" };
       }
-      state.tagStatusById[machine.id] = { text: "Guardado", state: "ok" };
       renderCards();
     }
   });
@@ -311,7 +311,7 @@ if (mount) {
 
         hooks.onDisconnectTag = (id) => {
           updateMachine(id, { tagId: null });
-          state.tagStatusById[id] = { text: "Tag desconectado", state: "" };
+          state.tagStatusById[id] = { text: "Tag desconectado", state: "error" };
           if (!state.selectedTabById) state.selectedTabById = {};
           state.selectedTabById[id] = "configuracion";
           state.expandedById = Array.from(expandedById);
