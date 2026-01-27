@@ -2,6 +2,7 @@ import { fetchMachineAccess, updateMachineAccess } from "/static/js/dashboard/ma
 import { createMachineCard } from "/static/js/dashboard/machineCardTemplate.js";
 import { hashPassword } from "/static/js/utils/crypto.js";
 import { initAutoSave } from "/static/js/dashboard/autoSave.js";
+import { normalizeTasks } from "/static/js/tasks/tasksModel.js";
 import {
   canSeeTab,
   canEditStatus,
@@ -180,7 +181,7 @@ const init = async () => {
       state.draft = {
         ...machineDoc,
         logs: machineDoc.logs || [],
-        tasks: machineDoc.tasks || []
+        tasks: normalizeTasks(machineDoc.tasks || [])
       };
       renderMachine();
     });
@@ -191,7 +192,7 @@ const init = async () => {
   state.draft = {
     ...machineDoc,
     logs: machineDoc.logs || [],
-    tasks: machineDoc.tasks || []
+    tasks: normalizeTasks(machineDoc.tasks || [])
   };
   renderMachine();
 };
@@ -212,11 +213,13 @@ const renderMachine = () => {
     hideConfig: !canSeeConfig(role),
     canEditStatus: canEditStatus(role),
     canEditTasks: canEditTasks(role),
+    canCompleteTasks: true,
     canDownloadHistory: canDownloadHistory(role),
     canEditGeneral: false,
     canEditConfig: false,
     visibleTabs,
-    disableTitleEdit: true
+    disableTitleEdit: true,
+    createdBy: state.session?.username || null
   });
 
   card.style.maxHeight = `${COLLAPSED_HEIGHT}px`;
@@ -250,31 +253,12 @@ const renderMachine = () => {
     autoSave.saveNow(state.tagId, "status");
   };
 
-  hooks.onAddTask = (id, titleInput, freqSelect, btn) => {
+  hooks.onAddTask = (id, task) => {
     if (!canEditTasks(role)) return;
-    const title = titleInput.value.trim();
-    if (!title) {
-      titleInput.setAttribute("aria-invalid", "true");
-      if (btn) {
-        const prev = btn.textContent;
-        btn.textContent = "Revisa el título";
-        setTimeout(() => (btn.textContent = prev), 1000);
-      }
-      return;
-    }
     state.draft = {
       ...machineDoc,
-      tasks: [
-        {
-          id: (window.crypto?.randomUUID && window.crypto.randomUUID()) || `t_${Date.now()}`,
-          title,
-          frequency: freqSelect.value,
-          createdAt: new Date().toISOString()
-        },
-        ...(machineDoc.tasks || [])
-      ]
+      tasks: [task, ...(machineDoc.tasks || [])]
     };
-    titleInput.value = "";
     renderMachine();
     autoSave.saveNow(state.tagId, "add-task");
   };
@@ -287,6 +271,29 @@ const renderMachine = () => {
     };
     renderMachine();
     autoSave.saveNow(state.tagId, "remove-task");
+  };
+
+  hooks.onCompleteTask = (id, taskId) => {
+    const tasks = normalizeTasks(machineDoc.tasks || []).map((t) =>
+      t.id === taskId ? { ...t, lastCompletedAt: new Date().toISOString() } : t
+    );
+    const task = tasks.find((t) => t.id === taskId);
+    const user = state.session?.username || "usuario";
+    state.draft = {
+      ...machineDoc,
+      tasks,
+      logs: [
+        ...(machineDoc.logs || []),
+        {
+          ts: new Date().toISOString(),
+          type: "task",
+          title: task?.title || "Tarea",
+          user
+        }
+      ]
+    };
+    renderMachine();
+    autoSave.saveNow(state.tagId, "task-complete");
   };
 
   list.appendChild(card);

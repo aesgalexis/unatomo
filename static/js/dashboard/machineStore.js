@@ -1,3 +1,5 @@
+import { normalizeTasks } from "/static/js/tasks/tasksModel.js";
+
 const generateId = () => {
   if (window.crypto?.randomUUID) return window.crypto.randomUUID();
   return `m_${Math.random().toString(36).slice(2, 10)}`;
@@ -19,7 +21,7 @@ export const normalizeMachine = (raw, index = 0) => {
     status: raw.status || "operativa",
     tagId: typeof raw.tagId === "string" ? raw.tagId : null,
     logs: Array.isArray(raw.logs) ? raw.logs : [],
-    tasks: Array.isArray(raw.tasks) ? raw.tasks : [],
+    tasks: normalizeTasks(raw.tasks),
     users: Array.isArray(raw.users) ? raw.users : [],
     order: typeof raw.order === "number" ? raw.order : index,
     isNew: !!raw.isNew
