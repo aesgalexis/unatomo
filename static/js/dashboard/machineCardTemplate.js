@@ -245,10 +245,14 @@ const renderConfiguracion = (panel, machine, hooks, options = {}) => {
   const tagBtn = document.createElement("button");
   tagBtn.type = "button";
   tagBtn.className = "mc-tag-connect";
-  tagBtn.textContent = "Conectar";
-  tagBtn.disabled = !tagInput.value.trim();
+  tagBtn.textContent = machine.tagId ? "Desconectar" : "Conectar";
+  tagBtn.disabled = !tagInput.value.trim() && !machine.tagId;
   tagBtn.addEventListener("click", (event) => {
     event.stopPropagation();
+    if (machine.tagId) {
+      if (hooks.onDisconnectTag) hooks.onDisconnectTag(machine.id, tagInput, tagStatus);
+      return;
+    }
     if (hooks.onConnectTag) hooks.onConnectTag(machine.id, tagInput, tagStatus);
   });
 
@@ -276,6 +280,9 @@ const renderConfiguracion = (panel, machine, hooks, options = {}) => {
   if (options.tagStatus?.text) {
     tagStatus.textContent = options.tagStatus.text;
     tagStatus.dataset.state = options.tagStatus.state || "";
+  } else if (machine.tagId) {
+    tagStatus.textContent = "Tag enlazado";
+    tagStatus.dataset.state = "ok";
   }
 
   const accessRow = document.createElement("div");
@@ -499,6 +506,7 @@ export const createMachineCard = (machine, options = {}) => {
     onTitleUpdate: null,
     onUpdateGeneral: null,
     onConnectTag: null,
+    onDisconnectTag: null,
     onCopyTagUrl: null,
     onAddUser: null,
     onUpdateUserRole: null,
