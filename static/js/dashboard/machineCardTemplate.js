@@ -42,7 +42,7 @@ const renderGeneral = (panel, machine, hooks, options = {}) => {
   const canEditGeneral = options.canEditGeneral !== false;
 
   const row = document.createElement("div");
-  row.className = "mc-row mc-row-input mc-row-inline";
+  row.className = "mc-row mc-row-input mc-row-stack";
 
   const fields = [
     { key: "brand", label: "Marca", value: machine.brand || "", type: "text" },
@@ -66,7 +66,10 @@ const renderGeneral = (panel, machine, hooks, options = {}) => {
       input.placeholder = "YYYY";
     }
     input.value = value;
-    if (!canEditGeneral) input.disabled = true;
+    if (!canEditGeneral) {
+      input.readOnly = true;
+      input.setAttribute("aria-readonly", "true");
+    }
     input.addEventListener("click", (event) => event.stopPropagation());
     input.addEventListener("blur", () => {
       if (hooks.onUpdateGeneral) {
@@ -80,7 +83,7 @@ const renderGeneral = (panel, machine, hooks, options = {}) => {
   });
 
   const error = document.createElement("div");
-  error.className = "mc-tag-status";
+  error.className = "mc-field-error";
 
   panel.appendChild(row);
   panel.appendChild(error);
