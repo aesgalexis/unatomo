@@ -261,6 +261,12 @@
   font-weight: 500;
 }
 
+.mc-operational-source {
+  font-size: 0.75rem;
+  color: color-mix(in srgb, var(--fg) 60%, transparent);
+  margin-left: 0.4rem;
+}
+
 .mc-log-list {
   display: grid;
   gap: 0.4rem;
