@@ -1,19 +1,50 @@
 import { execSync } from "node:child_process";
 
-function run(cmd) {
-  execSync(cmd, { stdio: "inherit" });
+function run(cmd, opts = {}) {
+  return execSync(cmd, { stdio: "inherit", ...opts });
 }
 
-const msg = process.argv.slice(2).join(" ").trim()
-  || `Update site (${new Date().toISOString().slice(0, 19).replace("T", " ")})`;
+function runQuiet(cmd) {
+  return execSync(cmd, { stdio: "pipe", encoding: "utf8" }).trim();
+}
 
-try {
-  run("npm run build");
+const msg =
+  process.argv.slice(2).join(" ").trim() ||
+  `Update site (${new Date().toISOString().slice(0, 19).replace("T", " ")})`;
 
+run("npm run build");
+
+const status = runQuiet("git status --porcelain");
+if (status) {
   run("git add .");
   run(`git commit -m "${msg.replaceAll('"', '\\"')}"`);
-  run("git push");
+} else {
+  console.log("\nℹ️  No hay cambios para commitear.\n");
+}
+
+let ahead = 0;
+try {
+  ahead = Number(runQuiet("git rev-list --count @{u}..HEAD")) || 0;
 } catch (e) {
-  console.log("\nℹ️  No había cambios para commitear o el commit falló. Revisa 'git status'.\n");
-  process.exit(1);
+  ahead = -1;
+}
+
+if (ahead > 0) {
+  console.log(`Pushing pending commits: ${ahead}`);
+  try {
+    run("git push origin main");
+  } catch (e) {
+    console.log("\n⚠️  Falló el push. Revisa el remoto o ejecuta 'git push origin main' manualmente.\n");
+    process.exit(1);
+  }
+} else if (ahead === 0) {
+  console.log("Nothing to push");
+} else {
+  console.log("No upstream configurado. Intentando push a origin/main...");
+  try {
+    run("git push origin main");
+  } catch (e) {
+    console.log("\n⚠️  No se pudo hacer push. Configura el upstream con:\n  git push -u origin main\n");
+    process.exit(1);
+  }
 }
