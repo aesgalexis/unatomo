@@ -21,7 +21,7 @@ export function initThemeToggle(options = {}) {
   if (btn) {
     btn.addEventListener("click", () => {
       const current = getCurrentTheme();
-      const next = current === "dark" ? "light" : "dark";
+      const next = current === "dark"  "light" : "dark";
       root.setAttribute("data-theme", next);
       try {
         localStorage.setItem("theme", next);
@@ -34,7 +34,7 @@ export function initThemeToggle(options = {}) {
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
     const handler = (e) => {
       root.removeAttribute("data-theme");
-      setBtnLabel(e.matches ? "dark" : "light");
+      setBtnLabel(e.matches  "dark" : "light");
     };
     if (mq.addEventListener) mq.addEventListener("change", handler);
     else if (mq.addListener) mq.addListener(handler);
@@ -43,15 +43,15 @@ export function initThemeToggle(options = {}) {
   function getCurrentTheme() {
     const attr = root.getAttribute("data-theme");
     if (attr === "light" || attr === "dark") return attr;
-    return prefersDark ? "dark" : "light";
+    return prefersDark  "dark" : "light";
   }
 
   function setBtnLabel(mode) {
     if (!btn) return;
-    btn.textContent = mode === "dark" ? "☼" : "☾";
+    btn.textContent = mode === "dark"  "☼" : "☾";
     btn.setAttribute(
       "aria-label",
-      mode === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"
+      mode === "dark"  "Cambiar a modo claro" : "Cambiar a modo oscuro"
     );
   }
 }

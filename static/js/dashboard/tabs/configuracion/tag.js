@@ -18,7 +18,7 @@ export const render = (container, machine, hooks, options = {}) => {
   const tagBtn = document.createElement("button");
   tagBtn.type = "button";
   tagBtn.className = "mc-tag-connect";
-  tagBtn.textContent = machine.tagId ? "Desconectar" : "Conectar";
+  tagBtn.textContent = machine.tagId  "Desconectar" : "Conectar";
   tagBtn.disabled = !tagInput.value.trim() && !machine.tagId;
   tagBtn.addEventListener("click", (event) => {
     event.stopPropagation();
@@ -50,7 +50,7 @@ export const render = (container, machine, hooks, options = {}) => {
 
   const tagStatus = document.createElement("div");
   tagStatus.className = "mc-tag-status";
-  if (options.tagStatus?.text) {
+  if (options.tagStatus.text) {
     tagStatus.textContent = options.tagStatus.text;
     tagStatus.dataset.state = options.tagStatus.state || "";
   } else if (machine.tagId) {
@@ -60,7 +60,7 @@ export const render = (container, machine, hooks, options = {}) => {
 
   const accessRow = document.createElement("div");
   accessRow.className = "mc-config-row";
-  accessRow.style.display = machine.tagId ? "" : "none";
+  accessRow.style.display = machine.tagId  "" : "none";
 
   const accessLabel = document.createElement("span");
   accessLabel.className = "mc-config-label";
@@ -71,7 +71,7 @@ export const render = (container, machine, hooks, options = {}) => {
   accessInput.type = "text";
   accessInput.readOnly = true;
   accessInput.value = machine.tagId
-    ? `${window.location.origin}/es/m.html?tag=${encodeURIComponent(machine.tagId)}`
+     `${window.location.origin}/es/m.htmltag=${encodeURIComponent(machine.tagId)}`
     : "";
   accessInput.addEventListener("click", (event) => event.stopPropagation());
 

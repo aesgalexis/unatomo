@@ -7,7 +7,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
 export const upsertMachineAccessFromMachine = async (uid, machine) => {
-  if (!machine?.tagId) return;
+  if (!machine.tagId) return;
   const ref = doc(db, "machine_access", machine.tagId);
   await setDoc(
     ref,
@@ -17,7 +17,7 @@ export const upsertMachineAccessFromMachine = async (uid, machine) => {
       title: machine.title,
       brand: machine.brand,
       model: machine.model,
-      year: machine.year ?? null,
+      year: machine.year  null,
       status: machine.status,
       logs: machine.logs || [],
       tasks: machine.tasks || [],

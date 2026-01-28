@@ -16,8 +16,8 @@ if (mount) {
   }
 
   const backBtn = document.getElementById("back-button");
-  const backHref = (document.body?.dataset?.backHref || "").trim();
-  const backMode = (document.body?.dataset?.backMode || "").trim();
+  const backHref = (document.body.dataset.backHref || "").trim();
+  const backMode = (document.body.dataset.backMode || "").trim();
 
   if (backBtn) {
     if (backHref) {

@@ -39,7 +39,7 @@ function initSetupLogin() {
   function toggleBox() {
     box.hidden = !box.hidden;
     clearStatus();
-    if (!box.hidden) emailInput?.focus();
+    if (!box.hidden) emailInput.focus();
   }
 
   btnOpen.addEventListener("click", toggleBox);
@@ -48,7 +48,7 @@ function initSetupLogin() {
     if (user) window.location.href = "/es/index.html";
   });
 
-  btnGoogle?.addEventListener("click", async () => {
+  btnGoogle.addEventListener("click", async () => {
     clearStatus();
     try {
       btnGoogle.disabled = true;
@@ -66,12 +66,12 @@ function initSetupLogin() {
     }
   });
 
-  form?.addEventListener("submit", async (e) => {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
     clearStatus();
 
-    const email = (emailInput?.value || "").trim();
-    const pw = passInput?.value || "";
+    const email = (emailInput.value || "").trim();
+    const pw = passInput.value || "";
     if (!email || !pw) return showStatus("Completa los campos obligatorios.");
 
     try {
@@ -84,7 +84,7 @@ function initSetupLogin() {
       showStatus("Sesión iniciada. Redirigiendo…");
       setTimeout(() => (window.location.href = "/es/index.html"), 650);
     } catch (e2) {
-      const code = String(e2?.code || "");
+      const code = String(e2.code || "");
       if (
         code.includes("auth/invalid-credential") ||
         code.includes("auth/wrong-password") ||
@@ -155,7 +155,7 @@ try {
       try { localStorage.setItem("unatomo_access_code", res.code); } catch {}
 
       setStatus("Código correcto. Redirigiendo…");
-const target = `/es/auth/registro.html?code=${encodeURIComponent(res.code)}`;
+const target = `/es/auth/registro.htmlcode=${encodeURIComponent(res.code)}`;
       setTimeout(() => (window.location.href = target), 650);
     } catch {
       setStatus("Error validando el código.");
@@ -196,7 +196,7 @@ function initLoginPage() {
     if (user) goHome();
   });
 
-  btnGoogle?.addEventListener("click", async () => {
+  btnGoogle.addEventListener("click", async () => {
     clearStatus();
     try {
       btnGoogle.disabled = true;
@@ -218,8 +218,8 @@ function initLoginPage() {
     e.preventDefault();
     clearStatus();
 
-    const email = (document.getElementById("email")?.value || "").trim();
-    const password = document.getElementById("password")?.value || "";
+    const email = (document.getElementById("email").value || "").trim();
+    const password = document.getElementById("password").value || "";
     if (!email || !password) return setStatus("Completa los campos obligatorios.");
 
     try {
@@ -232,7 +232,7 @@ function initLoginPage() {
       setStatus("Sesión iniciada. Redirigiendo…");
       setTimeout(goHome, 650);
     } catch (e2) {
-      const code = String(e2?.code || "");
+      const code = String(e2.code || "");
       if (
         code.includes("auth/invalid-credential") ||
         code.includes("auth/wrong-password") ||
@@ -277,7 +277,7 @@ function initRegisterPage() {
       try { code = (localStorage.getItem("unatomo_access_code") || "").trim(); } catch {}
     }
 
-    if (!code) return window.location.replace("/?setup=1");
+    if (!code) return window.location.replace("/setup=1");
 
     try { sessionStorage.setItem("unatomo_access_code", code); } catch {}
     try { localStorage.setItem("unatomo_access_code", code); } catch {}
@@ -294,12 +294,12 @@ function initRegisterPage() {
     if (!check.valid) {
       try { sessionStorage.removeItem("unatomo_access_code"); } catch {}
       try { localStorage.removeItem("unatomo_access_code"); } catch {}
-      return window.location.replace("/?setup=1");
+      return window.location.replace("/setup=1");
     }
 
     document.documentElement.style.visibility = "visible";
 
-    btnGoogle?.addEventListener("click", async () => {
+    btnGoogle.addEventListener("click", async () => {
       clearStatus();
       try {
         btnGoogle.disabled = true;
@@ -321,10 +321,10 @@ function initRegisterPage() {
       e.preventDefault();
       clearStatus();
 
-      const nombre = (document.getElementById("nombre")?.value || "").trim();
-      const email = (document.getElementById("email")?.value || "").trim();
-      const p1 = document.getElementById("password")?.value || "";
-      const p2 = document.getElementById("password2")?.value || "";
+      const nombre = (document.getElementById("nombre").value || "").trim();
+      const email = (document.getElementById("email").value || "").trim();
+      const p1 = document.getElementById("password").value || "";
+      const p2 = document.getElementById("password2").value || "";
 
       if (!email || !p1 || !p2) return setStatus("Completa los campos obligatorios.");
       if (p1.length < 8) return setStatus("La contraseña debe tener al menos 8 caracteres.");
@@ -340,7 +340,7 @@ function initRegisterPage() {
         setStatus("Registro completado. Redirigiendo…");
         setTimeout(() => (window.location.href = "/es/index.html"), 650);
       } catch (e2) {
-        const msg = String(e2?.code || "");
+        const msg = String(e2.code || "");
         if (msg.includes("auth/email-already-in-use")) setStatus("Ese correo ya tiene cuenta.");
         else if (msg.includes("auth/invalid-email")) setStatus("Correo no válido.");
         else if (msg.includes("auth/weak-password")) setStatus("Contraseña demasiado débil.");
@@ -369,7 +369,7 @@ function initSessionUI() {
     actionBtn.dataset.state = "guest";
   }
   function setUser(user) {
-    const label = user?.displayName || user?.email || "Usuario";
+    const label = user.displayName || user.email || "Usuario";
     setBadge(label);
     actionBtn.textContent = "Cerrar sesión";
     actionBtn.dataset.state = "user";
@@ -388,7 +388,7 @@ function initSessionUI() {
     try {
       actionBtn.disabled = true;
       await signOut(auth);
-      window.location.href = "/?setup=1";
+      window.location.href = "/setup=1";
     } catch {
       actionBtn.disabled = false;
     }

@@ -16,11 +16,11 @@ function clearStatus() {
   status.textContent = "";
 }
 
-form?.addEventListener("submit", async (e) => {
+form.addEventListener("submit", async (e) => {
   e.preventDefault();
   clearStatus();
 
-  const email = (form.querySelector("#email")?.value ?? "").toString().trim();
+  const email = (form.querySelector("#email").value  "").toString().trim();
   if (!email) return setStatus("Escribe tu correo.");
 
   try {
@@ -32,7 +32,7 @@ form?.addEventListener("submit", async (e) => {
     setStatus("Si el correo está registrado, recibirás un email con el enlace. (Revisa también Spam)");
     form.reset();
   } catch (err) {
-    const code = err?.code || "";
+    const code = err.code || "";
     if (code === "auth/invalid-email") {
       setStatus("El correo no parece válido.");
       return;

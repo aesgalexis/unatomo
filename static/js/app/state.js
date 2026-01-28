@@ -34,8 +34,8 @@ const getRole = () => {
   const stored = window.localStorage.getItem("role");
   if (roles.includes(stored)) return stored;
 
-  const isAuthed = document.documentElement?.dataset?.auth === "user";
-  return isAuthed ? "cliente" : "invitado";
+  const isAuthed = document.documentElement.dataset.auth === "user";
+  return isAuthed  "cliente" : "invitado";
 };
 
 const getMachineById = (id) => machines.find((item) => item.id === id) || null;

@@ -21,7 +21,7 @@ if (!btn || !menu || !label || !action) {
   }
 
   function applyButtonColor() {
-    btn.style.color = state === "user" ? ACCENT : FG;
+    btn.style.color = state === "user"  ACCENT : FG;
   }
 
   function openMenu() {
@@ -61,7 +61,7 @@ if (!btn || !menu || !label || !action) {
 
   function setUser(user) {
     setAuthState("user");
-    const name = (user?.displayName || user?.email || "Usuario").toString();
+    const name = (user.displayName || user.email || "Usuario").toString();
     label.textContent = name;
 
     action.textContent = "Cerrar sesión";
