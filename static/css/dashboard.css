@@ -144,11 +144,6 @@
   color: #dc2626;
 }
 
-.mc-status[data-status="desconectada"] {
-  border-color: #6b7280;
-  color: #6b7280;
-}
-
 .mc-badge {
   font-size: 0.8rem;
   padding: 0.2rem 0.6rem;
