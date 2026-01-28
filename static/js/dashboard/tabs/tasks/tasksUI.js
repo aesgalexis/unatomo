@@ -115,7 +115,7 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
       const option = document.createElement("option");
       option.value = key;
       option.textContent =
-        key === "diaria"
+        (key === "diaria"
           ? "Diaria"
           : key === "semanal"
           ? "Semanal"
@@ -125,7 +125,7 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
           ? "Trimestral"
           : key === "semestral"
           ? "Semestral"
-          : "Anual";
+          : "Anual");
       freqSelect.appendChild(option);
     });
     freqSelect.addEventListener("click", (event) => event.stopPropagation());
