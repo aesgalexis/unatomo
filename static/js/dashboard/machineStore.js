@@ -18,7 +18,7 @@ export const normalizeMachine = (raw, index = 0) => {
     brand: typeof raw.brand === "string" ? raw.brand : "",
     model: typeof raw.model === "string" ? raw.model : "",
     year: typeof raw.year === "number" ? raw.year : null,
-    status: raw.status || "operativa",
+    status: raw.status === "desconectada" ? "fuera_de_servicio" : raw.status || "operativa",
     tagId: typeof raw.tagId === "string" ? raw.tagId : null,
     logs: Array.isArray(raw.logs) ? raw.logs : [],
     tasks: normalizeTasks(raw.tasks),

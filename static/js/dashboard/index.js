@@ -39,9 +39,11 @@ if (mount) {
 
   const statusLabels = {
     operativa: "Operativo",
-    fuera_de_servicio: "Fuera de servicio",
-    desconectada: "Desconectada"
+    fuera_de_servicio: "Fuera de servicio"
   };
+
+  const normalizeStatus = (value) =>
+    value === "desconectada" ? "fuera_de_servicio" : value || "operativa";
 
   const addBar = document.createElement("div");
   addBar.className = "add-bar";
@@ -175,7 +177,7 @@ if (mount) {
   const applyOperationalPatch = (machineId, operational) => {
     const current = getDraftById(machineId);
     if (!current) return;
-    current.status = operational.status ?? current.status;
+    current.status = normalizeStatus(operational.status ?? current.status);
     current.tasks = operational.tasks ?? current.tasks;
     current.logs = operational.logs ?? current.logs;
     current._operationalSource = "tag";
@@ -186,7 +188,7 @@ if (mount) {
     const hooks = ref && ref.hooks ? ref.hooks : null;
     const statusBtn = card.querySelector(".mc-status");
     if (statusBtn) {
-      const status = current.status || "operativa";
+      const status = normalizeStatus(current.status);
       statusBtn.textContent = statusLabels[status] || status;
       statusBtn.dataset.status = status;
     }
@@ -316,8 +318,7 @@ if (mount) {
           visibleTabs: ["quehaceres", "general", "historial", "configuracion"],
           userRoles: ["usuario", "tecnico", "externo"],
           createdBy: state.adminLabel || null,
-          operationalSource: machine._operationalSource || "local",
-          configSubtab: state.configSubtabById[machine.id] || "tag"
+          operationalSource: machine._operationalSource || "local"
         });
         card.style.maxHeight = `${COLLAPSED_HEIGHT}px`;
 
@@ -346,19 +347,10 @@ if (mount) {
           }
         };
 
-        hooks.onSelectConfigSubtab = (id, key) => {
-          if (!state.configSubtabById) state.configSubtabById = {};
-          state.configSubtabById[id] = key || "tag";
-          if (expandedById.has(id)) {
-            const card = list.querySelector(`.machine-card[data-machine-id="${id}"]`);
-            if (card) scheduleHeightSync(id, () => recalcHeight(card));
-          }
-        };
-
         hooks.onStatusToggle = (node) => {
-          const statusOrder = ["operativa", "fuera_de_servicio", "desconectada"];
+          const statusOrder = ["operativa", "fuera_de_servicio"];
           const current = getDraftById(machine.id);
-          const currentStatus = current.status || "operativa";
+          const currentStatus = normalizeStatus(current.status);
           const idx = statusOrder.indexOf(currentStatus);
           const nextStatus = statusOrder[(idx + 1) % statusOrder.length];
           const keepExpanded = node.dataset.expanded === "true";
@@ -561,9 +553,7 @@ if (mount) {
             const value =
               log.value === "operativa"
                 ? "Operativo"
-                : log.value === "fuera_de_servicio"
-                ? "Fuera de servicio"
-                : "Desconectada";
+                : "Fuera de servicio";
             return `[${time}] Estado -> ${value}`;
           });
           const blob = new Blob([lines.join("\n")], {
