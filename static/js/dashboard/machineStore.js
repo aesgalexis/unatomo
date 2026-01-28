@@ -1,4 +1,4 @@
-import { normalizeTasks } from "/static/js/tasks/tasksModel.js";
+import { normalizeTasks } from "/static/js/dashboard/tabs/tasks/tasksModel.js";
 
 const generateId = () => {
   if (window.crypto?.randomUUID) return window.crypto.randomUUID();
