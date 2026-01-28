@@ -28,6 +28,7 @@ if (mount) {
     draftMachines: [],
     expandedById: [],
     selectedTabById: {},
+    configSubtabById: {},
     tagStatusById: {}
   };
 
@@ -314,7 +315,8 @@ if (mount) {
           visibleTabs: ["quehaceres", "general", "historial", "configuracion"],
           userRoles: ["usuario", "tecnico", "externo"],
           createdBy: state.adminLabel || null,
-          operationalSource: machine._operationalSource || "local"
+          operationalSource: machine._operationalSource || "local",
+          configSubtab: state.configSubtabById[machine.id] || "tag"
         });
         card.style.maxHeight = `${COLLAPSED_HEIGHT}px`;
 
@@ -340,6 +342,15 @@ if (mount) {
           state.selectedTabById[machine.id] = tabId || "quehaceres";
           if (node.dataset.expanded === "true") {
             scheduleHeightSync(machine.id, () => recalcHeight(node));
+          }
+        };
+
+        hooks.onSelectConfigSubtab = (id, key) => {
+          if (!state.configSubtabById) state.configSubtabById = {};
+          state.configSubtabById[id] = key || "tag";
+          if (expandedById.has(id)) {
+            const card = list.querySelector(`.machine-card[data-machine-id="${id}"]`);
+            if (card) scheduleHeightSync(id, () => recalcHeight(card));
           }
         };
 
@@ -601,6 +612,32 @@ if (mount) {
           state.expandedById = Array.from(expandedById);
           renderCards({ preserveScroll: true });
           autoSave.saveNow(id, "remove-task");
+        };
+
+        hooks.onUpdateNotifications = (id, next) => {
+          updateMachine(id, { notifications: next });
+          if (!state.selectedTabById) state.selectedTabById = {};
+          state.selectedTabById[id] = "configuracion";
+          state.expandedById = Array.from(expandedById);
+          renderCards({ preserveScroll: true });
+          autoSave.scheduleSave(id, "notifications");
+        };
+
+        hooks.onTestNotification = (machineData) => {
+          const logs = [
+            ...(machineData.logs || []),
+            {
+              ts: new Date().toISOString(),
+              type: "notification",
+              message: "Notificación de prueba solicitada"
+            }
+          ];
+          updateMachine(machineData.id, { logs });
+          if (!state.selectedTabById) state.selectedTabById = {};
+          state.selectedTabById[machineData.id] = "configuracion";
+          state.expandedById = Array.from(expandedById);
+          renderCards({ preserveScroll: true });
+          autoSave.saveNow(machineData.id, "notification-test");
         };
 
         hooks.onCompleteTask = (id, taskId) => {
