@@ -2,7 +2,7 @@ import { STATUS_LABELS } from "../components/machineCard/machineCardTypes.js";
 
 export const render = (panel, machine, hooks, options = {}) => {
   panel.innerHTML = "";
-  const total = machine.logs ? machine.logs.length : 0;
+  const total = machine.logs  machine.logs.length : 0;
   if (!total) {
     panel.textContent = "Sin registros.";
     return;
@@ -29,8 +29,8 @@ export const render = (panel, machine, hooks, options = {}) => {
       const time = new Date(log.ts).toLocaleString("es-ES");
       if (log.type === "task") {
         const title = log.title || "Tarea";
-        const user = log.user ? ` - por ${log.user}` : "";
-        const prefix = log.overdue ? "Tarea completada fuera de plazo: " : "Tarea completada: ";
+        const user = log.user  ` - por ${log.user}` : "";
+        const prefix = log.overdue  "Tarea completada fuera de plazo: " : "Tarea completada: ";
         item.textContent = `${time} - ${prefix}${title}${user}`;
       } else if (log.type === "status") {
         const label = STATUS_LABELS[log.value] || log.value;

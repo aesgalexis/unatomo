@@ -13,7 +13,7 @@ const renderTabs = (machineId, activeTab) => {
 
   tabs.forEach((tab) => {
     const link = document.createElement("a");
-    link.className = `machine-tab ${tab.id === activeTab ? "is-active" : ""}`;
+    link.className = `machine-tab ${tab.id === activeTab  "is-active" : ""}`;
     link.href = `#/m/${machineId}/${tab.id}`;
     link.textContent = tab.label;
     nav.appendChild(link);
@@ -34,7 +34,7 @@ const renderActions = (machine) => {
     assistance.textContent = "Solicitar asistencia";
     assistance.addEventListener("click", () => {
       window.location.href =
-        `mailto:soporte@unatomo.com?subject=Asistencia%20${encodeURIComponent(machine.nombre)}`;
+        `mailto:soporte@unatomo.comsubject=Asistencia%20${encodeURIComponent(machine.nombre)}`;
     });
     actions.appendChild(assistance);
   }
@@ -79,7 +79,7 @@ const renderTabContent = (machine, activeTab) => {
     ["Modelo", machine.modelo],
     ["Nº serie", machine.serie],
     ["Ubicación", machine.ubicacion],
-    ["Estado", machine.estado === "ok" ? "Operativo" : "Parada"],
+    ["Estado", machine.estado === "ok"  "Operativo" : "Parada"],
     ["Última intervención", machine.ultimaIntervencion]
   ];
 

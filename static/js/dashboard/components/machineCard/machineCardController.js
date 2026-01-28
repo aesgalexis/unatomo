@@ -59,7 +59,7 @@ export const createMachineCard = (machine, options = {}) => {
     onSelectConfigSubtab: null
   };
 
-  const visibleTabs = Array.isArray(options.visibleTabs) ? options.visibleTabs : null;
+  const visibleTabs = Array.isArray(options.visibleTabs)  options.visibleTabs : null;
   if (visibleTabs) {
     card.querySelectorAll(".mc-tab").forEach((tab) => {
       if (!visibleTabs.includes(tab.dataset.tab)) tab.remove();
