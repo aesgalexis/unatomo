@@ -8,8 +8,8 @@ import { initDragAndDrop } from "./dragAndDrop.js";
 import { cloneMachines, normalizeMachine, createDraftMachine } from "./machineStore.js";
 import { generateSaltBase64, hashPassword } from "/static/js/utils/crypto.js";
 import { initAutoSave } from "./autoSave.js";
-import { normalizeTasks } from "/static/js/tasks/tasksModel.js";
-import { getTaskTiming } from "/static/js/tasks/tasksTime.js";
+import { normalizeTasks } from "/static/js/dashboard/tabs/tasks/tasksModel.js";
+import { getTaskTiming } from "/static/js/dashboard/tabs/tasks/tasksTime.js";
 import {
   doc,
   onSnapshot

@@ -2,8 +2,8 @@ import { fetchMachineAccess, updateMachineAccess } from "/static/js/dashboard/ma
 import { createMachineCard } from "/static/js/dashboard/machineCardTemplate.js";
 import { hashPassword } from "/static/js/utils/crypto.js";
 import { initAutoSave } from "/static/js/dashboard/autoSave.js";
-import { normalizeTasks } from "/static/js/tasks/tasksModel.js";
-import { getTaskTiming } from "/static/js/tasks/tasksTime.js";
+import { normalizeTasks } from "/static/js/dashboard/tabs/tasks/tasksModel.js";
+import { getTaskTiming } from "/static/js/dashboard/tabs/tasks/tasksTime.js";
 import {
   canSeeTab,
   canEditStatus,
