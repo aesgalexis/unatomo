@@ -1,17 +1,22 @@
 const MAX_TITLE = 64;
 
 const toIso = (value) => {
-  const date = value  new Date(value) : null;
+  const date = value ? new Date(value) : null;
   if (!date || Number.isNaN(date.getTime())) return new Date().toISOString();
   return date.toISOString();
 };
 
 export const normalizeTask = (raw) => {
   if (!raw || typeof raw !== "object") return null;
-  const description = typeof raw.description === "string"  raw.description : (typeof raw.title === "string"  raw.title : "");
-  let title = typeof raw.title === "string"  raw.title.trim() : "";
+  const description =
+    typeof raw.description === "string"
+      ? raw.description
+      : typeof raw.title === "string"
+      ? raw.title
+      : "";
+  let title = typeof raw.title === "string" ? raw.title.trim() : "";
   if (!title) {
-    title = description  description.trim().slice(0, MAX_TITLE) : "Tarea";
+    title = description ? description.trim().slice(0, MAX_TITLE) : "Tarea";
   }
   if (title.length > MAX_TITLE) title = title.slice(0, MAX_TITLE);
 
@@ -21,7 +26,7 @@ export const normalizeTask = (raw) => {
     description,
     frequency: raw.frequency || "diaria",
     createdAt: toIso(raw.createdAt),
-    lastCompletedAt: raw.lastCompletedAt  null,
+    lastCompletedAt: raw.lastCompletedAt ?? null,
     createdBy: raw.createdBy || null
   };
 };
@@ -34,7 +39,8 @@ export const normalizeTasks = (tasks) => {
 export const createTask = ({ title, description, frequency, createdBy }) => {
   const cleanTitle = (title || "").trim();
   if (!cleanTitle) return { error: "title" };
-  const trimmed = cleanTitle.length > MAX_TITLE  cleanTitle.slice(0, MAX_TITLE) : cleanTitle;
+  const trimmed =
+    cleanTitle.length > MAX_TITLE ? cleanTitle.slice(0, MAX_TITLE) : cleanTitle;
   return {
     task: {
       id: (window.crypto.randomUUID && window.crypto.randomUUID()) || `t_${Date.now()}`,

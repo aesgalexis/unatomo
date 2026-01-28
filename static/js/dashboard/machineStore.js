@@ -15,17 +15,18 @@ export const normalizeMachine = (raw, index = 0) => {
   return {
     id: raw.id || generateId(),
     title: raw.title || raw.nombre || `Equipo ${index + 1}`,
-    brand: typeof raw.brand === "string"  raw.brand : "",
-    model: typeof raw.model === "string"  raw.model : "",
-    year: typeof raw.year === "number"  raw.year : null,
+    brand: typeof raw.brand === "string" ? raw.brand : "",
+    model: typeof raw.model === "string" ? raw.model : "",
+    year: typeof raw.year === "number" ? raw.year : null,
     status: raw.status || "operativa",
-    tagId: typeof raw.tagId === "string"  raw.tagId : null,
-    logs: Array.isArray(raw.logs)  raw.logs : [],
+    tagId: typeof raw.tagId === "string" ? raw.tagId : null,
+    logs: Array.isArray(raw.logs) ? raw.logs : [],
     tasks: normalizeTasks(raw.tasks),
-    users: Array.isArray(raw.users)  raw.users : [],
-    notifications: typeof raw.notifications === "object" && raw.notifications
-       raw.notifications
-      : {
+    users: Array.isArray(raw.users) ? raw.users : [],
+    notifications:
+      typeof raw.notifications === "object" && raw.notifications
+        ? raw.notifications
+        : {
           enabled: false,
           email: "",
           events: {
@@ -35,7 +36,7 @@ export const normalizeMachine = (raw, index = 0) => {
             tagDisconnected: false
           }
         },
-    order: typeof raw.order === "number"  raw.order : index,
+    order: typeof raw.order === "number" ? raw.order : index,
     isNew: !!raw.isNew
   };
 };
