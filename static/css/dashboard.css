@@ -175,16 +175,16 @@
 
 .mc-tab {
   padding: 0.35rem 0.75rem;
-  border-radius: 999px;
+  border-radius: 0.5rem;
   border: 1px solid var(--border-subtle);
-  background: transparent;
+  background: color-mix(in srgb, var(--bg) 96%, transparent);
   color: var(--fg);
   font: inherit;
   cursor: pointer;
 }
 
 .mc-tab.is-active {
-  background: color-mix(in srgb, var(--fg) 12%, transparent);
+  border-color: var(--fg);
 }
 
 .mc-panel {
@@ -373,17 +373,17 @@
 }
 
 .mc-config-tab {
-  border-radius: 0.5rem;
+  border-radius: 999px;
   border: 1px solid var(--border-subtle);
-  background: color-mix(in srgb, var(--bg) 96%, transparent);
+  background: transparent;
   color: var(--fg);
-  padding: 0.25rem 0.6rem;
+  padding: 0.35rem 0.75rem;
   font: inherit;
   cursor: pointer;
 }
 
 .mc-config-tab.is-active {
-  border-color: var(--fg);
+  background: color-mix(in srgb, var(--fg) 12%, transparent);
 }
 
 .mc-config-panel {
