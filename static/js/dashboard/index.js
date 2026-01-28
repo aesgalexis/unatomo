@@ -1,5 +1,5 @@
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
-import { auth } from "/static/js/firebase/firebaseApp.js";
+import { auth, db } from "/static/js/firebase/firebaseApp.js";
 import { fetchMachines, upsertMachine, deleteMachine } from "./firestoreRepo.js";
 import { validateTag, assignTag } from "./tagRepo.js";
 import { upsertMachineAccessFromMachine, fetchMachineAccess } from "./machineAccessRepo.js";
@@ -10,6 +10,10 @@ import { generateSaltBase64, hashPassword } from "/static/js/utils/crypto.js";
 import { initAutoSave } from "./autoSave.js";
 import { normalizeTasks } from "/static/js/tasks/tasksModel.js";
 import { getTaskTiming } from "/static/js/tasks/tasksTime.js";
+import {
+  doc,
+  onSnapshot
+} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
 const COLLAPSED_HEIGHT = 96;
 const EXPAND_FACTOR = 2.5;
@@ -25,6 +29,17 @@ if (mount) {
     expandedById: [],
     selectedTabById: {},
     tagStatusById: {}
+  };
+
+  const cardRefs = new Map();
+  const tagUnsubs = new Map();
+  const tagIdByMachineId = new Map();
+  const machineIdByTagId = new Map();
+
+  const statusLabels = {
+    operativa: "Operativo",
+    fuera_de_servicio: "Fuera de servicio",
+    desconectada: "Desconectada"
   };
 
   const addBar = document.createElement("div");
@@ -124,6 +139,65 @@ if (mount) {
     return merged;
   };
 
+  const syncMachineAccessListeners = (machines) => {
+    const nextTagIds = new Set();
+    tagIdByMachineId.clear();
+    machineIdByTagId.clear();
+
+    machines.forEach((machine) => {
+      if (!machine.tagId) return;
+      nextTagIds.add(machine.tagId);
+      tagIdByMachineId.set(machine.id, machine.tagId);
+      machineIdByTagId.set(machine.tagId, machine.id);
+      if (!tagUnsubs.has(machine.tagId)) {
+        const ref = doc(db, "machine_access", machine.tagId);
+        const unsub = onSnapshot(ref, (snap) => {
+          if (!snap.exists()) return;
+          const data = snap.data() || {};
+          const targetId = machineIdByTagId.get(machine.tagId);
+          if (!targetId) return;
+          applyOperationalPatch(targetId, data);
+        });
+        tagUnsubs.set(machine.tagId, unsub);
+      }
+    });
+
+    Array.from(tagUnsubs.keys()).forEach((tagId) => {
+      if (!nextTagIds.has(tagId)) {
+        const unsub = tagUnsubs.get(tagId);
+        if (unsub) unsub();
+        tagUnsubs.delete(tagId);
+      }
+    });
+  };
+
+  const applyOperationalPatch = (machineId, operational) => {
+    const current = getDraftById(machineId);
+    if (!current) return;
+    current.status = operational.status ?? current.status;
+    current.tasks = operational.tasks ?? current.tasks;
+    current.logs = operational.logs ?? current.logs;
+    current._operationalSource = "tag";
+
+    const ref = cardRefs.get(machineId);
+    const card = ref?.card || list.querySelector(`.machine-card[data-machine-id="${machineId}"]`);
+    if (!card) return;
+    const statusBtn = card.querySelector(".mc-status");
+    if (statusBtn) {
+      const status = current.status || "operativa";
+      statusBtn.textContent = statusLabels[status] || status;
+      statusBtn.dataset.status = status;
+    }
+
+    const activeTab = state.selectedTabById?.[machineId] || card.querySelector(".mc-panel")?.dataset?.panel;
+    if (ref?.hooks?.setActiveTab && (activeTab === "quehaceres" || activeTab === "historial")) {
+      ref.hooks.setActiveTab(activeTab, { notify: false });
+      if (card.dataset.expanded === "true") {
+        scheduleHeightSync(machineId, () => recalcHeight(card));
+      }
+    }
+  };
+
   const getDraftIndex = (id) => state.draftMachines.findIndex((m) => m.id === id);
   const getDraftById = (id) => state.draftMachines.find((m) => m.id === id);
 
@@ -219,6 +293,7 @@ if (mount) {
 
     const selectedTabById = state.selectedTabById || {};
 
+    cardRefs.clear();
     machines
       .slice()
       .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
@@ -556,6 +631,7 @@ if (mount) {
         };
 
         list.appendChild(card);
+        cardRefs.set(machine.id, { card, hooks });
 
         const isExpanded = expandedById.has(machine.id);
         if (isExpanded) {
@@ -580,6 +656,7 @@ if (mount) {
     if (preserveScroll) {
       requestAnimationFrame(() => window.scrollTo(0, prevScrollY || 0));
     }
+    syncMachineAccessListeners(state.draftMachines);
   };
 
   const handleReorder = (orderIds) => {
