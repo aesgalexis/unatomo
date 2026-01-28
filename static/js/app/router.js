@@ -5,7 +5,7 @@ const normalizeHash = () => {
 
 const parseRoute = (hash) => {
   const clean = hash.replace(/^#/, "");
-  const path = clean.startsWith("/")  clean : `/${clean}`;
+  const path = clean.startsWith("/") ? clean : `/${clean}`;
   const parts = path.split("/").filter(Boolean);
 
   if (parts.length === 0) {
