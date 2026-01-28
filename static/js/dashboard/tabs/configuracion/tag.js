@@ -1,4 +1,5 @@
 export const render = (container, machine, hooks, options = {}) => {
+  const tagStatusData = options.tagStatus || {};
   const canEditConfig = options.canEditConfig !== false;
 
   const tagRow = document.createElement("div");
@@ -50,9 +51,9 @@ export const render = (container, machine, hooks, options = {}) => {
 
   const tagStatus = document.createElement("div");
   tagStatus.className = "mc-tag-status";
-  if (options.tagStatus.text) {
-    tagStatus.textContent = options.tagStatus.text;
-    tagStatus.dataset.state = options.tagStatus.state || "";
+  if (tagStatusData.text) {
+    tagStatus.textContent = tagStatusData.text;
+    tagStatus.dataset.state = tagStatusData.state || "";
   } else if (machine.tagId) {
     tagStatus.textContent = "Tag enlazado";
     tagStatus.dataset.state = "ok";
