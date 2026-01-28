@@ -46,7 +46,7 @@
     themeInputs.forEach((input) => {
       input.addEventListener("change", () => {
         if (!input.checked) return;
-        const mode = input.value === "dark"  "dark" : "light";
+        const mode = input.value === "dark" ? "dark" : "light";
         document.documentElement.setAttribute("data-theme", mode);
         try {
           localStorage.setItem(THEME_KEY, mode);
