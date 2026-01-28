@@ -400,6 +400,13 @@ export const createMachineCard = (machine, options = {}) => {
   const panel = card.querySelector(".mc-panel");
 
   title.textContent = machine.title;
+  if (options.operationalSource) {
+    const badge = document.createElement("span");
+    badge.className = "mc-operational-source";
+    badge.textContent =
+      options.operationalSource === "tag" ? "Operativa: tag" : "Operativa: local";
+    title.insertAdjacentElement("afterend", badge);
+  }
   statusBtn.textContent = statusLabels[machine.status] || "Operativo";
   statusBtn.dataset.status = machine.status || "operativa";
   if (options.canEditStatus === false) {
