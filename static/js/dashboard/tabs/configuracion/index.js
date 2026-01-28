@@ -69,10 +69,10 @@ export const render = (panel, machine, hooks, options = {}) => {
     else if (key === "otros") subTabOtros.classList.add("is-active");
     else subTabTag.classList.add("is-active");
 
-    tagPanel.style.display = key === "tag"  "" : "none";
-    usersPanel.style.display = key === "usuarios"  "" : "none";
-    notifsPanel.style.display = key === "notificaciones"  "" : "none";
-    otrosPanel.style.display = key === "otros"  "" : "none";
+    tagPanel.style.display = key === "tag" ? "" : "none";
+    usersPanel.style.display = key === "usuarios" ? "" : "none";
+    notifsPanel.style.display = key === "notificaciones" ? "" : "none";
+    otrosPanel.style.display = key === "otros" ? "" : "none";
     if (hooks.onSelectConfigSubtab) hooks.onSelectConfigSubtab(machine.id, key);
   };
 

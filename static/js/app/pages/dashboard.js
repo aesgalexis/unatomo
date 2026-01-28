@@ -17,8 +17,8 @@ const renderCard = (machine) => {
   location.textContent = machine.ubicacion;
 
   const status = document.createElement("span");
-  status.className = `machine-status ${machine.estado === "ok"  "is-ok" : "is-stop"}`;
-  status.textContent = machine.estado === "ok"  "Operativo" : "Parada";
+  status.className = `machine-status ${machine.estado === "ok" ? "is-ok" : "is-stop"}`;
+  status.textContent = machine.estado === "ok" ? "Operativo" : "Parada";
 
   const last = document.createElement("p");
   last.className = "machine-meta";
