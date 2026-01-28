@@ -90,7 +90,7 @@ function attachGuard(el) {
 }
 
 function applyAuthState(isAuthed) {
-  document.documentElement.dataset.auth = isAuthed ? "user" : "guest";
+  document.documentElement.dataset.auth = isAuthed  "user" : "guest";
 
   document.querySelectorAll(SELECTOR).forEach((el) => {
     attachGuard(el);
@@ -105,7 +105,7 @@ onAuthStateChanged(auth, (user) => {
 });
 
 window.addEventListener("unatomo:auth", (e) => {
-  const st = e?.detail?.state;
+  const st = e.detail.state;
   if (st === "user") applyAuthState(true);
   if (st === "guest") applyAuthState(false);
 });

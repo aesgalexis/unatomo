@@ -9,13 +9,13 @@ const durationDays = {
 };
 
 const toMs = (value) => {
-  const date = value ? new Date(value) : null;
+  const date = value  new Date(value) : null;
   if (!date || Number.isNaN(date.getTime())) return Date.now();
   return date.getTime();
 };
 
 const formatCount = (count, unitSingular, unitPlural) => {
-  return count === 1 ? `${count} ${unitSingular}` : `${count} ${unitPlural}`;
+  return count === 1  `${count} ${unitSingular}` : `${count} ${unitPlural}`;
 };
 
 const formatRemaining = (ms, frequency) => {

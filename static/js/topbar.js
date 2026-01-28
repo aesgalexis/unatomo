@@ -19,7 +19,7 @@ try {
 
 const titleEl = document.getElementById("topbar-title");
 if (titleEl) {
-  const t = (document.body?.dataset?.topbarTitle || "").trim();
+  const t = (document.body.dataset.topbarTitle || "").trim();
   if (t) titleEl.textContent = t;
 }
 

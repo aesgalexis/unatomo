@@ -8,7 +8,7 @@ export const render = (panel, machine, hooks, options = {}) => {
   const fields = [
     { key: "brand", label: "Marca", value: machine.brand || "", type: "text" },
     { key: "model", label: "Modelo", value: machine.model || "", type: "text" },
-    { key: "year", label: "A?o", value: machine.year ?? "", type: "number" }
+    { key: "year", label: "Ao", value: machine.year  "", type: "number" }
   ];
 
   const error = document.createElement("div");

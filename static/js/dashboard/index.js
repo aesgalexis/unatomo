@@ -127,9 +127,9 @@ if (mount) {
           if (!access) return { ...machine, _operationalSource: "local" };
           return {
             ...machine,
-            status: access.status ?? machine.status,
-            tasks: access.tasks ?? machine.tasks,
-            logs: access.logs ?? machine.logs,
+            status: access.status  machine.status,
+            tasks: access.tasks  machine.tasks,
+            logs: access.logs  machine.logs,
             _operationalSource: "tag"
           };
         } catch {
@@ -175,13 +175,13 @@ if (mount) {
   const applyOperationalPatch = (machineId, operational) => {
     const current = getDraftById(machineId);
     if (!current) return;
-    current.status = operational.status ?? current.status;
-    current.tasks = operational.tasks ?? current.tasks;
-    current.logs = operational.logs ?? current.logs;
+    current.status = operational.status  current.status;
+    current.tasks = operational.tasks  current.tasks;
+    current.logs = operational.logs  current.logs;
     current._operationalSource = "tag";
 
     const ref = cardRefs.get(machineId);
-    const card = ref?.card || list.querySelector(`.machine-card[data-machine-id="${machineId}"]`);
+    const card = ref.card || list.querySelector(`.machine-card[data-machine-id="${machineId}"]`);
     if (!card) return;
     const statusBtn = card.querySelector(".mc-status");
     if (statusBtn) {
@@ -190,8 +190,8 @@ if (mount) {
       statusBtn.dataset.status = status;
     }
 
-    const activeTab = state.selectedTabById?.[machineId] || card.querySelector(".mc-panel")?.dataset?.panel;
-    if (ref?.hooks?.setActiveTab && (activeTab === "quehaceres" || activeTab === "historial")) {
+    const activeTab = state.selectedTabById.[machineId] || card.querySelector(".mc-panel").dataset.panel;
+    if (ref.hooks.setActiveTab && (activeTab === "quehaceres" || activeTab === "historial")) {
       ref.hooks.setActiveTab(activeTab, { notify: false });
       if (card.dataset.expanded === "true") {
         scheduleHeightSync(machineId, () => recalcHeight(card));
@@ -220,7 +220,7 @@ if (mount) {
 
   const computeNextOrder = () => {
     const maxOrder = state.draftMachines.reduce(
-      (acc, m) => (typeof m.order === "number" && m.order > acc ? m.order : acc),
+      (acc, m) => (typeof m.order === "number" && m.order > acc  m.order : acc),
       -1
     );
     return maxOrder + 1;
@@ -232,8 +232,8 @@ if (mount) {
     if (!card) return;
     const statusEl = card.querySelector('.mc-panel[data-panel="configuracion"] .mc-tag-status');
     if (!statusEl) return;
-    statusEl.textContent = status?.text || "";
-    statusEl.dataset.state = status?.state || "";
+    statusEl.textContent = status.text || "";
+    statusEl.dataset.state = status.state || "";
   };
 
   const autoSave = initAutoSave({
@@ -273,9 +273,9 @@ if (mount) {
   };
 
   const renderCards = ({ preserveScroll = false } = {}) => {
-    const prevScrollY = preserveScroll ? window.scrollY : null;
+    const prevScrollY = preserveScroll  window.scrollY : null;
     list.innerHTML = "";
-    const machines = Array.isArray(state.draftMachines) ? state.draftMachines : [];
+    const machines = Array.isArray(state.draftMachines)  state.draftMachines : [];
     if (!machines.length) {
       renderPlaceholder();
       if (preserveScroll) {
@@ -297,7 +297,7 @@ if (mount) {
     cardRefs.clear();
     machines
       .slice()
-      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+      .sort((a, b) => (a.order  0) - (b.order  0))
       .forEach((machine) => {
         if (machine.tagId && !state.tagStatusById[machine.id]) {
           state.tagStatusById[machine.id] = { text: "Tag enlazado", state: "ok" };
@@ -357,7 +357,7 @@ if (mount) {
         hooks.onStatusToggle = (node) => {
           const statusOrder = ["operativa", "fuera_de_servicio", "desconectada"];
           const current = getDraftById(machine.id);
-          const currentStatus = current?.status || "operativa";
+          const currentStatus = current.status || "operativa";
           const idx = statusOrder.indexOf(currentStatus);
           const nextStatus = statusOrder[(idx + 1) % statusOrder.length];
           const keepExpanded = node.dataset.expanded === "true";
@@ -365,7 +365,7 @@ if (mount) {
             ...current,
             status: nextStatus,
             logs: [
-              ...(current?.logs || []),
+              ...(current.logs || []),
               { ts: new Date().toISOString(), type: "status", value: nextStatus }
             ]
           });
@@ -396,7 +396,7 @@ if (mount) {
         hooks.onUpdateGeneral = (id, field, value, input, errorEl) => {
           if (field === "year") {
             const currentYear = new Date().getFullYear();
-            const parsed = value ? Number(value) : null;
+            const parsed = value  Number(value) : null;
             if (parsed !== null && (Number.isNaN(parsed) || parsed > currentYear || parsed < currentYear - 50)) {
               if (errorEl) {
                 errorEl.textContent = `Año inválido (entre ${currentYear - 50} y ${currentYear}).`;
@@ -485,7 +485,7 @@ if (mount) {
             return;
           }
           const current = getDraftById(id);
-          const users = Array.isArray(current?.users) ? [...current.users] : [];
+          const users = Array.isArray(current.users)  [...current.users] : [];
           if (users.some((u) => u.username === username)) {
             if (addBtn) {
               const prev = addBtn.textContent;
@@ -498,7 +498,7 @@ if (mount) {
             const saltBase64 = generateSaltBase64();
             const passwordHashBase64 = await hashPassword(password, saltBase64);
             users.push({
-              id: (window.crypto?.randomUUID && window.crypto.randomUUID()) || `u_${Date.now()}`,
+              id: (window.crypto.randomUUID && window.crypto.randomUUID()) || `u_${Date.now()}`,
               username,
               role: "usuario",
               createdAt: new Date().toISOString(),
@@ -525,8 +525,8 @@ if (mount) {
 
         hooks.onUpdateUserRole = (id, userId, role) => {
           const current = getDraftById(id);
-          const users = (current?.users || []).map((u) =>
-            u.id === userId ? { ...u, role } : u
+          const users = (current.users || []).map((u) =>
+            u.id === userId  { ...u, role } : u
           );
           updateMachine(id, { users });
           if (!state.selectedTabById) state.selectedTabById = {};
@@ -538,7 +538,7 @@ if (mount) {
 
         hooks.onRemoveUser = (id, userId) => {
           const current = getDraftById(id);
-          const users = (current?.users || []).filter((u) => u.id !== userId);
+          const users = (current.users || []).filter((u) => u.id !== userId);
           updateMachine(id, { users });
           if (!state.selectedTabById) state.selectedTabById = {};
           state.selectedTabById[id] = "configuracion";
@@ -553,15 +553,15 @@ if (mount) {
             const time = new Date(log.ts).toLocaleString("es-ES");
             if (log.type === "task") {
               const title = log.title || "Tarea";
-              const user = log.user ? ` - por ${log.user}` : "";
-              const prefix = log.overdue ? "Tarea completada fuera de plazo: " : "Tarea completada: ";
+              const user = log.user  ` - por ${log.user}` : "";
+              const prefix = log.overdue  "Tarea completada fuera de plazo: " : "Tarea completada: ";
               return `[${time}] ${prefix}${title}${user}`;
             }
             const value =
               log.value === "operativa"
-                ? "Operativo"
+                 "Operativo"
                 : log.value === "fuera_de_servicio"
-                ? "Fuera de servicio"
+                 "Fuera de servicio"
                 : "Desconectada";
             return `[${time}] Estado -> ${value}`;
           });
@@ -582,7 +582,7 @@ if (mount) {
         };
 
         hooks.onRemoveMachine = (machineData) => {
-          const ok = window.confirm("¿Seguro que quieres eliminar este equipo?");
+          const ok = window.confirm("¿Seguro que quieres eliminar este equipo");
           if (!ok) return;
           removeMachineFromState(machineData.id);
           renderCards();
@@ -593,7 +593,7 @@ if (mount) {
 
         hooks.onAddTask = (id, task) => {
           const current = getDraftById(id);
-          const tasks = Array.isArray(current?.tasks) ? [...current.tasks] : [];
+          const tasks = Array.isArray(current.tasks)  [...current.tasks] : [];
           tasks.unshift(task);
           updateMachine(id, { tasks });
           if (!state.selectedTabById) state.selectedTabById = {};
@@ -605,7 +605,7 @@ if (mount) {
 
         hooks.onRemoveTask = (id, taskId) => {
           const current = getDraftById(id);
-          const tasks = (current?.tasks || []).filter((t) => t.id !== taskId);
+          const tasks = (current.tasks || []).filter((t) => t.id !== taskId);
           updateMachine(id, { tasks });
           if (!state.selectedTabById) state.selectedTabById = {};
           state.selectedTabById[id] = "quehaceres";
@@ -642,19 +642,19 @@ if (mount) {
 
         hooks.onCompleteTask = (id, taskId) => {
           const current = getDraftById(id);
-          const tasks = normalizeTasks(current?.tasks || []).map((t) =>
-            t.id === taskId ? { ...t, lastCompletedAt: new Date().toISOString() } : t
+          const tasks = normalizeTasks(current.tasks || []).map((t) =>
+            t.id === taskId  { ...t, lastCompletedAt: new Date().toISOString() } : t
           );
           const task = tasks.find((t) => t.id === taskId);
-          const before = normalizeTasks(current?.tasks || []).find((t) => t.id === taskId);
-          const wasOverdue = before ? getTaskTiming(before).pending : false;
+          const before = normalizeTasks(current.tasks || []).find((t) => t.id === taskId);
+          const wasOverdue = before  getTaskTiming(before).pending : false;
           const user = state.adminLabel || "Administrador";
           const logs = [
-            ...(current?.logs || []),
+            ...(current.logs || []),
             {
               ts: new Date().toISOString(),
               type: "task",
-              title: task?.title || "Tarea",
+              title: task.title || "Tarea",
               user,
               overdue: !!wasOverdue
             }

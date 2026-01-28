@@ -148,7 +148,7 @@ const autoSave = initAutoSave({
         logs: state.draft.logs || [],
         tasks: state.draft.tasks || []
       },
-      `machineUser:${state.session?.username || "unknown"}`
+      `machineUser:${state.session.username || "unknown"}`
     );
   }
 });
@@ -203,7 +203,7 @@ const renderMachine = () => {
   const session = state.session;
   list.innerHTML = "";
 
-  const role = session?.role || "usuario";
+  const role = session.role || "usuario";
   const visibleTabs = ["quehaceres", "general", "historial"].filter((tab) =>
     canSeeTab(role, tab)
   );
@@ -220,7 +220,7 @@ const renderMachine = () => {
     canEditConfig: false,
     visibleTabs,
     disableTitleEdit: true,
-    createdBy: state.session?.username || null
+    createdBy: state.session.username || null
   });
 
   card.style.maxHeight = `${COLLAPSED_HEIGHT}px`;
@@ -281,12 +281,12 @@ const renderMachine = () => {
   hooks.onCompleteTask = (id, taskId) => {
     const baseTasks = normalizeTasks(machineDoc.tasks || []);
     const before = baseTasks.find((t) => t.id === taskId);
-    const wasOverdue = before ? getTaskTiming(before).pending : false;
+    const wasOverdue = before  getTaskTiming(before).pending : false;
     const tasks = baseTasks.map((t) =>
-      t.id === taskId ? { ...t, lastCompletedAt: new Date().toISOString() } : t
+      t.id === taskId  { ...t, lastCompletedAt: new Date().toISOString() } : t
     );
     const task = tasks.find((t) => t.id === taskId);
-    const user = state.session?.username || "usuario";
+    const user = state.session.username || "usuario";
     state.draft = {
       ...machineDoc,
       tasks,
@@ -295,7 +295,7 @@ const renderMachine = () => {
         {
           ts: new Date().toISOString(),
           type: "task",
-          title: task?.title || "Tarea",
+          title: task.title || "Tarea",
           user,
           overdue: !!wasOverdue
         }
