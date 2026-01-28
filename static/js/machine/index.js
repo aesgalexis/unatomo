@@ -234,7 +234,11 @@ const renderMachine = () => {
     const target = Math.max(minH, headerH + contentH);
     card.style.maxHeight = `${target}px`;
   };
-  recalcHeight();
+  list.appendChild(card);
+  requestAnimationFrame(() => {
+    recalcHeight();
+    requestAnimationFrame(() => recalcHeight());
+  });
 
   hooks.onSelectTab = () => {
     recalcHeight();
@@ -301,7 +305,6 @@ const renderMachine = () => {
     autoSave.saveNow(state.tagId, "task-complete");
   };
 
-  list.appendChild(card);
 };
 
 init();
