@@ -68,6 +68,24 @@ export const createMachineCard = (machine, options = {}) => {
   if (options.hideConfig) {
     const configTab = card.querySelector('.mc-tab[data-tab="configuracion"]');
     if (configTab) configTab.remove();
+  } else if (options.mode !== "single") {
+    const configTab = card.querySelector('.mc-tab[data-tab="configuracion"]');
+    if (!configTab) {
+      console.debug("[dashboard] Config tab missing", {
+        id: machine.id,
+        visibleTabs: options.visibleTabs,
+        hideConfig: options.hideConfig
+      });
+      const tabs = card.querySelector(".mc-tabs");
+      if (tabs) {
+        const btn = document.createElement("button");
+        btn.className = "mc-tab";
+        btn.type = "button";
+        btn.dataset.tab = "configuracion";
+        btn.textContent = "Configuración";
+        tabs.appendChild(btn);
+      }
+    }
   }
 
   const renderTab = (key) => {
