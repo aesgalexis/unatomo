@@ -5,6 +5,14 @@ import { render as renderOtros } from "./otros.js";
 
 export const render = (panel, machine, hooks, options = {}) => {
   panel.innerHTML = "";
+  const DEBUG = false;
+  if (DEBUG) {
+    console.debug("[config] render", {
+      id: machine.id,
+      tagId: machine.tagId,
+      panel
+    });
+  }
 
   const subTabs = document.createElement("div");
   subTabs.className = "mc-config-tabs";
