@@ -116,15 +116,15 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
       option.value = key;
       option.textContent =
         key === "diaria"
-           "Diaria"
+          ? "Diaria"
           : key === "semanal"
-           "Semanal"
+          ? "Semanal"
           : key === "mensual"
-           "Mensual"
+          ? "Mensual"
           : key === "trimestral"
-           "Trimestral"
+          ? "Trimestral"
           : key === "semestral"
-           "Semestral"
+          ? "Semestral"
           : "Anual";
       freqSelect.appendChild(option);
     });
