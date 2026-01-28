@@ -26,7 +26,7 @@ export const db = getFirestore(app);
 export const auth = getAuth(app);
 
 export async function validateRegistrationCode(code) {
-  const normalized = (code  "").toString().trim().toUpperCase();
+  const normalized = (code || "").toString().trim().toUpperCase();
   if (!normalized) return { valid: false, reason: "empty" };
 
   const ref = doc(db, "registration_codes", normalized);
@@ -55,7 +55,7 @@ async function upsertUserProfile(user, regCode) {
 }
 
 export async function registerWithGoogle(regCode) {
-  const code = (regCode  "").toString().trim().toUpperCase();
+  const code = (regCode || "").toString().trim().toUpperCase();
   if (!code) return { ok: false };
 
   const provider = new GoogleAuthProvider();
@@ -69,9 +69,9 @@ export async function registerWithGoogle(regCode) {
 }
 
 export async function registerWithEmail(regCode, email, password, displayName) {
-  const code = (regCode  "").toString().trim().toUpperCase();
-  const em = (email  "").toString().trim();
-  const pw = (password  "").toString();
+  const code = (regCode || "").toString().trim().toUpperCase();
+  const em = (email || "").toString().trim();
+  const pw = (password || "").toString();
 
   if (!code || !em || !pw) return { ok: false };
 
@@ -93,15 +93,15 @@ export async function loginWithGoogle() {
 }
 
 export async function loginWithEmail(email, password) {
-  const em = (email  "").toString().trim();
-  const pw = (password  "").toString();
+  const em = (email || "").toString().trim();
+  const pw = (password || "").toString();
   const cred = await signInWithEmailAndPassword(auth, em, pw);
   if (!cred.user) return { ok: false };
   return { ok: true, uid: cred.user.uid };
 }
 
 export async function sendPasswordReset(email) {
-  const em = (email  "").toString().trim();
+  const em = (email || "").toString().trim();
   if (!em) return { ok: false };
   await sendPasswordResetEmail(auth, em);
   return { ok: true };
