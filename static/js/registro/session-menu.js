@@ -21,7 +21,7 @@ if (!btn || !menu || !label || !action) {
   }
 
   function applyButtonColor() {
-    btn.style.color = state === "user"  ACCENT : FG;
+    btn.style.color = state === "user" ? ACCENT : FG;
   }
 
   function openMenu() {
