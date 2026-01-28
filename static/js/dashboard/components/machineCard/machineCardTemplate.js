@@ -14,7 +14,7 @@ export const buildMachineCardTemplate = () => {
           <button class="mc-tab is-active" data-tab="quehaceres" type="button">Tareas</button>
           <button class="mc-tab" data-tab="general" type="button">General</button>
           <button class="mc-tab" data-tab="historial" type="button">Historial</button>
-          <button class="mc-tab" data-tab="configuracion" type="button">Configuracin</button>
+          <button class="mc-tab" data-tab="configuracion" type="button">Configuración</button>
         </div>
         <div class="mc-panel" data-panel="quehaceres"></div>
       </div>
