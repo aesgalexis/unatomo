@@ -2,7 +2,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/fi
 import { auth } from "/static/js/firebase/firebaseApp.js";
 import { fetchMachines, upsertMachine, deleteMachine } from "./firestoreRepo.js";
 import { validateTag, assignTag } from "./tagRepo.js";
-import { upsertMachineAccessFromMachine } from "./machineAccessRepo.js";
+import { upsertMachineAccessFromMachine, fetchMachineAccess } from "./machineAccessRepo.js";
 import { createMachineCard } from "./machineCardTemplate.js";
 import { initDragAndDrop } from "./dragAndDrop.js";
 import { cloneMachines, normalizeMachine, createDraftMachine } from "./machineStore.js";
@@ -100,6 +100,28 @@ if (mount) {
     state.remoteMachines = cloneMachines(remote);
     state.draftMachines = cloneMachines(remote);
     state.tagStatusById = {};
+  };
+
+  const mergeOperationalFromTag = async (machines) => {
+    const merged = await Promise.all(
+      machines.map(async (machine) => {
+        if (!machine.tagId) return { ...machine, _operationalSource: "local" };
+        try {
+          const access = await fetchMachineAccess(machine.tagId);
+          if (!access) return { ...machine, _operationalSource: "local" };
+          return {
+            ...machine,
+            status: access.status ?? machine.status,
+            tasks: access.tasks ?? machine.tasks,
+            logs: access.logs ?? machine.logs,
+            _operationalSource: "tag"
+          };
+        } catch {
+          return { ...machine, _operationalSource: "local" };
+        }
+      })
+    );
+    return merged;
   };
 
   const getDraftIndex = (id) => state.draftMachines.findIndex((m) => m.id === id);
@@ -216,7 +238,8 @@ if (mount) {
           canEditConfig: true,
           visibleTabs: ["quehaceres", "general", "historial", "configuracion"],
           userRoles: ["usuario", "tecnico", "externo"],
-          createdBy: state.adminLabel || null
+          createdBy: state.adminLabel || null,
+          operationalSource: machine._operationalSource || "local"
         });
         card.style.maxHeight = `${COLLAPSED_HEIGHT}px`;
 
@@ -600,7 +623,8 @@ if (mount) {
     const normalized = remote
       .map((m, idx) => normalizeMachine(m, idx))
       .filter(Boolean);
-    setRemote(normalized);
+    const merged = await mergeOperationalFromTag(normalized);
+    setRemote(merged);
     renderCards();
     initDragAndDrop(list, handleReorder);
   };
