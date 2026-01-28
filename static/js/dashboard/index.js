@@ -9,6 +9,7 @@ import { cloneMachines, normalizeMachine, createDraftMachine } from "./machineSt
 import { generateSaltBase64, hashPassword } from "/static/js/utils/crypto.js";
 import { initAutoSave } from "./autoSave.js";
 import { normalizeTasks } from "/static/js/tasks/tasksModel.js";
+import { getTaskTiming } from "/static/js/tasks/tasksTime.js";
 
 const COLLAPSED_HEIGHT = 96;
 const EXPAND_FACTOR = 2.5;
@@ -444,7 +445,8 @@ if (mount) {
             if (log.type === "task") {
               const title = log.title || "Tarea";
               const user = log.user ? ` - por ${log.user}` : "";
-              return `[${time}] Tarea completada: ${title}${user}`;
+              const prefix = log.overdue ? "Tarea completada fuera de plazo: " : "Tarea completada: ";
+              return `[${time}] ${prefix}${title}${user}`;
             }
             const value =
               log.value === "operativa"
@@ -509,6 +511,8 @@ if (mount) {
             t.id === taskId ? { ...t, lastCompletedAt: new Date().toISOString() } : t
           );
           const task = tasks.find((t) => t.id === taskId);
+          const before = normalizeTasks(current?.tasks || []).find((t) => t.id === taskId);
+          const wasOverdue = before ? getTaskTiming(before).pending : false;
           const user = state.adminLabel || "Administrador";
           const logs = [
             ...(current?.logs || []),
@@ -516,7 +520,8 @@ if (mount) {
               ts: new Date().toISOString(),
               type: "task",
               title: task?.title || "Tarea",
-              user
+              user,
+              overdue: !!wasOverdue
             }
           ];
           updateMachine(id, { tasks, logs });

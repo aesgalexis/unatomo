@@ -119,7 +119,8 @@ const renderHistorial = (panel, machine, hooks, options = {}) => {
       if (log.type === "task") {
         const title = log.title || "Tarea";
         const user = log.user ? ` - por ${log.user}` : "";
-        item.textContent = `${time} - Tarea completada: ${title}${user}`;
+        const prefix = log.overdue ? "Tarea completada fuera de plazo: " : "Tarea completada: ";
+        item.textContent = `${time} - ${prefix}${title}${user}`;
       } else if (log.type === "status") {
         const label = statusLabels[log.value] || log.value;
         item.textContent = `${time} - Estado -> ${label}`;
