@@ -20,7 +20,7 @@ form.addEventListener("submit", async (e) => {
   e.preventDefault();
   clearStatus();
 
-  const email = (form.querySelector("#email").value  "").toString().trim();
+  const email = (form.querySelector("#email").value || "").toString().trim();
   if (!email) return setStatus("Escribe tu correo.");
 
   try {

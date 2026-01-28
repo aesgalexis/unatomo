@@ -62,7 +62,7 @@ export const render = (container, machine, hooks, options = {}) => {
     row.className = "mc-notif-event";
     const input = document.createElement("input");
     input.type = "checkbox";
-    input.checked = !!notifications.events.[key];
+    input.checked = !!notifications.events[key];
     input.disabled = !notifications.enabled;
     input.addEventListener("click", (event) => event.stopPropagation());
     input.addEventListener("change", (event) => {
