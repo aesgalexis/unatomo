@@ -1,13 +1,15 @@
 export const render = (container, machine, hooks, options = {}) => {
-  const notifications = machine.notifications || {
+  const notifications = {
     enabled: false,
     email: "",
     events: {
-      statusChanged: false,
-      taskOverdue: false,
-      taskLateCompleted: false,
-      tagDisconnected: false
-    }
+      statusChanged: false
+    },
+    ...(machine.notifications || {})
+  };
+  notifications.events = {
+    statusChanged: false,
+    ...(notifications.events || {})
   };
 
   const notifToggleRow = document.createElement("div");
@@ -57,47 +59,29 @@ export const render = (container, machine, hooks, options = {}) => {
   const eventsWrap = document.createElement("div");
   eventsWrap.className = "mc-notif-events";
 
-  const makeEvent = (key, label) => {
-    const row = document.createElement("label");
-    row.className = "mc-notif-event";
-    const input = document.createElement("input");
-    input.type = "checkbox";
-    input.checked = !!notifications.events[key];
-    input.disabled = !notifications.enabled;
-    input.addEventListener("click", (event) => event.stopPropagation());
-    input.addEventListener("change", (event) => {
-      event.stopPropagation();
-      if (hooks.onUpdateNotifications) {
-        hooks.onUpdateNotifications(machine.id, {
-          ...notifications,
-          events: { ...notifications.events, [key]: !!input.checked }
-        });
-      }
-    });
-    const span = document.createElement("span");
-    span.textContent = label;
-    row.appendChild(input);
-    row.appendChild(span);
-    return row;
-  };
-
-  eventsWrap.appendChild(makeEvent("statusChanged", "Cambio de estado"));
-  eventsWrap.appendChild(makeEvent("taskOverdue", "Tarea pendiente"));
-  eventsWrap.appendChild(makeEvent("taskLateCompleted", "Tarea completada fuera de plazo"));
-  eventsWrap.appendChild(makeEvent("tagDisconnected", "Tag desconectado"));
-
-  const notifBtn = document.createElement("button");
-  notifBtn.type = "button";
-  notifBtn.className = "mc-notif-test";
-  notifBtn.textContent = "Probar notificacin";
-  notifBtn.disabled = !notifications.enabled;
-  notifBtn.addEventListener("click", (event) => {
+  const row = document.createElement("label");
+  row.className = "mc-notif-event";
+  const input = document.createElement("input");
+  input.type = "checkbox";
+  input.checked = !!notifications.events.statusChanged;
+  input.disabled = !notifications.enabled;
+  input.addEventListener("click", (event) => event.stopPropagation());
+  input.addEventListener("change", (event) => {
     event.stopPropagation();
-    if (hooks.onTestNotification) hooks.onTestNotification(machine);
+    if (hooks.onUpdateNotifications) {
+      hooks.onUpdateNotifications(machine.id, {
+        ...notifications,
+        events: { statusChanged: !!input.checked }
+      });
+    }
   });
+  const span = document.createElement("span");
+  span.textContent = "Cambio de estado";
+  row.appendChild(input);
+  row.appendChild(span);
+  eventsWrap.appendChild(row);
 
   container.appendChild(notifToggleRow);
   container.appendChild(notifEmailRow);
   container.appendChild(eventsWrap);
-  container.appendChild(notifBtn);
 };

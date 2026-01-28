@@ -181,6 +181,10 @@ const init = async () => {
       state.session = userSession;
       state.draft = {
         ...machineDoc,
+        status:
+          machineDoc.status === "desconectada"
+            ? "fuera_de_servicio"
+            : machineDoc.status || "operativa",
         logs: machineDoc.logs || [],
         tasks: normalizeTasks(machineDoc.tasks || [])
       };
@@ -192,6 +196,10 @@ const init = async () => {
   state.session = session;
   state.draft = {
     ...machineDoc,
+    status:
+      machineDoc.status === "desconectada"
+        ? "fuera_de_servicio"
+        : machineDoc.status || "operativa",
     logs: machineDoc.logs || [],
     tasks: normalizeTasks(machineDoc.tasks || [])
   };
@@ -246,8 +254,10 @@ const renderMachine = () => {
 
   hooks.onStatusToggle = () => {
     if (!canEditStatus(role)) return;
-    const statusOrder = ["operativa", "fuera_de_servicio", "desconectada"];
-    const idx = statusOrder.indexOf(machineDoc.status || "operativa");
+    const statusOrder = ["operativa", "fuera_de_servicio"];
+    const currentStatus =
+      machineDoc.status === "desconectada" ? "fuera_de_servicio" : machineDoc.status || "operativa";
+    const idx = statusOrder.indexOf(currentStatus);
     const nextStatus = statusOrder[(idx + 1) % statusOrder.length];
     state.draft = {
       ...machineDoc,
