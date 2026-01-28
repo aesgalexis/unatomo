@@ -9,7 +9,7 @@ export const render = (container, machine, hooks, options = {}) => {
 
   const addLabel = document.createElement("span");
   addLabel.className = "mc-config-label";
-  addLabel.textContent = "A?adir usuario";
+  addLabel.textContent = "Añadir usuario";
 
   const userInput = document.createElement("input");
   userInput.className = "mc-user-username";
@@ -20,13 +20,13 @@ export const render = (container, machine, hooks, options = {}) => {
   const passInput = document.createElement("input");
   passInput.className = "mc-user-password";
   passInput.type = "password";
-  passInput.placeholder = "Contrase?a";
+  passInput.placeholder = "Contraseña";
   passInput.addEventListener("click", (event) => event.stopPropagation());
 
   const addBtn = document.createElement("button");
   addBtn.type = "button";
   addBtn.className = "mc-user-add";
-  addBtn.textContent = "A?adir usuario";
+  addBtn.textContent = "Añadir usuario";
   addBtn.addEventListener("click", (event) => {
     event.stopPropagation();
     if (hooks.onAddUser) hooks.onAddUser(machine.id, userInput, passInput, addBtn);
@@ -51,7 +51,7 @@ export const render = (container, machine, hooks, options = {}) => {
   list.className = "mc-user-list";
 
   const roles = options.userRoles || ["usuario", "tecnico", "externo"];
-  const labels = { usuario: "Usuario", tecnico: "T?cnico", externo: "Externo" };
+  const labels = { usuario: "Usuario", tecnico: "Técnico", externo: "Externo" };
 
   (machine.users || []).forEach((user) => {
     const row = document.createElement("div");
@@ -102,25 +102,7 @@ export const render = (container, machine, hooks, options = {}) => {
     list.appendChild(row);
   });
 
-  const sep2 = document.createElement("hr");
-  sep2.className = "mc-sep";
-
-  const removeLink = document.createElement("a");
-  removeLink.className = "mc-remove-machine";
-  removeLink.href = "#";
-  removeLink.textContent = "Eliminar equipo";
-  removeLink.addEventListener("click", (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    if (hooks.onRemoveMachine) hooks.onRemoveMachine(machine);
-  });
-  if (!canEditConfig || options.disableConfigActions) {
-    removeLink.style.display = "none";
-  }
-
   container.appendChild(sep);
   container.appendChild(addRow);
   container.appendChild(list);
-  container.appendChild(sep2);
-  container.appendChild(removeLink);
 };
