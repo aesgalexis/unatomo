@@ -281,9 +281,9 @@ const renderMachine = () => {
   hooks.onCompleteTask = (id, taskId) => {
     const baseTasks = normalizeTasks(machineDoc.tasks || []);
     const before = baseTasks.find((t) => t.id === taskId);
-    const wasOverdue = before  getTaskTiming(before).pending : false;
+    const wasOverdue = before ? getTaskTiming(before).pending : false;
     const tasks = baseTasks.map((t) =>
-      t.id === taskId  { ...t, lastCompletedAt: new Date().toISOString() } : t
+      t.id === taskId ? { ...t, lastCompletedAt: new Date().toISOString() } : t
     );
     const task = tasks.find((t) => t.id === taskId);
     const user = state.session.username || "usuario";
