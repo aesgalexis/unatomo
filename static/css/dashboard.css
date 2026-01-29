@@ -320,6 +320,7 @@
 .mc-row-inline {
   gap: 1rem;
   align-items: flex-end;
+  flex-wrap: wrap;
 }
 
 .mc-row-stack {
@@ -336,9 +337,22 @@
   gap: 0.25rem;
 }
 
+.mc-field-inline {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1 1 200px;
+}
+
+.mc-field-inline .mc-row-label {
+  min-width: 70px;
+}
+
 .mc-row-input-field {
   flex: 1;
   min-width: 160px;
+  max-width: 260px;
+  width: 100%;
   padding: 0.35rem 0.5rem;
   border-radius: 0.5rem;
   border: 1px solid var(--border-subtle);
