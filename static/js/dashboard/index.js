@@ -2,6 +2,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/fi
 import { auth, db } from "/static/js/firebase/firebaseApp.js";
 import { fetchMachines, upsertMachine, deleteMachine } from "./firestoreRepo.js";
 import { validateTag, assignTag } from "./tagRepo.js";
+import { createTagToken } from "/static/js/tokens/tagTokens.js";
 import { upsertMachineAccessFromMachine, fetchMachineAccess } from "./machineAccessRepo.js";
 import { createMachineCard } from "./machineCardTemplate.js";
 import { initDragAndDrop } from "./dragAndDrop.js";
@@ -543,6 +544,11 @@ if (mount) {
           state.expandedById = Array.from(expandedById);
           renderCards({ preserveScroll: true });
           autoSave.saveNow(id, "tag-disconnect");
+        };
+
+        hooks.onGenerateTag = async (id) => {
+          if (!state.uid) throw new Error("no-auth");
+          return createTagToken(state.uid);
         };
 
         hooks.onCopyTagUrl = (id, btn, input) => {

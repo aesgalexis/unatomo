@@ -13,7 +13,7 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
   if (!tasks.length) {
     const empty = document.createElement("div");
     empty.className = "task-empty";
-    empty.textContent = "Sin tareas.";
+    empty.textContent = "Crea una tarea para comenzar";
     list.appendChild(empty);
   } else {
     tasks.forEach((task) => {
