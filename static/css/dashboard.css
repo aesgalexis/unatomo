@@ -126,7 +126,7 @@
 }
 
 .mc-header-toggle {
-  margin-left: auto;
+  margin-left: 0;
   border: none;
   background: transparent;
   color: inherit;
@@ -188,6 +188,7 @@
 }
 
 .mc-status {
+  margin-left: auto;
   border: 2px solid color-mix(in srgb, var(--fg) 40%, transparent);
   border-radius: 999px;
   background: transparent;
@@ -223,6 +224,10 @@
 
 .mc-chevron {
   opacity: 0.6;
+}
+
+.mc-chevron::before {
+  content: "\25BE";
 }
 
 .mc-expand {
