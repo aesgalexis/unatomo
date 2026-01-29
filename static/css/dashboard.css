@@ -199,6 +199,10 @@
   opacity: 1;
 }
 
+.machine-card[data-expanded="false"] .mc-expand {
+  padding-bottom: 1.75rem;
+}
+
 .mc-tabs {
   display: flex;
   gap: 0.5rem;
