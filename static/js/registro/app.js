@@ -6,6 +6,13 @@ import {
   registerWithGoogle,
   registerWithEmail
 } from "/static/js/registro/firebase-init.js";
+import {
+  requestInviteCodeAndRedirect,
+  getRegisterTarget,
+  clearRegisterTarget,
+  shouldOpenInviteGate,
+  clearInviteGateFlag
+} from "/static/js/registro/invite-gate.js";
 
 import {
   onAuthStateChanged,
@@ -122,14 +129,13 @@ function initSetupRegisterCode() {
     if (!box.hidden) input.focus();
   }
 
-  registerBtn.addEventListener("click", toggleBox);
-try {
-  const flag = sessionStorage.getItem("unatomo_open_register") === "1";
-  if (flag) {
-    sessionStorage.removeItem("unatomo_open_register");
+  registerBtn.addEventListener("click", () => {
+    requestInviteCodeAndRedirect("/es/auth/registro.html", { showInline: toggleBox });
+  });
+  if (shouldOpenInviteGate()) {
+    clearInviteGateFlag();
     if (box.hidden) toggleBox();
   }
-} catch {}
   async function go() {
     clearStatus();
 
@@ -152,10 +158,14 @@ try {
       }
 
       try { sessionStorage.setItem("unatomo_access_code", res.code); } catch {}
+      try { sessionStorage.setItem("unatomo_invite_ok", "1"); } catch {}
       try { localStorage.setItem("unatomo_access_code", res.code); } catch {}
 
       setStatus("Código correcto. Redirigiendo…");
-const target = `/es/auth/registro.htmlcode=${encodeURIComponent(res.code)}`;
+const rawTarget = getRegisterTarget() || "/es/auth/registro.html";
+      clearRegisterTarget();
+      const sep = rawTarget.includes("?") ? "&" : "?";
+      const target = `${rawTarget}${sep}code=${encodeURIComponent(res.code)}`;
       setTimeout(() => (window.location.href = target), 650);
     } catch {
       setStatus("Error validando el código.");
