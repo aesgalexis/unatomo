@@ -5,10 +5,12 @@
   "main": "index.js",
   "scripts": {
     "dev": "vite",
+    "dev:static": "node scripts/dev-server.mjs",
     "build": "node scripts/build-static.mjs",
     "preview": "vite preview",
     "site:publish": "node scripts/site-publish.mjs",
-    "lint:links": "node scripts/lint-links.mjs"
+    "lint:links": "node scripts/lint-links.mjs",
+    "doctor": "node scripts/doctor.mjs"
   },
   "repository": {
     "type": "git",
@@ -24,5 +26,9 @@
   "homepage": "https://github.com/aesgalexis/unatomo#readme",
   "devDependencies": {
     "vite": "^7.3.1"
+  },
+  "volta": {
+    "node": "22.12.0",
+    "npm": "11.0.0"
   }
 }

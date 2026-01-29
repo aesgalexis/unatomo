@@ -2,7 +2,8 @@
 
 ## Requisitos
 
-- Node.js instalado
+- Node.js 22.12+ (recomendado) o 20.19+
+- Si usas Node 24 y Vite falla, cambia a Node LTS
 
 ## Instalar
 
@@ -16,7 +17,19 @@ npm i
 npm run dev
 ```
 
-## Probar rutas de m√°quina (hash)
+Si `npm run dev` falla dentro de `node_modules/vite`, ejecuta:
+
+```
+npm run doctor
+```
+
+Reinstala dependencias y, si hace falta, usa Node LTS o el servidor est·tico:
+
+```
+npm run dev:static
+```
+
+## Probar rutas de m·quina (hash)
 
 - Listado: `/es/index.html#/`
 - Detalle: `/es/index.html#/m/mx-101`
