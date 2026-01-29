@@ -1,7 +1,7 @@
 export const buildMachineCardTemplate = () => {
   const wrapper = document.createElement("div");
   wrapper.innerHTML = `
-    <article class="machine-card" data-expanded="false" draggable="true">
+    <article class="machine-card" data-expanded="false">
       <header class="mc-header">
         <div class="mc-title"></div>
         <button class="mc-status" type="button"></button>
