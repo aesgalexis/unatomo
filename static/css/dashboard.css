@@ -10,30 +10,60 @@
 }
 
 .add-search {
-  flex: 1 1 220px;
-  max-width: 280px;
-  min-width: 180px;
+  flex: 0 0 auto;
+  width: 2.55rem;
+  height: 2.55rem;
   margin-top: 0;
   border: 1px solid var(--border-subtle);
-  background: color-mix(in srgb, var(--bg) 96%, transparent);
-  color: var(--fg);
+  background-color: color-mix(in srgb, var(--bg) 96%, transparent);
+  color: transparent;
+  caret-color: transparent;
   border-radius: 0.75rem;
-  padding: 0.55rem 1.2rem;
+  padding: 0;
   font: inherit;
   font-size: 0.95rem;
-  height: 100%;
+  text-align: center;
+  transition: width 180ms ease, color 120ms ease, padding 180ms ease;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 18px 18px;
 }
 
 @media (max-width: 480px) {
   .add-search {
-    max-width: 100%;
-    flex-basis: 100%;
+    width: 44px;
   }
 }
 
+.add-search::placeholder {
+  color: transparent;
+}
+
 .add-search:focus {
-  border-color: #fff;
+  border-color: var(--fg);
   outline: none;
+}
+
+.add-search:hover,
+.add-search:focus {
+  width: 280px;
+  padding: 0.55rem 1.2rem 0.55rem 2.2rem;
+  color: var(--fg);
+  caret-color: var(--fg);
+  text-align: left;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-size: 18px 18px;
+  background-position: 0.75rem center;
+}
+
+.add-search:hover::placeholder {
+  color: color-mix(in srgb, var(--fg) 70%, transparent);
+}
+
+.add-search:focus::placeholder {
+  color: transparent;
 }
 
 :root {

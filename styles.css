@@ -603,7 +603,7 @@ body.page li {
 
 .field:focus {
   outline: none;
-  border-color: #fff;
+  border-color: var(--fg);
   background: var(--bg);
 }
 
