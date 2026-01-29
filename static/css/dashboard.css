@@ -148,6 +148,7 @@
 .mc-title {
   font-weight: 600;
   color: var(--fg);
+  cursor: pointer;
 }
 
 .mc-title-input {
