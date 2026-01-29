@@ -10,6 +10,8 @@ import { generateSaltBase64, hashPassword } from "/static/js/utils/crypto.js";
 import { initAutoSave } from "./autoSave.js";
 import { normalizeTasks } from "/static/js/dashboard/tabs/tasks/tasksModel.js";
 import { getTaskTiming } from "/static/js/dashboard/tabs/tasks/tasksTime.js";
+import { filterMachines } from "./components/machineSearch/machineFilter.js";
+import { createMachineSearchBar } from "./components/machineSearch/machineSearchBar.js";
 import {
   doc,
   onSnapshot
@@ -29,7 +31,8 @@ if (mount) {
     expandedById: [],
     selectedTabById: {},
     configSubtabById: {},
-    tagStatusById: {}
+    tagStatusById: {},
+    searchQuery: ""
   };
 
   const cardRefs = new Map();
@@ -82,10 +85,19 @@ if (mount) {
   addBtn.className = "btn-add";
   addBtn.textContent = "Añadir";
 
+  const searchInput = createMachineSearchBar({
+    placeholder: "Buscar por nombre o ubicaci\u00f3n...",
+    onQuery: (value) => {
+      state.searchQuery = value || "";
+      renderCards({ preserveScroll: true });
+    }
+  });
+
   const saveStatus = document.createElement("span");
   saveStatus.className = "save-status";
 
   addBar.appendChild(addBtn);
+  addBar.appendChild(searchInput);
   addBar.appendChild(saveStatus);
 
   const list = document.createElement("div");
@@ -307,8 +319,21 @@ if (mount) {
     const prevScrollY = preserveScroll ? window.scrollY : null;
     list.innerHTML = "";
     const machines = Array.isArray(state.draftMachines) ? state.draftMachines : [];
+    const query = (state.searchQuery || "").trim();
+    const visibleMachines = filterMachines(machines, query);
     if (!machines.length) {
       renderPlaceholder();
+      if (preserveScroll) {
+        requestAnimationFrame(() => window.scrollTo(0, prevScrollY || 0));
+      }
+      return;
+    }
+    if (!visibleMachines.length) {
+      list.innerHTML = "";
+      const placeholder = document.createElement("div");
+      placeholder.className = "machine-placeholder";
+      placeholder.textContent = `No hay resultados para "${query}".`;
+      list.appendChild(placeholder);
       if (preserveScroll) {
         requestAnimationFrame(() => window.scrollTo(0, prevScrollY || 0));
       }
@@ -327,7 +352,7 @@ if (mount) {
 
     cardRefs.clear();
     state.locations = computeLocations(state.draftMachines);
-    machines
+    visibleMachines
       .slice()
       .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
       .forEach((machine) => {
@@ -338,6 +363,7 @@ if (mount) {
           tagStatus: state.tagStatusById[machine.id],
           adminLabel: state.adminLabel,
           mode: "dashboard",
+          disableDrag: query.length > 0,
           canEditTasks: true,
           canCompleteTasks: true,
           canEditStatus: true,
