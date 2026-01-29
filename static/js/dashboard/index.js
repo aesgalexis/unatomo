@@ -639,8 +639,13 @@ if (mount) {
               return `[${time}] ${prefix}${title}${user}`;
             }
             if (log.type === "location") {
-              const value = log.value ? log.value : "Sin ubicación";
-              return `[${time}] Ubicación -> ${value}`;
+              const value = log.value ? log.value : "Sin ubicacion";
+              return `[${time}] Ubicacion -> ${value}`;
+            }
+            if (log.type === "intervencion") {
+              const message = log.message || "";
+              const user = log.user ? ` - por ${log.user}` : "";
+              return `[${time}] Intervencion: ${message}${user}`;
             }
             const value =
               log.value === "operativa"
@@ -673,6 +678,21 @@ if (mount) {
           autoSave.saveNow(machineData.id, "delete", async () => {
             await deleteMachine(state.uid, machineData.id);
           });
+        };
+
+        hooks.onAddIntervention = (machineData, message) => {
+          const current = getDraftById(machineData.id) || machineData;
+          const user = state.adminLabel || "Administrador";
+          const logs = [
+            ...(current.logs || []),
+            { ts: new Date().toISOString(), type: "intervencion", message, user }
+          ];
+          updateMachine(machineData.id, { logs });
+          if (!state.selectedTabById) state.selectedTabById = {};
+          state.selectedTabById[machineData.id] = "historial";
+          state.expandedById = Array.from(expandedById);
+          renderCards({ preserveScroll: true });
+          autoSave.saveNow(machineData.id, "intervencion");
         };
 
         hooks.onAddTask = (id, task) => {

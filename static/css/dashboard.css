@@ -397,6 +397,40 @@
   margin-bottom: 0.4rem;
 }
 
+.mc-log-form {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.6rem;
+}
+
+.mc-log-label {
+  font-size: 0.85rem;
+  color: color-mix(in srgb, var(--fg) 70%, transparent);
+}
+
+.mc-log-input {
+  flex: 1 1 260px;
+  min-width: 180px;
+  padding: 0.35rem 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--bg) 96%, transparent);
+  color: var(--fg);
+  font: inherit;
+}
+
+.mc-log-btn {
+  border-radius: 0.6rem;
+  border: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--bg) 96%, transparent);
+  color: var(--fg);
+  padding: 0.35rem 0.7rem;
+  font: inherit;
+  cursor: pointer;
+}
+
 .mc-log-download {
   margin-top: 0.6rem;
   border: none;

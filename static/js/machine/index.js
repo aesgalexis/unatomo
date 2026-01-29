@@ -316,6 +316,19 @@ const renderMachine = () => {
     autoSave.saveNow(state.tagId, "task-complete");
   };
 
+  hooks.onAddIntervention = (machineData, message) => {
+    const user = state.session.username || "usuario";
+    state.draft = {
+      ...machineDoc,
+      logs: [
+        ...(machineDoc.logs || []),
+        { ts: new Date().toISOString(), type: "intervencion", message, user }
+      ]
+    };
+    renderMachine();
+    autoSave.saveNow(state.tagId, "intervencion");
+  };
+
 };
 
 init();
