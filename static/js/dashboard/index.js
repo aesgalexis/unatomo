@@ -9,7 +9,7 @@ import { cloneMachines, normalizeMachine, createDraftMachine } from "./machineSt
 import { generateSaltBase64, hashPassword } from "/static/js/utils/crypto.js";
 import { initAutoSave } from "./autoSave.js";
 import { normalizeTasks } from "/static/js/dashboard/tabs/tasks/tasksModel.js";
-import { getTaskTiming } from "/static/js/dashboard/tabs/tasks/tasksTime.js";
+import { getTaskTiming, getOverdueDuration } from "/static/js/dashboard/tabs/tasks/tasksTime.js";
 import { filterMachines } from "./components/machineSearch/machineFilter.js";
 import { createMachineSearchBar } from "./components/machineSearch/machineSearchBar.js";
 import {
@@ -635,7 +635,12 @@ if (mount) {
             if (log.type === "task") {
               const title = log.title || "Tarea";
               const user = log.user ? ` - por ${log.user}` : "";
-              const prefix = log.overdue ? "Tarea completada fuera de plazo: " : "Tarea completada: ";
+              const overdueText = log.overdueDuration
+                ? `, ${log.overdueDuration} tarde`
+                : "";
+              const prefix = log.overdue
+                ? `Tarea completada fuera de plazo${overdueText}: `
+                : "Tarea completada: ";
               return `[${time}] ${prefix}${title}${user}`;
             }
             if (log.type === "location") {
@@ -752,6 +757,7 @@ if (mount) {
           const task = tasks.find((t) => t.id === taskId);
           const before = normalizeTasks(current.tasks || []).find((t) => t.id === taskId);
           const wasOverdue = before ? getTaskTiming(before).pending : false;
+          const overdueDuration = before ? getOverdueDuration(before) : "";
           const user = state.adminLabel || "Administrador";
           const logs = [
             ...(current.logs || []),
@@ -760,7 +766,8 @@ if (mount) {
               type: "task",
               title: task.title || "Tarea",
               user,
-              overdue: !!wasOverdue
+              overdue: !!wasOverdue,
+              overdueDuration
             }
           ];
           updateMachine(id, { tasks, logs });

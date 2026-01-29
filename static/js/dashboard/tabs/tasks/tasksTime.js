@@ -59,6 +59,24 @@ const formatOverdue = (ms) => {
   return `Vencida hace ${formatCount(hours, "hora", "horas")}`;
 };
 
+export const getOverdueDuration = (task, nowMs = Date.now()) => {
+  const baseMs = toMs(task.lastCompletedAt || task.createdAt);
+  const days = durationDays[task.frequency] || 1;
+  const nextDue = baseMs + days * DAY;
+  const diff = nowMs - nextDue;
+  if (diff <= 0) return "";
+  const dayCount = Math.max(1, Math.ceil(diff / DAY));
+  if (dayCount >= 30) {
+    const months = Math.ceil(dayCount / 30);
+    return formatCount(months, "mes", "meses");
+  }
+  if (dayCount >= 7) {
+    const weeks = Math.ceil(dayCount / 7);
+    return formatCount(weeks, "semana", "semanas");
+  }
+  return formatCount(dayCount, "d\u00eda", "d\u00edas");
+};
+
 export const getTaskTiming = (task, nowMs = Date.now()) => {
   const baseMs = toMs(task.lastCompletedAt || task.createdAt);
   const days = durationDays[task.frequency] || 1;
