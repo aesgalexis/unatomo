@@ -9,7 +9,7 @@ export const render = (panel, machine, hooks, options = {}) => {
 
   const label = document.createElement("span");
   label.className = "mc-log-label";
-  label.textContent = "Registrar intervencion";
+  label.textContent = "Intervenci\u00f3n";
 
   const input = document.createElement("input");
   input.type = "text";
@@ -33,12 +33,6 @@ export const render = (panel, machine, hooks, options = {}) => {
   form.appendChild(input);
   form.appendChild(btn);
   panel.appendChild(form);
-
-  const header = document.createElement("div");
-  header.className = "mc-log-header";
-  const visibleCount = Math.min(16, total);
-  header.textContent = `${visibleCount}/${total}`;
-  panel.appendChild(header);
 
   const sepTop = document.createElement("hr");
   sepTop.className = "mc-sep";
@@ -68,8 +62,8 @@ export const render = (panel, machine, hooks, options = {}) => {
           : "Tarea completada: ";
         item.textContent = `${time} - ${prefix}${title}${user}`;
       } else if (log.type === "location") {
-        const value = log.value ? log.value : "Sin ubicacion";
-        item.textContent = `${time} - Ubicacion -> ${value}`;
+        const value = log.value ? log.value : "Sin ubicaci\u00f3n";
+        item.textContent = `${time} - Ubicaci\u00f3n -> ${value}`;
       } else if (log.type === "status") {
         const label = STATUS_LABELS[log.value] || log.value;
         item.textContent = `${time} - Estado -> ${label}`;
@@ -88,6 +82,15 @@ export const render = (panel, machine, hooks, options = {}) => {
   sep.className = "mc-sep";
   panel.appendChild(sep);
 
+  const footer = document.createElement("div");
+  footer.className = "mc-log-footer";
+
+  const counter = document.createElement("div");
+  counter.className = "mc-log-header";
+  const visibleCount = Math.min(16, total);
+  counter.textContent = `${visibleCount}/${total}`;
+  footer.appendChild(counter);
+
   if (options.canDownloadHistory !== false) {
     const download = document.createElement("a");
     download.className = "mc-log-download";
@@ -98,6 +101,7 @@ export const render = (panel, machine, hooks, options = {}) => {
       event.stopPropagation();
       if (hooks.onDownloadLogs) hooks.onDownloadLogs(machine);
     });
-    panel.appendChild(download);
+    footer.appendChild(download);
   }
+  panel.appendChild(footer);
 };
