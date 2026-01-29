@@ -1,0 +1,32 @@
+.is-inactive-section {
+  opacity: 0.55;
+  filter: grayscale(0.3);
+  position: relative;
+}
+
+.is-inactive-section::after {
+  content: "No disponible";
+  position: absolute;
+  top: -8px;
+  right: 0;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  color: var(--fg);
+  border: 1px solid var(--border-subtle);
+  font-size: 0.75rem;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(-4px);
+  pointer-events: none;
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+
+.is-inactive-section:hover::after {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.is-inactive-section * {
+  pointer-events: none;
+}
