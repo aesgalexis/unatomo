@@ -92,6 +92,7 @@
   border-radius: 1rem;
   background: var(--panel-bg);
   overflow: hidden;
+  position: relative;
   max-height: var(--mc-collapsed-height);
   transition: max-height 240ms ease;
   margin-bottom: 1rem;
@@ -132,6 +133,9 @@
   color: inherit;
   cursor: pointer;
   padding: 0.2rem 0.4rem;
+  position: absolute;
+  right: 0.9rem;
+  top: calc(var(--mc-collapsed-height) - 1.9rem);
 }
 
 
@@ -228,6 +232,12 @@
 
 .mc-chevron::before {
   content: "\25BE";
+  display: inline-block;
+  transition: transform 160ms ease;
+}
+
+.machine-card[data-expanded="true"] .mc-chevron::before {
+  transform: rotate(180deg);
 }
 
 .mc-expand {
