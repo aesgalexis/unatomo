@@ -100,10 +100,15 @@ if (mount) {
   addBar.appendChild(searchInput);
   addBar.appendChild(saveStatus);
 
+  const filterInfo = document.createElement("div");
+  filterInfo.className = "filter-info";
+  filterInfo.style.display = "none";
+
   const list = document.createElement("div");
   list.id = "machineList";
 
   mount.appendChild(addBar);
+  mount.appendChild(filterInfo);
   mount.appendChild(list);
 
   let statusTimeout = null;
@@ -321,6 +326,13 @@ if (mount) {
     const machines = Array.isArray(state.draftMachines) ? state.draftMachines : [];
     const query = (state.searchQuery || "").trim();
     const visibleMachines = filterMachines(machines, query);
+    if (query) {
+      filterInfo.textContent = `Mostrando ${visibleMachines.length}/${machines.length} Equipos`;
+      filterInfo.style.display = "block";
+    } else {
+      filterInfo.textContent = "";
+      filterInfo.style.display = "none";
+    }
     if (!machines.length) {
       renderPlaceholder();
       if (preserveScroll) {
@@ -754,7 +766,7 @@ if (mount) {
           desiredTab = "quehaceres";
           if (state.selectedTabById) state.selectedTabById[machine.id] = "quehaceres";
         }
-        if (hooks.setActiveTab) {
+        if (hooks.setActiveTab && isExpanded) {
           hooks.setActiveTab(desiredTab, { notify: false });
         }
 
