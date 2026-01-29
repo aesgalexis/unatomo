@@ -7,6 +7,33 @@
   flex-wrap: wrap;
 }
 
+.add-search {
+  flex: 1 1 220px;
+  max-width: 280px;
+  min-width: 180px;
+  margin-top: 0;
+  border: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--bg) 96%, transparent);
+  color: var(--fg);
+  border-radius: 0.75rem;
+  padding: 0.55rem 1.2rem;
+  font: inherit;
+  font-size: 0.95rem;
+  height: 100%;
+}
+
+@media (max-width: 480px) {
+  .add-search {
+    max-width: 100%;
+    flex-basis: 100%;
+  }
+}
+
+.add-search:focus {
+  border-color: #fff;
+  outline: none;
+}
+
 :root {
   --mc-collapsed-height: 108px;
 }
