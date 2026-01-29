@@ -3,7 +3,7 @@ import { createMachineCard } from "/static/js/dashboard/machineCardTemplate.js";
 import { hashPassword } from "/static/js/utils/crypto.js";
 import { initAutoSave } from "/static/js/dashboard/autoSave.js";
 import { normalizeTasks } from "/static/js/dashboard/tabs/tasks/tasksModel.js";
-import { getTaskTiming } from "/static/js/dashboard/tabs/tasks/tasksTime.js";
+import { getTaskTiming, getOverdueDuration } from "/static/js/dashboard/tabs/tasks/tasksTime.js";
 import {
   canSeeTab,
   canEditStatus,
@@ -293,6 +293,7 @@ const renderMachine = () => {
     const baseTasks = normalizeTasks(machineDoc.tasks || []);
     const before = baseTasks.find((t) => t.id === taskId);
     const wasOverdue = before ? getTaskTiming(before).pending : false;
+    const overdueDuration = before ? getOverdueDuration(before) : "";
     const tasks = baseTasks.map((t) =>
       t.id === taskId ? { ...t, lastCompletedAt: new Date().toISOString() } : t
     );
@@ -308,7 +309,8 @@ const renderMachine = () => {
           type: "task",
           title: task.title || "Tarea",
           user,
-          overdue: !!wasOverdue
+          overdue: !!wasOverdue,
+          overdueDuration
         }
       ]
     };

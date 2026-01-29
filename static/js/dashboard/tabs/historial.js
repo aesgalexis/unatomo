@@ -57,8 +57,11 @@ export const render = (panel, machine, hooks, options = {}) => {
       if (log.type === "task") {
         const title = log.title || "Tarea";
         const user = log.user ? ` - por ${log.user}` : "";
+        const overdueText = log.overdueDuration
+          ? `, ${log.overdueDuration} tarde`
+          : "";
         const prefix = log.overdue
-          ? "Tarea completada fuera de plazo: "
+          ? `Tarea completada fuera de plazo${overdueText}: `
           : "Tarea completada: ";
         item.textContent = `${time} - ${prefix}${title}${user}`;
       } else if (log.type === "location") {
