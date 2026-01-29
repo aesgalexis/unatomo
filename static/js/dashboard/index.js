@@ -15,7 +15,7 @@ import {
   onSnapshot
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
-const DEFAULT_COLLAPSED_HEIGHT = 112;
+const DEFAULT_COLLAPSED_HEIGHT = 108;
 const EXPAND_FACTOR = 2.5;
 
 const mount = document.getElementById("dashboard-mount");
