@@ -273,6 +273,13 @@ export const createMachineCard = (machine, options = {}) => {
 
   if (options.mode !== "single" && header) {
     header.addEventListener("click", (event) => {
+      if (
+        event.target.closest(
+          ".mc-status, .mc-title, .mc-title-input, .mc-location, .mc-nfc-icon, .mc-header-toggle"
+        )
+      ) {
+        return;
+      }
       if (event.target.closest("button, a, input, select, textarea, label")) return;
       if (hooks.onToggleExpand) hooks.onToggleExpand(card);
       if (card.dataset.expanded === "true") {
