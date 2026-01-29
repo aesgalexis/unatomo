@@ -544,6 +544,7 @@
   background: color-mix(in srgb, var(--bg) 96%, transparent);
   color: var(--fg);
   font: inherit;
+  height: 38px;
 }
 
 .mc-tag-connect {
@@ -644,7 +645,10 @@
   color: var(--fg);
   cursor: pointer;
   font: inherit;
-  padding: 0 0.6rem;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .mc-url-generate,
