@@ -19,8 +19,24 @@ export const render = (panel, machine, hooks, options = {}) => {
   notifsPanel.className = "mc-config-panel";
   renderNotificaciones(notifsPanel, machine, hooks, options);
 
+  const sep2 = document.createElement("hr");
+  sep2.className = "mc-sep";
+
+  const removeRow = document.createElement("div");
+  const removeLink = document.createElement("a");
+  removeLink.className = "mc-danger-link";
+  removeLink.href = "#";
+  removeLink.textContent = "Eliminar equipo";
+  removeLink.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (hooks.onRemoveMachine) hooks.onRemoveMachine(machine);
+  });
+  removeRow.appendChild(removeLink);
+
   panel.appendChild(tagPanel);
   panel.appendChild(usersPanel);
-  panel.appendChild(sep2);
   panel.appendChild(notifsPanel);
+  panel.appendChild(sep2);
+  panel.appendChild(removeRow);
 };
