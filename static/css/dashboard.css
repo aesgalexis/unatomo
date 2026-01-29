@@ -557,6 +557,21 @@
   cursor: pointer;
 }
 
+.mc-tag-generate {
+  border-radius: 0.6rem;
+  border: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--bg) 96%, transparent);
+  color: var(--fg);
+  padding: 0.35rem 0.7rem;
+  font: inherit;
+  cursor: pointer;
+}
+
+.mc-tag-generate:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .mc-tag-connect:disabled {
   opacity: 0.5;
   cursor: not-allowed;

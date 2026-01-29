@@ -35,7 +35,7 @@ export const render = (panel, machine, hooks, options = {}) => {
       select.className = "mc-row-input-field";
       const empty = document.createElement("option");
       empty.value = "";
-      empty.textContent = "A\u00f1o";
+      empty.textContent = "Seleccionar";
       select.appendChild(empty);
       const currentYear = new Date().getFullYear();
       for (let y = currentYear; y >= currentYear - 50; y -= 1) {

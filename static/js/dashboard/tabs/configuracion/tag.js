@@ -37,14 +37,11 @@ export const render = (container, machine, hooks, options = {}) => {
     if (!hasValue) {
       tagStatus.textContent = "";
       tagStatus.dataset.state = "";
-      accessRow.style.display = "none";
     }
   });
 
   const tagControls = document.createElement("div");
   tagControls.className = "mc-config-controls";
-  tagControls.appendChild(tagInput);
-  tagControls.appendChild(tagBtn);
 
   tagRow.appendChild(tagLabel);
   tagRow.appendChild(tagControls);
@@ -61,7 +58,6 @@ export const render = (container, machine, hooks, options = {}) => {
 
   const accessRow = document.createElement("div");
   accessRow.className = "mc-config-row";
-  accessRow.style.display = machine.tagId ? "" : "none";
 
   const accessLabel = document.createElement("span");
   accessLabel.className = "mc-config-label";
@@ -87,6 +83,30 @@ export const render = (container, machine, hooks, options = {}) => {
     if (hooks.onCopyTagUrl) hooks.onCopyTagUrl(machine.id, accessCopy, accessInput);
   });
 
+  const accessGenerate = document.createElement("button");
+  accessGenerate.type = "button";
+  accessGenerate.className = "mc-tag-generate";
+  accessGenerate.textContent = "Generar";
+  accessGenerate.disabled = !!machine.tagId;
+  accessGenerate.addEventListener("click", async (event) => {
+    event.stopPropagation();
+    if (machine.tagId) return;
+    accessGenerate.disabled = true;
+    tagStatus.textContent = "Generando...";
+    tagStatus.dataset.state = "neutral";
+    try {
+      const newTagId = await hooks.onGenerateTag(machine.id);
+      tagInput.value = newTagId;
+      tagBtn.disabled = false;
+      accessRow.style.display = "";
+      if (hooks.onConnectTag) hooks.onConnectTag(machine.id, tagInput, tagStatus);
+    } catch {
+      tagStatus.textContent = "Error al generar tag";
+      tagStatus.dataset.state = "error";
+      accessGenerate.disabled = false;
+    }
+  });
+
   const accessControls = document.createElement("div");
   accessControls.className = "mc-config-controls";
   accessControls.appendChild(accessInput);
@@ -98,8 +118,15 @@ export const render = (container, machine, hooks, options = {}) => {
   if (!canEditConfig || options.disableConfigActions) {
     tagInput.readOnly = true;
     tagBtn.disabled = true;
+    accessGenerate.disabled = true;
+    accessCopy.disabled = true;
+  } else if (!machine.tagId) {
     accessCopy.disabled = true;
   }
+
+  tagControls.appendChild(accessGenerate);
+  tagControls.appendChild(tagInput);
+  tagControls.appendChild(tagBtn);
 
   container.appendChild(tagRow);
   container.appendChild(tagStatus);
