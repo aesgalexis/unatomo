@@ -1,4 +1,5 @@
 export const render = (container, machine, hooks, options = {}) => {
+  container.classList.add("is-inactive-section");
   const notifications = {
     enabled: false,
     email: "",
