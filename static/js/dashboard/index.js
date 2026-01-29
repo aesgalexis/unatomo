@@ -15,7 +15,7 @@ import {
   onSnapshot
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
-const COLLAPSED_HEIGHT = 96;
+const DEFAULT_COLLAPSED_HEIGHT = 112;
 const EXPAND_FACTOR = 2.5;
 
 const mount = document.getElementById("dashboard-mount");
@@ -51,6 +51,14 @@ if (mount) {
       .trim()
       .replace(/\s+/g, " ")
       .slice(0, 40);
+
+  const getCollapsedHeightPx = () => {
+    const value = getComputedStyle(document.documentElement)
+      .getPropertyValue("--mc-collapsed-height")
+      .trim();
+    const parsed = Number.parseFloat(value);
+    return Number.isFinite(parsed) ? parsed : DEFAULT_COLLAPSED_HEIGHT;
+  };
 
   const computeLocations = (machines) => {
     const map = new Map();
@@ -111,14 +119,14 @@ if (mount) {
     const expand = card.querySelector(".mc-expand");
     const headerH = header.offsetHeight;
     const contentH = expand.scrollHeight;
-    const minH = COLLAPSED_HEIGHT * EXPAND_FACTOR;
+    const minH = getCollapsedHeightPx() * EXPAND_FACTOR;
     const target = Math.max(minH, headerH + contentH);
     card.style.maxHeight = `${target}px`;
   };
 
   const collapseCard = (card, options = {}) => {
     card.dataset.expanded = "false";
-    card.style.maxHeight = `${COLLAPSED_HEIGHT}px`;
+    card.style.maxHeight = `${getCollapsedHeightPx()}px`;
     if (options.suppressAnimation) {
       card.classList.add("mc-no-anim");
       requestAnimationFrame(() => card.classList.remove("mc-no-anim"));
@@ -343,7 +351,7 @@ if (mount) {
           operationalSource: machine._operationalSource || "local",
           locations: state.locations
         });
-        card.style.maxHeight = `${COLLAPSED_HEIGHT}px`;
+        card.style.maxHeight = `${getCollapsedHeightPx()}px`;
 
         hooks.onToggleExpand = (node) => {
           if (node.classList.contains("is-dragging")) return;
