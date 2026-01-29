@@ -15,7 +15,7 @@ const TAB_RENDER = {
 export const createMachineCard = (machine, options = {}) => {
   const card = buildMachineCardTemplate();
   card.dataset.machineId = machine.id;
-  if (options.disableDrag) card.draggable = false;
+  card.draggable = options.disableDrag ? false : true;
   if (options.mode === "single") card.dataset.expanded = "true";
 
   const title = card.querySelector(".mc-title");
@@ -341,6 +341,16 @@ export const createMachineCard = (machine, options = {}) => {
       startTitleEdit();
     });
   }
+
+  card.addEventListener("focusin", (event) => {
+    if (event.target.closest("input, textarea, select")) {
+      card.draggable = false;
+    }
+  });
+
+  card.addEventListener("focusout", () => {
+    card.draggable = options.disableDrag ? false : true;
+  });
 
   hooks.setActiveTab = (tabId, { notify = true } = {}) => {
     const tab = card.querySelector(`.mc-tab[data-tab="${tabId}"]`);

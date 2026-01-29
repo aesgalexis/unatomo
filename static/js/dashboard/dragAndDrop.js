@@ -18,9 +18,16 @@ export const initDragAndDrop = (listEl, onReorder) => {
   let placeholder = null;
 
   listEl.addEventListener("dragstart", (event) => {
-    if (event.target.closest("button, input, select, textarea, a")) return;
+    if (event.target.closest("button, input, select, textarea, a, option")) {
+      event.preventDefault();
+      return;
+    }
     const card = event.target.closest(".machine-card");
     if (!card) return;
+    if (card.draggable === false) {
+      event.preventDefault();
+      return;
+    }
 
     draggedId = card.dataset.machineId;
     event.dataTransfer.setData("text/plain", draggedId);
