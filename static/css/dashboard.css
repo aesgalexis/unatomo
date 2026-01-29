@@ -203,6 +203,27 @@
   cursor: pointer;
 }
 
+.mc-nfc-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.4rem;
+  color: #2563eb;
+}
+
+.mc-tooltip {
+  position: fixed;
+  z-index: 1200;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  color: var(--fg);
+  border: 1px solid var(--border-subtle);
+  font-size: 0.75rem;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
 .mc-status:disabled {
   opacity: 0.6;
   cursor: not-allowed;
