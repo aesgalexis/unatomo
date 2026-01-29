@@ -325,6 +325,15 @@
   padding: 0;
 }
 
+.mc-danger-link {
+  color: var(--danger, #d33);
+  text-decoration: none;
+}
+
+.mc-danger-link:hover {
+  text-decoration: none;
+}
+
 .mc-remove-machine {
   display: inline-block;
   margin-top: 0.75rem;
