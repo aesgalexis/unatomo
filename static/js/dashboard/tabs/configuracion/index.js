@@ -8,9 +8,6 @@ export const render = (panel, machine, hooks, options = {}) => {
   tagPanel.className = "mc-config-panel";
   renderTag(tagPanel, machine, hooks, options);
 
-  const sep1 = document.createElement("hr");
-  sep1.className = "mc-sep";
-
   const usersPanel = document.createElement("div");
   usersPanel.className = "mc-config-panel";
   renderUsuarios(usersPanel, machine, hooks, options);
@@ -23,7 +20,6 @@ export const render = (panel, machine, hooks, options = {}) => {
   renderNotificaciones(notifsPanel, machine, hooks, options);
 
   panel.appendChild(tagPanel);
-  panel.appendChild(sep1);
   panel.appendChild(usersPanel);
   panel.appendChild(sep2);
   panel.appendChild(notifsPanel);
