@@ -242,17 +242,32 @@ export const createMachineCard = (machine, options = {}) => {
 
   hooks.renderTab = renderTab;
 
-  const firstTab = card.querySelector(".mc-tab");
-  if (firstTab) {
+  const clearActiveTabs = () => {
     card.querySelectorAll(".mc-tab").forEach((tab) => tab.classList.remove("is-active"));
-    firstTab.classList.add("is-active");
-    renderTab(firstTab.dataset.tab);
+    panel.dataset.panel = "";
+  };
+
+  const activateFirstTab = () => {
+    const firstTab = card.querySelector(".mc-tab");
+    if (!firstTab) return;
+    hooks.setActiveTab(firstTab.dataset.tab, { notify: true });
+  };
+
+  if (options.mode === "single") {
+    activateFirstTab();
+  } else {
+    clearActiveTabs();
   }
 
   if (options.mode !== "single" && headerToggle) {
     headerToggle.addEventListener("click", (event) => {
       event.stopPropagation();
       if (hooks.onToggleExpand) hooks.onToggleExpand(card);
+      if (card.dataset.expanded === "true") {
+        if (!card.querySelector(".mc-tab.is-active")) activateFirstTab();
+      } else {
+        clearActiveTabs();
+      }
     });
   }
 
@@ -260,6 +275,11 @@ export const createMachineCard = (machine, options = {}) => {
     header.addEventListener("click", (event) => {
       if (event.target.closest("button, a, input, select, textarea, label")) return;
       if (hooks.onToggleExpand) hooks.onToggleExpand(card);
+      if (card.dataset.expanded === "true") {
+        if (!card.querySelector(".mc-tab.is-active")) activateFirstTab();
+      } else {
+        clearActiveTabs();
+      }
     });
   }
 

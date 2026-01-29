@@ -76,6 +76,12 @@
   color: color-mix(in srgb, var(--fg) 70%, transparent);
 }
 
+.filter-info {
+  margin: 0 0 0.75rem;
+  font-size: 0.85rem;
+  color: color-mix(in srgb, var(--fg) 70%, transparent);
+}
+
 .machine-placeholder {
   border: 2px dashed color-mix(in srgb, var(--fg) 25%, transparent);
   border-radius: 1rem;
