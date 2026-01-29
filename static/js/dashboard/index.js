@@ -92,6 +92,13 @@ if (mount) {
       renderCards({ preserveScroll: true });
     }
   });
+  searchInput.addEventListener("input", () => {
+    if (searchInput.value.trim()) {
+      searchInput.classList.add("is-active-search");
+    } else {
+      searchInput.classList.remove("is-active-search");
+    }
+  });
 
   const saveStatus = document.createElement("span");
   saveStatus.className = "save-status";
