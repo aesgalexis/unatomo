@@ -24,7 +24,7 @@ export const render = (panel, machine, hooks, options = {}) => {
 
   const removeRow = document.createElement("div");
   const removeLink = document.createElement("a");
-  removeLink.className = "mc-danger-link";
+  removeLink.className = "mc-log-download mc-danger-link";
   removeLink.href = "#";
   removeLink.textContent = "Eliminar equipo";
   removeLink.addEventListener("click", (event) => {

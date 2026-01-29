@@ -627,7 +627,8 @@ if (mount) {
         };
 
         hooks.onRemoveMachine = (machineData) => {
-          const ok = window.confirm("¿Seguro que quieres eliminar este equipo");
+          const title = (machineData && machineData.title) || "este equipo";
+          const ok = window.confirm(`\u00bfSeguro que quieres eliminar ${title}?, Esta acci\u00f3n no se puede deshacer.`);
           if (!ok) return;
           removeMachineFromState(machineData.id);
           renderCards();
