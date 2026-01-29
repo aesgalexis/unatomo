@@ -639,8 +639,8 @@ if (mount) {
               return `[${time}] ${prefix}${title}${user}`;
             }
             if (log.type === "location") {
-              const value = log.value ? log.value : "Sin ubicacion";
-              return `[${time}] Ubicacion -> ${value}`;
+              const value = log.value ? log.value : "Sin ubicaci\u00f3n";
+              return `[${time}] Ubicaci\u00f3n -> ${value}`;
             }
             if (log.type === "intervencion") {
               const message = log.message || "";
