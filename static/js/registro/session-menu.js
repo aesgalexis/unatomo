@@ -1,5 +1,6 @@
 import { auth } from "/static/js/registro/firebase-init.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+import { requestInviteCodeAndRedirect } from "/static/js/registro/invite-gate.js";
 
 const btn = document.getElementById("session-menu-btn");
 const menu = document.getElementById("session-menu");
@@ -52,7 +53,7 @@ if (!btn || !menu || !label || !action) {
       registerBtn.setAttribute("aria-hidden", "false");
       registerBtn.onclick = () => {
         closeMenu();
-        window.location.href = "/es/auth/registro.html";
+        requestInviteCodeAndRedirect("/es/auth/registro.html");
       };
     }
 
