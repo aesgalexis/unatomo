@@ -1,4 +1,4 @@
-# Desarrollo
+Ôªø# Desarrollo
 
 ## Requisitos
 
@@ -23,13 +23,13 @@ Si `npm run dev` falla dentro de `node_modules/vite`, ejecuta:
 npm run doctor
 ```
 
-Reinstala dependencias y, si hace falta, usa Node LTS o el servidor est·tico:
+Reinstala dependencias y, si hace falta, usa Node LTS o el servidor est√°tico:
 
 ```
 npm run dev:static
 ```
 
-## Probar rutas de m·quina (hash)
+## Probar rutas de m√°quina (hash)
 
 - Listado: `/es/index.html#/`
 - Detalle: `/es/index.html#/m/mx-101`
