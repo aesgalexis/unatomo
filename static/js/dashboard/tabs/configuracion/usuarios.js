@@ -83,7 +83,7 @@ export const render = (container, machine, hooks, options = {}) => {
 
     const remove = document.createElement("a");
     remove.className = "mc-user-remove";
-    remove.textContent = "Eliminar";
+    remove.textContent = "eliminar";
     remove.href = "#";
     remove.addEventListener("click", (event) => {
       event.preventDefault();

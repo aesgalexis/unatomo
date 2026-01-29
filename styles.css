@@ -602,9 +602,8 @@ body.page li {
 }
 
 .field:focus {
-  outline: 2px solid color-mix(in srgb, var(--fg) 40%, transparent);
-  outline-offset: 1px;
-  border-color: color-mix(in srgb, var(--fg) 40%, transparent);
+  outline: none;
+  border-color: #fff;
   background: var(--bg);
 }
 
