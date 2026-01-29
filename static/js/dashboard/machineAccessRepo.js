@@ -18,6 +18,7 @@ export const upsertMachineAccessFromMachine = async (uid, machine) => {
       brand: machine.brand,
       model: machine.model,
       year: machine.year ?? null,
+      location: machine.location || "",
       status: machine.status,
       logs: machine.logs || [],
       tasks: machine.tasks || [],

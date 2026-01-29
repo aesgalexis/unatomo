@@ -225,6 +225,7 @@ const renderMachine = () => {
     canCompleteTasks: true,
     canDownloadHistory: canDownloadHistory(role),
     canEditGeneral: false,
+    canEditLocation: false,
     canEditConfig: false,
     visibleTabs,
     disableTitleEdit: true,

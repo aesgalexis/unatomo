@@ -118,6 +118,44 @@
   max-width: 160px;
 }
 
+.mc-location {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.mc-location-label {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.mc-location-select,
+.mc-location-input {
+  font: inherit;
+  border: 1px solid var(--border-subtle);
+  background: var(--panel-bg);
+  color: var(--fg);
+  border-radius: 0.5rem;
+  padding: 0.2rem 0.4rem;
+  max-width: 180px;
+}
+
+.mc-location-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.mc-location-accept,
+.mc-location-cancel {
+  border: 1px solid var(--border-subtle);
+  background: var(--panel-bg);
+  color: var(--fg);
+  border-radius: 0.5rem;
+  padding: 0.15rem 0.4rem;
+  cursor: pointer;
+}
+
 .mc-status {
   border: 2px solid color-mix(in srgb, var(--fg) 40%, transparent);
   border-radius: 999px;
