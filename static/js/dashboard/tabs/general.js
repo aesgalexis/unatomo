@@ -2,21 +2,28 @@ export const render = (panel, machine, hooks, options = {}) => {
   panel.innerHTML = "";
   const canEditGeneral = options.canEditGeneral !== false;
 
-  const row = document.createElement("div");
-  row.className = "mc-row mc-row-input mc-row-stack";
+  const rowTop = document.createElement("div");
+  rowTop.className = "mc-row mc-row-input mc-row-inline";
 
-  const fields = [
+  const rowBottom = document.createElement("div");
+  rowBottom.className = "mc-row mc-row-input mc-row-inline";
+
+  const fieldsTop = [
     { key: "brand", label: "Marca", value: machine.brand || "", type: "text" },
-    { key: "model", label: "Modelo", value: machine.model || "", type: "text" },
-    { key: "year", label: "Año", value: machine.year || "", type: "number" }
+    { key: "model", label: "Modelo", value: machine.model || "", type: "text" }
+  ];
+
+  const fieldsBottom = [
+    { key: "serial", label: "N. Serie", value: machine.serial || "", type: "text" },
+    { key: "year", label: "A\u00f1o", value: machine.year || "", type: "number" }
   ];
 
   const error = document.createElement("div");
   error.className = "mc-field-error";
 
-  fields.forEach(({ key, label, value, type }) => {
+  const buildField = ({ key, label, value, type }, container) => {
     const wrap = document.createElement("div");
-    wrap.className = "mc-field";
+    wrap.className = "mc-field mc-field-inline";
 
     const name = document.createElement("span");
     name.className = "mc-row-label";
@@ -43,9 +50,13 @@ export const render = (panel, machine, hooks, options = {}) => {
 
     wrap.appendChild(name);
     wrap.appendChild(input);
-    row.appendChild(wrap);
-  });
+    container.appendChild(wrap);
+  };
 
-  panel.appendChild(row);
+  fieldsTop.forEach((field) => buildField(field, rowTop));
+  fieldsBottom.forEach((field) => buildField(field, rowBottom));
+
+  panel.appendChild(rowTop);
+  panel.appendChild(rowBottom);
   panel.appendChild(error);
 };
