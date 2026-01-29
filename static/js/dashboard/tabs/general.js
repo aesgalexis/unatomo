@@ -29,27 +29,53 @@ export const render = (panel, machine, hooks, options = {}) => {
     name.className = "mc-row-label";
     name.textContent = label;
 
-    const input = document.createElement("input");
-    input.className = "mc-row-input-field";
-    input.type = type;
+    let fieldEl;
     if (key === "year") {
-      input.inputMode = "numeric";
-      input.placeholder = "YYYY";
-    }
-    input.value = value;
-    if (!canEditGeneral) {
-      input.readOnly = true;
-      input.setAttribute("aria-readonly", "true");
-    }
-    input.addEventListener("click", (event) => event.stopPropagation());
-    input.addEventListener("blur", () => {
-      if (hooks.onUpdateGeneral) {
-        hooks.onUpdateGeneral(machine.id, key, input.value, input, error);
+      const select = document.createElement("select");
+      select.className = "mc-row-input-field";
+      const empty = document.createElement("option");
+      empty.value = "";
+      empty.textContent = "A\u00f1o";
+      select.appendChild(empty);
+      const currentYear = new Date().getFullYear();
+      for (let y = currentYear; y >= currentYear - 50; y -= 1) {
+        const opt = document.createElement("option");
+        opt.value = String(y);
+        opt.textContent = String(y);
+        select.appendChild(opt);
       }
-    });
+      select.value = value ? String(value) : "";
+      if (!canEditGeneral) {
+        select.disabled = true;
+        select.setAttribute("aria-readonly", "true");
+      }
+      select.addEventListener("click", (event) => event.stopPropagation());
+      select.addEventListener("change", () => {
+        if (hooks.onUpdateGeneral) {
+          hooks.onUpdateGeneral(machine.id, key, select.value, select, error);
+        }
+      });
+      fieldEl = select;
+    } else {
+      const input = document.createElement("input");
+      input.className = "mc-row-input-field";
+      input.type = type;
+      input.value = value;
+      if (!canEditGeneral) {
+        input.readOnly = true;
+        input.setAttribute("aria-readonly", "true");
+      }
+      input.addEventListener("click", (event) => event.stopPropagation());
+      input.addEventListener("blur", () => {
+        if (hooks.onUpdateGeneral) {
+          hooks.onUpdateGeneral(machine.id, key, input.value, input, error);
+        }
+      });
+      fieldEl = input;
+    }
 
     wrap.appendChild(name);
-    wrap.appendChild(input);
+    wrap.appendChild(fieldEl);
     container.appendChild(wrap);
   };
 
