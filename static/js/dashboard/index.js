@@ -45,6 +45,26 @@ if (mount) {
   const normalizeStatus = (value) =>
     value === "desconectada" ? "fuera_de_servicio" : value || "operativa";
 
+  const normalizeLocation = (value) =>
+    (value || "")
+      .toString()
+      .trim()
+      .replace(/\s+/g, " ")
+      .slice(0, 40);
+
+  const computeLocations = (machines) => {
+    const map = new Map();
+    (machines || []).forEach((m) => {
+      const raw = normalizeLocation(m.location);
+      if (!raw) return;
+      const key = raw.toLowerCase();
+      if (!map.has(key)) map.set(key, raw);
+    });
+    return Array.from(map.values()).sort((a, b) =>
+      a.toLowerCase().localeCompare(b.toLowerCase(), "es")
+    );
+  };
+
   const addBar = document.createElement("div");
   addBar.className = "add-bar";
 
@@ -298,6 +318,7 @@ if (mount) {
     const selectedTabById = state.selectedTabById || {};
 
     cardRefs.clear();
+    state.locations = computeLocations(state.draftMachines);
     machines
       .slice()
       .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
@@ -313,12 +334,14 @@ if (mount) {
           canCompleteTasks: true,
           canEditStatus: true,
           canEditGeneral: true,
+          canEditLocation: true,
           canDownloadHistory: true,
           canEditConfig: true,
           visibleTabs: ["quehaceres", "general", "historial", "configuracion"],
           userRoles: ["usuario", "tecnico", "externo"],
           createdBy: state.adminLabel || null,
-          operationalSource: machine._operationalSource || "local"
+          operationalSource: machine._operationalSource || "local",
+          locations: state.locations
         });
         card.style.maxHeight = `${COLLAPSED_HEIGHT}px`;
 
@@ -408,6 +431,25 @@ if (mount) {
             updateMachine(id, { [field]: value });
           }
           autoSave.scheduleSave(id, `general:${field}`);
+        };
+
+        hooks.onUpdateLocation = (id, nextValue) => {
+          const current = getDraftById(id);
+          const normalized = normalizeLocation(nextValue);
+          const prev = normalizeLocation(current.location);
+          if (normalized === prev) return;
+          updateMachine(id, { location: normalized });
+          const logs = [
+            ...(current.logs || []),
+            {
+              ts: new Date().toISOString(),
+              type: "location",
+              value: normalized || ""
+            }
+          ];
+          updateMachine(id, { logs });
+          renderCards({ preserveScroll: true });
+          autoSave.scheduleSave(id, "location");
         };
 
         hooks.onConnectTag = async (id, tagInput, statusEl) => {
@@ -549,6 +591,10 @@ if (mount) {
               const user = log.user ? ` - por ${log.user}` : "";
               const prefix = log.overdue ? "Tarea completada fuera de plazo: " : "Tarea completada: ";
               return `[${time}] ${prefix}${title}${user}`;
+            }
+            if (log.type === "location") {
+              const value = log.value ? log.value : "Sin ubicación";
+              return `[${time}] Ubicación -> ${value}`;
             }
             const value =
               log.value === "operativa"

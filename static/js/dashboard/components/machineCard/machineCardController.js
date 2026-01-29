@@ -31,18 +31,13 @@ export const createMachineCard = (machine, options = {}) => {
     statusBtn.disabled = true;
   }
 
-  if (options.mode === "single") {
-    const chevron = card.querySelector(".mc-chevron");
-    if (chevron) chevron.style.display = "none";
-    if (headerToggle) headerToggle.style.display = "none";
-  }
-
   const hooks = {
     onToggleExpand: null,
     onSelectTab: null,
     onStatusToggle: null,
     onTitleUpdate: null,
     onUpdateGeneral: null,
+    onUpdateLocation: null,
     onConnectTag: null,
     onDisconnectTag: null,
     onCopyTagUrl: null,
@@ -58,6 +53,122 @@ export const createMachineCard = (machine, options = {}) => {
     onTestNotification: null,
     onSelectConfigSubtab: null
   };
+
+  const normalizeLocation = (value) =>
+    (value || "")
+      .toString()
+      .trim()
+      .replace(/\s+/g, " ")
+      .slice(0, 40);
+
+  const buildLocationNode = () => {
+    const wrap = document.createElement("div");
+    wrap.className = "mc-location";
+    const canEdit = options.canEditLocation !== false;
+    const current = normalizeLocation(machine.location);
+
+    if (!canEdit) {
+      const label = document.createElement("span");
+      label.className = "mc-location-label";
+      label.textContent = current || "Sin ubicación";
+      wrap.appendChild(label);
+      return wrap;
+    }
+
+    const select = document.createElement("select");
+    select.className = "mc-location-select";
+    select.addEventListener("click", (event) => event.stopPropagation());
+    select.addEventListener("change", (event) => {
+      event.stopPropagation();
+      const value = select.value;
+      if (value === "__add__") {
+        showAddInput();
+        return;
+      }
+      if (hooks.onUpdateLocation) hooks.onUpdateLocation(machine.id, value);
+    });
+
+    const addOption = (value, label) => {
+      const opt = document.createElement("option");
+      opt.value = value;
+      opt.textContent = label;
+      return opt;
+    };
+
+    select.appendChild(addOption("", "Sin ubicación"));
+    const list = Array.isArray(options.locations) ? options.locations : [];
+    list.forEach((loc) => {
+      select.appendChild(addOption(loc, loc));
+    });
+    if (current && !list.includes(current)) {
+      select.appendChild(addOption(current, current));
+    }
+    select.appendChild(addOption("__add__", "+ Añadir nueva…"));
+    select.value = current || "";
+
+    const showAddInput = () => {
+      wrap.innerHTML = "";
+      const input = document.createElement("input");
+      input.className = "mc-location-input";
+      input.type = "text";
+      input.placeholder = "Nueva ubicación";
+      input.maxLength = 40;
+      input.addEventListener("click", (event) => event.stopPropagation());
+
+      const actions = document.createElement("div");
+      actions.className = "mc-location-actions";
+
+      const okBtn = document.createElement("button");
+      okBtn.type = "button";
+      okBtn.className = "mc-location-accept";
+      okBtn.textContent = "Aceptar";
+      okBtn.addEventListener("click", (event) => {
+        event.stopPropagation();
+        const normalized = normalizeLocation(input.value);
+        const locations = Array.isArray(options.locations) ? options.locations : [];
+        let finalValue = normalized;
+        const match = locations.find(
+          (loc) => normalizeLocation(loc).toLowerCase() === normalized.toLowerCase()
+        );
+        if (match) finalValue = match;
+        if (hooks.onUpdateLocation) hooks.onUpdateLocation(machine.id, finalValue);
+        wrap.innerHTML = "";
+        wrap.appendChild(select);
+        select.value = finalValue || "";
+      });
+
+      const cancelBtn = document.createElement("button");
+      cancelBtn.type = "button";
+      cancelBtn.className = "mc-location-cancel";
+      cancelBtn.textContent = "Cancelar";
+      cancelBtn.addEventListener("click", (event) => {
+        event.stopPropagation();
+        wrap.innerHTML = "";
+        wrap.appendChild(select);
+        select.value = current || "";
+      });
+
+      actions.appendChild(okBtn);
+      actions.appendChild(cancelBtn);
+      wrap.appendChild(input);
+      wrap.appendChild(actions);
+      input.focus();
+    };
+
+    wrap.appendChild(select);
+    return wrap;
+  };
+
+  const locationNode = buildLocationNode();
+  if (header && statusBtn) {
+    header.insertBefore(locationNode, statusBtn);
+  }
+
+  if (options.mode === "single") {
+    const chevron = card.querySelector(".mc-chevron");
+    if (chevron) chevron.style.display = "none";
+    if (headerToggle) headerToggle.style.display = "none";
+  }
 
   const visibleTabs = Array.isArray(options.visibleTabs) ? options.visibleTabs : null;
   if (visibleTabs) {

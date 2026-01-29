@@ -34,6 +34,9 @@ export const render = (panel, machine, hooks, options = {}) => {
           ? "Tarea completada fuera de plazo: "
           : "Tarea completada: ";
         item.textContent = `${time} - ${prefix}${title}${user}`;
+      } else if (log.type === "location") {
+        const value = log.value ? log.value : "Sin ubicación";
+        item.textContent = `${time} - Ubicación -> ${value}`;
       } else if (log.type === "status") {
         const label = STATUS_LABELS[log.value] || log.value;
         item.textContent = `${time} - Estado -> ${label}`;
