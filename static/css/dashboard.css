@@ -7,6 +7,10 @@
   flex-wrap: wrap;
 }
 
+:root {
+  --mc-collapsed-height: 112px;
+}
+
 .btn-add {
   background: linear-gradient(135deg, #2da44e, #2c974b);
   border: 1px solid #2c974b;
@@ -61,7 +65,7 @@
   border-radius: 1rem;
   background: var(--panel-bg);
   overflow: hidden;
-  max-height: 96px;
+  max-height: var(--mc-collapsed-height);
   transition: max-height 240ms ease;
   margin-bottom: 1rem;
 }
