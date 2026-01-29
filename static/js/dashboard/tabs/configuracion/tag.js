@@ -65,7 +65,7 @@ export const render = (container, machine, hooks, options = {}) => {
 
   const accessLabel = document.createElement("span");
   accessLabel.className = "mc-config-label";
-  accessLabel.textContent = "URL de acceso";
+  accessLabel.textContent = "URL";
 
   const accessInput = document.createElement("input");
   accessInput.className = "mc-url-input";
@@ -80,7 +80,8 @@ export const render = (container, machine, hooks, options = {}) => {
   accessCopy.type = "button";
   accessCopy.className = "mc-url-copy";
   accessCopy.setAttribute("title", "Copiar");
-  accessCopy.textContent = "Copiar";
+  accessCopy.setAttribute("aria-label", "Copiar");
+  accessCopy.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><rect x="4" y="4" width="11" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="2"/></svg>';
   accessCopy.addEventListener("click", (event) => {
     event.stopPropagation();
     if (hooks.onCopyTagUrl) hooks.onCopyTagUrl(machine.id, accessCopy, accessInput);
