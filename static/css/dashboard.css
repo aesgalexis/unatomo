@@ -67,7 +67,7 @@
 }
 
 :root {
-  --mc-collapsed-height: 108px;
+  --mc-collapsed-height: 58px;
 }
 
 .btn-add {
@@ -172,8 +172,9 @@
   cursor: pointer;
   padding: 0.2rem 0.4rem;
   position: absolute;
-  right: 0.9rem;
-  top: calc(var(--mc-collapsed-height) - 1.9rem);
+  left: 50%;
+  transform: translate(-50%, -50%);
+  top: calc(var(--mc-collapsed-height) / 2);
 }
 
 
