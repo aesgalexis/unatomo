@@ -494,10 +494,25 @@ body.page li {
   text-decoration: none;
 }
 
+.topbar-title-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.05rem;
+  height: 52px;
+  justify-content: flex-end;
+}
+
 .topbar-title {
   font-size: clamp(1.3rem, 4vw, 1.8rem);
   color: var(--fg);
   font-weight: 500;
+}
+
+.topbar-status {
+  min-height: 0.9rem;
+  font-size: 0.75rem;
+  color: color-mix(in srgb, var(--fg) 70%, transparent);
 }
 
 .page-section {
