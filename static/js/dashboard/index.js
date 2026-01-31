@@ -601,11 +601,52 @@ if (mount) {
         };
 
         hooks.onAddUser = async (id, userInput, passInput, addBtn) => {
-          const username = userInput.value.trim();
+          const normalizeName = (value) =>
+            (value || "")
+              .trim()
+              .replace(/\s+/g, " ")
+              .toLowerCase();
+          const rawName = userInput.value;
+          const username = (rawName || "").trim().replace(/\s+/g, " ");
+          const normalizedUser = normalizeName(username);
           const password = passInput.value.trim();
-          const isKnown = (state.knownUsers || []).some(
-            (u) => u.toLowerCase() === username.toLowerCase()
+          const usingExisting = passInput.disabled && normalizedUser;
+          if (state.uid && normalizedUser && !usingExisting) {
+            try {
+              const remoteMachines = await fetchMachines(state.uid);
+              const remoteUsers = remoteMachines
+                .flatMap((m) => m.users || [])
+                .filter((u) => u && u.username);
+              const remoteDup = remoteUsers.some(
+                (u) => normalizeName(u.username) === normalizedUser
+              );
+              if (remoteDup) {
+                if (addBtn) {
+                  const prev = addBtn.textContent;
+                  addBtn.textContent = "Duplicado";
+                  setTimeout(() => (addBtn.textContent = prev), 1000);
+                }
+                return;
+              }
+            } catch {
+              // If remote check fails, fall back to local safeguards below.
+            }
+          }
+          const globalUsers = state.draftMachines
+            .flatMap((m) => m.users || [])
+            .filter((u) => u && u.username);
+          const existingGlobal = globalUsers.find(
+            (u) => normalizeName(u.username) === normalizedUser
           );
+          const isKnown = !!existingGlobal;
+          if (isKnown && !usingExisting) {
+            if (addBtn) {
+              const prev = addBtn.textContent;
+              addBtn.textContent = "Duplicado";
+              setTimeout(() => (addBtn.textContent = prev), 1000);
+            }
+            return;
+          }
           if (!username || (!password && !isKnown)) {
             userInput.setAttribute("aria-invalid", "true");
             if (addBtn) {
@@ -617,7 +658,7 @@ if (mount) {
           }
           const current = getDraftById(id);
           const users = Array.isArray(current.users) ? [...current.users] : [];
-          if (users.some((u) => u.username === username)) {
+          if (users.some((u) => normalizeName(u.username) === normalizedUser)) {
             if (addBtn) {
               const prev = addBtn.textContent;
               addBtn.textContent = "Duplicado";
@@ -628,14 +669,9 @@ if (mount) {
           try {
             let saltBase64 = "";
             let passwordHashBase64 = "";
-            if (!password && isKnown) {
-              const source = state.draftMachines
-                .flatMap((m) => m.users || [])
-                .find((u) => u.username === username);
-              if (source) {
-                saltBase64 = source.saltBase64 || "";
-                passwordHashBase64 = source.passwordHashBase64 || "";
-              }
+            if (isKnown) {
+              saltBase64 = existingGlobal ? existingGlobal.saltBase64 || "" : "";
+              passwordHashBase64 = existingGlobal ? existingGlobal.passwordHashBase64 || "" : "";
             } else {
               saltBase64 = generateSaltBase64();
               passwordHashBase64 = await hashPassword(password, saltBase64);
@@ -650,7 +686,7 @@ if (mount) {
             }
             users.push({
               id: (window.crypto.randomUUID && window.crypto.randomUUID()) || `u_${Date.now()}`,
-              username,
+              username: existingGlobal ? existingGlobal.username : username,
               role: "usuario",
               createdAt: new Date().toISOString(),
               saltBase64,
