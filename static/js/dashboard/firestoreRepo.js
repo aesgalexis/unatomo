@@ -3,6 +3,7 @@ import {
   collection,
   doc,
   getDocs,
+  runTransaction,
   serverTimestamp,
   writeBatch,
   setDoc,
@@ -80,4 +81,64 @@ export const upsertMachine = async (uid, machine) => {
 export const deleteMachine = async (uid, machineId) => {
   const ref = doc(db, "tenants", uid, "machines", machineId);
   await deleteDoc(ref);
+};
+
+const usernameDoc = (uid, normalized) =>
+  doc(db, "tenants", uid, "usernames", normalized);
+
+export const addUserWithRegistry = async (uid, machineId, user, options = {}) => {
+  const { normalizeName, allowExisting = false } = options;
+  const machineRef = doc(db, "tenants", uid, "machines", machineId);
+  const normalized = normalizeName
+    ? normalizeName(user.username)
+    : (user.username || "").trim().toLowerCase();
+  const userRef = usernameDoc(uid, normalized);
+
+  return runTransaction(db, async (tx) => {
+    const [machineSnap, userSnap] = await Promise.all([
+      tx.get(machineRef),
+      tx.get(userRef)
+    ]);
+    if (!machineSnap.exists()) throw new Error("machine-missing");
+    const machineData = machineSnap.data() || {};
+    const users = Array.isArray(machineData.users) ? [...machineData.users] : [];
+    const existsInMachine = users.some((u) => {
+      const uname = normalizeName
+        ? normalizeName(u.username)
+        : (u.username || "").trim().toLowerCase();
+      return uname === normalized;
+    });
+    if (existsInMachine) throw new Error("duplicate-user");
+
+    if (userSnap.exists()) {
+      if (!allowExisting) throw new Error("duplicate-user");
+      const data = userSnap.data() || {};
+      user.saltBase64 = data.saltBase64 || user.saltBase64 || "";
+      user.passwordHashBase64 = data.passwordHashBase64 || user.passwordHashBase64 || "";
+      user.username = data.username || user.username;
+      if (!user.saltBase64 || !user.passwordHashBase64) {
+        throw new Error("missing-credentials");
+      }
+    } else {
+      if (!user.saltBase64 || !user.passwordHashBase64) {
+        throw new Error("missing-credentials");
+      }
+      tx.set(userRef, {
+        username: user.username,
+        saltBase64: user.saltBase64,
+        passwordHashBase64: user.passwordHashBase64,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+        updatedBy: uid
+      });
+    }
+
+    users.push(user);
+    tx.set(
+      machineRef,
+      { users, updatedAt: serverTimestamp(), updatedBy: uid },
+      { merge: true }
+    );
+    return users;
+  });
 };
