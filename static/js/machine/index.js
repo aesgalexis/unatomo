@@ -33,6 +33,9 @@ mount.appendChild(list);
 const updateSaveState = (message = "") => {
   setTopbarSaveStatus(message);
 };
+const notifyTopbar = (message = "") => {
+  setTopbarSaveStatus(message);
+};
 
 const renderMessage = (text) => {
   list.innerHTML = "";
@@ -48,6 +51,12 @@ const getTagId = () => {
 };
 
 const sessionKey = (tagId) => `unatomo_machine_session_${tagId}`;
+
+const normalizeName = (value) =>
+  (value || "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .toLowerCase();
 
 const showLogin = (machine, tagId, onSuccess) => {
   const overlay = document.createElement("div");
@@ -85,7 +94,9 @@ const showLogin = (machine, tagId, onSuccess) => {
       error.textContent = "Completa usuario y contraseña.";
       return;
     }
-    const user = (machine.users || []).find((u) => u.username === username);
+    const user = (machine.users || []).find(
+      (u) => normalizeName(u.username) === normalizeName(username)
+    );
     if (!user) {
       error.textContent = "Credenciales incorrectas.";
       return;
@@ -165,7 +176,9 @@ const init = async () => {
   }
 
   const existingUser =
-    session && (machineDoc.users || []).find((u) => u.username === session.username);
+    session && (machineDoc.users || []).find(
+      (u) => normalizeName(u.username) === normalizeName(session.username)
+    );
   if (!existingUser) {
     showLogin(machineDoc, tagId, (userSession) => {
       state.session = userSession;
@@ -256,6 +269,7 @@ const renderMachine = () => {
       logs: [...(machineDoc.logs || []), { ts: new Date().toISOString(), type: "status", value: nextStatus }]
     };
     renderMachine();
+    notifyTopbar("Estado actualizado");
     autoSave.saveNow(state.tagId, "status");
   };
 
@@ -266,6 +280,7 @@ const renderMachine = () => {
       tasks: [task, ...(machineDoc.tasks || [])]
     };
     renderMachine();
+    notifyTopbar("Tarea creada");
     autoSave.saveNow(state.tagId, "add-task");
   };
 
@@ -305,6 +320,7 @@ const renderMachine = () => {
       ]
     };
     renderMachine();
+    notifyTopbar("Tarea completada");
     autoSave.saveNow(state.tagId, "task-complete");
   };
 
@@ -318,6 +334,7 @@ const renderMachine = () => {
       ]
     };
     renderMachine();
+    notifyTopbar("Intervención realizada");
     autoSave.saveNow(state.tagId, "intervencion");
   };
 

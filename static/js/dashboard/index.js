@@ -1,6 +1,6 @@
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 import { auth, db } from "/static/js/firebase/firebaseApp.js";
-import { fetchMachines, upsertMachine, deleteMachine } from "./firestoreRepo.js";
+import { fetchMachines, upsertMachine, deleteMachine, addUserWithRegistry } from "./firestoreRepo.js";
 import { validateTag, assignTag } from "./tagRepo.js";
 import { createTagToken } from "/static/js/tokens/tagTokens.js";
 import { upsertMachineAccessFromMachine, fetchMachineAccess } from "./machineAccessRepo.js";
@@ -117,6 +117,9 @@ if (mount) {
   mount.appendChild(list);
 
   const updateSaveState = (message = "") => {
+    setTopbarSaveStatus(message);
+  };
+  const notifyTopbar = (message = "") => {
     setTopbarSaveStatus(message);
   };
 
@@ -546,6 +549,7 @@ if (mount) {
             }
             updateMachine(id, { tagId });
             state.tagStatusById[id] = { text: "Tag enlazado", state: "ok" };
+            notifyTopbar("Tag enlazado");
             if (!state.selectedTabById) state.selectedTabById = {};
             state.selectedTabById[id] = "configuracion";
             state.expandedById = Array.from(expandedById);
@@ -563,6 +567,7 @@ if (mount) {
         hooks.onDisconnectTag = (id) => {
           updateMachine(id, { tagId: null });
           state.tagStatusById[id] = { text: "Tag desconectado", state: "error" };
+          notifyTopbar("Tag desconectado");
           if (!state.selectedTabById) state.selectedTabById = {};
           state.selectedTabById[id] = "configuracion";
           state.expandedById = Array.from(expandedById);
@@ -572,7 +577,9 @@ if (mount) {
 
         hooks.onGenerateTag = async (id) => {
           if (!state.uid) throw new Error("no-auth");
-          return createTagToken(state.uid);
+          const newId = await createTagToken(state.uid);
+          notifyTopbar("Tag ID generado");
+          return newId;
         };
 
         hooks.onCopyTagUrl = (id, btn, input) => {
@@ -601,27 +608,6 @@ if (mount) {
           const normalizedUser = normalizeName(username);
           const password = passInput.value.trim();
           const usingExisting = passInput.disabled && normalizedUser;
-          if (state.uid && normalizedUser && !usingExisting) {
-            try {
-              const remoteMachines = await fetchMachines(state.uid);
-              const remoteUsers = remoteMachines
-                .flatMap((m) => m.users || [])
-                .filter((u) => u && u.username);
-              const remoteDup = remoteUsers.some(
-                (u) => normalizeName(u.username) === normalizedUser
-              );
-              if (remoteDup) {
-                if (addBtn) {
-                  const prev = addBtn.textContent;
-                  addBtn.textContent = "Duplicado";
-                  setTimeout(() => (addBtn.textContent = prev), 1000);
-                }
-                return;
-              }
-            } catch {
-              // If remote check fails, fall back to local safeguards below.
-            }
-          }
           const globalUsers = state.draftMachines
             .flatMap((m) => m.users || [])
             .filter((u) => u && u.username);
@@ -629,14 +615,6 @@ if (mount) {
             (u) => normalizeName(u.username) === normalizedUser
           );
           const isKnown = !!existingGlobal;
-          if (isKnown && !usingExisting) {
-            if (addBtn) {
-              const prev = addBtn.textContent;
-              addBtn.textContent = "Duplicado";
-              setTimeout(() => (addBtn.textContent = prev), 1000);
-            }
-            return;
-          }
           if (!username || (!password && !isKnown)) {
             userInput.setAttribute("aria-invalid", "true");
             if (addBtn) {
@@ -674,30 +652,42 @@ if (mount) {
               }
               return;
             }
-            users.push({
+            const newUser = {
               id: (window.crypto.randomUUID && window.crypto.randomUUID()) || `u_${Date.now()}`,
               username: existingGlobal ? existingGlobal.username : username,
               role: "usuario",
               createdAt: new Date().toISOString(),
               saltBase64,
               passwordHashBase64
+            };
+            updateSaveState("Guardando...");
+            const updatedUsers = await addUserWithRegistry(state.uid, id, newUser, {
+              normalizeName,
+              allowExisting: usingExisting
             });
-            updateMachine(id, { users });
+            updateMachine(id, { users: updatedUsers });
+            if (current.tagId) {
+              await upsertMachineAccessFromMachine(state.uid, {
+                ...current,
+                users: updatedUsers
+              });
+            }
+            updateSaveState(usingExisting ? "Usuario asignado" : "Usuario creado");
             userInput.value = "";
             passInput.value = "";
           } catch {
             if (addBtn) {
               const prev = addBtn.textContent;
-              addBtn.textContent = "Error al cifrar";
+              addBtn.textContent = "Duplicado";
               setTimeout(() => (addBtn.textContent = prev), 1000);
             }
+            updateSaveState("Error al guardar");
             return;
           }
           if (!state.selectedTabById) state.selectedTabById = {};
           state.selectedTabById[id] = "configuracion";
           state.expandedById = Array.from(expandedById);
           renderCards({ preserveScroll: true });
-          autoSave.saveNow(id, "add-user");
         };
 
         hooks.onUpdateUserRole = (id, userId, role) => {
@@ -814,6 +804,7 @@ if (mount) {
           state.selectedTabById[machineData.id] = "historial";
           state.expandedById = Array.from(expandedById);
           renderCards({ preserveScroll: true });
+          notifyTopbar("Intervención realizada");
           autoSave.saveNow(machineData.id, "intervencion");
         };
 
@@ -826,6 +817,7 @@ if (mount) {
           state.selectedTabById[id] = "quehaceres";
           state.expandedById = Array.from(expandedById);
           renderCards({ preserveScroll: true });
+          notifyTopbar("Tarea creada");
           autoSave.saveNow(id, "add-task");
         };
 
@@ -892,6 +884,7 @@ if (mount) {
           state.selectedTabById[id] = "quehaceres";
           state.expandedById = Array.from(expandedById);
           renderCards({ preserveScroll: true });
+          notifyTopbar("Tarea completada");
           autoSave.saveNow(id, "task-complete");
         };
 
