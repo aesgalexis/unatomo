@@ -66,6 +66,11 @@ export const render = (panel, machine, hooks, options = {}) => {
         input.setAttribute("aria-readonly", "true");
       }
       input.addEventListener("click", (event) => event.stopPropagation());
+      input.addEventListener("input", () => {
+        if (hooks.onUpdateGeneral) {
+          hooks.onUpdateGeneral(machine.id, key, input.value, input, error);
+        }
+      });
       input.addEventListener("blur", () => {
         if (hooks.onUpdateGeneral) {
           hooks.onUpdateGeneral(machine.id, key, input.value, input, error);
@@ -143,15 +148,19 @@ export const render = (panel, machine, hooks, options = {}) => {
     searchBtn.textContent = "Buscar";
     searchBtn.addEventListener("click", (event) => {
       event.stopPropagation();
-      const hasBrandModel =
-        !!(machine.brand || "").trim() && !!(machine.model || "").trim();
-      if (!hasBrandModel) {
-        status.textContent = "Error al cargar el archivo. Introduce marca y modelo para buscar";
+      const hasBrand = !!(machine.brand || "").trim();
+      const hasModel = !!(machine.model || "").trim();
+      if (!hasBrand || !hasModel) {
+        status.textContent = !hasBrand && !hasModel
+          ? "Introduce marca y modelo para buscar"
+          : !hasBrand
+          ? "Introduce marca para buscar"
+          : "Introduce modelo para buscar";
         status.dataset.state = "error";
         if (hooks.onContentResize) hooks.onContentResize();
         return;
       }
-      const query = `${machine.brand} ${machine.model} pdf`.trim();
+      const query = `${machine.brand} ${machine.model} manual filetype:pdf`.trim();
       const url = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
       window.open(url, "_blank", "noopener");
     });
