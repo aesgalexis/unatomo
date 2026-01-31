@@ -189,7 +189,7 @@
   font-weight: 600;
   border: 1px solid var(--border-subtle);
   border-radius: 0.5rem;
-  padding: 0.15rem 0.4rem;
+  padding: 0.2rem 0.4rem;
   max-width: 160px;
 }
 
@@ -395,6 +395,10 @@
   font: inherit;
 }
 
+.mc-year-select {
+  padding: 0.35rem 0.5rem;
+}
+
 .mc-field-error {
   font-size: 0.75rem;
   color: var(--danger, #d33);
@@ -443,6 +447,48 @@
 
 .mc-log-footer .mc-log-download {
   margin-left: auto;
+}
+
+.mc-manual {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.mc-manual-input {
+  display: none;
+}
+
+.mc-manual-row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.mc-manual-drop {
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.5rem;
+  padding: 0.35rem 0.5rem;
+  text-align: left;
+  color: var(--fg);
+  background: color-mix(in srgb, var(--bg) 96%, transparent);
+  cursor: pointer;
+  font: inherit;
+  flex: 1 1 220px;
+  min-width: 180px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.mc-manual-btn {
+  border-radius: 0.6rem;
+  border: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--bg) 96%, transparent);
+  color: var(--fg);
+  padding: 0.35rem 0.7rem;
+  font: inherit;
+  cursor: pointer;
 }
 
 .mc-log-footer .mc-log-download {
@@ -538,6 +584,7 @@
   gap: 0.5rem;
   flex: 1;
   flex-wrap: wrap;
+  align-items: center;
 }
 
 .mc-url-input,
@@ -552,7 +599,6 @@
   background: color-mix(in srgb, var(--bg) 96%, transparent);
   color: var(--fg);
   font: inherit;
-  height: 38px;
 }
 
 .mc-tag-connect {
@@ -660,8 +706,8 @@
 }
 
 .mc-url-copy {
-  min-width: 38px;
-  height: 38px;
+  min-width: 32px;
+  height: 32px;
   border-radius: 0.5rem;
   border: 1px solid var(--border-subtle);
   background: color-mix(in srgb, var(--bg) 96%, transparent);
@@ -828,6 +874,7 @@
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
+  margin-top: 0.75rem;
 }
 
 .task-title-input {
@@ -839,6 +886,7 @@
   background: color-mix(in srgb, var(--bg) 96%, transparent);
   color: var(--fg);
   font: inherit;
+  height: 32px;
 }
 
 .task-desc-input {
@@ -850,6 +898,7 @@
   background: color-mix(in srgb, var(--bg) 96%, transparent);
   color: var(--fg);
   font: inherit;
+  height: 32px;
 }
 
 .task-frequency-select {
@@ -860,6 +909,7 @@
   background: color-mix(in srgb, var(--bg) 96%, transparent);
   color: var(--fg);
   font: inherit;
+  height: 32px;
 }
 
 .task-create-btn {
