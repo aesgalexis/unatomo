@@ -9,7 +9,7 @@ import {
 const randomChunk = () =>
   Math.random().toString(36).replace(/[^a-z0-9]/gi, "").slice(0, 4).toUpperCase();
 
-const buildTagId = () => `${randomChunk()}-${randomChunk()}`;
+const buildTagId = () => `G-${randomChunk()}-${randomChunk()}`;
 
 export const createTagToken = async (uid) => {
   if (!uid) throw new Error("missing-uid");

@@ -169,6 +169,9 @@ export const createMachineCard = (machine, options = {}) => {
   if (machine.tagId && statusBtn) {
     const nfc = document.createElement("span");
     nfc.className = "mc-nfc-icon";
+    if (String(machine.tagId).startsWith("G-")) {
+      nfc.classList.add("is-generated");
+    }
     nfc.setAttribute("aria-label", "Tag NFC enlazado");
     nfc.setAttribute("data-tooltip", "Tag NFC enlazado");
     nfc.innerHTML =
@@ -302,7 +305,7 @@ export const createMachineCard = (machine, options = {}) => {
     const current = title.textContent || "";
     const input = document.createElement("input");
     input.type = "text";
-    input.maxLength = 16;
+    input.maxLength = 24;
     input.className = "mc-title-input";
     input.value = current;
     input.addEventListener("click", (event) => event.stopPropagation());
