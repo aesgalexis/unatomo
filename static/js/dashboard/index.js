@@ -345,6 +345,14 @@ if (mount) {
     const machines = Array.isArray(state.draftMachines) ? state.draftMachines : [];
     const query = (state.searchQuery || "").trim();
     const visibleMachines = filterMachines(machines, query);
+    state.knownUsers = Array.from(
+      new Set(
+        machines
+          .flatMap((m) => (Array.isArray(m.users) ? m.users : []))
+          .map((u) => (u.username || "").trim())
+          .filter(Boolean)
+      )
+    ).sort((a, b) => a.localeCompare(b, "es"));
     if (query) {
       filterInfo.textContent = `Mostrando ${visibleMachines.length}/${machines.length} Equipos`;
       filterInfo.style.display = "block";
@@ -406,7 +414,8 @@ if (mount) {
           userRoles: ["usuario", "tecnico", "externo"],
           createdBy: state.adminLabel || null,
           operationalSource: machine._operationalSource || "local",
-          locations: state.locations
+          locations: state.locations,
+          knownUsers: state.knownUsers
         });
         card.style.maxHeight = `${getCollapsedHeightPx()}px`;
 
@@ -594,7 +603,10 @@ if (mount) {
         hooks.onAddUser = async (id, userInput, passInput, addBtn) => {
           const username = userInput.value.trim();
           const password = passInput.value.trim();
-          if (!username || !password) {
+          const isKnown = (state.knownUsers || []).some(
+            (u) => u.toLowerCase() === username.toLowerCase()
+          );
+          if (!username || (!password && !isKnown)) {
             userInput.setAttribute("aria-invalid", "true");
             if (addBtn) {
               const prev = addBtn.textContent;
@@ -614,8 +626,28 @@ if (mount) {
             return;
           }
           try {
-            const saltBase64 = generateSaltBase64();
-            const passwordHashBase64 = await hashPassword(password, saltBase64);
+            let saltBase64 = "";
+            let passwordHashBase64 = "";
+            if (!password && isKnown) {
+              const source = state.draftMachines
+                .flatMap((m) => m.users || [])
+                .find((u) => u.username === username);
+              if (source) {
+                saltBase64 = source.saltBase64 || "";
+                passwordHashBase64 = source.passwordHashBase64 || "";
+              }
+            } else {
+              saltBase64 = generateSaltBase64();
+              passwordHashBase64 = await hashPassword(password, saltBase64);
+            }
+            if (!passwordHashBase64 || !saltBase64) {
+              if (addBtn) {
+                const prev = addBtn.textContent;
+                addBtn.textContent = "Revisa los datos";
+                setTimeout(() => (addBtn.textContent = prev), 1000);
+              }
+              return;
+            }
             users.push({
               id: (window.crypto.randomUUID && window.crypto.randomUUID()) || `u_${Date.now()}`,
               username,
@@ -664,6 +696,27 @@ if (mount) {
           state.expandedById = Array.from(expandedById);
           renderCards({ preserveScroll: true });
           autoSave.saveNow(id, "remove-user");
+        };
+
+        hooks.onUpdateUserPassword = async (id, userId, nextPassword, input) => {
+          const current = getDraftById(id);
+          if (!current) return;
+          try {
+            const saltBase64 = generateSaltBase64();
+            const passwordHashBase64 = await hashPassword(nextPassword, saltBase64);
+            const users = (current.users || []).map((u) =>
+              u.id === userId ? { ...u, saltBase64, passwordHashBase64 } : u
+            );
+            updateMachine(id, { users });
+            if (input) input.setAttribute("aria-invalid", "false");
+            if (!state.selectedTabById) state.selectedTabById = {};
+            state.selectedTabById[id] = "configuracion";
+            state.expandedById = Array.from(expandedById);
+            renderCards({ preserveScroll: true });
+            autoSave.saveNow(id, "user-pin");
+          } catch {
+            if (input) input.setAttribute("aria-invalid", "true");
+          }
         };
 
         hooks.onDownloadLogs = (machineData) => {

@@ -3,7 +3,7 @@ export const render = (container, machine, hooks, options = {}) => {
   const canEditConfig = options.canEditConfig !== false;
 
   const tagRow = document.createElement("div");
-  tagRow.className = "mc-config-row";
+  tagRow.className = "mc-config-row mc-config-row-tag";
 
   const tagLabel = document.createElement("span");
   tagLabel.className = "mc-config-label";
@@ -60,7 +60,7 @@ export const render = (container, machine, hooks, options = {}) => {
   }
 
   const accessRow = document.createElement("div");
-  accessRow.className = "mc-config-row";
+  accessRow.className = "mc-config-row mc-config-row-url";
 
   const accessLabel = document.createElement("span");
   accessLabel.className = "mc-config-label";

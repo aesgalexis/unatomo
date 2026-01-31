@@ -68,7 +68,8 @@ const showLogin = (machine, tagId, onSuccess) => {
   panel.className = "machine-login-panel";
 
   const title = document.createElement("h3");
-  title.textContent = "Acceso a la máquina";
+  const name = machine.title || "Equipo";
+  title.textContent = `Acceso a ${name}`;
 
   const userInput = document.createElement("input");
   userInput.type = "text";
