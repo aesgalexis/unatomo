@@ -32,7 +32,7 @@ export const render = (panel, machine, hooks, options = {}) => {
     let fieldEl;
     if (key === "year") {
       const select = document.createElement("select");
-      select.className = "mc-row-input-field";
+      select.className = "mc-row-input-field mc-year-select";
       const empty = document.createElement("option");
       empty.value = "";
       empty.textContent = "Seleccionar";
@@ -85,4 +85,57 @@ export const render = (panel, machine, hooks, options = {}) => {
   panel.appendChild(rowTop);
   panel.appendChild(rowBottom);
   panel.appendChild(error);
+
+  const sep = document.createElement("hr");
+  sep.className = "mc-sep";
+  panel.appendChild(sep);
+
+  const manualWrap = document.createElement("div");
+  manualWrap.className = "mc-manual";
+
+  const createManualRow = (labelText) => {
+    const row = document.createElement("div");
+    row.className = "mc-manual-row";
+
+    const label = document.createElement("span");
+    label.className = "mc-row-label";
+    label.textContent = labelText;
+
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.accept = "application/pdf,image/*";
+    fileInput.className = "mc-manual-input";
+    fileInput.addEventListener("click", (event) => event.stopPropagation());
+
+    const drop = document.createElement("button");
+    drop.type = "button";
+    drop.className = "mc-manual-drop";
+    drop.textContent = "Arrastra o haz clic";
+    drop.addEventListener("click", (event) => {
+      event.stopPropagation();
+      fileInput.click();
+    });
+    fileInput.addEventListener("change", () => {
+      const file = fileInput.files && fileInput.files[0];
+      drop.textContent = file ? file.name : "Arrastra o haz clic";
+    });
+
+    const saveBtn = document.createElement("button");
+    saveBtn.type = "button";
+    saveBtn.className = "mc-manual-btn";
+    saveBtn.textContent = "Guardar";
+    saveBtn.addEventListener("click", (event) => event.stopPropagation());
+
+    row.appendChild(label);
+    row.appendChild(drop);
+    row.appendChild(fileInput);
+    row.appendChild(saveBtn);
+    return row;
+  };
+
+  manualWrap.appendChild(createManualRow("Manual de usuario"));
+  manualWrap.appendChild(createManualRow("Esquema electrico"));
+  manualWrap.appendChild(createManualRow("Otros manuales"));
+
+  panel.appendChild(manualWrap);
 };

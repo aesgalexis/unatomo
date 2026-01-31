@@ -11,10 +11,6 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
 
   const tasks = normalizeTasks(machine.tasks || []);
   if (!tasks.length) {
-    const empty = document.createElement("div");
-    empty.className = "task-empty";
-    empty.textContent = "Crea una tarea para comenzar";
-    list.appendChild(empty);
   } else {
     tasks.forEach((task) => {
       const item = document.createElement("div");
@@ -89,9 +85,6 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
   panel.appendChild(list);
 
   if (canEditTasks) {
-    const sep = document.createElement("hr");
-    sep.className = "mc-sep";
-
     const formRow = document.createElement("div");
     formRow.className = "task-form";
 
@@ -160,7 +153,6 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
     formRow.appendChild(freqSelect);
     formRow.appendChild(createBtn);
 
-    panel.appendChild(sep);
     panel.appendChild(formRow);
   }
 };
