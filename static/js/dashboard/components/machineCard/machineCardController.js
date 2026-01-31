@@ -44,6 +44,7 @@ export const createMachineCard = (machine, options = {}) => {
     onAddUser: null,
     onUpdateUserRole: null,
     onRemoveUser: null,
+    onUpdateUserPassword: null,
     onDownloadLogs: null,
     onRemoveMachine: null,
     onAddTask: null,
