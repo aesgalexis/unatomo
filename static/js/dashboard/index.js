@@ -282,6 +282,14 @@ if (mount) {
     return maxOrder + 1;
   };
 
+  const computePrevOrder = () => {
+    const minOrder = state.draftMachines.reduce(
+      (acc, m) => (typeof m.order === "number" && m.order < acc ? m.order : acc),
+      0
+    );
+    return state.draftMachines.length ? minOrder - 1 : 0;
+  };
+
   const updateTagStatusUI = (id) => {
     const status = state.tagStatusById[id];
     const card = list.querySelector(`.machine-card[data-machine-id="${id}"]`);
@@ -484,8 +492,10 @@ if (mount) {
             }
             if (input) input.removeAttribute("aria-invalid");
             updateMachine(id, { year: parsed });
+            machine.year = parsed;
           } else {
             updateMachine(id, { [field]: value });
+            machine[field] = value;
           }
           autoSave.scheduleSave(id, `general:${field}`);
         };
@@ -867,7 +877,7 @@ if (mount) {
   };
 
   addBtn.addEventListener("click", () => {
-    const order = computeNextOrder();
+    const order = computePrevOrder();
     const machine = createDraftMachine(state.draftMachines.length + 1, order);
     machine.title = getUniqueTitle();
     state.draftMachines = [machine, ...state.draftMachines];
