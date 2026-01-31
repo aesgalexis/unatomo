@@ -251,6 +251,10 @@
   color: #2563eb;
 }
 
+.mc-nfc-icon.is-generated {
+  color: #7c3aed;
+}
+
 .mc-tooltip {
   position: fixed;
   z-index: 1200;
@@ -985,6 +989,11 @@
   min-height: 1.1rem;
   color: var(--danger, #d33);
   font-size: 0.85rem;
+}
+
+.machine-login-panel .btn-add {
+  display: block;
+  margin: 0.8rem auto 0;
 }
 
 
