@@ -6,43 +6,166 @@ export const render = (container, machine, hooks, options = {}) => {
 
   const addRow = document.createElement("div");
   addRow.className = "mc-config-row";
+  addRow.classList.add("mc-config-row-users");
 
   const addLabel = document.createElement("span");
   addLabel.className = "mc-config-label";
-  addLabel.textContent = "Añadir usuario";
+  addLabel.textContent = "Usuarios";
+
+  const knownUsers = Array.isArray(options.knownUsers) ? options.knownUsers : [];
+  const currentUsers = new Set((machine.users || []).map((u) => (u.username || "").trim()));
+  const availableUsers = knownUsers.filter((name) => name && !currentUsers.has(name));
+
+  const userSelect = document.createElement("select");
+  userSelect.className = "mc-user-username";
+  userSelect.style.width = "100%";
+  userSelect.addEventListener("click", (event) => event.stopPropagation());
+
+  const addUserOption = (value, label) => {
+    const opt = document.createElement("option");
+    opt.value = value;
+    opt.textContent = label;
+    return opt;
+  };
+
+  if (availableUsers.length) {
+    userSelect.appendChild(addUserOption("", "Seleccionar"));
+    availableUsers.forEach((name) => userSelect.appendChild(addUserOption(name, name)));
+    userSelect.appendChild(addUserOption("__add__", "+ Añadir nuevo..."));
+  }
+
+  const addNewBtn = document.createElement("button");
+  addNewBtn.type = "button";
+  addNewBtn.className = "mc-user-add-new";
+  addNewBtn.textContent = "+ Añadir nuevo...";
+  addNewBtn.style.width = "100%";
+  addNewBtn.style.maxWidth = "150px";
+  addNewBtn.addEventListener("click", (event) => {
+    event.stopPropagation();
+    showUserInput();
+    addNewBtn.style.display = "none";
+  });
+
 
   const userInput = document.createElement("input");
   userInput.className = "mc-user-username";
   userInput.type = "text";
-  userInput.placeholder = "Usuario";
+  userInput.placeholder = "Nombre";
+  userInput.maxLength = 16;
+  userInput.style.display = "none";
+  userInput.style.width = "100%";
   userInput.addEventListener("click", (event) => event.stopPropagation());
 
   const passInput = document.createElement("input");
   passInput.className = "mc-user-password";
   passInput.type = "password";
-  passInput.placeholder = "Contraseña";
+  passInput.placeholder = "PIN";
+  passInput.maxLength = 8;
+  passInput.style.display = "none";
+  passInput.style.width = "150px";
+  passInput.style.maxWidth = "150px";
   passInput.addEventListener("click", (event) => event.stopPropagation());
 
   const addBtn = document.createElement("button");
   addBtn.type = "button";
-  addBtn.className = "mc-user-add";
-  addBtn.textContent = "Añadir usuario";
+  addBtn.className = "mc-location-accept";
+  addBtn.textContent = "Aceptar";
+  addBtn.style.display = "none";
   addBtn.addEventListener("click", (event) => {
     event.stopPropagation();
+    const isNew = userSelect.style.display === "none";
+    const pendingName = isNew ? (userInput.value || "").trim() : "";
     if (hooks.onAddUser) hooks.onAddUser(machine.id, userInput, passInput, addBtn);
+    if (pendingName) {
+      const exists = Array.from(userSelect.options).some((opt) => opt.value === pendingName);
+      if (!exists) {
+        userSelect.insertBefore(addUserOption(pendingName, pendingName), userSelect.options[1] || null);
+      }
+      userSelect.value = "";
+      hideUserInput();
+    }
+    if (!availableUsers.length) {
+      addNewBtn.style.display = "";
+    }
+  });
+
+  const cancelBtn = document.createElement("button");
+  cancelBtn.type = "button";
+  cancelBtn.className = "mc-location-cancel";
+  cancelBtn.textContent = "Cancelar";
+  cancelBtn.style.display = "none";
+  cancelBtn.addEventListener("click", (event) => {
+    event.stopPropagation();
+    userInput.value = "";
+    passInput.value = "";
+    userSelect.value = "";
+    hideUserInput();
+  });
+
+  const showUserInput = () => {
+    userSelect.style.display = "none";
+      userInput.style.display = "";
+    userInput.value = "";
+    userInput.focus();
+    passInput.style.display = "";
+    addBtn.style.display = "";
+    cancelBtn.style.display = "";
+  };
+
+  const hideUserInput = () => {
+    if (availableUsers.length) {
+      userSelect.style.display = "";
+      addNewBtn.style.display = "none";
+    } else {
+      userSelect.style.display = "none";
+      addNewBtn.style.display = "";
+    }
+    userInput.style.display = "none";
+    passInput.style.display = "none";
+    addBtn.style.display = "none";
+    cancelBtn.style.display = "none";
+  };
+
+  hideUserInput();
+
+  userSelect.addEventListener("change", () => {
+    if (userSelect.value === "__add__") {
+      showUserInput();
+      passInput.disabled = false;
+      passInput.value = "";
+      return;
+    }
+    hideUserInput();
+    userInput.value = userSelect.value || "";
+    passInput.disabled = true;
+    passInput.value = "";
+    if (userSelect.value && hooks.onAddUser) {
+      hooks.onAddUser(machine.id, userInput, passInput, addBtn);
+      userSelect.value = "";
+      userInput.value = "";
+    }
   });
 
   if (!canEditConfig || options.disableConfigActions) {
+    userSelect.disabled = true;
     userInput.disabled = true;
     passInput.disabled = true;
     addBtn.disabled = true;
+    cancelBtn.disabled = true;
   }
 
   const addControls = document.createElement("div");
   addControls.className = "mc-config-controls";
-  addControls.appendChild(userInput);
-  addControls.appendChild(passInput);
-  addControls.appendChild(addBtn);
+  const userLine = document.createElement("div");
+  userLine.className = "mc-user-add-line";
+  userLine.appendChild(userSelect);
+  userLine.appendChild(addNewBtn);
+  userLine.appendChild(userInput);
+  userLine.appendChild(passInput);
+  userLine.appendChild(addBtn);
+  userLine.appendChild(cancelBtn);
+
+  addControls.appendChild(userLine);
 
   addRow.appendChild(addLabel);
   addRow.appendChild(addControls);
@@ -81,9 +204,81 @@ export const render = (container, machine, hooks, options = {}) => {
       role.disabled = true;
     }
 
+    const pinWrap = document.createElement("div");
+    pinWrap.className = "mc-user-pin-wrap";
+
+    const pinInput = document.createElement("input");
+    pinInput.type = "password";
+    pinInput.className = "mc-user-pin";
+    pinInput.placeholder = "Cambiar PIN";
+    pinInput.maxLength = 8;
+    pinInput.addEventListener("click", (event) => event.stopPropagation());
+    pinInput.addEventListener("focus", () => {
+      pinInput.classList.add("is-active");
+      pinInput.placeholder = "";
+      list.querySelectorAll(".mc-user-row").forEach((rowEl) => {
+        if (rowEl !== row) {
+          const inputEl = rowEl.querySelector(".mc-user-pin");
+          if (inputEl) inputEl.disabled = true;
+          const actionsEl = rowEl.querySelector(".mc-user-pin-actions");
+          if (actionsEl) actionsEl.style.display = "none";
+        }
+      });
+      pinActions.style.display = "inline-flex";
+      if (hooks.onContentResize) hooks.onContentResize();
+    });
+    if (!canEditConfig || options.disableConfigActions) {
+      pinInput.disabled = true;
+    }
+
+    const pinActions = document.createElement("div");
+    pinActions.className = "mc-user-pin-actions";
+    pinActions.style.display = "none";
+
+    const pinOk = document.createElement("button");
+    pinOk.type = "button";
+    pinOk.className = "mc-location-accept";
+    pinOk.textContent = "Aceptar";
+    pinOk.addEventListener("click", (event) => {
+      event.stopPropagation();
+      const next = pinInput.value.trim();
+      if (!next) return;
+      if (hooks.onUpdateUserPassword) {
+        hooks.onUpdateUserPassword(machine.id, user.id, next, pinInput);
+      }
+      pinInput.value = "";
+      pinInput.placeholder = "Cambiar PIN";
+      pinInput.classList.remove("is-active");
+      pinActions.style.display = "none";
+      list.querySelectorAll(".mc-user-pin").forEach((inputEl) => {
+        inputEl.disabled = false;
+      });
+      if (hooks.onContentResize) hooks.onContentResize();
+    });
+
+    const pinCancel = document.createElement("button");
+    pinCancel.type = "button";
+    pinCancel.className = "mc-location-cancel";
+    pinCancel.textContent = "Cancelar";
+    pinCancel.addEventListener("click", (event) => {
+      event.stopPropagation();
+      pinInput.value = "";
+      pinInput.placeholder = "Cambiar PIN";
+      pinInput.classList.remove("is-active");
+      pinActions.style.display = "none";
+      list.querySelectorAll(".mc-user-pin").forEach((inputEl) => {
+        inputEl.disabled = false;
+      });
+      if (hooks.onContentResize) hooks.onContentResize();
+    });
+
+    pinActions.appendChild(pinOk);
+    pinActions.appendChild(pinCancel);
+    pinWrap.appendChild(pinInput);
+
     const remove = document.createElement("a");
     remove.className = "mc-user-remove";
-    remove.textContent = "eliminar";
+    remove.textContent = "quitar";
     remove.href = "#";
     remove.addEventListener("click", (event) => {
       event.preventDefault();
@@ -98,7 +293,9 @@ export const render = (container, machine, hooks, options = {}) => {
 
     row.appendChild(name);
     row.appendChild(role);
+    row.appendChild(pinWrap);
     row.appendChild(remove);
+    row.appendChild(pinActions);
     list.appendChild(row);
   });
 
