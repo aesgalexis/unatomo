@@ -110,27 +110,64 @@ export const render = (panel, machine, hooks, options = {}) => {
     const drop = document.createElement("button");
     drop.type = "button";
     drop.className = "mc-manual-drop";
-    drop.textContent = "Arrastra o haz clic";
+    drop.textContent = "Cargar";
     drop.addEventListener("click", (event) => {
       event.stopPropagation();
       fileInput.click();
     });
     fileInput.addEventListener("change", () => {
       const file = fileInput.files && fileInput.files[0];
-      drop.textContent = file ? file.name : "Arrastra o haz clic";
+      const label = file ? file.name : "Cargar";
+      drop.textContent = label;
+      drop.classList.toggle("is-file", !!file);
+      saveBtn.style.display = file ? "" : "none";
+      searchBtn.style.display = file ? "none" : "";
+      if (hooks.onContentResize) hooks.onContentResize();
     });
 
     const saveBtn = document.createElement("button");
     saveBtn.type = "button";
     saveBtn.className = "mc-manual-btn";
     saveBtn.textContent = "Guardar";
-    saveBtn.addEventListener("click", (event) => event.stopPropagation());
+    saveBtn.style.display = "none";
+    saveBtn.addEventListener("click", (event) => {
+      event.stopPropagation();
+      status.textContent = "Error al cargar el archivo";
+      status.dataset.state = "error";
+      if (hooks.onContentResize) hooks.onContentResize();
+    });
+
+    const searchBtn = document.createElement("button");
+    searchBtn.type = "button";
+    searchBtn.className = "mc-manual-btn";
+    searchBtn.textContent = "Buscar";
+    searchBtn.addEventListener("click", (event) => {
+      event.stopPropagation();
+      const hasBrandModel =
+        !!(machine.brand || "").trim() && !!(machine.model || "").trim();
+      if (!hasBrandModel) {
+        status.textContent = "Error al cargar el archivo. Introduce marca y modelo para buscar";
+        status.dataset.state = "error";
+        if (hooks.onContentResize) hooks.onContentResize();
+        return;
+      }
+      const query = `${machine.brand} ${machine.model} pdf`.trim();
+      const url = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+      window.open(url, "_blank", "noopener");
+    });
+
+    const status = document.createElement("div");
+    status.className = "mc-tag-status";
 
     row.appendChild(label);
     row.appendChild(drop);
     row.appendChild(fileInput);
+    row.appendChild(searchBtn);
     row.appendChild(saveBtn);
-    return row;
+    const wrap = document.createElement("div");
+    wrap.appendChild(row);
+    wrap.appendChild(status);
+    return wrap;
   };
 
   manualWrap.appendChild(createManualRow("Manual de usuario"));

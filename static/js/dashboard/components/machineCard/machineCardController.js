@@ -52,7 +52,8 @@ export const createMachineCard = (machine, options = {}) => {
     onAddIntervention: null,
     onUpdateNotifications: null,
     onTestNotification: null,
-    onSelectConfigSubtab: null
+    onSelectConfigSubtab: null,
+    onContentResize: null
   };
 
   const normalizeLocation = (value) =>

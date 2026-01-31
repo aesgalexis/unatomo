@@ -37,6 +37,7 @@ export const render = (container, machine, hooks, options = {}) => {
     if (!hasValue) {
       tagStatus.textContent = "";
       tagStatus.dataset.state = "";
+      if (hooks.onContentResize) hooks.onContentResize();
     }
   });
 
@@ -51,9 +52,11 @@ export const render = (container, machine, hooks, options = {}) => {
   if (tagStatusData.text) {
     tagStatus.textContent = tagStatusData.text;
     tagStatus.dataset.state = tagStatusData.state || "";
+    if (hooks.onContentResize) hooks.onContentResize();
   } else if (machine.tagId) {
     tagStatus.textContent = "Tag enlazado";
     tagStatus.dataset.state = "ok";
+    if (hooks.onContentResize) hooks.onContentResize();
   }
 
   const accessRow = document.createElement("div");
@@ -94,6 +97,7 @@ export const render = (container, machine, hooks, options = {}) => {
     accessGenerate.disabled = true;
     tagStatus.textContent = "Generando...";
     tagStatus.dataset.state = "neutral";
+    if (hooks.onContentResize) hooks.onContentResize();
     try {
       const newTagId = await hooks.onGenerateTag(machine.id);
       tagInput.value = newTagId;
@@ -104,6 +108,7 @@ export const render = (container, machine, hooks, options = {}) => {
       tagStatus.textContent = "Error al generar tag";
       tagStatus.dataset.state = "error";
       accessGenerate.disabled = false;
+      if (hooks.onContentResize) hooks.onContentResize();
     }
   });
 
