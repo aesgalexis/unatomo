@@ -122,7 +122,8 @@ if (mount) {
   let statusTimeout = null;
   const updateSaveState = (message = "") => {
     if (statusTimeout) clearTimeout(statusTimeout);
-    saveStatus.textContent = message;
+    const cleaned = (message || "").replace(/\s*a$/i, "");
+    saveStatus.textContent = cleaned;
     if (message && message !== "Guardando...") {
       statusTimeout = setTimeout(() => {
         saveStatus.textContent = "";
