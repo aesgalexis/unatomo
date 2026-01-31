@@ -98,7 +98,7 @@ export const render = (panel, machine, hooks, options = {}) => {
   const manualWrap = document.createElement("div");
   manualWrap.className = "mc-manual";
 
-  const createManualRow = (labelText) => {
+  const createManualRow = (labelText, { withSearch = false } = {}) => {
     const row = document.createElement("div");
     row.className = "mc-manual-row";
 
@@ -126,7 +126,7 @@ export const render = (panel, machine, hooks, options = {}) => {
       drop.textContent = label;
       drop.classList.toggle("is-file", !!file);
       saveBtn.style.display = file ? "" : "none";
-      searchBtn.style.display = file ? "none" : "";
+      if (searchBtn) searchBtn.style.display = file ? "none" : "";
       if (hooks.onContentResize) hooks.onContentResize();
     });
 
@@ -142,36 +142,43 @@ export const render = (panel, machine, hooks, options = {}) => {
       if (hooks.onContentResize) hooks.onContentResize();
     });
 
-    const searchBtn = document.createElement("button");
-    searchBtn.type = "button";
-    searchBtn.className = "mc-manual-btn";
-    searchBtn.textContent = "Buscar";
-    searchBtn.addEventListener("click", (event) => {
-      event.stopPropagation();
-      const hasBrand = !!(machine.brand || "").trim();
-      const hasModel = !!(machine.model || "").trim();
-      if (!hasBrand || !hasModel) {
-        status.textContent = !hasBrand && !hasModel
-          ? "Introduce marca y modelo para buscar"
-          : !hasBrand
-          ? "Introduce marca para buscar"
-          : "Introduce modelo para buscar";
-        status.dataset.state = "error";
-        if (hooks.onContentResize) hooks.onContentResize();
-        return;
-      }
-      const query = `${machine.brand} ${machine.model} manual filetype:pdf`.trim();
-      const url = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
-      window.open(url, "_blank", "noopener");
-    });
+    let searchBtn = null;
+    if (withSearch) {
+      searchBtn = document.createElement("button");
+      searchBtn.type = "button";
+      searchBtn.className = "mc-manual-btn";
+      searchBtn.textContent = "Buscar";
+      searchBtn.addEventListener("click", (event) => {
+        event.stopPropagation();
+        const hasBrand = !!(machine.brand || "").trim();
+        const hasModel = !!(machine.model || "").trim();
+        if (!hasBrand || !hasModel) {
+          status.textContent = !hasBrand && !hasModel
+            ? "Introduce marca y modelo para buscar"
+            : !hasBrand
+            ? "Introduce marca para buscar"
+            : "Introduce modelo para buscar";
+          status.dataset.state = "error";
+          if (hooks.onContentResize) hooks.onContentResize();
+          return;
+        }
+        const query = `${machine.brand} ${machine.model} manual filetype:pdf`.trim();
+        const url = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+        window.open(url, "_blank", "noopener");
+      });
+    }
 
     const status = document.createElement("div");
     status.className = "mc-tag-status";
 
+    const actions = document.createElement("div");
+    actions.className = "mc-manual-actions";
+    if (searchBtn) actions.appendChild(searchBtn);
+    actions.appendChild(drop);
+
     row.appendChild(label);
-    row.appendChild(drop);
+    row.appendChild(actions);
     row.appendChild(fileInput);
-    row.appendChild(searchBtn);
     row.appendChild(saveBtn);
     const wrap = document.createElement("div");
     wrap.appendChild(row);
@@ -179,8 +186,8 @@ export const render = (panel, machine, hooks, options = {}) => {
     return wrap;
   };
 
-  manualWrap.appendChild(createManualRow("Manual de usuario"));
-  manualWrap.appendChild(createManualRow("Esquema electrico"));
+  manualWrap.appendChild(createManualRow("Manual", { withSearch: true }));
+  manualWrap.appendChild(createManualRow("Esquema eléctrico"));
   manualWrap.appendChild(createManualRow("Otros manuales"));
 
   panel.appendChild(manualWrap);
