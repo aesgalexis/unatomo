@@ -442,6 +442,10 @@
 }
 
 .mc-log-footer .mc-log-download {
+  margin-left: auto;
+}
+
+.mc-log-footer .mc-log-download {
   margin-top: 0;
 }
 
@@ -488,6 +492,9 @@
   cursor: pointer;
   font-size: 0.85rem;
   padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .mc-danger-link {
