@@ -13,6 +13,7 @@ import { normalizeTasks } from "/static/js/dashboard/tabs/tasks/tasksModel.js";
 import { getTaskTiming, getOverdueDuration } from "/static/js/dashboard/tabs/tasks/tasksTime.js";
 import { filterMachines } from "./components/machineSearch/machineFilter.js";
 import { createMachineSearchBar } from "./components/machineSearch/machineSearchBar.js";
+import { setTopbarSaveStatus } from "/static/js/topbar/save-status.js";
 import {
   doc,
   onSnapshot
@@ -101,12 +102,8 @@ if (mount) {
     }
   });
 
-  const saveStatus = document.createElement("span");
-  saveStatus.className = "save-status";
-
   addBar.appendChild(addBtn);
   addBar.appendChild(searchInput);
-  addBar.appendChild(saveStatus);
 
   const filterInfo = document.createElement("div");
   filterInfo.className = "filter-info";
@@ -119,16 +116,8 @@ if (mount) {
   mount.appendChild(filterInfo);
   mount.appendChild(list);
 
-  let statusTimeout = null;
   const updateSaveState = (message = "") => {
-    if (statusTimeout) clearTimeout(statusTimeout);
-    const cleaned = (message || "").replace(/\s*a$/i, "");
-    saveStatus.textContent = cleaned;
-    if (message && message !== "Guardando...") {
-      statusTimeout = setTimeout(() => {
-        saveStatus.textContent = "";
-      }, 1600);
-    }
+    setTopbarSaveStatus(message);
   };
 
   const renderPlaceholder = () => {

@@ -4,6 +4,7 @@ import { hashPassword } from "/static/js/utils/crypto.js";
 import { initAutoSave } from "/static/js/dashboard/autoSave.js";
 import { normalizeTasks } from "/static/js/dashboard/tabs/tasks/tasksModel.js";
 import { getTaskTiming, getOverdueDuration } from "/static/js/dashboard/tabs/tasks/tasksTime.js";
+import { setTopbarSaveStatus } from "/static/js/topbar/save-status.js";
 import {
   canSeeTab,
   canEditStatus,
@@ -23,26 +24,14 @@ if (!mount) {
 const addBar = document.createElement("div");
 addBar.className = "add-bar";
 
-const saveStatus = document.createElement("span");
-saveStatus.className = "save-status";
-
-addBar.appendChild(saveStatus);
-
 const list = document.createElement("div");
 list.id = "machineList";
 
 mount.appendChild(addBar);
 mount.appendChild(list);
 
-let statusTimeout = null;
 const updateSaveState = (message = "") => {
-  if (statusTimeout) clearTimeout(statusTimeout);
-  saveStatus.textContent = message;
-  if (message && message !== "Guardando...") {
-    statusTimeout = setTimeout(() => {
-      saveStatus.textContent = "";
-    }, 1600);
-  }
+  setTopbarSaveStatus(message);
 };
 
 const renderMessage = (text) => {
