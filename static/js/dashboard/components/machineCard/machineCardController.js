@@ -1,7 +1,7 @@
 import { buildMachineCardTemplate } from "./machineCardTemplate.js";
 import { STATUS_LABELS } from "./machineCardTypes.js";
-import { render as renderQuehaceres } from "../../tabs/tareas.js";
-import { render as renderGeneral } from "../../tabs/general.js";
+import { render as renderQuehaceres } from "../../tabs/tasks/tareas.js";
+import { render as renderGeneral } from "../../tabs/general/general.js";
 import { render as renderHistorial } from "../../tabs/historial.js";
 import { render as renderConfiguracion } from "../../tabs/configuracion/index.js";
 
