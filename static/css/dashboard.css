@@ -388,6 +388,7 @@
   max-width: 260px;
   width: 100%;
   padding: 0.35rem 0.5rem;
+  height: 32px;
   border-radius: 0.5rem;
   border: 1px solid var(--border-subtle);
   background: color-mix(in srgb, var(--bg) 96%, transparent);
@@ -397,6 +398,7 @@
 
 .mc-year-select {
   padding: 0.35rem 0.5rem;
+  height: 32px;
 }
 
 .mc-field-error {
@@ -466,6 +468,10 @@
   align-items: center;
 }
 
+.mc-manual-row .mc-manual-drop {
+  margin-left: auto;
+}
+
 .mc-manual-drop {
   border: 1px solid var(--border-subtle);
   border-radius: 0.5rem;
@@ -475,10 +481,22 @@
   background: color-mix(in srgb, var(--bg) 96%, transparent);
   cursor: pointer;
   font: inherit;
-  flex: 1 1 220px;
-  min-width: 180px;
+  opacity: 1;
+  appearance: none;
+  -webkit-appearance: none;
+  flex: 0 0 auto;
+  width: auto;
   display: inline-flex;
   align-items: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 120px;
+}
+
+.mc-manual-drop.is-file {
+  flex: 1 1 220px;
+  max-width: 240px;
 }
 
 .mc-manual-btn {

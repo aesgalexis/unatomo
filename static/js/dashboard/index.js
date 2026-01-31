@@ -290,6 +290,9 @@ if (mount) {
     if (!statusEl) return;
     statusEl.textContent = status.text || "";
     statusEl.dataset.state = status.state || "";
+    if (card.dataset.expanded === "true") {
+      requestAnimationFrame(() => recalcHeight(card));
+    }
   };
 
   const autoSave = initAutoSave({
@@ -511,16 +514,25 @@ if (mount) {
           if (!tagId) return;
           statusEl.textContent = "Comprobando...";
           statusEl.dataset.state = "neutral";
+          if (card.dataset.expanded === "true") {
+            scheduleHeightSync(machine.id, () => recalcHeight(card));
+          }
           try {
             const res = await validateTag(tagId);
             if (!res.exists) {
               statusEl.textContent = "Tag no existe";
               statusEl.dataset.state = "error";
+              if (card.dataset.expanded === "true") {
+                scheduleHeightSync(machine.id, () => recalcHeight(card));
+              }
               return;
             }
             if (res.machineId && res.machineId !== id) {
               statusEl.textContent = "Tag ya está asignado";
               statusEl.dataset.state = "error";
+              if (card.dataset.expanded === "true") {
+                scheduleHeightSync(machine.id, () => recalcHeight(card));
+              }
               return;
             }
             updateMachine(id, { tagId });
@@ -533,6 +545,9 @@ if (mount) {
           } catch {
             statusEl.textContent = "Error al validar el tag";
             statusEl.dataset.state = "error";
+            if (card.dataset.expanded === "true") {
+              scheduleHeightSync(machine.id, () => recalcHeight(card));
+            }
           }
         };
 
@@ -789,6 +804,12 @@ if (mount) {
           state.expandedById = Array.from(expandedById);
           renderCards({ preserveScroll: true });
           autoSave.saveNow(id, "task-complete");
+        };
+
+        hooks.onContentResize = () => {
+          if (card.dataset.expanded === "true") {
+            scheduleHeightSync(machine.id, () => recalcHeight(card));
+          }
         };
 
         list.appendChild(card);
