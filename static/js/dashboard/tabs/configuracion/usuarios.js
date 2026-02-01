@@ -63,6 +63,10 @@ export const render = (container, machine, hooks, options = {}) => {
   passInput.className = "mc-user-password";
   passInput.type = "password";
   passInput.placeholder = "PIN";
+  passInput.autocomplete = "new-password";
+  passInput.name = "new-password";
+  passInput.setAttribute("data-lpignore", "true");
+  passInput.setAttribute("data-1p-ignore", "true");
   passInput.maxLength = 8;
   passInput.style.display = "none";
   passInput.style.width = "150px";
@@ -211,21 +215,45 @@ export const render = (container, machine, hooks, options = {}) => {
     const pinWrap = document.createElement("div");
     pinWrap.className = "mc-user-pin-wrap";
 
+    const pinToggle = document.createElement("button");
+    pinToggle.type = "button";
+    pinToggle.className = "mc-user-pin-toggle";
+    pinToggle.setAttribute("aria-label", "Cambiar PIN");
+    pinToggle.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 1 1 8 0v3"></path></svg>`;
+    pinToggle.addEventListener("click", (event) => {
+      event.stopPropagation();
+      pinToggle.style.display = "none";
+      pinInput.style.display = "";
+      pinInput.focus();
+      list.querySelectorAll(".mc-user-pin-toggle").forEach((toggleEl) => {
+        if (toggleEl !== pinToggle) toggleEl.disabled = true;
+      });
+    });
+
     const pinInput = document.createElement("input");
     pinInput.type = "password";
     pinInput.className = "mc-user-pin";
     pinInput.placeholder = "Cambiar PIN";
+    pinInput.autocomplete = "new-password";
+    pinInput.name = "new-password";
+    pinInput.setAttribute("data-lpignore", "true");
+    pinInput.setAttribute("data-1p-ignore", "true");
     pinInput.maxLength = 8;
     pinInput.addEventListener("click", (event) => event.stopPropagation());
     pinInput.addEventListener("focus", () => {
       pinInput.classList.add("is-active");
-      pinInput.placeholder = "";
+      pinToggle.style.display = "none";
       list.querySelectorAll(".mc-user-row").forEach((rowEl) => {
         if (rowEl !== row) {
           const inputEl = rowEl.querySelector(".mc-user-pin");
           if (inputEl) inputEl.disabled = true;
           const actionsEl = rowEl.querySelector(".mc-user-pin-actions");
           if (actionsEl) actionsEl.style.display = "none";
+          const toggleEl = rowEl.querySelector(".mc-user-pin-toggle");
+          if (toggleEl) {
+            toggleEl.style.display = "";
+            toggleEl.disabled = true;
+          }
         }
       });
       pinActions.style.display = "inline-flex";
@@ -254,6 +282,12 @@ export const render = (container, machine, hooks, options = {}) => {
       pinInput.placeholder = "Cambiar PIN";
       pinInput.classList.remove("is-active");
       pinActions.style.display = "none";
+      pinInput.style.display = "none";
+      pinToggle.style.display = "";
+      pinToggle.disabled = false;
+      list.querySelectorAll(".mc-user-pin-toggle").forEach((toggleEl) => {
+        toggleEl.disabled = false;
+      });
       list.querySelectorAll(".mc-user-pin").forEach((inputEl) => {
         inputEl.disabled = false;
       });
@@ -270,6 +304,12 @@ export const render = (container, machine, hooks, options = {}) => {
       pinInput.placeholder = "Cambiar PIN";
       pinInput.classList.remove("is-active");
       pinActions.style.display = "none";
+      pinInput.style.display = "none";
+      pinToggle.style.display = "";
+      pinToggle.disabled = false;
+      list.querySelectorAll(".mc-user-pin-toggle").forEach((toggleEl) => {
+        toggleEl.disabled = false;
+      });
       list.querySelectorAll(".mc-user-pin").forEach((inputEl) => {
         inputEl.disabled = false;
       });
@@ -278,6 +318,8 @@ export const render = (container, machine, hooks, options = {}) => {
 
     pinActions.appendChild(pinOk);
     pinActions.appendChild(pinCancel);
+    pinInput.style.display = "none";
+    pinWrap.appendChild(pinToggle);
     pinWrap.appendChild(pinInput);
 
     const remove = document.createElement("a");
