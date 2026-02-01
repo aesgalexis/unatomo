@@ -104,11 +104,13 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
 
     const freqSelect = document.createElement("select");
     freqSelect.className = "task-frequency-select";
-    ["diaria", "semanal", "mensual", "trimestral", "semestral", "anual"].forEach((key) => {
+    ["puntual", "diaria", "semanal", "mensual", "trimestral", "semestral", "anual"].forEach((key) => {
       const option = document.createElement("option");
       option.value = key;
       option.textContent =
-        (key === "diaria"
+        (key === "puntual"
+          ? "Frecuencia"
+          : key === "diaria"
           ? "Diaria"
           : key === "semanal"
           ? "Semanal"
@@ -136,13 +138,18 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
         createdBy: context.createdBy || null
       });
       if (error) {
-        titleInput.setAttribute("aria-invalid", "true");
+        if (error === "description") {
+          descInput.setAttribute("aria-invalid", "true");
+        } else {
+          titleInput.setAttribute("aria-invalid", "true");
+        }
         const prev = createBtn.textContent;
-        createBtn.textContent = "Revisa el título";
+        createBtn.textContent = "Revisa la descripción";
         setTimeout(() => (createBtn.textContent = prev), 1000);
         return;
       }
       titleInput.removeAttribute("aria-invalid");
+      descInput.removeAttribute("aria-invalid");
       if (hooks.onAddTask) hooks.onAddTask(machine.id, task, createBtn);
       titleInput.value = "";
       descInput.value = "";

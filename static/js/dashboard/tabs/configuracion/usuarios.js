@@ -58,6 +58,16 @@ export const render = (container, machine, hooks, options = {}) => {
   userInput.style.display = "none";
   userInput.style.width = "100%";
   userInput.addEventListener("click", (event) => event.stopPropagation());
+  userInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      addBtn.click();
+    }
+    if (event.key === "Escape") {
+      event.preventDefault();
+      cancelBtn.click();
+    }
+  });
 
   const passInput = document.createElement("input");
   passInput.className = "mc-user-password";
@@ -72,6 +82,16 @@ export const render = (container, machine, hooks, options = {}) => {
   passInput.style.width = "150px";
   passInput.style.maxWidth = "150px";
   passInput.addEventListener("click", (event) => event.stopPropagation());
+  passInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      addBtn.click();
+    }
+    if (event.key === "Escape") {
+      event.preventDefault();
+      cancelBtn.click();
+    }
+  });
 
   const addBtn = document.createElement("button");
   addBtn.type = "button";
@@ -240,6 +260,16 @@ export const render = (container, machine, hooks, options = {}) => {
     pinInput.setAttribute("data-1p-ignore", "true");
     pinInput.maxLength = 8;
     pinInput.addEventListener("click", (event) => event.stopPropagation());
+    pinInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        pinOk.click();
+      }
+      if (event.key === "Escape") {
+        event.preventDefault();
+        pinCancel.click();
+      }
+    });
     pinInput.addEventListener("focus", () => {
       pinInput.classList.add("is-active");
       pinToggle.style.display = "none";

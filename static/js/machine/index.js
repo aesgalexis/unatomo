@@ -3,7 +3,7 @@ import { createMachineCard } from "/static/js/dashboard/machineCardTemplate.js";
 import { hashPassword } from "/static/js/utils/crypto.js";
 import { initAutoSave } from "/static/js/dashboard/autoSave.js";
 import { normalizeTasks } from "/static/js/dashboard/tabs/tasks/tasksModel.js";
-import { getTaskTiming, getOverdueDuration } from "/static/js/dashboard/tabs/tasks/tasksTime.js";
+import { getTaskTiming, getOverdueDuration, getCompletionDuration } from "/static/js/dashboard/tabs/tasks/tasksTime.js";
 import { setTopbarSaveStatus } from "/static/js/topbar/save-status.js";
 import {
   canSeeTab,
@@ -299,10 +299,13 @@ const renderMachine = () => {
     const before = baseTasks.find((t) => t.id === taskId);
     const wasOverdue = before ? getTaskTiming(before).pending : false;
     const overdueDuration = before ? getOverdueDuration(before) : "";
-    const tasks = baseTasks.map((t) =>
-      t.id === taskId ? { ...t, lastCompletedAt: new Date().toISOString() } : t
-    );
-    const task = tasks.find((t) => t.id === taskId);
+    const completionDuration = before ? getCompletionDuration(before) : "";
+    const tasks = baseTasks
+      .map((t) =>
+        t.id === taskId ? { ...t, lastCompletedAt: new Date().toISOString() } : t
+      )
+      .filter((t) => !(t.id === taskId && t.frequency === "puntual"));
+    const task = baseTasks.find((t) => t.id === taskId);
     const user = state.session.username || "usuario";
     state.draft = {
       ...machineDoc,
@@ -315,7 +318,9 @@ const renderMachine = () => {
           title: task.title || "Tarea",
           user,
           overdue: !!wasOverdue,
-          overdueDuration
+          overdueDuration,
+          punctual: task.frequency === "puntual",
+          completionDuration
         }
       ]
     };
