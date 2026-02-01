@@ -208,7 +208,7 @@
 .mc-location-input {
   font: inherit;
   border: 1px solid var(--border-subtle);
-  background: var(--panel-bg);
+  background: color-mix(in srgb, var(--bg) 96%, transparent);
   color: var(--fg);
   border-radius: 0.5rem;
   padding: 0.2rem 0.4rem;
@@ -1069,13 +1069,14 @@
 
 .task-frequency-select {
   min-width: 150px;
-  padding: 0.35rem 0.5rem;
+  padding: 0 0.5rem;
   border-radius: 0.5rem;
   border: 1px solid var(--border-subtle);
   background: color-mix(in srgb, var(--bg) 96%, transparent);
   color: var(--fg);
   font: inherit;
   height: 32px;
+  line-height: 30px;
 }
 
 .task-create-btn {
