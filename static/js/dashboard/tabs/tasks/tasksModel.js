@@ -37,16 +37,18 @@ export const normalizeTasks = (tasks) => {
 };
 
 export const createTask = ({ title, description, frequency, createdBy }) => {
+  const cleanDesc = (description || "").trim();
+  if (!cleanDesc) return { error: "description" };
   const cleanTitle = (title || "").trim();
-  if (!cleanTitle) return { error: "title" };
+  const baseTitle = cleanTitle || "Tarea";
   const trimmed =
-    cleanTitle.length > MAX_TITLE ? cleanTitle.slice(0, MAX_TITLE) : cleanTitle;
+    baseTitle.length > MAX_TITLE ? baseTitle.slice(0, MAX_TITLE) : baseTitle;
   return {
     task: {
       id: (window.crypto.randomUUID && window.crypto.randomUUID()) || `t_${Date.now()}`,
       title: trimmed,
-      description: (description || "").trim(),
-      frequency: frequency || "diaria",
+      description: cleanDesc,
+      frequency: frequency || "puntual",
       createdAt: new Date().toISOString(),
       lastCompletedAt: null,
       createdBy: createdBy || null

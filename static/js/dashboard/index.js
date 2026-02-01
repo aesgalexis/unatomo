@@ -10,7 +10,7 @@ import { cloneMachines, normalizeMachine, createDraftMachine } from "./machineSt
 import { generateSaltBase64, hashPassword } from "/static/js/utils/crypto.js";
 import { initAutoSave } from "./autoSave.js";
 import { normalizeTasks } from "/static/js/dashboard/tabs/tasks/tasksModel.js";
-import { getTaskTiming, getOverdueDuration } from "/static/js/dashboard/tabs/tasks/tasksTime.js";
+import { getTaskTiming, getOverdueDuration, getCompletionDuration } from "/static/js/dashboard/tabs/tasks/tasksTime.js";
 import { filterMachines } from "./components/machineSearch/machineFilter.js";
 import { createMachineSearchBar } from "./components/machineSearch/machineSearchBar.js";
 import { setTopbarSaveStatus } from "/static/js/topbar/save-status.js";
@@ -805,6 +805,10 @@ if (mount) {
             if (log.type === "task") {
               const title = log.title || "Tarea";
               const user = log.user ? ` - por ${log.user}` : "";
+              if (log.punctual) {
+                const duration = log.completionDuration ? ` (${log.completionDuration})` : "";
+                return `[${time}] Tarea puntual completada${duration}: ${title}${user}`;
+              }
               const overdueText = log.overdueDuration
                 ? `, ${log.overdueDuration} tarde`
                 : "";
@@ -923,13 +927,17 @@ if (mount) {
 
         hooks.onCompleteTask = (id, taskId) => {
           const current = getDraftById(id);
-          const tasks = normalizeTasks(current.tasks || []).map((t) =>
-            t.id === taskId ? { ...t, lastCompletedAt: new Date().toISOString() } : t
-          );
-          const task = tasks.find((t) => t.id === taskId);
-          const before = normalizeTasks(current.tasks || []).find((t) => t.id === taskId);
+          const baseTasks = normalizeTasks(current.tasks || []);
+          const before = baseTasks.find((t) => t.id === taskId);
           const wasOverdue = before ? getTaskTiming(before).pending : false;
           const overdueDuration = before ? getOverdueDuration(before) : "";
+          const completionDuration = before ? getCompletionDuration(before) : "";
+          const tasks = baseTasks
+            .map((t) =>
+              t.id === taskId ? { ...t, lastCompletedAt: new Date().toISOString() } : t
+            )
+            .filter((t) => !(t.id === taskId && t.frequency === "puntual"));
+          const task = baseTasks.find((t) => t.id === taskId);
           const user = state.adminLabel || "Administrador";
           const logs = [
             ...(current.logs || []),
@@ -939,7 +947,9 @@ if (mount) {
               title: task.title || "Tarea",
               user,
               overdue: !!wasOverdue,
-              overdueDuration
+              overdueDuration,
+              punctual: task.frequency === "puntual",
+              completionDuration
             }
           ];
           updateMachine(id, { tasks, logs });

@@ -19,6 +19,9 @@ const formatCount = (count, unitSingular, unitPlural) => {
 };
 
 const formatRemaining = (ms, frequency) => {
+  if (frequency === "puntual") {
+    return "Tarea puntual";
+  }
   const days = Math.ceil(ms / DAY);
   if (frequency === "diaria") {
     const hours = Math.max(1, Math.ceil(ms / (60 * 60 * 1000)));
@@ -77,7 +80,29 @@ export const getOverdueDuration = (task, nowMs = Date.now()) => {
   return formatCount(dayCount, "d\u00eda", "d\u00edas");
 };
 
+export const getCompletionDuration = (task, nowMs = Date.now()) => {
+  const baseMs = toMs(task.createdAt);
+  const diff = Math.max(0, nowMs - baseMs);
+  const dayCount = Math.max(1, Math.ceil(diff / DAY));
+  if (dayCount >= 30) {
+    const months = Math.ceil(dayCount / 30);
+    return formatCount(months, "mes", "meses");
+  }
+  if (dayCount >= 7) {
+    const weeks = Math.ceil(dayCount / 7);
+    return formatCount(weeks, "semana", "semanas");
+  }
+  return formatCount(dayCount, "día", "días");
+};
+
 export const getTaskTiming = (task, nowMs = Date.now()) => {
+  if (task.frequency === "puntual") {
+    return {
+      nextDue: toMs(task.createdAt),
+      pending: true,
+      label: "Tarea puntual"
+    };
+  }
   const baseMs = toMs(task.lastCompletedAt || task.createdAt);
   const days = durationDays[task.frequency] || 1;
   const nextDue = baseMs + days * DAY;

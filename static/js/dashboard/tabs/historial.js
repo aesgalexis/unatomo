@@ -57,13 +57,18 @@ export const render = (panel, machine, hooks, options = {}) => {
       if (log.type === "task") {
         const title = log.title || "Tarea";
         const user = log.user ? ` - por ${log.user}` : "";
-        const overdueText = log.overdueDuration
-          ? `, ${log.overdueDuration} tarde`
-          : "";
-        const prefix = log.overdue
-          ? `Tarea completada fuera de plazo${overdueText}: `
-          : "Tarea completada: ";
-        item.textContent = `${time} - ${prefix}${title}${user}`;
+        if (log.punctual) {
+          const duration = log.completionDuration ? ` (${log.completionDuration})` : "";
+          item.textContent = `${time} - Tarea puntual completada${duration}: ${title}${user}`;
+        } else {
+          const overdueText = log.overdueDuration
+            ? `, ${log.overdueDuration} tarde`
+            : "";
+          const prefix = log.overdue
+            ? `Tarea completada fuera de plazo${overdueText}: `
+            : "Tarea completada: ";
+          item.textContent = `${time} - ${prefix}${title}${user}`;
+        }
       } else if (log.type === "location") {
         const value = log.value ? log.value : "Sin ubicaci\u00f3n";
         item.textContent = `${time} - Ubicaci\u00f3n -> ${value}`;
