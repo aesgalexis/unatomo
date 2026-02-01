@@ -12,6 +12,9 @@ export const render = (container, machine, hooks, options = {}) => {
   addLabel.className = "mc-config-label";
   addLabel.textContent = "Usuarios";
 
+  const statusEl = document.createElement("div");
+  statusEl.className = "mc-user-status";
+
   const knownUsers = Array.isArray(options.knownUsers) ? options.knownUsers : [];
   const currentUsers = new Set((machine.users || []).map((u) => (u.username || "").trim()));
   const availableUsers = knownUsers.filter((name) => name && !currentUsers.has(name));
@@ -75,7 +78,7 @@ export const render = (container, machine, hooks, options = {}) => {
     event.stopPropagation();
     const isNew = userSelect.style.display === "none";
     const pendingName = isNew ? (userInput.value || "").trim() : "";
-    if (hooks.onAddUser) hooks.onAddUser(machine.id, userInput, passInput, addBtn);
+    if (hooks.onAddUser) hooks.onAddUser(machine.id, userInput, passInput, addBtn, statusEl);
     if (pendingName) {
       const exists = Array.from(userSelect.options).some((opt) => opt.value === pendingName);
       if (!exists) {
@@ -140,11 +143,12 @@ export const render = (container, machine, hooks, options = {}) => {
     passInput.disabled = true;
     passInput.value = "";
     if (userSelect.value && hooks.onAddUser) {
-      hooks.onAddUser(machine.id, userInput, passInput, addBtn);
+      hooks.onAddUser(machine.id, userInput, passInput, addBtn, statusEl);
       userSelect.value = "";
       userInput.value = "";
     }
   });
+
 
   if (!canEditConfig || options.disableConfigActions) {
     userSelect.disabled = true;
@@ -301,5 +305,6 @@ export const render = (container, machine, hooks, options = {}) => {
 
   container.appendChild(sep);
   container.appendChild(addRow);
+  container.appendChild(statusEl);
   container.appendChild(list);
 };

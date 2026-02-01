@@ -632,6 +632,18 @@ if (mount) {
               addBtn.textContent = "Duplicado";
               setTimeout(() => (addBtn.textContent = prev), 1000);
             }
+            const statusEl = card.querySelector(".mc-user-status");
+            if (statusEl) {
+              statusEl.textContent = "El usuario ya existe";
+              statusEl.dataset.state = "error";
+              if (card.dataset.expanded === "true") scheduleHeightSync(machine.id, () => recalcHeight(card));
+              if (statusEl._timer) clearTimeout(statusEl._timer);
+              statusEl._timer = setTimeout(() => {
+                statusEl.textContent = "";
+                statusEl.dataset.state = "";
+                if (card.dataset.expanded === "true") scheduleHeightSync(machine.id, () => recalcHeight(card));
+              }, 2200);
+            }
             return;
           }
           try {
@@ -680,6 +692,18 @@ if (mount) {
               const prev = addBtn.textContent;
               addBtn.textContent = "Duplicado";
               setTimeout(() => (addBtn.textContent = prev), 1000);
+            }
+            const statusEl = card.querySelector(".mc-user-status");
+            if (statusEl) {
+              statusEl.textContent = "El usuario ya existe";
+              statusEl.dataset.state = "error";
+              if (card.dataset.expanded === "true") scheduleHeightSync(machine.id, () => recalcHeight(card));
+              if (statusEl._timer) clearTimeout(statusEl._timer);
+              statusEl._timer = setTimeout(() => {
+                statusEl.textContent = "";
+                statusEl.dataset.state = "";
+                if (card.dataset.expanded === "true") scheduleHeightSync(machine.id, () => recalcHeight(card));
+              }, 2200);
             }
             updateSaveState("Error al guardar");
             return;

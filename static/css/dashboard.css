@@ -743,6 +743,17 @@
   color: #16a34a;
 }
 
+.mc-user-status {
+  font-size: 0.85rem;
+  color: color-mix(in srgb, var(--fg) 70%, transparent);
+  margin: 0.1rem 0 0.6rem;
+}
+
+.mc-user-status[data-state="error"] {
+  color: var(--danger, #d33);
+}
+
+
 .mc-config-tabs {
   display: inline-flex;
   gap: 0.4rem;
