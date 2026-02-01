@@ -1,6 +1,6 @@
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 import { auth, db } from "/static/js/firebase/firebaseApp.js";
-import { fetchMachines, upsertMachine, deleteMachine, addUserWithRegistry } from "./firestoreRepo.js";
+import { fetchMachines, upsertMachine, deleteMachine, addUserWithRegistry, deleteUserRegistry } from "./firestoreRepo.js";
 import { validateTag, assignTag } from "./tagRepo.js";
 import { createTagToken } from "/static/js/tokens/tagTokens.js";
 import { upsertMachineAccessFromMachine, fetchMachineAccess } from "./machineAccessRepo.js";
@@ -706,12 +706,51 @@ if (mount) {
         hooks.onRemoveUser = (id, userId) => {
           const current = getDraftById(id);
           const users = (current.users || []).filter((u) => u.id !== userId);
+          const removedUser = (current.users || []).find((u) => u.id === userId);
+          const normalizedRemoved = removedUser
+            ? (removedUser.username || "")
+                .trim()
+                .replace(/\s+/g, " ")
+                .toLowerCase()
+            : "";
           updateMachine(id, { users });
           if (!state.selectedTabById) state.selectedTabById = {};
           state.selectedTabById[id] = "configuracion";
           state.expandedById = Array.from(expandedById);
           renderCards({ preserveScroll: true });
           autoSave.saveNow(id, "remove-user");
+          if (state.uid && normalizedRemoved) {
+            const stillAssignedLocal = state.draftMachines
+              .flatMap((m) => m.users || [])
+              .some(
+                (u) =>
+                  (u.username || "")
+                    .trim()
+                    .replace(/\s+/g, " ")
+                    .toLowerCase() === normalizedRemoved
+              );
+            if (!stillAssignedLocal) {
+              (async () => {
+                try {
+                  const remoteMachines = await fetchMachines(state.uid);
+                  const stillAssignedRemote = remoteMachines
+                    .flatMap((m) => m.users || [])
+                    .some(
+                      (u) =>
+                        (u.username || "")
+                          .trim()
+                          .replace(/\s+/g, " ")
+                          .toLowerCase() === normalizedRemoved
+                    );
+                  if (!stillAssignedRemote) {
+                    await deleteUserRegistry(state.uid, normalizedRemoved);
+                  }
+                } catch {
+                  // ignore cleanup errors
+                }
+              })();
+            }
+          }
         };
 
         hooks.onUpdateUserPassword = async (id, userId, nextPassword, input) => {

@@ -11,6 +11,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
 const machinesCollection = (uid) => collection(db, "tenants", uid, "machines");
+const usernamesDoc = (uid, normalized) => doc(db, "tenants", uid, "usernames", normalized);
 
 export const fetchMachines = async (uid) => {
   const snap = await getDocs(machinesCollection(uid));
@@ -83,16 +84,13 @@ export const deleteMachine = async (uid, machineId) => {
   await deleteDoc(ref);
 };
 
-const usernameDoc = (uid, normalized) =>
-  doc(db, "tenants", uid, "usernames", normalized);
-
 export const addUserWithRegistry = async (uid, machineId, user, options = {}) => {
   const { normalizeName, allowExisting = false } = options;
   const machineRef = doc(db, "tenants", uid, "machines", machineId);
   const normalized = normalizeName
     ? normalizeName(user.username)
     : (user.username || "").trim().toLowerCase();
-  const userRef = usernameDoc(uid, normalized);
+  const userRef = usernamesDoc(uid, normalized);
 
   return runTransaction(db, async (tx) => {
     const [machineSnap, userSnap] = await Promise.all([
@@ -141,4 +139,10 @@ export const addUserWithRegistry = async (uid, machineId, user, options = {}) =>
     );
     return users;
   });
+};
+
+export const deleteUserRegistry = async (uid, normalized) => {
+  if (!normalized) return;
+  const ref = usernamesDoc(uid, normalized);
+  await deleteDoc(ref);
 };
