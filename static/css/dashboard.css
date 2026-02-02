@@ -192,20 +192,6 @@
   padding: 0.9rem 1.25rem;
 }
 
-.mc-header-toggle {
-  margin-left: 0;
-  border: none;
-  background: transparent;
-  color: inherit;
-  cursor: pointer;
-  padding: 0.2rem 0.4rem;
-  position: absolute;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  top: calc(var(--mc-collapsed-height) / 2);
-}
-
-
 .mc-title {
   font-weight: 600;
   color: var(--fg);
@@ -343,20 +329,6 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-}
-
-.mc-chevron {
-  opacity: 0.6;
-}
-
-.mc-chevron::before {
-  content: "\25BE";
-  display: inline-block;
-  transition: transform 160ms ease;
-}
-
-.machine-card[data-expanded="true"] .mc-chevron::before {
-  transform: rotate(180deg);
 }
 
 
