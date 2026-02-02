@@ -4,7 +4,10 @@ export const buildMachineCardTemplate = () => {
     <article class="machine-card" data-expanded="false">
       <header class="mc-header">
         <div class="mc-title"></div>
-        <button class="mc-status" type="button"></button>
+        <div class="mc-right">
+          <button class="mc-pending" type="button" aria-label="Tareas pendientes"></button>
+          <button class="mc-status" type="button"></button>
+        </div>
         <button class="mc-header-toggle" type="button" aria-label="Expandir">
           <span class="mc-chevron" aria-hidden="true"></span>
         </button>
