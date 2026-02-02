@@ -4,6 +4,7 @@ import { render as renderQuehaceres } from "../../tabs/tasks/tareas.js";
 import { render as renderGeneral } from "../../tabs/general/general.js";
 import { render as renderHistorial } from "../../tabs/historial.js";
 import { render as renderConfiguracion } from "../../tabs/configuracion/index.js";
+import { getTaskTiming } from "../../tabs/tasks/tasksTime.js";
 
 const TAB_RENDER = {
   quehaceres: renderQuehaceres,
@@ -19,12 +20,24 @@ export const createMachineCard = (machine, options = {}) => {
   if (options.mode === "single") card.dataset.expanded = "true";
 
   const title = card.querySelector(".mc-title");
+  const pendingBtn = card.querySelector(".mc-pending");
+  const rightWrap = card.querySelector(".mc-right");
   const statusBtn = card.querySelector(".mc-status");
   const header = card.querySelector(".mc-header");
   const headerToggle = card.querySelector(".mc-header-toggle");
   const panel = card.querySelector(".mc-panel");
 
   title.textContent = machine.title;
+  const tasks = Array.isArray(machine.tasks) ? machine.tasks : [];
+  const pendingCount = tasks.filter((task) => getTaskTiming(task).pending).length;
+  if (pendingBtn) {
+    pendingBtn.textContent = String(pendingCount);
+    pendingBtn.style.display = pendingCount > 0 ? "inline-flex" : "none";
+    pendingBtn.disabled = false;
+    const pendingLabel = pendingCount === 1 ? "Tarea pendiente" : "Tareas pendientes";
+    pendingBtn.setAttribute("aria-label", pendingLabel);
+    pendingBtn.setAttribute("data-tooltip", pendingLabel);
+  }
   statusBtn.textContent = STATUS_LABELS[machine.status] || "Operativo";
   statusBtn.dataset.status = machine.status || "operativa";
   if (options.canEditStatus === false) {
@@ -163,11 +176,11 @@ export const createMachineCard = (machine, options = {}) => {
   };
 
   const locationNode = buildLocationNode();
-  if (header && statusBtn) {
-    header.insertBefore(locationNode, statusBtn);
+  if (header && rightWrap) {
+    header.insertBefore(locationNode, rightWrap);
   }
 
-  if (machine.tagId && statusBtn) {
+  if (machine.tagId && rightWrap) {
     const nfc = document.createElement("span");
     nfc.className = "mc-nfc-icon";
     if (String(machine.tagId).startsWith("G-")) {
@@ -202,7 +215,11 @@ export const createMachineCard = (machine, options = {}) => {
     nfc.addEventListener("mouseenter", showTip);
     nfc.addEventListener("mouseleave", hideTip);
     nfc.addEventListener("blur", hideTip);
-    statusBtn.insertAdjacentElement("beforebegin", nfc);
+    header.insertBefore(nfc, rightWrap);
+  }
+
+  if (pendingBtn && statusBtn) {
+    statusBtn.insertAdjacentElement("beforebegin", pendingBtn);
   }
 
   if (options.mode === "single") {
@@ -281,7 +298,7 @@ export const createMachineCard = (machine, options = {}) => {
     header.addEventListener("click", (event) => {
       if (
         event.target.closest(
-          ".mc-status, .mc-title, .mc-title-input, .mc-location, .mc-nfc-icon, .mc-header-toggle"
+          ".mc-status, .mc-pending, .mc-title, .mc-title-input, .mc-location, .mc-nfc-icon, .mc-header-toggle"
         )
       ) {
         return;
@@ -296,6 +313,37 @@ export const createMachineCard = (machine, options = {}) => {
     });
   }
 
+  if (pendingBtn) {
+    let tipEl = null;
+    const showTip = (event) => {
+      const label = pendingBtn.getAttribute("data-tooltip");
+      if (!label) return;
+      tipEl = document.createElement("div");
+      tipEl.className = "mc-tooltip";
+      tipEl.textContent = label;
+      document.body.appendChild(tipEl);
+      const x = (event && event.clientX) || 0;
+      const y = (event && event.clientY) || 0;
+      const left = x + 12;
+      const top = y - tipEl.offsetHeight - 10;
+      tipEl.style.top = `${Math.max(8, top)}px`;
+      tipEl.style.left = `${Math.max(8, left)}px`;
+    };
+    const hideTip = () => {
+      if (tipEl && tipEl.parentNode) tipEl.parentNode.removeChild(tipEl);
+      tipEl = null;
+    };
+    pendingBtn.addEventListener("mouseenter", showTip);
+    pendingBtn.addEventListener("mouseleave", hideTip);
+    pendingBtn.addEventListener("blur", hideTip);
+    pendingBtn.addEventListener("click", (event) => {
+      event.stopPropagation();
+      if (card.dataset.expanded !== "true" && hooks.onToggleExpand) {
+        hooks.onToggleExpand(card);
+        if (!card.querySelector(".mc-tab.is-active")) activateFirstTab();
+      }
+    });
+  }
   statusBtn.addEventListener("click", (event) => {
     event.stopPropagation();
     if (options.canEditStatus === false) return;

@@ -231,8 +231,15 @@
   cursor: pointer;
 }
 
-.mc-status {
+.mc-right {
   margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.mc-status {
+  margin-left: 0;
   border: 2px solid color-mix(in srgb, var(--fg) 40%, transparent);
   border-radius: 999px;
   background: transparent;
@@ -289,6 +296,23 @@
   border-radius: 999px;
   border: 1px solid var(--border-subtle);
   background: color-mix(in srgb, var(--fg) 10%, transparent);
+}
+
+.mc-pending {
+  margin-left: 0;
+  border: 2px solid #f97316;
+  border-radius: 999px;
+  background: transparent;
+  color: #f97316;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  min-width: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
 }
 
 .mc-chevron {
