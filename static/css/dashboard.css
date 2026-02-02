@@ -264,8 +264,20 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-right: 0.4rem;
+  margin-right: 0.2rem;
   color: #2563eb;
+}
+
+.mc-share {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.2rem;
+  border: none;
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  cursor: pointer;
 }
 
 .mc-nfc-icon.is-generated {
