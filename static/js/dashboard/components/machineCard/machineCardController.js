@@ -180,6 +180,19 @@ export const createMachineCard = (machine, options = {}) => {
     header.insertBefore(locationNode, rightWrap);
   }
 
+  if (rightWrap) {
+    const share = document.createElement("button");
+    share.type = "button";
+    share.className = "mc-share";
+    share.setAttribute("aria-label", "Compartir");
+    share.innerHTML =
+      '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">' +
+      '<path fill="currentColor" d="M18 8a3 3 0 1 0-2.83-4H15a3 3 0 0 0 .17 1L8.9 9.02a3 3 0 0 0-1.9-.69A3 3 0 1 0 7 14a3 3 0 0 0 1.9-.69l6.27 4.02A3 3 0 0 0 18 20a3 3 0 1 0-2.83-4h-.17l-6.26-4.02a3 3 0 0 0 0-1.92l6.26-4.02H15a3 3 0 0 0 3 2z"/>' +
+      "</svg>";
+    share.addEventListener("click", (event) => event.stopPropagation());
+    header.insertBefore(share, rightWrap);
+  }
+
   if (machine.tagId && rightWrap) {
     const nfc = document.createElement("span");
     nfc.className = "mc-nfc-icon";
