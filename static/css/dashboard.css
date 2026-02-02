@@ -66,6 +66,32 @@
   color: transparent;
 }
 
+.btn-order {
+  width: 2.55rem;
+  height: 2.55rem;
+  border: 1px solid var(--border-subtle);
+  background-color: color-mix(in srgb, var(--bg) 96%, transparent);
+  color: var(--fg);
+  border-radius: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn-order:hover,
+.btn-order:focus {
+  border-color: var(--fg);
+  outline: none;
+}
+
+
+
+
+
+
 :root {
   --mc-collapsed-height: 58px;
 }
