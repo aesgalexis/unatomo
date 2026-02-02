@@ -38,6 +38,28 @@ if (mount) {
   };
 
   const cardRefs = new Map();
+  const ORDER_CACHE_KEY = "unatomo_order_v1";
+  const loadOrderCache = () => {
+    try {
+      const raw = localStorage.getItem(ORDER_CACHE_KEY);
+      if (!raw) return {};
+      const parsed = JSON.parse(raw);
+      return parsed && typeof parsed === "object" ? parsed : {};
+    } catch {
+      return {};
+    }
+  };
+  const saveOrderCache = (list) => {
+    try {
+      const map = {};
+      (list || []).forEach((m) => {
+        if (m && m.id) map[m.id] = m.order ?? 0;
+      });
+      localStorage.setItem(ORDER_CACHE_KEY, JSON.stringify(map));
+    } catch {
+      // ignore
+    }
+  };
   const tagUnsubs = new Map();
   const tagIdByMachineId = new Map();
   const machineIdByTagId = new Map();
@@ -415,7 +437,10 @@ if (mount) {
 
     cardRefs.clear();
     state.locations = computeLocations(state.draftMachines);
-    visibleMachines.forEach((machine) => {
+    visibleMachines
+      .slice()
+      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+      .forEach((machine) => {
         if (machine.tagId && !state.tagStatusById[machine.id]) {
           state.tagStatusById[machine.id] = { text: "Tag enlazado", state: "ok" };
         }
@@ -1033,6 +1058,7 @@ if (mount) {
       autoSave.scheduleSave(id, "order");
     });
     state.draftMachines = updated;
+    saveOrderCache(updated);
     renderCards();
   };
 
@@ -1054,6 +1080,7 @@ if (mount) {
     const machine = createDraftMachine(state.draftMachines.length + 1, order);
     machine.title = getUniqueTitle();
     state.draftMachines = [machine, ...state.draftMachines];
+    saveOrderCache(state.draftMachines);
     renderCards();
     autoSave.saveNow(machine.id, "create");
   });
@@ -1065,7 +1092,13 @@ if (mount) {
     const normalized = remote
       .map((m, idx) => normalizeMachine(m, idx))
       .filter(Boolean);
-    const merged = await mergeOperationalFromTag(normalized);
+    const orderCache = loadOrderCache();
+    const withOrder = normalized.map((m) =>
+      Object.prototype.hasOwnProperty.call(orderCache, m.id)
+        ? { ...m, order: orderCache[m.id] }
+        : m
+    );
+    const merged = await mergeOperationalFromTag(withOrder);
     setRemote(merged);
     renderCards();
     initDragAndDrop(list, handleReorder);

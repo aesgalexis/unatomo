@@ -81,9 +81,11 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-.btn-order:hover,
-.btn-order:focus {
+.btn-order:hover {
   border-color: var(--fg);
+}
+
+.btn-order:focus {
   outline: none;
 }
 
