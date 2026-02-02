@@ -149,6 +149,7 @@ if (mount) {
       });
     const updated = sorted.map((m, index) => ({ ...m, order: index }));
     state.draftMachines = updated;
+    saveOrderCache(updated);
     renderCards({ preserveScroll: true });
     updated.forEach((m) => autoSave.scheduleSave(m.id, "order"));
   });

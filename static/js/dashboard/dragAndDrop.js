@@ -42,9 +42,6 @@ export const initDragAndDrop = (listEl, onReorder) => {
   listEl.addEventListener("dragend", () => {
     const dragging = listEl.querySelector(".machine-card.is-dragging");
     if (dragging) dragging.classList.remove("is-dragging");
-    listEl.querySelectorAll(".machine-card.is-over").forEach((node) => {
-      node.classList.remove("is-over");
-    });
     if (placeholder && placeholder.parentNode) {
       placeholder.parentNode.removeChild(placeholder);
     }
@@ -54,14 +51,6 @@ export const initDragAndDrop = (listEl, onReorder) => {
 
   listEl.addEventListener("dragover", (event) => {
     event.preventDefault();
-    const card = event.target.closest(".machine-card");
-    if (card) {
-      listEl.querySelectorAll(".machine-card.is-over").forEach((node) => {
-        if (node !== card) node.classList.remove("is-over");
-      });
-      card.classList.add("is-over");
-    }
-
     const afterElement = getDragAfterElement(listEl, event.clientY);
     const dragging = listEl.querySelector(".machine-card.is-dragging");
     if (!dragging) return;

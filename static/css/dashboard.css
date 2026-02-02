@@ -173,11 +173,6 @@
   box-shadow: 0 8px 18px rgba(0,0,0,0.15);
 }
 
-.machine-card.is-over {
-  outline: 2px dashed color-mix(in srgb, var(--fg) 40%, transparent);
-  outline-offset: -6px;
-}
-
 .machine-drop-placeholder {
   border: 2px dashed color-mix(in srgb, var(--fg) 35%, transparent);
   border-radius: 1rem;
