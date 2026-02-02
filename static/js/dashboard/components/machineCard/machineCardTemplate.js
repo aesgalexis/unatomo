@@ -8,9 +8,6 @@ export const buildMachineCardTemplate = () => {
           <button class="mc-pending" type="button" aria-label="Tareas pendientes"></button>
           <button class="mc-status" type="button"></button>
         </div>
-        <button class="mc-header-toggle" type="button" aria-label="Expandir">
-          <span class="mc-chevron" aria-hidden="true"></span>
-        </button>
       </header>
       <div class="mc-expand">
         <div class="mc-tabs" role="tablist">

@@ -223,8 +223,6 @@ export const createMachineCard = (machine, options = {}) => {
   }
 
   if (options.mode === "single") {
-    const chevron = card.querySelector(".mc-chevron");
-    if (chevron) chevron.style.display = "none";
     if (headerToggle) headerToggle.style.display = "none";
   }
 
