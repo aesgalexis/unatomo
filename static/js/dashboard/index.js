@@ -101,9 +101,40 @@ if (mount) {
       searchInput.classList.remove("is-active-search");
     }
   });
+  const orderBtn = document.createElement("button");
+  orderBtn.type = "button";
+  orderBtn.className = "btn-order";
+  orderBtn.setAttribute("aria-label", "Ordenar");
+  orderBtn.innerHTML =
+    '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">' +
+    '<path fill="currentColor" d="M7 6h10a1 1 0 1 0 0-2H7a1 1 0 0 0 0 2zm0 7h6a1 1 0 1 0 0-2H7a1 1 0 0 0 0 2zm0 7h2a1 1 0 1 0 0-2H7a1 1 0 0 0 0 2zM4 5l2 2 2-2H4zm0 7l2 2 2-2H4zm0 7l2 2 2-2H4z"/>' +
+    '</svg>';
+  orderBtn.addEventListener("click", () => {
+    const pendingCount = (machine) => {
+      const tasks = Array.isArray(machine.tasks) ? machine.tasks : [];
+      return tasks.filter((task) => getTaskTiming(task).pending).length;
+    };
+    const sorted = state.draftMachines
+      .slice()
+      .sort((a, b) => {
+        const aDown = a.status === "fuera_de_servicio" ? 0 : 1;
+        const bDown = b.status === "fuera_de_servicio" ? 0 : 1;
+        if (aDown !== bDown) return aDown - bDown;
+        const aPending = pendingCount(a);
+        const bPending = pendingCount(b);
+        if (aPending !== bPending) return bPending - aPending;
+        return (a.order ?? 0) - (b.order ?? 0);
+      });
+    const updated = sorted.map((m, index) => ({ ...m, order: index }));
+    state.draftMachines = updated;
+    renderCards({ preserveScroll: true });
+    updated.forEach((m) => autoSave.scheduleSave(m.id, "order"));
+  });
+
 
   addBar.appendChild(addBtn);
   addBar.appendChild(searchInput);
+  addBar.appendChild(orderBtn);
 
   const filterInfo = document.createElement("div");
   filterInfo.className = "filter-info";
@@ -384,10 +415,7 @@ if (mount) {
 
     cardRefs.clear();
     state.locations = computeLocations(state.draftMachines);
-    visibleMachines
-      .slice()
-      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-      .forEach((machine) => {
+    visibleMachines.forEach((machine) => {
         if (machine.tagId && !state.tagStatusById[machine.id]) {
           state.tagStatusById[machine.id] = { text: "Tag enlazado", state: "ok" };
         }
