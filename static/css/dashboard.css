@@ -268,18 +268,6 @@
   color: #2563eb;
 }
 
-.mc-share {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 0.2rem;
-  border: none;
-  background: transparent;
-  color: inherit;
-  padding: 0;
-  cursor: pointer;
-}
-
 .mc-nfc-icon.is-generated {
   color: #7c3aed;
 }
@@ -774,6 +762,73 @@
 
 .mc-tag-status[data-state="ok"] {
   color: #16a34a;
+}
+
+.mc-config-title {
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+}
+
+.mc-admin-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.mc-admin-line {
+  width: 100%;
+}
+
+.mc-admin-input {
+  width: min(320px, 66%);
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.6rem;
+  padding: 0.35rem 0.5rem;
+  background: var(--panel-bg);
+  color: var(--fg);
+  font: inherit;
+  height: 32px;
+}
+
+.mc-admin-actions {
+  display: inline-flex;
+  gap: 0.35rem;
+  margin-top: 0.4rem;
+}
+
+.mc-admin-assign-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.mc-admin-assign {
+  border: 1px solid var(--border-subtle);
+  background: var(--panel-bg);
+  color: var(--fg);
+  padding: 0.35rem 0.6rem;
+  border-radius: 0.6rem;
+  font: inherit;
+  cursor: pointer;
+  height: 32px;
+}
+
+.mc-admin-email {
+  font-weight: 500;
+}
+
+.mc-admin-status {
+  color: #f97316;
+  font-size: 0.85rem;
+}
+
+.mc-admin-status[data-state="error"] {
+  color: var(--danger, #d33);
+}
+
+.mc-admin-status[data-state="pending"] {
+  color: #f97316;
 }
 
 .mc-user-status {
