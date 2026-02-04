@@ -69,6 +69,8 @@ export const upsertMachine = async (uid, machine) => {
     tasks: machine.tasks || [],
     order: typeof machine.order === "number" ? machine.order : 0,
     users: machine.users || [],
+    adminEmail: machine.adminEmail || "",
+    adminStatus: machine.adminStatus || "",
     notifications: machine.notifications || null,
     updatedAt: serverTimestamp(),
     updatedBy: uid

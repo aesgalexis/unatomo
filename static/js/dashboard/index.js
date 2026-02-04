@@ -962,6 +962,45 @@ if (mount) {
           autoSave.scheduleSave(id, "notifications");
         };
 
+        hooks.onUpdateAdmin = (id, email) => {
+          const ownerEmail = (state.adminEmail || "").trim().toLowerCase();
+          const nextEmail = (email || "").trim().toLowerCase();
+          if (!nextEmail) {
+            updateMachine(id, { adminEmail: "", adminStatus: "" });
+            if (!state.selectedTabById) state.selectedTabById = {};
+            state.selectedTabById[id] = "configuracion";
+            state.expandedById = Array.from(expandedById);
+            renderCards({ preserveScroll: true });
+            autoSave.scheduleSave(id, "admin");
+            return;
+          }
+          if (ownerEmail && nextEmail === ownerEmail) {
+            updateMachine(id, {
+              adminEmail: "",
+              adminStatus: "Introduce otra dirección de correo que no se la tuya"
+            });
+            state.selectedTabById = { ...(state.selectedTabById || {}), [id]: "configuracion" };
+            state.expandedById = Array.from(expandedById);
+            renderCards({ preserveScroll: true });
+            return;
+          }
+          updateMachine(id, { adminEmail: email, adminStatus: "Pendiente aceptación" });
+          if (!state.selectedTabById) state.selectedTabById = {};
+          state.selectedTabById[id] = "configuracion";
+          state.expandedById = Array.from(expandedById);
+          renderCards({ preserveScroll: true });
+          autoSave.scheduleSave(id, "admin");
+        };
+
+        hooks.onRemoveAdmin = (id) => {
+          updateMachine(id, { adminEmail: "", adminStatus: "" });
+          if (!state.selectedTabById) state.selectedTabById = {};
+          state.selectedTabById[id] = "configuracion";
+          state.expandedById = Array.from(expandedById);
+          renderCards({ preserveScroll: true });
+          autoSave.scheduleSave(id, "admin");
+        };
+
         hooks.onTestNotification = (machineData) => {
           const logs = [
             ...(machineData.logs || []),
@@ -1089,6 +1128,7 @@ if (mount) {
   const initDashboard = async (uid, user) => {
     state.uid = uid;
     state.adminLabel = user.displayName || user.email || "Administrador";
+    state.adminEmail = user.email || "";
     const remote = await fetchMachines(uid);
     const normalized = remote
       .map((m, idx) => normalizeMachine(m, idx))
