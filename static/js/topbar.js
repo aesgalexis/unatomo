@@ -26,3 +26,7 @@ if (titleEl) {
 initThemeToggle();
 
 await import("/static/js/registro/session-menu.js");
+const { initTopbarNotifications } = await import(
+  "/static/js/notifications/topbar-notifications.js"
+);
+initTopbarNotifications();

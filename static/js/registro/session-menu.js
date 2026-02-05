@@ -26,6 +26,9 @@ if (!btn || !menu || !label || !action) {
   }
 
   function openMenu() {
+    window.dispatchEvent(
+      new CustomEvent("unatomo:topbar-open", { detail: { id: "session" } })
+    );
     menu.hidden = false;
     btn.setAttribute("aria-expanded", "true");
   }
@@ -93,6 +96,10 @@ if (!btn || !menu || !label || !action) {
     e.stopPropagation();
     if (menu.hidden) openMenu();
     else closeMenu();
+  });
+
+  window.addEventListener("unatomo:topbar-open", (e) => {
+    if (e.detail && e.detail.id !== "session") closeMenu();
   });
 
   document.addEventListener("click", (e) => {
