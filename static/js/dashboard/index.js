@@ -359,7 +359,7 @@ if (mount) {
       if (machine.tagId) {
         const res = await validateTag(machine.tagId);
         if (!res.exists) {
-          state.tagStatusById[machine.id] = { text: "Tag no existe", state: "error" };
+          state.tagStatusById[machine.id] = { text: "El Tag ID introducido no existe", state: "error" };
           updateTagStatusUI(machine.id);
           throw new Error("tag-missing");
         }
@@ -586,7 +586,7 @@ if (mount) {
           try {
             const res = await validateTag(tagId);
             if (!res.exists) {
-              statusEl.textContent = "Tag no existe";
+              statusEl.textContent = "El Tag ID introducido no existe";
               statusEl.dataset.state = "error";
               if (card.dataset.expanded === "true") {
                 scheduleHeightSync(machine.id, () => recalcHeight(card));
