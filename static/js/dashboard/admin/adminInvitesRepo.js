@@ -12,6 +12,9 @@ import {
 
 const INVITES_COLLECTION = "machine_admin_invites";
 
+const normalizeEmail = (email) =>
+  (email || "").toString().trim().toLowerCase();
+
 export const inviteDocId = (ownerUid, machineId) =>
   `${ownerUid}_${machineId}`;
 
@@ -65,18 +68,21 @@ export const updateInviteStatus = async (ownerUid, machineId, patch) => {
 };
 
 export const fetchInvitesForAdmin = async (adminUid, status, email) => {
-  if (!adminUid && !email) return [];
+  const normalizedEmail = normalizeEmail(email);
+  if (!adminUid && !normalizedEmail) return [];
   const collectionRef = collection(db, INVITES_COLLECTION);
   let q = null;
   if (adminUid) {
     q = query(collectionRef, where("adminUid", "==", adminUid));
   } else {
-    q = query(collectionRef, where("adminEmail", "==", email));
+    q = query(collectionRef, where("adminEmail", "==", normalizedEmail));
   }
   const snap = await getDocs(q);
   let list = snap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
-  if (adminUid && email) {
-    const emailSnap = await getDocs(query(collectionRef, where("adminEmail", "==", email)));
+  if (adminUid && normalizedEmail) {
+    const emailSnap = await getDocs(
+      query(collectionRef, where("adminEmail", "==", normalizedEmail))
+    );
     const emailList = emailSnap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
     const map = new Map();
     [...list, ...emailList].forEach((invite) => {
