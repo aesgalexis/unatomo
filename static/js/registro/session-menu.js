@@ -1,6 +1,7 @@
 import { auth } from "/static/js/registro/firebase-init.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 import { requestInviteCodeAndRedirect } from "/static/js/registro/invite-gate.js";
+import { upsertAccountDirectory } from "/static/js/dashboard/admin/accountDirectoryRepo.js";
 
 const btn = document.getElementById("session-menu-btn");
 const menu = document.getElementById("session-menu");
@@ -113,7 +114,11 @@ if (!btn || !menu || !label || !action) {
   setGuest();
 
   onAuthStateChanged(auth, (user) => {
-    if (user) setUser(user);
-    else setGuest();
+    if (user) {
+      setUser(user);
+      upsertAccountDirectory(user).catch(() => {});
+    } else {
+      setGuest();
+    }
   });
 }
