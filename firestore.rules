@@ -91,7 +91,7 @@ service cloud.firestore {
           );
       }
 
-      allow get: if (resource != null) && (ownerSide() || adminSide());
+      allow get: if (resource != null) && (ownerSide() || adminSide() || adminEmailSide());
       allow list: if isSignedIn();
 
       allow create: if isSignedIn()
@@ -117,8 +117,6 @@ service cloud.firestore {
                 (resource.data.adminUid == null || resource.data.adminUid == "")
                 && adminEmailSide()
                 && request.resource.data.adminUid == request.auth.uid
-                && request.resource.data.adminEmailLower is string
-                && request.resource.data.adminEmailLower == lower(request.auth.token.email)
               )
             )
           )
