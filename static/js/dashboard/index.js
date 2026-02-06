@@ -417,10 +417,8 @@ if (mount) {
       status: decision,
       respondedAt: serverTimestamp()
     };
-    if (decision === "accepted") {
-      patch.adminUid = state.uid;
-      patch.adminEmail = invite.adminEmail || adminEmail || "";
-    }
+    patch.adminUid = state.uid;
+    patch.adminEmail = invite.adminEmail || adminEmail || "";
     await updateInviteStatus(invite.ownerUid, invite.machineId, patch);
 
     if (decision === "accepted") {
@@ -1322,6 +1320,28 @@ if (mount) {
     return machines.filter(Boolean);
   };
 
+  const syncAdminInviteUids = async (ownerMachines) => {
+    const candidates = (ownerMachines || []).filter((m) => {
+      const status = (m.adminStatus || "").toLowerCase();
+      return m.adminEmail && status.includes("pendiente");
+    });
+    for (const machine of candidates) {
+      try {
+        const invite = await getInviteForMachine(state.uid, machine.id);
+        if (!invite) continue;
+        if (invite.adminUid) continue;
+        const account = await getAccountByEmail(machine.adminEmail);
+        if (!account || !account.uid) continue;
+        await updateInviteStatus(state.uid, machine.id, {
+          adminUid: account.uid,
+          adminEmail: account.email || machine.adminEmail
+        });
+      } catch {
+        // ignore sync failures
+      }
+    }
+  };
+
   const initDashboard = async (uid, user) => {
     state.uid = uid;
     state.adminLabel = user.displayName || user.email || "Administrador";
@@ -1342,6 +1362,7 @@ if (mount) {
       role: "owner",
       ownerEmail: user.email || ""
     }));
+    await syncAdminInviteUids(ownerMachines);
     let adminMachines = [];
     try {
       adminMachines = await fetchAdminMachines(uid, normalizeEmail(user.email || ""));
