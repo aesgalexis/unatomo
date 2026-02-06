@@ -396,6 +396,10 @@ if (mount) {
       actions.appendChild(rejectBtn);
       row.appendChild(text);
       row.appendChild(actions);
+      const debug = document.createElement("div");
+      debug.className = "invite-debug";
+      debug.textContent = `debug: inviteId=${invite.id || ""} detId=${inviteDocId(invite.ownerUid, invite.machineId)} adminEmailLower=${invite.adminEmailLower || ""} adminEmail=${invite.adminEmail || ""} adminUid=${invite.adminUid || ""} userUid=${state.uid || ""} userEmail=${state.adminEmail || ""}`;
+      row.appendChild(debug);
       inviteBanner.appendChild(row);
     });
 
@@ -412,6 +416,18 @@ if (mount) {
 
   const handleInviteDecision = async (invite, decision) => {
     if (!invite || !invite.ownerUid || !invite.machineId) return;
+    const deterministicId = inviteDocId(invite.ownerUid, invite.machineId);
+    if (invite.id && invite.id !== deterministicId) {
+      const deterministicInvite = await getInviteForMachine(
+        invite.ownerUid,
+        invite.machineId
+      );
+      if (!deterministicInvite) {
+        notifyTopbar("La invitación debe activarse en el dashboard del propietario");
+        return;
+      }
+      invite = deterministicInvite;
+    }
     const adminEmail = normalizeEmail(state.adminEmail || "");
     const normalizedInviteEmail = normalizeEmail(invite.adminEmail || adminEmail || "");
     const patch = {
@@ -1329,6 +1345,32 @@ if (mount) {
       }
     };
 
+    const ensureDeterministicInvites = async (ownerMachines) => {
+      for (const machine of ownerMachines || []) {
+        const email = normalizeEmail(machine.adminEmail || "");
+        if (!email) continue;
+        try {
+          const invite = await getInviteForMachine(state.uid, machine.id);
+          if (invite) continue;
+          const statusSource = (machine.adminStatus || "").toLowerCase();
+          let status = "pending";
+          if (statusSource.includes("administrado")) status = "accepted";
+          if (statusSource.includes("rechazada")) status = "rejected";
+          await upsertInvite({
+            ownerUid: state.uid,
+            ownerEmail: state.adminEmail || "",
+            machineId: machine.id,
+            machineTitle: machine.title || "",
+            adminUid: "",
+            adminEmail: email,
+            status
+          });
+        } catch {
+          // ignore deterministic invite sync failures
+        }
+      }
+    };
+
     const syncAdminInviteStatuses = async (ownerMachines) => {
       for (const machine of ownerMachines || []) {
         try {
@@ -1391,6 +1433,7 @@ if (mount) {
       role: "owner",
       ownerEmail: user.email || ""
     }));
+      await ensureDeterministicInvites(ownerMachines);
       await syncAdminInviteUids(ownerMachines);
       await syncAdminInviteStatuses(ownerMachines);
     let adminMachines = [];
