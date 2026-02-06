@@ -1,50 +1,183 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+
     function isOwner(uid) {
       return request.auth != null && request.auth.uid == uid;
     }
 
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // inviteDocId = ownerUid_machineId
+    function invitePath(ownerUid, machineId) {
+      return /databases/$(database)/documents/machine_admin_invites/$(ownerUid + "_" + machineId);
+    }
+
+    function isAcceptedAdminOfMachine(ownerUid, machineId) {
+      return isSignedIn()
+        && exists(invitePath(ownerUid, machineId))
+        && get(invitePath(ownerUid, machineId)).data.adminUid == request.auth.uid
+        && get(invitePath(ownerUid, machineId)).data.status == "accepted";
+    }
+
     match /registration_codes/{code} {
-      allow read: if true;
+      allow get: if true;
+      allow list: if false;
       allow write: if false;
     }
 
     match /users/{uid} {
-      allow read, write: if isOwner(uid);
-    }
+      allow read: if isSignedIn() && request.auth.uid == uid;
 
-    match /tenants/{uid} {
-      allow read, write: if isOwner(uid);
+      allow create, update: if isSignedIn()
+                            && request.auth.uid == uid
+                            && request.resource.data.regCode is string
+                            && exists(/databases/$(database)/documents/registration_codes/$(request.resource.data.regCode))
+                            && get(/databases/$(database)/documents/registration_codes/$(request.resource.data.regCode)).data.active == true;
 
-      match /machines/{machineId} {
-        allow read, write: if isOwner(uid);
-      }
-
-      match /tags/{tagId} {
-        allow read, write: if isOwner(uid);
-      }
+      allow delete: if false;
     }
 
     match /tags/{tagId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null && request.resource.data.tenantId == request.auth.uid;
+      allow get, list: if isSignedIn();
+
+      allow create, update: if isSignedIn()
+        && (
+          (resource == null || resource.data.tenantId == null || resource.data.tenantId == "")
+            ? request.resource.data.tenantId == request.auth.uid
+            : resource.data.tenantId == request.auth.uid
+        );
+
+      allow delete: if false;
+    }
+
+    match /account_directory/{emailLower} {
+      allow get: if isSignedIn();
+      allow list: if false;
+
+      allow create, update: if isSignedIn()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.email is string
+        && lower(request.resource.data.email) == emailLower;
+
+      allow delete: if false;
+    }
+
+    match /machine_admin_invites/{inviteId} {
+      function ownerSide() {
+        return isSignedIn()
+          && resource != null
+          && resource.data.ownerUid == request.auth.uid;
+      }
+
+      function adminSide() {
+        return isSignedIn()
+          && resource != null
+          && resource.data.adminUid == request.auth.uid;
+      }
+
+      function adminEmailSide() {
+        return isSignedIn()
+          && resource != null
+          && request.auth.token.email != null
+          && lower(request.auth.token.email) == resource.data.adminEmail;
+      }
+
+      allow get: if (resource != null) && (ownerSide() || adminSide());
+      allow list: if isSignedIn();
+
+      allow create: if isSignedIn()
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.adminUid is string
+        && request.resource.data.machineId is string
+        && request.resource.data.status == "pending";
+
+      allow update: if isSignedIn()
+        && (
+          // Admin responde: pending -> accepted/rejected
+          (
+            resource.data.status == "pending"
+            && request.resource.data.status in ["accepted", "rejected"]
+            && (
+              resource.data.adminUid == request.auth.uid
+              ||
+              (
+                (resource.data.adminUid == null || resource.data.adminUid == "")
+                && adminEmailSide()
+                && request.resource.data.adminUid == request.auth.uid
+              )
+            )
+          )
+          ||
+          // Admin deja de administrar: accepted -> left
+          (resource.data.adminUid == request.auth.uid
+            && resource.data.status == "accepted"
+            && request.resource.data.status == "left"
+          )
+          ||
+          // Owner puede actualizar el doc (p.ej. reflejar estado/limpiar)
+          (resource.data.ownerUid == request.auth.uid)
+        );
+
+      allow delete: if false;
+    }
+
+    match /tenants/{tenantId} {
+      allow read, write: if isOwner(tenantId);
+
+      match /machines/{machineId} {
+        allow read: if isOwner(tenantId) || isAcceptedAdminOfMachine(tenantId, machineId);
+        allow create, update: if isOwner(tenantId) || isAcceptedAdminOfMachine(tenantId, machineId);
+        allow delete: if isOwner(tenantId);
+      }
+
+      match /{document=**} {
+        allow read, write: if isOwner(tenantId);
+      }
     }
 
     match /machine_access/{tagId} {
-      allow read: if true;
-      allow create: if request.auth != null && request.resource.data.tenantId == request.auth.uid;
-      allow delete: if request.auth != null && resource.data.tenantId == request.auth.uid;
-      allow update: if request.auth != null && resource.data.tenantId == request.auth.uid;
-      allow update: if request.auth == null && isOperationalUpdate();
+      allow get: if true;
+      allow list: if false;
+
+      function isOperationalUpdate() {
+        return request.auth == null
+          && request.resource.data.diff(resource.data).changedKeys()
+            .hasOnly(["status", "logs", "tasks", "updatedAt", "updatedBy"])
+
+          && request.resource.data.tenantId == resource.data.tenantId
+          && request.resource.data.machineId == resource.data.machineId
+          && request.resource.data.users == resource.data.users
+
+          && request.resource.data.title == resource.data.title
+          && request.resource.data.brand == resource.data.brand
+          && request.resource.data.model == resource.data.model
+          && request.resource.data.year == resource.data.year
+
+          && request.resource.data.status is string
+          && request.resource.data.logs is list
+          && request.resource.data.tasks is list
+          && request.resource.data.updatedBy is string
+
+          && (request.resource.data.status in ["operativa", "fuera_de_servicio", "desconectada"]);
+      }
+
+      function canManageMachineAccess(tenantId, machineId) {
+        return isSignedIn()
+          && (request.auth.uid == tenantId || isAcceptedAdminOfMachine(tenantId, machineId));
+      }
+
+      allow create: if canManageMachineAccess(request.resource.data.tenantId, request.resource.data.machineId);
+      allow update: if canManageMachineAccess(resource.data.tenantId, resource.data.machineId);
+      allow delete: if isSignedIn() && resource.data.tenantId == request.auth.uid;
+
+      allow update: if isOperationalUpdate();
     }
 
-    function isOperationalUpdate() {
-      return request.resource.data.diff(resource.data).changedKeys()
-        .hasOnly(["status", "logs", "tasks", "updatedAt", "updatedBy"])
-        && request.resource.data.tenantId == resource.data.tenantId
-        && request.resource.data.machineId == resource.data.machineId
-        && request.resource.data.users == resource.data.users;
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }
