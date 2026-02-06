@@ -2,7 +2,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/fi
 import { auth, db } from "/static/js/firebase/firebaseApp.js";
 import { fetchMachines, fetchLegacyMachines, migrateLegacyMachines, fetchMachine, upsertMachine, deleteMachine, addUserWithRegistry, deleteUserRegistry } from "./firestoreRepo.js";
 import { upsertAccountDirectory, getAccountByEmail, normalizeEmail } from "./admin/accountDirectoryRepo.js";
-import { fetchLinksForAdmin, getLinkForMachine, linkDocId, upsertLink, updateLinkStatus } from "./admin/adminLinksRepo.js";
+import { fetchLinksForAdmin, getLinkForMachine, linkDocId, upsertLink, updateLinkStatus, updateLinkStatusById } from "./admin/adminLinksRepo.js";
 import { validateTag, assignTag } from "./tagRepo.js";
 import { createTagToken } from "/static/js/tokens/tagTokens.js";
 import { upsertMachineAccessFromMachine, fetchMachineAccess } from "./machineAccessRepo.js";
@@ -442,7 +442,11 @@ if (mount) {
     patch.adminUid = state.uid;
     patch.adminEmail = normalizedInviteEmail;
     try {
-      await updateLinkStatus(invite.ownerUid, invite.machineId, invite.adminEmail || "", patch);
+      if (invite.id) {
+        await updateLinkStatusById(invite.id, patch);
+      } else {
+        await updateLinkStatus(invite.ownerUid, invite.machineId, invite.adminEmail || "", patch);
+      }
     } catch {
       notifyTopbar(
         `Permisos: ownerUid=${invite.ownerUid} admin=${normalizeEmail(state.adminEmail || "")}`
