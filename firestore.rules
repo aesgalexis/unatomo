@@ -10,16 +10,17 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    // inviteDocId = ownerUid_machineId
-    function invitePath(ownerUid, machineId) {
-      return /databases/$(database)/documents/machine_admin_invites/$(ownerUid + "_" + machineId);
+    // linkDocId = ownerUid_machineId_adminEmailLower
+    function linkPath(ownerUid, machineId, adminEmailLower) {
+      return /databases/$(database)/documents/admin_machine_links/$(ownerUid + "_" + machineId + "_" + adminEmailLower);
     }
 
     function isAcceptedAdminOfMachine(ownerUid, machineId) {
       return isSignedIn()
-        && exists(invitePath(ownerUid, machineId))
-        && get(invitePath(ownerUid, machineId)).data.adminUid == request.auth.uid
-        && get(invitePath(ownerUid, machineId)).data.status == "accepted";
+        && request.auth.token.email is string
+        && exists(/databases/$(database)/documents/admin_machine_links/$(ownerUid + "_" + machineId + "_" + lower(request.auth.token.email)))
+        && get(/databases/$(database)/documents/admin_machine_links/$(ownerUid + "_" + machineId + "_" + lower(request.auth.token.email))).data.adminUid == request.auth.uid
+        && get(/databases/$(database)/documents/admin_machine_links/$(ownerUid + "_" + machineId + "_" + lower(request.auth.token.email))).data.status == "accepted";
     }
 
     match /registration_codes/{code} {
@@ -65,7 +66,7 @@ service cloud.firestore {
       allow delete: if false;
     }
 
-    match /machine_admin_invites/{inviteId} {
+    match /admin_machine_links/{linkId} {
       function ownerSide() {
         return isSignedIn()
           && resource != null

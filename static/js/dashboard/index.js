@@ -2,7 +2,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/fi
 import { auth, db } from "/static/js/firebase/firebaseApp.js";
 import { fetchMachines, fetchMachine, upsertMachine, deleteMachine, addUserWithRegistry, deleteUserRegistry } from "./firestoreRepo.js";
 import { upsertAccountDirectory, getAccountByEmail, normalizeEmail } from "./admin/accountDirectoryRepo.js";
-import { fetchInvitesForAdmin, getInviteForMachine, inviteDocId, upsertInvite, updateInviteStatus } from "./admin/adminInvitesRepo.js";
+import { fetchLinksForAdmin, getLinkForMachine, linkDocId, upsertLink, updateLinkStatus } from "./admin/adminLinksRepo.js";
 import { validateTag, assignTag } from "./tagRepo.js";
 import { createTagToken } from "/static/js/tokens/tagTokens.js";
 import { upsertMachineAccessFromMachine, fetchMachineAccess } from "./machineAccessRepo.js";
@@ -398,7 +398,7 @@ if (mount) {
       row.appendChild(actions);
       const debug = document.createElement("div");
       debug.className = "invite-debug";
-      debug.textContent = `debug: inviteId=${invite.id || ""} detId=${inviteDocId(invite.ownerUid, invite.machineId)} status=${invite.status || ""} adminEmailLower=${invite.adminEmailLower || ""} adminEmail=${invite.adminEmail || ""} adminUid=${invite.adminUid || ""} userUid=${state.uid || ""} userEmail=${state.adminEmail || ""}`;
+      debug.textContent = `debug: linkId=${invite.id || ""} detId=${linkDocId(invite.ownerUid, invite.machineId, normalizeEmail(invite.adminEmail || ""))} status=${invite.status || ""} adminEmailLower=${invite.adminEmailLower || ""} adminEmail=${invite.adminEmail || ""} adminUid=${invite.adminUid || ""} userUid=${state.uid || ""} userEmail=${state.adminEmail || ""}`;
       row.appendChild(debug);
       inviteBanner.appendChild(row);
     });
@@ -416,11 +416,16 @@ if (mount) {
 
   const handleInviteDecision = async (invite, decision) => {
     if (!invite || !invite.ownerUid || !invite.machineId) return;
-    const deterministicId = inviteDocId(invite.ownerUid, invite.machineId);
+    const deterministicId = linkDocId(
+      invite.ownerUid,
+      invite.machineId,
+      normalizeEmail(invite.adminEmail || "")
+    );
     if (invite.id && invite.id !== deterministicId) {
-      const deterministicInvite = await getInviteForMachine(
+      const deterministicInvite = await getLinkForMachine(
         invite.ownerUid,
-        invite.machineId
+        invite.machineId,
+        invite.adminEmail || ""
       );
       if (!deterministicInvite) {
         notifyTopbar("La invitación debe activarse en el dashboard del propietario");
@@ -436,7 +441,7 @@ if (mount) {
     };
     patch.adminUid = state.uid;
     patch.adminEmail = normalizedInviteEmail;
-    await updateInviteStatus(invite.ownerUid, invite.machineId, patch);
+    await updateLinkStatus(invite.ownerUid, invite.machineId, invite.adminEmail || "", patch);
 
     if (decision === "accepted") {
       const ownerMachine = await fetchMachine(invite.ownerUid, invite.machineId);
@@ -1039,20 +1044,10 @@ if (mount) {
           renderCards();
           const ownerUid = machineData.tenantId;
           if (ownerUid) {
-            updateInviteStatus(ownerUid, machineData.id, {
+            updateLinkStatus(ownerUid, machineData.id, machineData.adminEmail || "", {
               status: "left",
               respondedAt: serverTimestamp()
             }).catch(() => {});
-            (async () => {
-              const ownerMachine = await fetchMachine(ownerUid, machineData.id);
-              if (ownerMachine) {
-                await upsertMachine(ownerUid, {
-                  ...ownerMachine,
-                  adminEmail: "",
-                  adminStatus: ""
-                });
-              }
-            })();
           }
         };
 
@@ -1141,7 +1136,7 @@ if (mount) {
             resolvedAdminUid = "";
           }
 
-            await upsertInvite({
+            await upsertLink({
               ownerUid: tenantId,
               ownerEmail: ownerEmail || state.adminEmail || "",
               machineId: id,
@@ -1171,7 +1166,7 @@ if (mount) {
           state.selectedTabById[id] = "configuracion";
           state.expandedById = Array.from(expandedById);
           renderCards({ preserveScroll: true });
-          await updateInviteStatus(tenantId, id, {
+          await updateLinkStatus(tenantId, id, current.adminEmail || "", {
             status: "left",
             respondedAt: serverTimestamp()
           });
@@ -1305,13 +1300,13 @@ if (mount) {
     autoSave.saveNow(machine.id, "create");
   });
 
-  const fetchAdminMachines = async (uid, email) => {
-    const invites = await fetchInvitesForAdmin(uid, "accepted", email || "");
-    const machines = await Promise.all(
-      invites.map(async (invite) => {
-        if (!invite.ownerUid || !invite.machineId) return null;
-        if (invite.status !== "accepted") return null;
-        const data = await fetchMachine(invite.ownerUid, invite.machineId);
+    const fetchAdminMachines = async (uid, email) => {
+      const invites = await fetchLinksForAdmin(email || "", "accepted");
+      const machines = await Promise.all(
+        invites.map(async (invite) => {
+          if (!invite.ownerUid || !invite.machineId) return null;
+          if (invite.status !== "accepted") return null;
+          const data = await fetchMachine(invite.ownerUid, invite.machineId);
         if (!data) return null;
         const normalized = normalizeMachine(data, state.draftMachines.length);
         normalized.tenantId = invite.ownerUid;
@@ -1323,25 +1318,29 @@ if (mount) {
     return machines.filter(Boolean);
   };
 
-  const syncAdminInviteUids = async (ownerMachines) => {
-    const candidates = (ownerMachines || []).filter((m) => {
-      const status = (m.adminStatus || "").toLowerCase();
-      return m.adminEmail && status.includes("pendiente");
-    });
-    for (const machine of candidates) {
-      try {
-        const invite = await getInviteForMachine(state.uid, machine.id);
-        if (!invite) continue;
-        if (invite.adminUid) continue;
-        const account = await getAccountByEmail(machine.adminEmail);
-        if (!account || !account.uid) continue;
-        await updateInviteStatus(state.uid, machine.id, {
-          adminUid: account.uid,
-          adminEmail: account.email || machine.adminEmail
-        });
-      } catch {
-        // ignore sync failures
-      }
+    const syncAdminInviteUids = async (ownerMachines) => {
+      const candidates = (ownerMachines || []).filter((m) => {
+        const status = (m.adminStatus || "").toLowerCase();
+        return m.adminEmail && status.includes("pendiente");
+      });
+      for (const machine of candidates) {
+        try {
+          const invite = await getLinkForMachine(
+            state.uid,
+            machine.id,
+            machine.adminEmail || ""
+          );
+          if (!invite) continue;
+          if (invite.adminUid) continue;
+          const account = await getAccountByEmail(machine.adminEmail);
+          if (!account || !account.uid) continue;
+          await updateLinkStatus(state.uid, machine.id, machine.adminEmail || "", {
+            adminUid: account.uid,
+            adminEmail: account.email || machine.adminEmail
+          });
+        } catch {
+          // ignore sync failures
+        }
       }
     };
 
@@ -1350,7 +1349,7 @@ if (mount) {
         const email = normalizeEmail(machine.adminEmail || "");
         if (!email) continue;
         try {
-          const invite = await getInviteForMachine(state.uid, machine.id);
+          const invite = await getLinkForMachine(state.uid, machine.id, email);
           if (invite) {
             const validStatuses = ["pending", "accepted", "rejected", "left"];
             const needsStatusFix = !validStatuses.includes(invite.status);
@@ -1359,7 +1358,7 @@ if (mount) {
               const patch = {};
               if (needsStatusFix) patch.status = "pending";
               if (needsEmailLowerFix) patch.adminEmail = invite.adminEmail;
-              await updateInviteStatus(state.uid, machine.id, patch);
+              await updateLinkStatus(state.uid, machine.id, email, patch);
             }
             continue;
           }
@@ -1367,7 +1366,7 @@ if (mount) {
           let status = "pending";
           if (statusSource.includes("administrado")) status = "accepted";
           if (statusSource.includes("rechazada")) status = "rejected";
-          await upsertInvite({
+          await upsertLink({
             ownerUid: state.uid,
             ownerEmail: state.adminEmail || "",
             machineId: machine.id,
@@ -1385,7 +1384,11 @@ if (mount) {
     const syncAdminInviteStatuses = async (ownerMachines) => {
       for (const machine of ownerMachines || []) {
         try {
-          const invite = await getInviteForMachine(state.uid, machine.id);
+          const invite = await getLinkForMachine(
+            state.uid,
+            machine.id,
+            machine.adminEmail || ""
+          );
           if (!invite || !invite.status) continue;
           const emailLabel = invite.adminEmail || machine.adminEmail || "";
           let nextAdminEmail = machine.adminEmail || "";
@@ -1447,12 +1450,12 @@ if (mount) {
       await ensureDeterministicInvites(ownerMachines);
       await syncAdminInviteUids(ownerMachines);
       await syncAdminInviteStatuses(ownerMachines);
-    let adminMachines = [];
-    try {
-      adminMachines = await fetchAdminMachines(uid, normalizeEmail(user.email || ""));
-    } catch {
-      adminMachines = [];
-    }
+      let adminMachines = [];
+      try {
+        adminMachines = await fetchAdminMachines(uid, normalizeEmail(user.email || ""));
+      } catch {
+        adminMachines = [];
+      }
     const combined = [...ownerMachines, ...adminMachines];
     const orderCache = loadOrderCache();
     const withOrder = combined.map((m) =>
@@ -1462,15 +1465,14 @@ if (mount) {
     );
     const merged = await mergeOperationalFromTag(withOrder);
     setRemote(merged);
-    try {
-      state.pendingInvites = await fetchInvitesForAdmin(
-        uid,
-        "pending",
-        normalizeEmail(user.email || "")
-      );
-    } catch {
-      state.pendingInvites = [];
-    }
+      try {
+        state.pendingInvites = await fetchLinksForAdmin(
+          normalizeEmail(user.email || ""),
+          "pending"
+        );
+      } catch {
+        state.pendingInvites = [];
+      }
     renderInviteBanner();
     renderCards();
     initDragAndDrop(list, handleReorder);
