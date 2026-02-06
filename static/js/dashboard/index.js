@@ -2,7 +2,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/fi
 import { auth, db } from "/static/js/firebase/firebaseApp.js";
 import { fetchMachines, fetchMachine, upsertMachine, deleteMachine, addUserWithRegistry, deleteUserRegistry } from "./firestoreRepo.js";
 import { upsertAccountDirectory, getAccountByEmail, normalizeEmail } from "./admin/accountDirectoryRepo.js";
-import { fetchInvitesForAdmin, getInviteForMachine, upsertInvite, updateInviteStatus, updateInviteStatusById } from "./admin/adminInvitesRepo.js";
+import { fetchInvitesForAdmin, getInviteForMachine, inviteDocId, upsertInvite, updateInviteStatus, updateInviteStatusById } from "./admin/adminInvitesRepo.js";
 import { validateTag, assignTag } from "./tagRepo.js";
 import { createTagToken } from "/static/js/tokens/tagTokens.js";
 import { upsertMachineAccessFromMachine, fetchMachineAccess } from "./machineAccessRepo.js";
@@ -413,50 +413,41 @@ if (mount) {
   const handleInviteDecision = async (invite, decision) => {
     if (!invite || !invite.ownerUid || !invite.machineId) return;
     const adminEmail = normalizeEmail(state.adminEmail || "");
+    const normalizedInviteEmail = normalizeEmail(invite.adminEmail || adminEmail || "");
     const patch = {
       status: decision,
       respondedAt: serverTimestamp()
     };
     patch.adminUid = state.uid;
-    patch.adminEmail = normalizeEmail(invite.adminEmail || adminEmail || "");
+    patch.adminEmail = normalizedInviteEmail;
+    const deterministicId = inviteDocId(invite.ownerUid, invite.machineId);
+    let deterministicUpdated = false;
     try {
-      if (invite.id) {
+      await updateInviteStatus(invite.ownerUid, invite.machineId, patch);
+      deterministicUpdated = true;
+    } catch {
+      deterministicUpdated = false;
+    }
+
+    if (invite.id && invite.id !== deterministicId) {
+      try {
         await updateInviteStatusById(invite.id, patch);
-      } else {
-        await updateInviteStatus(invite.ownerUid, invite.machineId, patch);
-      }
-    } catch (error) {
-      if (invite.ownerUid && invite.machineId) {
-        await updateInviteStatus(invite.ownerUid, invite.machineId, patch);
-      } else {
-        throw error;
+      } catch {
+        // ignore secondary invite update failures
       }
     }
 
     if (decision === "accepted") {
+      if (!deterministicUpdated) return;
       const ownerMachine = await fetchMachine(invite.ownerUid, invite.machineId);
       if (ownerMachine) {
         const label = invite.adminEmail || adminEmail || "";
-        await upsertMachine(invite.ownerUid, {
-          ...ownerMachine,
-          adminEmail: label,
-          adminStatus: `Administrado por ${label}`
-        });
         const normalized = normalizeMachine(ownerMachine, state.draftMachines.length);
         normalized.tenantId = invite.ownerUid;
         normalized.role = "admin";
         normalized.ownerEmail = invite.ownerEmail || "";
         state.draftMachines = [normalized, ...state.draftMachines];
         renderCards({ preserveScroll: true });
-      }
-    } else if (decision === "rejected") {
-      const ownerMachine = await fetchMachine(invite.ownerUid, invite.machineId);
-      if (ownerMachine) {
-        await upsertMachine(invite.ownerUid, {
-          ...ownerMachine,
-          adminEmail: "",
-          adminStatus: `Invitación rechazada por ${invite.adminEmail || adminEmail || ""}`
-        });
       }
     }
 
@@ -1351,8 +1342,50 @@ if (mount) {
       } catch {
         // ignore sync failures
       }
-    }
-  };
+      }
+    };
+
+    const syncAdminInviteStatuses = async (ownerMachines) => {
+      for (const machine of ownerMachines || []) {
+        try {
+          const invite = await getInviteForMachine(state.uid, machine.id);
+          if (!invite || !invite.status) continue;
+          const emailLabel = invite.adminEmail || machine.adminEmail || "";
+          let nextAdminEmail = machine.adminEmail || "";
+          let nextStatus = machine.adminStatus || "";
+
+          if (invite.status === "pending") {
+            nextStatus = "Pendiente aceptación";
+            nextAdminEmail = emailLabel || nextAdminEmail;
+          } else if (invite.status === "accepted") {
+            nextStatus = `Administrado por ${emailLabel}`;
+            nextAdminEmail = emailLabel;
+          } else if (invite.status === "rejected") {
+            nextStatus = `Invitación rechazada por ${emailLabel}`;
+            nextAdminEmail = "";
+          } else if (invite.status === "left") {
+            nextStatus = "";
+            nextAdminEmail = "";
+          }
+
+          const needsUpdate =
+            nextStatus !== (machine.adminStatus || "") ||
+            nextAdminEmail !== (machine.adminEmail || "");
+
+          if (needsUpdate) {
+            await upsertMachine(state.uid, {
+              ...machine,
+              adminEmail: nextAdminEmail,
+              adminStatus: nextStatus
+            });
+            machine.adminEmail = nextAdminEmail;
+            machine.adminStatus = nextStatus;
+          }
+        } catch {
+          // ignore status sync failures
+        }
+      }
+    };
 
   const initDashboard = async (uid, user) => {
     state.uid = uid;
@@ -1374,7 +1407,8 @@ if (mount) {
       role: "owner",
       ownerEmail: user.email || ""
     }));
-    await syncAdminInviteUids(ownerMachines);
+      await syncAdminInviteUids(ownerMachines);
+      await syncAdminInviteStatuses(ownerMachines);
     let adminMachines = [];
     try {
       adminMachines = await fetchAdminMachines(uid, normalizeEmail(user.email || ""));
