@@ -6,6 +6,7 @@ import {
   getDocs,
   query,
   setDoc,
+  updateDoc,
   where,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
@@ -75,6 +76,19 @@ export const updateLinkStatus = async (ownerUid, machineId, adminEmail, patch) =
     },
     { merge: true }
   );
+};
+
+export const updateLinkStatusById = async (linkId, patch) => {
+  if (!linkId) return null;
+  const ref = doc(db, LINKS_COLLECTION, linkId);
+  const normalizedPatch = { ...patch };
+  if (Object.prototype.hasOwnProperty.call(normalizedPatch, "adminEmail")) {
+    normalizedPatch.adminEmailLower = normalizeEmail(normalizedPatch.adminEmail);
+  }
+  await updateDoc(ref, {
+    ...normalizedPatch,
+    updatedAt: serverTimestamp()
+  });
 };
 
 export const fetchLinksForAdmin = async (email, status) => {
