@@ -82,6 +82,21 @@ export const fetchInvitesForAdmin = async (adminUid, status, email) => {
   const q = query(collectionRef, where("adminEmailLower", "==", normalizedEmail));
   const snap = await getDocs(q);
   let list = snap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
+  const map = new Map();
+  list.forEach((invite) => {
+    if (!invite || !invite.ownerUid || !invite.machineId) return;
+    const key = `${invite.ownerUid}_${invite.machineId}`;
+    const preferredId = inviteDocId(invite.ownerUid, invite.machineId);
+    const existing = map.get(key);
+    if (!existing) {
+      map.set(key, invite);
+      return;
+    }
+    if (existing.id !== preferredId && invite.id === preferredId) {
+      map.set(key, invite);
+    }
+  });
+  list = Array.from(map.values());
   if (!status) return list;
   return list.filter((invite) => invite.status === status);
 };
