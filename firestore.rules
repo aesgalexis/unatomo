@@ -161,7 +161,7 @@ service cloud.firestore {
           && request.resource.data.tasks is list
           && request.resource.data.updatedBy is string
 
-          && (request.resource.data.status in ["operativa", "fuera_de_servicio", "desconectada"]);
+          && (request.resource.data.status in ["operativa", "fuera_de_servicio"]);
       }
 
       function canManageMachineAccess(tenantId, machineId) {
