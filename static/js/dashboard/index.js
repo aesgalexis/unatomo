@@ -398,7 +398,7 @@ if (mount) {
       row.appendChild(actions);
       const debug = document.createElement("div");
       debug.className = "invite-debug";
-      debug.textContent = `debug: inviteId=${invite.id || ""} detId=${inviteDocId(invite.ownerUid, invite.machineId)} adminEmailLower=${invite.adminEmailLower || ""} adminEmail=${invite.adminEmail || ""} adminUid=${invite.adminUid || ""} userUid=${state.uid || ""} userEmail=${state.adminEmail || ""}`;
+      debug.textContent = `debug: inviteId=${invite.id || ""} detId=${inviteDocId(invite.ownerUid, invite.machineId)} status=${invite.status || ""} adminEmailLower=${invite.adminEmailLower || ""} adminEmail=${invite.adminEmail || ""} adminUid=${invite.adminUid || ""} userUid=${state.uid || ""} userEmail=${state.adminEmail || ""}`;
       row.appendChild(debug);
       inviteBanner.appendChild(row);
     });
@@ -1351,7 +1351,18 @@ if (mount) {
         if (!email) continue;
         try {
           const invite = await getInviteForMachine(state.uid, machine.id);
-          if (invite) continue;
+          if (invite) {
+            const validStatuses = ["pending", "accepted", "rejected", "left"];
+            const needsStatusFix = !validStatuses.includes(invite.status);
+            const needsEmailLowerFix = !invite.adminEmailLower && invite.adminEmail;
+            if (needsStatusFix || needsEmailLowerFix) {
+              const patch = {};
+              if (needsStatusFix) patch.status = "pending";
+              if (needsEmailLowerFix) patch.adminEmail = invite.adminEmail;
+              await updateInviteStatus(state.uid, machine.id, patch);
+            }
+            continue;
+          }
           const statusSource = (machine.adminStatus || "").toLowerCase();
           let status = "pending";
           if (statusSource.includes("administrado")) status = "accepted";
