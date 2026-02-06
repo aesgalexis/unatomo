@@ -36,6 +36,7 @@ export const upsertInvite = async (payload) => {
     adminEmail,
     status
   } = payload;
+  const adminEmailLower = normalizeEmail(adminEmail);
   const ref = doc(db, INVITES_COLLECTION, inviteDocId(ownerUid, machineId));
   await setDoc(
     ref,
@@ -46,6 +47,7 @@ export const upsertInvite = async (payload) => {
       machineTitle: machineTitle || "",
       adminUid,
       adminEmail,
+      adminEmailLower,
       status,
       updatedAt: serverTimestamp(),
       createdAt: serverTimestamp()
@@ -57,23 +59,16 @@ export const upsertInvite = async (payload) => {
 
 export const updateInviteStatus = async (ownerUid, machineId, patch) => {
   const ref = doc(db, INVITES_COLLECTION, inviteDocId(ownerUid, machineId));
+  const normalizedPatch = {
+    ...patch
+  };
+  if (Object.prototype.hasOwnProperty.call(normalizedPatch, "adminEmail")) {
+    normalizedPatch.adminEmailLower = normalizeEmail(normalizedPatch.adminEmail);
+  }
   await setDoc(
     ref,
     {
-      ...patch,
-      updatedAt: serverTimestamp()
-    },
-    { merge: true }
-  );
-};
-
-export const updateInviteStatusById = async (inviteId, patch) => {
-  if (!inviteId) return;
-  const ref = doc(db, INVITES_COLLECTION, inviteId);
-  await setDoc(
-    ref,
-    {
-      ...patch,
+      ...normalizedPatch,
       updatedAt: serverTimestamp()
     },
     { merge: true }
@@ -82,27 +77,11 @@ export const updateInviteStatusById = async (inviteId, patch) => {
 
 export const fetchInvitesForAdmin = async (adminUid, status, email) => {
   const normalizedEmail = normalizeEmail(email);
-  if (!adminUid && !normalizedEmail) return [];
+  if (!normalizedEmail) return [];
   const collectionRef = collection(db, INVITES_COLLECTION);
-  let q = null;
-  if (adminUid) {
-    q = query(collectionRef, where("adminUid", "==", adminUid));
-  } else {
-    q = query(collectionRef, where("adminEmail", "==", normalizedEmail));
-  }
+  const q = query(collectionRef, where("adminEmailLower", "==", normalizedEmail));
   const snap = await getDocs(q);
   let list = snap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
-  if (adminUid && normalizedEmail) {
-    const emailSnap = await getDocs(
-      query(collectionRef, where("adminEmail", "==", normalizedEmail))
-    );
-    const emailList = emailSnap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
-    const map = new Map();
-    [...list, ...emailList].forEach((invite) => {
-      if (invite && invite.id) map.set(invite.id, invite);
-    });
-    list = Array.from(map.values());
-  }
   if (!status) return list;
   return list.filter((invite) => invite.status === status);
 };

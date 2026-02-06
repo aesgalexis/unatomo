@@ -2,7 +2,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/fi
 import { auth, db } from "/static/js/firebase/firebaseApp.js";
 import { fetchMachines, fetchMachine, upsertMachine, deleteMachine, addUserWithRegistry, deleteUserRegistry } from "./firestoreRepo.js";
 import { upsertAccountDirectory, getAccountByEmail, normalizeEmail } from "./admin/accountDirectoryRepo.js";
-import { fetchInvitesForAdmin, getInviteForMachine, inviteDocId, upsertInvite, updateInviteStatus, updateInviteStatusById } from "./admin/adminInvitesRepo.js";
+import { fetchInvitesForAdmin, getInviteForMachine, inviteDocId, upsertInvite, updateInviteStatus } from "./admin/adminInvitesRepo.js";
 import { validateTag, assignTag } from "./tagRepo.js";
 import { createTagToken } from "/static/js/tokens/tagTokens.js";
 import { upsertMachineAccessFromMachine, fetchMachineAccess } from "./machineAccessRepo.js";
@@ -420,25 +420,9 @@ if (mount) {
     };
     patch.adminUid = state.uid;
     patch.adminEmail = normalizedInviteEmail;
-    const deterministicId = inviteDocId(invite.ownerUid, invite.machineId);
-    let deterministicUpdated = false;
-    try {
-      await updateInviteStatus(invite.ownerUid, invite.machineId, patch);
-      deterministicUpdated = true;
-    } catch {
-      deterministicUpdated = false;
-    }
-
-    if (invite.id && invite.id !== deterministicId) {
-      try {
-        await updateInviteStatusById(invite.id, patch);
-      } catch {
-        // ignore secondary invite update failures
-      }
-    }
+    await updateInviteStatus(invite.ownerUid, invite.machineId, patch);
 
     if (decision === "accepted") {
-      if (!deterministicUpdated) return;
       const ownerMachine = await fetchMachine(invite.ownerUid, invite.machineId);
       if (ownerMachine) {
         const label = invite.adminEmail || adminEmail || "";
@@ -1141,15 +1125,15 @@ if (mount) {
             resolvedAdminUid = "";
           }
 
-          await upsertInvite({
-            ownerUid: tenantId,
-            ownerEmail: ownerEmail || state.adminEmail || "",
-            machineId: id,
-            machineTitle: current.title || "",
-            adminUid: resolvedAdminUid,
-            adminEmail: nextEmail,
-            status: "pending"
-          });
+            await upsertInvite({
+              ownerUid: tenantId,
+              ownerEmail: ownerEmail || state.adminEmail || "",
+              machineId: id,
+              machineTitle: current.title || "",
+              adminUid: resolvedAdminUid,
+              adminEmail: nextEmail,
+              status: "pending"
+            });
 
           updateMachine(id, {
             adminEmail: nextEmail,
