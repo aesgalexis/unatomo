@@ -779,10 +779,10 @@ textarea.field {
 }
 
 #notif-menu{
-  position:absolute;
-  right:0;
-  top:calc(100% + 8px);
-  min-width:210px;
+    position:absolute;
+    right:0;
+    top:calc(100% + 8px);
+    min-width:315px;
   background:var(--bg);
   border:1px solid var(--border-subtle);
   border-radius:14px;
