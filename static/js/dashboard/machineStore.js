@@ -27,7 +27,12 @@ export const normalizeMachine = (raw, index = 0) => {
     users: Array.isArray(raw.users) ? raw.users : [],
     adminEmail: typeof raw.adminEmail === "string" ? raw.adminEmail : "",
     adminStatus: typeof raw.adminStatus === "string" ? raw.adminStatus : "",
-    tenantId: typeof raw.tenantId === "string" ? raw.tenantId : "",
+    tenantId:
+      typeof raw.tenantId === "string"
+        ? raw.tenantId
+        : typeof raw.ownerUid === "string"
+          ? raw.ownerUid
+          : "",
     role: typeof raw.role === "string" ? raw.role : "owner",
     ownerEmail: typeof raw.ownerEmail === "string" ? raw.ownerEmail : "",
     notifications:
