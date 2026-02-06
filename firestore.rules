@@ -104,9 +104,7 @@ service cloud.firestore {
         && request.resource.data.ownerUid == request.auth.uid
         && request.resource.data.machineId is string
         && request.resource.data.status == "pending"
-        && request.resource.data.adminEmail is string
-        && request.resource.data.adminEmailLower is string
-        && request.resource.data.adminEmailLower == lower(request.resource.data.adminEmail);
+        && request.resource.data.adminEmail is string;
 
       allow update: if isSignedIn()
         && (
