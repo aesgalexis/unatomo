@@ -1,6 +1,6 @@
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 import { auth, db } from "/static/js/firebase/firebaseApp.js";
-import { fetchMachines, fetchMachine, upsertMachine, deleteMachine, addUserWithRegistry, deleteUserRegistry } from "./firestoreRepo.js";
+import { fetchMachines, fetchLegacyMachines, migrateLegacyMachines, fetchMachine, upsertMachine, deleteMachine, addUserWithRegistry, deleteUserRegistry } from "./firestoreRepo.js";
 import { upsertAccountDirectory, getAccountByEmail, normalizeEmail } from "./admin/accountDirectoryRepo.js";
 import { fetchLinksForAdmin, getLinkForMachine, linkDocId, upsertLink, updateLinkStatus } from "./admin/adminLinksRepo.js";
 import { validateTag, assignTag } from "./tagRepo.js";
@@ -1104,9 +1104,13 @@ if (mount) {
           const current = getDraftById(id);
           if (!current) return;
           const ownerEmail = (current.ownerEmail || state.adminEmail || "").trim();
+          if (!isOwnerMachine(current)) {
+            notifyTopbar("Solo el propietario puede asignar administrador");
+            return;
+          }
           const nextEmail = normalizeEmail(email);
           const ownerNormalized = normalizeEmail(ownerEmail);
-          const tenantId = getMachineTenantId(current);
+          const tenantId = state.uid;
 
           if (!nextEmail) {
             updateMachine(id, { adminEmail: "", adminStatus: "" });
@@ -1437,16 +1441,23 @@ if (mount) {
       // ignore directory write errors
     }
 
-    const remote = await fetchMachines(uid);
-    const normalized = remote
-      .map((m, idx) => normalizeMachine(m, idx))
-      .filter(Boolean);
-    const ownerMachines = normalized.map((m) => ({
-      ...m,
-      tenantId: uid,
-      role: "owner",
-      ownerEmail: user.email || ""
-    }));
+      let remote = await fetchMachines(uid);
+      if (!remote.length) {
+        const legacy = await fetchLegacyMachines(uid);
+        if (legacy.length) {
+          await migrateLegacyMachines(uid, legacy);
+          remote = await fetchMachines(uid);
+        }
+      }
+      const normalized = remote
+        .map((m, idx) => normalizeMachine(m, idx))
+        .filter(Boolean);
+      const ownerMachines = normalized.map((m) => ({
+        ...m,
+        tenantId: uid,
+        role: "owner",
+        ownerEmail: user.email || ""
+      }));
       await ensureDeterministicInvites(ownerMachines);
       await syncAdminInviteUids(ownerMachines);
       await syncAdminInviteStatuses(ownerMachines);

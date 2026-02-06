@@ -10,11 +10,6 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    // linkDocId = ownerUid_machineId_adminEmailLower
-    function linkPath(ownerUid, machineId, adminEmailLower) {
-      return /databases/$(database)/documents/admin_machine_links/$(ownerUid + "_" + machineId + "_" + adminEmailLower);
-    }
-
     function isAcceptedAdminOfMachine(ownerUid, machineId) {
       return isSignedIn()
         && request.auth.token.email is string
@@ -52,6 +47,16 @@ service cloud.firestore {
         );
 
       allow delete: if false;
+    }
+
+    match /tenants/{tenantId} {
+      allow read: if isOwner(tenantId);
+      allow write: if false;
+
+      match /{document=**} {
+        allow read: if isOwner(tenantId);
+        allow write: if false;
+      }
     }
 
     match /account_directory/{emailLower} {
@@ -100,10 +105,8 @@ service cloud.firestore {
         && request.resource.data.machineId is string
         && request.resource.data.status == "pending"
         && request.resource.data.adminEmail is string
-        && (
-          !(request.resource.data.adminEmailLower is string)
-          || request.resource.data.adminEmailLower == lower(request.resource.data.adminEmail)
-        );
+        && request.resource.data.adminEmailLower is string
+        && request.resource.data.adminEmailLower == lower(request.resource.data.adminEmail);
 
       allow update: if isSignedIn()
         && (
@@ -135,18 +138,32 @@ service cloud.firestore {
       allow delete: if false;
     }
 
-    match /tenants/{tenantId} {
-      allow read, write: if isOwner(tenantId);
+    match /machines/{machineId} {
+      allow read: if isSignedIn()
+        && resource.data.ownerUid is string
+        && (resource.data.ownerUid == request.auth.uid
+          || isAcceptedAdminOfMachine(resource.data.ownerUid, machineId));
+      allow create: if isSignedIn()
+        && request.resource.data.ownerUid == request.auth.uid;
+      allow update: if isSignedIn()
+        && resource.data.ownerUid is string
+        && (resource.data.ownerUid == request.auth.uid
+          || isAcceptedAdminOfMachine(resource.data.ownerUid, machineId));
+      allow delete: if isSignedIn()
+        && resource.data.ownerUid == request.auth.uid;
+    }
 
-      match /machines/{machineId} {
-        allow read: if isOwner(tenantId) || isAcceptedAdminOfMachine(tenantId, machineId);
-        allow create, update: if isOwner(tenantId) || isAcceptedAdminOfMachine(tenantId, machineId);
-        allow delete: if isOwner(tenantId);
-      }
-
-      match /{document=**} {
-        allow read, write: if isOwner(tenantId);
-      }
+    match /usernames/{docId} {
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn()
+        && request.resource.data.ownerUid is string
+        && request.resource.data.machineId is string
+        && (request.resource.data.ownerUid == request.auth.uid
+          || isAcceptedAdminOfMachine(request.resource.data.ownerUid, request.resource.data.machineId));
+      allow delete: if isSignedIn()
+        && resource.data.ownerUid is string
+        && (resource.data.ownerUid == request.auth.uid
+          || isAcceptedAdminOfMachine(resource.data.ownerUid, resource.data.machineId));
     }
 
     match /machine_access/{tagId} {

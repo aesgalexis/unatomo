@@ -4,6 +4,8 @@ import {
   doc,
   getDocs,
   getDoc,
+  query,
+  where,
   runTransaction,
   serverTimestamp,
   writeBatch,
@@ -11,30 +13,63 @@ import {
   deleteDoc
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
-const machinesCollection = (uid) => collection(db, "tenants", uid, "machines");
-const usernamesDoc = (uid, normalized) => doc(db, "tenants", uid, "usernames", normalized);
+const machinesCollection = collection(db, "machines");
+const usernamesDoc = (ownerUid, normalized) =>
+  doc(db, "usernames", `${ownerUid}_${normalized}`);
 
 export const fetchMachines = async (uid) => {
-  const snap = await getDocs(machinesCollection(uid));
+  const q = query(machinesCollection, where("ownerUid", "==", uid));
+  const snap = await getDocs(q);
   return snap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
 };
 
+export const fetchLegacyMachines = async (uid) => {
+  if (!uid) return [];
+  const legacyCol = collection(db, "tenants", uid, "machines");
+  const snap = await getDocs(legacyCol);
+  return snap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
+};
+
+export const migrateLegacyMachines = async (uid, legacyMachines = []) => {
+  if (!uid || !legacyMachines.length) return;
+  const batch = writeBatch(db);
+  const now = serverTimestamp();
+  legacyMachines.forEach((machine) => {
+    const ref = doc(machinesCollection, machine.id);
+    batch.set(
+      ref,
+      {
+        ...machine,
+        ownerUid: uid,
+        tenantId: uid,
+        updatedAt: now,
+        updatedBy: uid
+      },
+      { merge: true }
+    );
+  });
+  await batch.commit();
+};
+
 export const fetchMachine = async (uid, machineId) => {
-  const ref = doc(db, "tenants", uid, "machines", machineId);
+  const ref = doc(db, "machines", machineId);
   const snap = await getDoc(ref);
   if (!snap.exists()) return null;
-  return { id: snap.id, ...snap.data() };
+  const data = snap.data();
+  if (uid && data.ownerUid && data.ownerUid !== uid) return null;
+  return { id: snap.id, ...data };
 };
 
 export const commitChanges = async (uid, { creates, updates, deletes }) => {
   const batch = writeBatch(db);
-  const col = machinesCollection(uid);
+  const col = machinesCollection;
   const now = serverTimestamp();
 
   creates.forEach((machine) => {
     const ref = doc(col, machine.id);
     batch.set(ref, {
       ...machine,
+      ownerUid: machine.tenantId || machine.ownerUid || uid,
       createdAt: now,
       updatedAt: now,
       updatedBy: uid
@@ -47,6 +82,7 @@ export const commitChanges = async (uid, { creates, updates, deletes }) => {
       ref,
       {
         ...machine,
+        ownerUid: machine.tenantId || machine.ownerUid || uid,
         updatedAt: now,
         updatedBy: uid
       },
@@ -63,8 +99,11 @@ export const commitChanges = async (uid, { creates, updates, deletes }) => {
 };
 
 export const upsertMachine = async (uid, machine) => {
-  const ref = doc(db, "tenants", uid, "machines", machine.id);
+  const ref = doc(db, "machines", machine.id);
+  const ownerUid = machine.tenantId || machine.ownerUid || uid;
   const payload = {
+    ownerUid,
+    tenantId: ownerUid,
     title: machine.title,
     brand: machine.brand,
     model: machine.model,
@@ -90,13 +129,13 @@ export const upsertMachine = async (uid, machine) => {
 };
 
 export const deleteMachine = async (uid, machineId) => {
-  const ref = doc(db, "tenants", uid, "machines", machineId);
+  const ref = doc(db, "machines", machineId);
   await deleteDoc(ref);
 };
 
 export const addUserWithRegistry = async (uid, machineId, user, options = {}) => {
   const { normalizeName, allowExisting = false } = options;
-  const machineRef = doc(db, "tenants", uid, "machines", machineId);
+  const machineRef = doc(db, "machines", machineId);
   const normalized = normalizeName
     ? normalizeName(user.username)
     : (user.username || "").trim().toLowerCase();
@@ -109,6 +148,9 @@ export const addUserWithRegistry = async (uid, machineId, user, options = {}) =>
     ]);
     if (!machineSnap.exists()) throw new Error("machine-missing");
     const machineData = machineSnap.data() || {};
+    if (machineData.ownerUid && machineData.ownerUid !== uid) {
+      throw new Error("not-owner");
+    }
     const users = Array.isArray(machineData.users) ? [...machineData.users] : [];
     const existsInMachine = users.some((u) => {
       const uname = normalizeName
@@ -135,6 +177,8 @@ export const addUserWithRegistry = async (uid, machineId, user, options = {}) =>
         username: user.username,
         saltBase64: user.saltBase64,
         passwordHashBase64: user.passwordHashBase64,
+        ownerUid: uid,
+        machineId,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
         updatedBy: uid
