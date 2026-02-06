@@ -82,8 +82,13 @@ service cloud.firestore {
         return isSignedIn()
           && resource != null
           && request.auth.token.email != null
-          && resource.data.adminEmailLower is string
-          && lower(request.auth.token.email) == resource.data.adminEmailLower;
+          && (
+            (resource.data.adminEmailLower is string
+              && lower(request.auth.token.email) == resource.data.adminEmailLower)
+            ||
+            (resource.data.adminEmail is string
+              && lower(request.auth.token.email) == lower(resource.data.adminEmail))
+          );
       }
 
       allow get: if (resource != null) && (ownerSide() || adminSide());
@@ -92,7 +97,12 @@ service cloud.firestore {
       allow create: if isSignedIn()
         && request.resource.data.ownerUid == request.auth.uid
         && request.resource.data.machineId is string
-        && request.resource.data.status == "pending";
+        && request.resource.data.status == "pending"
+        && request.resource.data.adminEmail is string
+        && (
+          !(request.resource.data.adminEmailLower is string)
+          || request.resource.data.adminEmailLower == lower(request.resource.data.adminEmail)
+        );
 
       allow update: if isSignedIn()
         && (
