@@ -3,6 +3,7 @@ import {
   collection,
   doc,
   getDocs,
+  getDoc,
   runTransaction,
   serverTimestamp,
   writeBatch,
@@ -16,6 +17,13 @@ const usernamesDoc = (uid, normalized) => doc(db, "tenants", uid, "usernames", n
 export const fetchMachines = async (uid) => {
   const snap = await getDocs(machinesCollection(uid));
   return snap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
+};
+
+export const fetchMachine = async (uid, machineId) => {
+  const ref = doc(db, "tenants", uid, "machines", machineId);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) return null;
+  return { id: snap.id, ...snap.data() };
 };
 
 export const commitChanges = async (uid, { creates, updates, deletes }) => {

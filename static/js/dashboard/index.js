@@ -1,6 +1,8 @@
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 import { auth, db } from "/static/js/firebase/firebaseApp.js";
-import { fetchMachines, upsertMachine, deleteMachine, addUserWithRegistry, deleteUserRegistry } from "./firestoreRepo.js";
+import { fetchMachines, fetchMachine, upsertMachine, deleteMachine, addUserWithRegistry, deleteUserRegistry } from "./firestoreRepo.js";
+import { upsertAccountDirectory, getAccountByEmail, normalizeEmail } from "./admin/accountDirectoryRepo.js";
+import { fetchInvitesForAdmin, getInviteForMachine, upsertInvite, updateInviteStatus } from "./admin/adminInvitesRepo.js";
 import { validateTag, assignTag } from "./tagRepo.js";
 import { createTagToken } from "/static/js/tokens/tagTokens.js";
 import { upsertMachineAccessFromMachine, fetchMachineAccess } from "./machineAccessRepo.js";
@@ -14,9 +16,11 @@ import { getTaskTiming, getOverdueDuration, getCompletionDuration } from "/stati
 import { filterMachines } from "./components/machineSearch/machineFilter.js";
 import { createMachineSearchBar } from "./components/machineSearch/machineSearchBar.js";
 import { setTopbarSaveStatus } from "/static/js/topbar/save-status.js";
+import { setTopbarNotifications } from "/static/js/notifications/topbar-notifications.js";
 import {
   doc,
-  onSnapshot
+  onSnapshot,
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
 const DEFAULT_COLLAPSED_HEIGHT = 108;
@@ -34,7 +38,8 @@ if (mount) {
     selectedTabById: {},
     configSubtabById: {},
     tagStatusById: {},
-    searchQuery: ""
+    searchQuery: "",
+    pendingInvites: []
   };
 
   const cardRefs = new Map();
@@ -166,7 +171,12 @@ if (mount) {
   const list = document.createElement("div");
   list.id = "machineList";
 
+  const inviteBanner = document.createElement("div");
+  inviteBanner.className = "admin-invite-banner";
+  inviteBanner.style.display = "none";
+
   mount.appendChild(addBar);
+  mount.appendChild(inviteBanner);
   mount.appendChild(filterInfo);
   mount.appendChild(list);
 
@@ -350,12 +360,99 @@ if (mount) {
     }
   };
 
+  const getMachineTenantId = (machine) => machine.tenantId || state.uid;
+  const isOwnerMachine = (machine) => (machine.role || "owner") === "owner";
+
+  const renderInviteBanner = () => {
+    const invites = Array.isArray(state.pendingInvites) ? state.pendingInvites : [];
+    if (!invites.length) {
+      inviteBanner.innerHTML = "";
+      inviteBanner.style.display = "none";
+      setTopbarNotifications([]);
+      return;
+    }
+    inviteBanner.innerHTML = "";
+    inviteBanner.style.display = "flex";
+    invites.forEach((invite) => {
+      const row = document.createElement("div");
+      row.className = "invite-row";
+      const text = document.createElement("div");
+      text.className = "invite-text";
+      const ownerLabel = invite.ownerEmail || "Un usuario";
+      text.textContent = `${ownerLabel} quiere que administres 1 Equipo/s`;
+      const actions = document.createElement("div");
+      actions.className = "invite-actions";
+      const acceptBtn = document.createElement("button");
+      acceptBtn.type = "button";
+      acceptBtn.className = "mc-location-accept";
+      acceptBtn.textContent = "Aceptar";
+      acceptBtn.addEventListener("click", () => handleInviteDecision(invite, "accepted"));
+      const rejectBtn = document.createElement("button");
+      rejectBtn.type = "button";
+      rejectBtn.className = "mc-location-cancel";
+      rejectBtn.textContent = "Rechazar";
+      rejectBtn.addEventListener("click", () => handleInviteDecision(invite, "rejected"));
+      actions.appendChild(acceptBtn);
+      actions.appendChild(rejectBtn);
+      row.appendChild(text);
+      row.appendChild(actions);
+      inviteBanner.appendChild(row);
+    });
+
+    setTopbarNotifications(
+      invites.map((invite) => ({
+        text: `${invite.ownerEmail || "Un usuario"} quiere que administres 1 Equipo/s`,
+        actions: [
+          { label: "Aceptar", className: "mc-location-accept", onClick: () => handleInviteDecision(invite, "accepted") },
+          { label: "Rechazar", className: "mc-location-cancel", onClick: () => handleInviteDecision(invite, "rejected") }
+        ]
+      }))
+    );
+  };
+
+  const handleInviteDecision = async (invite, decision) => {
+    if (!invite || !invite.ownerUid || !invite.machineId) return;
+    await updateInviteStatus(invite.ownerUid, invite.machineId, {
+      status: decision,
+      respondedAt: serverTimestamp()
+    });
+
+    if (decision === "accepted") {
+      const ownerMachine = await fetchMachine(invite.ownerUid, invite.machineId);
+      if (ownerMachine) {
+        await upsertMachine(invite.ownerUid, {
+          ...ownerMachine,
+          adminEmail: invite.adminEmail || "",
+          adminStatus: `Administrado por ${invite.adminEmail || ""}`
+        });
+        const normalized = normalizeMachine(ownerMachine, state.draftMachines.length);
+        normalized.tenantId = invite.ownerUid;
+        normalized.role = "admin";
+        state.draftMachines = [normalized, ...state.draftMachines];
+        renderCards({ preserveScroll: true });
+      }
+    } else if (decision === "rejected") {
+      const ownerMachine = await fetchMachine(invite.ownerUid, invite.machineId);
+      if (ownerMachine) {
+        await upsertMachine(invite.ownerUid, {
+          ...ownerMachine,
+          adminEmail: "",
+          adminStatus: `Invitación rechazada por ${invite.adminEmail || ""}`
+        });
+      }
+    }
+
+    state.pendingInvites = state.pendingInvites.filter((i) => i.id !== invite.id);
+    renderInviteBanner();
+  };
+
   const autoSave = initAutoSave({
     notify: updateSaveState,
     saveFn: async (machineId) => {
       if (!state.uid) throw new Error("no-auth");
       const machine = getDraftById(machineId);
       if (!machine) return;
+      const tenantId = machine.tenantId || state.uid;
       if (machine.tagId) {
         const res = await validateTag(machine.tagId);
         if (!res.exists) {
@@ -369,11 +466,11 @@ if (mount) {
           throw new Error("tag-assigned");
         }
       }
-      await upsertMachine(state.uid, machine);
+      await upsertMachine(tenantId, machine);
       machine.isNew = false;
       if (machine.tagId) {
-        await assignTag(machine.tagId, state.uid, machine.id);
-        await upsertMachineAccessFromMachine(state.uid, machine);
+        await assignTag(machine.tagId, tenantId, machine.id);
+        await upsertMachineAccessFromMachine(tenantId, machine, state.uid);
         state.tagStatusById[machine.id] = { text: "Tag enlazado", state: "ok" };
       }
       updateTagStatusUI(machine.id);
@@ -449,6 +546,7 @@ if (mount) {
           tagStatus: state.tagStatusById[machine.id],
           adminLabel: state.adminLabel,
           mode: "dashboard",
+          role: machine.role || "owner",
           disableDrag: query.length > 0,
           canEditTasks: true,
           canCompleteTasks: true,
@@ -631,7 +729,9 @@ if (mount) {
 
         hooks.onGenerateTag = async (id) => {
           if (!state.uid) throw new Error("no-auth");
-          const newId = await createTagToken(state.uid);
+          const current = getDraftById(id);
+          const tenantId = current ? current.tenantId || state.uid : state.uid;
+          const newId = await createTagToken(tenantId);
           notifyTopbar("Tag ID generado");
           return newId;
         };
@@ -679,6 +779,8 @@ if (mount) {
             return;
           }
           const current = getDraftById(id);
+          if (!current) return;
+          const tenantId = current.tenantId || state.uid;
           const users = Array.isArray(current.users) ? [...current.users] : [];
           if (users.some((u) => normalizeName(u.username) === normalizedUser)) {
             if (addBtn) {
@@ -727,16 +829,16 @@ if (mount) {
               passwordHashBase64
             };
             updateSaveState("Guardando...");
-            const updatedUsers = await addUserWithRegistry(state.uid, id, newUser, {
+            const updatedUsers = await addUserWithRegistry(tenantId, id, newUser, {
               normalizeName,
               allowExisting: usingExisting
             });
             updateMachine(id, { users: updatedUsers });
             if (current.tagId) {
-              await upsertMachineAccessFromMachine(state.uid, {
+              await upsertMachineAccessFromMachine(tenantId, {
                 ...current,
                 users: updatedUsers
-              });
+              }, state.uid);
             }
             updateSaveState(usingExisting ? "Usuario asignado" : "Usuario creado");
             userInput.value = "";
@@ -797,7 +899,8 @@ if (mount) {
           state.expandedById = Array.from(expandedById);
           renderCards({ preserveScroll: true });
           autoSave.saveNow(id, "remove-user");
-          if (state.uid && normalizedRemoved) {
+          const tenantId = current.tenantId || state.uid;
+          if (tenantId && normalizedRemoved) {
             const stillAssignedLocal = state.draftMachines
               .flatMap((m) => m.users || [])
               .some(
@@ -810,7 +913,7 @@ if (mount) {
             if (!stillAssignedLocal) {
               (async () => {
                 try {
-                  const remoteMachines = await fetchMachines(state.uid);
+                  const remoteMachines = await fetchMachines(tenantId);
                   const stillAssignedRemote = remoteMachines
                     .flatMap((m) => m.users || [])
                     .some(
@@ -821,7 +924,7 @@ if (mount) {
                           .toLowerCase() === normalizedRemoved
                     );
                   if (!stillAssignedRemote) {
-                    await deleteUserRegistry(state.uid, normalizedRemoved);
+                    await deleteUserRegistry(tenantId, normalizedRemoved);
                   }
                 } catch {
                   // ignore cleanup errors
@@ -834,6 +937,7 @@ if (mount) {
         hooks.onUpdateUserPassword = async (id, userId, nextPassword, input) => {
           const current = getDraftById(id);
           if (!current) return;
+          const tenantId = current.tenantId || state.uid;
           try {
             const saltBase64 = generateSaltBase64();
             const passwordHashBase64 = await hashPassword(nextPassword, saltBase64);
@@ -903,14 +1007,44 @@ if (mount) {
         };
 
         hooks.onRemoveMachine = (machineData) => {
+          if (!isOwnerMachine(machineData)) return;
           const title = (machineData && machineData.title) || "este equipo";
           const ok = window.confirm(`\u00bfSeguro que quieres eliminar ${title}?, Esta acci\u00f3n no se puede deshacer.`);
           if (!ok) return;
           removeMachineFromState(machineData.id);
           renderCards();
           autoSave.saveNow(machineData.id, "delete", async () => {
-            await deleteMachine(state.uid, machineData.id);
+            const tenantId = machineData.tenantId || state.uid;
+            await deleteMachine(tenantId, machineData.id);
           });
+        };
+
+        hooks.onLeaveAdmin = (machineData) => {
+          if (isOwnerMachine(machineData)) return;
+          const title = (machineData && machineData.title) || "este equipo";
+          const ok = window.confirm(
+            `\u00bfSeguro que quieres dejar de administrar ${title}?`
+          );
+          if (!ok) return;
+          removeMachineFromState(machineData.id);
+          renderCards();
+          const ownerUid = machineData.tenantId;
+          if (ownerUid) {
+            updateInviteStatus(ownerUid, machineData.id, {
+              status: "left",
+              respondedAt: serverTimestamp()
+            }).catch(() => {});
+            (async () => {
+              const ownerMachine = await fetchMachine(ownerUid, machineData.id);
+              if (ownerMachine) {
+                await upsertMachine(ownerUid, {
+                  ...ownerMachine,
+                  adminEmail: "",
+                  adminStatus: ""
+                });
+              }
+            })();
+          }
         };
 
         hooks.onAddIntervention = (machineData, message) => {
@@ -962,9 +1096,14 @@ if (mount) {
           autoSave.scheduleSave(id, "notifications");
         };
 
-        hooks.onUpdateAdmin = (id, email) => {
-          const ownerEmail = (state.adminEmail || "").trim().toLowerCase();
-          const nextEmail = (email || "").trim().toLowerCase();
+        hooks.onUpdateAdmin = async (id, email) => {
+          const current = getDraftById(id);
+          if (!current) return;
+          const ownerEmail = (current.ownerEmail || state.adminEmail || "").trim();
+          const nextEmail = normalizeEmail(email);
+          const ownerNormalized = normalizeEmail(ownerEmail);
+          const tenantId = getMachineTenantId(current);
+
           if (!nextEmail) {
             updateMachine(id, { adminEmail: "", adminStatus: "" });
             if (!state.selectedTabById) state.selectedTabById = {};
@@ -974,7 +1113,7 @@ if (mount) {
             autoSave.scheduleSave(id, "admin");
             return;
           }
-          if (ownerEmail && nextEmail === ownerEmail) {
+          if (ownerNormalized && nextEmail === ownerNormalized) {
             updateMachine(id, {
               adminEmail: "",
               adminStatus: "Introduce otra dirección de correo que no se la tuya"
@@ -984,7 +1123,33 @@ if (mount) {
             renderCards({ preserveScroll: true });
             return;
           }
-          updateMachine(id, { adminEmail: email, adminStatus: "Pendiente aceptación" });
+
+          const account = await getAccountByEmail(nextEmail);
+          if (!account || !account.uid) {
+            updateMachine(id, {
+              adminEmail: "",
+              adminStatus: "Ese usuario aún no existe o no ha iniciado sesión"
+            });
+            state.selectedTabById = { ...(state.selectedTabById || {}), [id]: "configuracion" };
+            state.expandedById = Array.from(expandedById);
+            renderCards({ preserveScroll: true });
+            return;
+          }
+
+          await upsertInvite({
+            ownerUid: tenantId,
+            ownerEmail: ownerEmail || state.adminEmail || "",
+            machineId: id,
+            machineTitle: current.title || "",
+            adminUid: account.uid,
+            adminEmail: account.email || nextEmail,
+            status: "pending"
+          });
+
+          updateMachine(id, {
+            adminEmail: account.email || nextEmail,
+            adminStatus: "Pendiente aceptación"
+          });
           if (!state.selectedTabById) state.selectedTabById = {};
           state.selectedTabById[id] = "configuracion";
           state.expandedById = Array.from(expandedById);
@@ -992,12 +1157,19 @@ if (mount) {
           autoSave.scheduleSave(id, "admin");
         };
 
-        hooks.onRemoveAdmin = (id) => {
+        hooks.onRemoveAdmin = async (id) => {
+          const current = getDraftById(id);
+          if (!current) return;
+          const tenantId = getMachineTenantId(current);
           updateMachine(id, { adminEmail: "", adminStatus: "" });
           if (!state.selectedTabById) state.selectedTabById = {};
           state.selectedTabById[id] = "configuracion";
           state.expandedById = Array.from(expandedById);
           renderCards({ preserveScroll: true });
+          await updateInviteStatus(tenantId, id, {
+            status: "left",
+            respondedAt: serverTimestamp()
+          });
           autoSave.scheduleSave(id, "admin");
         };
 
@@ -1119,28 +1291,73 @@ if (mount) {
     const order = computePrevOrder();
     const machine = createDraftMachine(state.draftMachines.length + 1, order);
     machine.title = getUniqueTitle();
+    machine.tenantId = state.uid;
+    machine.role = "owner";
+    machine.ownerEmail = state.adminEmail || "";
     state.draftMachines = [machine, ...state.draftMachines];
     saveOrderCache(state.draftMachines);
     renderCards();
     autoSave.saveNow(machine.id, "create");
   });
 
+  const fetchAdminMachines = async (uid) => {
+    const invites = await fetchInvitesForAdmin(uid, "accepted");
+    const machines = await Promise.all(
+      invites.map(async (invite) => {
+        if (!invite.ownerUid || !invite.machineId) return null;
+        const data = await fetchMachine(invite.ownerUid, invite.machineId);
+        if (!data) return null;
+        const normalized = normalizeMachine(data, state.draftMachines.length);
+        normalized.tenantId = invite.ownerUid;
+        normalized.role = "admin";
+        normalized.ownerEmail = invite.ownerEmail || "";
+        return normalized;
+      })
+    );
+    return machines.filter(Boolean);
+  };
+
   const initDashboard = async (uid, user) => {
     state.uid = uid;
     state.adminLabel = user.displayName || user.email || "Administrador";
     state.adminEmail = user.email || "";
+    try {
+      await upsertAccountDirectory(user);
+    } catch {
+      // ignore directory write errors
+    }
+
     const remote = await fetchMachines(uid);
     const normalized = remote
       .map((m, idx) => normalizeMachine(m, idx))
       .filter(Boolean);
+    const ownerMachines = normalized.map((m) => ({
+      ...m,
+      tenantId: uid,
+      role: "owner",
+      ownerEmail: user.email || ""
+    }));
+    let adminMachines = [];
+    try {
+      adminMachines = await fetchAdminMachines(uid);
+    } catch {
+      adminMachines = [];
+    }
+    const combined = [...ownerMachines, ...adminMachines];
     const orderCache = loadOrderCache();
-    const withOrder = normalized.map((m) =>
+    const withOrder = combined.map((m) =>
       Object.prototype.hasOwnProperty.call(orderCache, m.id)
         ? { ...m, order: orderCache[m.id] }
         : m
     );
     const merged = await mergeOperationalFromTag(withOrder);
     setRemote(merged);
+    try {
+      state.pendingInvites = await fetchInvitesForAdmin(uid, "pending");
+    } catch {
+      state.pendingInvites = [];
+    }
+    renderInviteBanner();
     renderCards();
     initDragAndDrop(list, handleReorder);
   };

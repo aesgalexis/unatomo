@@ -6,13 +6,14 @@ import {
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
-export const upsertMachineAccessFromMachine = async (uid, machine) => {
+export const upsertMachineAccessFromMachine = async (tenantId, machine, updatedBy) => {
   if (!machine.tagId) return;
   const ref = doc(db, "machine_access", machine.tagId);
+  const author = updatedBy || tenantId;
   await setDoc(
     ref,
     {
-      tenantId: uid,
+      tenantId,
       machineId: machine.id,
       title: machine.title,
       brand: machine.brand,
@@ -25,7 +26,7 @@ export const upsertMachineAccessFromMachine = async (uid, machine) => {
       tasks: machine.tasks || [],
       users: machine.users || [],
       updatedAt: serverTimestamp(),
-      updatedBy: uid
+      updatedBy: author
     },
     { merge: true }
   );

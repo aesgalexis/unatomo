@@ -142,6 +142,36 @@
   color: color-mix(in srgb, var(--fg) 70%, transparent);
 }
 
+.admin-invite-banner {
+  margin: 0 0 0.75rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.9rem;
+  background: var(--panel-bg);
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.invite-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.invite-text {
+  font-size: 0.9rem;
+  color: var(--fg);
+}
+
+.invite-actions {
+  display: inline-flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
 .machine-placeholder {
   border: 2px dashed color-mix(in srgb, var(--fg) 25%, transparent);
   border-radius: 1rem;
@@ -228,6 +258,31 @@
   display: flex;
   align-items: center;
   gap: 0.35rem;
+}
+
+.mc-location-select {
+  width: 32px;
+  min-width: 32px;
+  height: 32px;
+  padding: 0;
+  color: transparent;
+  text-indent: -9999px;
+  overflow: hidden;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 10c0 6-9 12-9 12S3 16 3 10a9 9 0 1 1 18 0z'/%3E%3Ccircle cx='12' cy='10' r='3'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 16px 16px;
+  transition: width 180ms ease, padding 180ms ease, color 120ms ease;
+}
+
+.mc-location:hover .mc-location-select,
+.mc-location:focus-within .mc-location-select {
+  width: 180px;
+  min-width: 180px;
+  padding: 0.2rem 0.4rem 0.2rem 1.7rem;
+  color: var(--fg);
+  text-indent: 0;
+  background-position: 0.5rem center;
 }
 
 .mc-location-accept,
@@ -423,8 +478,9 @@
 }
 
 .mc-year-select {
-  padding: 0.35rem 0.5rem;
+  padding: 0 0.5rem;
   height: 32px;
+  line-height: 30px;
 }
 
 .mc-field-error {
