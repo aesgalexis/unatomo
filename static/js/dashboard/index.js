@@ -1140,6 +1140,7 @@ if (mount) {
             resolvedAdminUid = "";
           }
 
+          try {
             await upsertLink({
               ownerUid: tenantId,
               ownerEmail: ownerEmail || state.adminEmail || "",
@@ -1149,6 +1150,10 @@ if (mount) {
               adminEmail: nextEmail,
               status: "pending"
             });
+          } catch {
+            notifyTopbar("No tienes permisos para asignar administrador");
+            return;
+          }
 
           updateMachine(id, {
             adminEmail: nextEmail,
