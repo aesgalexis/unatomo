@@ -67,6 +67,19 @@ export const updateInviteStatus = async (ownerUid, machineId, patch) => {
   );
 };
 
+export const updateInviteStatusById = async (inviteId, patch) => {
+  if (!inviteId) return;
+  const ref = doc(db, INVITES_COLLECTION, inviteId);
+  await setDoc(
+    ref,
+    {
+      ...patch,
+      updatedAt: serverTimestamp()
+    },
+    { merge: true }
+  );
+};
+
 export const fetchInvitesForAdmin = async (adminUid, status, email) => {
   const normalizedEmail = normalizeEmail(email);
   if (!adminUid && !normalizedEmail) return [];

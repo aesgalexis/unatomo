@@ -2,7 +2,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/fi
 import { auth, db } from "/static/js/firebase/firebaseApp.js";
 import { fetchMachines, fetchMachine, upsertMachine, deleteMachine, addUserWithRegistry, deleteUserRegistry } from "./firestoreRepo.js";
 import { upsertAccountDirectory, getAccountByEmail, normalizeEmail } from "./admin/accountDirectoryRepo.js";
-import { fetchInvitesForAdmin, getInviteForMachine, upsertInvite, updateInviteStatus } from "./admin/adminInvitesRepo.js";
+import { fetchInvitesForAdmin, getInviteForMachine, upsertInvite, updateInviteStatus, updateInviteStatusById } from "./admin/adminInvitesRepo.js";
 import { validateTag, assignTag } from "./tagRepo.js";
 import { createTagToken } from "/static/js/tokens/tagTokens.js";
 import { upsertMachineAccessFromMachine, fetchMachineAccess } from "./machineAccessRepo.js";
@@ -412,14 +412,26 @@ if (mount) {
 
   const handleInviteDecision = async (invite, decision) => {
     if (!invite || !invite.ownerUid || !invite.machineId) return;
-    const adminEmail = (state.adminEmail || "").trim().toLowerCase();
+    const adminEmail = normalizeEmail(state.adminEmail || "");
     const patch = {
       status: decision,
       respondedAt: serverTimestamp()
     };
     patch.adminUid = state.uid;
-    patch.adminEmail = invite.adminEmail || adminEmail || "";
-    await updateInviteStatus(invite.ownerUid, invite.machineId, patch);
+    patch.adminEmail = normalizeEmail(invite.adminEmail || adminEmail || "");
+    try {
+      if (invite.id) {
+        await updateInviteStatusById(invite.id, patch);
+      } else {
+        await updateInviteStatus(invite.ownerUid, invite.machineId, patch);
+      }
+    } catch (error) {
+      if (invite.ownerUid && invite.machineId) {
+        await updateInviteStatus(invite.ownerUid, invite.machineId, patch);
+      } else {
+        throw error;
+      }
+    }
 
     if (decision === "accepted") {
       const ownerMachine = await fetchMachine(invite.ownerUid, invite.machineId);
