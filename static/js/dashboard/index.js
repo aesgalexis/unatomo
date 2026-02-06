@@ -412,22 +412,30 @@ if (mount) {
 
   const handleInviteDecision = async (invite, decision) => {
     if (!invite || !invite.ownerUid || !invite.machineId) return;
-    await updateInviteStatus(invite.ownerUid, invite.machineId, {
+    const adminEmail = (state.adminEmail || "").trim().toLowerCase();
+    const patch = {
       status: decision,
       respondedAt: serverTimestamp()
-    });
+    };
+    if (decision === "accepted") {
+      patch.adminUid = state.uid;
+      patch.adminEmail = invite.adminEmail || adminEmail || "";
+    }
+    await updateInviteStatus(invite.ownerUid, invite.machineId, patch);
 
     if (decision === "accepted") {
       const ownerMachine = await fetchMachine(invite.ownerUid, invite.machineId);
       if (ownerMachine) {
+        const label = invite.adminEmail || adminEmail || "";
         await upsertMachine(invite.ownerUid, {
           ...ownerMachine,
-          adminEmail: invite.adminEmail || "",
-          adminStatus: `Administrado por ${invite.adminEmail || ""}`
+          adminEmail: label,
+          adminStatus: `Administrado por ${label}`
         });
         const normalized = normalizeMachine(ownerMachine, state.draftMachines.length);
         normalized.tenantId = invite.ownerUid;
         normalized.role = "admin";
+        normalized.ownerEmail = invite.ownerEmail || "";
         state.draftMachines = [normalized, ...state.draftMachines];
         renderCards({ preserveScroll: true });
       }
@@ -437,7 +445,7 @@ if (mount) {
         await upsertMachine(invite.ownerUid, {
           ...ownerMachine,
           adminEmail: "",
-          adminStatus: `Invitación rechazada por ${invite.adminEmail || ""}`
+          adminStatus: `Invitación rechazada por ${invite.adminEmail || adminEmail || ""}`
         });
       }
     }
@@ -1124,30 +1132,18 @@ if (mount) {
             return;
           }
 
-          const account = await getAccountByEmail(nextEmail);
-          if (!account || !account.uid) {
-            updateMachine(id, {
-              adminEmail: "",
-              adminStatus: "Ese usuario aún no existe o no ha iniciado sesión"
-            });
-            state.selectedTabById = { ...(state.selectedTabById || {}), [id]: "configuracion" };
-            state.expandedById = Array.from(expandedById);
-            renderCards({ preserveScroll: true });
-            return;
-          }
-
           await upsertInvite({
             ownerUid: tenantId,
             ownerEmail: ownerEmail || state.adminEmail || "",
             machineId: id,
             machineTitle: current.title || "",
-            adminUid: account.uid,
-            adminEmail: account.email || nextEmail,
+            adminUid: "",
+            adminEmail: nextEmail,
             status: "pending"
           });
 
           updateMachine(id, {
-            adminEmail: account.email || nextEmail,
+            adminEmail: nextEmail,
             adminStatus: "Pendiente aceptación"
           });
           if (!state.selectedTabById) state.selectedTabById = {};
@@ -1300,11 +1296,12 @@ if (mount) {
     autoSave.saveNow(machine.id, "create");
   });
 
-  const fetchAdminMachines = async (uid) => {
-    const invites = await fetchInvitesForAdmin(uid, "accepted");
+  const fetchAdminMachines = async (uid, email) => {
+    const invites = await fetchInvitesForAdmin(uid, "accepted", email || "");
     const machines = await Promise.all(
       invites.map(async (invite) => {
         if (!invite.ownerUid || !invite.machineId) return null;
+        if (invite.status !== "accepted") return null;
         const data = await fetchMachine(invite.ownerUid, invite.machineId);
         if (!data) return null;
         const normalized = normalizeMachine(data, state.draftMachines.length);
@@ -1339,7 +1336,7 @@ if (mount) {
     }));
     let adminMachines = [];
     try {
-      adminMachines = await fetchAdminMachines(uid);
+      adminMachines = await fetchAdminMachines(uid, user.email || "");
     } catch {
       adminMachines = [];
     }
@@ -1353,7 +1350,7 @@ if (mount) {
     const merged = await mergeOperationalFromTag(withOrder);
     setRemote(merged);
     try {
-      state.pendingInvites = await fetchInvitesForAdmin(uid, "pending");
+      state.pendingInvites = await fetchInvitesForAdmin(uid, "pending", user.email || "");
     } catch {
       state.pendingInvites = [];
     }

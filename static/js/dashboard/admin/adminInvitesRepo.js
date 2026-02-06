@@ -64,14 +64,26 @@ export const updateInviteStatus = async (ownerUid, machineId, patch) => {
   );
 };
 
-export const fetchInvitesForAdmin = async (adminUid, status) => {
-  if (!adminUid) return [];
-  const q = query(
-    collection(db, INVITES_COLLECTION),
-    where("adminUid", "==", adminUid)
-  );
+export const fetchInvitesForAdmin = async (adminUid, status, email) => {
+  if (!adminUid && !email) return [];
+  const collectionRef = collection(db, INVITES_COLLECTION);
+  let q = null;
+  if (adminUid) {
+    q = query(collectionRef, where("adminUid", "==", adminUid));
+  } else {
+    q = query(collectionRef, where("adminEmail", "==", email));
+  }
   const snap = await getDocs(q);
-  const list = snap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
+  let list = snap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
+  if (adminUid && email) {
+    const emailSnap = await getDocs(query(collectionRef, where("adminEmail", "==", email)));
+    const emailList = emailSnap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
+    const map = new Map();
+    [...list, ...emailList].forEach((invite) => {
+      if (invite && invite.id) map.set(invite.id, invite);
+    });
+    list = Array.from(map.values());
+  }
   if (!status) return list;
   return list.filter((invite) => invite.status === status);
 };
