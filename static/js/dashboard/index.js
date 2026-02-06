@@ -441,7 +441,14 @@ if (mount) {
     };
     patch.adminUid = state.uid;
     patch.adminEmail = normalizedInviteEmail;
-    await updateLinkStatus(invite.ownerUid, invite.machineId, invite.adminEmail || "", patch);
+    try {
+      await updateLinkStatus(invite.ownerUid, invite.machineId, invite.adminEmail || "", patch);
+    } catch {
+      notifyTopbar(
+        `Permisos: ownerUid=${invite.ownerUid} admin=${normalizeEmail(state.adminEmail || "")}`
+      );
+      throw new Error("admin-link-update-denied");
+    }
 
     if (decision === "accepted") {
       const ownerMachine = await fetchMachine(invite.ownerUid, invite.machineId);
@@ -1175,10 +1182,16 @@ if (mount) {
           state.selectedTabById[id] = "configuracion";
           state.expandedById = Array.from(expandedById);
           renderCards({ preserveScroll: true });
-          await updateLinkStatus(tenantId, id, current.adminEmail || "", {
-            status: "left",
-            respondedAt: serverTimestamp()
-          });
+          try {
+            const link = await getLinkForMachine(tenantId, id, current.adminEmail || "");
+            if (!link) return;
+            await updateLinkStatus(tenantId, id, current.adminEmail || "", {
+              status: "left",
+              respondedAt: serverTimestamp()
+            });
+          } catch {
+            // ignore link update failures
+          }
           autoSave.scheduleSave(id, "admin");
         };
 
