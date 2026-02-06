@@ -68,6 +68,7 @@ export const createMachineCard = (machine, options = {}) => {
     onTestNotification: null,
     onUpdateAdmin: null,
     onRemoveAdmin: null,
+    onLeaveAdmin: null,
     onSelectConfigSubtab: null,
     onContentResize: null
   };
@@ -265,6 +266,15 @@ export const createMachineCard = (machine, options = {}) => {
 
   hooks.renderTab = renderTab;
 
+  hooks.setActiveTab = (tabId, { notify = true } = {}) => {
+    const tab = card.querySelector(`.mc-tab[data-tab="${tabId}"]`);
+    if (!tab) return;
+    card.querySelectorAll(".mc-tab").forEach((t) => t.classList.remove("is-active"));
+    tab.classList.add("is-active");
+    renderTab(tabId);
+    if (notify && hooks.onSelectTab) hooks.onSelectTab(card, tabId);
+  };
+
   const clearActiveTabs = () => {
     card.querySelectorAll(".mc-tab").forEach((tab) => tab.classList.remove("is-active"));
     panel.dataset.panel = "";
@@ -404,15 +414,6 @@ export const createMachineCard = (machine, options = {}) => {
   card.addEventListener("focusout", () => {
     card.draggable = options.disableDrag ? false : true;
   });
-
-  hooks.setActiveTab = (tabId, { notify = true } = {}) => {
-    const tab = card.querySelector(`.mc-tab[data-tab="${tabId}"]`);
-    if (!tab) return;
-    card.querySelectorAll(".mc-tab").forEach((t) => t.classList.remove("is-active"));
-    tab.classList.add("is-active");
-    renderTab(tabId);
-    if (notify && hooks.onSelectTab) hooks.onSelectTab(card, tabId);
-  };
 
   card.querySelectorAll(".mc-tab").forEach((tab) => {
     tab.addEventListener("click", (event) => {

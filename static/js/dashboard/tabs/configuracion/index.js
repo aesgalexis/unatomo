@@ -4,6 +4,7 @@ import { render as renderNotificaciones } from "./notificaciones.js";
 
 export const render = (panel, machine, hooks, options = {}) => {
   panel.innerHTML = "";
+  const isAdminView = options.role === "admin";
 
   const tagPanel = document.createElement("div");
   tagPanel.className = "mc-config-panel";
@@ -129,12 +130,31 @@ export const render = (panel, machine, hooks, options = {}) => {
     const status = document.createElement("div");
     status.className = "mc-admin-status";
     const statusText = (currentStatus || "Pendiente aceptaci\u00f3n").toString();
-    const pendingNorm = statusText.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-    status.dataset.state = pendingNorm.startsWith("pendiente") ? "pending" : (currentStatus ? "error" : "pending");
+    const pendingNorm = statusText
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase();
+    status.dataset.state = pendingNorm.startsWith("pendiente")
+      ? "pending"
+      : (currentStatus ? "error" : "pending");
     status.textContent = statusText;
     adminRow.appendChild(status);
   } else {
     renderAdminButton();
+    if (currentStatus) {
+      const status = document.createElement("div");
+      status.className = "mc-admin-status";
+      const statusText = currentStatus.toString();
+      const pendingNorm = statusText
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase();
+      status.dataset.state = pendingNorm.startsWith("pendiente")
+        ? "pending"
+        : "error";
+      status.textContent = statusText;
+      adminRow.appendChild(status);
+    }
   }
 
   adminHeader.appendChild(adminTitle);
@@ -159,11 +179,17 @@ export const render = (panel, machine, hooks, options = {}) => {
   const removeLink = document.createElement("a");
   removeLink.className = "mc-log-download mc-danger-link";
   removeLink.href = "#";
-  removeLink.textContent = "Eliminar equipo";
+  removeLink.textContent = isAdminView
+    ? "Dejar de administrar"
+    : "Eliminar equipo";
   removeLink.addEventListener("click", (event) => {
     event.preventDefault();
     event.stopPropagation();
-    if (hooks.onRemoveMachine) hooks.onRemoveMachine(machine);
+    if (isAdminView) {
+      if (hooks.onLeaveAdmin) hooks.onLeaveAdmin(machine);
+    } else if (hooks.onRemoveMachine) {
+      hooks.onRemoveMachine(machine);
+    }
   });
   removeRow.appendChild(removeLink);
 

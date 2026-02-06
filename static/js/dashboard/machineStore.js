@@ -27,6 +27,9 @@ export const normalizeMachine = (raw, index = 0) => {
     users: Array.isArray(raw.users) ? raw.users : [],
     adminEmail: typeof raw.adminEmail === "string" ? raw.adminEmail : "",
     adminStatus: typeof raw.adminStatus === "string" ? raw.adminStatus : "",
+    tenantId: typeof raw.tenantId === "string" ? raw.tenantId : "",
+    role: typeof raw.role === "string" ? raw.role : "owner",
+    ownerEmail: typeof raw.ownerEmail === "string" ? raw.ownerEmail : "",
     notifications:
       typeof raw.notifications === "object" && raw.notifications
         ? raw.notifications
@@ -61,6 +64,9 @@ export const createDraftMachine = (count, order) => {
     users: [],
     adminEmail: "",
     adminStatus: "",
+    tenantId: "",
+    role: "owner",
+    ownerEmail: "",
     notifications: {
       enabled: false,
       email: "",

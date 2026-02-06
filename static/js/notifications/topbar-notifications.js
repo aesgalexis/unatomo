@@ -1,3 +1,7 @@
+let menuEl = null;
+let labelEl = null;
+let listEl = null;
+
 export function initTopbarNotifications() {
   const wrap = document.getElementById("notif-menu-wrap");
   if (!wrap) return;
@@ -6,6 +10,20 @@ export function initTopbarNotifications() {
   const menu = wrap.querySelector("#notif-menu");
   if (!btn || !menu) return;
   const menuId = "notif";
+
+  menuEl = menu;
+  labelEl = menu.querySelector("#notif-menu-label");
+  if (!labelEl) {
+    labelEl = document.createElement("div");
+    labelEl.id = "notif-menu-label";
+    menu.appendChild(labelEl);
+  }
+  listEl = menu.querySelector("#notif-menu-list");
+  if (!listEl) {
+    listEl = document.createElement("div");
+    listEl.id = "notif-menu-list";
+    menu.appendChild(listEl);
+  }
 
   const closeMenu = () => {
     menu.hidden = true;
@@ -40,5 +58,43 @@ export function initTopbarNotifications() {
 
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") closeMenu();
+  });
+}
+
+export function setTopbarNotifications(items = []) {
+  if (!menuEl || !labelEl || !listEl) return;
+  const hasItems = Array.isArray(items) && items.length > 0;
+  labelEl.textContent = hasItems
+    ? "Notificaciones"
+    : "No hay notificaciones pendientes";
+  listEl.innerHTML = "";
+  if (!hasItems) return;
+  items.forEach((item) => {
+    const row = document.createElement("div");
+    row.className = "notif-item";
+
+    const text = document.createElement("div");
+    text.className = "notif-text";
+    text.textContent = item.text || "";
+
+    const actions = document.createElement("div");
+    actions.className = "notif-actions";
+
+    (item.actions || []).forEach((action) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = action.className || "btn-secondary";
+      btn.textContent = action.label || "Accion";
+      btn.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (typeof action.onClick === "function") action.onClick();
+      });
+      actions.appendChild(btn);
+    });
+
+    row.appendChild(text);
+    row.appendChild(actions);
+    listEl.appendChild(row);
   });
 }
