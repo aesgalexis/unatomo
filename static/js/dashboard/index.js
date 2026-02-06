@@ -1132,12 +1132,20 @@ if (mount) {
             return;
           }
 
+          let resolvedAdminUid = "";
+          try {
+            const account = await getAccountByEmail(nextEmail);
+            if (account && account.uid) resolvedAdminUid = account.uid;
+          } catch {
+            resolvedAdminUid = "";
+          }
+
           await upsertInvite({
             ownerUid: tenantId,
             ownerEmail: ownerEmail || state.adminEmail || "",
             machineId: id,
             machineTitle: current.title || "",
-            adminUid: "",
+            adminUid: resolvedAdminUid,
             adminEmail: nextEmail,
             status: "pending"
           });
@@ -1336,7 +1344,7 @@ if (mount) {
     }));
     let adminMachines = [];
     try {
-      adminMachines = await fetchAdminMachines(uid, user.email || "");
+      adminMachines = await fetchAdminMachines(uid, normalizeEmail(user.email || ""));
     } catch {
       adminMachines = [];
     }
@@ -1350,7 +1358,11 @@ if (mount) {
     const merged = await mergeOperationalFromTag(withOrder);
     setRemote(merged);
     try {
-      state.pendingInvites = await fetchInvitesForAdmin(uid, "pending", user.email || "");
+      state.pendingInvites = await fetchInvitesForAdmin(
+        uid,
+        "pending",
+        normalizeEmail(user.email || "")
+      );
     } catch {
       state.pendingInvites = [];
     }
