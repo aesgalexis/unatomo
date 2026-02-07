@@ -65,8 +65,8 @@ service cloud.firestore {
 
       allow create, update: if isSignedIn()
         && request.resource.data.uid == request.auth.uid
-        && request.resource.data.email is string
-        && request.resource.data.email.toLowerCase() == emailLower;
+        && request.resource.data.emailLower is string
+        && request.resource.data.emailLower == emailLower;
 
       allow delete: if false;
     }
@@ -84,10 +84,10 @@ service cloud.firestore {
           && request.auth.token.email != null
           && (
             (resource.data.adminEmailLower is string
-              && request.auth.token.email.toLowerCase() == resource.data.adminEmailLower)
+              && request.auth.token.email == resource.data.adminEmailLower)
             ||
             (resource.data.adminEmail is string
-              && request.auth.token.email.toLowerCase() == resource.data.adminEmail.toLowerCase())
+              && request.auth.token.email == resource.data.adminEmail)
           );
       }
 
@@ -110,7 +110,7 @@ service cloud.firestore {
       }
 
       allow get: if (resource != null) && (ownerSide() || adminSide());
-      allow list: if false;
+      allow list: if isSignedIn();
       allow write: if false;
     }
 
