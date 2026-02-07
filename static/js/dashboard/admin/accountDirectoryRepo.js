@@ -21,6 +21,7 @@ export const upsertAccountDirectory = async (user) => {
     {
       uid: user.uid,
       email: user.email,
+      emailLower: normalized,
       updatedAt: serverTimestamp()
     },
     { merge: true }
@@ -36,4 +37,3 @@ export const getAccountByEmail = async (email) => {
   if (!snap.exists()) return null;
   return { id: snap.id, ...snap.data() };
 };
-
