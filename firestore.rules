@@ -12,10 +12,10 @@ service cloud.firestore {
 
     function isAcceptedAdminOfMachine(ownerUid, machineId) {
       return isSignedIn()
-        && request.auth.token.email is string
-        && exists(/databases/$(database)/documents/admin_machine_links/$(ownerUid + "_" + machineId + "_" + lower(request.auth.token.email)))
-        && get(/databases/$(database)/documents/admin_machine_links/$(ownerUid + "_" + machineId + "_" + lower(request.auth.token.email))).data.adminUid == request.auth.uid
-        && get(/databases/$(database)/documents/admin_machine_links/$(ownerUid + "_" + machineId + "_" + lower(request.auth.token.email))).data.status == "accepted";
+        && exists(/databases/$(database)/documents/admin_machine_links/$(machineId + "_" + request.auth.uid))
+        && get(/databases/$(database)/documents/admin_machine_links/$(machineId + "_" + request.auth.uid)).data.adminUid == request.auth.uid
+        && get(/databases/$(database)/documents/admin_machine_links/$(machineId + "_" + request.auth.uid)).data.ownerUid == ownerUid
+        && get(/databases/$(database)/documents/admin_machine_links/$(machineId + "_" + request.auth.uid)).data.status == "accepted";
     }
 
     match /registration_codes/{code} {
@@ -66,9 +66,34 @@ service cloud.firestore {
       allow create, update: if isSignedIn()
         && request.resource.data.uid == request.auth.uid
         && request.resource.data.email is string
-        && lower(request.resource.data.email) == emailLower;
+        && request.resource.data.email.toLowerCase() == emailLower;
 
       allow delete: if false;
+    }
+
+    match /admin_machine_invites/{inviteId} {
+      function ownerInviteSide() {
+        return isSignedIn()
+          && resource != null
+          && resource.data.ownerUid == request.auth.uid;
+      }
+
+      function adminInviteSide() {
+        return isSignedIn()
+          && resource != null
+          && request.auth.token.email != null
+          && (
+            (resource.data.adminEmailLower is string
+              && request.auth.token.email.toLowerCase() == resource.data.adminEmailLower)
+            ||
+            (resource.data.adminEmail is string
+              && request.auth.token.email.toLowerCase() == resource.data.adminEmail.toLowerCase())
+          );
+      }
+
+      allow get: if (resource != null) && (ownerInviteSide() || adminInviteSide());
+      allow list: if isSignedIn();
+      allow write: if false;
     }
 
     match /admin_machine_links/{linkId} {
@@ -84,56 +109,9 @@ service cloud.firestore {
           && resource.data.adminUid == request.auth.uid;
       }
 
-      function adminEmailSide() {
-        return isSignedIn()
-          && resource != null
-          && request.auth.token.email != null
-          && (
-            (resource.data.adminEmailLower is string
-              && lower(request.auth.token.email) == resource.data.adminEmailLower)
-            ||
-            (resource.data.adminEmail is string
-              && lower(request.auth.token.email) == lower(resource.data.adminEmail))
-          );
-      }
-
-      allow get: if (resource != null) && (ownerSide() || adminSide() || adminEmailSide());
-      allow list: if isSignedIn();
-
-      allow create: if isSignedIn()
-        && request.resource.data.ownerUid == request.auth.uid
-        && request.resource.data.machineId is string
-        && request.resource.data.status == "pending"
-        && request.resource.data.adminEmail is string;
-
-      allow update: if isSignedIn()
-        && (
-          // Admin responde: pending -> accepted/rejected
-          (
-            resource.data.status == "pending"
-            && request.resource.data.status in ["accepted", "rejected"]
-            && (
-              resource.data.adminUid == request.auth.uid
-              ||
-              (
-                (resource.data.adminUid == null || resource.data.adminUid == "")
-                && adminEmailSide()
-                && request.resource.data.adminUid == request.auth.uid
-              )
-            )
-          )
-          ||
-          // Admin deja de administrar: accepted -> left
-          (resource.data.adminUid == request.auth.uid
-            && resource.data.status == "accepted"
-            && request.resource.data.status == "left"
-          )
-          ||
-          // Owner puede actualizar el doc (p.ej. reflejar estado/limpiar)
-          (resource.data.ownerUid == request.auth.uid)
-        );
-
-      allow delete: if false;
+      allow get: if (resource != null) && (ownerSide() || adminSide());
+      allow list: if false;
+      allow write: if false;
     }
 
     match /machines/{machineId} {

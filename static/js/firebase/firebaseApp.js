@@ -1,3 +1,6 @@
-import { auth, db } from "/static/js/registro/firebase-init.js";
+import { auth, db, app } from "/static/js/registro/firebase-init.js";
+import { getFunctions } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-functions.js";
 
-export { auth, db };
+const functions = getFunctions(app);
+
+export { auth, db, functions };
