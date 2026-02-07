@@ -95,7 +95,7 @@
 
 
 :root {
-  --mc-collapsed-height: 58px;
+  --mc-collapsed-height: 56px;
 }
 
 .btn-add {
@@ -215,6 +215,10 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.9rem 1.25rem;
+}
+
+.machine-card[data-expanded="false"] .mc-header {
+  justify-content: center;
 }
 
 .mc-title {
