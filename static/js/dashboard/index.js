@@ -3,6 +3,7 @@ import { auth, db } from "/static/js/firebase/firebaseApp.js";
 import { fetchMachines, fetchLegacyMachines, migrateLegacyMachines, fetchMachine, upsertMachine, deleteMachine, addUserWithRegistry, deleteUserRegistry } from "./firestoreRepo.js";
 import { upsertAccountDirectory, normalizeEmail } from "./admin/accountDirectoryRepo.js";
 import { fetchInvitesForAdmin } from "./admin/adminInvitesRepo.js";
+import { fetchLinksForAdmin } from "./admin/adminLinksRepo.js";
 import { createAdminInvite, respondAdminInvite, leaveAdminRole, revokeAdminInvite, ensureAdminLink } from "./admin/adminFunctionsRepo.js";
 import { validateTag, assignTag } from "./tagRepo.js";
 import { createTagToken } from "/static/js/tokens/tagTokens.js";
@@ -374,6 +375,7 @@ if (mount) {
     const nextIds = new Set();
     (links || []).forEach((link) => {
       if (!link || !link.machineId || !link.ownerUid) return;
+      if (link.status && link.status !== "accepted") return;
       nextIds.add(link.machineId);
       if (state.adminMachineUnsubs.has(link.machineId)) return;
       const ref = doc(db, "machines", link.machineId);
@@ -406,13 +408,13 @@ if (mount) {
     if (state.adminLinksUnsub) state.adminLinksUnsub();
     const q = query(
       collection(db, "admin_machine_links"),
-      where("adminUid", "==", uid),
-      where("status", "==", "accepted")
+      where("adminUid", "==", uid)
     );
     state.adminLinksUnsub = onSnapshot(q, (snap) => {
       const links = snap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
       state.adminLinks = links;
-      syncAdminMachineListeners(links);
+      const activeLinks = links.filter((link) => link.status !== "left" && link.status !== "rejected");
+      syncAdminMachineListeners(activeLinks);
       scheduleRebuild({ preserveScroll: true });
     });
   };
@@ -1401,17 +1403,17 @@ if (mount) {
   });
 
   const fetchAdminMachines = async (uid, email) => {
-    const invites = await fetchInvitesForAdmin(email || "", "accepted");
+    const links = await fetchLinksForAdmin(uid, "accepted");
     const machines = await Promise.all(
-      invites.map(async (invite) => {
-        if (!invite.ownerUid || !invite.machineId) return null;
-        if (invite.status !== "accepted") return null;
-        const data = await fetchMachine(invite.ownerUid, invite.machineId);
+      links.map(async (link) => {
+        if (!link.ownerUid || !link.machineId) return null;
+        if (link.status !== "accepted") return null;
+        const data = await fetchMachine(link.ownerUid, link.machineId);
         if (!data) return null;
         const normalized = normalizeMachine(data, state.draftMachines.length);
-        normalized.tenantId = invite.ownerUid;
+        normalized.tenantId = link.ownerUid;
         normalized.role = "admin";
-        normalized.ownerEmail = invite.ownerEmail || "";
+        normalized.ownerEmail = link.ownerEmail || "";
         return normalized;
       })
     );
