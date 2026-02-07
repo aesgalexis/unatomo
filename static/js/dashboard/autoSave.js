@@ -1,8 +1,9 @@
-export const initAutoSave = ({ saveFn, notify, debounceMs = 750 }) => {
+export const initAutoSave = ({ saveFn, notify, debounceMs = 750, onSaveStart }) => {
   const timers = new Map();
 
   const runSave = async (machineId, reason, customFn) => {
     if (!machineId) return;
+    if (onSaveStart) onSaveStart(machineId, reason);
     if (notify) notify("Guardando...");
     try {
       if (customFn) {

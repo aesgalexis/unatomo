@@ -330,6 +330,17 @@ if (mount) {
   const getDraftIndex = (id) => state.draftMachines.findIndex((m) => m.id === id);
   const getDraftById = (id) => state.draftMachines.find((m) => m.id === id);
 
+  const localWriteAt = new Map();
+  const markLocalWrite = (machineId) => {
+    if (!machineId) return;
+    localWriteAt.set(machineId, Date.now());
+  };
+  const isRecentLocalWrite = (machineId, windowMs = 1500) => {
+    if (!machineId) return false;
+    const ts = localWriteAt.get(machineId);
+    return typeof ts === "number" && Date.now() - ts < windowMs;
+  };
+
   const rebuildCombined = async ({ preserveScroll = true } = {}) => {
     const token = ++rebuildToken;
     const combined = [...(state.ownerMachines || []), ...(state.adminMachines || [])];
@@ -357,7 +368,12 @@ if (mount) {
   const subscribeOwnerMachines = (uid) => {
     if (state.ownerUnsub) state.ownerUnsub();
     const q = query(collection(db, "machines"), where("ownerUid", "==", uid));
-    state.ownerUnsub = onSnapshot(q, (snap) => {
+    state.ownerUnsub = onSnapshot(q, { includeMetadataChanges: true }, (snap) => {
+      if (snap.metadata.hasPendingWrites) return;
+      const changedIds = snap.docChanges().map((change) => change.doc.id);
+      if (changedIds.length && changedIds.every((id) => isRecentLocalWrite(id))) {
+        return;
+      }
       const list = snap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
       const normalized = list
         .map((m, idx) => normalizeMachine(m, idx))
@@ -381,7 +397,9 @@ if (mount) {
       nextIds.add(link.machineId);
       if (state.adminMachineUnsubs.has(link.machineId)) return;
       const ref = doc(db, "machines", link.machineId);
-      const unsub = onSnapshot(ref, (snap) => {
+      const unsub = onSnapshot(ref, { includeMetadataChanges: true }, (snap) => {
+        if (snap.metadata.hasPendingWrites) return;
+        if (isRecentLocalWrite(link.machineId)) return;
         if (!snap.exists()) return;
         const data = snap.data() || {};
         if (data.ownerUid && data.ownerUid !== link.ownerUid) return;
@@ -592,7 +610,8 @@ if (mount) {
         state.tagStatusById[machine.id] = { text: "Tag enlazado", state: "ok" };
       }
       updateTagStatusUI(machine.id);
-    }
+    },
+    onSaveStart: (machineId) => markLocalWrite(machineId)
   });
 
   const heightRAF = new Map();
