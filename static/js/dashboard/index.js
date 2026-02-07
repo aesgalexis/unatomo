@@ -3,7 +3,7 @@ import { auth, db } from "/static/js/firebase/firebaseApp.js";
 import { fetchMachines, fetchLegacyMachines, migrateLegacyMachines, fetchMachine, upsertMachine, deleteMachine, addUserWithRegistry, deleteUserRegistry } from "./firestoreRepo.js";
 import { upsertAccountDirectory, normalizeEmail } from "./admin/accountDirectoryRepo.js";
 import { fetchInvitesForAdmin } from "./admin/adminInvitesRepo.js";
-import { createAdminInvite, respondAdminInvite, leaveAdminRole, revokeAdminInvite } from "./admin/adminFunctionsRepo.js";
+import { createAdminInvite, respondAdminInvite, leaveAdminRole, revokeAdminInvite, ensureAdminLink } from "./admin/adminFunctionsRepo.js";
 import { validateTag, assignTag } from "./tagRepo.js";
 import { createTagToken } from "/static/js/tokens/tagTokens.js";
 import { upsertMachineAccessFromMachine, fetchMachineAccess } from "./machineAccessRepo.js";
@@ -1440,9 +1440,18 @@ if (mount) {
       // ignore migration failures
     }
 
+    const emailLower = normalizeEmail(user.email || "");
     subscribeOwnerMachines(uid);
     subscribeAdminLinks(uid);
-    subscribePendingInvites(normalizeEmail(user.email || ""));
+    subscribePendingInvites(emailLower);
+    try {
+      const acceptedInvites = await fetchInvitesForAdmin(emailLower, "accepted");
+      await Promise.all(
+        acceptedInvites.map((invite) => ensureAdminLink(invite.id))
+      );
+    } catch {
+      // ignore invite ensure failures
+    }
     renderCards();
     initDragAndDrop(list, handleReorder);
   };

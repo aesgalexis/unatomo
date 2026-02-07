@@ -282,3 +282,50 @@ export const revokeAdminInvite = onCall(async (request) => {
 
   return {ok: true};
 });
+
+export const ensureAdminLink = onCall(async (request) => {
+  const auth = request.auth;
+  if (!auth) throw new HttpsError("unauthenticated", "auth-required");
+  const inviteId = (request.data?.inviteId || "").toString().trim();
+  if (!inviteId) throw new HttpsError("invalid-argument", "inviteId-required");
+
+  const emailLower = normalizeEmail(auth.token.email || "");
+  const inviteRef = invitesCol().doc(inviteId);
+  const inviteSnap = await inviteRef.get();
+  if (!inviteSnap.exists) {
+    throw new HttpsError("not-found", "invite-not-found");
+  }
+  const invite = inviteSnap.data() || {};
+  if (
+    !invite.adminEmailLower ||
+    normalizeEmail(invite.adminEmailLower) !== emailLower
+  ) {
+    throw new HttpsError("permission-denied", "not-invitee");
+  }
+  if (invite.status !== "accepted") {
+    return {ok: true, created: false};
+  }
+  const linkId = `${invite.machineId}_${auth.uid}`;
+  const linkRef = linksCol().doc(linkId);
+  const linkSnap = await linkRef.get();
+  if (linkSnap.exists) {
+    return {ok: true, created: false};
+  }
+  const now = admin.firestore.FieldValue.serverTimestamp();
+  await linkRef.set(
+    {
+      ownerUid: invite.ownerUid,
+      ownerEmail: invite.ownerEmail || "",
+      machineId: invite.machineId,
+      machineTitle: invite.machineTitle || "",
+      adminUid: auth.uid,
+      adminEmail: invite.adminEmail || "",
+      adminEmailLower: invite.adminEmailLower,
+      status: "accepted",
+      createdAt: now,
+      updatedAt: now,
+    },
+    {merge: true},
+  );
+  return {ok: true, created: true};
+});
