@@ -20,7 +20,10 @@ import { setTopbarSaveStatus } from "/static/js/topbar/save-status.js";
 import { setTopbarNotifications } from "/static/js/notifications/topbar-notifications.js";
 import {
   doc,
+  collection,
   onSnapshot,
+  query,
+  where,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
@@ -33,14 +36,21 @@ if (mount) {
   const state = {
     uid: null,
     adminLabel: "",
+    adminEmail: "",
     remoteMachines: [],
+    ownerMachines: [],
+    adminMachines: [],
     draftMachines: [],
     expandedById: [],
     selectedTabById: {},
     configSubtabById: {},
     tagStatusById: {},
     searchQuery: "",
-    pendingInvites: []
+    pendingInvites: [],
+    ownerUnsub: null,
+    adminLinksUnsub: null,
+    adminMachineUnsubs: new Map(),
+    inviteUnsub: null
   };
 
   const cardRefs = new Map();
@@ -69,6 +79,8 @@ if (mount) {
   const tagUnsubs = new Map();
   const tagIdByMachineId = new Map();
   const machineIdByTagId = new Map();
+  let rebuildToken = 0;
+  let pendingRebuild = null;
 
   const statusLabels = {
     operativa: "Operativo",
@@ -315,6 +327,116 @@ if (mount) {
 
   const getDraftIndex = (id) => state.draftMachines.findIndex((m) => m.id === id);
   const getDraftById = (id) => state.draftMachines.find((m) => m.id === id);
+
+  const rebuildCombined = async ({ preserveScroll = true } = {}) => {
+    const token = ++rebuildToken;
+    const combined = [...(state.ownerMachines || []), ...(state.adminMachines || [])];
+    const orderCache = loadOrderCache();
+    const withOrder = combined.map((m) =>
+      Object.prototype.hasOwnProperty.call(orderCache, m.id)
+        ? { ...m, order: orderCache[m.id] }
+        : m
+    );
+    const merged = await mergeOperationalFromTag(withOrder);
+    if (token !== rebuildToken) return;
+    setRemote(merged);
+    renderCards({ preserveScroll });
+  };
+
+  const scheduleRebuild = (options = {}) => {
+    if (pendingRebuild) return;
+    pendingRebuild = requestAnimationFrame(async () => {
+      pendingRebuild = null;
+      await rebuildCombined(options);
+    });
+  };
+
+  const subscribeOwnerMachines = (uid) => {
+    if (state.ownerUnsub) state.ownerUnsub();
+    const q = query(collection(db, "machines"), where("ownerUid", "==", uid));
+    state.ownerUnsub = onSnapshot(q, (snap) => {
+      const list = snap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
+      const normalized = list
+        .map((m, idx) => normalizeMachine(m, idx))
+        .filter(Boolean)
+        .map((m) => ({
+          ...m,
+          tenantId: uid,
+          role: "owner",
+          ownerEmail: state.adminEmail || ""
+        }));
+      state.ownerMachines = normalized;
+      scheduleRebuild({ preserveScroll: true });
+    });
+  };
+
+  const syncAdminMachineListeners = (links) => {
+    const nextIds = new Set();
+    (links || []).forEach((link) => {
+      if (!link || !link.machineId || !link.ownerUid) return;
+      nextIds.add(link.machineId);
+      if (state.adminMachineUnsubs.has(link.machineId)) return;
+      const ref = doc(db, "machines", link.machineId);
+      const unsub = onSnapshot(ref, (snap) => {
+        if (!snap.exists()) return;
+        const data = snap.data() || {};
+        if (data.ownerUid && data.ownerUid !== link.ownerUid) return;
+        const normalized = normalizeMachine({ id: snap.id, ...data }, state.draftMachines.length);
+        normalized.tenantId = link.ownerUid;
+        normalized.role = "admin";
+        normalized.ownerEmail = link.ownerEmail || "";
+        state.adminMachines = (state.adminMachines || []).filter((m) => m.id !== link.machineId);
+        state.adminMachines = [normalized, ...state.adminMachines];
+        scheduleRebuild({ preserveScroll: true });
+      });
+      state.adminMachineUnsubs.set(link.machineId, unsub);
+    });
+
+    Array.from(state.adminMachineUnsubs.keys()).forEach((id) => {
+      if (!nextIds.has(id)) {
+        const unsub = state.adminMachineUnsubs.get(id);
+        if (unsub) unsub();
+        state.adminMachineUnsubs.delete(id);
+        state.adminMachines = (state.adminMachines || []).filter((m) => m.id !== id);
+      }
+    });
+  };
+
+  const subscribeAdminLinks = (uid) => {
+    if (state.adminLinksUnsub) state.adminLinksUnsub();
+    const q = query(
+      collection(db, "admin_machine_links"),
+      where("adminUid", "==", uid),
+      where("status", "==", "accepted")
+    );
+    state.adminLinksUnsub = onSnapshot(q, (snap) => {
+      const links = snap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
+      state.adminLinks = links;
+      syncAdminMachineListeners(links);
+      scheduleRebuild({ preserveScroll: true });
+    });
+  };
+
+  const subscribePendingInvites = (emailLower) => {
+    if (state.inviteUnsub) state.inviteUnsub();
+    if (!emailLower) {
+      state.pendingInvites = [];
+      renderInviteBanner();
+      return;
+    }
+    const q = query(
+      collection(db, "admin_machine_invites"),
+      where("adminEmailLower", "==", emailLower),
+      where("status", "==", "pending")
+    );
+    state.inviteUnsub = onSnapshot(q, (snap) => {
+      state.pendingInvites = snap.docs.map((docSnap) => ({
+        id: docSnap.id,
+        ...docSnap.data()
+      }));
+      renderInviteBanner();
+    });
+  };
 
   const updateMachine = (id, patch) => {
     const idx = getDraftIndex(id);
@@ -1007,7 +1129,20 @@ if (mount) {
           renderCards();
           autoSave.saveNow(machineData.id, "delete", async () => {
             const tenantId = machineData.tenantId || state.uid;
-            await deleteMachine(tenantId, machineData.id);
+            try {
+              await deleteMachine(tenantId, machineData.id);
+            } catch {
+              notifyTopbar("No se pudo eliminar el equipo");
+              const restored = await fetchMachine(tenantId, machineData.id);
+              if (restored) {
+                const normalized = normalizeMachine(restored, state.draftMachines.length);
+                normalized.tenantId = tenantId;
+                normalized.role = "owner";
+                normalized.ownerEmail = state.adminEmail || "";
+                state.draftMachines = [normalized, ...state.draftMachines];
+                renderCards({ preserveScroll: true });
+              }
+            }
           });
         };
 
@@ -1293,47 +1428,21 @@ if (mount) {
       // ignore directory write errors
     }
 
-      let remote = await fetchMachines(uid);
+    try {
+      const remote = await fetchMachines(uid);
       if (!remote.length) {
         const legacy = await fetchLegacyMachines(uid);
         if (legacy.length) {
           await migrateLegacyMachines(uid, legacy);
-          remote = await fetchMachines(uid);
         }
       }
-      const normalized = remote
-        .map((m, idx) => normalizeMachine(m, idx))
-        .filter(Boolean);
-      const ownerMachines = normalized.map((m) => ({
-        ...m,
-        tenantId: uid,
-        role: "owner",
-        ownerEmail: user.email || ""
-      }));
-      let adminMachines = [];
-      try {
-        adminMachines = await fetchAdminMachines(uid, normalizeEmail(user.email || ""));
-      } catch {
-        adminMachines = [];
-      }
-    const combined = [...ownerMachines, ...adminMachines];
-    const orderCache = loadOrderCache();
-    const withOrder = combined.map((m) =>
-      Object.prototype.hasOwnProperty.call(orderCache, m.id)
-        ? { ...m, order: orderCache[m.id] }
-        : m
-    );
-    const merged = await mergeOperationalFromTag(withOrder);
-    setRemote(merged);
-      try {
-        state.pendingInvites = await fetchInvitesForAdmin(
-          normalizeEmail(user.email || ""),
-          "pending"
-        );
-      } catch {
-        state.pendingInvites = [];
-      }
-    renderInviteBanner();
+    } catch {
+      // ignore migration failures
+    }
+
+    subscribeOwnerMachines(uid);
+    subscribeAdminLinks(uid);
+    subscribePendingInvites(normalizeEmail(user.email || ""));
     renderCards();
     initDragAndDrop(list, handleReorder);
   };
