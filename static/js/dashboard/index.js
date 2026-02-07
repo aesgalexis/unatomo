@@ -81,7 +81,8 @@ if (mount) {
   const tagIdByMachineId = new Map();
   const machineIdByTagId = new Map();
   let rebuildToken = 0;
-  let pendingRebuild = null;
+  let rebuildTimer = null;
+  let pendingRebuildOptions = null;
 
   const statusLabels = {
     operativa: "Operativo",
@@ -345,11 +346,12 @@ if (mount) {
   };
 
   const scheduleRebuild = (options = {}) => {
-    if (pendingRebuild) return;
-    pendingRebuild = requestAnimationFrame(async () => {
-      pendingRebuild = null;
-      await rebuildCombined(options);
-    });
+    pendingRebuildOptions = options;
+    if (rebuildTimer) clearTimeout(rebuildTimer);
+    rebuildTimer = setTimeout(() => {
+      rebuildTimer = null;
+      rebuildCombined(pendingRebuildOptions);
+    }, 160);
   };
 
   const subscribeOwnerMachines = (uid) => {
