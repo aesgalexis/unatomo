@@ -7,6 +7,7 @@ const createInviteCallable = httpsCallable(functions, "createAdminInvite");
 const respondInviteCallable = httpsCallable(functions, "respondAdminInvite");
 const leaveAdminCallable = httpsCallable(functions, "leaveAdminRole");
 const revokeAdminCallable = httpsCallable(functions, "revokeAdminInvite");
+const ensureLinkCallable = httpsCallable(functions, "ensureAdminLink");
 
 export const createAdminInvite = async (machineId, adminEmail) => {
   const res = await createInviteCallable({ machineId, adminEmail });
@@ -25,5 +26,10 @@ export const leaveAdminRole = async (machineId) => {
 
 export const revokeAdminInvite = async (machineId, adminEmail) => {
   const res = await revokeAdminCallable({ machineId, adminEmail });
+  return res.data || null;
+};
+
+export const ensureAdminLink = async (inviteId) => {
+  const res = await ensureLinkCallable({ inviteId });
   return res.data || null;
 };
