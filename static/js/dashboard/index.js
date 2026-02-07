@@ -1,4 +1,4 @@
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+﻿import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 import { auth, db } from "/static/js/firebase/firebaseApp.js";
 import { fetchMachines, fetchLegacyMachines, migrateLegacyMachines, fetchMachine, upsertMachine, deleteMachine, addUserWithRegistry, deleteUserRegistry } from "./firestoreRepo.js";
 import { upsertAccountDirectory, normalizeEmail } from "./admin/accountDirectoryRepo.js";
@@ -127,7 +127,8 @@ if (mount) {
   addBtn.type = "button";
   addBtn.id = "addMachineBtn";
   addBtn.className = "btn-add";
-  addBtn.textContent = "Añadir";
+  addBtn.textContent = "+";
+  addBtn.setAttribute("aria-label", "Añadir");
 
   const searchInput = createMachineSearchBar({
     placeholder: "Buscar por nombre o ubicaci\u00f3n...",
@@ -207,7 +208,7 @@ if (mount) {
     const placeholder = document.createElement("div");
     placeholder.className = "machine-placeholder";
     placeholder.textContent =
-      "Todavía no hay máquinas. Pulsa ‘Añadir’ para crear la primera.";
+      "TodavÃ­a no hay mÃ¡quinas. Pulsa â€˜AÃ±adirâ€™ para crear la primera.";
     list.appendChild(placeholder);
   };
 
@@ -597,7 +598,7 @@ if (mount) {
           throw new Error("tag-missing");
         }
         if (res.machineId && res.machineId !== machine.id) {
-          state.tagStatusById[machine.id] = { text: "Tag ya está asignado", state: "error" };
+          state.tagStatusById[machine.id] = { text: "Tag ya estÃ¡ asignado", state: "error" };
           updateTagStatusUI(machine.id);
           throw new Error("tag-assigned");
         }
@@ -771,7 +772,7 @@ if (mount) {
             const parsed = value ? Number(value) : null;
             if (parsed !== null && (Number.isNaN(parsed) || parsed > currentYear || parsed < currentYear - 50)) {
               if (errorEl) {
-                errorEl.textContent = `Año inválido (entre ${currentYear - 50} y ${currentYear}).`;
+                errorEl.textContent = `AÃ±o invÃ¡lido (entre ${currentYear - 50} y ${currentYear}).`;
                 errorEl.dataset.state = "error";
               }
               if (input) input.setAttribute("aria-invalid", "true");
@@ -829,7 +830,7 @@ if (mount) {
               return;
             }
             if (res.machineId && res.machineId !== id) {
-              statusEl.textContent = "Tag ya está asignado";
+              statusEl.textContent = "Tag ya estÃ¡ asignado";
               statusEl.dataset.state = "error";
               if (card.dataset.expanded === "true") {
                 scheduleHeightSync(machine.id, () => recalcHeight(card));
@@ -910,7 +911,7 @@ if (mount) {
             userInput.setAttribute("aria-invalid", "true");
             if (addBtn) {
               const prev = addBtn.textContent;
-              addBtn.textContent = "Revisa los datos";
+              addBtn.textContent = "Error";
               setTimeout(() => (addBtn.textContent = prev), 1000);
             }
             return;
@@ -922,7 +923,7 @@ if (mount) {
           if (users.some((u) => normalizeName(u.username) === normalizedUser)) {
             if (addBtn) {
               const prev = addBtn.textContent;
-              addBtn.textContent = "Duplicado";
+              addBtn.textContent = "Error";
               setTimeout(() => (addBtn.textContent = prev), 1000);
             }
             const statusEl = card.querySelector(".mc-user-status");
@@ -952,7 +953,7 @@ if (mount) {
             if (!passwordHashBase64 || !saltBase64) {
               if (addBtn) {
                 const prev = addBtn.textContent;
-                addBtn.textContent = "Revisa los datos";
+                addBtn.textContent = "Error";
                 setTimeout(() => (addBtn.textContent = prev), 1000);
               }
               return;
@@ -983,7 +984,7 @@ if (mount) {
           } catch {
             if (addBtn) {
               const prev = addBtn.textContent;
-              addBtn.textContent = "Duplicado";
+              addBtn.textContent = "Error";
               setTimeout(() => (addBtn.textContent = prev), 1000);
             }
             const statusEl = card.querySelector(".mc-user-status");
@@ -1193,7 +1194,7 @@ if (mount) {
           state.selectedTabById[machineData.id] = "historial";
           state.expandedById = Array.from(expandedById);
           renderCards({ preserveScroll: true });
-          notifyTopbar("Intervención realizada");
+          notifyTopbar("IntervenciÃ³n realizada");
           autoSave.saveNow(machineData.id, "intervencion");
         };
 
@@ -1254,7 +1255,7 @@ if (mount) {
           if (ownerNormalized && nextEmail === ownerNormalized) {
             updateMachine(id, {
               adminEmail: "",
-              adminStatus: "Introduce otra dirección de correo que no se la tuya"
+              adminStatus: "Introduce otra direcciÃ³n de correo que no se la tuya"
             });
             state.selectedTabById = { ...(state.selectedTabById || {}), [id]: "configuracion" };
             state.expandedById = Array.from(expandedById);
@@ -1270,7 +1271,7 @@ if (mount) {
 
           updateMachine(id, {
             adminEmail: nextEmail,
-            adminStatus: "Pendiente aceptación"
+            adminStatus: "Pendiente aceptaciÃ³n"
           });
           if (!state.selectedTabById) state.selectedTabById = {};
           state.selectedTabById[id] = "configuracion";
@@ -1302,7 +1303,7 @@ if (mount) {
             {
               ts: new Date().toISOString(),
               type: "notification",
-              message: "Notificación de prueba solicitada"
+              message: "NotificaciÃ³n de prueba solicitada"
             }
           ];
           updateMachine(machineData.id, { logs });
@@ -1487,3 +1488,7 @@ if (mount) {
     initDashboard(user.uid, user);
   });
 }
+
+
+
+

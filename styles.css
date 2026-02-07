@@ -279,11 +279,11 @@ button.btn-secondary:hover{
   transform: translateX(-50%);
   z-index: 1000;
   margin: 0;
-  padding: 6px 10px;
-  min-width: 40px;
-  min-height: 32px;
+  width: 40px;
+  height: 32px;
+  padding: 0;
   border-radius: 0.75rem;
-  border: 1px solid color-mix(in srgb, var(--fg) 55%, transparent);
+  border: none;
   background: color-mix(in srgb, var(--bg) 80%, transparent);
   color: var(--fg);
   font: inherit;
@@ -739,7 +739,6 @@ textarea.field {
 #session-menu-wrap{
   position:relative;
   display:inline-flex;
-  margin-right:0.5rem;
 }
 
 #notif-menu-wrap{
@@ -749,11 +748,11 @@ textarea.field {
 
 #notif-menu-btn{
   margin-top:0;
-  padding:6px 10px;
-  min-width:40px;
-  min-height:32px;
+  width:40px;
+  height:32px;
+  padding:0;
   border-radius:0.75rem;
-  border:1px solid color-mix(in srgb, var(--fg) 55%, transparent);
+  border:none;
   background:color-mix(in srgb, var(--bg) 80%, transparent);
   color:var(--fg);
   font:inherit;
@@ -826,11 +825,11 @@ textarea.field {
 
 #session-menu-btn{
   margin-top:0;
-  padding:6px 10px;
-  min-width:40px;
-  min-height:32px;
+  width:40px;
+  height:32px;
+  padding:0;
   border-radius:0.75rem;
-  border:1px solid color-mix(in srgb, var(--fg) 55%, transparent);
+  border:none;
   background:color-mix(in srgb, var(--bg) 80%, transparent);
   color:var(--fg);
   font:inherit;
