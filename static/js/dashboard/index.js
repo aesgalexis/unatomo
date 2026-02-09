@@ -52,6 +52,10 @@ if (mount) {
     loading: true,
     ownerReady: false,
     adminReady: false,
+    revealPending: false,
+    revealedOnce: false,
+    lastRenderAt: 0,
+    renderSeq: 0,
     ownerUnsub: null,
     adminLinksUnsub: null,
     adminMachineUnsubs: new Map(),
@@ -192,13 +196,14 @@ if (mount) {
 
   const list = document.createElement("div");
   list.id = "machineList";
+  list.className = "cards-reveal";
 
   const inviteBanner = document.createElement("div");
   inviteBanner.className = "admin-invite-banner";
   inviteBanner.style.display = "none";
 
+  addBar.appendChild(loadingEl);
   mount.appendChild(addBar);
-  mount.appendChild(loadingEl);
   mount.appendChild(inviteBanner);
   mount.appendChild(filterInfo);
   mount.appendChild(list);
@@ -217,11 +222,57 @@ if (mount) {
     setLoadingProgress(pct);
     if (ready >= total && state.loading) {
       state.loading = false;
-      loadingEl.style.display = "none";
+      if (!state.revealedOnce) {
+        state.revealPending = true;
+      }
       addBtn.disabled = false;
       searchInput.disabled = false;
       orderBtn.disabled = false;
+      setTimeout(() => {
+        loadingEl.style.display = "none";
+      }, 2000);
     }
+  };
+
+  let revealTimer = null;
+  let revealIdleTimer = null;
+  const scheduleReveal = (seq) => {
+    if (state.revealedOnce) return;
+    if (revealTimer) clearTimeout(revealTimer);
+    revealTimer = setTimeout(() => {
+      if (state.revealedOnce) return;
+      if (seq !== state.renderSeq) return;
+      const cards = Array.from(list.querySelectorAll(".machine-card"));
+      if (!cards.length) {
+        state.revealPending = true;
+        return;
+      }
+      list.dataset.reveal = "true";
+      requestAnimationFrame(() => {
+        cards.forEach((card) => card.classList.add("is-reveal"));
+      });
+      setTimeout(() => {
+        if (seq !== state.renderSeq) return;
+        list.dataset.reveal = "false";
+        cards.forEach((card) => card.classList.remove("is-reveal"));
+        state.revealedOnce = true;
+        state.revealPending = false;
+      }, cards.length * 136 + 1200);
+    }, 80);
+  };
+  const queueRevealAfterIdle = (seq) => {
+    if (state.revealedOnce) return;
+    if (revealIdleTimer) clearTimeout(revealIdleTimer);
+    revealIdleTimer = setTimeout(() => {
+      if (state.revealedOnce) return;
+      if (state.renderSeq !== seq) return;
+      const idleFor = Date.now() - state.lastRenderAt;
+      if (idleFor < 140) {
+        queueRevealAfterIdle(state.renderSeq);
+        return;
+      }
+      scheduleReveal(seq);
+    }, 160);
   };
 
   addBtn.disabled = true;
@@ -675,7 +726,15 @@ if (mount) {
 
   const renderCards = ({ preserveScroll = false } = {}) => {
     const prevScrollY = preserveScroll ? window.scrollY : null;
+    state.renderSeq += 1;
+    const renderSeq = state.renderSeq;
+    state.lastRenderAt = Date.now();
     list.innerHTML = "";
+    if (state.revealPending && !state.revealedOnce) {
+      list.dataset.reveal = "true";
+    } else {
+      list.dataset.reveal = "false";
+    }
     const machines = Array.isArray(state.draftMachines) ? state.draftMachines : [];
     const query = (state.searchQuery || "").trim();
     const visibleMachines = filterMachines(machines, query);
@@ -728,7 +787,7 @@ if (mount) {
     visibleMachines
       .slice()
       .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-      .forEach((machine) => {
+      .forEach((machine, idx) => {
         if (machine.tagId && !state.tagStatusById[machine.id]) {
           state.tagStatusById[machine.id] = { text: "Tag enlazado", state: "ok" };
         }
@@ -1432,6 +1491,11 @@ if (mount) {
           }
         };
 
+        if (!state.revealedOnce) {
+          card.style.setProperty("--reveal-delay", `${idx * 136}ms`);
+        } else {
+          card.style.removeProperty("--reveal-delay");
+        }
         list.appendChild(card);
         cardRefs.set(machine.id, { card, hooks });
 
@@ -1461,6 +1525,9 @@ if (mount) {
     syncMachineAccessListeners(state.draftMachines);
     if (state.loading && state.ownerReady && state.adminReady) {
       updateLoading();
+    }
+    if (state.revealPending && !state.revealedOnce) {
+      queueRevealAfterIdle(renderSeq);
     }
   };
 

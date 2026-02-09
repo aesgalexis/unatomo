@@ -1,4 +1,5 @@
 @import "/static/css/effects/inactive_sections/inactive.css";
+@import "/static/css/effects/card_reveal/reveal.css";
 
 .add-bar {
   margin: 0.5rem 0 1rem;
@@ -156,12 +157,11 @@
 }
 
 .dashboard-loading {
-  margin: 0 0 0.75rem;
-  padding: 0.75rem 1rem;
-  border: 2px dashed color-mix(in srgb, var(--fg) 25%, transparent);
-  border-radius: 1rem;
-  background: var(--panel-bg);
-  text-align: left;
+  margin-left: auto;
+  padding: 0;
+  border: none;
+  background: transparent;
+  text-align: right;
 }
 
 .dashboard-loading-text {
