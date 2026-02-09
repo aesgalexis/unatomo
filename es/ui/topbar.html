@@ -13,7 +13,7 @@
       </div>
     </a>
 
-    <div class="topbar-actions" aria-label="Sesi?n">
+    <div class="topbar-actions" aria-label="Sesión">
       <div id="notif-menu-wrap">
         <button
           id="notif-menu-btn"
@@ -46,7 +46,7 @@
         <button
           id="session-menu-btn"
           type="button"
-          aria-label="Men? de usuario"
+          aria-label="Menú de usuario"
           aria-haspopup="menu"
           aria-expanded="false"
         >
@@ -67,29 +67,36 @@
 
         <div id="session-menu" role="menu" hidden>
           <div id="session-menu-label">Invitado</div>
-
-          <button
-            id="session-menu-action"
-            type="button"
+          <a
+            id="session-menu-profile"
+            href="/es/configuracion.html"
             role="menuitem"
-            class="btn-secondary"
+            class="session-menu-link"
+            hidden
           >
-            Iniciar sesi?n
-          </button>
-
-          <button
-            id="session-menu-register"
-            type="button"
+            Usuario
+          </a>
+          <a
+            id="session-menu-action"
+            href="/es/auth/login.html"
             role="menuitem"
-            class="btn-secondary"
+            class="session-menu-link"
+          >
+            Iniciar sesión
+          </a>
+          <a
+            id="session-menu-register"
+            href="/es/auth/registro.html"
+            role="menuitem"
+            class="session-menu-link"
           >
             Registrarse
-          </button>
+          </a>
         </div>
       </div>
 
       <button id="theme-toggle" type="button" aria-label="Cambiar tema">
-        ? / ?
+        L / D
       </button>
     </div>
   </div>

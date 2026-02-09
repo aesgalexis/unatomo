@@ -879,15 +879,21 @@ textarea.field {
   word-break:break-word;
 }
 
-#session-menu-action,
-#session-menu-register{
+#session-menu .session-menu-link{
+  display:block;
   width:100%;
-  margin:0;
-  justify-content:center;
+  padding:6px 8px;
+  color:var(--fg);
+  text-decoration:none;
+  border-radius:10px;
 }
 
-#session-menu-register{
+#session-menu .session-menu-link + .session-menu-link{
   margin-top:8px;
+}
+
+#session-menu .session-menu-link:hover{
+  background:color-mix(in srgb, var(--fg) 8%, transparent);
 }
 
 .topbar #theme-toggle{
