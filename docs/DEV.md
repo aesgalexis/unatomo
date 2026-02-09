@@ -37,6 +37,16 @@ Configura estos secrets en el repositorio:
 - `FIREBASE_APP_ID`
 - `FIREBASE_MEASUREMENT_ID`
 
+## Firebase CLI (rules/functions)
+
+Los artefactos de Firebase viven en `firebase/`:
+
+- Reglas: `firebase/firestore.rules`
+- Índices: `firebase/firestore.indexes.json`
+- Functions: `firebase/functions`
+
+El CLI sigue leyendo `firebase.json` desde la raíz.
+
 ## Instalar
 
 ```
