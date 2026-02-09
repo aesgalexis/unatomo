@@ -74,7 +74,17 @@ export const render = (panel, machine, hooks, options = {}) => {
         item.textContent = `${time} - Ubicaci\u00f3n -> ${value}`;
       } else if (log.type === "status") {
         const label = STATUS_LABELS[log.value] || log.value;
-        item.textContent = `${time} - Estado -> ${label}`;
+        const user = log.user ? ` - por ${log.user}` : "";
+        item.textContent = `${time} - Estado -> ${label}${user}`;
+      } else if (log.type === "task_created") {
+        const title = log.title || "Tarea";
+        const desc = log.description ? ` - ${log.description}` : "";
+        const user = log.user ? ` - por ${log.user}` : "";
+        item.textContent = `${time} - Tarea creada: ${title}${desc}${user}`;
+      } else if (log.type === "admin_accept") {
+        const admin = log.admin ? ` ${log.admin}` : "";
+        const user = log.user ? ` - por ${log.user}` : "";
+        item.textContent = `${time} - Administrador aceptado:${admin}${user}`;
       } else if (log.type === "intervencion") {
         const message = log.message || "";
         const user = log.user ? ` - por ${log.user}` : "";

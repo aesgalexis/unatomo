@@ -568,8 +568,27 @@ if (mount) {
     }
 
     if (decision === "accepted") {
-      const ownerMachine = await fetchMachine(invite.ownerUid, invite.machineId);
+      const ownerMachine = await fetchMachine(null, invite.machineId);
       if (ownerMachine) {
+        const user = state.adminLabel || state.adminEmail || "Administrador";
+        const logs = [
+          ...(ownerMachine.logs || []),
+          {
+            ts: new Date().toISOString(),
+            type: "admin_accept",
+            admin: state.adminEmail || "",
+            user
+          }
+        ];
+        try {
+          await upsertMachine(invite.ownerUid, {
+            ...ownerMachine,
+            logs,
+            tenantId: invite.ownerUid
+          });
+        } catch {
+          // ignore log failures
+        }
         const normalized = normalizeMachine(ownerMachine, state.draftMachines.length);
         normalized.tenantId = invite.ownerUid;
         normalized.role = "admin";
@@ -734,12 +753,13 @@ if (mount) {
           const idx = statusOrder.indexOf(currentStatus);
           const nextStatus = statusOrder[(idx + 1) % statusOrder.length];
           const keepExpanded = node.dataset.expanded === "true";
+          const user = state.adminLabel || "Administrador";
           replaceMachine(machine.id, {
             ...current,
             status: nextStatus,
             logs: [
               ...(current.logs || []),
-              { ts: new Date().toISOString(), type: "status", value: nextStatus }
+              { ts: new Date().toISOString(), type: "status", value: nextStatus, user }
             ]
           });
           renderCards({ preserveScroll: true });
@@ -1202,7 +1222,18 @@ if (mount) {
           const current = getDraftById(id);
           const tasks = Array.isArray(current.tasks) ? [...current.tasks] : [];
           tasks.unshift(task);
-          updateMachine(id, { tasks });
+          const user = state.adminLabel || "Administrador";
+          const logs = [
+            ...(current.logs || []),
+            {
+              ts: new Date().toISOString(),
+              type: "task_created",
+              title: task.title || "Tarea",
+              description: task.description || "",
+              user
+            }
+          ];
+          updateMachine(id, { tasks, logs });
           if (!state.selectedTabById) state.selectedTabById = {};
           state.selectedTabById[id] = "quehaceres";
           state.expandedById = Array.from(expandedById);
