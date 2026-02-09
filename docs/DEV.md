@@ -5,6 +5,25 @@
 - Node.js 22.12+ (recomendado) o 20.19+
 - Si usas Node 24 y Vite falla, cambia a Node LTS
 
+## Configuración Firebase (runtime)
+
+El frontend lee la configuración de Firebase desde `static/js/config/runtime-config.js`,
+que se genera automáticamente desde `.env.local` o `.env`.
+
+1) Copia el ejemplo:
+
+```
+copy .env.example .env.local
+```
+
+2) Rellena los valores reales de Firebase en `.env.local`.
+
+Para verificar que no haya keys filtradas:
+
+```
+npm run scan:secrets
+```
+
 ## Instalar
 
 ```

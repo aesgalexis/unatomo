@@ -10,15 +10,21 @@ import {
   sendPasswordResetEmail
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 
+const runtimeConfig = window.__UNATOMO_CONFIG__ || {};
 const firebaseConfig = {
-  apiKey: "AIzaSyBWsV-z0v90W9OxtHDx-m2N4SF-iUc9JNY",
-  authDomain: "unatomo-c20a4.firebaseapp.com",
-  projectId: "unatomo-c20a4",
-  storageBucket: "unatomo-c20a4.firebasestorage.app",
-  messagingSenderId: "856960214566",
-  appId: "1:856960214566:web:8cfe8fffe96143e98728e7",
-  measurementId: "G-8S09EBX9ZK"
+  apiKey: runtimeConfig.FIREBASE_API_KEY || "",
+  authDomain: runtimeConfig.FIREBASE_AUTH_DOMAIN || "",
+  projectId: runtimeConfig.FIREBASE_PROJECT_ID || "",
+  storageBucket: runtimeConfig.FIREBASE_STORAGE_BUCKET || "",
+  messagingSenderId: runtimeConfig.FIREBASE_MESSAGING_SENDER_ID || "",
+  appId: runtimeConfig.FIREBASE_APP_ID || "",
+  measurementId: runtimeConfig.FIREBASE_MEASUREMENT_ID || ""
 };
+
+if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
+  console.error("Firebase config missing. Revisa runtime-config.js o .env.local.");
+  throw new Error("Missing Firebase config");
+}
 
 export const app = initializeApp(firebaseConfig);
 

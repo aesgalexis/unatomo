@@ -4,12 +4,16 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "predev": "node scripts/generate-config.mjs",
+    "predev:static": "node scripts/generate-config.mjs",
+    "prebuild": "node scripts/generate-config.mjs",
     "dev": "vite",
     "dev:static": "node scripts/dev-server.mjs",
     "build": "node scripts/build-static.mjs",
     "preview": "vite preview",
     "site:publish": "node scripts/site-publish.mjs",
     "lint:links": "node scripts/lint-links.mjs",
+    "scan:secrets": "node scripts/scan-secrets.mjs",
     "doctor": "node scripts/doctor.mjs"
   },
   "repository": {
