@@ -12,6 +12,7 @@ const msg =
   process.argv.slice(2).join(" ").trim() ||
   `Update site (${new Date().toISOString().slice(0, 19).replace("T", " ")})`;
 
+run("node scripts/generate-config.mjs");
 run("npm run build");
 
 const status = runQuiet("git status --porcelain");
