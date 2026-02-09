@@ -17,6 +17,7 @@ import { normalizeTasks } from "/static/js/dashboard/tabs/tasks/tasksModel.js";
 import { getTaskTiming, getOverdueDuration, getCompletionDuration } from "/static/js/dashboard/tabs/tasks/tasksTime.js";
 import { filterMachines } from "./components/machineSearch/machineFilter.js";
 import { createMachineSearchBar } from "./components/machineSearch/machineSearchBar.js";
+import { createDashboardLoading } from "./components/loading/dashboardLoading.js";
 import { setTopbarSaveStatus } from "/static/js/topbar/save-status.js";
 import { setTopbarNotifications } from "/static/js/notifications/topbar-notifications.js";
 import {
@@ -48,6 +49,9 @@ if (mount) {
     tagStatusById: {},
     searchQuery: "",
     pendingInvites: [],
+    loading: true,
+    ownerReady: false,
+    adminReady: false,
     ownerUnsub: null,
     adminLinksUnsub: null,
     adminMachineUnsubs: new Map(),
@@ -123,6 +127,8 @@ if (mount) {
   const addBar = document.createElement("div");
   addBar.className = "add-bar";
 
+  const { wrap: loadingEl, setProgress: setLoadingProgress } = createDashboardLoading();
+
   const addBtn = document.createElement("button");
   addBtn.type = "button";
   addBtn.id = "addMachineBtn";
@@ -192,6 +198,7 @@ if (mount) {
   inviteBanner.style.display = "none";
 
   mount.appendChild(addBar);
+  mount.appendChild(loadingEl);
   mount.appendChild(inviteBanner);
   mount.appendChild(filterInfo);
   mount.appendChild(list);
@@ -202,6 +209,24 @@ if (mount) {
   const notifyTopbar = (message = "") => {
     setTopbarSaveStatus(message);
   };
+
+  const updateLoading = () => {
+    const total = 2;
+    const ready = (state.ownerReady ? 1 : 0) + (state.adminReady ? 1 : 0);
+    const pct = Math.round((ready / total) * 100);
+    setLoadingProgress(pct);
+    if (ready >= total && state.loading) {
+      state.loading = false;
+      loadingEl.style.display = "none";
+      addBtn.disabled = false;
+      searchInput.disabled = false;
+      orderBtn.disabled = false;
+    }
+  };
+
+  addBtn.disabled = true;
+  searchInput.disabled = true;
+  orderBtn.disabled = true;
 
   const renderPlaceholder = () => {
     list.innerHTML = "";
@@ -371,6 +396,10 @@ if (mount) {
     const q = query(collection(db, "machines"), where("ownerUid", "==", uid));
     state.ownerUnsub = onSnapshot(q, { includeMetadataChanges: true }, (snap) => {
       if (snap.metadata.hasPendingWrites) return;
+      if (!state.ownerReady) {
+        state.ownerReady = true;
+        updateLoading();
+      }
       const changedIds = snap.docChanges().map((change) => change.doc.id);
       if (changedIds.length && changedIds.every((id) => isRecentLocalWrite(id))) {
         return;
@@ -432,6 +461,10 @@ if (mount) {
       where("adminUid", "==", uid)
     );
     state.adminLinksUnsub = onSnapshot(q, (snap) => {
+      if (!state.adminReady) {
+        state.adminReady = true;
+        updateLoading();
+      }
       const links = snap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
       state.adminLinks = links;
       const activeLinks = links.filter((link) => link.status !== "left" && link.status !== "rejected");
@@ -1426,6 +1459,9 @@ if (mount) {
       requestAnimationFrame(() => window.scrollTo(0, prevScrollY || 0));
     }
     syncMachineAccessListeners(state.draftMachines);
+    if (state.loading && state.ownerReady && state.adminReady) {
+      updateLoading();
+    }
   };
 
   const handleReorder = (orderIds) => {
