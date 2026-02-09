@@ -1,0 +1,18 @@
+.cards-reveal[data-reveal="true"] .machine-card {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.75s ease, transform 0.75s ease;
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+.cards-reveal[data-reveal="true"] .machine-card.is-reveal {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@keyframes cardReveal {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
