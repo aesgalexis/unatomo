@@ -127,7 +127,7 @@ if (mount) {
   addBtn.type = "button";
   addBtn.id = "addMachineBtn";
   addBtn.className = "btn-add";
-  addBtn.textContent = "+";
+  addBtn.innerHTML = "<span class=\"btn-add-icon\">+</span>";
   addBtn.setAttribute("aria-label", "Añadir");
 
   const searchInput = createMachineSearchBar({
@@ -1488,6 +1488,8 @@ if (mount) {
     initDashboard(user.uid, user);
   });
 }
+
+
 
 
 

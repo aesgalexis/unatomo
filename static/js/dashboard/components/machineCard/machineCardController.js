@@ -183,42 +183,66 @@ export const createMachineCard = (machine, options = {}) => {
     header.insertBefore(locationNode, rightWrap);
   }
 
-  if (machine.tagId && rightWrap) {
-    const nfc = document.createElement("span");
-    nfc.className = "mc-nfc-icon";
-    if (String(machine.tagId).startsWith("G-")) {
-      nfc.classList.add("is-generated");
+  const shouldShowShare = (options.role === "admin") || !!machine.adminEmail;
+  const shouldShowNfc = !!machine.tagId;
+  if (rightWrap && (shouldShowShare || shouldShowNfc)) {
+    const iconWrap = document.createElement("span");
+    iconWrap.className = "mc-icon-wrap";
+
+    if (shouldShowShare) {
+      const share = document.createElement("span");
+      share.className = "mc-share-icon";
+      if (options.role === "admin") {
+        share.classList.add("is-admin");
+      }
+      share.setAttribute("aria-label", "Compartido");
+      share.innerHTML =
+        '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">' +
+        '<path fill="currentColor" d="M18 8a3 3 0 1 0-2.83-4H15a3 3 0 0 0 0 1.5L8.91 9.1a3 3 0 1 0 0 5.8L15 18.5a3 3 0 1 0 .9-1.8l-6.1-3.5a3 3 0 0 0 0-2l6.1-3.5A3 3 0 0 0 18 8z"/>' +
+        "</svg>";
+      share.addEventListener("click", (event) => event.stopPropagation());
+      iconWrap.appendChild(share);
     }
-    nfc.setAttribute("aria-label", "Tag NFC enlazado");
-    nfc.setAttribute("data-tooltip", "Tag NFC enlazado");
-    nfc.innerHTML =
-      '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">' +
-      '<path fill="currentColor" d="M8 5a1 1 0 0 1 1 1v12a1 1 0 1 1-2 0V6a1 1 0 0 1 1-1zm6 1a6 6 0 0 1 6 6v.9a1 1 0 1 1-2 0V12a4 4 0 0 0-4-4 1 1 0 1 1 0-2zm0 4a2 2 0 0 1 2 2v.7a1 1 0 1 1-2 0V12a1 1 0 0 0-1-1 1 1 0 1 1 0-2z"/>' +
-      "</svg>";
-    nfc.addEventListener("click", (event) => event.stopPropagation());
-    let tipEl = null;
-    const showTip = (event) => {
-      const label = nfc.getAttribute("data-tooltip");
-      if (!label) return;
-      tipEl = document.createElement("div");
-      tipEl.className = "mc-tooltip";
-      tipEl.textContent = label;
-      document.body.appendChild(tipEl);
-      const x = (event && event.clientX) || 0;
-      const y = (event && event.clientY) || 0;
-      const left = x + 12;
-      const top = y - tipEl.offsetHeight - 10;
-      tipEl.style.top = `${Math.max(8, top)}px`;
-      tipEl.style.left = `${Math.max(8, left)}px`;
-    };
-    const hideTip = () => {
-      if (tipEl && tipEl.parentNode) tipEl.parentNode.removeChild(tipEl);
-      tipEl = null;
-    };
-    nfc.addEventListener("mouseenter", showTip);
-    nfc.addEventListener("mouseleave", hideTip);
-    nfc.addEventListener("blur", hideTip);
-    header.insertBefore(nfc, rightWrap);
+
+    if (shouldShowNfc) {
+      const nfc = document.createElement("span");
+      nfc.className = "mc-nfc-icon";
+      if (String(machine.tagId).startsWith("G-")) {
+        nfc.classList.add("is-generated");
+      }
+      nfc.setAttribute("aria-label", "Tag NFC enlazado");
+      nfc.setAttribute("data-tooltip", "Tag NFC enlazado");
+      nfc.innerHTML =
+        '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">' +
+        '<path fill="currentColor" d="M8 5a1 1 0 0 1 1 1v12a1 1 0 1 1-2 0V6a1 1 0 0 1 1-1zm6 1a6 6 0 0 1 6 6v.9a1 1 0 1 1-2 0V12a4 4 0 0 0-4-4 1 1 0 1 1 0-2zm0 4a2 2 0 0 1 2 2v.7a1 1 0 1 1-2 0V12a1 1 0 0 0-1-1 1 1 0 1 1 0-2z"/>' +
+        "</svg>";
+      nfc.addEventListener("click", (event) => event.stopPropagation());
+      let tipEl = null;
+      const showTip = (event) => {
+        const label = nfc.getAttribute("data-tooltip");
+        if (!label) return;
+        tipEl = document.createElement("div");
+        tipEl.className = "mc-tooltip";
+        tipEl.textContent = label;
+        document.body.appendChild(tipEl);
+        const x = (event && event.clientX) || 0;
+        const y = (event && event.clientY) || 0;
+        const left = x + 12;
+        const top = y - tipEl.offsetHeight - 10;
+        tipEl.style.top = `${Math.max(8, top)}px`;
+        tipEl.style.left = `${Math.max(8, left)}px`;
+      };
+      const hideTip = () => {
+        if (tipEl && tipEl.parentNode) tipEl.parentNode.removeChild(tipEl);
+        tipEl = null;
+      };
+      nfc.addEventListener("mouseenter", showTip);
+      nfc.addEventListener("mouseleave", hideTip);
+      nfc.addEventListener("blur", hideTip);
+      iconWrap.appendChild(nfc);
+    }
+
+    header.insertBefore(iconWrap, rightWrap);
   }
 
   if (pendingBtn && statusBtn) {
