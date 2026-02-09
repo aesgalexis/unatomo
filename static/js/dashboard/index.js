@@ -1244,8 +1244,20 @@ if (mount) {
 
         hooks.onRemoveTask = (id, taskId) => {
           const current = getDraftById(id);
+          const removed = (current.tasks || []).find((t) => t.id === taskId);
           const tasks = (current.tasks || []).filter((t) => t.id !== taskId);
-          updateMachine(id, { tasks });
+          const user = state.adminLabel || "Administrador";
+          const logs = [
+            ...(current.logs || []),
+            {
+              ts: new Date().toISOString(),
+              type: "task_removed",
+              title: (removed && removed.title) || "Tarea",
+              description: (removed && removed.description) || "",
+              user
+            }
+          ];
+          updateMachine(id, { tasks, logs });
           if (!state.selectedTabById) state.selectedTabById = {};
           state.selectedTabById[id] = "quehaceres";
           state.expandedById = Array.from(expandedById);

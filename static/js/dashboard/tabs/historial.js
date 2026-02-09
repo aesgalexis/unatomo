@@ -81,6 +81,11 @@ export const render = (panel, machine, hooks, options = {}) => {
         const desc = log.description ? ` - ${log.description}` : "";
         const user = log.user ? ` - por ${log.user}` : "";
         item.textContent = `${time} - Tarea creada: ${title}${desc}${user}`;
+      } else if (log.type === "task_removed") {
+        const title = log.title || "Tarea";
+        const desc = log.description ? ` - ${log.description}` : "";
+        const user = log.user ? ` - por ${log.user}` : "";
+        item.textContent = `${time} - Tarea eliminada: ${title}${desc}${user}`;
       } else if (log.type === "admin_accept") {
         const admin = log.admin ? ` ${log.admin}` : "";
         const user = log.user ? ` - por ${log.user}` : "";

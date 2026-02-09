@@ -1,4 +1,4 @@
-import { normalizeTasks, createTask, MAX_TASK_TITLE } from "./tasksModel.js";
+﻿import { normalizeTasks, createTask, MAX_TASK_TITLE } from "./tasksModel.js";
 import { getTaskTiming } from "./tasksTime.js";
 
 export const renderTasksPanel = (panel, machine, hooks, options = {}, context = {}) => {
@@ -138,13 +138,8 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
         createdBy: context.createdBy || null
       });
       if (error) {
-        if (error === "description") {
-          descInput.setAttribute("aria-invalid", "true");
-        } else {
-          titleInput.setAttribute("aria-invalid", "true");
-        }
         const prev = createBtn.textContent;
-        createBtn.textContent = "Revisa la descripción";
+        createBtn.textContent = "Revisa el formulario";
         setTimeout(() => (createBtn.textContent = prev), 1000);
         return;
       }
