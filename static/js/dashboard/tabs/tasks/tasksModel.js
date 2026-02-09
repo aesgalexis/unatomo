@@ -38,7 +38,6 @@ export const normalizeTasks = (tasks) => {
 
 export const createTask = ({ title, description, frequency, createdBy }) => {
   const cleanDesc = (description || "").trim();
-  if (!cleanDesc) return { error: "description" };
   const cleanTitle = (title || "").trim();
   const baseTitle = cleanTitle || "Tarea";
   const trimmed =
