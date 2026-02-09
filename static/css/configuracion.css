@@ -1,0 +1,123 @@
+﻿.profile-wrap {
+  display: grid;
+  gap: 16px;
+}
+
+.profile-card {
+  border: 1px solid var(--border-subtle);
+  background: var(--panel-bg);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.profile-card-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px;
+  background: transparent;
+  border: none;
+  color: var(--fg);
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.profile-card-title {
+  font-weight: 600;
+}
+
+.profile-card-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.profile-card-body {
+  padding: 0 18px 16px;
+}
+
+.profile-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--fg) 8%, transparent);
+}
+
+.profile-row:last-child {
+  border-bottom: none;
+}
+
+.profile-label {
+  color: color-mix(in srgb, var(--fg) 70%, transparent);
+  font-size: 13px;
+}
+
+.profile-value {
+  color: var(--fg);
+  font-size: 14px;
+  text-align: right;
+  word-break: break-word;
+}
+
+.profile-input {
+  min-width: 200px;
+  max-width: 320px;
+  width: 100%;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg);
+  color: var(--fg);
+  border-radius: 10px;
+  padding: 8px 10px;
+  text-align: right;
+}
+
+.profile-theme-options {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.profile-theme-option {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  color: var(--fg);
+  font-size: 14px;
+}
+
+.profile-theme-option input {
+  accent-color: var(--fg);
+}
+
+.profile-link {
+  color: var(--fg);
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.profile-link:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 700px) {
+  .profile-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .profile-input {
+    text-align: left;
+    max-width: 100%;
+  }
+
+  .profile-value {
+    text-align: left;
+  }
+
+  .profile-theme-options {
+    width: 100%;
+  }
+}

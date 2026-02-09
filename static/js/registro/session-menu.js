@@ -6,12 +6,14 @@ import { upsertAccountDirectory } from "/static/js/dashboard/admin/accountDirect
 const btn = document.getElementById("session-menu-btn");
 const menu = document.getElementById("session-menu");
 const label = document.getElementById("session-menu-label");
+const profileLink = document.getElementById("session-menu-profile");
 const action = document.getElementById("session-menu-action");
 const registerBtn = document.getElementById("session-menu-register");
 
 if (!btn || !menu || !label || !action) {
 } else {
   let state = "guest";
+  let currentUser = null;
 
   const FG = "var(--fg)";
   const ACCENT = "var(--accent)";
@@ -41,21 +43,32 @@ if (!btn || !menu || !label || !action) {
 
   function setGuest() {
     setAuthState("guest");
-    label.textContent = "Invitado";
+    currentUser = null;
+    if (label) {
+      label.hidden = false;
+      label.textContent = "Invitado";
+    }
+    if (profileLink) {
+      profileLink.hidden = true;
+      profileLink.textContent = "";
+    }
 
-    action.textContent = "Iniciar sesión";
-    action.classList.remove("btn-secondary");
-    action.classList.add("btn-primary");
-    action.onclick = () => {
-      closeMenu();
-      window.location.href = "/es/auth/login.html";
-    };
+    if (action) {
+      action.textContent = "Iniciar sesión";
+      action.setAttribute("href", "/es/auth/login.html");
+      action.onclick = () => {
+        closeMenu();
+      };
+    }
 
     if (registerBtn) {
       registerBtn.hidden = false;
       registerBtn.style.display = "";
       registerBtn.setAttribute("aria-hidden", "false");
-      registerBtn.onclick = () => {
+      registerBtn.textContent = "Registrarse";
+      registerBtn.setAttribute("href", "/es/auth/registro.html");
+      registerBtn.onclick = (e) => {
+        e.preventDefault();
         closeMenu();
         requestInviteCodeAndRedirect("/es/auth/registro.html");
       };
@@ -66,22 +79,32 @@ if (!btn || !menu || !label || !action) {
 
   function setUser(user) {
     setAuthState("user");
+    currentUser = user;
     const name = (user.displayName || user.email || "Usuario").toString();
-    label.textContent = name;
+    if (label) {
+      label.hidden = false;
+      label.textContent = name;
+    }
+    if (profileLink) {
+      profileLink.hidden = false;
+      profileLink.textContent = "Configuración";
+      profileLink.setAttribute("href", "/es/configuracion.html");
+    }
 
-    action.textContent = "Cerrar sesión";
-    action.classList.remove("btn-primary");
-    action.classList.add("btn-secondary");
-    action.onclick = async () => {
-      try {
-        action.disabled = true;
-        await signOut(auth);
-        closeMenu();
-        window.location.href = "/es/index.html";
-      } finally {
-        action.disabled = false;
-      }
-    };
+    if (action) {
+      action.textContent = "Cerrar sesión";
+      action.setAttribute("href", "#");
+      action.onclick = async (e) => {
+        e.preventDefault();
+        try {
+          await signOut(auth);
+          closeMenu();
+          window.location.href = "/es/index.html";
+        } catch {
+          // ignore
+        }
+      };
+    }
 
     if (registerBtn) {
       registerBtn.hidden = true;
@@ -98,6 +121,14 @@ if (!btn || !menu || !label || !action) {
     if (menu.hidden) openMenu();
     else closeMenu();
   });
+
+  if (profileLink) {
+    profileLink.addEventListener("click", (e) => {
+      if (!currentUser) return;
+      e.stopPropagation();
+      closeMenu();
+    });
+  }
 
   window.addEventListener("unatomo:topbar-open", (e) => {
     if (e.detail && e.detail.id !== "session") closeMenu();
