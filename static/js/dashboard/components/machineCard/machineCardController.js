@@ -38,7 +38,11 @@ export const createMachineCard = (machine, options = {}) => {
     pendingBtn.setAttribute("aria-label", pendingLabel);
     pendingBtn.setAttribute("data-tooltip", pendingLabel);
   }
-  statusBtn.textContent = STATUS_LABELS[machine.status] || "Operativo";
+  const statusLabel = STATUS_LABELS[machine.status] || "Operativo";
+  statusBtn.textContent = "";
+  statusBtn.dataset.label = statusLabel;
+  statusBtn.innerHTML = `<span class="mc-status-text">${statusLabel}</span>`;
+  statusBtn.classList.remove("is-open");
   statusBtn.dataset.status = machine.status || "operativa";
   if (options.canEditStatus === false) {
     statusBtn.disabled = true;
@@ -378,10 +382,16 @@ export const createMachineCard = (machine, options = {}) => {
       }
     });
   }
+  statusBtn.addEventListener("mousedown", (event) => {
+    event.preventDefault();
+  });
   statusBtn.addEventListener("click", (event) => {
     event.stopPropagation();
     if (options.canEditStatus === false) return;
     if (hooks.onStatusToggle) hooks.onStatusToggle(card);
+    if (document.activeElement === statusBtn) {
+      statusBtn.blur();
+    }
   });
 
   const startTitleEdit = () => {

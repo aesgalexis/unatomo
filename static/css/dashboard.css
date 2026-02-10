@@ -346,9 +346,43 @@
   color: var(--fg);
   font: inherit;
   font-size: 0.8rem;
-  padding: 0.3rem 0.6rem;
+  padding: 0;
   line-height: 1;
   cursor: pointer;
+  width: 28px;
+  min-width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: width 0.2s ease, padding 0.2s ease;
+}
+
+.mc-status-text {
+  white-space: nowrap;
+  transition: opacity 0.2s ease;
+  opacity: 0 !important;
+  visibility: hidden;
+  max-width: 0;
+  padding: 0;
+  overflow: hidden;
+  display: none;
+}
+
+.mc-status:hover,
+.mc-status:focus-visible {
+  width: auto;
+  padding: 0;
+}
+
+.mc-status:hover .mc-status-text,
+.mc-status:focus-visible .mc-status-text {
+  opacity: 1 !important;
+  visibility: visible;
+  max-width: 200px;
+  padding: 0 0.6rem;
+  display: inline-flex;
 }
 
 .mc-nfc-icon {
