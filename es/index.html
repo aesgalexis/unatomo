@@ -10,6 +10,7 @@
   <script src="/static/js/config/runtime-config.js"></script>
   <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="/static/css/dashboard.css">
+  <link rel="stylesheet" href="/static/css/sections.css">
   <link rel="icon" href="/static/img/favicon/favicon.svg" type="image/svg+xml">
 </head>
 
@@ -21,6 +22,8 @@
     <section class="page-section">
       <div id="dashboard-mount"></div>
       <script type="module" src="/static/js/dashboard/index.js"></script>
+      <div id="section-mount" class="section-shell" hidden></div>
+      <script type="module" src="/static/js/sections/router.js"></script>
     </section>
 
     <div id="legal-footer" class="legal-footer"></div>

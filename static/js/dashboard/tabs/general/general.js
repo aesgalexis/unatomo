@@ -122,8 +122,8 @@ export const render = (panel, machine, hooks, options = {}) => {
     });
     fileInput.addEventListener("change", () => {
       const file = fileInput.files && fileInput.files[0];
-      const label = file ? file.name : "Cargar";
-      drop.textContent = label;
+      const labelText = file ? file.name : "Cargar";
+      drop.textContent = labelText;
       drop.classList.toggle("is-file", !!file);
       saveBtn.style.display = file ? "" : "none";
       if (searchBtn) searchBtn.style.display = file ? "none" : "";
@@ -186,9 +186,42 @@ export const render = (panel, machine, hooks, options = {}) => {
     return wrap;
   };
 
-  manualWrap.appendChild(createManualRow("Manual", { withSearch: true }));
-  manualWrap.appendChild(createManualRow("Esquema eléctrico"));
-  manualWrap.appendChild(createManualRow("Otros manuales"));
+  const docHeader = document.createElement("div");
+  docHeader.className = "mc-doc-row";
+  const docLabel = document.createElement("span");
+  docLabel.className = "mc-row-label";
+  docLabel.textContent = "Documentación";
+  const docSelect = document.createElement("select");
+  docSelect.className = "mc-doc-select";
+  const docPlaceholder = document.createElement("option");
+  docPlaceholder.value = "";
+  docPlaceholder.textContent = "+ Añadir...";
+  docSelect.appendChild(docPlaceholder);
+  ["Placa", "Manual", "Esquema eléctrico"].forEach((labelText) => {
+    const opt = document.createElement("option");
+    opt.value = labelText;
+    opt.textContent = labelText;
+    docSelect.appendChild(opt);
+  });
+  docHeader.appendChild(docLabel);
+  docHeader.appendChild(docSelect);
+  manualWrap.appendChild(docHeader);
+
+  const rowsByLabel = {
+    Placa: createManualRow("Placa"),
+    Manual: createManualRow("Manual", { withSearch: true }),
+    "Esquema eléctrico": createManualRow("Esquema eléctrico")
+  };
+
+  docSelect.addEventListener("change", () => {
+    const value = docSelect.value;
+    if (!value || !rowsByLabel[value]) return;
+    if (!manualWrap.contains(rowsByLabel[value])) {
+      manualWrap.appendChild(rowsByLabel[value]);
+    }
+    docSelect.value = "";
+    if (hooks.onContentResize) hooks.onContentResize();
+  });
 
   panel.appendChild(manualWrap);
 };

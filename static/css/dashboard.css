@@ -591,6 +591,24 @@
   gap: 0.75rem;
 }
 
+.mc-doc-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.mc-doc-select {
+  border: 1px solid var(--border-subtle);
+  background: var(--bg);
+  color: var(--fg);
+  border-radius: 10px;
+  padding: 6px 10px;
+  min-height: 36px;
+  font: inherit;
+  line-height: 1.2;
+}
+
 .mc-manual-input {
   display: none;
 }
@@ -920,6 +938,10 @@
   font: inherit;
   cursor: pointer;
   height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
 .mc-admin-email {

@@ -30,3 +30,27 @@ const { initTopbarNotifications } = await import(
   "/static/js/notifications/topbar-notifications.js"
 );
 initTopbarNotifications();
+
+let backdrop = document.querySelector(".topbar-menu-backdrop");
+if (!backdrop) {
+  backdrop = document.createElement("div");
+  backdrop.className = "topbar-menu-backdrop";
+  backdrop.setAttribute("aria-hidden", "true");
+  document.body.appendChild(backdrop);
+}
+
+const logoGroup = document.querySelector(".topbar-logo-group");
+if (logoGroup) {
+  logoGroup.addEventListener("mouseenter", () => {
+    document.body.classList.add("menu-open");
+  });
+  logoGroup.addEventListener("mouseleave", () => {
+    document.body.classList.remove("menu-open");
+  });
+  logoGroup.addEventListener("focusin", () => {
+    document.body.classList.add("menu-open");
+  });
+  logoGroup.addEventListener("focusout", () => {
+    document.body.classList.remove("menu-open");
+  });
+}
