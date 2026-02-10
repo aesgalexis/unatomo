@@ -391,7 +391,9 @@ if (mount) {
     const statusBtn = card.querySelector(".mc-status");
     if (statusBtn) {
       const status = normalizeStatus(current.status);
-      statusBtn.textContent = statusLabels[status] || status;
+      const label = statusLabels[status] || status;
+      statusBtn.textContent = "";
+      statusBtn.innerHTML = `<span class="mc-status-text">${label}</span>`;
       statusBtn.dataset.status = status;
     }
 
