@@ -193,15 +193,27 @@ export const render = (panel, machine, hooks, options = {}) => {
   docLabel.textContent = "Documentación";
   const docSelect = document.createElement("select");
   docSelect.className = "mc-doc-select";
+  const docOptions = ["Placa", "Manual", "Esquema eléctrico"];
   const docPlaceholder = document.createElement("option");
   docPlaceholder.value = "";
-  docPlaceholder.textContent = "+ Añadir...";
+  docPlaceholder.textContent = "Añadir...";
+  docPlaceholder.hidden = true;
+  docPlaceholder.disabled = true;
+  docPlaceholder.selected = true;
   docSelect.appendChild(docPlaceholder);
-  ["Placa", "Manual", "Esquema eléctrico"].forEach((labelText) => {
+  const emptyOption = document.createElement("option");
+  emptyOption.value = "__empty__";
+  emptyOption.textContent = "Nada que añadir";
+  emptyOption.disabled = true;
+  emptyOption.hidden = true;
+  docSelect.appendChild(emptyOption);
+  const optionEls = {};
+  docOptions.forEach((labelText) => {
     const opt = document.createElement("option");
     opt.value = labelText;
     opt.textContent = labelText;
     docSelect.appendChild(opt);
+    optionEls[labelText] = opt;
   });
   docHeader.appendChild(docLabel);
   docHeader.appendChild(docSelect);
@@ -213,6 +225,18 @@ export const render = (panel, machine, hooks, options = {}) => {
     "Esquema eléctrico": createManualRow("Esquema eléctrico")
   };
 
+  const refreshDocOptions = () => {
+    let available = 0;
+    docOptions.forEach((labelText) => {
+      const opt = optionEls[labelText];
+      if (!opt) return;
+      opt.disabled = manualWrap.contains(rowsByLabel[labelText]);
+      opt.hidden = manualWrap.contains(rowsByLabel[labelText]);
+      if (!opt.hidden) available += 1;
+    });
+    emptyOption.hidden = available > 0;
+  };
+
   docSelect.addEventListener("change", () => {
     const value = docSelect.value;
     if (!value || !rowsByLabel[value]) return;
@@ -220,8 +244,11 @@ export const render = (panel, machine, hooks, options = {}) => {
       manualWrap.appendChild(rowsByLabel[value]);
     }
     docSelect.value = "";
+    refreshDocOptions();
     if (hooks.onContentResize) hooks.onContentResize();
   });
+
+  refreshDocOptions();
 
   panel.appendChild(manualWrap);
 };
