@@ -469,7 +469,7 @@ body.page li {
   background: color-mix(in srgb, var(--bg) 25%, transparent);
   border-bottom: 1px solid var(--border-subtle);
   backdrop-filter: blur(12px);
-  z-index: 900;
+  z-index: 2000;
 }
 
 .topbar-inner {
@@ -492,6 +492,125 @@ body.page li {
   align-items: center;
   gap: 0.75rem;
   text-decoration: none;
+}
+
+.topbar-logo-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.topbar-menu {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 8px);
+  z-index: 1201;
+  background: transparent;
+  padding: 10px;
+  display: grid;
+  gap: 6px;
+  min-width: 220px;
+  box-shadow: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px);
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+  z-index: 1100;
+}
+
+.topbar-menu-backdrop {
+  z-index: 900;
+}
+
+.topbar-logo-group:hover .topbar-menu,
+.topbar-logo-group:focus-within .topbar-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+body.menu-locked .topbar-menu {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px);
+}
+
+body.menu-locked .topbar-menu-backdrop {
+  opacity: 0;
+  visibility: hidden;
+}
+
+body.menu-locked .topbar-logo-group:hover .topbar-menu,
+body.menu-locked .topbar-logo-group:focus-within .topbar-menu,
+body.menu-locked .topbar-logo-group:hover .topbar-menu-backdrop,
+body.menu-locked .topbar-logo-group:focus-within .topbar-menu-backdrop {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  transform: translateY(-6px);
+}
+
+.topbar-menu-backdrop {
+  position: fixed;
+  top: 75px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.9);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  z-index: 940;
+  pointer-events: none;
+}
+
+html[data-theme="light"] .topbar-menu-backdrop,
+body[data-theme="light"] .topbar-menu-backdrop {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.topbar-logo-group:hover .topbar-menu-backdrop,
+.topbar-logo-group:focus-within .topbar-menu-backdrop {
+  opacity: 1;
+  visibility: visible;
+}
+
+.topbar-logo-link:hover ~ .topbar-menu-backdrop,
+.topbar-logo-link:focus-visible ~ .topbar-menu-backdrop {
+  opacity: 1;
+  visibility: visible;
+}
+
+body.menu-open .topbar-menu-backdrop {
+  opacity: 1;
+  visibility: visible;
+}
+
+.topbar-menu-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 0;
+  border-radius: 10px;
+  text-decoration: none;
+  color: color-mix(in srgb, var(--fg) 70%, transparent);
+  font-weight: 600;
+  position: relative;
+}
+
+.topbar-menu-link:hover,
+.topbar-menu-link.is-active {
+  color: var(--fg);
+}
+
+.topbar-menu-link.is-active::after {
+  content: "";
+  position: absolute;
+  left: -12px;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  margin-top: -3px;
+  border-radius: 999px;
+  background: #ffffff;
 }
 
 .topbar-title-wrap {
