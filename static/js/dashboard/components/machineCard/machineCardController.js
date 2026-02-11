@@ -196,15 +196,50 @@ export const createMachineCard = (machine, options = {}) => {
     if (shouldShowShare) {
       const share = document.createElement("span");
       share.className = "mc-share-icon";
-      if (options.role === "admin") {
+      const isAdmin = options.role === "admin";
+      if (isAdmin) {
         share.classList.add("is-admin");
+        share.setAttribute("aria-label", "Administrando");
+        share.setAttribute("data-tooltip", "Administrando");
+        share.innerHTML =
+          '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">' +
+          '<path fill="currentColor" d="M5 8l2-3 2 3h10a1 1 0 0 1 .8 1.6L17 13v3a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1v-3L4.2 9.6A1 1 0 0 1 5 8zm3.4 2-1.2 1.6L9 14.2V15h6v-.8l1.8-2.6L15.6 10h-7.2z"/>' +
+          "</svg>";
+      } else {
+        const adminName = (options.adminDisplayName || "").trim()
+          || (machine.adminName || "").trim()
+          || (machine.adminEmail || "").trim()
+          || "Administrador";
+        share.setAttribute("aria-label", `Administrada por ${adminName}`);
+        share.setAttribute("data-tooltip", `Administrada por ${adminName}`);
+        share.innerHTML =
+          '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">' +
+          '<path fill="currentColor" d="M12 3 5 6v5c0 4.4 3 8.3 7 9 4-0.7 7-4.6 7-9V6l-7-3zm0 2.2 5 2.1v3.7c0 3.2-2 6.4-5 7-3-0.6-5-3.8-5-7V7.3l5-2.1z"/>' +
+          "</svg>";
       }
-      share.setAttribute("aria-label", "Compartido");
-      share.innerHTML =
-        '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">' +
-        '<path fill="currentColor" d="M18 8a3 3 0 1 0-2.83-4H15a3 3 0 0 0 0 1.5L8.91 9.1a3 3 0 1 0 0 5.8L15 18.5a3 3 0 1 0 .9-1.8l-6.1-3.5a3 3 0 0 0 0-2l6.1-3.5A3 3 0 0 0 18 8z"/>' +
-        "</svg>";
       share.addEventListener("click", (event) => event.stopPropagation());
+      let tipEl = null;
+      const showTip = (event) => {
+        const label = share.getAttribute("data-tooltip");
+        if (!label) return;
+        tipEl = document.createElement("div");
+        tipEl.className = "mc-tooltip";
+        tipEl.textContent = label;
+        document.body.appendChild(tipEl);
+        const x = (event && event.clientX) || 0;
+        const y = (event && event.clientY) || 0;
+        const left = x + 12;
+        const top = y - tipEl.offsetHeight - 10;
+        tipEl.style.top = `${Math.max(8, top)}px`;
+        tipEl.style.left = `${Math.max(8, left)}px`;
+      };
+      const hideTip = () => {
+        if (tipEl && tipEl.parentNode) tipEl.parentNode.removeChild(tipEl);
+        tipEl = null;
+      };
+      share.addEventListener("mouseenter", showTip);
+      share.addEventListener("mouseleave", hideTip);
+      share.addEventListener("blur", hideTip);
       iconWrap.appendChild(share);
     }
 

@@ -15,6 +15,7 @@ export const upsertAccountDirectory = async (user) => {
   if (!user || !user.email || !user.uid) return null;
   const normalized = normalizeEmail(user.email);
   if (!normalized) return null;
+  const displayName = (user.displayName || "").toString().trim();
   const ref = doc(db, DIRECTORY_COLLECTION, normalized);
   await setDoc(
     ref,
@@ -22,6 +23,7 @@ export const upsertAccountDirectory = async (user) => {
       uid: user.uid,
       email: user.email,
       emailLower: normalized,
+      displayName,
       updatedAt: serverTimestamp()
     },
     { merge: true }

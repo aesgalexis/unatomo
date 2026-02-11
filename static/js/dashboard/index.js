@@ -1,7 +1,7 @@
 ﻿import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 import { auth, db } from "/static/js/firebase/firebaseApp.js";
 import { fetchMachines, fetchLegacyMachines, migrateLegacyMachines, fetchMachine, upsertMachine, deleteMachine, addUserWithRegistry, deleteUserRegistry } from "./firestoreRepo.js";
-import { upsertAccountDirectory, normalizeEmail } from "./admin/accountDirectoryRepo.js";
+import { upsertAccountDirectory, normalizeEmail, getAccountByEmail } from "./admin/accountDirectoryRepo.js";
 import { fetchInvitesForAdmin } from "./admin/adminInvitesRepo.js";
 import { fetchLinksForAdmin } from "./admin/adminLinksRepo.js";
 import { createAdminInvite, respondAdminInvite, leaveAdminRole, revokeAdminInvite, ensureAdminLink } from "./admin/adminFunctionsRepo.js";
@@ -126,6 +126,28 @@ if (mount) {
     return Array.from(map.values()).sort((a, b) =>
       a.toLowerCase().localeCompare(b.toLowerCase(), "es")
     );
+  };
+
+  const adminNameCache = new Map();
+  const adminNamePending = new Set();
+  const getAdminDisplayName = (email) => {
+    const normalized = normalizeEmail(email);
+    if (!normalized) return "";
+    if (adminNameCache.has(normalized)) return adminNameCache.get(normalized) || "";
+    if (adminNamePending.has(normalized)) return "";
+    adminNamePending.add(normalized);
+    getAccountByEmail(normalized)
+      .then((account) => {
+        const name = (account && account.displayName ? account.displayName : "").trim();
+        adminNameCache.set(normalized, name);
+        adminNamePending.delete(normalized);
+        if (name) renderCards({ preserveScroll: true });
+      })
+      .catch(() => {
+        adminNameCache.set(normalized, "");
+        adminNamePending.delete(normalized);
+      });
+    return "";
   };
 
   const addBar = document.createElement("div");
@@ -669,6 +691,7 @@ if (mount) {
         try {
           await upsertMachine(invite.ownerUid, {
             ...ownerMachine,
+            adminName: state.adminLabel || "",
             logs,
             tenantId: invite.ownerUid
           });
@@ -793,9 +816,15 @@ if (mount) {
         if (machine.tagId && !state.tagStatusById[machine.id]) {
           state.tagStatusById[machine.id] = { text: "Tag enlazado", state: "ok" };
         }
+        const adminDisplayName = machine.adminName
+          ? machine.adminName
+          : machine.adminEmail
+            ? getAdminDisplayName(machine.adminEmail)
+            : "";
         const { card, hooks } = createMachineCard(machine, {
           tagStatus: state.tagStatusById[machine.id],
           adminLabel: state.adminLabel,
+          adminDisplayName,
           mode: "dashboard",
           role: machine.role || "owner",
           disableDrag: query.length > 0,

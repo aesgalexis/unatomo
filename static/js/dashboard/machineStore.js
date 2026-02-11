@@ -26,6 +26,7 @@ export const normalizeMachine = (raw, index = 0) => {
     tasks: normalizeTasks(raw.tasks),
     users: Array.isArray(raw.users) ? raw.users : [],
     adminEmail: typeof raw.adminEmail === "string" ? raw.adminEmail : "",
+    adminName: typeof raw.adminName === "string" ? raw.adminName : "",
     adminStatus: typeof raw.adminStatus === "string" ? raw.adminStatus : "",
     tenantId:
       typeof raw.tenantId === "string"
@@ -68,6 +69,7 @@ export const createDraftMachine = (count, order) => {
     tasks: [],
     users: [],
     adminEmail: "",
+    adminName: "",
     adminStatus: "",
     tenantId: "",
     role: "owner",
