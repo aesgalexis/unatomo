@@ -899,20 +899,13 @@ textarea.field {
 
 .notif-badge{
   position:absolute;
-  top:-4px;
-  right:-4px;
-  min-width:16px;
-  height:16px;
-  padding:0 4px;
-  border-radius:999px;
-  background:#f97316;
-  color:#fff;
-  font-size:0.65rem;
+  top:-2px;
+  right:2px;
+  padding:0;
+  color:var(--fg);
+  font-size:0.7rem;
   font-weight:700;
-  line-height:16px;
-  text-align:center;
-  border:2px solid var(--bg);
-  box-sizing:border-box;
+  line-height:1;
 }
 
 #notif-menu{
@@ -949,6 +942,11 @@ textarea.field {
   display:flex;
   flex-direction:column;
   gap:8px;
+}
+
+.notif-item + .notif-item{
+  border-top:1px solid var(--border-subtle);
+  padding-top:10px;
 }
 
 .notif-text{
