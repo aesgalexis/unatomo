@@ -1,6 +1,8 @@
 let menuEl = null;
 let labelEl = null;
 let listEl = null;
+let badgeEl = null;
+let buttonEl = null;
 
 export function initTopbarNotifications() {
   const wrap = document.getElementById("notif-menu-wrap");
@@ -12,6 +14,14 @@ export function initTopbarNotifications() {
   const menuId = "notif";
 
   menuEl = menu;
+  buttonEl = btn;
+  badgeEl = btn.querySelector(".notif-badge");
+  if (!badgeEl) {
+    badgeEl = document.createElement("span");
+    badgeEl.className = "notif-badge";
+    badgeEl.hidden = true;
+    btn.appendChild(badgeEl);
+  }
   labelEl = menu.querySelector("#notif-menu-label");
   if (!labelEl) {
     labelEl = document.createElement("div");
@@ -64,6 +74,14 @@ export function initTopbarNotifications() {
 export function setTopbarNotifications(items = []) {
   if (!menuEl || !labelEl || !listEl) return;
   const hasItems = Array.isArray(items) && items.length > 0;
+  if (badgeEl) {
+    badgeEl.hidden = !hasItems;
+    if (hasItems) {
+      const count = items.length;
+      badgeEl.textContent = String(count);
+      badgeEl.setAttribute("aria-label", `${count} notificaciones pendientes`);
+    }
+  }
   labelEl.textContent = hasItems
     ? "Notificaciones"
     : "No hay notificaciones pendientes";
