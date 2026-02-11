@@ -2,7 +2,7 @@
   const wrap = document.createElement("div");
   wrap.className = "section-block";
   wrap.innerHTML = `
-    <h2>Tags físicos / precios</h2>
+    <h2>Tags físicos</h2>
     <p>
       Los tags NFC permiten abrir una máquina directamente desde una etiqueta.
     </p>

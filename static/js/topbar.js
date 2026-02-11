@@ -40,6 +40,10 @@ if (!backdrop) {
 }
 
 const logoGroup = document.querySelector(".topbar-logo-group");
+const closeTopbarMenu = () => {
+  document.body.classList.remove("menu-open");
+  document.body.classList.remove("menu-locked");
+};
 if (logoGroup) {
   logoGroup.addEventListener("mouseenter", () => {
     document.body.classList.add("menu-open");
@@ -53,4 +57,17 @@ if (logoGroup) {
   logoGroup.addEventListener("focusout", () => {
     document.body.classList.remove("menu-open");
   });
+}
+
+document.querySelectorAll(".topbar-menu-link").forEach((link) => {
+  link.addEventListener("click", () => {
+    if (document.activeElement && document.activeElement.blur) {
+      document.activeElement.blur();
+    }
+    closeTopbarMenu();
+  });
+});
+
+if (backdrop) {
+  backdrop.addEventListener("click", closeTopbarMenu);
 }
