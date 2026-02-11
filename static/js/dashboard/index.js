@@ -1,7 +1,7 @@
 ﻿import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 import { auth, db } from "/static/js/firebase/firebaseApp.js";
 import { fetchMachines, fetchLegacyMachines, migrateLegacyMachines, fetchMachine, upsertMachine, deleteMachine, addUserWithRegistry, deleteUserRegistry } from "./firestoreRepo.js";
-import { upsertAccountDirectory, normalizeEmail, getAccountByEmail } from "./admin/accountDirectoryRepo.js";
+import { upsertAccountDirectory, normalizeEmail, getDisplayNameByEmail } from "./admin/accountDirectoryRepo.js";
 import { fetchInvitesForAdmin } from "./admin/adminInvitesRepo.js";
 import { fetchLinksForAdmin } from "./admin/adminLinksRepo.js";
 import { createAdminInvite, respondAdminInvite, leaveAdminRole, revokeAdminInvite, ensureAdminLink } from "./admin/adminFunctionsRepo.js";
@@ -136,12 +136,12 @@ if (mount) {
     if (adminNameCache.has(normalized)) return adminNameCache.get(normalized) || "";
     if (adminNamePending.has(normalized)) return "";
     adminNamePending.add(normalized);
-    getAccountByEmail(normalized)
-      .then((account) => {
-        const name = (account && account.displayName ? account.displayName : "").trim();
-        adminNameCache.set(normalized, name);
+    getDisplayNameByEmail(normalized)
+      .then((name) => {
+        const safeName = (name || "").trim();
+        adminNameCache.set(normalized, safeName);
         adminNamePending.delete(normalized);
-        if (name) renderCards({ preserveScroll: true });
+        if (safeName) renderCards({ preserveScroll: true });
       })
       .catch(() => {
         adminNameCache.set(normalized, "");
@@ -815,6 +815,14 @@ if (mount) {
       .forEach((machine, idx) => {
         if (machine.tagId && !state.tagStatusById[machine.id]) {
           state.tagStatusById[machine.id] = { text: "Tag enlazado", state: "ok" };
+        }
+        if ((machine.role || "owner") === "admin") {
+          const nextAdminName = (state.adminLabel || "").trim();
+          if (nextAdminName && machine.adminName !== nextAdminName) {
+            updateMachine(machine.id, { adminName: nextAdminName });
+            machine.adminName = nextAdminName;
+            autoSave.scheduleSave(machine.id, "admin-name");
+          }
         }
         const adminDisplayName = machine.adminName
           ? machine.adminName
