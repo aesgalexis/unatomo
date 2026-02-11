@@ -900,8 +900,8 @@ textarea.field {
 }
 
 #notif-menu-btn svg{
-  width:18px;
-  height:18px;
+  width:17px;
+  height:17px;
   display:block;
 }
 
@@ -923,7 +923,7 @@ textarea.field {
     min-width:252px;
   background:var(--bg);
   border:1px solid var(--border-subtle);
-  border-radius:14px;
+  border-radius:0;
   padding:10px;
   text-align:left;
   box-shadow:0 10px 30px rgba(0,0,0,0.18);
@@ -1005,7 +1005,7 @@ textarea.field {
   min-width:210px;
   background:var(--bg);
   border:1px solid var(--border-subtle);
-  border-radius:14px;
+  border-radius:0;
   padding:10px;
   text-align:left;
   box-shadow:0 10px 30px rgba(0,0,0,0.18);
