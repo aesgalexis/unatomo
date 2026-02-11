@@ -385,6 +385,19 @@
   display: inline-flex;
 }
 
+.machine-card--single .mc-status {
+  width: auto;
+  padding: 0;
+}
+
+.machine-card--single .mc-status .mc-status-text {
+  opacity: 1 !important;
+  visibility: visible;
+  max-width: 200px;
+  padding: 0 0.6rem;
+  display: inline-flex;
+}
+
 .mc-nfc-icon {
   display: inline-flex;
   align-items: center;
@@ -1387,6 +1400,11 @@
 .machine-login-panel .btn-add {
   display: block;
   margin: 0.8rem auto 0;
+  width: auto;
+  height: auto;
+  padding: 0.6rem 1.4rem;
+  font-size: 0.95rem;
+  line-height: 1.2;
 }
 
 
