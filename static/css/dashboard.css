@@ -426,6 +426,10 @@
   transform: scaleX(-1);
 }
 
+.mc-share-icon.is-pending {
+  color: #f97316;
+}
+
 .mc-tooltip {
   position: fixed;
   z-index: 1200;

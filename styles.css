@@ -888,12 +888,31 @@ textarea.field {
   align-items:center;
   justify-content:center;
   line-height:1;
+  position:relative;
 }
 
 #notif-menu-btn svg{
   width:18px;
   height:18px;
   display:block;
+}
+
+.notif-badge{
+  position:absolute;
+  top:-4px;
+  right:-4px;
+  min-width:16px;
+  height:16px;
+  padding:0 4px;
+  border-radius:999px;
+  background:#f97316;
+  color:#fff;
+  font-size:0.65rem;
+  font-weight:700;
+  line-height:16px;
+  text-align:center;
+  border:2px solid var(--bg);
+  box-sizing:border-box;
 }
 
 #notif-menu{

@@ -625,27 +625,46 @@ if (mount) {
       setTopbarNotifications([]);
       return;
     }
+    const formatInviteText = (ownerLabel, count) =>
+      `${ownerLabel} quiere que administres ${count} ${count === 1 ? "Equipo" : "Equipos"}`;
+
     inviteBanner.innerHTML = "";
     inviteBanner.style.display = "flex";
+    const grouped = new Map();
     invites.forEach((invite) => {
+      const ownerLabel = invite.ownerEmail || "Un usuario";
+      const key = `${invite.ownerUid || ""}|${ownerLabel}`;
+      if (!grouped.has(key)) {
+        grouped.set(key, { ownerLabel, invites: [] });
+      }
+      grouped.get(key).invites.push(invite);
+    });
+    grouped.forEach(({ ownerLabel, invites: groupInvites }) => {
       const row = document.createElement("div");
       row.className = "invite-row";
       const text = document.createElement("div");
       text.className = "invite-text";
-      const ownerLabel = invite.ownerEmail || "Un usuario";
-      text.textContent = `${ownerLabel} quiere que administres 1 Equipo/s`;
+      text.textContent = formatInviteText(ownerLabel, groupInvites.length);
       const actions = document.createElement("div");
       actions.className = "invite-actions";
       const acceptBtn = document.createElement("button");
       acceptBtn.type = "button";
       acceptBtn.className = "mc-location-accept";
       acceptBtn.textContent = "Aceptar";
-      acceptBtn.addEventListener("click", () => handleInviteDecision(invite, "accepted"));
+      acceptBtn.addEventListener("click", async () => {
+        for (const invite of groupInvites) {
+          await handleInviteDecision(invite, "accepted");
+        }
+      });
       const rejectBtn = document.createElement("button");
       rejectBtn.type = "button";
       rejectBtn.className = "mc-location-cancel";
       rejectBtn.textContent = "Rechazar";
-      rejectBtn.addEventListener("click", () => handleInviteDecision(invite, "rejected"));
+      rejectBtn.addEventListener("click", async () => {
+        for (const invite of groupInvites) {
+          await handleInviteDecision(invite, "rejected");
+        }
+      });
       actions.appendChild(acceptBtn);
       actions.appendChild(rejectBtn);
       row.appendChild(text);
@@ -655,7 +674,7 @@ if (mount) {
 
     setTopbarNotifications(
       invites.map((invite) => ({
-        text: `${invite.ownerEmail || "Un usuario"} quiere que administres 1 Equipo/s`,
+        text: formatInviteText(invite.ownerEmail || "Un usuario", 1),
         actions: [
           { label: "Aceptar", className: "mc-location-accept", onClick: () => handleInviteDecision(invite, "accepted") },
           { label: "Rechazar", className: "mc-location-cancel", onClick: () => handleInviteDecision(invite, "rejected") }
@@ -713,12 +732,13 @@ if (mount) {
 
   const autoSave = initAutoSave({
     notify: updateSaveState,
-    saveFn: async (machineId) => {
+    saveFn: async (machineId, reason) => {
       if (!state.uid) throw new Error("no-auth");
       const machine = getDraftById(machineId);
       if (!machine) return;
       const tenantId = machine.tenantId || state.uid;
-      if (machine.tagId) {
+      const skipTagSync = typeof reason === "string" && reason.startsWith("admin");
+      if (machine.tagId && !skipTagSync) {
         const res = await validateTag(machine.tagId);
         if (!res.exists) {
           state.tagStatusById[machine.id] = { text: "El Tag ID introducido no existe", state: "error" };
@@ -733,10 +753,17 @@ if (mount) {
       }
       await upsertMachine(tenantId, machine);
       machine.isNew = false;
-      if (machine.tagId) {
-        await assignTag(machine.tagId, tenantId, machine.id);
-        await upsertMachineAccessFromMachine(tenantId, machine, state.uid);
-        state.tagStatusById[machine.id] = { text: "Tag enlazado", state: "ok" };
+      if (machine.tagId && !skipTagSync) {
+        try {
+          await assignTag(machine.tagId, tenantId, machine.id);
+          await upsertMachineAccessFromMachine(tenantId, machine, state.uid);
+          state.tagStatusById[machine.id] = { text: "Tag enlazado", state: "ok" };
+        } catch {
+          state.tagStatusById[machine.id] = {
+            text: "Guardado. Tag pendiente de sincronizar",
+            state: "error"
+          };
+        }
       }
       updateTagStatusUI(machine.id);
     },

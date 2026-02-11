@@ -210,8 +210,21 @@ export const createMachineCard = (machine, options = {}) => {
           || (machine.adminName || "").trim()
           || (machine.adminEmail || "").trim()
           || "Administrador";
-        share.setAttribute("aria-label", `Administrada por ${adminName}`);
-        share.setAttribute("data-tooltip", `Administrada por ${adminName}`);
+        const statusText = (machine.adminStatus || "").toString();
+        const pendingNorm = statusText
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .toLowerCase();
+        const isPending = pendingNorm.startsWith("pendiente");
+        if (isPending) share.classList.add("is-pending");
+        const label = isPending
+          ? "Pendiente aceptación del administrador"
+          : `Administrada por ${adminName}`;
+        const tooltip = isPending
+          ? "Pendiente aceptación\ndel administrador"
+          : `Administrada por\n${adminName}`;
+        share.setAttribute("aria-label", label);
+        share.setAttribute("data-tooltip", tooltip);
         share.innerHTML =
           '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">' +
           '<path fill="currentColor" d="M12 3 5 6v5c0 4.4 3 8.3 7 9 4-0.7 7-4.6 7-9V6l-7-3zm0 2.2 5 2.1v3.7c0 3.2-2 6.4-5 7-3-0.6-5-3.8-5-7V7.3l5-2.1z"/>' +
@@ -225,6 +238,7 @@ export const createMachineCard = (machine, options = {}) => {
         tipEl = document.createElement("div");
         tipEl.className = "mc-tooltip";
         tipEl.textContent = label;
+        tipEl.style.whiteSpace = "pre-line";
         document.body.appendChild(tipEl);
         const x = (event && event.clientX) || 0;
         const y = (event && event.clientY) || 0;
