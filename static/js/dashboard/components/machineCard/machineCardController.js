@@ -357,6 +357,9 @@ export const createMachineCard = (machine, options = {}) => {
     panel.dataset.panel = "";
   };
 
+  const shouldMaskInteractions = () =>
+    window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
+
   const activateFirstTab = () => {
     const firstTab = card.querySelector(".mc-tab");
     if (!firstTab) return;
@@ -385,7 +388,7 @@ export const createMachineCard = (machine, options = {}) => {
     header.addEventListener("click", (event) => {
       if (
         event.target.closest(
-          ".mc-status, .mc-pending, .mc-title, .mc-title-input, .mc-location, .mc-nfc-icon, .mc-header-toggle"
+          ".mc-status, .mc-pending, .mc-title, .mc-title-input, .mc-location, .mc-nfc-icon, .mc-share-icon, .mc-header-toggle"
         )
       ) {
         return;
@@ -434,6 +437,24 @@ export const createMachineCard = (machine, options = {}) => {
   statusBtn.addEventListener("mousedown", (event) => {
     event.preventDefault();
   });
+  card.addEventListener(
+    "click",
+    (event) => {
+      if (!shouldMaskInteractions()) return;
+      if (card.dataset.expanded === "true") return;
+      if (
+        event.target.closest(
+          ".mc-status, .mc-pending, .mc-title, .mc-title-input, .mc-location, .mc-nfc-icon, .mc-share-icon, .mc-header-toggle, button, a, input, select, textarea, label"
+        )
+      ) {
+        event.preventDefault();
+        event.stopPropagation();
+        if (hooks.onToggleExpand) hooks.onToggleExpand(card);
+        if (!card.querySelector(".mc-tab.is-active")) activateFirstTab();
+      }
+    },
+    true
+  );
   statusBtn.addEventListener("click", (event) => {
     event.stopPropagation();
     if (options.canEditStatus === false) return;
