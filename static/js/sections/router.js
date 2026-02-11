@@ -1,4 +1,4 @@
-﻿import { render as renderFaqs } from "./faqs.js";
+import { render as renderFaqs } from "./faqs.js";
 import { render as renderTags } from "./tags.js";
 import { render as renderSoporte } from "./soporte.js";
 
@@ -8,7 +8,7 @@ const sectionMount = document.getElementById("section-mount");
 const sectionMap = {
   dashboard: { title: "Dashboard", render: null },
   faqs: { title: "FAQs", render: renderFaqs },
-  tags: { title: "Tags físicos / precios", render: renderTags },
+  tags: { title: "Tags f�sicos", render: renderTags },
   contacto: { title: "Contacto", render: renderSoporte }
 };
 
@@ -67,3 +67,4 @@ window.addEventListener("DOMContentLoaded", () => {
   }
   renderSection();
 });
+
