@@ -1,7 +1,7 @@
 .cards-reveal[data-reveal="true"] .machine-card {
   opacity: 0;
   transform: translateY(10px);
-  transition: opacity 0.75s ease, transform 0.75s ease;
+  transition: opacity 0.375s ease, transform 0.375s ease;
   transition-delay: var(--reveal-delay, 0ms);
 }
 

@@ -257,8 +257,8 @@ if (mount) {
         cards.forEach((card) => card.classList.remove("is-reveal"));
         state.revealedOnce = true;
         state.revealPending = false;
-      }, cards.length * 136 + 1200);
-    }, 80);
+      }, cards.length * 68 + 600);
+    }, 40);
   };
   const queueRevealAfterIdle = (seq) => {
     if (state.revealedOnce) return;
@@ -267,12 +267,12 @@ if (mount) {
       if (state.revealedOnce) return;
       if (state.renderSeq !== seq) return;
       const idleFor = Date.now() - state.lastRenderAt;
-      if (idleFor < 140) {
+      if (idleFor < 70) {
         queueRevealAfterIdle(state.renderSeq);
         return;
       }
       scheduleReveal(seq);
-    }, 160);
+    }, 80);
   };
 
   addBtn.disabled = true;
@@ -1494,7 +1494,7 @@ if (mount) {
         };
 
         if (!state.revealedOnce) {
-          card.style.setProperty("--reveal-delay", `${idx * 136}ms`);
+          card.style.setProperty("--reveal-delay", `${idx * 68}ms`);
         } else {
           card.style.removeProperty("--reveal-delay");
         }

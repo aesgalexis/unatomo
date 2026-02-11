@@ -235,6 +235,8 @@ const renderMachine = () => {
     createdBy: state.session.username || null
   });
 
+  card.classList.add("machine-card--single");
+
   card.style.maxHeight = `${COLLAPSED_HEIGHT}px`;
   card.dataset.expanded = "true";
   const recalcHeight = () => {
@@ -263,10 +265,14 @@ const renderMachine = () => {
       machineDoc.status === "desconectada" ? "fuera_de_servicio" : machineDoc.status || "operativa";
     const idx = statusOrder.indexOf(currentStatus);
     const nextStatus = statusOrder[(idx + 1) % statusOrder.length];
+    const user = state.session.username || "usuario";
     state.draft = {
       ...machineDoc,
       status: nextStatus,
-      logs: [...(machineDoc.logs || []), { ts: new Date().toISOString(), type: "status", value: nextStatus }]
+      logs: [
+        ...(machineDoc.logs || []),
+        { ts: new Date().toISOString(), type: "status", value: nextStatus, user }
+      ]
     };
     renderMachine();
     notifyTopbar("Estado actualizado");
