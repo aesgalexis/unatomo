@@ -130,6 +130,10 @@ function initSetupRegisterCode() {
   }
 
   registerBtn.addEventListener("click", () => {
+    if (!box.hidden) {
+      toggleBox();
+      return;
+    }
     requestInviteCodeAndRedirect("/es/auth/registro.html", { showInline: toggleBox });
   });
   if (shouldOpenInviteGate()) {
