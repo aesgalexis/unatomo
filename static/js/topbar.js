@@ -50,12 +50,14 @@ if (logoGroup) {
   });
   logoGroup.addEventListener("mouseleave", () => {
     document.body.classList.remove("menu-open");
+    document.body.classList.remove("menu-locked");
   });
   logoGroup.addEventListener("focusin", () => {
     document.body.classList.add("menu-open");
   });
   logoGroup.addEventListener("focusout", () => {
     document.body.classList.remove("menu-open");
+    document.body.classList.remove("menu-locked");
   });
 }
 
@@ -70,4 +72,15 @@ document.querySelectorAll(".topbar-menu-link").forEach((link) => {
 
 if (backdrop) {
   backdrop.addEventListener("click", closeTopbarMenu);
+}
+
+const logoLink = document.querySelector(".topbar-logo-link");
+if (logoLink) {
+  logoLink.addEventListener("click", () => {
+    if (document.activeElement && document.activeElement.blur) {
+      document.activeElement.blur();
+    }
+    closeTopbarMenu();
+    document.body.classList.add("menu-locked");
+  });
 }
