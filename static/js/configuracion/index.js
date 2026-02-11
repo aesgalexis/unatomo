@@ -2,6 +2,7 @@
 import { collection, getDocs } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 import { auth, db } from "/static/js/firebase/firebaseApp.js";
 import { fetchLinksForAdmin } from "/static/js/dashboard/admin/adminLinksRepo.js";
+import { upsertAccountDirectory } from "/static/js/dashboard/admin/accountDirectoryRepo.js";
 
 const mount = document.getElementById("profile-mount");
 
@@ -167,6 +168,7 @@ if (mount) {
     setText(uidEl, user.uid || "-");
 
     loadCounts(user.uid);
+    upsertAccountDirectory(user).catch(() => {});
 
     if (nameInput) {
       nameInput.addEventListener("blur", async () => {
@@ -174,6 +176,7 @@ if (mount) {
         if (!next || next === user.displayName) return;
         try {
           await updateProfile(user, { displayName: next });
+          await upsertAccountDirectory(user);
         } catch {
           nameInput.value = user.displayName || user.email || "Usuario";
         }
