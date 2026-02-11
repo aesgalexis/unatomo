@@ -1,4 +1,4 @@
-﻿export const render = (mount) => {
+export const render = (mount) => {
   const wrap = document.createElement("div");
   wrap.className = "section-block";
   wrap.innerHTML = `
@@ -24,11 +24,11 @@
             <input id="section-empresa" name="empresa" type="text" class="field" autocomplete="organization" />
           </div>
           <div class="form-field">
-            <label for="section-email">Correo electrónico<span aria-hidden="true"> *</span></label>
+            <label for="section-email">Correo electr�nico<span aria-hidden="true"> *</span></label>
             <input id="section-email" name="email" type="email" required class="field" autocomplete="email" />
           </div>
           <div class="form-field">
-            <label for="section-telefono">Teléfono</label>
+            <label for="section-telefono">Tel�fono</label>
             <input id="section-telefono" name="telefono" type="tel" class="field" autocomplete="tel" inputmode="tel" />
           </div>
           <div class="form-field form-field--full">
@@ -37,8 +37,6 @@
               <option value="" disabled selected>Selecciona un asunto...</option>
               <option>Consulta general</option>
               <option>Registro</option>
-              <option>Auditoría técnica y de procesos</option>
-              <option>Asesoría independiente de equipamiento</option>
               <option>Otros</option>
             </select>
           </div>
@@ -55,3 +53,4 @@
   `;
   mount.appendChild(wrap);
 };
+
