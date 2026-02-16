@@ -1,6 +1,7 @@
 (() => {
   const root = document.documentElement;
   const btn = document.getElementById("theme-toggle");
+  const THEME_KEY = "ls_theme";
 
   const prefersDark =
     window.matchMedia &&
@@ -8,7 +9,7 @@
 
   let saved = null;
   try {
-    saved = localStorage.getItem("theme");
+    saved = localStorage.getItem(THEME_KEY);
   } catch {}
 
   if (saved === "light" || saved === "dark") {
@@ -23,7 +24,7 @@
       const next = current === "dark" ? "light" : "dark";
       root.setAttribute("data-theme", next);
       try {
-        localStorage.setItem("theme", next);
+        localStorage.setItem(THEME_KEY, next);
       } catch {}
       updateButton(next);
     });

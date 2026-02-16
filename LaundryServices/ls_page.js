@@ -6,6 +6,17 @@
 
   if (!toggle || !menu || !label) return;
 
+  const sortLanguageOptions = () => {
+    const options = Array.from(menu.querySelectorAll(".lang-option"));
+    options
+      .sort((a, b) =>
+        a.textContent.localeCompare(b.textContent, undefined, {
+          sensitivity: "base",
+        })
+      )
+      .forEach((option) => menu.appendChild(option));
+  };
+
   const closeMenu = () => {
     menu.hidden = true;
     toggle.setAttribute("aria-expanded", "false");
@@ -44,5 +55,8 @@
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") closeMenu();
   });
+
+  sortLanguageOptions();
+  document.addEventListener("app:language-change", sortLanguageOptions);
 
 })();

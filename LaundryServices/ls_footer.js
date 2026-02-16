@@ -11,7 +11,7 @@
   const render = (lang) => {
     const year = new Date().getFullYear();
     const text = MESSAGES[lang] || MESSAGES.es;
-    legalFooter.textContent = "(c) " + year + " " + text;
+    legalFooter.textContent = "© " + year + " " + text;
   };
 
   render(document.documentElement.lang || "es");
