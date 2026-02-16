@@ -900,12 +900,20 @@ textarea.field {
   display:inline-flex;
 }
 
+#msg-menu-wrap{
+  position:relative;
+  display:inline-flex;
+  height:32px;
+}
+
 #notif-menu-wrap{
   position:relative;
   display:inline-flex;
 }
 
-#notif-menu-btn{
+#msg-menu-btn,
+#notif-menu-btn,
+#session-menu-btn{
   margin-top:0;
   width:40px;
   height:32px;
@@ -928,7 +936,28 @@ textarea.field {
   align-items:center;
   justify-content:center;
   line-height:1;
+}
+
+#msg-menu-btn{
+  opacity:0.58;
+  color:color-mix(in srgb, var(--fg) 55%, transparent);
+  cursor:default;
+}
+
+#notif-menu-btn{
   position:relative;
+}
+
+#msg-menu-btn svg{
+  width:18px;
+  height:18px;
+  display:block;
+}
+
+#msg-menu-btn{
+  height:32px;
+  min-height:32px;
+  max-height:32px;
 }
 
 #notif-menu-btn svg{
@@ -999,35 +1028,51 @@ textarea.field {
   gap:0.4rem;
 }
 
-#session-menu-btn{
-  margin-top:0;
-  width:40px;
-  height:32px;
-  padding:0;
-  border-radius:0.75rem;
-  border:none;
-  background:color-mix(in srgb, var(--bg) 80%, transparent);
-  color:var(--fg);
-  font:inherit;
-  font-size:0.9rem;
-  cursor:pointer;
-  opacity:0.9;
-  backdrop-filter:blur(8px);
-  -webkit-tap-highlight-color:transparent;
-  appearance:none;
-  -webkit-appearance:none;
-  box-shadow:none;
-  filter:none;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  line-height:1;
-}
-
 #session-menu-btn svg{
   width:18px;
   height:18px;
   display:block;
+}
+
+#msg-menu-btn:hover,
+#notif-menu-btn:hover,
+#session-menu-btn:hover{
+  opacity:1;
+  filter:none;
+}
+
+#msg-menu-btn:hover,
+#msg-menu-btn:focus-visible{
+  opacity:0.58;
+  filter:none;
+}
+
+#msg-menu-wrap::after{
+  content:"Soon";
+  position:absolute;
+  left:50%;
+  top:calc(100% + 8px);
+  transform:translate(-50%, -4px);
+  background:var(--bg);
+  color:var(--fg);
+  border:1px solid var(--border-subtle);
+  border-radius:6px;
+  padding:4px 8px;
+  font-size:0.75rem;
+  line-height:1;
+  white-space:nowrap;
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  transition:opacity 0.15s ease, transform 0.15s ease, visibility 0.15s ease;
+  z-index:1100;
+}
+
+#msg-menu-wrap:hover::after,
+#msg-menu-wrap:focus-within::after{
+  opacity:1;
+  visibility:visible;
+  transform:translate(-50%, 0);
 }
 
 #session-menu{
