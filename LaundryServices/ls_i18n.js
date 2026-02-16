@@ -6,9 +6,9 @@
       page_title: "unatomo | Laundry Services",
       page_desc:
         "Servicios tecnicos para lavanderias industriales: auditoria, asesoramiento y control de productividad.",
-      lang_option_en: "Ingles",
-      lang_option_es: "Espanol",
-      lang_option_el: "Griego",
+      lang_option_en: "English",
+      lang_option_es: "Español",
+      lang_option_el: "ελληνικά",
       hero_title:
         "Auditoria, asesoramiento y soporte tecnico para lavanderias industriales.",
       hero_lead:
@@ -47,9 +47,9 @@
       page_title: "unatomo | Laundry Services",
       page_desc:
         "Technical services for industrial laundries: audits, advisory and productivity control.",
-      lang_option_en: "Ingles",
-      lang_option_es: "Espanol",
-      lang_option_el: "Griego",
+      lang_option_en: "English",
+      lang_option_es: "Español",
+      lang_option_el: "ελληνικά",
       hero_title:
         "Audit, advisory and technical support for industrial laundries.",
       hero_lead:
@@ -89,8 +89,8 @@
       page_desc:
         "Τεχνικές υπηρεσίες για βιομηχανικά πλυντήρια: έλεγχος, συμβουλευτική και έλεγχος παραγωγικότητας.",
       lang_option_en: "English",
-      lang_option_es: "Spanish",
-      lang_option_el: "Greek",
+      lang_option_es: "Español",
+      lang_option_el: "ελληνικά",
       hero_title:
         "Ελεγχος, συμβουλευτικη και τεχνικη υποστηριξη για βιομηχανικα πλυντηρια.",
       hero_lead:
@@ -169,9 +169,15 @@
       const stored = localStorage.getItem("lang");
       if (stored) return normalize(stored);
     } catch {}
-    return normalize(document.documentElement.lang || "es");
+    const fromBrowser =
+      (navigator.languages && navigator.languages[0]) ||
+      navigator.language ||
+      document.documentElement.lang ||
+      "es";
+    return normalize(String(fromBrowser).slice(0, 2).toLowerCase());
   };
 
   window.unatomoI18n = { setLanguage, getLanguage, supported: [...LANGS] };
   setLanguage(getLanguage());
 })();
+

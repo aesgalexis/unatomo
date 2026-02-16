@@ -314,6 +314,38 @@ body.page #theme-toggle {
   filter: none;
 }
 
+#theme-toggle .icon {
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#theme-toggle svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+  fill: currentColor;
+  stroke: currentColor;
+}
+
+#theme-toggle[data-theme="dark"] [data-icon="sun"] {
+  display: none;
+}
+
+#theme-toggle[data-theme="light"] [data-icon="moon"] {
+  display: none;
+}
+
+:root[data-theme="dark"] #theme-toggle [data-icon="sun"] {
+  display: none;
+}
+
+:root[data-theme="light"] #theme-toggle [data-icon="moon"] {
+  display: none;
+}
+
 .intro {
   margin-top: 1.5rem;
   margin-bottom: 0.5rem;

@@ -17,11 +17,7 @@
                 <path d="M12 2.5v3M12 18.5v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2.5 12h3M18.5 12h3M4.9 19.1l2.1-2.1M17 7l2.1-2.1" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"></path>
               </svg>
             </span>
-            <span class="icon" data-icon="moon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" role="img" focusable="false">
-                <path d="M20 15.5A8 8 0 1 1 8.5 4a6.5 6.5 0 0 0 11.5 11.5z" fill="currentColor"></path>
-              </svg>
-            </span>
+            <span class="icon" data-icon="moon" aria-hidden="true">\u263E</span>
           </button>
           <div class="lang-picker">
             <button id="lang-toggle" class="icon-button" type="button" aria-expanded="false" aria-controls="lang-menu">
@@ -33,9 +29,9 @@
               <span class="lang-label">ES</span>
             </button>
             <div id="lang-menu" class="lang-menu" role="menu" hidden>
-              <button type="button" class="lang-option" data-lang="en" role="menuitem" data-i18n="lang_option_en">Ingles</button>
-              <button type="button" class="lang-option" data-lang="es" role="menuitem" data-i18n="lang_option_es">Espanol</button>
-              <button type="button" class="lang-option" data-lang="el" role="menuitem" data-i18n="lang_option_el">Griego</button>
+              <button type="button" class="lang-option" data-lang="en" role="menuitem" data-i18n="lang_option_en">English</button>
+              <button type="button" class="lang-option" data-lang="es" role="menuitem" data-i18n="lang_option_es">Espa\u00f1ol</button>
+              <button type="button" class="lang-option" data-lang="el" role="menuitem" data-i18n="lang_option_el">\u03b5\u03bb\u03bb\u03b7\u03bd\u03b9\u03ba\u03ac</button>
             </div>
           </div>
         </div>
