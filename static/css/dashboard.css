@@ -226,6 +226,16 @@
   margin-bottom: 1rem;
 }
 
+:root[data-theme="dark"] .machine-card {
+  background: #000;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) .machine-card {
+    background: #000;
+  }
+}
+
 .machine-card.mc-no-anim {
   transition: none !important;
 }
@@ -251,6 +261,46 @@
 
 .machine-card[data-expanded="false"] .mc-header {
   justify-content: center;
+}
+
+.machine-card[data-expanded="false"]::after {
+  content: "+";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  color: transparent;
+  font-size: 1.15rem;
+  font-weight: 600;
+  line-height: 1;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.84s ease, color 0.84s ease;
+}
+
+.machine-card[data-expanded="false"]:hover:not(
+  :has(
+    .mc-title:hover,
+    .mc-title-input:hover,
+    .mc-location:hover,
+    .mc-location:focus-within,
+    .mc-location-select:focus,
+    .mc-location-input:focus,
+    .mc-pending:hover,
+    .mc-status:hover,
+    .mc-nfc-icon:hover,
+    .mc-share-icon:hover,
+    button:hover,
+    a:hover,
+    input:hover,
+    select:hover,
+    textarea:hover,
+    label:hover
+  )
+)::after {
+  transition-duration: 2.55s, 2.55s;
+  color: #fff;
+  opacity: 1;
 }
 
 .mc-title {
