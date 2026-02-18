@@ -1,4 +1,4 @@
-(() => {
+﻿(() => {
   const LANGS = ["es", "en", "el"];
 
   const I18N = {
@@ -10,35 +10,36 @@
       lang_option_es: "Español",
       lang_option_el: "ελληνικά",
       hero_title:
-        "Auditoria, asesoramiento y soporte tecnico para lavanderias industriales.",
+        "Auditoria, asesoramiento y soporte tecnico para lavanderias industriales",
       hero_lead:
-        "Servicios independientes para optimizar procesos, validar inversiones y capturar datos utiles para la operacion diaria.",
-      card1_title: "Auditoria tecnica y de procesos",
+        "",
+      closing_claim: "Tu proceso, Nuestra visión",
+      card1_title: "Auditoria técnica y de procesos",
       card1_p1:
-        "Deteccion de puntos criticos para optimizar el rendimiento de planta. Realizamos una inspeccion integral para identificar donde se esta perdiendo rendimiento y como se podria evitar. Nos centramos en corregir cuellos de botella, fallos recurrentes y desajustes operativos que lastran la produccion en el dia a dia.",
+        "Detección de puntos críticos para optimizar el rendimiento de planta. Realizamos una inspección integral para identificar donde se esta perdiendo rendimiento y como se podría evitar. Nos centramos en corregir cuellos de botella, fallos recurrentes y desajustes operativos que lastran la producción en el día a día.",
       card1_p2:
-        "Realizamos un informe tecnico por secciones con prioridades claras sobre en que urge intervenir, que mejoras programar y que inversiones pueden resultar mas rentables.",
+        "Realizamos un informe técnico por secciones con prioridades claras sobre en que urge intervenir, que mejoras programar y que inversiones pueden resultar mas rentables.",
       card1_p3:
-        "Ponemos el foco en el analisis de los flujos de produccion, mantenimiento preventivo, recambios criticos y habitos de trabajo.",
+        "Ponemos el foco en el análisis de los flujos de producción, mantenimiento preventivo, recambios críticos y hábitos de trabajo.",
       card1_price: "Desde 1390 EUR/día",
       card1_price_note:
         "* (Gastos de traslado y alojamiento no incluidos en el precio)\n** (Solo España: impuestos no incluidos)",
       card1_cta: "Contratar",
-      card2_title: "Asesoria independiente de equipamiento",
+      card2_title: "Asesoría independiente de equipamiento",
       card2_p1:
-        "Validacion tecnica de inversiones sin conflictos de interes. Aportamos perspectiva tecnica antes de que cierren su proxima compra. No representamos marcas ni cobramos comisiones de fabricantes. Nuestro objetivo es asegurar que el equipo sea el adecuado para su operativa real.",
+        "Validación técnica de inversiones sin conflictos de interés. Aportamos perspectiva técnica antes de que cierren su próxima compra. No representamos marcas ni cobramos comisiones de fabricantes. Nuestro objetivo es asegurar que el equipo sea el adecuado para su operativa real.",
       card2_p2:
-        "Realizamos un analisis exhaustivo de idoneidad, virtudes, limitaciones y flexibilidad de la maquina a medio-largo plazo.",
+        "Realizamos un análisis exhaustivo de idoneidad, virtudes, limitaciones y flexibilidad de la maquina a medio-largo plazo.",
       card2_p3:
-        "Evaluamos el servicio postventa y mantenimiento: dependencia de repuestos, facilidad de servicio tecnico y vida util esperable.",
+        "Evaluamos el servicio postventa y mantenimiento: dependencia de repuestos, facilidad de servicio técnico y vida útil esperable.",
       card2_p4:
-        "Acompanamiento: revision del pliego tecnico y comparativa de alternativas antes de la decision final.",
-      card2_price: "Desde 1,5% del coste de la inversion",
+        "Acompañamiento: revisión del pliego técnico y comparativa de alternativas antes de la decisión final.",
+      card2_price: "Desde 1,5% del coste de la inversión",
       card2_cta: "Solicitar",
       card3_title: "Control de productividad, consumos y captura de datos",
       card3_p1:
-        "Software adaptado para recabar datos de todo lo que se pueda considerar relevante para la produccion. Implementamos soluciones de monitorizacion que captura, traduce y representa el trabajo de la lavanderia en datos utiles para el control diario y la toma de decisiones.",
-      card3_cta: "Consultar",
+        "Software adaptado para recabar datos de todo lo que se pueda considerar relevante para la producción. Implementamos soluciones de monitorización que captura, traduce y representa el trabajo de la lavandería en datos útiles para el control diario y la toma de decisiones.",
+      card3_cta: "Solicitar",
       card4_title: "Asistencia técnica",
       card4_cta: "No disponible",
       contact_page_title: "Contacto · unatomo | Laundry Services",
@@ -70,9 +71,10 @@
       lang_option_es: "Español",
       lang_option_el: "ελληνικά",
       hero_title:
-        "Audit, advisory and technical support for industrial laundries.",
+        "Audit, advisory and technical support for industrial laundries",
       hero_lead:
-        "Independent services to optimize processes, validate investments and capture useful data for daily operations.",
+        "",
+      closing_claim: "Your process, Our insight",
       card1_title: "Technical and process audit",
       card1_p1:
         "Detection of critical points to optimize plant performance. We perform a full inspection to identify where performance is being lost and how to prevent it. We focus on correcting bottlenecks, recurring failures and operational imbalances that hurt day-to-day production.",
@@ -80,8 +82,9 @@
         "We provide a technical report by section with clear priorities on what requires urgent action, what improvements to schedule, and what investments can be more profitable.",
       card1_p3:
         "We focus on production flow analysis, preventive maintenance, critical spare parts and work practices.",
-      card1_price: "From 1790 EUR/day",
-      card1_price_note: "(Report included in the price)",
+      card1_price: "From 1390 EUR/day",
+      card1_price_note:
+        "* (Travel and accommodation costs not included in the price)\n** (Spain only: taxes not included)",
       card1_cta: "Hire",
       card2_title: "Independent equipment advisory",
       card2_p1:
@@ -97,7 +100,7 @@
       card3_title: "Productivity control and data capture",
       card3_p1:
         "Custom software to collect data from everything considered relevant to production. We implement monitoring solutions that capture, translate and represent laundry operations into useful data for daily control and decision-making.",
-      card3_cta: "Consult",
+      card3_cta: "Request",
       card4_title: "Technical assistance",
       card4_cta: "Unavailable",
       contact_page_title: "Contact · unatomo | Laundry Services",
@@ -129,9 +132,10 @@
       lang_option_es: "Español",
       lang_option_el: "ελληνικά",
       hero_title:
-        "Ελεγχος, συμβουλευτικη και τεχνικη υποστηριξη για βιομηχανικα πλυντηρια.",
+        "Ελεγχος, συμβουλευτικη και τεχνικη υποστηριξη για βιομηχανικα πλυντηρια",
       hero_lead:
-        "Ανεξαρτητες υπηρεσιες για βελτιστοποιηση διαδικασιων, αξιολογηση επενδυσεων και συλλογη χρησιμων δεδομενων για την καθημερινη λειτουργια.",
+        "",
+      closing_claim: "Η διαδικασία σας, η γνώση μας",
       card1_title: "Τεχνικος και λειτουργικος ελεγχος",
       card1_p1:
         "Εντοπισμος κρισιμων σημειων για βελτιστοποιηση της αποδοσης της μοναδας. Πραγματοποιουμε ολοκληρωμενη επιθεωρηση για να εντοπισουμε που χανεται αποδοση και πως μπορει να αποτραπει. Εστιαζουμε στη διορθωση σημειων συμφόρησης, επαναλαμβανομενων βλαβων και λειτουργικων αστοχιων που επηρεαζουν την καθημερινη παραγωγη.",
@@ -139,8 +143,9 @@
         "Παρεχουμε τεχνικη αναφορα ανα τομεα με σαφεις προτεραιοτητες για αμεσες παρεμβασεις, προγραμματισμενες βελτιωσεις και πιο αποδοτικες επενδυσεις.",
       card1_p3:
         "Εστιαζουμε στην αναλυση ροων παραγωγης, στην προληπτικη συντηρηση, στα κρισιμα ανταλλακτικα και στις πρακτικες εργασιας.",
-      card1_price: "Απο 1790 EUR/ημερα",
-      card1_price_note: "(Η αναφορα περιλαμβανεται στην τιμη)",
+      card1_price: "Απο 1390 EUR/ημερα",
+      card1_price_note:
+        "* (Τα εξοδα μετακινησης και διαμονης δεν περιλαμβανονται στην τιμη)\n** (Μονο Ισπανια: οι φοροι δεν περιλαμβανονται)",
       card1_cta: "Αναθεση",
       card2_title: "Ανεξαρτητη συμβουλευτικη εξοπλισμου",
       card2_p1:
@@ -156,7 +161,7 @@
       card3_title: "Ελεγχος παραγωγικοτητας και συλλογη δεδομενων",
       card3_p1:
         "Προσαρμοσμενο λογισμικο για συλλογη δεδομενων απο καθε στοιχειο που θεωρειται σημαντικο για την παραγωγη. Υλοποιουμε λυσεις παρακολουθησης που καταγραφουν, μετατρεπουν και παρουσιαζουν τη λειτουργια του πλυντηριου σε χρησιμα δεδομενα για καθημερινο ελεγχο και ληψη αποφασεων.",
-      card3_cta: "Συμβουλη",
+      card3_cta: "Αιτηση",
       card4_title: "Τεχνικη υποστηριξη",
       card4_cta: "Μη διαθεσιμο",
       contact_page_title: "Επικοινωνία · unatomo | Laundry Services",

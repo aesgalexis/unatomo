@@ -178,6 +178,40 @@ a:hover {
   gap: 1.5rem;
 }
 
+.closing-claim {
+  margin-top: 4.4rem;
+}
+
+.closing-claim-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.8fr);
+  gap: 2rem;
+  align-items: center;
+}
+
+.closing-claim h2 {
+  font-size: clamp(2.2rem, 4.6vw, 3.2rem);
+  letter-spacing: -0.03em;
+  color: var(--fg);
+  font-weight: 600;
+  margin: 0;
+}
+
+.closing-claim-icon {
+  width: 100px;
+  height: 100px;
+  color: color-mix(in srgb, var(--fg) 85%, transparent);
+  justify-self: center;
+  align-self: center;
+  flex-shrink: 0;
+}
+
+.closing-claim-icon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
 .service-card {
   position: relative;
   padding: 0 1.2rem;
@@ -561,13 +595,27 @@ body.page .ls-topbar #lang-toggle {
 }
 
 .card {
-  max-width: 600px;
-  margin: 2rem auto;
-  padding: 1rem 1.25rem 1.5rem;
-  border-radius: 0;
+  padding: 1.3rem 1.4rem;
   border: 1px solid var(--border-subtle);
+  border-radius: 0;
   background: var(--panel-bg);
   text-align: left;
+}
+
+body.ls-contact-page .page-shell {
+  max-width: 800px;
+}
+
+body.ls-contact-page .contacto {
+  display: grid;
+  gap: 1.1rem;
+}
+
+body.ls-privacy-page {
+  background:
+    radial-gradient(circle at 85% 10%, color-mix(in srgb, var(--fg) 8%, transparent), transparent 55%),
+    radial-gradient(circle at 10% 15%, color-mix(in srgb, var(--fg) 5%, transparent), transparent 50%),
+    var(--bg);
 }
 
 .contact-info {
