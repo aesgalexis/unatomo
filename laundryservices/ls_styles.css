@@ -689,6 +689,10 @@ textarea.field {
     padding: 92px 1.25rem 2.5rem;
   }
 
+  .service-card.is-collapsed {
+    height: 48px;
+  }
+
   .service-card {
     padding: 0.9rem 1rem;
   }
