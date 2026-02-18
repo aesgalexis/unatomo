@@ -20,8 +20,9 @@
         "Realizamos un informe tecnico por secciones con prioridades claras sobre en que urge intervenir, que mejoras programar y que inversiones pueden resultar mas rentables.",
       card1_p3:
         "Ponemos el foco en el analisis de los flujos de produccion, mantenimiento preventivo, recambios criticos y habitos de trabajo.",
-      card1_price: "Desde 1790 EUR/dia",
-      card1_price_note: "(Informe incluido en el precio)",
+      card1_price: "Desde 1390 EUR/día",
+      card1_price_note:
+        "* (Gastos de traslado y alojamiento no incluidos en el precio)\n** (Solo España: impuestos no incluidos)",
       card1_cta: "Contratar",
       card2_title: "Asesoria independiente de equipamiento",
       card2_p1:
@@ -40,6 +41,24 @@
       card3_cta: "Consultar",
       card4_title: "Asistencia técnica",
       card4_cta: "No disponible",
+      contact_page_title: "Contacto · unatomo | Laundry Services",
+      contact_email_label: "Correo electrónico:",
+      contact_phone_label: "Teléfono:",
+      contact_hours_label: "Horario de atención:",
+      contact_hours_value:
+        "De lunes a viernes, de 09:00 a 15:00 (Horario de España / CET).",
+      contact_address_label: "Dirección:",
+      contact_form_title: "Formulario de contacto",
+      contact_name_label: "Nombre",
+      contact_company_label: "Empresa",
+      contact_cif_label: "CIF",
+      contact_email_field_label: "Correo electrónico",
+      contact_phone_field_label: "Teléfono",
+      contact_subject_label: "Asunto",
+      contact_subject_placeholder: "Selecciona un asunto…",
+      contact_subject_other: "Otro",
+      contact_message_label: "Mensaje",
+      contact_send: "Enviar",
       privacy_link: "Politica de privacidad y cookies",
       legal_footer: "UNATOMO CORE SL - Todos los derechos reservados.",
     },
@@ -81,6 +100,24 @@
       card3_cta: "Consult",
       card4_title: "Technical assistance",
       card4_cta: "Unavailable",
+      contact_page_title: "Contact · unatomo | Laundry Services",
+      contact_email_label: "Email:",
+      contact_phone_label: "Phone:",
+      contact_hours_label: "Support hours:",
+      contact_hours_value:
+        "Monday to Friday, from 09:00 to 15:00 (Spain time / CET).",
+      contact_address_label: "Address:",
+      contact_form_title: "Contact form",
+      contact_name_label: "Name",
+      contact_company_label: "Company",
+      contact_cif_label: "Tax ID",
+      contact_email_field_label: "Email",
+      contact_phone_field_label: "Phone",
+      contact_subject_label: "Subject",
+      contact_subject_placeholder: "Select a subject…",
+      contact_subject_other: "Other",
+      contact_message_label: "Message",
+      contact_send: "Send",
       privacy_link: "Privacy and cookies policy",
       legal_footer: "UNATOMO CORE SL - All rights reserved.",
     },
@@ -122,6 +159,24 @@
       card3_cta: "Συμβουλη",
       card4_title: "Τεχνικη υποστηριξη",
       card4_cta: "Μη διαθεσιμο",
+      contact_page_title: "Επικοινωνία · unatomo | Laundry Services",
+      contact_email_label: "Email:",
+      contact_phone_label: "Τηλέφωνο:",
+      contact_hours_label: "Ωράριο εξυπηρέτησης:",
+      contact_hours_value:
+        "Δευτέρα έως Παρασκευή, 09:00 έως 15:00 (Ώρα Ισπανίας / CET).",
+      contact_address_label: "Διεύθυνση:",
+      contact_form_title: "Φόρμα επικοινωνίας",
+      contact_name_label: "Όνομα",
+      contact_company_label: "Εταιρεία",
+      contact_cif_label: "ΑΦΜ",
+      contact_email_field_label: "Email",
+      contact_phone_field_label: "Τηλέφωνο",
+      contact_subject_label: "Θέμα",
+      contact_subject_placeholder: "Επιλέξτε θέμα…",
+      contact_subject_other: "Άλλο",
+      contact_message_label: "Μήνυμα",
+      contact_send: "Αποστολή",
       privacy_link: "Πολιτικη απορρητου και cookies",
       legal_footer: "UNATOMO CORE SL - Με επιφυλαξη παντος δικαιωματος.",
     },
@@ -141,7 +196,8 @@
       el.textContent = t[key];
     });
 
-    document.title = t.page_title;
+    const pageTitleEl = document.querySelector("title[data-i18n]");
+    document.title = pageTitleEl ? pageTitleEl.textContent : t.page_title;
     const desc = document.querySelector('meta[name="description"]');
     if (desc) desc.setAttribute("content", t.page_desc);
 

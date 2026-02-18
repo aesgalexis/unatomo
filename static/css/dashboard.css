@@ -223,7 +223,7 @@
   position: relative;
   max-height: var(--mc-collapsed-height);
   transition: max-height 240ms ease;
-  margin-bottom: 1rem;
+  margin-bottom: 0.6rem;
 }
 
 :root[data-theme="dark"] .machine-card {
@@ -299,7 +299,7 @@
   )
 )::after {
   transition-duration: 2.55s, 2.55s;
-  color: #fff;
+  color: var(--fg);
   opacity: 1;
 }
 
