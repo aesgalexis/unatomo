@@ -52,6 +52,7 @@ if (mount) {
     loading: true,
     ownerReady: false,
     adminReady: false,
+    loadingGuardTimer: null,
     revealPending: false,
     revealedOnce: false,
     lastRenderAt: 0,
@@ -244,6 +245,10 @@ if (mount) {
     setLoadingProgress(pct);
     if (ready >= total && state.loading) {
       state.loading = false;
+      if (state.loadingGuardTimer) {
+        clearTimeout(state.loadingGuardTimer);
+        state.loadingGuardTimer = null;
+      }
       if (!state.revealedOnce) {
         state.revealPending = true;
       }
@@ -254,6 +259,28 @@ if (mount) {
         loadingEl.style.display = "none";
       }, 2000);
     }
+  };
+
+  const armLoadingGuard = () => {
+    if (state.loadingGuardTimer) {
+      clearTimeout(state.loadingGuardTimer);
+      state.loadingGuardTimer = null;
+    }
+    state.loadingGuardTimer = setTimeout(() => {
+      let changed = false;
+      if (!state.ownerReady) {
+        state.ownerReady = true;
+        changed = true;
+      }
+      if (!state.adminReady) {
+        state.adminReady = true;
+        changed = true;
+      }
+      if (changed) {
+        updateLoading();
+        renderCards({ preserveScroll: true });
+      }
+    }, 8000);
   };
 
   let revealTimer = null;
@@ -469,29 +496,40 @@ if (mount) {
   const subscribeOwnerMachines = (uid) => {
     if (state.ownerUnsub) state.ownerUnsub();
     const q = query(collection(db, "machines"), where("ownerUid", "==", uid));
-    state.ownerUnsub = onSnapshot(q, { includeMetadataChanges: true }, (snap) => {
-      if (snap.metadata.hasPendingWrites) return;
-      if (!state.ownerReady) {
-        state.ownerReady = true;
-        updateLoading();
+    state.ownerUnsub = onSnapshot(
+      q,
+      { includeMetadataChanges: true },
+      (snap) => {
+        if (snap.metadata.hasPendingWrites) return;
+        if (!state.ownerReady) {
+          state.ownerReady = true;
+          updateLoading();
+        }
+        const changedIds = snap.docChanges().map((change) => change.doc.id);
+        if (changedIds.length && changedIds.every((id) => isRecentLocalWrite(id))) {
+          return;
+        }
+        const list = snap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
+        const normalized = list
+          .map((m, idx) => normalizeMachine(m, idx))
+          .filter(Boolean)
+          .map((m) => ({
+            ...m,
+            tenantId: uid,
+            role: "owner",
+            ownerEmail: state.adminEmail || ""
+          }));
+        state.ownerMachines = normalized;
+        scheduleRebuild({ preserveScroll: true });
+      },
+      () => {
+        if (!state.ownerReady) {
+          state.ownerReady = true;
+          updateLoading();
+        }
+        renderCards({ preserveScroll: true });
       }
-      const changedIds = snap.docChanges().map((change) => change.doc.id);
-      if (changedIds.length && changedIds.every((id) => isRecentLocalWrite(id))) {
-        return;
-      }
-      const list = snap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
-      const normalized = list
-        .map((m, idx) => normalizeMachine(m, idx))
-        .filter(Boolean)
-        .map((m) => ({
-          ...m,
-          tenantId: uid,
-          role: "owner",
-          ownerEmail: state.adminEmail || ""
-        }));
-      state.ownerMachines = normalized;
-      scheduleRebuild({ preserveScroll: true });
-    });
+    );
   };
 
   const syncAdminMachineListeners = (links) => {
@@ -535,17 +573,27 @@ if (mount) {
       collection(db, "admin_machine_links"),
       where("adminUid", "==", uid)
     );
-    state.adminLinksUnsub = onSnapshot(q, (snap) => {
-      if (!state.adminReady) {
-        state.adminReady = true;
-        updateLoading();
+    state.adminLinksUnsub = onSnapshot(
+      q,
+      (snap) => {
+        if (!state.adminReady) {
+          state.adminReady = true;
+          updateLoading();
+        }
+        const links = snap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
+        state.adminLinks = links;
+        const activeLinks = links.filter((link) => link.status !== "left" && link.status !== "rejected");
+        syncAdminMachineListeners(activeLinks);
+        scheduleRebuild({ preserveScroll: true });
+      },
+      () => {
+        if (!state.adminReady) {
+          state.adminReady = true;
+          updateLoading();
+        }
+        renderCards({ preserveScroll: true });
       }
-      const links = snap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
-      state.adminLinks = links;
-      const activeLinks = links.filter((link) => link.status !== "left" && link.status !== "rejected");
-      syncAdminMachineListeners(activeLinks);
-      scheduleRebuild({ preserveScroll: true });
-    });
+    );
   };
 
   const subscribePendingInvites = (emailLower) => {
@@ -1658,14 +1706,27 @@ if (mount) {
     state.uid = uid;
     state.adminLabel = user.displayName || user.email || "Administrador";
     state.adminEmail = user.email || "";
+    armLoadingGuard();
     try {
       await upsertAccountDirectory(user);
     } catch {
       // ignore directory write errors
     }
 
+    let ownerFetchResolved = false;
+    let ownerBootstrap = [];
     try {
       const remote = await fetchMachines(uid);
+      ownerFetchResolved = true;
+      ownerBootstrap = remote
+        .map((m, idx) => normalizeMachine(m, idx))
+        .filter(Boolean)
+        .map((m) => ({
+          ...m,
+          tenantId: uid,
+          role: "owner",
+          ownerEmail: state.adminEmail || ""
+        }));
       if (!remote.length) {
         const legacy = await fetchLegacyMachines(uid);
         if (legacy.length) {
@@ -1677,6 +1738,24 @@ if (mount) {
     }
 
     const emailLower = normalizeEmail(user.email || "");
+    if (ownerFetchResolved) {
+      state.ownerMachines = ownerBootstrap;
+      if (!state.ownerReady) {
+        state.ownerReady = true;
+        updateLoading();
+      }
+    }
+    try {
+      const adminBootstrap = await fetchAdminMachines(uid, emailLower);
+      state.adminMachines = adminBootstrap;
+      if (!state.adminReady) {
+        state.adminReady = true;
+        updateLoading();
+      }
+    } catch {
+      // ignore admin bootstrap failures
+    }
+    scheduleRebuild({ preserveScroll: true });
     subscribeOwnerMachines(uid);
     subscribeAdminLinks(uid);
     subscribePendingInvites(emailLower);
