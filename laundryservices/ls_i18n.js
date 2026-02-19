@@ -21,7 +21,7 @@
         "Realizamos un informe técnico por secciones con prioridades claras sobre en que urge intervenir, que mejoras programar y que inversiones pueden resultar mas rentables.",
       card1_p3:
         "Ponemos el foco en el análisis de los flujos de producción, mantenimiento preventivo, recambios críticos y hábitos de trabajo.",
-      card1_price: "Desde 1390 EUR/día",
+      card1_price: "Desde 1790 EUR/día",
       card1_price_note:
         "* (Gastos de traslado y alojamiento no incluidos en el precio)\n** (Solo España: impuestos no incluidos)",
       card1_cta: "Contratar",
@@ -82,7 +82,7 @@
         "We provide a technical report by section with clear priorities on what requires urgent action, what improvements to schedule, and what investments can be more profitable.",
       card1_p3:
         "We focus on production flow analysis, preventive maintenance, critical spare parts and work practices.",
-      card1_price: "From 1390 EUR/day",
+      card1_price: "From 1790 EUR/day",
       card1_price_note:
         "* (Travel and accommodation costs not included in the price)\n** (Spain only: taxes not included)",
       card1_cta: "Hire",
@@ -143,7 +143,7 @@
         "Παρεχουμε τεχνικη αναφορα ανα τομεα με σαφεις προτεραιοτητες για αμεσες παρεμβασεις, προγραμματισμενες βελτιωσεις και πιο αποδοτικες επενδυσεις.",
       card1_p3:
         "Εστιαζουμε στην αναλυση ροων παραγωγης, στην προληπτικη συντηρηση, στα κρισιμα ανταλλακτικα και στις πρακτικες εργασιας.",
-      card1_price: "Απο 1390 EUR/ημερα",
+      card1_price: "Απο 1790 EUR/ημερα",
       card1_price_note:
         "* (Τα εξοδα μετακινησης και διαμονης δεν περιλαμβανονται στην τιμη)\n** (Μονο Ισπανια: οι φοροι δεν περιλαμβανονται)",
       card1_cta: "Αναθεση",
