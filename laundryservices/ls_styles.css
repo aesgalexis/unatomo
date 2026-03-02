@@ -334,6 +334,11 @@ a:hover {
   display: flex;
   align-items: flex-start;
   justify-content: flex-start;
+  width: 100%;
+}
+
+.ls-upperfooter-brand.is-logo-right {
+  justify-content: flex-end;
 }
 
 .ls-upperfooter-logo {
@@ -341,6 +346,8 @@ a:hover {
   height: auto;
   display: block;
   opacity: 0.95;
+  cursor: pointer;
+  touch-action: manipulation;
 }
 
 .service-card {
