@@ -186,12 +186,14 @@ a:hover {
 }
 
 .closing-claim {
-  margin-top: 4.4rem;
+  margin-top: 5.4rem;
+  text-align: center;
 }
 
 .closing-claim-head {
-  display: inline-flex;
+  display: flex;
   align-items: center;
+  justify-content: center;
   gap: 1.1rem;
 }
 
@@ -201,6 +203,24 @@ a:hover {
   color: var(--fg);
   font-weight: 600;
   margin: 0;
+}
+
+.claim-loop-banner {
+  width: 100%;
+  padding: 0.9rem 1rem;
+  background: transparent;
+}
+
+.claim-loop-text {
+  margin: 0;
+  transition: opacity 0.34s ease, transform 0.34s ease, filter 0.34s ease;
+  will-change: opacity, transform, filter;
+}
+
+.claim-loop-text.is-transitioning {
+  opacity: 0.04;
+  transform: translateY(6px);
+  filter: blur(2px);
 }
 
 .closing-claim-icon {
@@ -217,11 +237,11 @@ a:hover {
 }
 
 .ls-upperfooter {
-  margin-top: 2.5rem;
+  margin-top: 1.6rem;
   padding-top: 1.5rem;
   border-top: 1px solid var(--border-subtle);
   display: grid;
-  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr) minmax(0, 1.2fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1.25rem;
   align-items: start;
 }
@@ -253,6 +273,40 @@ a:hover {
 
 .ls-upperfooter-contact .contact-info {
   margin-top: 0;
+  display: grid;
+  row-gap: 0.65rem;
+}
+
+.ls-upperfooter-contact .contact-info-item {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  column-gap: 0.5rem;
+  align-items: start;
+}
+
+.ls-upperfooter-contact .contact-icon-link {
+  width: 18px;
+  height: 18px;
+  border-radius: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: color-mix(in srgb, var(--fg) 78%, transparent);
+  border: none;
+  text-decoration: none;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.ls-upperfooter-contact .contact-icon-link:hover,
+.ls-upperfooter-contact .contact-icon-link:focus-visible {
+  color: var(--fg);
+  border: none;
+}
+
+.ls-upperfooter-contact .contact-info-item p {
+  line-height: 1.35;
 }
 
 .ls-upperfooter-brand {
@@ -262,7 +316,7 @@ a:hover {
 }
 
 .ls-upperfooter-logo {
-  width: min(100%, 200px);
+  width: min(100%, 150px);
   height: auto;
   display: block;
   opacity: 0.95;
@@ -270,6 +324,7 @@ a:hover {
 
 .service-card {
   position: relative;
+  --card-title-color: var(--fg);
   padding: 0 1.2rem;
   border-radius: 0.85rem;
   border: none;
@@ -282,6 +337,7 @@ a:hover {
 
 .service-card h2 {
   font-size: clamp(1.105rem, 2.21vw, 1.445rem);
+  color: var(--card-title-color);
   margin: 0;
   padding: 0.55rem 1.9rem 0.55rem 0;
 }
@@ -307,7 +363,7 @@ a:hover {
   font-size: 1.25rem;
   line-height: 1;
   font-weight: 600;
-  color: var(--fg);
+  color: var(--card-title-color);
 }
 
 .service-card[data-collapsed="true"]::after {
@@ -326,6 +382,7 @@ a:hover {
 }
 
 .service-card.is-collapsed {
+  --card-title-color: color-mix(in srgb, var(--fg) 58%, transparent);
   height: 40px;
   overflow: hidden;
   background: transparent;
@@ -336,11 +393,14 @@ a:hover {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: color-mix(in srgb, var(--fg) 58%, transparent);
 }
 
 .service-card.is-collapsed:hover h2 {
   color: var(--fg);
+}
+
+.service-card.is-collapsed:hover {
+  --card-title-color: var(--fg);
 }
 
 .service-card p + p {
@@ -789,6 +849,15 @@ textarea.field {
 
   .ls-upperfooter {
     grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .ls-upperfooter-col {
+    padding: 0.95rem 0;
+  }
+
+  .ls-upperfooter-col + .ls-upperfooter-col {
+    border-top: 1px solid var(--border-subtle);
   }
 
   .ls-upperfooter-brand {

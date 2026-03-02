@@ -18,6 +18,14 @@
       <div class="hero-content">
         <h1 data-i18n="hero_title">Auditoria, asesoramiento y soporte técnico para lavanderias industriales</h1>
       </div>
+      <span class="hero-atom" aria-hidden="true">
+        <svg viewBox="0 0 100 100" width="100" height="100" role="img" focusable="false">
+          <circle cx="50" cy="50" r="7" fill="currentColor"></circle>
+          <ellipse cx="50" cy="50" rx="36" ry="16" fill="none" stroke="currentColor" stroke-width="2"></ellipse>
+          <ellipse cx="50" cy="50" rx="36" ry="16" fill="none" stroke="currentColor" stroke-width="2" transform="rotate(60 50 50)"></ellipse>
+          <ellipse cx="50" cy="50" rx="36" ry="16" fill="none" stroke="currentColor" stroke-width="2" transform="rotate(-60 50 50)"></ellipse>
+        </svg>
+      </span>
     </section>
 
     <section class="services-grid">
@@ -48,7 +56,7 @@
             <p class="price" data-i18n="card2_price">Desde 1,5% del coste de la inversión</p>
           </div>
           <div class="service-actions">
-            <a class="btn-pill btn-pill-outline" href="/laundryservices/ls_contacto.html" data-i18n="card2_cta">Solicitar</a>
+            <a class="btn-pill btn-pill-outline" href="/laundryservices/ls_contacto.html?subject=card2" data-i18n="card2_cta">Solicitar</a>
           </div>
         </div>
       </article>
@@ -58,7 +66,7 @@
         <p data-i18n="card3_p1">Software adaptado para recabar datos de todo lo que se pueda considerar relevante para la producción. Implementamos soluciones de monitorización que captura, traduce y representa el trabajo de la lavandería en datos útiles para el control diario y la toma de decisiones.</p>
         <div class="service-meta">
           <div class="service-actions">
-            <a class="btn-pill btn-pill-outline" href="/laundryservices/ls_contacto.html" data-i18n="card3_cta">Solicitar</a>
+            <a class="btn-pill btn-pill-outline" href="/laundryservices/ls_contacto.html?subject=card3" data-i18n="card3_cta">Solicitar</a>
           </div>
         </div>
       </article>
@@ -75,16 +83,8 @@
     </section>
 
     <section class="closing-claim">
-      <div class="closing-claim-head">
-        <span class="closing-claim-icon" aria-hidden="true">
-          <svg viewBox="0 0 100 100" width="100" height="100" role="img" focusable="false">
-            <circle cx="50" cy="50" r="7" fill="currentColor"></circle>
-            <ellipse cx="50" cy="50" rx="36" ry="16" fill="none" stroke="currentColor" stroke-width="2"></ellipse>
-            <ellipse cx="50" cy="50" rx="36" ry="16" fill="none" stroke="currentColor" stroke-width="2" transform="rotate(60 50 50)"></ellipse>
-            <ellipse cx="50" cy="50" rx="36" ry="16" fill="none" stroke="currentColor" stroke-width="2" transform="rotate(-60 50 50)"></ellipse>
-          </svg>
-        </span>
-        <h2 data-i18n="closing_claim">Tu proceso, Nuestra visión</h2>
+      <div class="closing-claim-head claim-loop-banner">
+        <h2 id="ls-claim-loop-text" class="claim-loop-text">Tu proceso, Nuestra visión</h2>
       </div>
     </section>
 
@@ -101,6 +101,7 @@
   <script src="/laundryservices/ls_i18n.js"></script>
   <script src="/laundryservices/ls_page.js"></script>
   <script src="/laundryservices/ls_interface.js"></script>
+  <script src="/laundryservices/ls_claim-loop.js"></script>
   <script src="/laundryservices/ls_particles.js"></script>
   <script src="/laundryservices/ls_upperfooter.js"></script>
   <script src="/laundryservices/ls_footer.js"></script>
