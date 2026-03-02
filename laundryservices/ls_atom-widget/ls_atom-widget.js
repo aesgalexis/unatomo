@@ -89,8 +89,8 @@ export function initAtomWidget({ container, pixelRatioCap = 1.8 } = {}) {
     if (getTheme() === "light") {
       orbitMat.color.set(0x5f6672);
       orbitMat.opacity = 0.62;
-      electronMat.color.set(0x7e22ce);
-      electronMat.emissive.set(0x581c87);
+      electronMat.color.set(0x2563eb);
+      electronMat.emissive.set(0x1d4ed8);
       electronMat.emissiveIntensity = 0.9;
     } else {
       orbitMat.color.set(0xaed7ff);
