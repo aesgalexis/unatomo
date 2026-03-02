@@ -183,10 +183,9 @@ a:hover {
 }
 
 .closing-claim-head {
-  display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.8fr);
-  gap: 2rem;
+  display: inline-flex;
   align-items: center;
+  gap: 1.1rem;
 }
 
 .closing-claim h2 {
@@ -201,8 +200,6 @@ a:hover {
   width: 100px;
   height: 100px;
   color: color-mix(in srgb, var(--fg) 85%, transparent);
-  justify-self: center;
-  align-self: center;
   flex-shrink: 0;
 }
 
