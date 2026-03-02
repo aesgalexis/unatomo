@@ -742,6 +742,10 @@ textarea.field {
     padding: 0.9rem 1rem;
   }
 
+  .service-card[role="button"]::after {
+    top: 24px;
+  }
+
   .ls-topbar-inner {
     padding: 0 0.75rem;
   }
