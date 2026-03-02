@@ -743,7 +743,7 @@ textarea.field {
   }
 
   .service-card[role="button"]::after {
-    top: 24px;
+    top: 33px;
   }
 
   .ls-topbar-inner {
