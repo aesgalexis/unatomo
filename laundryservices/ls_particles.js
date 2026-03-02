@@ -1,33 +1,26 @@
 (() => {
   const root = document.documentElement;
-  const host = document.querySelector(".page-shell");
+  const host = document.body;
   if (!host) return;
 
   const prefersReducedMotion =
     window.matchMedia &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const isMobileLike = () =>
+    (window.matchMedia && window.matchMedia("(pointer: coarse)").matches) ||
+    (window.matchMedia && window.matchMedia("(hover: none)").matches) ||
+    window.innerWidth <= 900;
 
   const canvas = document.createElement("canvas");
   canvas.setAttribute("aria-hidden", "true");
   canvas.className = "ls-particles-canvas";
-  canvas.style.position = "absolute";
+  canvas.style.position = "fixed";
   canvas.style.inset = "0";
   canvas.style.width = "100%";
   canvas.style.height = "100%";
   canvas.style.pointerEvents = "none";
   canvas.style.zIndex = "0";
-  if (window.getComputedStyle(host).position === "static") {
-    host.style.position = "relative";
-  }
   host.insertBefore(canvas, host.firstChild);
-  Array.from(host.children).forEach((child) => {
-    if (child === canvas) return;
-    const el = child;
-    if (window.getComputedStyle(el).position === "static") {
-      el.style.position = "relative";
-    }
-    if (!el.style.zIndex) el.style.zIndex = "1";
-  });
 
   const ctx = canvas.getContext("2d", { alpha: true });
   if (!ctx) return;
@@ -39,6 +32,7 @@
     particles: [],
     rafId: 0,
     running: true,
+    staticMode: false,
     baseAlpha: 0.08,
     particleColor: { r: 210, g: 90, b: 255 }
   };
@@ -65,8 +59,8 @@
   };
 
   const resize = () => {
-    state.width = Math.max(host.clientWidth, 1);
-    state.height = Math.max(host.scrollHeight, host.clientHeight, 1);
+    state.width = Math.max(window.innerWidth, 1);
+    state.height = Math.max(window.innerHeight, 1);
     state.dpr = Math.min(window.devicePixelRatio || 1, 1.5);
     canvas.width = Math.floor(state.width * state.dpr);
     canvas.height = Math.floor(state.height * state.dpr);
@@ -91,22 +85,23 @@
     state.particles = Array.from({ length: count }, makeParticle);
   };
 
-  const drawFrame = () => {
-    if (!state.running) return;
+  const drawFrame = (animate = true) => {
     ctx.clearRect(0, 0, state.width, state.height);
     for (let i = 0; i < state.particles.length; i += 1) {
       const p = state.particles[i];
-      const driftX = Math.sin(p.phase * 0.75) * 0.018;
-      const driftY = Math.cos(p.phase * 0.62) * 0.018;
-      p.x += (p.vx + driftX) * p.speedScale;
-      p.y += (p.vy + driftY) * p.speedScale;
+      if (animate) {
+        const driftX = Math.sin(p.phase * 0.75) * 0.018;
+        const driftY = Math.cos(p.phase * 0.62) * 0.018;
+        p.x += (p.vx + driftX) * p.speedScale;
+        p.y += (p.vy + driftY) * p.speedScale;
+      }
 
       if (p.x < -4) p.x = state.width + 4;
       if (p.x > state.width + 4) p.x = -4;
       if (p.y < -4) p.y = state.height + 4;
       if (p.y > state.height + 4) p.y = -4;
 
-      p.phase += p.phaseSpeed;
+      if (animate) p.phase += p.phaseSpeed;
       const pulse = 0.78 + Math.sin(p.phase) * 0.22;
       const r = p.radius * pulse;
       const zone =
@@ -123,18 +118,24 @@
       ctx.fill();
     }
 
-    state.rafId = window.requestAnimationFrame(drawFrame);
+  };
+
+  const animateLoop = () => {
+    if (!state.running) return;
+    drawFrame(true);
+    state.rafId = window.requestAnimationFrame(animateLoop);
   };
 
   const start = () => {
     if (state.rafId) cancelAnimationFrame(state.rafId);
-    state.running = true;
-    if (prefersReducedMotion) {
-      drawFrame();
+    state.staticMode = isMobileLike();
+    if (prefersReducedMotion || state.staticMode) {
       state.running = false;
+      drawFrame(false);
       return;
     }
-    drawFrame();
+    state.running = true;
+    animateLoop();
   };
 
   const stop = () => {
@@ -145,17 +146,28 @@
     }
   };
 
+  const refresh = () => {
+    resize();
+    if (state.staticMode || prefersReducedMotion) {
+      stop();
+      drawFrame(false);
+      return;
+    }
+    if (!state.running) {
+      start();
+      state.running = false;
+    }
+  };
+
   updateTheme();
   resize();
   start();
 
-  window.addEventListener("resize", resize, { passive: true });
-  if (window.ResizeObserver) {
-    const ro = new ResizeObserver(resize);
-    ro.observe(host);
+  if (!isMobileLike()) {
+    window.addEventListener("resize", refresh, { passive: true });
   }
   document.addEventListener("visibilitychange", () => {
-    if (document.hidden) stop();
+    if (document.hidden || state.staticMode) stop();
     else start();
   });
 

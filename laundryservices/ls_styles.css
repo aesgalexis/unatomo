@@ -209,6 +209,58 @@ a:hover {
   display: block;
 }
 
+.ls-upperfooter {
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-subtle);
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr) minmax(0, 1.2fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.ls-upperfooter-col {
+  min-width: 0;
+}
+
+.ls-upperfooter-kicker {
+  margin: 0;
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--fg) 70%, transparent);
+}
+
+.ls-upperfooter-list {
+  margin: 0.55rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.ls-upperfooter-list li {
+  font-size: 0.9rem;
+  color: color-mix(in srgb, var(--fg) 88%, transparent);
+}
+
+.ls-upperfooter-contact .contact-info {
+  margin-top: 0;
+}
+
+.ls-upperfooter-brand {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.ls-upperfooter-logo {
+  width: min(100%, 200px);
+  height: auto;
+  display: block;
+  opacity: 0.95;
+}
+
 .service-card {
   position: relative;
   padding: 0 1.2rem;
@@ -726,6 +778,14 @@ textarea.field {
 
   .hero-atom {
     order: -1;
+  }
+
+  .ls-upperfooter {
+    grid-template-columns: 1fr;
+  }
+
+  .ls-upperfooter-brand {
+    justify-content: flex-start;
   }
 }
 
