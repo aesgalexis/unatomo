@@ -15,6 +15,7 @@
           <li data-i18n="card2_title">Asesor\u00eda independiente de equipamiento</li>
           <li data-i18n="card3_title">Control de productividad, consumos y captura de datos</li>
           <li data-i18n="card4_title">Asistencia t\u00e9cnica</li>
+          <li data-i18n="card5_title">Recambios</li>
         </ul>
       </div>
 

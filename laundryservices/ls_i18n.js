@@ -42,6 +42,10 @@
       card3_cta: "Solicitar",
       card4_title: "Asistencia técnica",
       card4_cta: "No disponible",
+      card5_title: "Recambios",
+      card5_p1:
+        "Tenemos acceso a recambios originales de las principales marcas del sector. Cuéntanos qué repuesto necesitas y te ayudamos a encontrarlo. No importa la antigüedad de la máquina y salvo casos excepcionales, tampoco el periodo de obsolescencia.",
+      card5_cta: "Solicitar",
       contact_page_title: "Contacto · unatomo | Laundry Services",
       contact_email_label: "Correo electrónico:",
       contact_phone_label: "Teléfono:",
@@ -103,6 +107,10 @@
       card3_cta: "Request",
       card4_title: "Technical assistance",
       card4_cta: "Unavailable",
+      card5_title: "Spare parts",
+      card5_p1:
+        "We have access to original spare parts from the leading brands in the industry. Tell us what part you need and we'll help you find it. The age of the machine doesn't matter, and except in exceptional cases, neither does its obsolescence period.",
+      card5_cta: "Request",
       contact_page_title: "Contact · unatomo | Laundry Services",
       contact_email_label: "Email:",
       contact_phone_label: "Phone:",
@@ -164,6 +172,10 @@
       card3_cta: "Αιτηση",
       card4_title: "Τεχνικη υποστηριξη",
       card4_cta: "Μη διαθεσιμο",
+      card5_title: "Ανταλλακτικα",
+      card5_p1:
+        "Έχουμε πρόσβαση σε γνήσια ανταλλακτικά από τις κορυφαίες μάρκες του κλάδου. Πείτε μας ποιο ανταλλακτικό χρειάζεστε και θα σας βοηθήσουμε να το βρείτε. Η ηλικία του μηχανήματος δεν έχει σημασία, και εκτός από εξαιρετικές περιπτώσεις, ούτε η περίοδος απαξίωσής του.",
+      card5_cta: "Αιτηση",
       contact_page_title: "Επικοινωνία · unatomo | Laundry Services",
       contact_email_label: "Email:",
       contact_phone_label: "Τηλέφωνο:",
