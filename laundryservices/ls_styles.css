@@ -123,7 +123,7 @@ a:hover {
   border-bottom: 1px solid var(--border-subtle);
   backdrop-filter: blur(12px);
   z-index: 2000;
-  transition: transform 0.22s ease, opacity 0.22s ease;
+  transition: transform 0.28s ease, opacity 0.28s ease;
   will-change: transform, opacity;
 }
 
@@ -173,8 +173,8 @@ a:hover {
 }
 
 .hero-atom {
-  width: 100px;
-  height: 100px;
+  width: 135px;
+  height: 135px;
   justify-self: center;
   align-self: center;
   color: color-mix(in srgb, var(--fg) 85%, transparent);

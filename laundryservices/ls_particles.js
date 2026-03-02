@@ -6,10 +6,6 @@
   const prefersReducedMotion =
     window.matchMedia &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const isMobileLike = () =>
-    (window.matchMedia && window.matchMedia("(pointer: coarse)").matches) ||
-    (window.matchMedia && window.matchMedia("(hover: none)").matches) ||
-    window.innerWidth <= 900;
 
   const canvas = document.createElement("canvas");
   canvas.setAttribute("aria-hidden", "true");
@@ -128,8 +124,8 @@
 
   const start = () => {
     if (state.rafId) cancelAnimationFrame(state.rafId);
-    state.staticMode = isMobileLike();
-    if (prefersReducedMotion || state.staticMode) {
+    state.staticMode = false;
+    if (prefersReducedMotion) {
       state.running = false;
       drawFrame(false);
       return;
@@ -148,26 +144,21 @@
 
   const refresh = () => {
     resize();
-    if (state.staticMode || prefersReducedMotion) {
+    if (prefersReducedMotion) {
       stop();
       drawFrame(false);
       return;
     }
-    if (!state.running) {
-      start();
-      state.running = false;
-    }
+    if (!document.hidden) start();
   };
 
   updateTheme();
   resize();
   start();
 
-  if (!isMobileLike()) {
-    window.addEventListener("resize", refresh, { passive: true });
-  }
+  window.addEventListener("resize", refresh, { passive: true });
   document.addEventListener("visibilitychange", () => {
-    if (document.hidden || state.staticMode) stop();
+    if (document.hidden) stop();
     else start();
   });
 
