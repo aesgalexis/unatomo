@@ -32,6 +32,7 @@
     baseAlpha: 0.08,
     particleColor: { r: 210, g: 90, b: 255 }
   };
+  const PARTICLE_SPEED_MULTIPLIER = 1.25;
 
   const getTheme = () => {
     const attr = root.getAttribute("data-theme");
@@ -88,8 +89,8 @@
       if (animate) {
         const driftX = Math.sin(p.phase * 0.75) * 0.018;
         const driftY = Math.cos(p.phase * 0.62) * 0.018;
-        p.x += (p.vx + driftX) * p.speedScale;
-        p.y += (p.vy + driftY) * p.speedScale;
+        p.x += (p.vx + driftX) * p.speedScale * PARTICLE_SPEED_MULTIPLIER;
+        p.y += (p.vy + driftY) * p.speedScale * PARTICLE_SPEED_MULTIPLIER;
       }
 
       if (p.x < -4) p.x = state.width + 4;
@@ -97,7 +98,7 @@
       if (p.y < -4) p.y = state.height + 4;
       if (p.y > state.height + 4) p.y = -4;
 
-      if (animate) p.phase += p.phaseSpeed;
+      if (animate) p.phase += p.phaseSpeed * PARTICLE_SPEED_MULTIPLIER;
       const pulse = 0.78 + Math.sin(p.phase) * 0.22;
       const r = p.radius * pulse;
       const zone =

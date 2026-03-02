@@ -10,6 +10,7 @@ export function initAtomWidget({
   canvasScale = 1.9,
   enableZoom = true,
   zoomMaxPercent = 100,
+  maxZoomOutScale = 1,
 } = {}) {
   if (!(container instanceof HTMLElement)) {
     throw new Error("initAtomWidget requires a valid HTMLElement in 'container'.");
@@ -25,7 +26,7 @@ export function initAtomWidget({
   const baseCamDist = isFloating ? rawBaseCamDist * scale : rawBaseCamDist;
   let camDist = baseCamDist;
   const minCamDist = Math.max(0.8, baseCamDist / (1 + Math.max(0, zoomMaxPercent) / 100));
-  const maxCamDist = baseCamDist;
+  const maxCamDist = Math.max(minCamDist, baseCamDist * Math.max(0.1, maxZoomOutScale));
 
   const renderer = new THREE.WebGLRenderer({
     antialias: true,
