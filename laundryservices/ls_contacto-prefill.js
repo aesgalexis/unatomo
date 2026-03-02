@@ -14,7 +14,9 @@
   const populateBrands = () => {
     if (!brandSelect) return;
     const brands = Array.isArray(window.lsRecambiosBrandList)
-      ? window.lsRecambiosBrandList
+      ? [...window.lsRecambiosBrandList].sort((a, b) =>
+          String(a).localeCompare(String(b), "es", { sensitivity: "base" })
+        )
       : [];
     const placeholder = brandSelect.querySelector('option[value=""]');
     const currentValue = brandSelect.value;
