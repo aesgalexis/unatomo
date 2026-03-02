@@ -120,6 +120,23 @@
               </select>
             </div>
 
+            <div class="form-field" data-recambios-only hidden aria-hidden="true">
+              <label for="marca" data-i18n="contact_brand_label">Marca</label>
+              <select id="marca" name="marca" class="field">
+                <option value="" selected data-i18n="contact_brand_placeholder">Selecciona una marca…</option>
+              </select>
+            </div>
+
+            <div class="form-field" data-recambios-only hidden aria-hidden="true">
+              <label for="modelo" data-i18n="contact_model_label">Modelo</label>
+              <input id="modelo" name="modelo" type="text" class="field" autocomplete="off" />
+            </div>
+
+            <div class="form-field form-field--full" data-recambios-only hidden aria-hidden="true">
+              <label for="numero-serie" data-i18n="contact_serial_label">Nº de serie / Matrícula</label>
+              <input id="numero-serie" name="numero_serie_matricula" type="text" class="field" autocomplete="off" />
+            </div>
+
             <div class="form-field form-field--full">
               <label for="mensaje"><span data-i18n="contact_message_label">Mensaje</span><span aria-hidden="true"> *</span></label>
               <textarea id="mensaje" name="mensaje" rows="6" required class="field"></textarea>
@@ -146,6 +163,7 @@
   <script src="/laundryservices/ls_i18n.js"></script>
   <script src="/laundryservices/ls_page.js"></script>
   <script src="/laundryservices/ls_footer.js"></script>
+  <script src="/laundryservices/ls_recambios/ls_brand-list.js"></script>
   <script src="/laundryservices/ls_contacto-prefill.js"></script>
   <script src="/static/js/contacto.js"></script>
 </body>
