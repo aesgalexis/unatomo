@@ -109,7 +109,21 @@
   <script type="module">
     import { initAtomWidget } from "/laundryservices/ls_atom-widget/ls_atom-widget.js";
     const atomContainer = document.getElementById("atom");
-    if (atomContainer) initAtomWidget({ container: atomContainer, pixelRatioCap: 1.8 });
+    if (atomContainer) {
+      initAtomWidget({
+        container: atomContainer,
+        pixelRatioCap: 1.8,
+        atomScale: 0.33,
+        orbitStyle: "grid",
+        canvasScale: 1.9,
+        renderMode: "floating",
+        interactionTarget: atomContainer,
+        cameraFov: 66,
+        cameraNear: 0.02,
+        minCameraDistance: 0.744,
+        maxCameraDistance: 10.5,
+      });
+    }
   </script>
   <script src="/laundryservices/ls_particles.js"></script>
   <script src="/laundryservices/ls_upperfooter.js"></script>
