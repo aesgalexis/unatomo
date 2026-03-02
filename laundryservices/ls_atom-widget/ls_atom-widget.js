@@ -76,6 +76,31 @@ export function initAtomWidget({ container, pixelRatioCap = 1.8 } = {}) {
     depthWrite: false,
   });
 
+  const getTheme = () => {
+    const attr = document.documentElement.getAttribute("data-theme");
+    if (attr === "light" || attr === "dark") return attr;
+    if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      return "dark";
+    }
+    return "light";
+  };
+
+  const applyThemeMaterials = () => {
+    if (getTheme() === "light") {
+      orbitMat.color.set(0x5f6672);
+      orbitMat.opacity = 0.62;
+      electronMat.color.set(0x7e22ce);
+      electronMat.emissive.set(0x581c87);
+      electronMat.emissiveIntensity = 0.9;
+    } else {
+      orbitMat.color.set(0xaed7ff);
+      orbitMat.opacity = 0.52;
+      electronMat.color.set(0x22d3ee);
+      electronMat.emissive.set(0x0ea5e9);
+      electronMat.emissiveIntensity = 0.85;
+    }
+  };
+
   const orbitConfigs = [
     { radius: 1.0, periodSec: 5.0 },
     { radius: 1.27, periodSec: 6.0 },
@@ -84,11 +109,11 @@ export function initAtomWidget({ container, pixelRatioCap = 1.8 } = {}) {
 
   const electronGeo = new THREE.SphereGeometry(0.055, 14, 14);
   const electronMat = new THREE.MeshStandardMaterial({
-    color: 0xffffff,
-    emissive: 0x78b4ff,
-    emissiveIntensity: 0.95,
-    roughness: 0.15,
-    metalness: 0.2,
+    color: 0x22d3ee,
+    emissive: 0x0ea5e9,
+    emissiveIntensity: 0.85,
+    roughness: 0.18,
+    metalness: 0.1,
   });
 
   const orbitGroups = [];
@@ -126,6 +151,8 @@ export function initAtomWidget({ container, pixelRatioCap = 1.8 } = {}) {
       wobblePhase: Math.random() * Math.PI * 2,
     });
   });
+
+  applyThemeMaterials();
 
   let rafId = 0;
   let running = false;
@@ -234,6 +261,21 @@ export function initAtomWidget({ container, pixelRatioCap = 1.8 } = {}) {
   const onVisibility = () => updateRunningState();
   document.addEventListener("visibilitychange", onVisibility);
 
+  const onThemeChange = () => applyThemeMaterials();
+  const themeMq = window.matchMedia
+    ? window.matchMedia("(prefers-color-scheme: dark)")
+    : null;
+  if (themeMq) {
+    if (themeMq.addEventListener) themeMq.addEventListener("change", onThemeChange);
+    else if (themeMq.addListener) themeMq.addListener(onThemeChange);
+  }
+
+  const themeObserver = new MutationObserver(onThemeChange);
+  themeObserver.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["data-theme"],
+  });
+
   const onPointerDown = (event) => {
     if (destroyed) return;
     isDragging = true;
@@ -293,8 +335,13 @@ export function initAtomWidget({ container, pixelRatioCap = 1.8 } = {}) {
     updateRunningState();
     io.disconnect();
     resizeObserver.disconnect();
+    themeObserver.disconnect();
     document.removeEventListener("visibilitychange", onVisibility);
     window.removeEventListener("resize", resize);
+    if (themeMq) {
+      if (themeMq.removeEventListener) themeMq.removeEventListener("change", onThemeChange);
+      else if (themeMq.removeListener) themeMq.removeListener(onThemeChange);
+    }
     renderer.domElement.removeEventListener("pointerdown", onPointerDown);
     renderer.domElement.removeEventListener("pointermove", onPointerMove);
     renderer.domElement.removeEventListener("pointerup", finishPointer);
