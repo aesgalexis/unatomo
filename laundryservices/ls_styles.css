@@ -577,6 +577,15 @@ button.btn-pill:focus-visible,
   border-color: #ffffff;
 }
 
+#theme-toggle[aria-pressed="true"] {
+  border-color: var(--border-subtle);
+}
+
+#theme-toggle[aria-pressed="true"]:hover,
+#theme-toggle[aria-pressed="true"]:focus-visible {
+  border-color: #ffffff;
+}
+
 .icon-button .icon {
   width: 18px;
   height: 18px;
