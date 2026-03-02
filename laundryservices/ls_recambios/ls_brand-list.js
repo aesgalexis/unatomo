@@ -7,6 +7,11 @@
     "Aliance",
     "Electrolux",
     "Miele",
+    "Imesa",
+    "Ipso",
+    "Veit",
+    "Renzacci",
+    "Böwe",
+    "Union",
   ];
 })();
-
