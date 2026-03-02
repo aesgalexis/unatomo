@@ -5,20 +5,20 @@
     es: {
       page_title: "unatomo | Laundry Services",
       page_desc:
-        "Servicios tecnicos para lavanderias industriales: auditoria, asesoramiento y control de productividad.",
+        "Servicios técnicos para lavanderías industriales: auditoría, asesoramiento y control de productividad.",
       lang_option_en: "English",
       lang_option_es: "Español",
       lang_option_el: "ελληνικά",
       hero_title:
-        "Auditoria, asesoramiento y soporte tecnico para lavanderias industriales",
+        "Auditoría, asesoramiento y soporte técnico para lavanderías industriales",
       hero_lead:
         "",
       closing_claim: "Tu proceso, Nuestra visión",
-      card1_title: "Auditoria técnica y de procesos",
+      card1_title: "Auditoría técnica y de procesos",
       card1_p1:
-        "Detección de puntos críticos para optimizar el rendimiento de planta. Realizamos una inspección integral para identificar donde se esta perdiendo rendimiento y como se podría evitar. Nos centramos en corregir cuellos de botella, fallos recurrentes y desajustes operativos que lastran la producción en el día a día.",
+        "Detección de puntos críticos para optimizar el rendimiento de planta. Realizamos una inspección integral para identificar dónde se está perdiendo rendimiento y cómo se podría evitar. Nos centramos en corregir cuellos de botella, fallos recurrentes y desajustes operativos que lastran la producción en el día a día.",
       card1_p2:
-        "Realizamos un informe técnico por secciones con prioridades claras sobre en que urge intervenir, que mejoras programar y que inversiones pueden resultar mas rentables.",
+        "Realizamos un informe técnico por secciones con prioridades claras sobre en qué urge intervenir, qué mejoras programar y qué inversiones pueden resultar más rentables.",
       card1_p3:
         "Ponemos el foco en el análisis de los flujos de producción, mantenimiento preventivo, recambios críticos y hábitos de trabajo.",
       card1_price: "Desde 1390 EUR/día",
@@ -29,7 +29,7 @@
       card2_p1:
         "Validación técnica de inversiones sin conflictos de interés. Aportamos perspectiva técnica antes de que cierren su próxima compra. No representamos marcas ni cobramos comisiones de fabricantes. Nuestro objetivo es asegurar que el equipo sea el adecuado para su operativa real.",
       card2_p2:
-        "Realizamos un análisis exhaustivo de idoneidad, virtudes, limitaciones y flexibilidad de la maquina a medio-largo plazo.",
+        "Realizamos un análisis exhaustivo de idoneidad, virtudes, limitaciones y flexibilidad de la máquina a medio-largo plazo.",
       card2_p3:
         "Evaluamos el servicio postventa y mantenimiento: dependencia de repuestos, facilidad de servicio técnico y vida útil esperable.",
       card2_p4:
@@ -68,7 +68,7 @@
       contact_serial_label: "Nº de serie / Matrícula",
       contact_message_label: "Mensaje",
       contact_send: "Enviar",
-      privacy_link: "Politica de privacidad y cookies",
+      privacy_link: "Política de privacidad y cookies",
       legal_footer: "UNATOMO CORE SL - Todos los derechos reservados.",
     },
     en: {

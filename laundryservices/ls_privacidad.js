@@ -4,8 +4,8 @@
 
   const META = {
     es: {
-      title: "Politica de privacidad y cookies | Laundry Services",
-      desc: "Politica de privacidad y cookies de Laundry Services.",
+      title: "Política de privacidad y cookies | Laundry Services",
+      desc: "Política de privacidad y cookies de Laundry Services.",
     },
     en: {
       title: "Privacy and Cookies Policy | Laundry Services",

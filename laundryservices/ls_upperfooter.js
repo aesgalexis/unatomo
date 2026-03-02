@@ -5,13 +5,13 @@
   mount.innerHTML = `
     <section class="ls-upperfooter" aria-label="Laundry Services upperfooter">
       <div class="ls-upperfooter-col ls-upperfooter-brand">
-        <img src="/static/img/logo-unatomo-v1.5.svg" alt="unatomo" class="ls-upperfooter-logo" loading="lazy" />
+        <img src="/static/img/logo-unatomo-v1.5.svg" alt="unatomo" class="ls-upperfooter-logo js-upperfooter-logo" loading="lazy" />
       </div>
 
       <div class="ls-upperfooter-col ls-upperfooter-col-main">
         <p class="ls-upperfooter-kicker">Laundry Services</p>
         <ul class="ls-upperfooter-list">
-          <li data-i18n="card1_title">Auditoria t\u00e9cnica y de procesos</li>
+          <li data-i18n="card1_title">Auditoría t\u00e9cnica y de procesos</li>
           <li data-i18n="card2_title">Asesor\u00eda independiente de equipamiento</li>
           <li data-i18n="card3_title">Control de productividad, consumos y captura de datos</li>
           <li data-i18n="card4_title">Asistencia t\u00e9cnica</li>
@@ -79,5 +79,13 @@
   if (i18n && typeof i18n.setLanguage === "function") {
     const lang = document.documentElement.lang || (i18n.getLanguage && i18n.getLanguage()) || "es";
     i18n.setLanguage(lang);
+  }
+
+  const logo = mount.querySelector(".js-upperfooter-logo");
+  const brandCol = mount.querySelector(".ls-upperfooter-brand");
+  if (logo && brandCol) {
+    logo.addEventListener("click", () => {
+      brandCol.classList.toggle("is-logo-right");
+    });
   }
 })();
