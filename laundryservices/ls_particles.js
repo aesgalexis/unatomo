@@ -50,7 +50,7 @@
       state.baseAlpha = 0.15125;
       state.particleColor = { r: 224, g: 132, b: 255 };
     } else {
-      state.baseAlpha = 0.20625;
+      state.baseAlpha = 0.226875;
       state.particleColor = { r: 198, g: 58, b: 255 };
     }
   };
