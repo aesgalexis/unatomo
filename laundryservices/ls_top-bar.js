@@ -38,4 +38,43 @@
       </div>
     </header>
   `;
+
+  const topbar = mount.querySelector(".ls-topbar");
+  if (!topbar) return;
+
+  let lastY = Math.max(window.scrollY || 0, 0);
+  let ticking = false;
+  const delta = 6;
+
+  const syncVisibility = () => {
+    ticking = false;
+    const currentY = Math.max(window.scrollY || 0, 0);
+
+    if (currentY <= 4) {
+      topbar.classList.remove("is-hidden");
+      lastY = currentY;
+      return;
+    }
+
+    const diff = currentY - lastY;
+    if (Math.abs(diff) < delta) return;
+
+    if (diff > 0) {
+      topbar.classList.add("is-hidden");
+    } else {
+      topbar.classList.remove("is-hidden");
+    }
+
+    lastY = currentY;
+  };
+
+  window.addEventListener(
+    "scroll",
+    () => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(syncVisibility);
+    },
+    { passive: true }
+  );
 })();

@@ -50,10 +50,10 @@
 
   const updateTheme = () => {
     if (getTheme() === "dark") {
-      state.baseAlpha = 0.11;
+      state.baseAlpha = 0.1375;
       state.particleColor = { r: 224, g: 132, b: 255 };
     } else {
-      state.baseAlpha = 0.15;
+      state.baseAlpha = 0.1875;
       state.particleColor = { r: 198, g: 58, b: 255 };
     }
   };

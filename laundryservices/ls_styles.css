@@ -123,6 +123,13 @@ a:hover {
   border-bottom: 1px solid var(--border-subtle);
   backdrop-filter: blur(12px);
   z-index: 2000;
+  transition: transform 0.22s ease, opacity 0.22s ease;
+  will-change: transform, opacity;
+}
+
+.ls-topbar.is-hidden {
+  transform: translateY(calc(-100% - 2px));
+  opacity: 0.96;
 }
 
 .ls-topbar-inner {
