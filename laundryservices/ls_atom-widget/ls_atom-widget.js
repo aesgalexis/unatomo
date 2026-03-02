@@ -3,27 +3,29 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.m
 export function initAtomWidget({
   container,
   pixelRatioCap = 1.8,
-  onClick,
   atomScale = 1,
-  orbitStyle = "adaptive",
   protonScale = 1,
-  canvasScale = 1,
   renderMode = "container",
   interactionTarget = null,
-  cameraFov = 45,
-  cameraNear = 0.1,
-  minCameraDistance = 2.2,
-  maxCameraDistance = null,
+  canvasScale = 1.9,
+  enableZoom = true,
+  zoomMaxPercent = 100,
 } = {}) {
   if (!(container instanceof HTMLElement)) {
     throw new Error("initAtomWidget requires a valid HTMLElement in 'container'.");
   }
 
   const scene = new THREE.Scene();
-
-  const camera = new THREE.PerspectiveCamera(cameraFov, 1, cameraNear, 50);
+  const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 50);
   camera.position.set(0, 0, 5.2);
-  let camDist = camera.position.length();
+
+  const rawBaseCamDist = camera.position.length();
+  const isFloating = renderMode === "floating";
+  const scale = Math.max(1, canvasScale);
+  const baseCamDist = isFloating ? rawBaseCamDist * scale : rawBaseCamDist;
+  let camDist = baseCamDist;
+  const minCamDist = Math.max(0.8, baseCamDist / (1 + Math.max(0, zoomMaxPercent) / 100));
+  const maxCamDist = baseCamDist;
 
   const renderer = new THREE.WebGLRenderer({
     antialias: true,
@@ -33,29 +35,19 @@ export function initAtomWidget({
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, pixelRatioCap));
   renderer.setClearColor(0x000000, 0);
   renderer.outputEncoding = THREE.sRGBEncoding;
-  renderer.domElement.style.touchAction = "none";
-  const scale = Math.max(1, canvasScale);
-  const hasScaledCanvas = scale > 1.001;
-  const isFloating = renderMode === "floating";
+
   if (isFloating) {
     renderer.domElement.style.position = "fixed";
     renderer.domElement.style.left = "0";
     renderer.domElement.style.top = "0";
+    renderer.domElement.style.transform = "translate(-50%, -50%)";
     renderer.domElement.style.pointerEvents = "none";
     renderer.domElement.style.zIndex = "0";
-    renderer.domElement.style.transform = "translate(-50%, -50%)";
-  } else if (hasScaledCanvas) {
-    container.style.position = "relative";
-    container.style.overflow = "visible";
-    renderer.domElement.style.position = "absolute";
-    renderer.domElement.style.left = "50%";
-    renderer.domElement.style.top = "50%";
-    renderer.domElement.style.transform = "translate(-50%, -50%)";
-    renderer.domElement.style.width = `${(scale * 100).toFixed(0)}%`;
-    renderer.domElement.style.height = `${(scale * 100).toFixed(0)}%`;
+    document.body.appendChild(renderer.domElement);
+  } else {
+    renderer.domElement.style.touchAction = "none";
+    container.appendChild(renderer.domElement);
   }
-  if (isFloating) document.body.appendChild(renderer.domElement);
-  else container.appendChild(renderer.domElement);
 
   const inputTarget =
     interactionTarget instanceof HTMLElement ? interactionTarget : renderer.domElement;
@@ -115,11 +107,20 @@ export function initAtomWidget({
   }
 
   const orbitMat = new THREE.MeshBasicMaterial({
-    color: 0xaed7ff,
+    color: 0x5f6672,
     transparent: true,
-    opacity: 0.52,
+    opacity: 0.62,
     depthWrite: false,
     wireframe: false,
+  });
+
+  const electronGeo = new THREE.SphereGeometry(0.024, 14, 14);
+  const electronMat = new THREE.MeshStandardMaterial({
+    color: 0x22d3ee,
+    emissive: 0x0ea5e9,
+    emissiveIntensity: 0.85,
+    roughness: 0.18,
+    metalness: 0.1,
   });
 
   const getTheme = () => {
@@ -132,37 +133,11 @@ export function initAtomWidget({
   };
 
   const applyThemeMaterials = () => {
-    if (orbitStyle === "original") {
-      orbitMat.color.set(0x8b5cf6);
-      orbitMat.opacity = 0.35;
-      orbitMat.wireframe = true;
-      electronMat.color.set(0x22d3ee);
-      electronMat.emissive.set(0x0ea5e9);
-      electronMat.emissiveIntensity = 0.85;
-      return;
-    }
-
-    if (orbitStyle === "grid") {
-      orbitMat.color.set(0x5f6672);
-      orbitMat.opacity = 0.62;
-      orbitMat.wireframe = true;
-    }
-
     if (getTheme() === "light") {
-      if (orbitStyle !== "grid") {
-        orbitMat.color.set(0x5f6672);
-        orbitMat.opacity = 0.62;
-        orbitMat.wireframe = false;
-      }
       electronMat.color.set(0x2563eb);
       electronMat.emissive.set(0x1d4ed8);
       electronMat.emissiveIntensity = 0.9;
     } else {
-      if (orbitStyle !== "grid") {
-        orbitMat.color.set(0xaed7ff);
-        orbitMat.opacity = 0.52;
-        orbitMat.wireframe = false;
-      }
       electronMat.color.set(0x22d3ee);
       electronMat.emissive.set(0x0ea5e9);
       electronMat.emissiveIntensity = 0.85;
@@ -175,15 +150,6 @@ export function initAtomWidget({
     { radius: 1.56, periodSec: 7.0 },
   ];
 
-  const electronGeo = new THREE.SphereGeometry(0.024, 14, 14);
-  const electronMat = new THREE.MeshStandardMaterial({
-    color: 0x22d3ee,
-    emissive: 0x0ea5e9,
-    emissiveIntensity: 0.85,
-    roughness: 0.18,
-    metalness: 0.1,
-  });
-
   const orbitGroups = [];
   orbitConfigs.forEach((cfg) => {
     const pivot = new THREE.Group();
@@ -193,20 +159,8 @@ export function initAtomWidget({
       Math.random() * Math.PI
     );
 
-    const tubeRadius =
-      orbitStyle === "original"
-        ? cfg.radius * 0.012
-        : Math.max(cfg.radius * 0.012, 0.012);
-    const ringRadialSegments = orbitStyle === "grid" ? 6 : 12;
-    const ringTubularSegments = orbitStyle === "grid" ? 90 : 180;
-
     const ring = new THREE.Mesh(
-      new THREE.TorusGeometry(
-        cfg.radius,
-        tubeRadius,
-        ringRadialSegments,
-        ringTubularSegments
-      ),
+      new THREE.TorusGeometry(cfg.radius, Math.max(cfg.radius * 0.012, 0.012), 12, 180),
       orbitMat
     );
     pivot.add(ring);
@@ -222,7 +176,6 @@ export function initAtomWidget({
     holder.add(electron);
 
     atom.add(pivot);
-
     orbitGroups.push({
       pivot,
       rotator,
@@ -238,18 +191,53 @@ export function initAtomWidget({
   let running = false;
   let destroyed = false;
   let inView = true;
+
   let isDragging = false;
   let dragPointerId = null;
   let lastPointerX = 0;
   let lastPointerY = 0;
-  let dragDistance = 0;
   let spinVelocityX = 0;
   let spinVelocityY = 0;
   const FRICTION = 0.985;
   let elapsed = 0;
-  let maxCamDist = typeof maxCameraDistance === "number" ? maxCameraDistance : 14;
 
   const clock = new THREE.Clock();
+
+  const applyCameraDistance = (nextDist) => {
+    camDist = Math.max(minCamDist, Math.min(maxCamDist, nextDist));
+    const dir = camera.position.clone().normalize();
+    camera.position.copy(dir.multiplyScalar(camDist));
+    camera.lookAt(0, 0, 0);
+  };
+
+  const getSize = () => ({
+    width: Math.max(1, container.clientWidth),
+    height: Math.max(1, container.clientHeight),
+  });
+
+  const resize = () => {
+    if (destroyed) return;
+    const { width, height } = getSize();
+
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, pixelRatioCap));
+
+    if (isFloating) {
+      const rect = container.getBoundingClientRect();
+      const renderSize = Math.max(width, height) * scale;
+      camera.aspect = 1;
+      camera.updateProjectionMatrix();
+      renderer.setSize(renderSize, renderSize, false);
+      renderer.domElement.style.left = `${rect.left + rect.width / 2}px`;
+      renderer.domElement.style.top = `${rect.top + rect.height / 2}px`;
+      renderer.domElement.style.width = `${Math.round(renderSize)}px`;
+      renderer.domElement.style.height = `${Math.round(renderSize)}px`;
+      return;
+    }
+
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+    renderer.setSize(width, height, false);
+  };
 
   const render = () => {
     if (!running || destroyed) return;
@@ -292,57 +280,6 @@ export function initAtomWidget({
     renderer.render(scene, camera);
   };
 
-  const getSize = () => {
-    const width = Math.max(1, container.clientWidth);
-    const height = Math.max(1, container.clientHeight);
-    return { width, height };
-  };
-
-  const resize = () => {
-    if (destroyed) return;
-    const { width, height } = getSize();
-    let renderWidth = width;
-    let renderHeight = height;
-    if (isFloating && hasScaledCanvas) {
-      const viewportDiag = Math.hypot(
-        Math.max(1, window.innerWidth),
-        Math.max(1, window.innerHeight)
-      );
-      const base = Math.max(viewportDiag, Math.max(width, height) * 2);
-      const floatingSize = base * scale;
-      renderWidth = floatingSize;
-      renderHeight = floatingSize;
-    } else if (hasScaledCanvas) {
-      renderWidth = width * scale;
-      renderHeight = height * scale;
-    }
-
-    camera.aspect = renderWidth / renderHeight;
-    camera.updateProjectionMatrix();
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, pixelRatioCap));
-    renderer.setSize(renderWidth, renderHeight, false);
-
-    if (isFloating) {
-      const rect = container.getBoundingClientRect();
-      renderer.domElement.style.left = `${rect.left + rect.width / 2}px`;
-      renderer.domElement.style.top = `${rect.top + rect.height / 2}px`;
-      renderer.domElement.style.width = `${Math.round(renderWidth)}px`;
-      renderer.domElement.style.height = `${Math.round(renderHeight)}px`;
-    }
-  };
-
-  const applyCameraDistance = (nextDist) => {
-    camDist = Math.max(minCameraDistance, Math.min(maxCamDist, nextDist));
-    const dir = camera.position.clone().normalize();
-    camera.position.copy(dir.multiplyScalar(camDist));
-    camera.lookAt(0, 0, 0);
-  };
-
-  const resizeObserver = new ResizeObserver(resize);
-  resizeObserver.observe(container);
-  window.addEventListener("resize", resize);
-  window.addEventListener("scroll", resize, { passive: true });
-
   const updateRunningState = () => {
     const shouldRun = !destroyed && inView && !document.hidden;
     if (shouldRun && !running) {
@@ -359,6 +296,11 @@ export function initAtomWidget({
       }
     }
   };
+
+  const resizeObserver = new ResizeObserver(resize);
+  resizeObserver.observe(container);
+  window.addEventListener("resize", resize);
+  if (isFloating) window.addEventListener("scroll", resize, { passive: true });
 
   const io = new IntersectionObserver(
     (entries) => {
@@ -396,12 +338,9 @@ export function initAtomWidget({
     dragPointerId = event.pointerId;
     lastPointerX = event.clientX;
     lastPointerY = event.clientY;
-    dragDistance = 0;
-    if (inputTarget.setPointerCapture) {
-      try {
-        inputTarget.setPointerCapture(event.pointerId);
-      } catch {}
-    }
+    try {
+      inputTarget.setPointerCapture(event.pointerId);
+    } catch {}
     if (useGrabCursor) inputTarget.style.cursor = "grabbing";
   };
 
@@ -409,7 +348,6 @@ export function initAtomWidget({
     if (!isDragging || event.pointerId !== dragPointerId) return;
     const dx = event.clientX - lastPointerX;
     const dy = event.clientY - lastPointerY;
-    dragDistance += Math.hypot(dx, dy);
     lastPointerX = event.clientX;
     lastPointerY = event.clientY;
 
@@ -424,15 +362,12 @@ export function initAtomWidget({
 
   const finishPointer = (event) => {
     if (event.pointerId !== dragPointerId) return;
-    const wasClick = dragDistance < 6;
     isDragging = false;
     try {
-      if (inputTarget.releasePointerCapture) inputTarget.releasePointerCapture(event.pointerId);
+      inputTarget.releasePointerCapture(event.pointerId);
     } catch {}
     dragPointerId = null;
-    dragDistance = 0;
     if (useGrabCursor) inputTarget.style.cursor = "grab";
-    if (wasClick && typeof onClick === "function") onClick(event);
   };
 
   inputTarget.addEventListener("pointerdown", onPointerDown);
@@ -441,49 +376,48 @@ export function initAtomWidget({
   inputTarget.addEventListener("pointercancel", finishPointer);
   inputTarget.addEventListener("lostpointercapture", finishPointer);
 
-  const onWheel = (event) => {
-    event.preventDefault();
-    const factor = 1 + Math.sign(event.deltaY) * 0.08;
-    applyCameraDistance(camDist * factor);
-  };
-  inputTarget.addEventListener("wheel", onWheel, { passive: false });
-
-  const touchDist = (t1, t2) => Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
   let touchPinching = false;
   let lastPinchDist = 0;
 
+  const getTouchDist = (t1, t2) => Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
+
+  const onWheel = (event) => {
+    if (!enableZoom) return;
+    event.preventDefault();
+    const factor = event.deltaY < 0 ? 0.92 : 1.08;
+    applyCameraDistance(camDist * factor);
+  };
+
   const onTouchStart = (event) => {
-    if (!event.touches || event.touches.length !== 2) return;
+    if (!enableZoom || !event.touches || event.touches.length !== 2) return;
     touchPinching = true;
-    lastPinchDist = touchDist(event.touches[0], event.touches[1]);
+    lastPinchDist = getTouchDist(event.touches[0], event.touches[1]);
   };
 
   const onTouchMove = (event) => {
-    if (!touchPinching || !event.touches || event.touches.length !== 2) return;
+    if (!enableZoom || !touchPinching || !event.touches || event.touches.length !== 2) return;
     event.preventDefault();
-    const dist = touchDist(event.touches[0], event.touches[1]);
+    const dist = getTouchDist(event.touches[0], event.touches[1]);
     if (lastPinchDist > 0) applyCameraDistance(camDist * (lastPinchDist / dist));
     lastPinchDist = dist;
   };
 
   const onTouchEnd = (event) => {
-    if (event.touches && event.touches.length >= 2) return;
-    touchPinching = false;
-    lastPinchDist = 0;
+    if (!event.touches || event.touches.length < 2) {
+      touchPinching = false;
+      lastPinchDist = 0;
+    }
   };
 
-  inputTarget.addEventListener("touchstart", onTouchStart, { passive: false });
-  inputTarget.addEventListener("touchmove", onTouchMove, { passive: false });
-  inputTarget.addEventListener("touchend", onTouchEnd, { passive: true });
-  inputTarget.addEventListener("touchcancel", onTouchEnd, { passive: true });
-
-  if (isFloating && hasScaledCanvas) {
-    const baseDist = camDist * scale;
-    const autoMax = Math.max(18, baseDist * 2);
-    maxCamDist = typeof maxCameraDistance === "number" ? maxCameraDistance : autoMax;
-    applyCameraDistance(maxCamDist);
+  if (enableZoom) {
+    inputTarget.addEventListener("wheel", onWheel, { passive: false });
+    inputTarget.addEventListener("touchstart", onTouchStart, { passive: false });
+    inputTarget.addEventListener("touchmove", onTouchMove, { passive: false });
+    inputTarget.addEventListener("touchend", onTouchEnd, { passive: true });
+    inputTarget.addEventListener("touchcancel", onTouchEnd, { passive: true });
   }
 
+  applyCameraDistance(maxCamDist);
   resize();
   updateRunningState();
 
@@ -499,28 +433,32 @@ export function initAtomWidget({
   const destroy = () => {
     if (destroyed) return;
     destroyed = true;
-
     updateRunningState();
+
     io.disconnect();
     resizeObserver.disconnect();
     themeObserver.disconnect();
     document.removeEventListener("visibilitychange", onVisibility);
     window.removeEventListener("resize", resize);
-    window.removeEventListener("scroll", resize);
+    if (isFloating) window.removeEventListener("scroll", resize);
     if (themeMq) {
       if (themeMq.removeEventListener) themeMq.removeEventListener("change", onThemeChange);
       else if (themeMq.removeListener) themeMq.removeListener(onThemeChange);
     }
+
     inputTarget.removeEventListener("pointerdown", onPointerDown);
     inputTarget.removeEventListener("pointermove", onPointerMove);
     inputTarget.removeEventListener("pointerup", finishPointer);
     inputTarget.removeEventListener("pointercancel", finishPointer);
     inputTarget.removeEventListener("lostpointercapture", finishPointer);
-    inputTarget.removeEventListener("wheel", onWheel);
-    inputTarget.removeEventListener("touchstart", onTouchStart);
-    inputTarget.removeEventListener("touchmove", onTouchMove);
-    inputTarget.removeEventListener("touchend", onTouchEnd);
-    inputTarget.removeEventListener("touchcancel", onTouchEnd);
+
+    if (enableZoom) {
+      inputTarget.removeEventListener("wheel", onWheel);
+      inputTarget.removeEventListener("touchstart", onTouchStart);
+      inputTarget.removeEventListener("touchmove", onTouchMove);
+      inputTarget.removeEventListener("touchend", onTouchEnd);
+      inputTarget.removeEventListener("touchcancel", onTouchEnd);
+    }
 
     scene.traverse((obj) => {
       if (obj.geometry) obj.geometry.dispose();
