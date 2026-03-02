@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LS Atom Widget Demo</title>
+  <link rel="stylesheet" href="./ls_atom-widget.css">
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #0b0b0c;
+      --fg: #e7e8eb;
+      --line: rgba(255, 255, 255, 0.15);
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 15% 15%, rgba(255, 255, 255, 0.07), transparent 46%),
+        radial-gradient(circle at 86% 20%, rgba(120, 165, 255, 0.12), transparent 48%),
+        var(--bg);
+      color: var(--fg);
+      font: 500 16px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+
+    .demo-shell {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 3rem 1.25rem;
+      display: grid;
+      gap: 1.25rem;
+    }
+
+    .demo-card {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .demo-card h1 {
+      margin: 0 0 0.25rem;
+      font-size: clamp(1.3rem, 2.5vw, 1.8rem);
+      font-weight: 620;
+    }
+
+    .demo-card p {
+      margin: 0;
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body>
+  <main class="demo-shell">
+    <section class="demo-card">
+      <h1>Atom Widget</h1>
+      <p>Widget minimalista en Three.js, embebido en un contenedor transparente.</p>
+    </section>
+
+    <section class="demo-card">
+      <div id="atom"></div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { initAtomWidget } from "./ls_atom-widget.js";
+
+    const container = document.getElementById("atom");
+    const widget = initAtomWidget({ container, pixelRatioCap: 1.8 });
+
+    // Si abres este archivo directamente (file://) y tu navegador bloquea módulos CDN/CORS,
+    // usa un servidor local simple:
+    // python -m http.server
+    // y abre: http://localhost:8000/laundryservices/ls_atom-widget/ls_demo.html
+
+    window.addEventListener("beforeunload", () => widget.destroy());
+  </script>
+</body>
+</html>

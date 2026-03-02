@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Atom defaults</title>
+    <style>
+      body { margin: 0; font-family: Arial, sans-serif; background: #0b1020; color: #e5e7eb; }
+      main { max-width: 720px; margin: 32px auto; padding: 0 20px 40px; }
+      h1 { font-size: 24px; margin: 0 0 8px; }
+      p { margin: 0 0 20px; color: #cbd5e1; }
+      .default-item { border: 1px solid #263247; border-radius: 10px; padding: 12px; margin-bottom: 12px; background: rgba(15, 23, 42, 0.6); }
+      label { display: block; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: #9aa4b2; margin-bottom: 6px; }
+      input, textarea { width: 100%; box-sizing: border-box; background: #0f172a; color: #e5e7eb; border: 1px solid #334155; border-radius: 8px; padding: 10px; font-size: 14px; }
+      textarea { min-height: 72px; resize: vertical; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Default AB content</h1>
+      <p>Edit these titles and text. They are used when there is no saved data.</p>
+
+      <div class="default-item">
+        <label>Title 1</label>
+        <input data-default-title="1" value="Que es unatomo" />
+        <label>Text 1</label>
+        <textarea data-default-text="1">text1</textarea>
+      </div>
+
+      <div class="default-item">
+        <label>Title 2</label>
+        <input data-default-title="2" value="AB2" />
+        <label>Text 2</label>
+        <textarea data-default-text="2">text2</textarea>
+      </div>
+
+      <div class="default-item">
+        <label>Title 3</label>
+        <input data-default-title="3" value="AB3" />
+        <label>Text 3</label>
+        <textarea data-default-text="3">text3</textarea>
+      </div>
+
+      <div class="default-item">
+        <label>Title 4</label>
+        <input data-default-title="4" value="AB4" />
+        <label>Text 4</label>
+        <textarea data-default-text="4">text4</textarea>
+      </div>
+
+      <div class="default-item">
+        <label>Title 5</label>
+        <input data-default-title="5" value="AB5" />
+        <label>Text 5</label>
+        <textarea data-default-text="5">text5</textarea>
+      </div>
+    </main>
+  </body>
+</html>
