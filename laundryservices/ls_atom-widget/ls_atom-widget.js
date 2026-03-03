@@ -10,6 +10,8 @@ export function initAtomWidget({
   canvasScale = 1.9,
   enableZoom = true,
   zoomMaxPercent = 100,
+  zoomLevels = 10,
+  initialZoomLevel = 1,
   maxZoomOutScale = 1,
 } = {}) {
   if (!(container instanceof HTMLElement)) {
@@ -27,6 +29,13 @@ export function initAtomWidget({
   let camDist = baseCamDist;
   const minCamDist = Math.max(0.8, baseCamDist / (1 + Math.max(0, zoomMaxPercent) / 100));
   const maxCamDist = Math.max(minCamDist, baseCamDist * Math.max(0.1, maxZoomOutScale));
+  const totalZoomLevels = Math.max(2, Math.round(zoomLevels));
+  const normalizedInitialLevel = Math.min(
+    totalZoomLevels,
+    Math.max(1, Math.round(initialZoomLevel))
+  );
+  const initialZoomProgress = (normalizedInitialLevel - 1) / (totalZoomLevels - 1);
+  const initialCamDist = maxCamDist - (maxCamDist - minCamDist) * initialZoomProgress;
 
   const renderer = new THREE.WebGLRenderer({
     antialias: true,
@@ -418,7 +427,7 @@ export function initAtomWidget({
     inputTarget.addEventListener("touchcancel", onTouchEnd, { passive: true });
   }
 
-  applyCameraDistance(maxCamDist);
+  applyCameraDistance(initialCamDist);
   resize();
   updateRunningState();
 
