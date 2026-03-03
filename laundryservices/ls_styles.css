@@ -265,6 +265,18 @@ a:hover {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1.25rem;
   align-items: start;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.ls-upperfooter * {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.ls-upperfooter img {
+  -webkit-user-drag: none;
+  user-drag: none;
 }
 
 .ls-upperfooter-col {
