@@ -774,6 +774,7 @@ body.page .ls-topbar #lang-toggle {
   width: 100%;
   border-collapse: collapse;
   min-width: 620px;
+  table-layout: fixed;
 }
 
 .ls-table th,
@@ -782,6 +783,8 @@ body.page .ls-topbar #lang-toggle {
   border-bottom: 1px solid var(--border-subtle);
   text-align: left;
   vertical-align: top;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .ls-table th {
@@ -872,6 +875,10 @@ body.page .ls-topbar #lang-toggle {
   vertical-align: middle;
   text-decoration: none;
   align-self: center;
+  appearance: none;
+  -webkit-appearance: none;
+  box-shadow: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .ls-mini-action-label {
@@ -1143,6 +1150,52 @@ textarea.field {
   .icon-button {
     width: 42px;
     height: 34px;
+  }
+
+  .table-wrap {
+    overflow-x: visible;
+  }
+
+  .ls-table {
+    min-width: 0;
+    table-layout: auto;
+    font-size: 0.84rem;
+  }
+
+  .ls-table th,
+  .ls-table td {
+    padding: 0.55rem 0.35rem;
+  }
+
+  .ls-table-subrow td,
+  .ls-table-gallery-row td {
+    padding-left: 0.35rem;
+    padding-right: 0.35rem;
+  }
+
+  .ls-table-subrow-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.6rem;
+  }
+
+  .ls-table-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .ls-mini-action,
+  .ls-filter-btn {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: none;
+    box-shadow: none;
+    transform: none;
+  }
+
+  .ls-machine-gallery img {
+    width: 78px;
+    height: 58px;
   }
 }
 
