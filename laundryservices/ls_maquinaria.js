@@ -11,19 +11,30 @@
       title: "Used Machinery | Laundry Services",
       desc: "Used machinery listing from Laundry Services.",
     },
+    it: {
+      title: "Macchinari usati | Laundry Services",
+      desc: "Elenco di macchinari usati di Laundry Services.",
+    },
     el: {
       title: "Μεταχειρισμενα μηχανηματα | Laundry Services",
       desc: "Λιστα μεταχειρισμενων μηχανηματων απο το Laundry Services.",
     },
   };
 
-  const normalize = (lang) => (["es", "en", "el"].includes(lang) ? lang : "es");
+  const normalize = (lang) => (["es", "en", "it", "el"].includes(lang) ? lang : "es");
 
   const applyLanguage = (lang) => {
     const active = normalize(lang);
+    let visible = false;
     copies.forEach((el) => {
-      el.hidden = el.getAttribute("data-legal-lang") !== active;
+      const match = el.getAttribute("data-legal-lang") === active;
+      el.hidden = !match;
+      if (match) visible = true;
     });
+    if (!visible) {
+      const fallback = copies.find((el) => el.getAttribute("data-legal-lang") === "en");
+      if (fallback) fallback.hidden = false;
+    }
 
     const meta = META[active] || META.es;
     document.title = meta.title;

@@ -30,6 +30,7 @@
             </button>
             <div id="lang-menu" class="lang-menu" role="menu" hidden>
               <button type="button" class="lang-option" data-lang="en" role="menuitem" data-i18n="lang_option_en">English</button>
+              <button type="button" class="lang-option" data-lang="it" role="menuitem" data-i18n="lang_option_it">Italiano</button>
               <button type="button" class="lang-option" data-lang="es" role="menuitem" data-i18n="lang_option_es">Espa\u00f1ol</button>
               <button type="button" class="lang-option" data-lang="el" role="menuitem" data-i18n="lang_option_el">\u03b5\u03bb\u03bb\u03b7\u03bd\u03b9\u03ba\u03ac</button>
             </div>
