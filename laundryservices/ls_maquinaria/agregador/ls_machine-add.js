@@ -41,6 +41,13 @@ const getNextMachineId = (type) => {
   return helper.buildMachineId(type, max + 1);
 };
 
+const hasConsistentIdForType = (type, id) => {
+  const helper = window.lsMachineId;
+  if (!helper || typeof helper.getTypePrefix !== "function") return true;
+  const expectedPrefix = helper.getTypePrefix(type);
+  return String(id || "").toUpperCase().startsWith(expectedPrefix);
+};
+
 const createButton = () => {
   const wrap = document.createElement("div");
   wrap.className = "ls-filterbar-admin";
@@ -234,6 +241,11 @@ form.addEventListener("submit", (event) => {
   event.preventDefault();
   renderDerivedState();
   renderFiles();
+  if (!hasConsistentIdForType(typeField.value, idField.value)) {
+    statusEl.removeAttribute("data-state");
+    statusEl.textContent = "El ID sugerido no coincide con el tipo seleccionado. Revisa el tipo de maquinaria.";
+    return;
+  }
   statusEl.dataset.state = "ok";
   statusEl.textContent = `Ficha preparada. Crea la carpeta ${folderEl.textContent} y coloca ahí las imágenes seleccionadas.`;
 });
