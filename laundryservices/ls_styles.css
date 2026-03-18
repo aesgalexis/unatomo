@@ -1228,7 +1228,8 @@ textarea.field {
 
   .ls-table td {
     padding: 0.18rem 0;
-    border-bottom: none;
+    border-top: none !important;
+    border-bottom: none !important;
   }
 
   .ls-table tbody tr[data-machine-id] td::before {
@@ -1251,6 +1252,10 @@ textarea.field {
   .ls-machine-gallery img {
     width: 78px;
     height: 58px;
+  }
+
+  .ls-table-gallery-row td {
+    padding-bottom: 1rem;
   }
 
   .ls-table-actions {
