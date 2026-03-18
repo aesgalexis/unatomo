@@ -17,6 +17,12 @@
     const images = IMAGE_MANIFEST[id];
     if (!id || !Array.isArray(images) || !images.length) return;
 
+    const priceRow =
+      row.nextElementSibling && row.nextElementSibling.classList.contains("ls-table-subrow")
+        ? row.nextElementSibling
+        : null;
+    if (!priceRow) return;
+
     const galleryRow = document.createElement("tr");
     galleryRow.className = "ls-table-gallery-row";
     galleryRow.setAttribute("data-gallery-id", id);
@@ -38,7 +44,7 @@
       </td>
     `;
 
-    row.insertAdjacentElement("afterend", galleryRow);
+    priceRow.insertAdjacentElement("afterend", galleryRow);
   });
 
   document.addEventListener("click", (event) => {

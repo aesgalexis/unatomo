@@ -52,16 +52,14 @@
     const applyFilter = (filter) => {
       rows.forEach((row) => {
         const typeCell = row.querySelector("td[data-type]");
-        const galleryRow =
-          row.nextElementSibling && row.nextElementSibling.classList.contains("ls-table-gallery-row")
+        const subrow =
+          row.nextElementSibling && row.nextElementSibling.classList.contains("ls-table-subrow")
             ? row.nextElementSibling
             : null;
-        const subrow =
-          galleryRow && galleryRow.nextElementSibling && galleryRow.nextElementSibling.classList.contains("ls-table-subrow")
-            ? galleryRow.nextElementSibling
-            : row.nextElementSibling && row.nextElementSibling.classList.contains("ls-table-subrow")
-              ? row.nextElementSibling
-              : null;
+        const galleryRow =
+          subrow && subrow.nextElementSibling && subrow.nextElementSibling.classList.contains("ls-table-gallery-row")
+            ? subrow.nextElementSibling
+            : null;
         const matches = filter === "all" || (typeCell && typeCell.dataset.type === filter);
         row.hidden = !matches;
         if (galleryRow) {
