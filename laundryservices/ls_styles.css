@@ -1021,6 +1021,11 @@ body.ls-contact-page .page-shell {
   max-width: 800px;
 }
 
+html:has(body.ls-privacy-page),
+body.ls-privacy-page {
+  scrollbar-gutter: auto;
+}
+
 body.ls-contact-page .contacto {
   display: grid;
   gap: 1.1rem;

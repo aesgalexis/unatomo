@@ -56,7 +56,7 @@
       card4_p1:
         "Ofrecemos soporte técnico a todos nuestros clientes. Desde diagnóstico y solución de averías hasta operaciones recurrentes programadas como cambios de muletones, membranas de prensas, rodamientos, etc.",
       card4_price: "Desde 65 EUR/hora",
-      card4_price_note: "* Precio para Mallorca",
+      card4_price_note: "* Tarifa para Mallorca",
       card4_cta: "No disponible",
       card5_title: "Recambios y consumibles",
       card5_p1:
@@ -143,7 +143,7 @@
       card4_p1:
         "We offer technical support to all our clients. From fault diagnosis and repair to scheduled recurring operations such as replacing padding covers, press membranes, bearings, and more.",
       card4_price: "From 65 EUR/hour",
-      card4_price_note: "* Price for Mallorca",
+      card4_price_note: "* Rate for Mallorca",
       card4_cta: "Unavailable",
       card5_title: "Spare parts and consumables",
       card5_p1:
@@ -230,7 +230,7 @@
       card4_p1:
         "Offriamo supporto tecnico a tutti i nostri clienti. Dalla diagnosi e risoluzione dei guasti fino a operazioni ricorrenti programmate come sostituzione di molettone, membrane di presse, cuscinetti, ecc.",
       card4_price: "Da 65 EUR/ora",
-      card4_price_note: "* Prezzo per Mallorca",
+      card4_price_note: "* Tariffa per Mallorca",
       card4_cta: "Non disponibile",
       card5_title: "Ricambi e consumabili",
       card5_p1:
@@ -317,7 +317,7 @@
       card4_p1:
         "Προσφερουμε τεχνικη υποστηριξη σε ολους τους πελατες μας. Απο διαγνωση και επιλυση βλαβων εως προγραμματισμενες επαναλαμβανομενες εργασιες οπως αλλαγες μουλετον, μεμβρανων πρεσας, ρουλεμαν και αλλα.",
       card4_price: "Απο 65 EUR/ωρα",
-      card4_price_note: "* Τιμη για Mallorca",
+      card4_price_note: "* Χρεωση για Mallorca",
       card4_cta: "Μη διαθεσιμο",
       card5_title: "Ανταλλακτικα και αναλωσιμα",
       card5_p1:
