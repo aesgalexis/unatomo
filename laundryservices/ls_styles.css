@@ -343,23 +343,47 @@ a:hover {
 }
 
 .ls-upperfooter-brand {
+  position: relative;
   display: flex;
+  flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
   width: 100%;
+  gap: 0.6rem;
+  min-height: 72px;
 }
 
 .ls-upperfooter-brand.is-logo-right {
   justify-content: flex-end;
+  align-items: flex-end;
 }
 
 .ls-upperfooter-logo {
+  position: relative;
+  z-index: 1;
   width: min(100%, 150px);
   height: auto;
   display: block;
   opacity: 0.95;
   cursor: pointer;
   touch-action: manipulation;
+}
+
+.ls-upperfooter-about-link {
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-size: 0.9rem;
+  color: color-mix(in srgb, var(--fg) 88%, transparent);
+  text-decoration: underline;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.ls-upperfooter-brand.is-logo-right .ls-upperfooter-about-link {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .service-card {
@@ -441,6 +465,12 @@ a:hover {
 
 .service-card.is-collapsed:hover {
   --card-title-color: var(--fg);
+}
+
+.service-card--selectable-copy,
+.service-card--selectable-copy * {
+  user-select: text;
+  -webkit-user-select: text;
 }
 
 .service-card p + p {

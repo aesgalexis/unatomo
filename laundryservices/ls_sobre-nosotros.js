@@ -4,20 +4,20 @@
 
   const META = {
     es: {
-      title: "Política de privacidad y cookies | Laundry Services",
-      desc: "Política de privacidad y cookies de Laundry Services.",
+      title: "Sobre nosotros | Laundry Services",
+      desc: "Información sobre Laundry Services y UNATOMO CORE SL.",
     },
     en: {
-      title: "Privacy and Cookies Policy | Laundry Services",
-      desc: "Privacy and cookies policy for Laundry Services.",
+      title: "About us | Laundry Services",
+      desc: "Information about Laundry Services and UNATOMO CORE SL.",
     },
     it: {
-      title: "Privacy e Cookie Policy | Laundry Services",
-      desc: "Privacy e cookie policy per Laundry Services.",
+      title: "Chi siamo | Laundry Services",
+      desc: "Informazioni su Laundry Services e UNATOMO CORE SL.",
     },
     el: {
-      title: "Πολιτικη απορρητου και cookies | Laundry Services",
-      desc: "Πολιτικη απορρητου και cookies του Laundry Services.",
+      title: "Σχετικα με εμας | Laundry Services",
+      desc: "Πληροφοριες για το Laundry Services και την UNATOMO CORE SL.",
     },
   };
 

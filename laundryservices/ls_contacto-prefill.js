@@ -33,6 +33,9 @@
     if (lang === "en") {
       return `I want to receive information about the following machine: ${machineLabel}`;
     }
+    if (lang === "it") {
+      return `Voglio ricevere informazioni sulla seguente macchina: ${machineLabel}`;
+    }
     if (lang === "el") {
       return `Θελω να λαβω πληροφοριες για το ακολουθο μηχανημα: ${machineLabel}`;
     }

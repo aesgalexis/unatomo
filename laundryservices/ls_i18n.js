@@ -1,5 +1,5 @@
 ﻿(() => {
-  const LANGS = ["es", "en", "el"];
+  const LANGS = ["es", "en", "it", "el"];
 
   const I18N = {
     es: {
@@ -7,6 +7,7 @@
       page_desc:
         "Servicios técnicos para lavanderías industriales: auditoría, asesoramiento y control de productividad.",
       lang_option_en: "English",
+      lang_option_it: "Italiano",
       lang_option_es: "Español",
       lang_option_el: "ελληνικά",
       hero_title:
@@ -21,24 +22,30 @@
         "Realizamos un informe técnico por secciones con prioridades claras sobre en qué urge intervenir, qué mejoras programar y qué inversiones pueden resultar más rentables.",
       card1_p3:
         "Ponemos el foco en el análisis de los flujos de producción, mantenimiento preventivo, recambios críticos y hábitos de trabajo.",
-      card1_price: "Desde 1390 EUR/día",
+      card1_price: "Desde 1.390 EUR/día",
       card1_price_note:
         "* (Gastos de traslado y alojamiento no incluidos en el precio)\n** (Solo España: impuestos no incluidos)",
       card1_cta: "Contratar",
       card2_title: "Asesoría independiente de equipamiento",
       card2_p1:
-        "Validación técnica de inversiones sin conflictos de interés. Aportamos perspectiva técnica antes de que cierren su próxima compra. No representamos marcas ni cobramos comisiones de fabricantes. Nuestro objetivo es asegurar que el equipo sea el adecuado para su operativa real.",
+        "Validación técnica de inversiones sin conflictos de interés. Aportamos perspectiva técnica antes de que cierren su próxima compra. No representamos marcas ni cobramos comisiones de fabricantes. Nuestro objetivo es asegurar que el equipo sea el adecuado para su operativa real y que se adapte a sus necesidades.",
       card2_p2:
         "Realizamos un análisis exhaustivo de idoneidad, virtudes, limitaciones y flexibilidad de la máquina a medio-largo plazo.",
       card2_p3:
-        "Evaluamos el servicio postventa y mantenimiento: dependencia de repuestos, facilidad de servicio técnico y vida útil esperable.",
+        "Evaluamos el servicio postventa y mantenimiento: dependencia de repuestos, facilidad de servicio técnico, vida útil esperable, etc.",
       card2_p4:
-        "Acompañamiento: revisión del pliego técnico y comparativa de alternativas antes de la decisión final.",
+        "Acompañamiento: revisión del pliego técnico y comparativa de alternativas para ayudarle a tomar la decisión final.",
       card2_price: "Desde 1,5% del coste de la inversión",
       card2_cta: "Solicitar",
-      card3_title: "Control de productividad, consumos y captura de datos",
+      card3_title: "Control de productividad y captura de datos",
       card3_p1:
-        "Software adaptado para recabar datos de todo lo que se pueda considerar relevante para la producción. Implementamos soluciones de monitorización que captura, traduce y representa el trabajo de la lavandería en datos útiles para el control diario y la toma de decisiones.",
+        "Contamos con soluciones de software específico para recabar datos de todo lo que se pueda considerar relevante para la producción. Contadores de piezas por tipo de ropa y cliente, que implementamos en plegadores o líneas de planchado de cualquier tipo. Conectamos el sistema con bases de datos nuevas o con bases existentes.",
+      card3_price:
+        "Desde 7.990 EUR/Sistema de base.",
+      card3_price_2:
+        "Desde 4.990 EUR/Línea adicional.",
+      card3_price_note:
+        "* El sistema de base incluye: Autómata para conteo, HMI para selección de cliente y/o Identificación de personal, Ordenador y pantalla de 24” para muestreo de datos. Instalación e implementación del sistema incluida.",
       card3_cta: "Solicitar",
       card6_title: "Maquinaria",
       card6_p1_before: "Contamos con un amplio espectro de maquinaria nueva y ",
@@ -46,10 +53,14 @@
       card6_p1_after: ".",
       card6_cta: "Solicitar",
       card4_title: "Asistencia técnica",
+      card4_p1:
+        "Ofrecemos soporte técnico a todos nuestros clientes. Desde diagnóstico y solución de averías hasta operaciones recurrentes programadas como cambios de muletones, membranas de prensas, rodamientos, etc.",
+      card4_price: "Desde 65 EUR/hora",
+      card4_price_note: "* Precio para Mallorca",
       card4_cta: "No disponible",
-      card5_title: "Recambios",
+      card5_title: "Recambios y consumibles",
       card5_p1:
-        "Tenemos acceso a recambios originales de las principales marcas del sector. Cuéntanos qué repuesto necesitas y te ayudamos a encontrarlo. No importa la antigüedad de la máquina y salvo casos excepcionales, tampoco el periodo de obsolescencia.",
+        "Tenemos acceso a recambios originales de las principales marcas del sector, así como recambios genéricos. También suministramos consumibles de todo tipo, desde bandas de algodón o muletones hasta convertidores de frecuencia o pantallas. Dinos que necesitas y te ayudamos a encontrarlo.",
       card5_cta: "Solicitar",
       contact_page_title: "Contacto · unatomo | Laundry Services",
       contact_email_label: "Correo electrónico:",
@@ -75,6 +86,7 @@
       contact_message_label: "Mensaje",
       contact_send: "Enviar",
       privacy_link: "Política de privacidad y cookies",
+      about_us_link: "Sobre nosotros",
       legal_footer: "UNATOMO CORE SL - Todos los derechos reservados.",
     },
     en: {
@@ -82,6 +94,7 @@
       page_desc:
         "Technical services for industrial laundries: audits, advisory and productivity control.",
       lang_option_en: "English",
+      lang_option_it: "Italiano",
       lang_option_es: "Español",
       lang_option_el: "ελληνικά",
       hero_title:
@@ -96,24 +109,30 @@
         "We provide a technical report by section with clear priorities on what requires urgent action, what improvements to schedule, and what investments can be more profitable.",
       card1_p3:
         "We focus on production flow analysis, preventive maintenance, critical spare parts and work practices.",
-      card1_price: "From 1390 EUR/day",
+      card1_price: "From 1.390 EUR/day",
       card1_price_note:
         "* (Travel and accommodation costs not included in the price)\n** (Spain only: taxes not included)",
       card1_cta: "Hire",
       card2_title: "Independent equipment advisory",
       card2_p1:
-        "Technical validation of investments without conflicts of interest. We provide technical perspective before you close your next purchase. We do not represent brands or receive commissions from manufacturers. Our goal is to ensure the equipment truly fits your operation.",
+        "Technical validation of investments without conflicts of interest. We provide technical perspective before you close your next purchase. We do not represent brands or receive commissions from manufacturers. Our goal is to ensure the equipment is suitable for your actual operation and adapts to your needs.",
       card2_p2:
         "We perform a thorough analysis of suitability, strengths, limitations and medium-term to long-term flexibility.",
       card2_p3:
-        "We evaluate after-sales service and maintenance: spare-part dependency, serviceability and expected useful life.",
+        "We evaluate after-sales service and maintenance: spare-parts dependency, ease of technical service, expected useful life, and more.",
       card2_p4:
-        "Support: technical specification review and alternative comparison before final decision.",
+        "Support: review of the technical specification and comparison of alternatives to help you make the final decision.",
       card2_price: "From 1.5% of investment cost",
       card2_cta: "Request",
       card3_title: "Productivity control and data capture",
       card3_p1:
-        "Custom software to collect data from everything considered relevant to production. We implement monitoring solutions that capture, translate and represent laundry operations into useful data for daily control and decision-making.",
+        "We provide dedicated software solutions to collect data from everything considered relevant to production. Piece counters by garment type and customer, implemented on folders or ironing lines of any kind. We connect the system to new databases or to existing databases.",
+      card3_price:
+        "From 7.990 EUR/Base system.",
+      card3_price_2:
+        "From 4.990 EUR/Additional line.",
+      card3_price_note:
+        "* The base system includes: Counting PLC, HMI for customer selection and/or staff identification, computer and 24-inch display for data sampling. System installation and implementation included.",
       card3_cta: "Request",
       card6_title: "Machinery",
       card6_p1_before: "We offer a wide range of new and ",
@@ -121,10 +140,14 @@
       card6_p1_after: ".",
       card6_cta: "Request",
       card4_title: "Technical assistance",
+      card4_p1:
+        "We offer technical support to all our clients. From fault diagnosis and repair to scheduled recurring operations such as replacing padding covers, press membranes, bearings, and more.",
+      card4_price: "From 65 EUR/hour",
+      card4_price_note: "* Price for Mallorca",
       card4_cta: "Unavailable",
-      card5_title: "Spare parts",
+      card5_title: "Spare parts and consumables",
       card5_p1:
-        "We have access to original spare parts from the leading brands in the industry. Tell us what part you need and we'll help you find it. The age of the machine doesn't matter, and except in exceptional cases, neither does its obsolescence period.",
+        "We have access to original spare parts from the leading brands in the industry, as well as generic spare parts. We also supply all kinds of consumables, from cotton belts or padding covers to frequency converters or displays. Tell us what you need and we'll help you find it.",
       card5_cta: "Request",
       contact_page_title: "Contact · unatomo | Laundry Services",
       contact_email_label: "Email:",
@@ -150,13 +173,102 @@
       contact_message_label: "Message",
       contact_send: "Send",
       privacy_link: "Privacy and cookies policy",
+      about_us_link: "About us",
       legal_footer: "UNATOMO CORE SL - All rights reserved.",
+    },
+    it: {
+      page_title: "unatomo | Laundry Services",
+      page_desc:
+        "Servizi tecnici per lavanderie industriali: audit, consulenza e controllo della produttivita.",
+      lang_option_en: "English",
+      lang_option_it: "Italiano",
+      lang_option_es: "Español",
+      lang_option_el: "ελληνικά",
+      hero_title:
+        "Audit, consulenza e supporto tecnico per lavanderie industriali",
+      hero_lead:
+        "",
+      closing_claim: "Il tuo processo, La nostra visione",
+      card1_title: "Audit tecnico e di processo",
+      card1_p1:
+        "Individuazione dei punti critici per ottimizzare le prestazioni dell'impianto. Effettuiamo un'ispezione completa per identificare dove si perde rendimento e come evitarlo. Ci concentriamo sulla correzione di colli di bottiglia, guasti ricorrenti e squilibri operativi che penalizzano la produzione quotidiana.",
+      card1_p2:
+        "Redigiamo un rapporto tecnico per sezioni con priorita chiare su dove intervenire con urgenza, quali miglioramenti programmare e quali investimenti possono risultare piu redditizi.",
+      card1_p3:
+        "Ci concentriamo sull'analisi dei flussi produttivi, della manutenzione preventiva, dei ricambi critici e delle abitudini di lavoro.",
+      card1_price: "Da 1.390 EUR/giorno",
+      card1_price_note:
+        "* (Spese di viaggio e alloggio non incluse nel prezzo)\n** (Solo Spagna: imposte non incluse)",
+      card1_cta: "Richiedi",
+      card2_title: "Consulenza indipendente sulle attrezzature",
+      card2_p1:
+        "Validazione tecnica degli investimenti senza conflitti di interesse. Forniamo una prospettiva tecnica prima che concludiate il vostro prossimo acquisto. Non rappresentiamo marchi e non percepiamo commissioni dai produttori. Il nostro obiettivo e garantire che l'attrezzatura sia adatta alla vostra operativita reale e alle vostre esigenze.",
+      card2_p2:
+        "Svolgiamo un'analisi approfondita di idoneita, punti di forza, limiti e flessibilita della macchina nel medio-lungo periodo.",
+      card2_p3:
+        "Valutiamo il servizio post-vendita e la manutenzione: dipendenza dai ricambi, facilita di assistenza tecnica, vita utile prevista, ecc.",
+      card2_p4:
+        "Affiancamento: revisione del capitolato tecnico e confronto tra alternative per aiutarvi nella decisione finale.",
+      card2_price: "Da 1,5% del costo dell'investimento",
+      card2_cta: "Richiedi",
+      card3_title: "Controllo della produttivita e acquisizione dati",
+      card3_p1:
+        "Disponiamo di soluzioni software specifiche per raccogliere dati su tutto cio che puo essere considerato rilevante per la produzione. Contatori di pezzi per tipologia di biancheria e cliente, che implementiamo su piegatrici o linee di stiratura di qualsiasi tipo. Colleghiamo il sistema a nuove basi dati o a basi dati esistenti.",
+      card3_price:
+        "Da 7.990 EUR/Sistema base.",
+      card3_price_2:
+        "Da 4.990 EUR/Linea aggiuntiva.",
+      card3_price_note:
+        "* Il sistema base include: automa per il conteggio, HMI per selezione cliente e/o identificazione del personale, computer e schermo da 24 pollici per campionamento dati. Installazione e implementazione del sistema incluse.",
+      card3_cta: "Richiedi",
+      card6_title: "Macchinari",
+      card6_p1_before: "Disponiamo di un'ampia gamma di macchinari nuovi e ",
+      card6_p1_link: "usati",
+      card6_p1_after: ".",
+      card6_cta: "Richiedi",
+      card4_title: "Assistenza tecnica",
+      card4_p1:
+        "Offriamo supporto tecnico a tutti i nostri clienti. Dalla diagnosi e risoluzione dei guasti fino a operazioni ricorrenti programmate come sostituzione di molettone, membrane di presse, cuscinetti, ecc.",
+      card4_price: "Da 65 EUR/ora",
+      card4_price_note: "* Prezzo per Mallorca",
+      card4_cta: "Non disponibile",
+      card5_title: "Ricambi e consumabili",
+      card5_p1:
+        "Abbiamo accesso a ricambi originali dei principali marchi del settore, cosi come a ricambi generici. Forniamo anche consumabili di ogni tipo, da nastri in cotone o molettone fino a convertitori di frequenza o schermi. Dicci di cosa hai bisogno e ti aiuteremo a trovarlo.",
+      card5_cta: "Richiedi",
+      contact_page_title: "Contatto · unatomo | Laundry Services",
+      contact_email_label: "Email:",
+      contact_phone_label: "Telefono:",
+      contact_hours_label: "Orario di assistenza:",
+      contact_hours_value:
+        "Dal lunedi al venerdi, dalle 09:00 alle 15:00 (Orario della Spagna / CET).",
+      contact_address_label: "Indirizzo:",
+      contact_form_title: "Modulo di contatto",
+      contact_name_label: "Nome",
+      contact_company_label: "Azienda",
+      contact_country_label: "Paese",
+      contact_cif_label: "Partita IVA",
+      contact_email_field_label: "Email",
+      contact_phone_field_label: "Telefono",
+      contact_subject_label: "Oggetto",
+      contact_subject_placeholder: "Seleziona un oggetto…",
+      contact_subject_other: "Altro",
+      contact_brand_label: "Marca",
+      contact_brand_placeholder: "Seleziona una marca…",
+      contact_model_label: "Modello",
+      contact_serial_label: "N. di serie / Matricola",
+      contact_message_label: "Messaggio",
+      contact_send: "Invia",
+      privacy_link: "Politica sulla privacy e cookie",
+      about_us_link: "Chi siamo",
+      legal_footer: "UNATOMO CORE SL - Tutti i diritti riservati.",
     },
     el: {
       page_title: "unatomo | Laundry Services",
       page_desc:
         "Τεχνικές υπηρεσίες για βιομηχανικά πλυντήρια: έλεγχος, συμβουλευτική και έλεγχος παραγωγικότητας.",
       lang_option_en: "English",
+      lang_option_it: "Italiano",
       lang_option_es: "Español",
       lang_option_el: "ελληνικά",
       hero_title:
@@ -171,24 +283,30 @@
         "Παρεχουμε τεχνικη αναφορα ανα τομεα με σαφεις προτεραιοτητες για αμεσες παρεμβασεις, προγραμματισμενες βελτιωσεις και πιο αποδοτικες επενδυσεις.",
       card1_p3:
         "Εστιαζουμε στην αναλυση ροων παραγωγης, στην προληπτικη συντηρηση, στα κρισιμα ανταλλακτικα και στις πρακτικες εργασιας.",
-      card1_price: "Απο 1390 EUR/ημερα",
+      card1_price: "Απο 1.390 EUR/ημερα",
       card1_price_note:
         "* (Τα εξοδα μετακινησης και διαμονης δεν περιλαμβανονται στην τιμη)\n** (Μονο Ισπανια: οι φοροι δεν περιλαμβανονται)",
       card1_cta: "Αναθεση",
       card2_title: "Ανεξαρτητη συμβουλευτικη εξοπλισμου",
       card2_p1:
-        "Τεχνικη αξιολογηση επενδυσεων χωρις συγκρουση συμφεροντων. Παρεχουμε τεχνικη οπτικη πριν την επομενη αγορα σας. Δεν εκπροσωπουμε μαρκες και δεν λαμβανουμε προμηθειες απο κατασκευαστες. Στοχος μας ειναι ο εξοπλισμος να ταιριαζει πραγματικα στη λειτουργια σας.",
+        "Τεχνικη αξιολογηση επενδυσεων χωρις συγκρουση συμφεροντων. Παρεχουμε τεχνικη οπτικη πριν την επομενη αγορα σας. Δεν εκπροσωπουμε μαρκες και δεν λαμβανουμε προμηθειες απο κατασκευαστες. Στοχος μας ειναι ο εξοπλισμος να ειναι καταλληλος για την πραγματικη λειτουργια σας και να προσαρμοζεται στις αναγκες σας.",
       card2_p2:
         "Πραγματοποιουμε πληρη αναλυση καταλληλοτητας, πλεονεκτηματων, περιορισμων και ευελιξιας σε μεσο-μακροπροθεσμο οριζοντα.",
       card2_p3:
-        "Αξιολογουμε την υποστηριξη μετα την πωληση και τη συντηρηση: εξαρτηση απο ανταλλακτικα, ευκολια τεχνικης εξυπηρετησης και αναμενομενη διαρκεια ζωης.",
+        "Αξιολογουμε την υποστηριξη μετα την πωληση και τη συντηρηση: εξαρτηση απο ανταλλακτικα, ευκολια τεχνικης εξυπηρετησης, αναμενομενη διαρκεια ζωης και αλλα.",
       card2_p4:
-        "Υποστηριξη: ελεγχος τεχνικων προδιαγραφων και συγκριση εναλλακτικων πριν την τελικη αποφαση.",
+        "Υποστηριξη: ελεγχος τεχνικων προδιαγραφων και συγκριση εναλλακτικων για να σας βοηθησουμε να παρετε την τελικη αποφαση.",
       card2_price: "Απο 1,5% του κοστους επενδυσης",
       card2_cta: "Αιτηση",
       card3_title: "Ελεγχος παραγωγικοτητας και συλλογη δεδομενων",
       card3_p1:
-        "Προσαρμοσμενο λογισμικο για συλλογη δεδομενων απο καθε στοιχειο που θεωρειται σημαντικο για την παραγωγη. Υλοποιουμε λυσεις παρακολουθησης που καταγραφουν, μετατρεπουν και παρουσιαζουν τη λειτουργια του πλυντηριου σε χρησιμα δεδομενα για καθημερινο ελεγχο και ληψη αποφασεων.",
+        "Διαθετουμε ειδικες λυσεις λογισμικου για τη συλλογη δεδομενων απο καθε στοιχειο που θεωρειται σημαντικο για την παραγωγη. Μετρητες τεμαχιων ανα τυπο ρουχου και πελατη, που υλοποιουμε σε διπλωτικα ή γραμμες σιδερωματος καθε τυπου. Συνδεουμε το συστημα με νεες ή υπαρχουσες βασεις δεδομενων.",
+      card3_price:
+        "Απο 7.990 EUR/Βασικο συστημα.",
+      card3_price_2:
+        "Απο 4.990 EUR/Επιπλεον γραμμη.",
+      card3_price_note:
+        "* Το βασικο συστημα περιλαμβανει: αυτοματο μετρησης, HMI για επιλογη πελατη και/ή ταυτοποιηση προσωπικου, υπολογιστη και οθονη 24 ιντσων για δειγματοληψια δεδομενων. Περιλαμβανονται εγκατασταση και υλοποιηση του συστηματος.",
       card3_cta: "Αιτηση",
       card6_title: "Μηχανηματα",
       card6_p1_before: "Διαθετουμε ευρυ φασμα νεων και ",
@@ -196,10 +314,14 @@
       card6_p1_after: ".",
       card6_cta: "Αιτηση",
       card4_title: "Τεχνικη υποστηριξη",
+      card4_p1:
+        "Προσφερουμε τεχνικη υποστηριξη σε ολους τους πελατες μας. Απο διαγνωση και επιλυση βλαβων εως προγραμματισμενες επαναλαμβανομενες εργασιες οπως αλλαγες μουλετον, μεμβρανων πρεσας, ρουλεμαν και αλλα.",
+      card4_price: "Απο 65 EUR/ωρα",
+      card4_price_note: "* Τιμη για Mallorca",
       card4_cta: "Μη διαθεσιμο",
-      card5_title: "Ανταλλακτικα",
+      card5_title: "Ανταλλακτικα και αναλωσιμα",
       card5_p1:
-        "Έχουμε πρόσβαση σε γνήσια ανταλλακτικά από τις κορυφαίες μάρκες του κλάδου. Πείτε μας ποιο ανταλλακτικό χρειάζεστε και θα σας βοηθήσουμε να το βρείτε. Η ηλικία του μηχανήματος δεν έχει σημασία, και εκτός από εξαιρετικές περιπτώσεις, ούτε η περίοδος απαξίωσής του.",
+        "Εχουμε προσβαση σε γνησια ανταλλακτικα απο τις κυριοτερες μαρκες του κλαδου, καθως και σε γενικα ανταλλακτικα. Επισης προμηθευουμε καθε ειδους αναλωσιμα, απο βαμβακερες ταινιες ή μουλετον μεχρι μετατροπεις συχνοτητας ή οθονες. Πειτε μας τι χρειαζεστε και θα σας βοηθησουμε να το βρειτε.",
       card5_cta: "Αιτηση",
       contact_page_title: "Επικοινωνία · unatomo | Laundry Services",
       contact_email_label: "Email:",
@@ -225,6 +347,7 @@
       contact_message_label: "Μήνυμα",
       contact_send: "Αποστολή",
       privacy_link: "Πολιτικη απορρητου και cookies",
+      about_us_link: "Σχετικα με εμας",
       legal_footer: "UNATOMO CORE SL - Με επιφυλαξη παντος δικαιωματος.",
     },
   };
@@ -253,6 +376,7 @@
       const selectorLabelByContent = {
         es: "ES",
         en: "EN",
+        it: "IT",
         el: "EL",
       };
       label.textContent = selectorLabelByContent[next] || "ES";
