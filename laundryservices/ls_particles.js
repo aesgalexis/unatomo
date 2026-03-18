@@ -78,7 +78,8 @@
 
   const initParticles = () => {
     const area = state.width * state.height;
-    const count = Math.max(16, Math.min(52, Math.round(area / 35000)));
+    const baseCount = Math.max(16, Math.min(52, Math.round(area / 35000)));
+    const count = Math.round(baseCount * 1.5);
     state.particles = Array.from({ length: count }, makeParticle);
   };
 
