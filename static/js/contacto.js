@@ -3,7 +3,9 @@
   if (!form) return;
 
   const status = form.querySelector(".form-status");
-  const submitBtn = form.querySelector(".btn-submit");
+  const submitBtn =
+    form.querySelector(".btn-submit") ||
+    form.querySelector('button[type="submit"]');
   const honeypot = form.querySelector('input[name="_gotcha"]');
 
   function setStatus(message, state) {
@@ -24,7 +26,7 @@
       return;
     }
 
-    setStatus("Enviando…");
+    setStatus("Enviando...");
     if (submitBtn) submitBtn.disabled = true;
 
     const formData = new FormData(form);
