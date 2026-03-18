@@ -22,6 +22,7 @@
         ? row.nextElementSibling
         : null;
     if (!priceRow) return;
+    priceRow.classList.add("ls-table-subrow-has-gallery");
 
     const galleryRow = document.createElement("tr");
     galleryRow.className = "ls-table-gallery-row";
@@ -54,9 +55,13 @@
     if (!id) return;
     const galleries = document.querySelectorAll(`.ls-table-gallery-row[data-gallery-id="${id}"]`);
     galleries.forEach((row) => {
+      const priceRow = row.previousElementSibling;
       const nextOpen = row.dataset.galleryOpen !== "true";
       row.dataset.galleryOpen = nextOpen ? "true" : "false";
       row.hidden = !nextOpen;
+      if (priceRow && priceRow.classList.contains("ls-table-subrow")) {
+        priceRow.classList.toggle("is-gallery-open", nextOpen);
+      }
     });
   });
 })();
