@@ -52,13 +52,13 @@
     const applyFilter = (filter) => {
       rows.forEach((row) => {
         const typeCell = row.querySelector("td[data-type]");
-        const galleryRow =
-          row.previousElementSibling && row.previousElementSibling.classList.contains("ls-table-gallery-row")
-            ? row.previousElementSibling
-            : null;
         const subrow =
           row.nextElementSibling && row.nextElementSibling.classList.contains("ls-table-subrow")
             ? row.nextElementSibling
+            : null;
+        const galleryRow =
+          subrow && subrow.nextElementSibling && subrow.nextElementSibling.classList.contains("ls-table-gallery-row")
+            ? subrow.nextElementSibling
             : null;
         const matches = filter === "all" || (typeCell && typeCell.dataset.type === filter);
         row.hidden = !matches;

@@ -808,9 +808,13 @@ body.page .ls-topbar #lang-toggle {
   font-size: 0.92rem;
 }
 
+.ls-table-subrow-has-gallery td {
+  border-bottom: none;
+}
+
 .ls-table-gallery-row td {
   padding-top: 0.25rem;
-  padding-bottom: 0.4rem;
+  padding-bottom: 0.75rem;
   border-bottom: none;
 }
 
@@ -902,6 +906,10 @@ body.page .ls-topbar #lang-toggle {
 
 .ls-table tbody tr.ls-table-subrow:last-child td {
   border-bottom: none;
+}
+
+.ls-table tbody tr[data-machine-id]:not(:first-child) td {
+  border-top: 1px solid var(--border-subtle);
 }
 
 
