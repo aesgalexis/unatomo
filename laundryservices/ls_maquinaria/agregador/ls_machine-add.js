@@ -4,7 +4,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/fi
 const OWNER_EMAIL = "aesg.alexis@gmail.com";
 
 const TYPE_OPTIONS = [
-  "Plegadora de toallas",
+  "Plegadora",
   "Lavadora",
   "Tunel",
   "Secadora",

@@ -12,6 +12,14 @@
   const rows = Array.from(document.querySelectorAll(".ls-table tbody tr[data-machine-id]"));
   if (!rows.length) return;
 
+  document.querySelectorAll(".ls-gallery-toggle").forEach((button) => {
+    const id = button.getAttribute("data-gallery-id");
+    const images = IMAGE_MANIFEST[id];
+    if (!id || !Array.isArray(images) || !images.length) {
+      button.remove();
+    }
+  });
+
   rows.forEach((row) => {
     const id = row.getAttribute("data-machine-id");
     const images = IMAGE_MANIFEST[id];

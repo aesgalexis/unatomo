@@ -1,10 +1,8 @@
 (() => {
   const TYPE_PREFIX_RULES = {
     folder: "P",
-    towel_folder: "P",
     folding_machine: "P",
     plegadora: "P",
-    "plegadora de toallas": "P",
     washer: "L",
     washing_machine: "L",
     lavadora: "L",
