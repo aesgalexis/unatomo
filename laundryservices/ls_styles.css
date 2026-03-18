@@ -767,6 +767,13 @@ body.page .ls-topbar #lang-toggle {
   text-align: left;
 }
 
+:root[data-theme="dark"] body {
+  background:
+    radial-gradient(circle at 85% 10%, rgba(96, 165, 250, 0.12), transparent 45%),
+    radial-gradient(circle at 12% 18%, rgba(56, 189, 248, 0.08), transparent 40%),
+    linear-gradient(180deg, #07111f 0%, #04070d 52%, #000000 100%);
+}
+
 body.ls-contact-page .page-shell {
   max-width: 800px;
 }
