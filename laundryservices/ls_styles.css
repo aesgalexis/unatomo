@@ -707,6 +707,197 @@ body.page .ls-topbar #lang-toggle {
   font-size: 0.75rem;
 }
 
+.ls-note {
+  margin: 1rem 0 0;
+  font-size: 0.82rem;
+  color: color-mix(in srgb, var(--fg) 72%, transparent);
+}
+
+.ls-note-block {
+  margin-top: 1rem;
+}
+
+.ls-note-block .ls-note:first-child {
+  margin-top: 0;
+}
+
+.ls-filterbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0 0 1rem;
+}
+
+.ls-filter-btn {
+  border: 1px solid var(--border-subtle);
+  background: var(--panel-bg);
+  color: var(--fg);
+  border-radius: 999px;
+  height: 32px;
+  padding: 0 0.8rem;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.9rem;
+  line-height: 1;
+  display: inline-grid;
+  place-items: center;
+  text-align: center;
+  vertical-align: middle;
+  box-sizing: border-box;
+  appearance: none;
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.ls-filter-btn-label {
+  display: block;
+  transform: translateY(-1px);
+}
+
+.ls-filter-btn.is-active {
+  background: var(--fg);
+  color: var(--bg);
+  border-color: var(--fg);
+}
+
+.ls-filter-btn:focus-visible {
+  outline: 2px solid var(--fg);
+  outline-offset: 2px;
+}
+
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.ls-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 620px;
+}
+
+.ls-table th,
+.ls-table td {
+  padding: 0.85rem 0.9rem;
+  border-bottom: 1px solid var(--border-subtle);
+  text-align: left;
+  vertical-align: top;
+}
+
+.ls-table th {
+  color: var(--fg);
+  font-weight: 600;
+}
+
+.ls-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.ls-price {
+  color: #16a34a;
+  font-weight: 700;
+}
+
+.ls-table-subrow td {
+  padding-top: 0;
+  border-bottom: 1px solid var(--border-subtle);
+  color: color-mix(in srgb, var(--fg) 78%, transparent);
+  font-size: 0.92rem;
+}
+
+.ls-table-gallery-row td {
+  padding-top: 0.25rem;
+  padding-bottom: 0.4rem;
+  border-bottom: none;
+}
+
+.ls-table-gallery-row[hidden] {
+  display: none;
+}
+
+.ls-machine-gallery {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.ls-machine-gallery a {
+  display: inline-flex;
+  text-decoration: none;
+}
+
+.ls-machine-gallery img {
+  width: 92px;
+  height: 68px;
+  object-fit: cover;
+  display: block;
+  border-radius: 0.45rem;
+  border: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--fg) 6%, transparent);
+}
+
+.ls-table-subrow-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+}
+
+.ls-table-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  flex-shrink: 0;
+}
+
+.ls-mini-action {
+  border: 1px solid var(--border-subtle);
+  background: var(--panel-bg);
+  color: var(--fg);
+  border-radius: 0.5rem;
+  min-width: 58px;
+  height: 24px;
+  padding: 0 0.5rem 0.02rem;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.85rem;
+  line-height: 1;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  vertical-align: middle;
+  text-decoration: none;
+  align-self: center;
+}
+
+.ls-mini-action-label {
+  display: block;
+  line-height: 1;
+  transform: translateY(-1px);
+}
+
+.ls-mini-action:hover {
+  opacity: 0.92;
+}
+
+.ls-mini-action:focus-visible {
+  outline: 2px solid var(--fg);
+  outline-offset: 2px;
+}
+
+.ls-table tbody tr:not(.ls-table-subrow) td {
+  border-bottom: none;
+}
+
+.ls-table tbody tr.ls-table-subrow:last-child td {
+  border-bottom: none;
+}
+
+
 .scroll-top-container {
   margin-top: 2rem;
   display: flex;
@@ -765,6 +956,13 @@ body.page .ls-topbar #lang-toggle {
   border-radius: 0;
   background: var(--panel-bg);
   text-align: left;
+}
+
+:root[data-theme="light"] body {
+  background:
+    radial-gradient(circle at 85% 10%, rgba(148, 163, 184, 0.08), transparent 45%),
+    radial-gradient(circle at 12% 18%, rgba(203, 213, 225, 0.12), transparent 40%),
+    linear-gradient(180deg, #ffffff 0%, #f5f7fb 52%, #e5e7eb 100%);
 }
 
 :root[data-theme="dark"] body {

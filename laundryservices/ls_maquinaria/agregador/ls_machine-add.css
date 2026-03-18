@@ -1,0 +1,143 @@
+.ls-filterbar-admin {
+  margin-left: auto;
+}
+
+.ls-machine-add-btn {
+  border: 1px solid var(--fg);
+  background: var(--fg);
+  color: var(--bg);
+  border-radius: 999px;
+  height: 32px;
+  padding: 0 0.95rem;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.9rem;
+  line-height: 1;
+  display: inline-grid;
+  place-items: center;
+  appearance: none;
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.ls-machine-add-btn:hover {
+  opacity: 0.94;
+}
+
+.ls-machine-add-btn:focus-visible {
+  outline: 2px solid var(--fg);
+  outline-offset: 2px;
+}
+
+.ls-machine-add-dialog {
+  width: min(920px, calc(100vw - 2rem));
+  max-height: calc(100vh - 2rem);
+  margin: auto;
+  padding: 0;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg);
+  color: var(--fg);
+}
+
+.ls-machine-add-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.ls-machine-add-sheet {
+  display: grid;
+  gap: 1rem;
+  padding: 1.25rem 1.25rem 1.35rem;
+}
+
+.ls-machine-add-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.ls-machine-add-head h2 {
+  margin: 0;
+}
+
+.ls-machine-add-close {
+  border: 1px solid var(--border-subtle);
+  background: var(--panel-bg);
+  color: var(--fg);
+  border-radius: 0.55rem;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+}
+
+.ls-machine-add-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem 1rem;
+}
+
+.ls-machine-add-grid .form-field--full {
+  grid-column: 1 / -1;
+}
+
+.ls-machine-inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem 1.2rem;
+  align-items: center;
+}
+
+.ls-machine-inline label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.ls-machine-add-meta {
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--border-subtle);
+  background: var(--panel-bg);
+  border-radius: 0.75rem;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.ls-machine-add-meta strong {
+  color: var(--fg);
+}
+
+.ls-machine-add-status {
+  min-height: 1.4rem;
+  font-size: 0.92rem;
+  color: color-mix(in srgb, var(--fg) 78%, transparent);
+}
+
+.ls-machine-add-status[data-state="ok"] {
+  color: #16a34a;
+}
+
+.ls-machine-file-list {
+  display: grid;
+  gap: 0.3rem;
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.ls-machine-add-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 720px) {
+  .ls-machine-add-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ls-machine-add-dialog {
+    width: calc(100vw - 1rem);
+  }
+}
