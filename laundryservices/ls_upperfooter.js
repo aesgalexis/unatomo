@@ -6,7 +6,7 @@
     <section class="ls-upperfooter" aria-label="Laundry Services upperfooter">
       <div class="ls-upperfooter-col ls-upperfooter-brand">
         <img src="/static/img/logo-unatomo-v1.5.svg" alt="unatomo" class="ls-upperfooter-logo js-upperfooter-logo" loading="lazy" />
-        <a href="/laundryservices/ls_sobre-nosotros.html" class="ls-upperfooter-about-link" data-i18n="about_us_link">Sobre nosotros</a>
+        <a href="/laundryservices/ls_sobre-nosotros/" class="ls-upperfooter-about-link" data-i18n="about_us_link">Sobre nosotros</a>
       </div>
 
       <div class="ls-upperfooter-col ls-upperfooter-col-main">
