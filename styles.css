@@ -352,6 +352,14 @@ body.page #theme-toggle {
   text-align: justify;
 }
 
+#intro-line-1 {
+  text-align: center;
+}
+
+#enter-site {
+  margin-top: 1rem;
+}
+
 .card {
   max-width: 600px;
   margin: 2rem auto;
