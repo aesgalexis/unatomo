@@ -1,2 +1,30 @@
+# Root-level robots.txt served at /robots.txt
+# This allows compliant search engines and AI crawlers to access the whole site.
+
 User-agent: *
 Allow: /
+
+# Explicit allow rules for common AI crawlers. The wildcard rule above already covers
+# them, but keeping these entries makes the intent unambiguous.
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+Sitemap: https://unatomo.com/sitemap.xml

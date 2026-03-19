@@ -56,6 +56,12 @@
       card4_p1:
         "Ofrecemos soporte técnico a todos nuestros clientes. Desde diagnóstico y solución de averías hasta operaciones recurrentes programadas como cambios de muletones, membranas de prensas, rodamientos, etc.",
       card4_cta: "No disponible",
+      card7_title: "Sobre nosotros",
+      card7_p1:
+        "Laundry Services es la división especializada de UNATOMO CORE SL orientada al soporte técnico, la auditoría de procesos, la validación de inversiones y la comercialización de maquinaria para lavanderías industriales.",
+      card7_p2:
+        "Trabajamos con un enfoque independiente y técnico. Nuestro objetivo es ayudar a cada cliente a tomar mejores decisiones operativas, reducir incidencias y mejorar el rendimiento real de su planta.",
+      card7_cta: "Conocer más",
       card5_title: "Recambios y consumibles",
       card5_p1:
         "Tenemos acceso a recambios originales de las principales marcas del sector, así como recambios genéricos. También suministramos consumibles de todo tipo, desde bandas de algodón o muletones hasta convertidores de frecuencia o pantallas. Dinos que necesitas y te ayudamos a encontrarlo.",
@@ -141,6 +147,12 @@
       card4_p1:
         "We offer technical support to all our clients. From fault diagnosis and repair to scheduled recurring operations such as replacing padding covers, press membranes, bearings, and more.",
       card4_cta: "Unavailable",
+      card7_title: "About us",
+      card7_p1:
+        "Laundry Services is the specialized division of UNATOMO CORE SL focused on technical support, process audits, investment validation, and machinery supply for industrial laundries.",
+      card7_p2:
+        "We work with an independent and technical approach. Our goal is to help each client make better operational decisions, reduce incidents, and improve the real performance of their plant.",
+      card7_cta: "Learn more",
       card5_title: "Spare parts and consumables",
       card5_p1:
         "We have access to original spare parts from the leading brands in the industry, as well as generic spare parts. We also supply all kinds of consumables, from cotton belts or padding covers to frequency converters or displays. Tell us what you need and we'll help you find it.",
@@ -226,6 +238,12 @@
       card4_p1:
         "Offriamo supporto tecnico a tutti i nostri clienti. Dalla diagnosi e risoluzione dei guasti fino a operazioni ricorrenti programmate come sostituzione di molettone, membrane di presse, cuscinetti, ecc.",
       card4_cta: "Non disponibile",
+      card7_title: "Chi siamo",
+      card7_p1:
+        "Laundry Services e la divisione specializzata di UNATOMO CORE SL dedicata al supporto tecnico, all'audit dei processi, alla validazione degli investimenti e alla fornitura di macchinari per lavanderie industriali.",
+      card7_p2:
+        "Lavoriamo con un approccio indipendente e tecnico. Il nostro obiettivo e aiutare ogni cliente a prendere decisioni operative migliori, ridurre gli imprevisti e migliorare le prestazioni reali del proprio impianto.",
+      card7_cta: "Scopri di piu",
       card5_title: "Ricambi e consumabili",
       card5_p1:
         "Abbiamo accesso a ricambi originali dei principali marchi del settore, cosi come a ricambi generici. Forniamo anche consumabili di ogni tipo, da nastri in cotone o molettone fino a convertitori di frequenza o schermi. Dicci di cosa hai bisogno e ti aiuteremo a trovarlo.",
@@ -311,6 +329,12 @@
       card4_p1:
         "Προσφερουμε τεχνικη υποστηριξη σε ολους τους πελατες μας. Απο διαγνωση και επιλυση βλαβων εως προγραμματισμενες επαναλαμβανομενες εργασιες οπως αλλαγες μουλετον, μεμβρανων πρεσας, ρουλεμαν και αλλα.",
       card4_cta: "Μη διαθεσιμο",
+      card7_title: "Σχετικα με εμας",
+      card7_p1:
+        "Το Laundry Services ειναι η εξειδικευμενη μοναδα της UNATOMO CORE SL για τεχνικη υποστηριξη, ελεγχο διαδικασιων, αξιολογηση επενδυσεων και διαθεση μηχανηματων για βιομηχανικα πλυντηρια.",
+      card7_p2:
+        "Εργαζομαστε με ανεξαρτητη και τεχνικη προσεγγιση. Στοχος μας ειναι να βοηθαμε καθε πελατη να παιρνει καλυτερες λειτουργικες αποφασεις, να μειωνει τα προβληματα και να βελτιωνει την πραγματικη αποδοση της μοναδας του.",
+      card7_cta: "Μαθετε περισσοτερα",
       card5_title: "Ανταλλακτικα και αναλωσιμα",
       card5_p1:
         "Εχουμε προσβαση σε γνησια ανταλλακτικα απο τις κυριοτερες μαρκες του κλαδου, καθως και σε γενικα ανταλλακτικα. Επισης προμηθευουμε καθε ειδους αναλωσιμα, απο βαμβακερες ταινιες ή μουλετον μεχρι μετατροπεις συχνοτητας ή οθονες. Πειτε μας τι χρειαζεστε και θα σας βοηθησουμε να το βρειτε.",

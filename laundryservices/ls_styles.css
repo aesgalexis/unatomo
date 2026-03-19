@@ -988,7 +988,7 @@ body.page .ls-topbar #lang-toggle {
 .ls-about-person {
   margin: 0;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.95rem;
 }
 
