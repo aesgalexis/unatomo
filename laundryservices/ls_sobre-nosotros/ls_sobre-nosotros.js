@@ -5,7 +5,7 @@
   const META = {
     es: {
       title: "Sobre nosotros | Laundry Services",
-      desc: "Información sobre Laundry Services y UNATOMO CORE SL.",
+      desc: "Informacion sobre Laundry Services y UNATOMO CORE SL.",
     },
     en: {
       title: "About us | Laundry Services",
@@ -16,8 +16,8 @@
       desc: "Informazioni su Laundry Services e UNATOMO CORE SL.",
     },
     el: {
-      title: "Σχετικα με εμας | Laundry Services",
-      desc: "Πληροφοριες για το Laundry Services και την UNATOMO CORE SL.",
+      title: "Schetika me emas | Laundry Services",
+      desc: "Plirofories gia to Laundry Services kai tin UNATOMO CORE SL.",
     },
   };
 
