@@ -1010,11 +1010,25 @@ body.page .ls-topbar #lang-toggle {
     linear-gradient(180deg, #ffffff 0%, #f5f7fb 52%, #e5e7eb 100%);
 }
 
+:root[data-theme="light"] body.ls-maquinaria-page {
+  background:
+    radial-gradient(circle at 85% 10%, rgba(148, 163, 184, 0.08), transparent 45%),
+    radial-gradient(circle at 12% 18%, rgba(203, 213, 225, 0.12), transparent 40%),
+    linear-gradient(180deg, #e5e7eb 0%, #f5f7fb 52%, #ffffff 100%);
+}
+
 :root[data-theme="dark"] body {
   background:
     radial-gradient(circle at 85% 10%, rgba(96, 165, 250, 0.12), transparent 45%),
     radial-gradient(circle at 12% 18%, rgba(56, 189, 248, 0.08), transparent 40%),
     linear-gradient(180deg, #07111f 0%, #04070d 52%, #000000 100%);
+}
+
+:root[data-theme="dark"] body.ls-maquinaria-page {
+  background:
+    radial-gradient(circle at 85% 10%, rgba(96, 165, 250, 0.12), transparent 45%),
+    radial-gradient(circle at 12% 18%, rgba(56, 189, 248, 0.08), transparent 40%),
+    linear-gradient(180deg, #000000 0%, #04070d 52%, #07111f 100%);
 }
 
 body.ls-contact-page .page-shell {
@@ -1261,6 +1275,7 @@ textarea.field {
   .ls-table-actions {
     width: 100%;
     justify-content: flex-start;
+    margin-bottom: 0.35rem;
   }
 
   .ls-mini-action,
