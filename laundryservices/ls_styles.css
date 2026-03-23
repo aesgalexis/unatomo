@@ -976,6 +976,11 @@ body.page .ls-topbar #lang-toggle {
 
 .legal-copy h1 {
   margin-top: 0.5rem;
+  margin-bottom: 1.1rem;
+}
+
+.legal-copy h1 + .ls-about-people {
+  margin-top: 2.35rem;
 }
 
 .ls-about-people {
@@ -1000,6 +1005,14 @@ body.page .ls-topbar #lang-toggle {
   flex: 0 0 125px;
   border: 1px solid var(--border-subtle);
   background: var(--panel-bg);
+  display: block;
+  cursor: pointer;
+  transition: transform 160ms ease, border-color 160ms ease;
+}
+
+.ls-about-person-media:hover {
+  transform: translateY(-1px);
+  border-color: var(--text);
 }
 
 .ls-about-person-media img {

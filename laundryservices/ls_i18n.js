@@ -56,6 +56,9 @@
       card4_p1:
         "Ofrecemos soporte técnico a todos nuestros clientes. Desde diagnóstico y solución de averías hasta operaciones recurrentes programadas como cambios de muletones, membranas de prensas, rodamientos, etc.",
       card4_cta: "No disponible",
+      card8_title: "Alcance",
+      card8_p1:
+        "Damos soporte a lavanderías industriales, hoteleras, autoservicio y tintorerías en toda España y gran parte de Europa. Contamos con un conocimiento técnico integral en todas las áreas y colaboramos con los aliados estratégicos necesarios para cubrir cualquier desafío técnico específico que pueda presentarse.",
       card7_title: "Sobre nosotros",
       card7_p1:
         "Laundry Services es la división especializada de UNATOMO CORE SL orientada al soporte técnico, la auditoría de procesos, la validación de inversiones y la comercialización de maquinaria para lavanderías industriales.",
@@ -147,6 +150,9 @@
       card4_p1:
         "We offer technical support to all our clients. From fault diagnosis and repair to scheduled recurring operations such as replacing padding covers, press membranes, bearings, and more.",
       card4_cta: "Unavailable",
+      card8_title: "Scope",
+      card8_p1:
+        "We support industrial laundries, hotel laundries, self-service laundries and dry cleaners throughout Spain and much of Europe. We have comprehensive technical knowledge across all areas and work with the strategic partners needed to cover any specific technical challenge that may arise.",
       card7_title: "About us",
       card7_p1:
         "Laundry Services is the specialized division of UNATOMO CORE SL focused on technical support, process audits, investment validation, and machinery supply for industrial laundries.",
@@ -238,6 +244,9 @@
       card4_p1:
         "Offriamo supporto tecnico a tutti i nostri clienti. Dalla diagnosi e risoluzione dei guasti fino a operazioni ricorrenti programmate come sostituzione di molettone, membrane di presse, cuscinetti, ecc.",
       card4_cta: "Non disponibile",
+      card8_title: "Ambito",
+      card8_p1:
+        "Forniamo supporto a lavanderie industriali, alberghiere, self-service e tintorie in tutta la Spagna e in gran parte dell'Europa. Disponiamo di una conoscenza tecnica completa in tutte le aree e collaboriamo con i partner strategici necessari per coprire qualsiasi sfida tecnica specifica che possa presentarsi.",
       card7_title: "Chi siamo",
       card7_p1:
         "Laundry Services e la divisione specializzata di UNATOMO CORE SL dedicata al supporto tecnico, all'audit dei processi, alla validazione degli investimenti e alla fornitura di macchinari per lavanderie industriali.",
@@ -329,6 +338,9 @@
       card4_p1:
         "Προσφερουμε τεχνικη υποστηριξη σε ολους τους πελατες μας. Απο διαγνωση και επιλυση βλαβων εως προγραμματισμενες επαναλαμβανομενες εργασιες οπως αλλαγες μουλετον, μεμβρανων πρεσας, ρουλεμαν και αλλα.",
       card4_cta: "Μη διαθεσιμο",
+      card8_title: "Πεδιο",
+      card8_p1:
+        "Παρεχουμε υποστηριξη σε βιομηχανικα πλυντηρια, ξενοδοχειακες μοναδες πλυντηριων, self-service πλυντηρια και καθαριστηρια σε ολη την Ισπανια και σε μεγαλο μερος της Ευρωπης. Διαθετουμε ολοκληρωμενη τεχνικη γνωση σε ολους τους τομεις και συνεργαζομαστε με τους απαραιτητους στρατηγικους συνεργατες για να καλυψουμε καθε ειδικη τεχνικη προκληση που μπορει να προκυψει.",
       card7_title: "Σχετικα με εμας",
       card7_p1:
         "Το Laundry Services ειναι η εξειδικευμενη μοναδα της UNATOMO CORE SL για τεχνικη υποστηριξη, ελεγχο διαδικασιων, αξιολογηση επενδυσεων και διαθεση μηχανηματων για βιομηχανικα πλυντηρια.",
