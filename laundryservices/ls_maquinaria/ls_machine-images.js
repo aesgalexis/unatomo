@@ -7,6 +7,9 @@
     L001: [
       "/laundryservices/ls_maquinaria/imagenes/L001/unnamed.jpg",
     ],
+    L003: [
+      "/laundryservices/ls_maquinaria/imagenes/L003/fd5fc6cb-3c21-4191-8bc1-eef1c099eb0a.JPG",
+    ],
   };
 
   const rows = Array.from(document.querySelectorAll(".ls-table tbody tr[data-machine-id]"));

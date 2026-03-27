@@ -33,6 +33,7 @@
     particleColor: { r: 210, g: 90, b: 255 }
   };
   const PARTICLE_SPEED_MULTIPLIER = 1.25;
+  const isDarkTheme = () => getTheme() === "dark";
 
   const getTheme = () => {
     const attr = root.getAttribute("data-theme");
@@ -46,12 +47,15 @@
   };
 
   const updateTheme = () => {
-    if (getTheme() === "dark") {
+    if (isDarkTheme()) {
       state.baseAlpha = 0.15125;
       state.particleColor = { r: 224, g: 132, b: 255 };
+      canvas.style.display = "block";
     } else {
       state.baseAlpha = 0.226875;
       state.particleColor = { r: 198, g: 58, b: 255 };
+      canvas.style.display = "none";
+      ctx.clearRect(0, 0, state.width, state.height);
     }
   };
 
@@ -146,6 +150,11 @@
 
   const refresh = () => {
     resize();
+    updateTheme();
+    if (!isDarkTheme()) {
+      stop();
+      return;
+    }
     if (prefersReducedMotion) {
       stop();
       drawFrame(false);
@@ -156,21 +165,25 @@
 
   updateTheme();
   resize();
-  start();
+  if (isDarkTheme()) start();
 
   window.addEventListener("resize", refresh, { passive: true });
   document.addEventListener("visibilitychange", () => {
+    if (!isDarkTheme()) {
+      stop();
+      return;
+    }
     if (document.hidden) stop();
     else start();
   });
 
   if (window.matchMedia) {
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    const onColorScheme = () => updateTheme();
+    const onColorScheme = () => refresh();
     if (mq.addEventListener) mq.addEventListener("change", onColorScheme);
     else if (mq.addListener) mq.addListener(onColorScheme);
   }
 
-  const obs = new MutationObserver(updateTheme);
+  const obs = new MutationObserver(refresh);
   obs.observe(root, { attributes: true, attributeFilter: ["data-theme"] });
 })();
