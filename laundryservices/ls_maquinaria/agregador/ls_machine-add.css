@@ -118,6 +118,10 @@
   color: #16a34a;
 }
 
+.ls-machine-add-status[data-state="error"] {
+  color: #dc2626;
+}
+
 .ls-machine-file-list {
   display: grid;
   gap: 0.3rem;

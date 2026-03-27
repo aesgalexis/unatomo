@@ -51,7 +51,8 @@
       card6_p1_before: "Contamos con un amplio espectro de maquinaria nueva y ",
       card6_p1_link: "de ocasión",
       card6_p1_after: ".",
-      card6_cta: "Solicitar",
+      card6_used_cta: "De ocasión",
+      card6_cta: "Nueva",
       card4_title: "Asistencia técnica",
       card4_p1:
         "Ofrecemos soporte técnico a todos nuestros clientes. Desde diagnóstico y solución de averías hasta operaciones recurrentes programadas como cambios de muletones, membranas de prensas, rodamientos, etc.",
@@ -145,7 +146,8 @@
       card6_p1_before: "We offer a wide range of new and ",
       card6_p1_link: "used machinery",
       card6_p1_after: ".",
-      card6_cta: "Request",
+      card6_used_cta: "Used",
+      card6_cta: "New",
       card4_title: "Technical assistance",
       card4_p1:
         "We offer technical support to all our clients. From fault diagnosis and repair to scheduled recurring operations such as replacing padding covers, press membranes, bearings, and more.",
@@ -239,7 +241,8 @@
       card6_p1_before: "Disponiamo di un'ampia gamma di macchinari nuovi e ",
       card6_p1_link: "usati",
       card6_p1_after: ".",
-      card6_cta: "Richiedi",
+      card6_used_cta: "Usati",
+      card6_cta: "Nuova",
       card4_title: "Assistenza tecnica",
       card4_p1:
         "Offriamo supporto tecnico a tutti i nostri clienti. Dalla diagnosi e risoluzione dei guasti fino a operazioni ricorrenti programmate come sostituzione di molettone, membrane di presse, cuscinetti, ecc.",
@@ -333,7 +336,8 @@
       card6_p1_before: "Διαθετουμε ευρυ φασμα νεων και ",
       card6_p1_link: "μεταχειρισμενων μηχανηματων",
       card6_p1_after: ".",
-      card6_cta: "Αιτηση",
+      card6_used_cta: "Μεταχειρισμενα",
+      card6_cta: "Νεα",
       card4_title: "Τεχνικη υποστηριξη",
       card4_p1:
         "Προσφερουμε τεχνικη υποστηριξη σε ολους τους πελατες μας. Απο διαγνωση και επιλυση βλαβων εως προγραμματισμενες επαναλαμβανομενες εργασιες οπως αλλαγες μουλετον, μεμβρανων πρεσας, ρουλεμαν και αλλα.",

@@ -1,10 +1,10 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Maquinaria de ocasión | Laundry Services</title>
-  <meta name="description" content="Listado de maquinaria de ocasión de Laundry Services." />
+  <title>Maquinaria de ocasi&oacute;n | Laundry Services</title>
+  <meta name="description" content="Listado de maquinaria de ocasi&oacute;n de Laundry Services." />
   <meta name="robots" content="index, follow" />
   <script src="/laundryservices/ls_theme-init.js"></script>
   <script src="/static/js/config/runtime-config.js"></script>
@@ -17,19 +17,26 @@
 
   <main class="page-shell legal-doc">
     <article class="legal-copy" data-legal-lang="es">
-      <h1>Listado de maquinaria de ocasión</h1>
+      <h1>Listado de maquinaria de ocasi&oacute;n</h1>
 
       <section class="page-section">
         <p>
-          Encuentra la máquina de ocasión que buscas.
+          Encuentra la m&aacute;quina de ocasi&oacute;n que buscas.
         </p>
       </section>
 
       <section class="page-section">
         <div class="ls-filterbar" aria-label="Filtro por tipo">
-          <button type="button" class="ls-filter-btn is-active" data-filter="all"><span class="ls-filter-btn-label">Todo</span></button>
-          <button type="button" class="ls-filter-btn" data-filter="Plegadora"><span class="ls-filter-btn-label">Plegadoras</span></button>
-          <button type="button" class="ls-filter-btn" data-filter="Lavadora"><span class="ls-filter-btn-label">Lavadoras</span></button>
+          <select class="ls-filter-select" data-filter-select aria-label="Filtro por tipo">
+            <option value="all">Categor&iacute;a: Todo</option>
+            <option value="Plegadora">Categor&iacute;a: Plegadoras</option>
+            <option value="Lavadora">Categor&iacute;a: Lavadoras</option>
+            <option value="Tunel">Categor&iacute;a: Tuneles</option>
+            <option value="Secadora">Categor&iacute;a: Secadoras</option>
+            <option value="Calandra">Categor&iacute;a: Calandras</option>
+            <option value="Prensa">Categor&iacute;a: Prensas</option>
+            <option value="Otro">Categor&iacute;a: Otros</option>
+          </select>
         </div>
 
         <div class="card card--wide">
@@ -40,73 +47,13 @@
                   <th>Tipo</th>
                   <th>Marca</th>
                   <th>Modelo</th>
-                  <th>Año</th>
+                  <th>Capacidad</th>
+                  <th>A&ntilde;o</th>
                   <th>Estado</th>
-                  <th>Ubicación</th>
-                  <th>ID</th>
+                  <th>Ubicaci&oacute;n</th>
                 </tr>
               </thead>
               <tbody>
-                <tr data-machine-id="P001">
-                  <td data-type="Plegadora" data-label="Tipo">Plegadora</td>
-                  <td data-label="Marca">Jensen</td>
-                  <td data-label="Modelo">Butterfly</td>
-                  <td data-label="Año">2007</td>
-                  <td data-label="Estado">Bueno</td>
-                  <td data-label="Ubicación">Mallorca</td>
-                  <td data-label="ID">P001</td>
-                </tr>
-                <tr class="ls-table-subrow">
-                  <td colspan="7">
-                    <div class="ls-table-subrow-inner">
-                      <div><strong>Precio:</strong> <span class="ls-price">18.000 €</span> · Envío y puesta en marcha incluida</div>
-                      <div class="ls-table-actions">
-                        <button type="button" class="ls-mini-action ls-gallery-toggle" data-gallery-id="P001"><span class="ls-mini-action-label">Ver fotos</span></button>
-                        <a class="ls-mini-action" href="/laundryservices/ls_contacto.html?subject=card6&type=Plegadora&brand=Jensen&model=Butterfly&year=2007&id=P001"><span class="ls-mini-action-label">+ info</span></a>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-                <tr data-machine-id="L001">
-                  <td data-type="Lavadora" data-label="Tipo">Lavadora</td>
-                  <td data-label="Marca">Tolkar</td>
-                  <td data-label="Modelo">55kg</td>
-                  <td data-label="Año">2022</td>
-                  <td data-label="Estado">Excelente</td>
-                  <td data-label="Ubicación">Barcelona</td>
-                  <td data-label="ID">L001</td>
-                </tr>
-                <tr class="ls-table-subrow">
-                  <td colspan="7">
-                    <div class="ls-table-subrow-inner">
-                      <div><strong>Precio:</strong> <span class="ls-price">17.000 €</span> · Envío y puesta en marcha incluida · 1 año de garantía de piezas</div>
-                      <div class="ls-table-actions">
-                        <button type="button" class="ls-mini-action ls-gallery-toggle" data-gallery-id="L001"><span class="ls-mini-action-label">Ver fotos</span></button>
-                        <a class="ls-mini-action" href="/laundryservices/ls_contacto.html?subject=card6&type=Lavadora&brand=Tolkar&model=55kg&year=2022&id=L001"><span class="ls-mini-action-label">+ info</span></a>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-                <tr data-machine-id="L002">
-                  <td data-type="Lavadora" data-label="Tipo">Lavadora</td>
-                  <td data-label="Marca">Unimac</td>
-                  <td data-label="Modelo">110 kg</td>
-                  <td data-label="Año">2001</td>
-                  <td data-label="Estado">Bueno</td>
-                  <td data-label="Ubicación">Mallorca</td>
-                  <td data-label="ID">L002</td>
-                </tr>
-                <tr class="ls-table-subrow">
-                  <td colspan="7">
-                    <div class="ls-table-subrow-inner">
-                      <div><strong>Precio:</strong> <span class="ls-price">12.500 €</span></div>
-                      <div class="ls-table-actions">
-                        <button type="button" class="ls-mini-action ls-gallery-toggle" data-gallery-id="L002"><span class="ls-mini-action-label">Ver fotos</span></button>
-                        <a class="ls-mini-action" href="/laundryservices/ls_contacto.html?subject=card6&type=Lavadora&brand=Unimac&model=110%20kg&year=2001&id=L002"><span class="ls-mini-action-label">+ info</span></a>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
               </tbody>
             </table>
           </div>
@@ -114,9 +61,9 @@
       </section>
 
       <div class="ls-note-block">
-        <p class="ls-note">* Solo España: Impuestos no incluidos.</p>
-        <p class="ls-note">Toda la maquinaria está lista para ser entregada en un plazo aproximado de 2 - 3 semanas, salvo que se indique expresamente lo contrario.</p>
-        <p class="ls-note">Cuando se indica que el envío y la puesta en marcha están incluidos, solo aplica para España (península) y Baleares. Para el resto destinos finales, se aplicará el coste extra de gastos logísticos.</p>
+        <p class="ls-note">* Solo Espa&ntilde;a: Impuestos no incluidos.</p>
+        <p class="ls-note">Toda la maquinaria est&aacute; lista para ser entregada en un plazo aproximado de 2 - 3 semanas, salvo que se indique expresamente lo contrario.</p>
+        <p class="ls-note">Cuando se indica que el env&iacute;o y la puesta en marcha est&aacute;n incluidos, solo aplica para Espa&ntilde;a (pen&iacute;nsula) y Baleares. Para el resto destinos finales, se aplicar&aacute; el coste extra de gastos log&iacute;sticos.</p>
       </div>
     </article>
 
@@ -131,9 +78,16 @@
 
       <section class="page-section">
         <div class="ls-filterbar" aria-label="Filter by type">
-          <button type="button" class="ls-filter-btn is-active" data-filter="all"><span class="ls-filter-btn-label">All</span></button>
-          <button type="button" class="ls-filter-btn" data-filter="Folder"><span class="ls-filter-btn-label">Folders</span></button>
-          <button type="button" class="ls-filter-btn" data-filter="Washer"><span class="ls-filter-btn-label">Washers</span></button>
+          <select class="ls-filter-select" data-filter-select aria-label="Filter by type">
+            <option value="all">Category: All</option>
+            <option value="Folder">Category: Folders</option>
+            <option value="Washer">Category: Washers</option>
+            <option value="Tunnel">Category: Tunnels</option>
+            <option value="Dryer">Category: Dryers</option>
+            <option value="Ironer">Category: Ironers</option>
+            <option value="Press">Category: Presses</option>
+            <option value="Other">Category: Other</option>
+          </select>
         </div>
 
         <div class="card card--wide">
@@ -144,73 +98,13 @@
                   <th>Type</th>
                   <th>Brand</th>
                   <th>Model</th>
+                  <th>Capacity</th>
                   <th>Year</th>
                   <th>Status</th>
                   <th>Location</th>
-                  <th>ID</th>
                 </tr>
               </thead>
               <tbody>
-                <tr data-machine-id="P001">
-                  <td data-type="Folder" data-label="Type">Folder</td>
-                  <td data-label="Brand">Jensen</td>
-                  <td data-label="Model">Butterfly</td>
-                  <td data-label="Year">2007</td>
-                  <td data-label="Status">Good</td>
-                  <td data-label="Location">Mallorca</td>
-                  <td data-label="ID">P001</td>
-                </tr>
-                <tr class="ls-table-subrow">
-                  <td colspan="7">
-                    <div class="ls-table-subrow-inner">
-                      <div><strong>Price:</strong> <span class="ls-price">18.000 €</span> · Shipping and commissioning included</div>
-                      <div class="ls-table-actions">
-                        <button type="button" class="ls-mini-action ls-gallery-toggle" data-gallery-id="P001"><span class="ls-mini-action-label">View photos</span></button>
-                        <a class="ls-mini-action" href="/laundryservices/ls_contacto.html?subject=card6&type=Folder&brand=Jensen&model=Butterfly&year=2007&id=P001"><span class="ls-mini-action-label">+ info</span></a>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-                <tr data-machine-id="L001">
-                  <td data-type="Washer" data-label="Type">Washer</td>
-                  <td data-label="Brand">Tolkar</td>
-                  <td data-label="Model">55kg</td>
-                  <td data-label="Year">2022</td>
-                  <td data-label="Status">Excellent</td>
-                  <td data-label="Location">Barcelona</td>
-                  <td data-label="ID">L001</td>
-                </tr>
-                <tr class="ls-table-subrow">
-                  <td colspan="7">
-                    <div class="ls-table-subrow-inner">
-                      <div><strong>Price:</strong> <span class="ls-price">17.000 €</span> · Shipping and commissioning included · 1-year parts warranty</div>
-                      <div class="ls-table-actions">
-                        <button type="button" class="ls-mini-action ls-gallery-toggle" data-gallery-id="L001"><span class="ls-mini-action-label">View photos</span></button>
-                        <a class="ls-mini-action" href="/laundryservices/ls_contacto.html?subject=card6&type=Washer&brand=Tolkar&model=55kg&year=2022&id=L001"><span class="ls-mini-action-label">+ info</span></a>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-                <tr data-machine-id="L002">
-                  <td data-type="Washer" data-label="Type">Washer</td>
-                  <td data-label="Brand">Unimac</td>
-                  <td data-label="Model">110 kg</td>
-                  <td data-label="Year">2001</td>
-                  <td data-label="Status">Good</td>
-                  <td data-label="Location">Mallorca</td>
-                  <td data-label="ID">L002</td>
-                </tr>
-                <tr class="ls-table-subrow">
-                  <td colspan="7">
-                    <div class="ls-table-subrow-inner">
-                      <div><strong>Price:</strong> <span class="ls-price">12.500 €</span></div>
-                      <div class="ls-table-actions">
-                        <button type="button" class="ls-mini-action ls-gallery-toggle" data-gallery-id="L002"><span class="ls-mini-action-label">View photos</span></button>
-                        <a class="ls-mini-action" href="/laundryservices/ls_contacto.html?subject=card6&type=Washer&brand=Unimac&model=110%20kg&year=2001&id=L002"><span class="ls-mini-action-label">+ info</span></a>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
               </tbody>
             </table>
           </div>
@@ -235,9 +129,16 @@
 
       <section class="page-section">
         <div class="ls-filterbar" aria-label="Filtro per tipo">
-          <button type="button" class="ls-filter-btn is-active" data-filter="all"><span class="ls-filter-btn-label">Tutto</span></button>
-          <button type="button" class="ls-filter-btn" data-filter="Folder"><span class="ls-filter-btn-label">Piegatrici</span></button>
-          <button type="button" class="ls-filter-btn" data-filter="Washer"><span class="ls-filter-btn-label">Lavatrici</span></button>
+          <select class="ls-filter-select" data-filter-select aria-label="Filtro per tipo">
+            <option value="all">Categoria: Tutto</option>
+            <option value="Piegatrice">Categoria: Piegatrici</option>
+            <option value="Lavatrice">Categoria: Lavatrici</option>
+            <option value="Tunnel">Categoria: Tunnel</option>
+            <option value="Essiccatore">Categoria: Essiccatori</option>
+            <option value="Calandra">Categoria: Calandre</option>
+            <option value="Pressa">Categoria: Presse</option>
+            <option value="Altro">Categoria: Altro</option>
+          </select>
         </div>
 
         <div class="card card--wide">
@@ -248,73 +149,13 @@
                   <th>Tipo</th>
                   <th>Marca</th>
                   <th>Modello</th>
+                  <th>Capacita</th>
                   <th>Anno</th>
                   <th>Stato</th>
                   <th>Ubicazione</th>
-                  <th>ID</th>
                 </tr>
               </thead>
               <tbody>
-                <tr data-machine-id="P001">
-                  <td data-type="Folder" data-label="Tipo">Piegatrice</td>
-                  <td data-label="Marca">Jensen</td>
-                  <td data-label="Modello">Butterfly</td>
-                  <td data-label="Anno">2007</td>
-                  <td data-label="Stato">Buono</td>
-                  <td data-label="Ubicazione">Mallorca</td>
-                  <td data-label="ID">P001</td>
-                </tr>
-                <tr class="ls-table-subrow">
-                  <td colspan="7">
-                    <div class="ls-table-subrow-inner">
-                      <div><strong>Prezzo:</strong> <span class="ls-price">18.000 EUR</span> · Spedizione e messa in servizio incluse</div>
-                      <div class="ls-table-actions">
-                        <button type="button" class="ls-mini-action ls-gallery-toggle" data-gallery-id="P001"><span class="ls-mini-action-label">Vedi foto</span></button>
-                        <a class="ls-mini-action" href="/laundryservices/ls_contacto.html?subject=card6&type=Folder&brand=Jensen&model=Butterfly&year=2007&id=P001"><span class="ls-mini-action-label">+ info</span></a>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-                <tr data-machine-id="L001">
-                  <td data-type="Washer" data-label="Tipo">Lavatrice</td>
-                  <td data-label="Marca">Tolkar</td>
-                  <td data-label="Modello">55kg</td>
-                  <td data-label="Anno">2022</td>
-                  <td data-label="Stato">Eccellente</td>
-                  <td data-label="Ubicazione">Barcelona</td>
-                  <td data-label="ID">L001</td>
-                </tr>
-                <tr class="ls-table-subrow">
-                  <td colspan="7">
-                    <div class="ls-table-subrow-inner">
-                      <div><strong>Prezzo:</strong> <span class="ls-price">17.000 EUR</span> · Spedizione e messa in servizio incluse · 1 anno di garanzia sui ricambi</div>
-                      <div class="ls-table-actions">
-                        <button type="button" class="ls-mini-action ls-gallery-toggle" data-gallery-id="L001"><span class="ls-mini-action-label">Vedi foto</span></button>
-                        <a class="ls-mini-action" href="/laundryservices/ls_contacto.html?subject=card6&type=Washer&brand=Tolkar&model=55kg&year=2022&id=L001"><span class="ls-mini-action-label">+ info</span></a>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-                <tr data-machine-id="L002">
-                  <td data-type="Washer" data-label="Tipo">Lavatrice</td>
-                  <td data-label="Marca">Unimac</td>
-                  <td data-label="Modello">110 kg</td>
-                  <td data-label="Anno">2001</td>
-                  <td data-label="Stato">Buono</td>
-                  <td data-label="Ubicazione">Mallorca</td>
-                  <td data-label="ID">L002</td>
-                </tr>
-                <tr class="ls-table-subrow">
-                  <td colspan="7">
-                    <div class="ls-table-subrow-inner">
-                      <div><strong>Prezzo:</strong> <span class="ls-price">12.500 EUR</span></div>
-                      <div class="ls-table-actions">
-                        <button type="button" class="ls-mini-action ls-gallery-toggle" data-gallery-id="L002"><span class="ls-mini-action-label">Vedi foto</span></button>
-                        <a class="ls-mini-action" href="/laundryservices/ls_contacto.html?subject=card6&type=Washer&brand=Unimac&model=110%20kg&year=2001&id=L002"><span class="ls-mini-action-label">+ info</span></a>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
               </tbody>
             </table>
           </div>
@@ -329,19 +170,26 @@
     </article>
 
     <article class="legal-copy" data-legal-lang="el" hidden>
-      <h1>Λιστα μεταχειρισμενων μηχανηματων</h1>
+      <h1>&#923;&#953;&#963;&#964;&#945; &#956;&#949;&#964;&#945;&#967;&#949;&#953;&#961;&#953;&#963;&#956;&#949;&#957;&#969;&#957; &#956;&#951;&#967;&#945;&#957;&#951;&#956;&#945;&#964;&#969;&#957;</h1>
 
       <section class="page-section">
         <p>
-          Βρειτε το μεταχειρισμενο μηχανημα που αναζητατε.
+          &#914;&#961;&#949;&#953;&#964;&#949; &#964;&#959; &#956;&#949;&#964;&#945;&#967;&#949;&#953;&#961;&#953;&#963;&#956;&#949;&#957;&#959; &#956;&#951;&#967;&#945;&#957;&#951;&#956;&#945; &#960;&#959;&#965; &#945;&#957;&#945;&#950;&#951;&#964;&#945;&#964;&#949;.
         </p>
       </section>
 
       <section class="page-section">
-        <div class="ls-filterbar" aria-label="Φιλτρο κατα τυπο">
-          <button type="button" class="ls-filter-btn is-active" data-filter="all"><span class="ls-filter-btn-label">Ολα</span></button>
-          <button type="button" class="ls-filter-btn" data-filter="Διπλωτικο"><span class="ls-filter-btn-label">Διπλωτικα</span></button>
-          <button type="button" class="ls-filter-btn" data-filter="Πλυντηριο"><span class="ls-filter-btn-label">Πλυντηρια</span></button>
+        <div class="ls-filterbar" aria-label="&#934;&#953;&#955;&#964;&#961;&#959; &#954;&#945;&#964;&#945; &#964;&#965;&#960;&#959;">
+          <select class="ls-filter-select" data-filter-select aria-label="&#934;&#953;&#955;&#964;&#961;&#959; &#954;&#945;&#964;&#945; &#964;&#965;&#960;&#959;">
+            <option value="all">&#922;&#945;&#964;&#951;&#947;&#959;&#961;&#953;&#945;: &#927;&#955;&#945;</option>
+            <option value="&#916;&#953;&#960;&#955;&#969;&#964;&#953;&#954;&#959;">&#922;&#945;&#964;&#951;&#947;&#959;&#961;&#953;&#945;: &#916;&#953;&#960;&#955;&#969;&#964;&#953;&#954;&#945;</option>
+            <option value="&#928;&#955;&#965;&#957;&#964;&#951;&#961;&#953;&#959;">&#922;&#945;&#964;&#951;&#947;&#959;&#961;&#953;&#945;: &#928;&#955;&#965;&#957;&#964;&#951;&#961;&#953;&#945;</option>
+            <option value="&#932;&#959;&#965;&#957;&#949;&#955;">&#922;&#945;&#964;&#951;&#947;&#959;&#961;&#953;&#945;: &#932;&#959;&#965;&#957;&#949;&#955;</option>
+            <option value="&#931;&#964;&#949;&#947;&#957;&#969;&#964;&#951;&#961;&#953;&#959;">&#922;&#945;&#964;&#951;&#947;&#959;&#961;&#953;&#945;: &#931;&#964;&#949;&#947;&#957;&#969;&#964;&#951;&#961;&#953;&#945;</option>
+            <option value="&#922;&#945;&#955;&#945;&#957;&#948;&#961;&#945;">&#922;&#945;&#964;&#951;&#947;&#959;&#961;&#953;&#945;: &#922;&#945;&#955;&#945;&#957;&#948;&#961;&#949;&#962;</option>
+            <option value="&#928;&#961;&#949;&#963;&#945;">&#922;&#945;&#964;&#951;&#947;&#959;&#961;&#953;&#945;: &#928;&#961;&#949;&#963;&#949;&#962;</option>
+            <option value="&#913;&#955;&#955;&#959;">&#922;&#945;&#964;&#951;&#947;&#959;&#961;&#953;&#945;: &#913;&#955;&#955;&#945;</option>
+          </select>
         </div>
 
         <div class="card card--wide">
@@ -349,76 +197,16 @@
             <table class="ls-table">
               <thead>
                 <tr>
-                  <th>Τυπος</th>
-                  <th>Μαρκα</th>
-                  <th>Μοντελο</th>
-                  <th>Ετος</th>
-                  <th>Κατασταση</th>
-                  <th>Τοποθεσια</th>
-                  <th>ID</th>
+                  <th>&#932;&#965;&#960;&#959;&#962;</th>
+                  <th>&#924;&#945;&#961;&#954;&#945;</th>
+                  <th>&#924;&#959;&#957;&#964;&#949;&#955;&#959;</th>
+                  <th>&#921;&#954;&#945;&#957;&#959;&#964;&#951;&#964;&#945;</th>
+                  <th>&#917;&#964;&#959;&#962;</th>
+                  <th>&#922;&#945;&#964;&#945;&#963;&#964;&#945;&#963;&#951;</th>
+                  <th>&#932;&#959;&#960;&#959;&#952;&#949;&#963;&#953;&#945;</th>
                 </tr>
               </thead>
               <tbody>
-                <tr data-machine-id="P001">
-                  <td data-type="Διπλωτικο" data-label="Τυπος">Διπλωτικο</td>
-                  <td data-label="Μαρκα">Jensen</td>
-                  <td data-label="Μοντελο">Butterfly</td>
-                  <td data-label="Ετος">2007</td>
-                  <td data-label="Κατασταση">Καλη</td>
-                  <td data-label="Τοποθεσια">Mallorca</td>
-                  <td data-label="ID">P001</td>
-                </tr>
-                <tr class="ls-table-subrow">
-                  <td colspan="7">
-                    <div class="ls-table-subrow-inner">
-                      <div><strong>Τιμη:</strong> <span class="ls-price">18.000 €</span> · Περιλαμβανονται αποστολη και θεση σε λειτουργια</div>
-                      <div class="ls-table-actions">
-                        <button type="button" class="ls-mini-action ls-gallery-toggle" data-gallery-id="P001"><span class="ls-mini-action-label">Προβολη φωτο</span></button>
-                        <a class="ls-mini-action" href="/laundryservices/ls_contacto.html?subject=card6&type=%CE%94%CE%B9%CF%80%CE%BB%CF%89%CF%84%CE%B9%CE%BA%CE%BF&brand=Jensen&model=Butterfly&year=2007&id=P001"><span class="ls-mini-action-label">+ info</span></a>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-                <tr data-machine-id="L001">
-                  <td data-type="Πλυντηριο" data-label="Τυπος">Πλυντηριο</td>
-                  <td data-label="Μαρκα">Tolkar</td>
-                  <td data-label="Μοντελο">55kg</td>
-                  <td data-label="Ετος">2022</td>
-                  <td data-label="Κατασταση">Εξαιρετικη</td>
-                  <td data-label="Τοποθεσια">Barcelona</td>
-                  <td data-label="ID">L001</td>
-                </tr>
-                <tr class="ls-table-subrow">
-                  <td colspan="7">
-                    <div class="ls-table-subrow-inner">
-                      <div><strong>Τιμη:</strong> <span class="ls-price">17.000 €</span> · Περιλαμβανονται αποστολη και θεση σε λειτουργια · 1 ετος εγγυηση ανταλλακτικων</div>
-                      <div class="ls-table-actions">
-                        <button type="button" class="ls-mini-action ls-gallery-toggle" data-gallery-id="L001"><span class="ls-mini-action-label">Προβολη φωτο</span></button>
-                        <a class="ls-mini-action" href="/laundryservices/ls_contacto.html?subject=card6&type=%CE%A0%CE%BB%CF%85%CE%BD%CF%84%CE%B7%CF%81%CE%B9%CE%BF&brand=Tolkar&model=55kg&year=2022&id=L001"><span class="ls-mini-action-label">+ info</span></a>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-                <tr data-machine-id="L002">
-                  <td data-type="Πλυντηριο" data-label="Τυπος">Πλυντηριο</td>
-                  <td data-label="Μαρκα">Unimac</td>
-                  <td data-label="Μοντελο">110 kg</td>
-                  <td data-label="Ετος">2001</td>
-                  <td data-label="Κατασταση">Καλη</td>
-                  <td data-label="Τοποθεσια">Mallorca</td>
-                  <td data-label="ID">L002</td>
-                </tr>
-                <tr class="ls-table-subrow">
-                  <td colspan="7">
-                    <div class="ls-table-subrow-inner">
-                      <div><strong>Τιμη:</strong> <span class="ls-price">12.500 €</span></div>
-                      <div class="ls-table-actions">
-                        <button type="button" class="ls-mini-action ls-gallery-toggle" data-gallery-id="L002"><span class="ls-mini-action-label">Προβολη φωτο</span></button>
-                        <a class="ls-mini-action" href="/laundryservices/ls_contacto.html?subject=card6&type=%CE%A0%CE%BB%CF%85%CE%BD%CF%84%CE%B7%CF%81%CE%B9%CE%BF&brand=Unimac&model=110%20kg&year=2001&id=L002"><span class="ls-mini-action-label">+ info</span></a>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
               </tbody>
             </table>
           </div>
@@ -426,16 +214,16 @@
       </section>
 
       <div class="ls-note-block">
-        <p class="ls-note">* Μονο Ισπανια: Δεν περιλαμβανονται οι φοροι.</p>
-        <p class="ls-note">Ολος ο εξοπλισμος ειναι ετοιμος για παραδοση σε μεσο χρονο 2 - 3 εβδομαδων, εκτος αν αναφερεται ρητα διαφορετικα.</p>
-        <p class="ls-note">Οταν αναφερεται οτι η αποστολη και η θεση σε λειτουργια περιλαμβανονται, αυτο ισχυει μονο για Ισπανια (ηπειρωτικη χωρα) και Βαλεαριδες Νησους. Για καθε αλλο τελικο προορισμο θα εφαρμοστει επιπλεον κοστος λογιστικων.</p>
+        <p class="ls-note">* &#924;&#959;&#957;&#959; &#921;&#963;&#960;&#945;&#957;&#953;&#945;: &#916;&#949;&#957; &#960;&#949;&#961;&#953;&#955;&#945;&#956;&#946;&#945;&#957;&#959;&#957;&#964;&#945;&#953; &#959;&#953; &#966;&#959;&#961;&#959;&#953;.</p>
+        <p class="ls-note">&#927;&#955;&#959;&#962; &#959; &#949;&#958;&#959;&#960;&#955;&#953;&#963;&#956;&#959;&#962; &#949;&#953;&#957;&#945;&#953; &#949;&#964;&#959;&#953;&#956;&#959;&#962; &#947;&#953;&#945; &#960;&#945;&#961;&#945;&#948;&#959;&#963;&#951; &#963;&#949; &#956;&#949;&#963;&#959; &#967;&#961;&#959;&#957;&#959; 2 - 3 &#949;&#946;&#948;&#959;&#956;&#945;&#948;&#969;&#957;, &#949;&#954;&#964;&#959;&#962; &#945;&#957; &#945;&#957;&#945;&#966;&#949;&#961;&#949;&#964;&#945;&#953; &#961;&#951;&#964;&#945; &#948;&#953;&#945;&#966;&#959;&#961;&#949;&#964;&#953;&#954;&#945;.</p>
+        <p class="ls-note">&#927;&#964;&#945;&#957; &#945;&#957;&#945;&#966;&#949;&#961;&#949;&#964;&#945;&#953; &#959;&#964;&#953; &#951; &#945;&#960;&#959;&#963;&#964;&#959;&#955;&#951; &#954;&#945;&#953; &#951; &#952;&#949;&#963;&#951; &#963;&#949; &#955;&#949;&#953;&#964;&#959;&#965;&#961;&#947;&#953;&#945; &#960;&#949;&#961;&#953;&#955;&#945;&#956;&#946;&#945;&#957;&#959;&#957;&#964;&#945;&#953;, &#945;&#965;&#964;&#959; &#953;&#963;&#967;&#965;&#949;&#953; &#956;&#959;&#957;&#959; &#947;&#953;&#945; &#921;&#963;&#960;&#945;&#957;&#953;&#945; (&#951;&#960;&#949;&#953;&#961;&#969;&#964;&#953;&#954;&#951; &#967;&#969;&#961;&#945;) &#954;&#945;&#953; &#914;&#945;&#955;&#949;&#945;&#961;&#953;&#948;&#949;&#962; &#925;&#951;&#963;&#959;&#965;&#962;. &#915;&#953;&#945; &#954;&#945;&#952;&#949; &#945;&#955;&#955;&#959; &#964;&#949;&#955;&#953;&#954;&#959; &#960;&#961;&#959;&#959;&#961;&#953;&#963;&#956;&#959; &#952;&#945; &#949;&#966;&#945;&#961;&#956;&#959;&#963;&#964;&#949;&#953; &#949;&#960;&#953;&#960;&#955;&#949;&#959;&#957; &#954;&#959;&#963;&#964;&#959;&#962; &#955;&#959;&#947;&#953;&#963;&#964;&#953;&#954;&#969;&#957;.</p>
       </div>
     </article>
 
     <div id="page-nav-mount"></div>
     <div id="legal-footer" class="legal-footer"></div>
     <div class="footer-link">
-      <a href="/laundryservices/ls_privacidad.html" data-i18n="privacy_link">Política de privacidad y cookies</a>
+      <a href="/laundryservices/ls_privacidad.html" data-i18n="privacy_link">Pol&iacute;tica de privacidad y cookies</a>
     </div>
   </main>
 
@@ -443,11 +231,14 @@
   <script src="/laundryservices/ls_theme.js"></script>
   <script src="/laundryservices/ls_i18n.js"></script>
   <script src="/laundryservices/ls_maquinaria/ls_machine-id.js"></script>
-  <script src="/laundryservices/ls_maquinaria/ls_machine-images.js"></script>
-  <script src="/laundryservices/ls_maquinaria.js"></script>
+  <script type="module" src="/laundryservices/ls_maquinaria.js"></script>
   <script type="module" src="/laundryservices/ls_maquinaria/agregador/ls_machine-add.js"></script>
   <script src="/laundryservices/ls_page.js"></script>
   <script src="/laundryservices/ls_footer.js"></script>
   <script type="module" src="/static/js/page-nav.js"></script>
 </body>
 </html>
+
+
+
+

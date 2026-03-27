@@ -779,6 +779,36 @@ body.page .ls-topbar #lang-toggle {
   margin: 0;
 }
 
+.ls-filter-select {
+  border: 1px solid var(--border-subtle);
+  background: var(--panel-bg);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2.25 4.5 6 8.25 9.75 4.5' stroke='%23666' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-position: right 0.85rem center;
+  background-repeat: no-repeat;
+  background-size: 0.85rem;
+  color: var(--fg);
+  border-radius: 999px;
+  height: 32px;
+  padding: 0 2.1rem 0 0.9rem;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.9rem;
+  line-height: 1;
+  appearance: none;
+  -webkit-appearance: none;
+  margin: 0;
+  min-width: 180px;
+}
+
+[data-theme="dark"] .ls-filter-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2.25 4.5 6 8.25 9.75 4.5' stroke='%23dfe7f8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+.ls-filter-select:focus-visible {
+  outline: 2px solid var(--fg);
+  outline-offset: 2px;
+}
+
 .ls-filter-btn-label {
   display: block;
   transform: translateY(-1px);
@@ -836,6 +866,15 @@ body.page .ls-topbar #lang-toggle {
   border-bottom: 1px solid var(--border-subtle);
   color: color-mix(in srgb, var(--fg) 78%, transparent);
   font-size: 0.92rem;
+}
+
+.ls-table-meta {
+  margin-bottom: 0.2rem;
+}
+
+.ls-table-comment {
+  padding-top: 0.15rem;
+  color: color-mix(in srgb, var(--fg) 78%, transparent);
 }
 
 .ls-table-subrow-has-gallery td {
@@ -942,6 +981,12 @@ body.page .ls-topbar #lang-toggle {
   border-top: 1px solid var(--border-subtle);
 }
 
+.ls-table-state {
+  padding: 1rem 0.9rem !important;
+  color: color-mix(in srgb, var(--fg) 78%, transparent);
+  border-bottom: none !important;
+}
+
 
 .scroll-top-container {
   margin-top: 2rem;
@@ -1012,7 +1057,7 @@ body.page .ls-topbar #lang-toggle {
 
 .ls-about-person-media:hover {
   transform: translateY(-1px);
-  border-color: var(--text);
+  opacity: 1;
 }
 
 .ls-about-person-media img {
@@ -1047,6 +1092,52 @@ body.page .ls-topbar #lang-toggle {
   margin-top: 0.2rem;
   color: var(--text-muted);
   line-height: 1.45;
+}
+
+.ls-about-social {
+  margin-top: 0.35rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--fg);
+  text-decoration: none;
+  font-weight: 700;
+  line-height: 1;
+  align-self: flex-start;
+}
+
+.ls-about-social-row {
+  display: inline-flex;
+  gap: 0.45rem;
+}
+
+.ls-about-social-grid {
+  margin-top: -1.35rem;
+  margin-bottom: 2rem;
+}
+
+.ls-about-social-slot {
+  min-height: 1.5rem;
+  display: flex;
+  align-items: flex-start;
+  padding-left: calc(125px + 0.95rem);
+}
+
+.ls-about-social svg {
+  width: 1.104rem;
+  height: 1.104rem;
+  display: block;
+}
+
+.ls-about-social-mail svg {
+  width: 1.3248rem;
+  height: 1.3248rem;
+}
+
+.ls-about-social:hover {
+  opacity: 0.9;
 }
 
 .page-section + .page-section {
@@ -1106,7 +1197,7 @@ body.page .ls-topbar #lang-toggle {
   background:
     radial-gradient(circle at 85% 10%, rgba(148, 163, 184, 0.08), transparent 45%),
     radial-gradient(circle at 12% 18%, rgba(203, 213, 225, 0.12), transparent 40%),
-    linear-gradient(180deg, #e5e7eb 0%, #f5f7fb 52%, #ffffff 100%);
+    linear-gradient(180deg, #ffffff 0%, #f5f7fb 52%, #e5e7eb 100%);
 }
 
 :root[data-theme="dark"] body {
@@ -1120,7 +1211,7 @@ body.page .ls-topbar #lang-toggle {
   background:
     radial-gradient(circle at 85% 10%, rgba(96, 165, 250, 0.12), transparent 45%),
     radial-gradient(circle at 12% 18%, rgba(56, 189, 248, 0.08), transparent 40%),
-    linear-gradient(180deg, #000000 0%, #04070d 52%, #07111f 100%);
+    linear-gradient(180deg, #07111f 0%, #04070d 52%, #000000 100%);
 }
 
 body.ls-contact-page .page-shell {
