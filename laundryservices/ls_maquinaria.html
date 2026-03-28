@@ -10,6 +10,7 @@
   <script src="/static/js/config/runtime-config.js"></script>
   <link rel="stylesheet" href="/laundryservices/ls_styles.css">
   <link rel="stylesheet" href="/laundryservices/ls_maquinaria/agregador/ls_machine-add.css">
+  <link rel="stylesheet" href="/laundryservices/ls_effects/ls_admin-dot.css">
   <link rel="icon" href="/static/img/favicon/favicon.svg" type="image/svg+xml">
 </head>
 <body class="page ls-privacy-page ls-maquinaria-page" data-back-mode="history">
@@ -21,21 +22,22 @@
 
       <section class="page-section">
         <p>
-          Encuentra la m&aacute;quina de ocasi&oacute;n que buscas.
+          Encuentra la m&aacute;quina de ocasi&oacute;n que buscas, o <a href="/laundryservices/ls_contacto.html?subject=card6">vende</a> la m&aacute;quina de ocasi&oacute;n que no necesitas.
         </p>
       </section>
 
       <section class="page-section">
         <div class="ls-filterbar" aria-label="Filtro por tipo">
           <select class="ls-filter-select" data-filter-select aria-label="Filtro por tipo">
-            <option value="all">Categor&iacute;a: Todo</option>
-            <option value="Plegadora">Categor&iacute;a: Plegadoras</option>
-            <option value="Lavadora">Categor&iacute;a: Lavadoras</option>
-            <option value="Tunel">Categor&iacute;a: Tuneles</option>
-            <option value="Secadora">Categor&iacute;a: Secadoras</option>
-            <option value="Calandra">Categor&iacute;a: Calandras</option>
-            <option value="Prensa">Categor&iacute;a: Prensas</option>
-            <option value="Otro">Categor&iacute;a: Otros</option>
+            <option value="all">Mostrar: Todo</option>
+            <option value="Plegadora">Mostrar: Plegadoras</option>
+            <option value="Lavadora">Mostrar: Lavadoras</option>
+            <option value="Tunel">Mostrar: Tuneles</option>
+            <option value="Secadora">Mostrar: Secadoras</option>
+            <option value="Calandra">Mostrar: Calandras</option>
+            <option value="Prensa">Mostrar: Prensas</option>
+            <option value="Empaquetadora">Mostrar: Empaquetadoras</option>
+            <option value="Otro">Mostrar: Otros</option>
           </select>
         </div>
 
@@ -58,6 +60,11 @@
             </table>
           </div>
         </div>
+        <div class="ls-pagination" data-pagination>
+          <button type="button" class="ls-mini-action" data-page-prev>Anterior</button>
+          <span class="ls-pagination-status" data-page-status>Pagina 1 de 1</span>
+          <button type="button" class="ls-mini-action" data-page-next>Siguiente</button>
+        </div>
       </section>
 
       <div class="ls-note-block">
@@ -72,21 +79,22 @@
 
       <section class="page-section">
         <p>
-          Find the used machine you are looking for.
+          Find the used machine you are looking for, or <a href="/laundryservices/ls_contacto.html?subject=card6">sell</a> the used machine you no longer need.
         </p>
       </section>
 
       <section class="page-section">
         <div class="ls-filterbar" aria-label="Filter by type">
           <select class="ls-filter-select" data-filter-select aria-label="Filter by type">
-            <option value="all">Category: All</option>
-            <option value="Folder">Category: Folders</option>
-            <option value="Washer">Category: Washers</option>
-            <option value="Tunnel">Category: Tunnels</option>
-            <option value="Dryer">Category: Dryers</option>
-            <option value="Ironer">Category: Ironers</option>
-            <option value="Press">Category: Presses</option>
-            <option value="Other">Category: Other</option>
+            <option value="all">Show: All</option>
+            <option value="Folder">Show: Folders</option>
+            <option value="Washer">Show: Washers</option>
+            <option value="Tunnel">Show: Tunnels</option>
+            <option value="Dryer">Show: Dryers</option>
+            <option value="Ironer">Show: Ironers</option>
+            <option value="Press">Show: Presses</option>
+            <option value="Packer">Show: Packers</option>
+            <option value="Other">Show: Other</option>
           </select>
         </div>
 
@@ -109,6 +117,11 @@
             </table>
           </div>
         </div>
+        <div class="ls-pagination" data-pagination>
+          <button type="button" class="ls-mini-action" data-page-prev>Previous</button>
+          <span class="ls-pagination-status" data-page-status>Page 1 of 1</span>
+          <button type="button" class="ls-mini-action" data-page-next>Next</button>
+        </div>
       </section>
 
       <div class="ls-note-block">
@@ -123,21 +136,22 @@
 
       <section class="page-section">
         <p>
-          Trova il macchinario usato che stai cercando.
+          Trova il macchinario usato che stai cercando, oppure <a href="/laundryservices/ls_contacto.html?subject=card6">vendi</a> il macchinario usato che non ti serve piu.
         </p>
       </section>
 
       <section class="page-section">
         <div class="ls-filterbar" aria-label="Filtro per tipo">
           <select class="ls-filter-select" data-filter-select aria-label="Filtro per tipo">
-            <option value="all">Categoria: Tutto</option>
-            <option value="Piegatrice">Categoria: Piegatrici</option>
-            <option value="Lavatrice">Categoria: Lavatrici</option>
-            <option value="Tunnel">Categoria: Tunnel</option>
-            <option value="Essiccatore">Categoria: Essiccatori</option>
-            <option value="Calandra">Categoria: Calandre</option>
-            <option value="Pressa">Categoria: Presse</option>
-            <option value="Altro">Categoria: Altro</option>
+            <option value="all">Mostra: Tutto</option>
+            <option value="Piegatrice">Mostra: Piegatrici</option>
+            <option value="Lavatrice">Mostra: Lavatrici</option>
+            <option value="Tunnel">Mostra: Tunnel</option>
+            <option value="Essiccatore">Mostra: Essiccatori</option>
+            <option value="Calandra">Mostra: Calandre</option>
+            <option value="Pressa">Mostra: Presse</option>
+            <option value="Imballatrice">Mostra: Imballatrici</option>
+            <option value="Altro">Mostra: Altro</option>
           </select>
         </div>
 
@@ -160,6 +174,11 @@
             </table>
           </div>
         </div>
+        <div class="ls-pagination" data-pagination>
+          <button type="button" class="ls-mini-action" data-page-prev>Precedente</button>
+          <span class="ls-pagination-status" data-page-status>Pagina 1 di 1</span>
+          <button type="button" class="ls-mini-action" data-page-next>Successiva</button>
+        </div>
       </section>
 
       <div class="ls-note-block">
@@ -174,21 +193,22 @@
 
       <section class="page-section">
         <p>
-          &#914;&#961;&#949;&#953;&#964;&#949; &#964;&#959; &#956;&#949;&#964;&#945;&#967;&#949;&#953;&#961;&#953;&#963;&#956;&#949;&#957;&#959; &#956;&#951;&#967;&#945;&#957;&#951;&#956;&#945; &#960;&#959;&#965; &#945;&#957;&#945;&#950;&#951;&#964;&#945;&#964;&#949;.
+          &#914;&#961;&#949;&#953;&#964;&#949; &#964;&#959; &#956;&#949;&#964;&#945;&#967;&#949;&#953;&#961;&#953;&#963;&#956;&#949;&#957;&#959; &#956;&#951;&#967;&#945;&#957;&#951;&#956;&#945; &#960;&#959;&#965; &#945;&#957;&#945;&#950;&#951;&#964;&#945;&#964;&#949;, &#951; <a href="/laundryservices/ls_contacto.html?subject=card6">&#960;&#959;&#965;&#955;&#951;&#963;&#964;&#949;</a> &#964;&#959; &#956;&#949;&#964;&#945;&#967;&#949;&#953;&#961;&#953;&#963;&#956;&#949;&#957;&#959; &#956;&#951;&#967;&#945;&#957;&#951;&#956;&#945; &#960;&#959;&#965; &#948;&#949;&#957; &#967;&#961;&#949;&#953;&#945;&#950;&#949;&#963;&#964;&#949;.
         </p>
       </section>
 
       <section class="page-section">
         <div class="ls-filterbar" aria-label="&#934;&#953;&#955;&#964;&#961;&#959; &#954;&#945;&#964;&#945; &#964;&#965;&#960;&#959;">
           <select class="ls-filter-select" data-filter-select aria-label="&#934;&#953;&#955;&#964;&#961;&#959; &#954;&#945;&#964;&#945; &#964;&#965;&#960;&#959;">
-            <option value="all">&#922;&#945;&#964;&#951;&#947;&#959;&#961;&#953;&#945;: &#927;&#955;&#945;</option>
-            <option value="&#916;&#953;&#960;&#955;&#969;&#964;&#953;&#954;&#959;">&#922;&#945;&#964;&#951;&#947;&#959;&#961;&#953;&#945;: &#916;&#953;&#960;&#955;&#969;&#964;&#953;&#954;&#945;</option>
-            <option value="&#928;&#955;&#965;&#957;&#964;&#951;&#961;&#953;&#959;">&#922;&#945;&#964;&#951;&#947;&#959;&#961;&#953;&#945;: &#928;&#955;&#965;&#957;&#964;&#951;&#961;&#953;&#945;</option>
-            <option value="&#932;&#959;&#965;&#957;&#949;&#955;">&#922;&#945;&#964;&#951;&#947;&#959;&#961;&#953;&#945;: &#932;&#959;&#965;&#957;&#949;&#955;</option>
-            <option value="&#931;&#964;&#949;&#947;&#957;&#969;&#964;&#951;&#961;&#953;&#959;">&#922;&#945;&#964;&#951;&#947;&#959;&#961;&#953;&#945;: &#931;&#964;&#949;&#947;&#957;&#969;&#964;&#951;&#961;&#953;&#945;</option>
-            <option value="&#922;&#945;&#955;&#945;&#957;&#948;&#961;&#945;">&#922;&#945;&#964;&#951;&#947;&#959;&#961;&#953;&#945;: &#922;&#945;&#955;&#945;&#957;&#948;&#961;&#949;&#962;</option>
-            <option value="&#928;&#961;&#949;&#963;&#945;">&#922;&#945;&#964;&#951;&#947;&#959;&#961;&#953;&#945;: &#928;&#961;&#949;&#963;&#949;&#962;</option>
-            <option value="&#913;&#955;&#955;&#959;">&#922;&#945;&#964;&#951;&#947;&#959;&#961;&#953;&#945;: &#913;&#955;&#955;&#945;</option>
+            <option value="all">&#917;&#956;&#966;&#945;&#957;&#953;&#963;&#949;: &#927;&#955;&#945;</option>
+            <option value="&#916;&#953;&#960;&#955;&#969;&#964;&#953;&#954;&#959;">&#917;&#956;&#966;&#945;&#957;&#953;&#963;&#949;: &#916;&#953;&#960;&#955;&#969;&#964;&#953;&#954;&#945;</option>
+            <option value="&#928;&#955;&#965;&#957;&#964;&#951;&#961;&#953;&#959;">&#917;&#956;&#966;&#945;&#957;&#953;&#963;&#949;: &#928;&#955;&#965;&#957;&#964;&#951;&#961;&#953;&#945;</option>
+            <option value="&#932;&#959;&#965;&#957;&#949;&#955;">&#917;&#956;&#966;&#945;&#957;&#953;&#963;&#949;: &#932;&#959;&#965;&#957;&#949;&#955;</option>
+            <option value="&#931;&#964;&#949;&#947;&#957;&#969;&#964;&#951;&#961;&#953;&#959;">&#917;&#956;&#966;&#945;&#957;&#953;&#963;&#949;: &#931;&#964;&#949;&#947;&#957;&#969;&#964;&#951;&#961;&#953;&#945;</option>
+            <option value="&#922;&#945;&#955;&#945;&#957;&#948;&#961;&#945;">&#917;&#956;&#966;&#945;&#957;&#953;&#963;&#949;: &#922;&#945;&#955;&#945;&#957;&#948;&#961;&#949;&#962;</option>
+            <option value="&#928;&#961;&#949;&#963;&#945;">&#917;&#956;&#966;&#945;&#957;&#953;&#963;&#949;: &#928;&#961;&#949;&#963;&#949;&#962;</option>
+            <option value="&#931;&#965;&#963;&#954;&#949;&#965;&#945;&#963;&#964;&#953;&#954;&#959;">&#917;&#956;&#966;&#945;&#957;&#953;&#963;&#949;: &#931;&#965;&#963;&#954;&#949;&#965;&#945;&#963;&#964;&#953;&#954;&#945;</option>
+            <option value="&#913;&#955;&#955;&#959;">&#917;&#956;&#966;&#945;&#957;&#953;&#963;&#949;: &#913;&#955;&#955;&#945;</option>
           </select>
         </div>
 
@@ -210,6 +230,11 @@
               </tbody>
             </table>
           </div>
+        </div>
+        <div class="ls-pagination" data-pagination>
+          <button type="button" class="ls-mini-action" data-page-prev>&#928;&#961;&#959;&#951;&#947;&#959;&#965;&#956;&#949;&#957;&#951;</button>
+          <span class="ls-pagination-status" data-page-status>&#931;&#949;&#955;&#953;&#948;&#945; 1 &#945;&#960;&#959; 1</span>
+          <button type="button" class="ls-mini-action" data-page-next>&#917;&#960;&#959;&#956;&#949;&#957;&#951;</button>
         </div>
       </section>
 
@@ -235,6 +260,7 @@
   <script type="module" src="/laundryservices/ls_maquinaria/agregador/ls_machine-add.js"></script>
   <script src="/laundryservices/ls_page.js"></script>
   <script src="/laundryservices/ls_footer.js"></script>
+  <script type="module" src="/laundryservices/ls_effects/ls_admin-dot.js"></script>
   <script type="module" src="/static/js/page-nav.js"></script>
 </body>
 </html>

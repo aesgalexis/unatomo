@@ -809,6 +809,19 @@ body.page .ls-topbar #lang-toggle {
   outline-offset: 2px;
 }
 
+.ls-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-top: 0.85rem;
+}
+
+.ls-pagination-status {
+  font-size: 0.92rem;
+  color: color-mix(in srgb, var(--fg) 78%, transparent);
+}
+
 .ls-filter-btn-label {
   display: block;
   transform: translateY(-1px);
@@ -1009,6 +1022,10 @@ body.page .ls-topbar #lang-toggle {
   align-items: center;
   justify-content: center;
   -webkit-tap-highlight-color: transparent;
+}
+
+.scroll-top-button[hidden] {
+  display: none !important;
 }
 
 .scroll-top-button:hover {
@@ -1244,6 +1261,20 @@ body.ls-privacy-page {
     radial-gradient(circle at 85% 10%, color-mix(in srgb, var(--fg) 8%, transparent), transparent 55%),
     radial-gradient(circle at 10% 15%, color-mix(in srgb, var(--fg) 5%, transparent), transparent 50%),
     var(--bg);
+}
+
+body.ls-privacy-page .page-shell.legal-doc {
+  min-height: calc(100vh - 75px);
+  display: flex;
+  flex-direction: column;
+}
+
+body.ls-privacy-page .page-shell.legal-doc > .legal-copy:not([hidden]) {
+  flex: 1 0 auto;
+}
+
+body.ls-privacy-page .page-shell.legal-doc > #page-nav-mount {
+  margin-top: auto;
 }
 
 .contact-info {

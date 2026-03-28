@@ -10,6 +10,13 @@ if (mount) {
 
   const topBtn = document.getElementById("scroll-top-button");
   if (topBtn) {
+    const syncTopButton = () => {
+      topBtn.hidden = window.scrollY < 24;
+    };
+
+    syncTopButton();
+    window.addEventListener("scroll", syncTopButton, { passive: true });
+
     topBtn.addEventListener("click", () => {
       window.scrollTo({ top: 0, behavior: "smooth" });
     });

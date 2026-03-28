@@ -7,7 +7,7 @@ import {
 } from "./ls_machine-store.js";
 import { isAdminUser } from "./firebase-config.js";
 
-const TYPE_OPTIONS = ["Plegadora", "Lavadora", "Tunel", "Secadora", "Calandra", "Prensa", "Otro"];
+const TYPE_OPTIONS = ["Plegadora", "Lavadora", "Tunel", "Secadora", "Calandra", "Prensa", "Empaquetadora", "Otro"];
 const STATE_OPTIONS = ["Usada", "Bueno", "Muy Bueno", "Excelente", "Repasada"];
 const HEATING_OPTIONS = ["", "Gas", "Vapor", "Aceite"];
 
@@ -56,7 +56,7 @@ const createDialog = () => {
 
         <div class="form-field">
           <label for="ls-add-capacity">Capacidad</label>
-          <input id="ls-add-capacity" class="field" type="text" autocomplete="off" />
+          <input id="ls-add-capacity" class="field" type="number" min="0" step="1" inputmode="numeric" autocomplete="off" />
         </div>
 
         <div class="form-field">
@@ -78,7 +78,7 @@ const createDialog = () => {
 
         <div class="form-field">
           <label for="ls-add-price">Precio</label>
-          <input id="ls-add-price" class="field" type="text" placeholder="17.000 EUR" required autocomplete="off" />
+          <input id="ls-add-price" class="field" type="text" placeholder="17000 o Consultar" autocomplete="off" />
         </div>
 
         <div class="form-field" id="ls-add-heating-wrap" hidden>
@@ -92,8 +92,16 @@ const createDialog = () => {
           <div class="ls-machine-inline">
             <label><input id="ls-add-shipping" type="checkbox" checked /> Envío incluido</label>
             <label><input id="ls-add-startup" type="checkbox" checked /> Puesta en marcha incluida</label>
-            <label><input id="ls-add-warranty-enabled" type="checkbox" /> Garantía de piezas</label>
           </div>
+        </div>
+
+        <div class="form-field">
+          <label for="ls-add-warranty-type">Tipo de garantía</label>
+          <select id="ls-add-warranty-type" class="field">
+            <option value="">Sin garantía</option>
+            <option value="piezas">Garantía de piezas</option>
+            <option value="total">Garantía total</option>
+          </select>
         </div>
 
         <div class="form-field form-field--full">
@@ -155,7 +163,7 @@ const heatingWrap = dialog.querySelector("#ls-add-heating-wrap");
 const heatingField = dialog.querySelector("#ls-add-heating");
 const shippingField = dialog.querySelector("#ls-add-shipping");
 const startupField = dialog.querySelector("#ls-add-startup");
-const warrantyEnabledField = dialog.querySelector("#ls-add-warranty-enabled");
+const warrantyTypeField = dialog.querySelector("#ls-add-warranty-type");
 const warrantyField = dialog.querySelector("#ls-add-warranty");
 const imagesField = dialog.querySelector("#ls-add-images");
 const commentsField = dialog.querySelector("#ls-add-comments");
@@ -164,6 +172,20 @@ const summaryEl = dialog.querySelector("#ls-add-summary");
 const filesEl = dialog.querySelector("#ls-add-files");
 const statusEl = dialog.querySelector("#ls-add-status");
 const submitButton = dialog.querySelector("#ls-add-submit");
+
+const normalizeCapacity = (value) => {
+  const numeric = String(value || "").trim().replace(/[^\d]/g, "");
+  return numeric ? `${numeric} kg` : "";
+};
+
+const normalizePricePreview = (value) => {
+  const raw = String(value || "").trim();
+  if (!raw) return "";
+  if (raw.toLowerCase() === "consultar") return "Consultar";
+  const numeric = raw.replace(/[^\d]/g, "");
+  if (!numeric) return raw;
+  return `${Number.parseInt(numeric, 10).toLocaleString("es-ES")} EUR`;
+};
 
 const setBusy = (busy) => {
   submitButton.disabled = busy;
@@ -215,17 +237,17 @@ const renderDerivedState = async () => {
   if (typeField.value) parts.push(typeField.value);
   if (brandField.value.trim()) parts.push(brandField.value.trim());
   if (modelField.value.trim()) parts.push(modelField.value.trim());
-  if (capacityField.value.trim()) parts.push(capacityField.value.trim());
+  if (capacityField.value.trim()) parts.push(normalizeCapacity(capacityField.value));
   if (yearField.value.trim()) parts.push(yearField.value.trim());
   if (stateField.value) parts.push(stateField.value);
   if (locationField.value.trim()) parts.push(locationField.value.trim());
 
   const extras = [];
-  if (priceField.value.trim()) extras.push(`precio ${priceField.value.trim()}`);
+  if (priceField.value.trim()) extras.push(`precio ${normalizePricePreview(priceField.value)}`);
   if (shippingField.checked && startupField.checked) extras.push("envío y puesta en marcha incluida");
   else if (shippingField.checked) extras.push("envío incluido");
   else if (startupField.checked) extras.push("puesta en marcha incluida");
-  if (warrantyEnabledField.checked && warrantyField.value.trim()) extras.push(warrantyField.value.trim());
+  if (warrantyTypeField.value && warrantyField.value.trim()) extras.push(warrantyField.value.trim());
   if (isDryer && heatingField.value) extras.push(`calefacción ${heatingField.value}`);
   if (commentsField.value.trim()) extras.push("comentarios");
 
@@ -245,7 +267,7 @@ const clearForm = () => {
   stateField.value = STATE_OPTIONS[0];
   shippingField.checked = true;
   startupField.checked = true;
-  warrantyEnabledField.checked = false;
+  warrantyTypeField.value = "";
   heatingField.value = "";
   submitButton.textContent = "Preparar alta";
   void renderDerivedState();
@@ -262,7 +284,7 @@ const fillFormForEdit = (machine) => {
   idField.value = machine.id || "";
   brandField.value = machine.marca || "";
   modelField.value = machine.modelo || "";
-  capacityField.value = machine.capacidad || "";
+  capacityField.value = String(machine.capacidad || "").replace(/[^\d]/g, "");
   yearField.value = machine.anio != null ? String(machine.anio) : "";
   stateField.value = machine.estado || STATE_OPTIONS[0];
   locationField.value = machine.ubicacion || "";
@@ -270,7 +292,7 @@ const fillFormForEdit = (machine) => {
   heatingField.value = machine.calefaccion || "";
   shippingField.checked = Boolean(machine.envioIncluido);
   startupField.checked = Boolean(machine.puestaEnMarchaIncluida);
-  warrantyEnabledField.checked = Boolean(machine.garantiaTexto || machine.garantiaPiezasAnos);
+  warrantyTypeField.value = machine.garantiaTipo || (machine.garantiaPiezasAnos ? "piezas" : machine.garantiaTexto ? "total" : "");
   warrantyField.value = machine.garantiaTexto || "";
   commentsField.value = machine.comentarios || "";
   imagesField.value = "";
@@ -329,7 +351,7 @@ dialog.querySelector("#ls-add-cancel").addEventListener("click", () => dialog.cl
   heatingField,
   shippingField,
   startupField,
-  warrantyEnabledField,
+  warrantyTypeField,
   warrantyField,
   commentsField,
 ].forEach((field) => {
@@ -353,7 +375,7 @@ form.addEventListener("submit", async (event) => {
     categoria: typeField.value,
         marca: brandField.value,
         modelo: modelField.value,
-        capacidad: capacityField.value,
+        capacidad: normalizeCapacity(capacityField.value),
         anio: yearField.value,
         estado: stateField.value,
         ubicacion: locationField.value,
@@ -361,9 +383,9 @@ form.addEventListener("submit", async (event) => {
     calefaccion: heatingField.value,
     envioIncluido: shippingField.checked,
     puestaEnMarchaIncluida: startupField.checked,
-    garantiaActiva: warrantyEnabledField.checked,
-    garantiaDetalle: warrantyField.value,
-    comentarios: commentsField.value,
+        garantiaTipo: warrantyTypeField.value,
+        garantiaDetalle: warrantyField.value,
+        comentarios: commentsField.value,
   };
 
   setBusy(true);

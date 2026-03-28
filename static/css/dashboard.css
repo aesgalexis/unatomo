@@ -240,6 +240,10 @@
   transition: none !important;
 }
 
+.machine-card[data-expanded="false"] {
+  cursor: pointer;
+}
+
 .machine-card.is-dragging {
   opacity: 0.6;
   box-shadow: 0 8px 18px rgba(0,0,0,0.15);
@@ -263,12 +267,10 @@
   justify-content: center;
 }
 
-.machine-card[data-expanded="false"]::after {
-  content: "+";
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
+.mc-hover-plus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   color: transparent;
   font-size: 1.15rem;
   font-weight: 600;
@@ -276,6 +278,11 @@
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.84s ease, color 0.84s ease;
+}
+
+.machine-card[data-expanded="true"] .mc-hover-plus,
+.machine-card--single .mc-hover-plus {
+  display: none;
 }
 
 .machine-card[data-expanded="false"]:hover:not(
@@ -297,7 +304,7 @@
     textarea:hover,
     label:hover
   )
-)::after {
+) .mc-hover-plus {
   transition-duration: 2.55s, 2.55s;
   color: var(--fg);
   opacity: 1;

@@ -17,6 +17,10 @@
     calandra: "C",
     press: "R",
     prensa: "R",
+    packaging_machine: "E",
+    packaging_machinery: "E",
+    empaquetadora: "E",
+    empaquetadoras: "E",
   };
 
   const normalizeTypeKey = (value) =>
