@@ -4,6 +4,7 @@
     <article class="machine-card" data-expanded="false">
       <header class="mc-header">
         <div class="mc-title"></div>
+        <span class="mc-hover-plus" aria-hidden="true">+</span>
         <div class="mc-right">
           <button class="mc-pending" type="button" aria-label="Tareas pendientes"></button>
           <button class="mc-status" type="button"></button>

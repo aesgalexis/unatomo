@@ -731,6 +731,10 @@ body.menu-open .topbar-menu-backdrop {
   -webkit-tap-highlight-color: transparent;
 }
 
+.scroll-top-button[hidden] {
+  display: none !important;
+}
+
 .scroll-top-button:hover {
   opacity: 0.9;
 }

@@ -139,6 +139,27 @@ const parsePriceAmount = (value) => {
   return Number.isFinite(numeric) ? numeric : null;
 };
 
+const buildPriceFields = (value) => {
+  const raw = String(value || "").trim();
+  if (!raw) {
+    return { precioAmount: null, precioTexto: "" };
+  }
+
+  if (raw.toLowerCase() === "consultar") {
+    return { precioAmount: null, precioTexto: "Consultar" };
+  }
+
+  const precioAmount = parsePriceAmount(raw);
+  if (precioAmount === null) {
+    throw new Error("El precio debe ser numerico o 'Consultar'.");
+  }
+
+  return {
+    precioAmount,
+    precioTexto: "",
+  };
+};
+
 const getMachineIdHelper = () => window.lsMachineId || null;
 
 const extractSequence = (id) => {
@@ -275,6 +296,7 @@ export const subscribeMachines = (onData, onError) =>
             puestaEnMarchaIncluida: data.puestaEnMarchaIncluida !== false,
             garantiaTexto: data.garantiaTexto || "",
             garantiaPiezasAnos: data.garantiaPiezasAnos ?? null,
+            garantiaTipo: data.garantiaTipo || "",
             comentarios: data.comentarios || "",
             calefaccion: data.calefaccion || "",
             imagenes: Array.isArray(data.imagenes)
@@ -348,19 +370,28 @@ const uploadMachineImages = async (machineId, files) => {
   return uploaded;
 };
 
-const buildWarrantyData = (enabled, detail) => {
-  if (!enabled) {
+const buildWarrantyData = (type, detail) => {
+  const warrantyType = String(type || "").trim();
+  if (!warrantyType) {
     return {
       garantiaTexto: "",
       garantiaPiezasAnos: null,
+      garantiaTipo: "",
     };
   }
 
-  const warrantyText = String(detail || "").trim();
+  let warrantyText = String(detail || "").trim();
+  if (!warrantyText && warrantyType === "total") {
+    warrantyText = "1 año de garantía";
+  }
+  if (!warrantyText && warrantyType === "piezas") {
+    warrantyText = "1 año de garantía de piezas";
+  }
   const yearsMatch = warrantyText.match(/(\d+)/);
   return {
     garantiaTexto: warrantyText,
     garantiaPiezasAnos: yearsMatch ? Number.parseInt(yearsMatch[1], 10) || null : null,
+    garantiaTipo: warrantyType,
   };
 };
 
@@ -382,8 +413,8 @@ export const createMachine = async (draft, files, user) => {
 
   const machineId = await reserveNextMachineId(categoria);
   const images = await uploadMachineImages(machineId, files);
-  const priceAmount = parsePriceAmount(draft?.precio);
-  const warranty = buildWarrantyData(draft?.garantiaActiva, draft?.garantiaDetalle);
+  const priceFields = buildPriceFields(draft?.precio);
+  const warranty = buildWarrantyData(draft?.garantiaTipo, draft?.garantiaDetalle);
 
   const payload = {
     id: machineId,
@@ -395,12 +426,13 @@ export const createMachine = async (draft, files, user) => {
     anio: parseInteger(draft?.anio),
     estado,
     ubicacion,
-    precioAmount: priceAmount,
-    precioTexto: String(draft?.precio || "").trim(),
+    precioAmount: priceFields.precioAmount,
+    precioTexto: priceFields.precioTexto,
     envioIncluido: Boolean(draft?.envioIncluido),
     puestaEnMarchaIncluida: Boolean(draft?.puestaEnMarchaIncluida),
     garantiaTexto: warranty.garantiaTexto,
     garantiaPiezasAnos: warranty.garantiaPiezasAnos,
+    garantiaTipo: warranty.garantiaTipo,
     comentarios: String(draft?.comentarios || "").trim(),
     calefaccion: String(draft?.calefaccion || "").trim(),
     imagenes: images,
@@ -444,8 +476,8 @@ export const updateMachine = async (machineId, draft, files, user, currentMachin
   const existingData = currentMachine || existingSnap.data() || {};
   const newImages = await uploadMachineImages(normalizedId, files);
   const existingImages = Array.isArray(existingData.imagenes) ? existingData.imagenes : [];
-  const warranty = buildWarrantyData(draft?.garantiaActiva, draft?.garantiaDetalle);
-  const priceAmount = parsePriceAmount(draft?.precio);
+  const warranty = buildWarrantyData(draft?.garantiaTipo, draft?.garantiaDetalle);
+  const priceFields = buildPriceFields(draft?.precio);
 
   const payload = {
     id: normalizedId,
@@ -457,12 +489,13 @@ export const updateMachine = async (machineId, draft, files, user, currentMachin
     anio: parseInteger(draft?.anio),
     estado,
     ubicacion,
-    precioAmount: priceAmount,
-    precioTexto: String(draft?.precio || "").trim(),
+    precioAmount: priceFields.precioAmount,
+    precioTexto: priceFields.precioTexto,
     envioIncluido: Boolean(draft?.envioIncluido),
     puestaEnMarchaIncluida: Boolean(draft?.puestaEnMarchaIncluida),
     garantiaTexto: warranty.garantiaTexto,
     garantiaPiezasAnos: warranty.garantiaPiezasAnos,
+    garantiaTipo: warranty.garantiaTipo,
     comentarios: String(draft?.comentarios || "").trim(),
     calefaccion: String(draft?.calefaccion || "").trim(),
     imagenes: [...existingImages, ...newImages],

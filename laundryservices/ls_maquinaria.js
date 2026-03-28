@@ -5,6 +5,7 @@ import {
 import { isAdminUser } from "/laundryservices/ls_maquinaria/agregador/firebase-config.js";
 
 const LANGS = ["es", "en", "it", "el"];
+const PAGE_SIZE = 10;
 
 const META = {
   es: {
@@ -24,6 +25,8 @@ const META = {
       startupOnly: "Puesta en marcha incluida",
       shippingStartup: "Envio y puesta en marcha incluida",
       heating: "Calefacción:",
+      fullWarranty: (years) => `${years} ano de garantia`,
+      fullWarrantyPlural: (years) => `${years} anos de garantia`,
       partsWarranty: (years) => `${years} ano de garantia de piezas`,
       partsWarrantyPlural: (years) => `${years} anos de garantia de piezas`,
       type: "Tipo",
@@ -34,6 +37,10 @@ const META = {
       status: "Estado",
       location: "Ubicacion",
       id: "ID:",
+      prev: "Anterior",
+      next: "Siguiente",
+      page: (current, total) => `Pagina ${current} de ${total}`,
+      consult: "Consultar",
     },
   },
   en: {
@@ -53,6 +60,8 @@ const META = {
       startupOnly: "Commissioning included",
       shippingStartup: "Shipping and commissioning included",
       heating: "Heating:",
+      fullWarranty: (years) => `${years} year warranty`,
+      fullWarrantyPlural: (years) => `${years} years warranty`,
       partsWarranty: (years) => `${years} year parts warranty`,
       partsWarrantyPlural: (years) => `${years} years parts warranty`,
       type: "Type",
@@ -63,6 +72,10 @@ const META = {
       status: "Status",
       location: "Location",
       id: "ID:",
+      prev: "Previous",
+      next: "Next",
+      page: (current, total) => `Page ${current} of ${total}`,
+      consult: "Enquire",
     },
   },
   it: {
@@ -82,6 +95,8 @@ const META = {
       startupOnly: "Messa in servizio inclusa",
       shippingStartup: "Spedizione e messa in servizio incluse",
       heating: "Riscaldamento:",
+      fullWarranty: (years) => `${years} anno di garanzia`,
+      fullWarrantyPlural: (years) => `${years} anni di garanzia`,
       partsWarranty: (years) => `${years} anno di garanzia sui ricambi`,
       partsWarrantyPlural: (years) => `${years} anni di garanzia sui ricambi`,
       type: "Tipo",
@@ -92,6 +107,10 @@ const META = {
       status: "Stato",
       location: "Ubicazione",
       id: "ID:",
+      prev: "Precedente",
+      next: "Successiva",
+      page: (current, total) => `Pagina ${current} di ${total}`,
+      consult: "Consultare",
     },
   },
   el: {
@@ -111,6 +130,8 @@ const META = {
       startupOnly: "\u03a0\u03b5\u03c1\u03b9\u03bb\u03b1\u03bc\u03b2\u03b1\u03bd\u03b5\u03c4\u03b1\u03b9 \u03b8\u03b5\u03c3\u03b7 \u03c3\u03b5 \u03bb\u03b5\u03b9\u03c4\u03bf\u03c5\u03c1\u03b3\u03b9\u03b1",
       shippingStartup: "\u03a0\u03b5\u03c1\u03b9\u03bb\u03b1\u03bc\u03b2\u03b1\u03bd\u03bf\u03bd\u03c4\u03b1\u03b9 \u03b1\u03c0\u03bf\u03c3\u03c4\u03bf\u03bb\u03b7 \u03ba\u03b1\u03b9 \u03b8\u03b5\u03c3\u03b7 \u03c3\u03b5 \u03bb\u03b5\u03b9\u03c4\u03bf\u03c5\u03c1\u03b3\u03b9\u03b1",
       heating: "\u0398\u03b5\u03c1\u03bc\u03b1\u03bd\u03c3\u03b7:",
+      fullWarranty: (years) => `${years} \u03b5\u03c4\u03bf\u03c2 \u03b5\u03b3\u03b3\u03c5\u03b7\u03c3\u03b7`,
+      fullWarrantyPlural: (years) => `${years} \u03b5\u03c4\u03b7 \u03b5\u03b3\u03b3\u03c5\u03b7\u03c3\u03b7`,
       partsWarranty: (years) => `${years} \u03b5\u03c4\u03bf\u03c2 \u03b5\u03b3\u03b3\u03c5\u03b7\u03c3\u03b7 \u03b1\u03bd\u03c4\u03b1\u03bb\u03bb\u03b1\u03ba\u03c4\u03b9\u03ba\u03c9\u03bd`,
       partsWarrantyPlural: (years) => `${years} \u03b5\u03c4\u03b7 \u03b5\u03b3\u03b3\u03c5\u03b7\u03c3\u03b7 \u03b1\u03bd\u03c4\u03b1\u03bb\u03bb\u03b1\u03ba\u03c4\u03b9\u03ba\u03c9\u03bd`,
       type: "\u03a4\u03c5\u03c0\u03bf\u03c2",
@@ -121,6 +142,10 @@ const META = {
       status: "\u039a\u03b1\u03c4\u03b1\u03c3\u03c4\u03b1\u03c3\u03b7",
       location: "\u03a4\u03bf\u03c0\u03bf\u03b8\u03b5\u03c3\u03b9\u03b1",
       id: "ID:",
+      prev: "\u03a0\u03c1\u03bf\u03b7\u03b3\u03bf\u03c5\u03bc\u03b5\u03bd\u03b7",
+      next: "\u0395\u03c0\u03bf\u03bc\u03b5\u03bd\u03b7",
+      page: (current, total) => `\u03a3\u03b5\u03bb\u03b9\u03b4\u03b1 ${current} \u03b1\u03c0\u03bf ${total}`,
+      consult: "\u039a\u03b1\u03c4\u03bf\u03c0\u03b9\u03bd \u03b5\u03c1\u03c9\u03c4\u03b7\u03c3\u03b7\u03c2",
     },
   },
 };
@@ -132,6 +157,7 @@ const TYPE_LABELS = {
   secadora: { es: "Secadora", en: "Dryer", it: "Essiccatore", el: "\u03a3\u03c4\u03b5\u03b3\u03bd\u03c9\u03c4\u03b7\u03c1\u03b9\u03bf" },
   calandra: { es: "Calandra", en: "Ironer", it: "Calandra", el: "\u039a\u03b1\u03bb\u03b1\u03bd\u03b4\u03c1\u03b1" },
   prensa: { es: "Prensa", en: "Press", it: "Pressa", el: "\u03a0\u03c1\u03b5\u03c3\u03b1" },
+  empaquetadora: { es: "Empaquetadora", en: "Packer", it: "Imballatrice", el: "\u03a3\u03c5\u03c3\u03ba\u03b5\u03c5\u03b1\u03c3\u03c4\u03b9\u03ba\u03bf" },
   otro: { es: "Otro", en: "Other", it: "Altro", el: "\u0391\u03bb\u03bb\u03bf" },
 };
 
@@ -167,10 +193,13 @@ if (copies.length) {
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#39;");
 
-  const formatPrice = (machine) => {
+  const formatPrice = (machine, lang) => {
     if (typeof machine.precioAmount === "number" && Number.isFinite(machine.precioAmount)) {
       const amount = Math.round(machine.precioAmount).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
       return `${amount} EUR`;
+    }
+    if (String(machine.precioTexto || "").trim().toLowerCase() === "consultar") {
+      return META[lang].labels.consult;
     }
     return machine.precioTexto || "";
   };
@@ -188,7 +217,11 @@ if (copies.length) {
   const getWarrantyText = (machine, lang) => {
     const labels = META[lang].labels;
     const years = Number.parseInt(machine.garantiaPiezasAnos, 10);
+    const warrantyType = String(machine.garantiaTipo || "").trim();
     if (Number.isFinite(years) && years > 0) {
+      if (warrantyType === "total") {
+        return years === 1 ? labels.fullWarranty(years) : labels.fullWarrantyPlural(years);
+      }
       return years === 1 ? labels.partsWarranty(years) : labels.partsWarrantyPlural(years);
     }
     return machine.garantiaTexto || "";
@@ -244,7 +277,7 @@ if (copies.length) {
     const year = escapeHtml(machine.anio ?? "");
     const state = escapeHtml(translateState(machine.estado, lang));
     const location = escapeHtml(machine.ubicacion);
-    const price = escapeHtml(formatPrice(machine));
+    const price = escapeHtml(formatPrice(machine, lang));
     const extras = buildExtras(machine, lang).map(escapeHtml);
     const heating = machine.calefaccion ? escapeHtml(translateHeating(machine.calefaccion, lang)) : "";
     const comments = machine.comentarios ? escapeHtml(machine.comentarios) : "";
@@ -311,18 +344,54 @@ if (copies.length) {
         <td class="ls-table-state" colspan="7">${escapeHtml(message)}</td>
       </tr>
     `;
+    const status = copy.querySelector("[data-page-status]");
+    const prev = copy.querySelector("[data-page-prev]");
+    const next = copy.querySelector("[data-page-next]");
+    if (status) status.textContent = "";
+    if (prev) prev.disabled = true;
+    if (next) next.disabled = true;
+  };
+
+  const getFilteredMachines = (copy, machines) => {
+    const filter = copy.dataset.activeFilter || "all";
+    if (filter === "all") return machines;
+    return machines.filter((machine) => translateType(machine.categoria, normalizeLang(copy.getAttribute("data-legal-lang"))) === filter);
+  };
+
+  const renderPagination = (copy, currentPage, totalPages) => {
+    const lang = normalizeLang(copy.getAttribute("data-legal-lang"));
+    const labels = META[lang].labels;
+    const status = copy.querySelector("[data-page-status]");
+    const prev = copy.querySelector("[data-page-prev]");
+    const next = copy.querySelector("[data-page-next]");
+    if (status) status.textContent = labels.page(currentPage, totalPages);
+    if (prev) {
+      prev.disabled = currentPage <= 1;
+      prev.textContent = labels.prev;
+    }
+    if (next) {
+      next.disabled = currentPage >= totalPages;
+      next.textContent = labels.next;
+    }
   };
 
   const renderMachinesForCopy = (copy, machines) => {
     const lang = normalizeLang(copy.getAttribute("data-legal-lang"));
     const body = copy.querySelector(".ls-table tbody");
     if (!body) return;
-    if (!machines.length) {
+    const filteredMachines = getFilteredMachines(copy, machines);
+    if (!filteredMachines.length) {
       renderTableState(copy, META[lang].empty);
       return;
     }
-    body.innerHTML = machines.map((machine) => renderMachineRows(machine, lang)).join("");
-    applyFilter(copy, copy.dataset.activeFilter || "all");
+    const totalPages = Math.max(1, Math.ceil(filteredMachines.length / PAGE_SIZE));
+    const requestedPage = Number.parseInt(copy.dataset.activePage || "1", 10) || 1;
+    const currentPage = Math.min(Math.max(1, requestedPage), totalPages);
+    copy.dataset.activePage = String(currentPage);
+    const start = (currentPage - 1) * PAGE_SIZE;
+    const pageMachines = filteredMachines.slice(start, start + PAGE_SIZE);
+    body.innerHTML = pageMachines.map((machine) => renderMachineRows(machine, lang)).join("");
+    renderPagination(copy, currentPage, totalPages);
   };
 
   const applyLanguage = (lang) => {
@@ -346,34 +415,36 @@ if (copies.length) {
 
   const applyFilter = (copy, filter) => {
     copy.dataset.activeFilter = filter;
-    const rows = Array.from(copy.querySelectorAll(".ls-table tbody tr[data-machine-id]"));
+    copy.dataset.activePage = "1";
     const select = copy.querySelector("[data-filter-select]");
-    rows.forEach((row) => {
-      const typeCell = row.querySelector("td[data-type]");
-      const subrow =
-        row.nextElementSibling && row.nextElementSibling.classList.contains("ls-table-subrow")
-          ? row.nextElementSibling
-          : null;
-      const galleryRow =
-        subrow && subrow.nextElementSibling && subrow.nextElementSibling.classList.contains("ls-table-gallery-row")
-          ? subrow.nextElementSibling
-          : null;
-      const matches = filter === "all" || (typeCell && typeCell.dataset.type === filter);
-      row.hidden = !matches;
-      if (subrow) subrow.hidden = !matches;
-      if (galleryRow) {
-        galleryRow.hidden = !matches || galleryRow.dataset.galleryOpen !== "true";
-      }
-    });
     if (select) select.value = filter;
+    renderMachinesForCopy(copy, currentMachines);
   };
 
   copies.forEach((copy) => {
     copy.dataset.activeFilter = "all";
+    copy.dataset.activePage = "1";
     const select = copy.querySelector("[data-filter-select]");
     if (select) {
       select.addEventListener("change", () => {
         applyFilter(copy, select.value || "all");
+      });
+    }
+    const prev = copy.querySelector("[data-page-prev]");
+    const next = copy.querySelector("[data-page-next]");
+    if (prev) {
+      prev.addEventListener("click", () => {
+        const currentPage = Number.parseInt(copy.dataset.activePage || "1", 10) || 1;
+        if (currentPage <= 1) return;
+        copy.dataset.activePage = String(currentPage - 1);
+        renderMachinesForCopy(copy, currentMachines);
+      });
+    }
+    if (next) {
+      next.addEventListener("click", () => {
+        const currentPage = Number.parseInt(copy.dataset.activePage || "1", 10) || 1;
+        copy.dataset.activePage = String(currentPage + 1);
+        renderMachinesForCopy(copy, currentMachines);
       });
     }
   });
