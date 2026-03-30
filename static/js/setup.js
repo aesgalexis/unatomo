@@ -1,7 +1,12 @@
 (function () {
   const PREF_KEY = "cookiePrefs";
   const THEME_KEY = "theme";
-  const isEn = window.location.pathname.startsWith("/en");
+  const lang =
+    (document.documentElement.lang || "").trim().toLowerCase() === "en" ||
+    window.location.pathname.startsWith("/en")
+      ? "en"
+      : "es";
+  const isEn = lang === "en";
 
   const themeInputs = document.querySelectorAll('input[name="theme"]');
   const cookieInputs = document.querySelectorAll("[data-cookie-key]");
