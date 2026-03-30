@@ -1,5 +1,5 @@
 import { initThemeToggle } from "/static/js/theme/theme-toggle.js";
-import { getCurrentLang, getLocalizedHref, getUiPath } from "/static/js/site/locale.js";
+import { getCurrentLang, getLocalizedHref, getUiPath, setSavedLang } from "/static/js/site/locale.js";
 
 const mount =
   document.getElementById("topbar-mount") ||
@@ -35,6 +35,8 @@ if (langEs && langEn) {
   langEn.setAttribute("aria-current", currentLang === "en" ? "page" : "false");
   langEs.classList.toggle("is-active", currentLang === "es");
   langEn.classList.toggle("is-active", currentLang === "en");
+  langEs.addEventListener("click", () => setSavedLang("es"));
+  langEn.addEventListener("click", () => setSavedLang("en"));
 }
 
 initThemeToggle();
