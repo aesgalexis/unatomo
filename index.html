@@ -31,6 +31,13 @@
 </head>
 <body>
   <main class="shell">
+    <div style="display:flex; justify-content:center; margin-bottom:1rem;">
+      <div class="topbar-lang-toggle" aria-label="Language">
+        <a id="lang-link-es" class="topbar-lang-link" href="#">ES</a>
+        <a id="lang-link-en" class="topbar-lang-link" href="#">EN</a>
+      </div>
+    </div>
+
     <img
       src="/static/img/logo-unatomo-v1.5.svg"
       alt="unatomo"
@@ -126,24 +133,24 @@
       var lang = document.documentElement.lang === "en" ? "en" : "es";
       var text = {
         es: {
-          subtitle: "?Ya hablas con tus maquinas?",
-          loginButton: "Iniciar sesi?n",
-          loginTitle: "Iniciar sesi?n",
-          loginCopy: "Accede con Google o con tu correo y contrase?a.",
+          subtitle: "\u00bfYa hablas con tus maquinas?",
+          loginButton: "Iniciar sesi\u00f3n",
+          loginTitle: "Iniciar sesi\u00f3n",
+          loginCopy: "Accede con Google o con tu correo y contrase\u00f1a.",
           loginGoogle: "Continuar con Google",
-          loginEmail: 'Correo electr?nico<span aria-hidden="true"> *</span>',
-          loginPassword: 'Contrase?a<span aria-hidden="true"> *</span>',
+          loginEmail: 'Correo electr\u00f3nico<span aria-hidden="true"> *</span>',
+          loginPassword: 'Contrase\u00f1a<span aria-hidden="true"> *</span>',
           loginSubmit: "Entrar",
-          resetLink: "Olvid? mi contrase?a",
+          resetLink: "Olvid\u00e9 mi contrase\u00f1a",
           registerButton: "Registrarse",
-          registerTitle: "C?digo de acceso",
-          registerCopy: "Introduce el c?digo de invitaci?n para registrarte.",
-          registerPlaceholder: "C?digo",
+          registerTitle: "C\u00f3digo de acceso",
+          registerCopy: "Introduce el c\u00f3digo de invitaci\u00f3n para registrarte.",
+          registerPlaceholder: "C\u00f3digo",
           registerSubmit: "Continuar",
-          requestCode: "Solicitar c?digo",
-          intro: "Sistema de gesti?n de maquinaria y equipamiento basado en tecnolog?a NFC",
+          requestCode: "Solicitar c\u00f3digo",
+          intro: "Sistema de gesti\u00f3n de maquinaria y equipamiento basado en tecnolog\u00eda NFC",
           contact: "Contactar",
-          privacy: "Pol?tica de privacidad y cookies"
+          privacy: "Pol\u00edtica de privacidad y cookies"
         },
         en: {
           subtitle: "Do you already talk to your machines?",
@@ -185,11 +192,26 @@
       document.getElementById("intro-line-1").textContent = text.intro;
       document.getElementById("enter-site").textContent = text.contact;
       document.getElementById("privacy-link").textContent = text.privacy;
+      document.getElementById("lang-link-es").classList.toggle("is-active", lang === "es");
+      document.getElementById("lang-link-en").classList.toggle("is-active", lang === "en");
+      document.getElementById("lang-link-es").setAttribute("aria-current", lang === "es" ? "page" : "false");
+      document.getElementById("lang-link-en").setAttribute("aria-current", lang === "en" ? "page" : "false");
 
       document.getElementById("reset-link").href = lang === "en" ? "/en/auth/reset.html" : "/es/auth/reset.html";
       document.getElementById("request-code-link").href = lang === "en" ? "/en/contacto.html" : "/es/contacto.html";
       document.getElementById("privacy-link").href = lang === "en" ? "/en/privacidad.html" : "/es/privacidad.html";
       document.querySelector(".auth-actions").setAttribute("aria-label", lang === "en" ? "Access" : "Acceso");
+
+      document.getElementById("lang-link-es").addEventListener("click", function (e) {
+        e.preventDefault();
+        try { localStorage.setItem("unatomo_lang", "es"); } catch (err) {}
+        window.location.reload();
+      });
+      document.getElementById("lang-link-en").addEventListener("click", function (e) {
+        e.preventDefault();
+        try { localStorage.setItem("unatomo_lang", "en"); } catch (err) {}
+        window.location.reload();
+      });
     })();
   </script>
   <script type="module" src="/static/js/theme/theme.js"></script>
