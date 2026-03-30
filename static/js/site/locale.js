@@ -1,4 +1,5 @@
 const SUPPORTED_LANGS = ["es", "en"];
+const LANG_STORAGE_KEY = "unatomo_lang";
 
 const TEXT = {
   es: {
@@ -38,6 +39,38 @@ export const getCurrentLang = () => {
   if (SUPPORTED_LANGS.includes(fromHtml)) return fromHtml;
 
   return "es";
+};
+
+export const getSavedLang = () => {
+  try {
+    const value = (localStorage.getItem(LANG_STORAGE_KEY) || "").trim().toLowerCase();
+    return SUPPORTED_LANGS.includes(value) ? value : "";
+  } catch {
+    return "";
+  }
+};
+
+export const setSavedLang = (lang) => {
+  const value = SUPPORTED_LANGS.includes(lang) ? lang : "";
+  if (!value) return;
+  try {
+    localStorage.setItem(LANG_STORAGE_KEY, value);
+  } catch {}
+};
+
+export const resolvePreferredLang = () => {
+  const saved = getSavedLang();
+  if (saved) return saved;
+
+  const browserLangs = Array.isArray(navigator.languages) && navigator.languages.length
+    ? navigator.languages
+    : [navigator.language || navigator.userLanguage || ""];
+
+  const first = browserLangs
+    .map((value) => String(value || "").trim().toLowerCase())
+    .find(Boolean);
+
+  return first.startsWith("es") ? "es" : "en";
 };
 
 export const getLangPrefix = (lang = getCurrentLang()) =>

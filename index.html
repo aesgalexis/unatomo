@@ -1,120 +1,43 @@
 <!doctype html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>unatomo</title>
-  <meta name="robots" content="noindex, nofollow" />
-  <link rel="stylesheet" href="/styles.css">
+  <meta name="robots" content="index, follow" />
   <link rel="icon" href="/static/img/favicon/favicon.svg" type="image/svg+xml">
-  <script src="/static/js/config/runtime-config.js"></script>
+  <script>
+    (function () {
+      var STORAGE_KEY = "unatomo_lang";
+      function pickLang() {
+        try {
+          var saved = (localStorage.getItem(STORAGE_KEY) || "").trim().toLowerCase();
+          if (saved === "es" || saved === "en") return saved;
+        } catch (e) {}
+
+        var langs = Array.isArray(navigator.languages) && navigator.languages.length
+          ? navigator.languages
+          : [navigator.language || navigator.userLanguage || ""];
+        var first = String(langs[0] || "").trim().toLowerCase();
+        return first.indexOf("es") === 0 ? "es" : "en";
+      }
+
+      var lang = pickLang();
+      var target = lang === "es" ? "/es/index.html" : "/en/index.html";
+      window.location.replace(target);
+    })();
+  </script>
+  <style>
+    html,body{height:100%}
+    body{margin:0;display:grid;place-items:center;font:16px/1.4 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:#0b0b0c;color:#f3f3f3}
+    main{padding:24px;text-align:center}
+    a{color:#f3f3f3}
+  </style>
 </head>
 <body>
-  <main class="shell">
-    <img
-      src="/static/img/logo-unatomo-v1.5.svg"
-      alt="unatomo"
-      class="logo"
-      loading="lazy"
-    />
-
-    <h1 id="title-main">unatomo</h1>
-    <h2 id="subtitle-main">&iquest;Ya hablas con tus maquinas?</h2>
-
-    <br><br>
-
-    <div class="auth-actions" aria-label="Acceso">
-      <button type="button" class="btn-pill btn-pill-solid" id="go-login">
-        Iniciar sesión
-      </button>
-    </div>
-
-    <section id="login-box" class="card" hidden>
-      <h3>Iniciar sesión</h3>
-      <p>Accede con Google o con tu correo y contraseña.</p>
-
-      <div class="form-actions" style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
-        <button type="button" class="btn-secondary" id="login-google">
-          Continuar con Google
-        </button>
-      </div>
-
-      <br>
-
-      <form id="login-email-form" class="contact-form" novalidate>
-        <div class="form-grid">
-          <div class="form-field form-field--full">
-            <label for="login-email">Correo electrónico<span aria-hidden="true"> *</span></label>
-            <input id="login-email" name="email" type="email" required class="field" autocomplete="email" />
-          </div>
-
-          <div class="form-field form-field--full">
-            <label for="login-password">Contraseña<span aria-hidden="true"> *</span></label>
-            <input id="login-password" name="password" type="password" required class="field" autocomplete="current-password" />
-          </div>
-        </div>
-
-        <p id="login-status" class="form-status" role="status" aria-live="polite" hidden></p>
-
-        <div class="form-actions" style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
-          <button type="submit" class="btn-primary" id="login-email-submit">Entrar</button>
-        </div>
-
-        <p class="footer-link" style="text-align:center; margin-top:0.75rem;">
-          <a href="/es/auth/reset.html">Olvidé mi contraseña</a>
-        </p>
-      </form>
-    </section>
-
-    <br>
-
-    <button type="button" class="btn-pill btn-pill-outline" id="go-register">
-      Registrarse
-    </button>
-
-    <section id="register-code-box" class="card" hidden>
-      <h3>Código de acceso</h3>
-      <p>Introduce el código de invitacón para registrarte.</p>
-      <br>
-
-      <div class="inline-field-row">
-        <input
-          id="register-code-input"
-          class="field"
-          type="text"
-          placeholder="Código"
-          autocomplete="one-time-code"
-        >
-        <button id="register-code-submit" type="button" class="btn-secondary">
-          Continuar
-        </button>
-      </div>
-
-      <p id="register-code-status" class="form-status" role="status" aria-live="polite" hidden></p>
-
-      <p class="footer-link">
-<a href="/es/contacto.html">Solicitar código</a>
-      </p>
-    </section>
-
-    <section class="intro">
-      <h5 id="intro-title"></h5>
-      <h5 id="intro-line-1">
-        Sistema de gesti&oacute;n de maquinaria y equipamiento basado en tecnolog&iacute;a NFC
-      </h5>
-    </section>
-
-    <button id="enter-site" type="button" class="btn-pill btn-pill-outline">Contactar</button>
-
-    <p id="legal-footer" class="legal-footer"></p>
-    <p class="footer-link">
-      <a href="/es/privacidad.html">Política de privacidad y cookies</a>
-    </p>
+  <main>
+    <p>Redirecting...</p>
+    <p><a href="/es/index.html">Espa&ntilde;ol</a> &middot; <a href="/en/index.html">English</a></p>
   </main>
-
-  <script type="module" src="/static/js/theme/theme.js"></script>
-  <script src="/static/js/setup.js"></script>
-  <script type="module" src="/static/js/registro/app.js"></script>
-  <script src="/static/js/footer.js"></script>
 </body>
 </html>
