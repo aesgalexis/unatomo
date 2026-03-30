@@ -3,6 +3,8 @@
     const pathMatch = window.location.pathname.match(/^\/([a-z]{2})(?:\/|$)/i);
     const fromPath = pathMatch ? pathMatch[1].toLowerCase() : "";
     if (fromPath === "en") return "en";
+    const fromHtml = (document.documentElement.lang || "").trim().toLowerCase();
+    if (fromHtml === "en") return "en";
     return "es";
   };
 
