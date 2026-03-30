@@ -1,8 +1,12 @@
-// FILE: static/js/registro/auth-gate.js
 import { auth } from "/static/js/registro/firebase-init.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+import { getCurrentLang } from "/static/js/site/locale.js";
 
 const SELECTOR = "[data-requires-auth]";
+const isEn = getCurrentLang() === "en";
+const loginRequiredText = isEn
+  ? "You need to sign in to use this function."
+  : "Necesitas iniciar sesión para usar esta función.";
 
 function ensureToast() {
   let el = document.getElementById("auth-toast");
@@ -81,10 +85,7 @@ function attachGuard(el) {
     e.preventDefault();
     e.stopPropagation();
 
-    const msg =
-      el.getAttribute("data-auth-msg") ||
-      "Necesitas iniciar sesión para usar esta función.";
-
+    const msg = el.getAttribute("data-auth-msg") || loginRequiredText;
     toast(msg);
   });
 }

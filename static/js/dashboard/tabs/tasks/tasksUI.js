@@ -1,5 +1,17 @@
-﻿import { normalizeTasks, createTask, MAX_TASK_TITLE } from "./tasksModel.js";
+import { t } from "/static/js/dashboard/i18n.js";
+import { normalizeTasks, createTask, MAX_TASK_TITLE } from "./tasksModel.js";
 import { getTaskTiming } from "./tasksTime.js";
+
+const frequencyLabel = (key) =>
+  ({
+    puntual: t("tasks.frequency", "Frecuencia"),
+    diaria: t("tasks.daily", "Diaria"),
+    semanal: t("tasks.weekly", "Semanal"),
+    mensual: t("tasks.monthly", "Mensual"),
+    trimestral: t("tasks.quarterly", "Trimestral"),
+    semestral: t("tasks.semiannual", "Semestral"),
+    anual: t("tasks.annual", "Anual"),
+  })[key] || key;
 
 export const renderTasksPanel = (panel, machine, hooks, options = {}, context = {}) => {
   panel.innerHTML = "";
@@ -10,8 +22,7 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
   list.className = "task-list";
 
   const tasks = normalizeTasks(machine.tasks || []);
-  if (!tasks.length) {
-  } else {
+  if (tasks.length) {
     tasks.forEach((task) => {
       const item = document.createElement("div");
       item.className = "task-item";
@@ -21,7 +32,7 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
 
       const title = document.createElement("strong");
       title.className = "task-title";
-      title.textContent = task.title || "Tarea";
+      title.textContent = task.title || t("tasks.task", "Tarea");
 
       const meta = document.createElement("div");
       meta.className = "task-meta";
@@ -35,7 +46,7 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
       if (timing.pending) {
         const pending = document.createElement("span");
         pending.className = "task-pending";
-        pending.textContent = "Pendiente";
+        pending.textContent = t("tasks.pending", "Pendiente");
         meta.appendChild(pending);
       }
 
@@ -43,7 +54,7 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
         const completeBtn = document.createElement("button");
         completeBtn.type = "button";
         completeBtn.className = "task-complete-btn";
-        completeBtn.textContent = "Completada";
+        completeBtn.textContent = t("tasks.completed", "Completada");
         completeBtn.addEventListener("click", (event) => {
           event.stopPropagation();
           if (hooks.onCompleteTask) hooks.onCompleteTask(machine.id, task.id, context);
@@ -68,7 +79,7 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
       if (canEditTasks) {
         const remove = document.createElement("a");
         remove.className = "task-remove-link";
-        remove.textContent = "eliminar";
+        remove.textContent = t("tasks.remove", "eliminar");
         remove.href = "#";
         remove.addEventListener("click", (event) => {
           event.preventDefault();
@@ -91,14 +102,14 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
     const titleInput = document.createElement("input");
     titleInput.className = "task-title-input";
     titleInput.type = "text";
-    titleInput.placeholder = "Tarea";
+    titleInput.placeholder = t("tasks.task", "Tarea");
     titleInput.maxLength = MAX_TASK_TITLE;
     titleInput.addEventListener("click", (event) => event.stopPropagation());
 
     const descInput = document.createElement("input");
     descInput.className = "task-desc-input";
     descInput.type = "text";
-    descInput.placeholder = "Descripción";
+    descInput.placeholder = t("tasks.description", "Descripción");
     descInput.maxLength = 255;
     descInput.addEventListener("click", (event) => event.stopPropagation());
 
@@ -107,20 +118,7 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
     ["puntual", "diaria", "semanal", "mensual", "trimestral", "semestral", "anual"].forEach((key) => {
       const option = document.createElement("option");
       option.value = key;
-      option.textContent =
-        (key === "puntual"
-          ? "Frecuencia"
-          : key === "diaria"
-          ? "Diaria"
-          : key === "semanal"
-          ? "Semanal"
-          : key === "mensual"
-          ? "Mensual"
-          : key === "trimestral"
-          ? "Trimestral"
-          : key === "semestral"
-          ? "Semestral"
-          : "Anual");
+      option.textContent = frequencyLabel(key);
       freqSelect.appendChild(option);
     });
     freqSelect.addEventListener("click", (event) => event.stopPropagation());
@@ -128,18 +126,18 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
     const createBtn = document.createElement("button");
     createBtn.type = "button";
     createBtn.className = "task-create-btn";
-    createBtn.textContent = "Crear";
+    createBtn.textContent = t("tasks.create", "Crear");
     createBtn.addEventListener("click", (event) => {
       event.stopPropagation();
       const { task, error } = createTask({
         title: titleInput.value,
         description: descInput.value,
         frequency: freqSelect.value,
-        createdBy: context.createdBy || null
+        createdBy: context.createdBy || null,
       });
       if (error) {
         const prev = createBtn.textContent;
-        createBtn.textContent = "Revisa el formulario";
+        createBtn.textContent = t("tasks.reviewForm", "Revisa el formulario");
         setTimeout(() => (createBtn.textContent = prev), 1000);
         return;
       }

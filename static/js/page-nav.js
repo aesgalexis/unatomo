@@ -1,7 +1,9 @@
+import { getUiPath } from "/static/js/site/locale.js";
+
 const mount = document.getElementById("page-nav-mount");
 if (mount) {
   try {
-    const res = await fetch("/es/ui/page-nav.html", { cache: "no-store" });
+    const res = await fetch(getUiPath("page-nav.html"), { cache: "no-store" });
     if (!res.ok) throw new Error("page-nav fetch failed");
     mount.innerHTML = await res.text();
   } catch {

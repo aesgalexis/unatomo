@@ -1,6 +1,7 @@
 (function () {
   const PREF_KEY = "cookiePrefs";
   const THEME_KEY = "theme";
+  const isEn = window.location.pathname.startsWith("/en");
 
   const themeInputs = document.querySelectorAll('input[name="theme"]');
   const cookieInputs = document.querySelectorAll("[data-cookie-key]");
@@ -86,6 +87,6 @@
       localStorage.setItem(PREF_KEY, JSON.stringify(prefs));
     } catch (e) {}
 
-    window.location.href = "/es/contacto.html";
+    window.location.href = isEn ? "/en/contacto.html" : "/es/contacto.html";
   });
 })();

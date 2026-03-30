@@ -3,6 +3,27 @@ import { collection, getDocs } from "https://www.gstatic.com/firebasejs/12.7.0/f
 import { auth, db } from "/static/js/firebase/firebaseApp.js";
 import { fetchLinksForAdmin } from "/static/js/dashboard/admin/adminLinksRepo.js";
 import { upsertAccountDirectory } from "/static/js/dashboard/admin/accountDirectoryRepo.js";
+import { getCurrentLang, localizeEsPath } from "/static/js/site/locale.js";
+
+const isEn = getCurrentLang() === "en";
+const textMap = {
+  account: isEn ? "Account" : "Cuenta",
+  preferences: isEn ? "Preferences" : "Preferencias",
+  activity: isEn ? "Activity" : "Actividad",
+  security: isEn ? "Security" : "Seguridad",
+  name: isEn ? "Name" : "Nombre",
+  email: isEn ? "Email" : "Correo electr\u00f3nico",
+  createdAt: isEn ? "Created at" : "Fecha de creaci\u00f3n",
+  theme: isEn ? "Theme" : "Tema",
+  light: isEn ? "Light" : "Claro",
+  dark: isEn ? "Dark" : "Oscuro",
+  ownMachines: isEn ? "Owned machines" : "M\u00e1quinas propias",
+  adminMachines: isEn ? "Machines as administrator" : "M\u00e1quinas como administrador",
+  changePassword: isEn ? "Change password" : "Cambiar contrase\u00f1a",
+  logout: isEn ? "Sign out" : "Cerrar sesi\u00f3n",
+  user: isEn ? "User" : "Usuario",
+  createdLocale: isEn ? "en-GB" : "es-ES",
+};
 
 const mount = document.getElementById("profile-mount");
 
@@ -35,10 +56,10 @@ if (mount) {
   const wrap = document.createElement("div");
   wrap.className = "profile-wrap";
 
-  const accountCard = createCard("Cuenta");
-  const preferencesCard = createCard("Preferencias");
-  const activityCard = createCard("Actividad");
-  const securityCard = createCard("Seguridad");
+  const accountCard = createCard(textMap.account);
+  const preferencesCard = createCard(textMap.preferences);
+  const activityCard = createCard(textMap.activity);
+  const securityCard = createCard(textMap.security);
 
   wrap.appendChild(accountCard);
   wrap.appendChild(preferencesCard);
@@ -54,15 +75,15 @@ if (mount) {
   if (accountBody) {
     accountBody.innerHTML = `
       <div class="profile-row">
-        <span class="profile-label">Nombre</span>
+        <span class="profile-label">${textMap.name}</span>
         <input class="profile-input" id="profile-name" type="text" maxlength="40" />
       </div>
       <div class="profile-row">
-        <span class="profile-label">Correo electrónico</span>
+        <span class="profile-label">${textMap.email}</span>
         <span class="profile-value" id="profile-email">-</span>
       </div>
       <div class="profile-row">
-        <span class="profile-label">Fecha de creación</span>
+        <span class="profile-label">${textMap.createdAt}</span>
         <span class="profile-value" id="profile-created">-</span>
       </div>
       <div class="profile-row">
@@ -75,15 +96,15 @@ if (mount) {
   if (prefsBody) {
     prefsBody.innerHTML = `
       <div class="profile-row">
-        <span class="profile-label">Tema</span>
-        <div class="profile-theme-options" role="radiogroup" aria-label="Tema">
+        <span class="profile-label">${textMap.theme}</span>
+        <div class="profile-theme-options" role="radiogroup" aria-label="${textMap.theme}">
           <label class="profile-theme-option">
             <input type="radio" name="profile-theme" value="light" />
-            <span>Claro</span>
+            <span>${textMap.light}</span>
           </label>
           <label class="profile-theme-option">
             <input type="radio" name="profile-theme" value="dark" />
-            <span>Oscuro</span>
+            <span>${textMap.dark}</span>
           </label>
         </div>
       </div>
@@ -93,11 +114,11 @@ if (mount) {
   if (activityBody) {
     activityBody.innerHTML = `
       <div class="profile-row">
-        <span class="profile-label">Máquinas propias</span>
+        <span class="profile-label">${textMap.ownMachines}</span>
         <span class="profile-value" id="profile-owner-count">-</span>
       </div>
       <div class="profile-row">
-        <span class="profile-label">Máquinas como administrador</span>
+        <span class="profile-label">${textMap.adminMachines}</span>
         <span class="profile-value" id="profile-admin-count">-</span>
       </div>
     `;
@@ -106,10 +127,10 @@ if (mount) {
   if (securityBody) {
     securityBody.innerHTML = `
       <div class="profile-row">
-        <a class="profile-link" id="profile-reset" href="/es/auth/reset.html">Cambiar contraseña</a>
+        <a class="profile-link" id="profile-reset" href="${localizeEsPath("/es/auth/reset.html")}">${textMap.changePassword}</a>
       </div>
       <div class="profile-row">
-        <a class="profile-link" id="profile-logout" href="#">Cerrar sesión</a>
+        <a class="profile-link" id="profile-logout" href="#">${textMap.logout}</a>
       </div>
     `;
   }
@@ -149,11 +170,11 @@ if (mount) {
 
   onAuthStateChanged(auth, async (user) => {
     if (!user) {
-      window.location.href = "/es/auth/login.html";
+      window.location.href = localizeEsPath("/es/auth/login.html");
       return;
     }
 
-    const displayName = user.displayName || user.email || "Usuario";
+    const displayName = user.displayName || user.email || textMap.user;
     if (nameInput) nameInput.value = displayName;
     setText(emailEl, user.email || "-");
     if (createdEl) {
@@ -162,7 +183,7 @@ if (mount) {
         : null;
       setText(
         createdEl,
-        created ? created.toLocaleDateString("es-ES") : "-"
+        created ? created.toLocaleDateString(textMap.createdLocale) : "-"
       );
     }
     setText(uidEl, user.uid || "-");
@@ -178,7 +199,7 @@ if (mount) {
           await updateProfile(user, { displayName: next });
           await upsertAccountDirectory(user);
         } catch {
-          nameInput.value = user.displayName || user.email || "Usuario";
+          nameInput.value = user.displayName || user.email || textMap.user;
         }
       });
     }
@@ -217,7 +238,7 @@ if (mount) {
         try {
           await auth.signOut();
         } finally {
-          window.location.href = "/es/index.html";
+          window.location.href = localizeEsPath("/es/index.html");
         }
       });
     }

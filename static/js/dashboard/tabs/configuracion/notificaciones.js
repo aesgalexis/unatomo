@@ -1,3 +1,4 @@
+import { t } from "../../i18n.js";
 export const render = (container, machine, hooks, options = {}) => {
   container.classList.add("is-inactive-section");
   const notifications = {
@@ -17,7 +18,7 @@ export const render = (container, machine, hooks, options = {}) => {
   notifToggleRow.className = "mc-config-row";
   const notifLabel = document.createElement("span");
   notifLabel.className = "mc-config-label";
-  notifLabel.textContent = "Activar notificaciones";
+  notifLabel.textContent = t("config.notifications", "Activar notificaciones");
   const notifToggle = document.createElement("input");
   notifToggle.type = "checkbox";
   notifToggle.checked = !!notifications.enabled;
@@ -38,7 +39,7 @@ export const render = (container, machine, hooks, options = {}) => {
   notifEmailRow.className = "mc-config-row";
   const notifEmailLabel = document.createElement("span");
   notifEmailLabel.className = "mc-config-label";
-  notifEmailLabel.textContent = "Email destino";
+  notifEmailLabel.textContent = t("config.targetEmail", "Email destino");
   const notifEmail = document.createElement("input");
   notifEmail.type = "email";
   notifEmail.className = "mc-notif-email";
@@ -77,7 +78,7 @@ export const render = (container, machine, hooks, options = {}) => {
     }
   });
   const span = document.createElement("span");
-  span.textContent = "Cambio de estado";
+  span.textContent = t("config.statusChanged", "Cambio de estado");
   row.appendChild(input);
   row.appendChild(span);
   eventsWrap.appendChild(row);

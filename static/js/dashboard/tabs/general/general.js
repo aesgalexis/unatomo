@@ -1,3 +1,5 @@
+import { t } from "/static/js/dashboard/i18n.js";
+
 export const render = (panel, machine, hooks, options = {}) => {
   panel.innerHTML = "";
   const canEditGeneral = options.canEditGeneral !== false;
@@ -9,13 +11,13 @@ export const render = (panel, machine, hooks, options = {}) => {
   rowBottom.className = "mc-row mc-row-input mc-row-inline";
 
   const fieldsTop = [
-    { key: "brand", label: "Marca", value: machine.brand || "", type: "text" },
-    { key: "model", label: "Modelo", value: machine.model || "", type: "text" }
+    { key: "brand", label: t("general.brand", "Marca"), value: machine.brand || "", type: "text" },
+    { key: "model", label: t("general.model", "Modelo"), value: machine.model || "", type: "text" },
   ];
 
   const fieldsBottom = [
-    { key: "serial", label: "N. Serie", value: machine.serial || "", type: "text" },
-    { key: "year", label: "A\u00f1o", value: machine.year || "", type: "number" }
+    { key: "serial", label: t("general.serial", "N. Serie"), value: machine.serial || "", type: "text" },
+    { key: "year", label: t("general.year", "Año"), value: machine.year || "", type: "number" },
   ];
 
   const error = document.createElement("div");
@@ -35,7 +37,7 @@ export const render = (panel, machine, hooks, options = {}) => {
       select.className = "mc-row-input-field mc-year-select";
       const empty = document.createElement("option");
       empty.value = "";
-      empty.textContent = "Seleccionar";
+      empty.textContent = t("general.select", "Seleccionar");
       select.appendChild(empty);
       const currentYear = new Date().getFullYear();
       for (let y = currentYear; y >= currentYear - 50; y -= 1) {
@@ -115,15 +117,15 @@ export const render = (panel, machine, hooks, options = {}) => {
     const drop = document.createElement("button");
     drop.type = "button";
     drop.className = "mc-manual-drop";
-    drop.textContent = "Cargar";
+    drop.textContent = t("general.upload", "Cargar");
     drop.addEventListener("click", (event) => {
       event.stopPropagation();
       fileInput.click();
     });
     fileInput.addEventListener("change", () => {
       const file = fileInput.files && fileInput.files[0];
-      const labelText = file ? file.name : "Cargar";
-      drop.textContent = labelText;
+      const nextLabel = file ? file.name : t("general.upload", "Cargar");
+      drop.textContent = nextLabel;
       drop.classList.toggle("is-file", !!file);
       saveBtn.style.display = file ? "" : "none";
       if (searchBtn) searchBtn.style.display = file ? "none" : "";
@@ -133,11 +135,11 @@ export const render = (panel, machine, hooks, options = {}) => {
     const saveBtn = document.createElement("button");
     saveBtn.type = "button";
     saveBtn.className = "mc-manual-btn";
-    saveBtn.textContent = "Guardar";
+    saveBtn.textContent = t("general.save", "Guardar");
     saveBtn.style.display = "none";
     saveBtn.addEventListener("click", (event) => {
       event.stopPropagation();
-      status.textContent = "Error al cargar el archivo";
+      status.textContent = t("general.uploadError", "Error al cargar el archivo");
       status.dataset.state = "error";
       if (hooks.onContentResize) hooks.onContentResize();
     });
@@ -147,17 +149,17 @@ export const render = (panel, machine, hooks, options = {}) => {
       searchBtn = document.createElement("button");
       searchBtn.type = "button";
       searchBtn.className = "mc-manual-btn";
-      searchBtn.textContent = "Buscar";
+      searchBtn.textContent = t("general.search", "Buscar");
       searchBtn.addEventListener("click", (event) => {
         event.stopPropagation();
         const hasBrand = !!(machine.brand || "").trim();
         const hasModel = !!(machine.model || "").trim();
         if (!hasBrand || !hasModel) {
           status.textContent = !hasBrand && !hasModel
-            ? "Introduce marca y modelo para buscar"
+            ? t("general.searchNeedBoth", "Introduce marca y modelo para buscar")
             : !hasBrand
-            ? "Introduce marca para buscar"
-            : "Introduce modelo para buscar";
+            ? t("general.searchNeedBrand", "Introduce marca para buscar")
+            : t("general.searchNeedModel", "Introduce modelo para buscar");
           status.dataset.state = "error";
           if (hooks.onContentResize) hooks.onContentResize();
           return;
@@ -190,20 +192,24 @@ export const render = (panel, machine, hooks, options = {}) => {
   docHeader.className = "mc-doc-row";
   const docLabel = document.createElement("span");
   docLabel.className = "mc-row-label";
-  docLabel.textContent = "Documentación";
+  docLabel.textContent = t("general.documentation", "Documentación");
   const docSelect = document.createElement("select");
   docSelect.className = "mc-doc-select";
-  const docOptions = ["Placa", "Manual", "Esquema eléctrico"];
+  const docOptions = [
+    t("general.plate", "Placa"),
+    t("general.manual", "Manual"),
+    t("general.wiring", "Esquema eléctrico"),
+  ];
   const docPlaceholder = document.createElement("option");
   docPlaceholder.value = "";
-  docPlaceholder.textContent = "Añadir...";
+  docPlaceholder.textContent = t("general.add", "Añadir...");
   docPlaceholder.hidden = true;
   docPlaceholder.disabled = true;
   docPlaceholder.selected = true;
   docSelect.appendChild(docPlaceholder);
   const emptyOption = document.createElement("option");
   emptyOption.value = "__empty__";
-  emptyOption.textContent = "Nada que añadir";
+  emptyOption.textContent = t("general.nothingToAdd", "Nada que añadir");
   emptyOption.disabled = true;
   emptyOption.hidden = true;
   docSelect.appendChild(emptyOption);
@@ -220,9 +226,9 @@ export const render = (panel, machine, hooks, options = {}) => {
   manualWrap.appendChild(docHeader);
 
   const rowsByLabel = {
-    Placa: createManualRow("Placa"),
-    Manual: createManualRow("Manual", { withSearch: true }),
-    "Esquema eléctrico": createManualRow("Esquema eléctrico")
+    [t("general.plate", "Placa")]: createManualRow(t("general.plate", "Placa")),
+    [t("general.manual", "Manual")]: createManualRow(t("general.manual", "Manual"), { withSearch: true }),
+    [t("general.wiring", "Esquema eléctrico")]: createManualRow(t("general.wiring", "Esquema eléctrico")),
   };
 
   const refreshDocOptions = () => {
@@ -249,6 +255,5 @@ export const render = (panel, machine, hooks, options = {}) => {
   });
 
   refreshDocOptions();
-
   panel.appendChild(manualWrap);
 };

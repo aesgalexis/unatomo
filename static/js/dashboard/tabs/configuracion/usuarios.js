@@ -1,3 +1,4 @@
+import { t } from "../../i18n.js";
 export const render = (container, machine, hooks, options = {}) => {
   const canEditConfig = options.canEditConfig !== false;
 
@@ -10,7 +11,7 @@ export const render = (container, machine, hooks, options = {}) => {
 
   const addLabel = document.createElement("span");
   addLabel.className = "mc-config-label";
-  addLabel.textContent = "Usuarios";
+  addLabel.textContent = t("config.users", "Usuarios");
 
   const statusEl = document.createElement("div");
   statusEl.className = "mc-user-status";
@@ -32,15 +33,15 @@ export const render = (container, machine, hooks, options = {}) => {
   };
 
   if (availableUsers.length) {
-    userSelect.appendChild(addUserOption("", "Seleccionar"));
+    userSelect.appendChild(addUserOption("", t("config.select", "Seleccionar")));
     availableUsers.forEach((name) => userSelect.appendChild(addUserOption(name, name)));
-    userSelect.appendChild(addUserOption("__add__", "+ Añadir nuevo..."));
+    userSelect.appendChild(addUserOption("__add__", t("config.addNew", "+ Añadir nuevo...")));
   }
 
   const addNewBtn = document.createElement("button");
   addNewBtn.type = "button";
   addNewBtn.className = "mc-user-add-new";
-  addNewBtn.textContent = "+ Añadir nuevo...";
+  addNewBtn.textContent = t("config.addNew", "+ Añadir nuevo...");
   addNewBtn.style.width = "100%";
   addNewBtn.style.maxWidth = "150px";
   addNewBtn.addEventListener("click", (event) => {
@@ -53,7 +54,7 @@ export const render = (container, machine, hooks, options = {}) => {
   const userInput = document.createElement("input");
   userInput.className = "mc-user-username";
   userInput.type = "text";
-  userInput.placeholder = "Nombre";
+  userInput.placeholder = t("config.name", "Nombre");
   userInput.maxLength = 16;
   userInput.style.display = "none";
   userInput.style.width = "100%";
@@ -72,7 +73,7 @@ export const render = (container, machine, hooks, options = {}) => {
   const passInput = document.createElement("input");
   passInput.className = "mc-user-password";
   passInput.type = "password";
-  passInput.placeholder = "PIN";
+  passInput.placeholder = t("config.pin", "PIN");
   passInput.autocomplete = "new-password";
   passInput.name = "new-password";
   passInput.setAttribute("data-lpignore", "true");
@@ -96,7 +97,7 @@ export const render = (container, machine, hooks, options = {}) => {
   const addBtn = document.createElement("button");
   addBtn.type = "button";
   addBtn.className = "mc-location-accept";
-  addBtn.textContent = "Aceptar";
+  addBtn.textContent = t("card.accept", "Aceptar");
   addBtn.style.display = "none";
   addBtn.addEventListener("click", (event) => {
     event.stopPropagation();
@@ -119,7 +120,7 @@ export const render = (container, machine, hooks, options = {}) => {
   const cancelBtn = document.createElement("button");
   cancelBtn.type = "button";
   cancelBtn.className = "mc-location-cancel";
-  cancelBtn.textContent = "Cancelar";
+  cancelBtn.textContent = t("card.cancel", "Cancelar");
   cancelBtn.style.display = "none";
   cancelBtn.addEventListener("click", (event) => {
     event.stopPropagation();
@@ -202,7 +203,11 @@ export const render = (container, machine, hooks, options = {}) => {
   list.className = "mc-user-list";
 
   const roles = options.userRoles || ["usuario", "tecnico", "externo"];
-  const labels = { usuario: "Usuario", tecnico: "Técnico", externo: "Externo" };
+  const labels = {
+    usuario: t("config.user", "Usuario"),
+    tecnico: t("config.technician", "Técnico"),
+    externo: t("config.external", "Externo"),
+  };
 
   (machine.users || []).forEach((user) => {
     const row = document.createElement("div");
@@ -238,7 +243,7 @@ export const render = (container, machine, hooks, options = {}) => {
     const pinToggle = document.createElement("button");
     pinToggle.type = "button";
     pinToggle.className = "mc-user-pin-toggle";
-    pinToggle.setAttribute("aria-label", "Cambiar PIN");
+    pinToggle.setAttribute("aria-label", t("config.changePin", "Cambiar PIN"));
     pinToggle.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 1 1 8 0v3"></path></svg>`;
     pinToggle.addEventListener("click", (event) => {
       event.stopPropagation();
@@ -253,7 +258,7 @@ export const render = (container, machine, hooks, options = {}) => {
     const pinInput = document.createElement("input");
     pinInput.type = "password";
     pinInput.className = "mc-user-pin";
-    pinInput.placeholder = "Cambiar PIN";
+    pinInput.placeholder = t("config.changePin", "Cambiar PIN");
     pinInput.autocomplete = "new-password";
     pinInput.name = "new-password";
     pinInput.setAttribute("data-lpignore", "true");
@@ -300,7 +305,7 @@ export const render = (container, machine, hooks, options = {}) => {
     const pinOk = document.createElement("button");
     pinOk.type = "button";
     pinOk.className = "mc-location-accept";
-    pinOk.textContent = "Aceptar";
+    pinOk.textContent = t("card.accept", "Aceptar");
     pinOk.addEventListener("click", (event) => {
       event.stopPropagation();
       const next = pinInput.value.trim();
@@ -309,7 +314,7 @@ export const render = (container, machine, hooks, options = {}) => {
         hooks.onUpdateUserPassword(machine.id, user.id, next, pinInput);
       }
       pinInput.value = "";
-      pinInput.placeholder = "Cambiar PIN";
+      pinInput.placeholder = t("config.changePin", "Cambiar PIN");
       pinInput.classList.remove("is-active");
       pinActions.style.display = "none";
       pinInput.style.display = "none";
@@ -327,11 +332,11 @@ export const render = (container, machine, hooks, options = {}) => {
     const pinCancel = document.createElement("button");
     pinCancel.type = "button";
     pinCancel.className = "mc-location-cancel";
-    pinCancel.textContent = "Cancelar";
+    pinCancel.textContent = t("card.cancel", "Cancelar");
     pinCancel.addEventListener("click", (event) => {
       event.stopPropagation();
       pinInput.value = "";
-      pinInput.placeholder = "Cambiar PIN";
+      pinInput.placeholder = t("config.changePin", "Cambiar PIN");
       pinInput.classList.remove("is-active");
       pinActions.style.display = "none";
       pinInput.style.display = "none";
@@ -354,7 +359,7 @@ export const render = (container, machine, hooks, options = {}) => {
 
     const remove = document.createElement("a");
     remove.className = "mc-user-remove";
-    remove.textContent = "quitar";
+    remove.textContent = t("config.remove", "quitar");
     remove.href = "#";
     remove.addEventListener("click", (event) => {
       event.preventDefault();

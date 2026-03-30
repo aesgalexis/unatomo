@@ -18,6 +18,46 @@ import {
   onAuthStateChanged,
   signOut
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+import { getCurrentLang, localizeEsPath } from "/static/js/site/locale.js";
+
+const lang = getCurrentLang();
+const isEn = lang === "en";
+const paths = {
+  home: localizeEsPath("/es/index.html", lang),
+  login: localizeEsPath("/es/auth/login.html", lang),
+  register: localizeEsPath("/es/auth/registro.html", lang),
+};
+
+const text = {
+  connectingGoogle: isEn ? "Connecting to Google..." : "Conectando con Google...",
+  loginFailed: isEn ? "Could not sign in." : "No se pudo iniciar sesión.",
+  loginSuccess: isEn ? "Signed in. Redirecting..." : "Sesión iniciada. Redirigiendo...",
+  googleLoginError: isEn ? "Error signing in with Google." : "Error en el inicio de sesión con Google.",
+  requiredFields: isEn ? "Complete the required fields." : "Completa los campos obligatorios.",
+  signingIn: isEn ? "Signing in..." : "Iniciando sesión...",
+  wrongCredentials: isEn ? "Incorrect email or password." : "Correo o contraseña incorrectos.",
+  invalidEmail: isEn ? "Invalid email." : "Correo no válido.",
+  tooManyRequests: isEn ? "Too many attempts. Try again later." : "Demasiados intentos. Prueba más tarde.",
+  loginError: isEn ? "Error signing in." : "Error iniciando sesión.",
+  enterValidCode: isEn ? "Enter a valid code." : "Introduce un código válido.",
+  validatingCode: isEn ? "Validating code..." : "Validando código...",
+  invalidCode: isEn ? "Invalid code." : "Código no válido.",
+  validCode: isEn ? "Valid code. Redirecting..." : "Código correcto. Redirigiendo...",
+  validateCodeError: isEn ? "Error validating code." : "Error validando el código.",
+  registerFailed: isEn ? "Could not complete registration." : "No se pudo completar el registro.",
+  registerSuccess: isEn ? "Registration completed. Redirecting..." : "Registro completado. Redirigiendo...",
+  googleRegisterError: isEn ? "Error registering with Google." : "Error en el registro con Google.",
+  passwordMin: isEn ? "Password must be at least 8 characters." : "La contraseña debe tener al menos 8 caracteres.",
+  passwordMismatch: isEn ? "Passwords do not match." : "Las contraseñas no coinciden.",
+  creatingAccount: isEn ? "Creating account..." : "Creando cuenta...",
+  emailInUse: isEn ? "That email already has an account." : "Ese correo ya tiene cuenta.",
+  weakPassword: isEn ? "Password is too weak." : "Contraseña demasiado débil.",
+  createAccountError: isEn ? "Error creating account." : "Error creando la cuenta.",
+  guest: isEn ? "Guest" : "Invitado",
+  login: isEn ? "Sign in" : "Iniciar sesión",
+  user: isEn ? "User" : "Usuario",
+  logout: isEn ? "Sign out" : "Cerrar sesión",
+};
 
 function initSetupLogin() {
   const btnOpen = document.getElementById("go-login");
@@ -52,22 +92,22 @@ function initSetupLogin() {
   btnOpen.addEventListener("click", toggleBox);
 
   onAuthStateChanged(auth, (user) => {
-    if (user) window.location.href = "/es/index.html";
+    if (user) window.location.href = paths.home;
   });
 
   btnGoogle.addEventListener("click", async () => {
     clearStatus();
     try {
       btnGoogle.disabled = true;
-      showStatus("Conectando con Google…");
+      showStatus(text.connectingGoogle);
 
       const res = await loginWithGoogle();
-      if (!res.ok) return showStatus("No se pudo iniciar sesión.");
+      if (!res.ok) return showStatus(text.loginFailed);
 
-      showStatus("Sesión iniciada. Redirigiendo…");
-      setTimeout(() => (window.location.href = "/es/index.html"), 650);
+      showStatus(text.loginSuccess);
+      setTimeout(() => (window.location.href = paths.home), 650);
     } catch {
-      showStatus("Error en el inicio de sesión con Google.");
+      showStatus(text.googleLoginError);
     } finally {
       btnGoogle.disabled = false;
     }
@@ -79,27 +119,27 @@ function initSetupLogin() {
 
     const email = (emailInput.value || "").trim();
     const pw = passInput.value || "";
-    if (!email || !pw) return showStatus("Completa los campos obligatorios.");
+    if (!email || !pw) return showStatus(text.requiredFields);
 
     try {
       if (btnEmail) btnEmail.disabled = true;
-      showStatus("Iniciando sesión…");
+      showStatus(text.signingIn);
 
       const res = await loginWithEmail(email, pw);
-      if (!res.ok) return showStatus("No se pudo iniciar sesión.");
+      if (!res.ok) return showStatus(text.loginFailed);
 
-      showStatus("Sesión iniciada. Redirigiendo…");
-      setTimeout(() => (window.location.href = "/es/index.html"), 650);
+      showStatus(text.loginSuccess);
+      setTimeout(() => (window.location.href = paths.home), 650);
     } catch (e2) {
       const code = String(e2.code || "");
       if (
         code.includes("auth/invalid-credential") ||
         code.includes("auth/wrong-password") ||
         code.includes("auth/user-not-found")
-      ) showStatus("Correo o contraseña incorrectos.");
-      else if (code.includes("auth/invalid-email")) showStatus("Correo no válido.");
-      else if (code.includes("auth/too-many-requests")) showStatus("Demasiados intentos. Prueba más tarde.");
-      else showStatus("Error iniciando sesión.");
+      ) showStatus(text.wrongCredentials);
+      else if (code.includes("auth/invalid-email")) showStatus(text.invalidEmail);
+      else if (code.includes("auth/too-many-requests")) showStatus(text.tooManyRequests);
+      else showStatus(text.loginError);
     } finally {
       if (btnEmail) btnEmail.disabled = false;
     }
@@ -134,7 +174,7 @@ function initSetupRegisterCode() {
       toggleBox();
       return;
     }
-    requestInviteCodeAndRedirect("/es/auth/registro.html", { showInline: toggleBox });
+    requestInviteCodeAndRedirect(paths.register, { showInline: toggleBox });
   });
   if (shouldOpenInviteGate()) {
     clearInviteGateFlag();
@@ -145,18 +185,18 @@ function initSetupRegisterCode() {
 
     const raw = (input.value || "").trim();
     if (!raw) {
-      setStatus("Introduce un código válido.");
+      setStatus(text.enterValidCode);
       input.focus();
       return;
     }
 
     try {
       submit.disabled = true;
-      setStatus("Validando código…");
+      setStatus(text.validatingCode);
 
       const res = await validateRegistrationCode(raw);
       if (!res.valid) {
-        setStatus("Código no válido.");
+        setStatus(text.invalidCode);
         input.focus();
         return;
       }
@@ -165,14 +205,14 @@ function initSetupRegisterCode() {
       try { sessionStorage.setItem("unatomo_invite_ok", "1"); } catch {}
       try { localStorage.setItem("unatomo_access_code", res.code); } catch {}
 
-      setStatus("Código correcto. Redirigiendo…");
-const rawTarget = getRegisterTarget() || "/es/auth/registro.html";
+      setStatus(text.validCode);
+const rawTarget = getRegisterTarget() || paths.register;
       clearRegisterTarget();
       const sep = rawTarget.includes("?") ? "&" : "?";
       const target = `${rawTarget}${sep}code=${encodeURIComponent(res.code)}`;
       setTimeout(() => (window.location.href = target), 650);
     } catch {
-      setStatus("Error validando el código.");
+      setStatus(text.validateCodeError);
     } finally {
       submit.disabled = false;
     }
@@ -201,7 +241,7 @@ function initLoginPage() {
     status.textContent = "";
   }
   function goHome() {
-    window.location.href = "/es/index.html";
+    window.location.href = paths.home;
   }
 
   document.documentElement.style.visibility = "visible";
@@ -214,15 +254,15 @@ function initLoginPage() {
     clearStatus();
     try {
       btnGoogle.disabled = true;
-      setStatus("Conectando con Google…");
+      setStatus(text.connectingGoogle);
 
       const res = await loginWithGoogle();
-      if (!res.ok) return setStatus("No se pudo iniciar sesión.");
+      if (!res.ok) return setStatus(text.loginFailed);
 
-      setStatus("Sesión iniciada. Redirigiendo…");
+      setStatus(text.loginSuccess);
       setTimeout(goHome, 650);
     } catch {
-      setStatus("Error en el inicio de sesión con Google.");
+      setStatus(text.googleLoginError);
     } finally {
       btnGoogle.disabled = false;
     }
@@ -234,16 +274,16 @@ function initLoginPage() {
 
     const email = (document.getElementById("email").value || "").trim();
     const password = document.getElementById("password").value || "";
-    if (!email || !password) return setStatus("Completa los campos obligatorios.");
+    if (!email || !password) return setStatus(text.requiredFields);
 
     try {
       if (btnEmail) btnEmail.disabled = true;
-      setStatus("Iniciando sesión…");
+      setStatus(text.signingIn);
 
       const res = await loginWithEmail(email, password);
-      if (!res.ok) return setStatus("No se pudo iniciar sesión.");
+      if (!res.ok) return setStatus(text.loginFailed);
 
-      setStatus("Sesión iniciada. Redirigiendo…");
+      setStatus(text.loginSuccess);
       setTimeout(goHome, 650);
     } catch (e2) {
       const code = String(e2.code || "");
@@ -251,10 +291,10 @@ function initLoginPage() {
         code.includes("auth/invalid-credential") ||
         code.includes("auth/wrong-password") ||
         code.includes("auth/user-not-found")
-      ) setStatus("Correo o contraseña incorrectos.");
-      else if (code.includes("auth/invalid-email")) setStatus("Correo no válido.");
-      else if (code.includes("auth/too-many-requests")) setStatus("Demasiados intentos. Prueba más tarde.");
-      else setStatus("Error iniciando sesión.");
+      ) setStatus(text.wrongCredentials);
+      else if (code.includes("auth/invalid-email")) setStatus(text.invalidEmail);
+      else if (code.includes("auth/too-many-requests")) setStatus(text.tooManyRequests);
+      else setStatus(text.loginError);
     } finally {
       if (btnEmail) btnEmail.disabled = false;
     }
@@ -317,15 +357,15 @@ function initRegisterPage() {
       clearStatus();
       try {
         btnGoogle.disabled = true;
-        setStatus("Conectando con Google…");
+        setStatus(text.connectingGoogle);
 
         const res = await registerWithGoogle(code);
-        if (!res.ok) return setStatus("No se pudo completar el registro.");
+        if (!res.ok) return setStatus(text.registerFailed);
 
-        setStatus("Registro completado. Redirigiendo…");
-        setTimeout(() => (window.location.href = "/es/index.html"), 650);
+        setStatus(text.registerSuccess);
+        setTimeout(() => (window.location.href = paths.home), 650);
       } catch {
-        setStatus("Error en el registro con Google.");
+        setStatus(text.googleRegisterError);
       } finally {
         btnGoogle.disabled = false;
       }
@@ -340,25 +380,25 @@ function initRegisterPage() {
       const p1 = document.getElementById("password").value || "";
       const p2 = document.getElementById("password2").value || "";
 
-      if (!email || !p1 || !p2) return setStatus("Completa los campos obligatorios.");
-      if (p1.length < 8) return setStatus("La contraseña debe tener al menos 8 caracteres.");
-      if (p1 !== p2) return setStatus("Las contraseñas no coinciden.");
+      if (!email || !p1 || !p2) return setStatus(text.requiredFields);
+      if (p1.length < 8) return setStatus(text.passwordMin);
+      if (p1 !== p2) return setStatus(text.passwordMismatch);
 
       try {
         if (btnEmail) btnEmail.disabled = true;
-        setStatus("Creando cuenta…");
+        setStatus(text.creatingAccount);
 
         const res = await registerWithEmail(code, email, p1, nombre);
-        if (!res.ok) return setStatus("No se pudo completar el registro.");
+        if (!res.ok) return setStatus(text.registerFailed);
 
-        setStatus("Registro completado. Redirigiendo…");
-        setTimeout(() => (window.location.href = "/es/index.html"), 650);
+        setStatus(text.registerSuccess);
+        setTimeout(() => (window.location.href = paths.home), 650);
       } catch (e2) {
         const msg = String(e2.code || "");
-        if (msg.includes("auth/email-already-in-use")) setStatus("Ese correo ya tiene cuenta.");
-        else if (msg.includes("auth/invalid-email")) setStatus("Correo no válido.");
-        else if (msg.includes("auth/weak-password")) setStatus("Contraseña demasiado débil.");
-        else setStatus("Error creando la cuenta.");
+        if (msg.includes("auth/email-already-in-use")) setStatus(text.emailInUse);
+        else if (msg.includes("auth/invalid-email")) setStatus(text.invalidEmail);
+        else if (msg.includes("auth/weak-password")) setStatus(text.weakPassword);
+        else setStatus(text.createAccountError);
       } finally {
         if (btnEmail) btnEmail.disabled = false;
       }
@@ -378,14 +418,14 @@ function initSessionUI() {
     badge.textContent = text;
   }
   function setGuest() {
-    setBadge("Invitado");
-    actionBtn.textContent = "Iniciar sesión";
+    setBadge(text.guest);
+    actionBtn.textContent = text.login;
     actionBtn.dataset.state = "guest";
   }
   function setUser(user) {
-    const label = user.displayName || user.email || "Usuario";
+    const label = user.displayName || user.email || text.user;
     setBadge(label);
-    actionBtn.textContent = "Cerrar sesión";
+    actionBtn.textContent = text.logout;
     actionBtn.dataset.state = "user";
   }
 
@@ -395,7 +435,7 @@ function initSessionUI() {
     const state = actionBtn.dataset.state || "guest";
 
     if (state === "guest") {
-      window.location.href = "/es/auth/login.html";
+      window.location.href = paths.login;
       return;
     }
 

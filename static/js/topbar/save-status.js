@@ -22,7 +22,7 @@ export const setTopbarSaveStatus = (message = "") => {
   if (!el) return;
   if (statusTimeout) clearTimeout(statusTimeout);
   el.textContent = message || "";
-  if (message && message !== "Guardando...") {
+  if (message && !String(message).trim().endsWith("...")) {
     statusTimeout = setTimeout(() => {
       el.textContent = "";
     }, 1600);

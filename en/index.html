@@ -1,0 +1,38 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>unatomo</title>
+  <meta name="description" content="UNATOMO CORE SL. Machinery management and textile laundry process control for industrial, hotel and dry-cleaning operations. Sales, installation, maintenance, training and tailored audits.">
+  <meta name="robots" content="index, follow" />
+  <script src="/static/js/theme/theme-init.js"></script>
+  <script src="/static/js/config/runtime-config.js"></script>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/static/css/dashboard.css">
+  <link rel="stylesheet" href="/static/css/sections.css">
+  <link rel="icon" href="/static/img/favicon/favicon.svg" type="image/svg+xml">
+</head>
+
+<body class="page" data-topbar-title="Dashboard" data-back-mode="history">
+  <div id="topbar-mount"></div>
+  <script type="module" src="/static/js/topbar.js"></script>
+
+  <main class="shell page-shell">
+    <section class="page-section">
+      <div id="dashboard-mount"></div>
+      <script type="module" src="/static/js/dashboard/index.js"></script>
+      <div id="section-mount" class="section-shell" hidden></div>
+      <script type="module" src="/static/js/sections/router.js"></script>
+    </section>
+
+    <div id="legal-footer" class="legal-footer"></div>
+
+    <div class="footer-link">
+      <a href="/en/privacidad.html">Privacy and cookie policy</a>
+    </div>
+  </main>
+
+  <script src="/static/js/footer.js"></script>
+</body>
+</html>

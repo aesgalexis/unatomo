@@ -1,4 +1,5 @@
 (function () {
+  const isEn = /^\/en(?:\/|$)/i.test(window.location.pathname);
   const form = document.querySelector(".contact-form");
   if (!form) return;
 
@@ -7,6 +8,17 @@
     form.querySelector(".btn-submit") ||
     form.querySelector('button[type="submit"]');
   const honeypot = form.querySelector('input[name="_gotcha"]');
+
+  const text = {
+    sending: isEn ? "Sending..." : "Enviando...",
+    success: isEn ? "Message sent successfully." : "Mensaje enviado correctamente.",
+    sendError: isEn
+      ? "There was a problem sending the message. Please try again later."
+      : "Ha habido un problema al enviar el mensaje. Por favor, int?ntalo de nuevo m?s tarde.",
+    networkError: isEn
+      ? "There was a connection problem. Please try again."
+      : "Ha habido un problema de conexi?n. Por favor, int?ntalo de nuevo.",
+  };
 
   function setStatus(message, state) {
     if (!status) return;
@@ -26,7 +38,7 @@
       return;
     }
 
-    setStatus("Enviando...");
+    setStatus(text.sending);
     if (submitBtn) submitBtn.disabled = true;
 
     const formData = new FormData(form);
@@ -39,7 +51,7 @@
       });
 
       if (response.ok) {
-        setStatus("Mensaje enviado correctamente.", "success");
+        setStatus(text.success, "success");
         form.reset();
       } else {
         setStatus(

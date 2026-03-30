@@ -5,6 +5,7 @@ import { initAutoSave } from "/static/js/dashboard/autoSave.js";
 import { normalizeTasks } from "/static/js/dashboard/tabs/tasks/tasksModel.js";
 import { getTaskTiming, getOverdueDuration, getCompletionDuration } from "/static/js/dashboard/tabs/tasks/tasksTime.js";
 import { setTopbarSaveStatus } from "/static/js/topbar/save-status.js";
+import { t } from "/static/js/dashboard/i18n.js";
 import {
   canSeeTab,
   canEditStatus,
@@ -18,7 +19,7 @@ const EXPAND_FACTOR = 2.5;
 
 const mount = document.getElementById("machine-mount");
 if (!mount) {
-  throw new Error("Falta el contenedor #machine-mount");
+  throw new Error(t("machine.missingContainer", "Falta el contenedor #machine-mount"));
 }
 
 const addBar = document.createElement("div");
@@ -66,17 +67,17 @@ const showLogin = (machine, tagId, onSuccess) => {
   panel.className = "machine-login-panel";
 
   const title = document.createElement("h3");
-  const name = machine.title || "Equipo";
-  title.textContent = `Acceso a ${name}`;
+  const name = machine.title || t("machine.machine", "Equipo");
+  title.textContent = t("machine.accessTo", (value) => `Acceso a ${value}`)(name);
 
   const userInput = document.createElement("input");
   userInput.type = "text";
-  userInput.placeholder = "Usuario";
+  userInput.placeholder = t("machine.username", "Usuario");
   userInput.className = "machine-login-input";
 
   const passInput = document.createElement("input");
   passInput.type = "password";
-  passInput.placeholder = "Contraseña";
+  passInput.placeholder = t("machine.password", "Contrase\u00f1a");
   passInput.className = "machine-login-input";
 
   const error = document.createElement("div");
@@ -85,42 +86,42 @@ const showLogin = (machine, tagId, onSuccess) => {
   const btn = document.createElement("button");
   btn.type = "button";
   btn.className = "btn-add";
-  btn.textContent = "Entrar";
+  btn.textContent = t("machine.enter", "Entrar");
 
   btn.addEventListener("click", async () => {
     const username = userInput.value.trim();
     const password = passInput.value.trim();
     if (!username || !password) {
-      error.textContent = "Completa usuario y contraseña.";
+      error.textContent = t("machine.completeCredentials", "Completa usuario y contrase\u00f1a.");
       return;
     }
     const user = (machine.users || []).find(
       (u) => normalizeName(u.username) === normalizeName(username)
     );
     if (!user) {
-      error.textContent = "Credenciales incorrectas.";
+      error.textContent = t("machine.invalidCredentials", "Credenciales incorrectas.");
       return;
     }
     try {
       const expected = user.passwordHashBase64 || "";
       const salt = user.saltBase64 || "";
       if (!expected || !salt) {
-        error.textContent = "Usuario sin credenciales activas.";
+        error.textContent = t("machine.userNoCredentials", "Usuario sin credenciales activas.");
         return;
       }
       const hash = await hashPassword(password, salt);
       if (hash !== expected) {
-        error.textContent = "Credenciales incorrectas.";
+        error.textContent = t("machine.invalidCredentials", "Credenciales incorrectas.");
         return;
       }
       sessionStorage.setItem(
         sessionKey(tagId),
-        JSON.stringify({ username, role: user.role || "usuario" })
+        JSON.stringify({ username, role: user.role || t("machine.userRoleFallback", "usuario") })
       );
       overlay.remove();
-      onSuccess({ username, role: user.role || "usuario" });
+      onSuccess({ username, role: user.role || t("machine.userRoleFallback", "usuario") });
     } catch {
-      error.textContent = "Error al validar credenciales.";
+      error.textContent = t("machine.validationError", "Error al validar credenciales.");
     }
   });
 
@@ -157,14 +158,14 @@ const autoSave = initAutoSave({
 const init = async () => {
   const tagId = getTagId();
   if (!tagId) {
-    renderMessage("Falta tag.");
+    renderMessage(t("machine.missingTag", "Falta tag."));
     return;
   }
   state.tagId = tagId;
 
   const machineDoc = await fetchMachineAccess(tagId);
   if (!machineDoc) {
-    renderMessage("Tag no encontrado.");
+    renderMessage(t("machine.tagNotFound", "Tag no encontrado."));
     return;
   }
 
@@ -214,7 +215,7 @@ const renderMachine = () => {
   const session = state.session;
   list.innerHTML = "";
 
-  const role = session.role || "usuario";
+  const role = session.role || t("machine.userRoleFallback", "usuario");
   const visibleTabs = ["quehaceres", "general", "historial"].filter((tab) =>
     canSeeTab(role, tab)
   );
@@ -265,7 +266,7 @@ const renderMachine = () => {
       machineDoc.status === "desconectada" ? "fuera_de_servicio" : machineDoc.status || "operativa";
     const idx = statusOrder.indexOf(currentStatus);
     const nextStatus = statusOrder[(idx + 1) % statusOrder.length];
-    const user = state.session.username || "usuario";
+    const user = state.session.username || t("machine.userRoleFallback", "usuario");
     state.draft = {
       ...machineDoc,
       status: nextStatus,
@@ -275,7 +276,7 @@ const renderMachine = () => {
       ]
     };
     renderMachine();
-    notifyTopbar("Estado actualizado");
+    notifyTopbar(t("machine.statusUpdated", "Estado actualizado"));
     autoSave.saveNow(state.tagId, "status");
   };
 
@@ -286,7 +287,7 @@ const renderMachine = () => {
       tasks: [task, ...(machineDoc.tasks || [])]
     };
     renderMachine();
-    notifyTopbar("Tarea creada");
+    notifyTopbar(t("machine.taskCreated", "Tarea creada"));
     autoSave.saveNow(state.tagId, "add-task");
   };
 
@@ -312,7 +313,7 @@ const renderMachine = () => {
       )
       .filter((t) => !(t.id === taskId && t.frequency === "puntual"));
     const task = baseTasks.find((t) => t.id === taskId);
-    const user = state.session.username || "usuario";
+    const user = state.session.username || t("machine.userRoleFallback", "usuario");
     state.draft = {
       ...machineDoc,
       tasks,
@@ -321,7 +322,7 @@ const renderMachine = () => {
         {
           ts: new Date().toISOString(),
           type: "task",
-          title: task.title || "Tarea",
+          title: task.title || t("tasks.task", "Tarea"),
           user,
           overdue: !!wasOverdue,
           overdueDuration,
@@ -331,12 +332,12 @@ const renderMachine = () => {
       ]
     };
     renderMachine();
-    notifyTopbar("Tarea completada");
+    notifyTopbar(t("machine.taskCompleted", "Tarea completada"));
     autoSave.saveNow(state.tagId, "task-complete");
   };
 
   hooks.onAddIntervention = (machineData, message) => {
-    const user = state.session.username || "usuario";
+    const user = state.session.username || t("machine.userRoleFallback", "usuario");
     state.draft = {
       ...machineDoc,
       logs: [
@@ -345,7 +346,7 @@ const renderMachine = () => {
       ]
     };
     renderMachine();
-    notifyTopbar("Intervención realizada");
+    notifyTopbar(t("machine.interventionDone", "Intervención realizada"));
     autoSave.saveNow(state.tagId, "intervencion");
   };
 
