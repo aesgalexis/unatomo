@@ -1,6 +1,7 @@
 import { render as renderTag } from "./tag.js";
 import { render as renderUsuarios } from "./usuarios.js";
 import { render as renderNotificaciones } from "./notificaciones.js";
+import { t } from "../../i18n.js";
 
 export const render = (panel, machine, hooks, options = {}) => {
   panel.innerHTML = "";
@@ -20,7 +21,7 @@ export const render = (panel, machine, hooks, options = {}) => {
   adminHeader.className = "mc-config-row";
   const adminTitle = document.createElement("div");
   adminTitle.className = "mc-config-label";
-  adminTitle.textContent = "Administrador";
+  adminTitle.textContent = t("config.administrator", "Administrador");
   const btnPlaceholder = document.createElement("div");
   btnPlaceholder.className = "mc-admin-assign-wrap";
 
@@ -35,7 +36,7 @@ export const render = (panel, machine, hooks, options = {}) => {
     const input = document.createElement("input");
     input.type = "email";
     input.className = "mc-admin-input";
-    input.placeholder = "Correo electrónico";
+    input.placeholder = t("config.email", "Correo electrónico");
     input.addEventListener("click", (event) => event.stopPropagation());
 
     const actions = document.createElement("div");
@@ -44,7 +45,7 @@ export const render = (panel, machine, hooks, options = {}) => {
     const acceptBtn = document.createElement("button");
     acceptBtn.type = "button";
     acceptBtn.className = "mc-location-accept";
-    acceptBtn.textContent = "Aceptar";
+    acceptBtn.textContent = t("card.accept", "Aceptar");
     acceptBtn.addEventListener("click", (event) => {
       event.stopPropagation();
       const email = input.value.trim();
@@ -55,7 +56,7 @@ export const render = (panel, machine, hooks, options = {}) => {
     const cancelBtn = document.createElement("button");
     cancelBtn.type = "button";
     cancelBtn.className = "mc-location-cancel";
-    cancelBtn.textContent = "Cancelar";
+    cancelBtn.textContent = t("card.cancel", "Cancelar");
     cancelBtn.addEventListener("click", (event) => {
       event.stopPropagation();
       adminRow.innerHTML = "";
@@ -74,7 +75,7 @@ export const render = (panel, machine, hooks, options = {}) => {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "mc-admin-assign";
-    btn.textContent = "Asignar";
+    btn.textContent = t("config.assign", "Asignar");
     btn.addEventListener("click", (event) => {
       event.stopPropagation();
       renderAdminForm();
@@ -94,7 +95,7 @@ export const render = (panel, machine, hooks, options = {}) => {
     rolePlaceholder.disabled = true;
     rolePlaceholder.style.visibility = "hidden";
     const roleOpt = document.createElement("option");
-    roleOpt.textContent = "Usuario";
+    roleOpt.textContent = t("config.user", "Usuario");
     rolePlaceholder.appendChild(roleOpt);
 
     const pinWrap = document.createElement("div");
@@ -103,14 +104,14 @@ export const render = (panel, machine, hooks, options = {}) => {
     const pinToggle = document.createElement("button");
     pinToggle.type = "button";
     pinToggle.className = "mc-user-pin-toggle";
-    pinToggle.setAttribute("aria-label", "Cambiar PIN");
+    pinToggle.setAttribute("aria-label", t("config.changePin", "Cambiar PIN"));
     pinToggle.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 1 1 8 0v3"></path></svg>`;
     pinWrap.appendChild(pinToggle);
 
     const remove = document.createElement("a");
     remove.className = "mc-user-remove";
     remove.href = "#";
-    remove.textContent = "quitar";
+    remove.textContent = t("config.remove", "quitar");
     remove.addEventListener("click", (event) => {
       event.preventDefault();
       event.stopPropagation();
@@ -129,7 +130,7 @@ export const render = (panel, machine, hooks, options = {}) => {
 
     const status = document.createElement("div");
     status.className = "mc-admin-status";
-    const statusText = (currentStatus || "Pendiente aceptaci\u00f3n").toString();
+    const statusText = (currentStatus || t("config.pendingAcceptance", "Pendiente aceptación")).toString();
     const pendingNorm = statusText
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
@@ -180,8 +181,8 @@ export const render = (panel, machine, hooks, options = {}) => {
   removeLink.className = "mc-log-download mc-danger-link";
   removeLink.href = "#";
   removeLink.textContent = isAdminView
-    ? "Dejar de administrar"
-    : "Eliminar equipo";
+    ? t("config.leaveAdmin", "Dejar de administrar")
+    : t("config.removeMachine", "Eliminar equipo");
   removeLink.addEventListener("click", (event) => {
     event.preventDefault();
     event.stopPropagation();

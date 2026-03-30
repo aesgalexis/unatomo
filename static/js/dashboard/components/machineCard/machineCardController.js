@@ -5,6 +5,7 @@ import { render as renderGeneral } from "../../tabs/general/general.js";
 import { render as renderHistorial } from "../../tabs/historial.js";
 import { render as renderConfiguracion } from "../../tabs/configuracion/index.js";
 import { getTaskTiming } from "../../tabs/tasks/tasksTime.js";
+import { t } from "../../i18n.js";
 
 const TAB_RENDER = {
   quehaceres: renderQuehaceres,
@@ -35,11 +36,11 @@ export const createMachineCard = (machine, options = {}) => {
     pendingBtn.textContent = String(pendingCount);
     pendingBtn.style.display = pendingCount > 0 ? "inline-flex" : "none";
     pendingBtn.disabled = false;
-    const pendingLabel = pendingCount === 1 ? "Tarea pendiente" : "Tareas pendientes";
+    const pendingLabel = pendingCount === 1 ? t("card.pendingOne", "Tarea pendiente") : t("card.pendingMany", "Tareas pendientes");
     pendingBtn.setAttribute("aria-label", pendingLabel);
     pendingBtn.setAttribute("data-tooltip", pendingLabel);
   }
-  const statusLabel = STATUS_LABELS[machine.status] || "Operativo";
+  const statusLabel = STATUS_LABELS[machine.status] || t("status.operativa", "Operativo");
   statusBtn.textContent = "";
   statusBtn.dataset.label = statusLabel;
   statusBtn.innerHTML = `<span class="mc-status-text">${statusLabel}</span>`;
@@ -94,7 +95,7 @@ export const createMachineCard = (machine, options = {}) => {
     if (!canEdit) {
       const label = document.createElement("span");
       label.className = "mc-location-label";
-      label.textContent = current || "Sin ubicación";
+      label.textContent = current || t("card.noLocation", "Sin ubicación");
       wrap.appendChild(label);
       return wrap;
     }
@@ -119,7 +120,7 @@ export const createMachineCard = (machine, options = {}) => {
       return opt;
     };
 
-    select.appendChild(addOption("", "Sin ubicación"));
+    select.appendChild(addOption("", t("card.noLocation", "Sin ubicación")));
     const list = Array.isArray(options.locations) ? options.locations : [];
     list.forEach((loc) => {
       select.appendChild(addOption(loc, loc));
@@ -127,7 +128,7 @@ export const createMachineCard = (machine, options = {}) => {
     if (current && !list.includes(current)) {
       select.appendChild(addOption(current, current));
     }
-    select.appendChild(addOption("__add__", "+ Añadir nueva…"));
+    select.appendChild(addOption("__add__", t("card.addNewLocation", "+ Añadir nueva...")));
     select.value = current || "";
 
     const showAddInput = () => {
@@ -135,7 +136,7 @@ export const createMachineCard = (machine, options = {}) => {
       const input = document.createElement("input");
       input.className = "mc-location-input";
       input.type = "text";
-      input.placeholder = "Nueva ubicación";
+      input.placeholder = t("card.newLocation", "Nueva ubicación");
       input.maxLength = 40;
       input.addEventListener("click", (event) => event.stopPropagation());
 
@@ -145,7 +146,7 @@ export const createMachineCard = (machine, options = {}) => {
       const okBtn = document.createElement("button");
       okBtn.type = "button";
       okBtn.className = "mc-location-accept";
-      okBtn.textContent = "Aceptar";
+      okBtn.textContent = t("card.accept", "Aceptar");
       okBtn.addEventListener("click", (event) => {
         event.stopPropagation();
         const normalized = normalizeLocation(input.value);
@@ -164,7 +165,7 @@ export const createMachineCard = (machine, options = {}) => {
       const cancelBtn = document.createElement("button");
       cancelBtn.type = "button";
       cancelBtn.className = "mc-location-cancel";
-      cancelBtn.textContent = "Cancelar";
+      cancelBtn.textContent = t("card.cancel", "Cancelar");
       cancelBtn.addEventListener("click", (event) => {
         event.stopPropagation();
         wrap.innerHTML = "";
@@ -200,8 +201,8 @@ export const createMachineCard = (machine, options = {}) => {
       const isAdmin = options.role === "admin";
       if (isAdmin) {
         share.classList.add("is-admin");
-        share.setAttribute("aria-label", "Administrando");
-        share.setAttribute("data-tooltip", "Administrando");
+        share.setAttribute("aria-label", t("card.adminManaging", "Administrando"));
+        share.setAttribute("data-tooltip", t("card.adminManaging", "Administrando"));
         share.innerHTML =
           '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">' +
           '<path fill="currentColor" d="M5 8l2-3 2 3h10a1 1 0 0 1 .8 1.6L17 13v3a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1v-3L4.2 9.6A1 1 0 0 1 5 8zm3.4 2-1.2 1.6L9 14.2V15h6v-.8l1.8-2.6L15.6 10h-7.2z"/>' +
@@ -210,7 +211,7 @@ export const createMachineCard = (machine, options = {}) => {
         const adminName = (options.adminDisplayName || "").trim()
           || (machine.adminName || "").trim()
           || (machine.adminEmail || "").trim()
-          || "Administrador";
+          || t("card.admin", "Administrador");
         const statusText = (machine.adminStatus || "").toString();
         const pendingNorm = statusText
           .normalize("NFD")
@@ -219,11 +220,11 @@ export const createMachineCard = (machine, options = {}) => {
         const isPending = pendingNorm.startsWith("pendiente");
         if (isPending) share.classList.add("is-pending");
         const label = isPending
-          ? "Pendiente aceptación del administrador"
-          : `Administrada por ${adminName}`;
+          ? t("card.adminPending", "Pendiente aceptación del administrador")
+          : t("card.adminManagedBy", (name) => `Administrada por ${name}`)(adminName);
         const tooltip = isPending
-          ? "Pendiente aceptación\ndel administrador"
-          : `Administrada por\n${adminName}`;
+          ? t("card.adminPendingTooltip", "Pendiente aceptación\ndel administrador")
+          : t("card.adminManagedByTooltip", (name) => `Administrada por\n${name}`)(adminName);
         share.setAttribute("aria-label", label);
         share.setAttribute("data-tooltip", tooltip);
         share.innerHTML =
@@ -264,8 +265,8 @@ export const createMachineCard = (machine, options = {}) => {
       if (String(machine.tagId).startsWith("G-")) {
         nfc.classList.add("is-generated");
       }
-      nfc.setAttribute("aria-label", "Tag NFC enlazado");
-      nfc.setAttribute("data-tooltip", "Tag NFC enlazado");
+      nfc.setAttribute("aria-label", t("card.nfcLinked", "Tag NFC enlazado"));
+      nfc.setAttribute("data-tooltip", t("card.nfcLinked", "Tag NFC enlazado"));
       nfc.innerHTML =
         '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">' +
         '<path fill="currentColor" d="M8 5a1 1 0 0 1 1 1v12a1 1 0 1 1-2 0V6a1 1 0 0 1 1-1zm6 1a6 6 0 0 1 6 6v.9a1 1 0 1 1-2 0V12a4 4 0 0 0-4-4 1 1 0 1 1 0-2zm0 4a2 2 0 0 1 2 2v.7a1 1 0 1 1-2 0V12a1 1 0 0 0-1-1 1 1 0 1 1 0-2z"/>' +
@@ -334,11 +335,18 @@ export const createMachineCard = (machine, options = {}) => {
         btn.className = "mc-tab";
         btn.type = "button";
         btn.dataset.tab = "configuracion";
-        btn.textContent = "Configuración";
+        btn.textContent = t("tabs.configuracion", "Configuración");
         tabs.appendChild(btn);
       }
     }
   }
+
+  card.querySelectorAll(".mc-tab").forEach((tab) => {
+    const key = tab.dataset.tab;
+    const label = t(`tabs.${key}`, key);
+    tab.setAttribute("aria-label", label);
+    tab.setAttribute("title", label);
+  });
 
   const renderTab = (key) => {
     const render = TAB_RENDER[key] || TAB_RENDER.general;

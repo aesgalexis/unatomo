@@ -20,6 +20,8 @@ import { createMachineSearchBar } from "./components/machineSearch/machineSearch
 import { createDashboardLoading } from "./components/loading/dashboardLoading.js";
 import { setTopbarSaveStatus } from "/static/js/topbar/save-status.js";
 import { setTopbarNotifications } from "/static/js/notifications/topbar-notifications.js";
+import { localizeEsPath } from "/static/js/site/locale.js";
+import { t } from "./i18n.js";
 import {
   doc,
   collection,
@@ -94,8 +96,8 @@ if (mount) {
   let pendingRebuildOptions = null;
 
   const statusLabels = {
-    operativa: "Operativo",
-    fuera_de_servicio: "Fuera de servicio"
+    operativa: t("dashboard.statusByValue.operativa", "Operativo"),
+    fuera_de_servicio: t("dashboard.statusByValue.fuera_de_servicio", "Fuera de servicio")
   };
 
   const normalizeStatus = (value) =>
@@ -161,10 +163,10 @@ if (mount) {
   addBtn.id = "addMachineBtn";
   addBtn.className = "btn-add";
   addBtn.innerHTML = "<span class=\"btn-add-icon\">+</span>";
-  addBtn.setAttribute("aria-label", "Añadir");
+  addBtn.setAttribute("aria-label", t("dashboard.addAria", "Añadir"));
 
   const searchInput = createMachineSearchBar({
-    placeholder: "Buscar por nombre o ubicaci\u00f3n...",
+    placeholder: t("dashboard.searchPlaceholder", "Buscar por nombre o ubicación..."),
     onQuery: (value) => {
       state.searchQuery = value || "";
       renderCards({ preserveScroll: true });
@@ -180,7 +182,7 @@ if (mount) {
   const orderBtn = document.createElement("button");
   orderBtn.type = "button";
   orderBtn.className = "btn-order";
-  orderBtn.setAttribute("aria-label", "Ordenar");
+  orderBtn.setAttribute("aria-label", t("dashboard.orderAria", "Ordenar"));
   orderBtn.innerHTML =
     '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">' +
     '<path fill="currentColor" d="M7 6h10a1 1 0 1 0 0-2H7a1 1 0 0 0 0 2zm0 7h6a1 1 0 1 0 0-2H7a1 1 0 0 0 0 2zm0 7h2a1 1 0 1 0 0-2H7a1 1 0 0 0 0 2zM4 5l2 2 2-2H4zm0 7l2 2 2-2H4zm0 7l2 2 2-2H4z"/>' +
@@ -333,7 +335,7 @@ if (mount) {
     const placeholder = document.createElement("div");
     placeholder.className = "machine-placeholder";
     placeholder.textContent =
-      "TodavÃ­a no hay mÃ¡quinas. Pulsa â€˜AÃ±adirâ€™ para crear la primera.";
+      t("dashboard.noMachines", "Todavía no hay máquinas. Pulsa 'Añadir' para crear la primera.");
     list.appendChild(placeholder);
   };
 
@@ -674,13 +676,16 @@ if (mount) {
       return;
     }
     const formatInviteText = (ownerLabel, count) =>
-      `${ownerLabel} quiere que administres ${count} ${count === 1 ? "Equipo" : "Equipos"}`;
+      t("dashboard.inviteManage", (value, total) => `${value} wants you to manage ${total} machines`)(
+        ownerLabel,
+        count
+      );
 
     inviteBanner.innerHTML = "";
     inviteBanner.style.display = "flex";
     const grouped = new Map();
     invites.forEach((invite) => {
-      const ownerLabel = invite.ownerEmail || "Un usuario";
+      const ownerLabel = invite.ownerEmail || t("dashboard.anonymousUser", "Un usuario");
       const key = `${invite.ownerUid || ""}|${ownerLabel}`;
       if (!grouped.has(key)) {
         grouped.set(key, { ownerLabel, invites: [] });
@@ -698,7 +703,7 @@ if (mount) {
       const acceptBtn = document.createElement("button");
       acceptBtn.type = "button";
       acceptBtn.className = "mc-location-accept";
-      acceptBtn.textContent = "Aceptar";
+      acceptBtn.textContent = t("card.accept", "Aceptar");
       acceptBtn.addEventListener("click", async () => {
         for (const invite of groupInvites) {
           await handleInviteDecision(invite, "accepted");
@@ -707,7 +712,7 @@ if (mount) {
       const rejectBtn = document.createElement("button");
       rejectBtn.type = "button";
       rejectBtn.className = "mc-location-cancel";
-      rejectBtn.textContent = "Rechazar";
+      rejectBtn.textContent = t("dashboard.reject", "Rechazar");
       rejectBtn.addEventListener("click", async () => {
         for (const invite of groupInvites) {
           await handleInviteDecision(invite, "rejected");
@@ -722,10 +727,10 @@ if (mount) {
 
     setTopbarNotifications(
       invites.map((invite) => ({
-        text: formatInviteText(invite.ownerEmail || "Un usuario", 1),
+        text: formatInviteText(invite.ownerEmail || t("dashboard.anonymousUser", "Un usuario"), 1),
         actions: [
-          { label: "Aceptar", className: "mc-location-accept", onClick: () => handleInviteDecision(invite, "accepted") },
-          { label: "Rechazar", className: "mc-location-cancel", onClick: () => handleInviteDecision(invite, "rejected") }
+          { label: t("card.accept", "Aceptar"), className: "mc-location-accept", onClick: () => handleInviteDecision(invite, "accepted") },
+          { label: t("dashboard.reject", "Rechazar"), className: "mc-location-cancel", onClick: () => handleInviteDecision(invite, "rejected") }
         ]
       }))
     );
@@ -745,7 +750,7 @@ if (mount) {
     if (decision === "accepted") {
       const ownerMachine = await fetchMachine(null, invite.machineId);
       if (ownerMachine) {
-        const user = state.adminLabel || state.adminEmail || "Administrador";
+        const user = state.adminLabel || state.adminEmail || t("dashboard.admin", "Administrador");
         const logs = [
           ...(ownerMachine.logs || []),
           {
@@ -789,12 +794,12 @@ if (mount) {
       if (machine.tagId && !skipTagSync) {
         const res = await validateTag(machine.tagId);
         if (!res.exists) {
-          state.tagStatusById[machine.id] = { text: "El Tag ID introducido no existe", state: "error" };
+          state.tagStatusById[machine.id] = { text: t("config.tagNotFound", "El Tag ID introducido no existe"), state: "error" };
           updateTagStatusUI(machine.id);
           throw new Error("tag-missing");
         }
         if (res.machineId && res.machineId !== machine.id) {
-          state.tagStatusById[machine.id] = { text: "Tag ya estÃ¡ asignado", state: "error" };
+          state.tagStatusById[machine.id] = { text: t("config.tagAlreadyAssigned", "Tag ya está asignado"), state: "error" };
           updateTagStatusUI(machine.id);
           throw new Error("tag-assigned");
         }
@@ -805,10 +810,10 @@ if (mount) {
         try {
           await assignTag(machine.tagId, tenantId, machine.id);
           await upsertMachineAccessFromMachine(tenantId, machine, state.uid);
-          state.tagStatusById[machine.id] = { text: "Tag enlazado", state: "ok" };
+          state.tagStatusById[machine.id] = { text: t("dashboard.tagLinked", "Tag enlazado"), state: "ok" };
         } catch {
           state.tagStatusById[machine.id] = {
-            text: "Guardado. Tag pendiente de sincronizar",
+            text: t("dashboard.savedTagPending", "Guardado. Tag pendiente de sincronizar"),
             state: "error"
           };
         }
@@ -847,7 +852,10 @@ if (mount) {
       )
     ).sort((a, b) => a.localeCompare(b, "es"));
     if (query) {
-      filterInfo.textContent = `Mostrando ${visibleMachines.length}/${machines.length} Equipos`;
+      filterInfo.textContent = t(
+        "dashboard.showingResults",
+        (visible, total) => `Showing ${visible}/${total} machines`
+      )(visibleMachines.length, machines.length);
       filterInfo.style.display = "block";
     } else {
       filterInfo.textContent = "";
@@ -864,7 +872,7 @@ if (mount) {
       list.innerHTML = "";
       const placeholder = document.createElement("div");
       placeholder.className = "machine-placeholder";
-      placeholder.textContent = `No hay resultados para "${query}".`;
+      placeholder.textContent = t("dashboard.noResults", (value) => `No results for "${value}".`)(query);
       list.appendChild(placeholder);
       if (preserveScroll) {
         requestAnimationFrame(() => window.scrollTo(0, prevScrollY || 0));
@@ -889,7 +897,7 @@ if (mount) {
       .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
       .forEach((machine, idx) => {
         if (machine.tagId && !state.tagStatusById[machine.id]) {
-          state.tagStatusById[machine.id] = { text: "Tag enlazado", state: "ok" };
+          state.tagStatusById[machine.id] = { text: t("dashboard.tagLinked", "Tag enlazado"), state: "ok" };
         }
         if ((machine.role || "owner") === "admin") {
           const nextAdminName = (state.adminLabel || "").trim();
@@ -959,7 +967,7 @@ if (mount) {
           const idx = statusOrder.indexOf(currentStatus);
           const nextStatus = statusOrder[(idx + 1) % statusOrder.length];
           const keepExpanded = node.dataset.expanded === "true";
-          const user = state.adminLabel || "Administrador";
+          const user = state.adminLabel || t("dashboard.admin", "Administrador");
           replaceMachine(machine.id, {
             ...current,
             status: nextStatus,
@@ -984,7 +992,7 @@ if (mount) {
             (m) => m.id !== machine.id && (m.title || "").trim().toLowerCase() === normalized
           );
           if (duplicate) {
-            updateSaveState("Nombre duplicado");
+            updateSaveState(t("dashboard.duplicateName", "Nombre duplicado"));
             return false;
           }
           updateMachine(machine.id, { title: trimmed });
@@ -998,7 +1006,7 @@ if (mount) {
             const parsed = value ? Number(value) : null;
             if (parsed !== null && (Number.isNaN(parsed) || parsed > currentYear || parsed < currentYear - 50)) {
               if (errorEl) {
-                errorEl.textContent = `AÃ±o invÃ¡lido (entre ${currentYear - 50} y ${currentYear}).`;
+                errorEl.textContent = t("dashboard.invalidYear", (min, max) => `Año inválido (entre ${min} y ${max}).`)(currentYear - 50, currentYear);
                 errorEl.dataset.state = "error";
               }
               if (input) input.setAttribute("aria-invalid", "true");
@@ -1040,7 +1048,7 @@ if (mount) {
         hooks.onConnectTag = async (id, tagInput, statusEl) => {
           const tagId = tagInput.value.trim();
           if (!tagId) return;
-          statusEl.textContent = "Comprobando...";
+          statusEl.textContent = t("dashboard.checking", "Comprobando...");
           statusEl.dataset.state = "neutral";
           if (card.dataset.expanded === "true") {
             scheduleHeightSync(machine.id, () => recalcHeight(card));
@@ -1048,7 +1056,7 @@ if (mount) {
           try {
             const res = await validateTag(tagId);
             if (!res.exists) {
-              statusEl.textContent = "El Tag ID introducido no existe";
+              statusEl.textContent = t("config.tagNotFound", "El Tag ID introducido no existe");
               statusEl.dataset.state = "error";
               if (card.dataset.expanded === "true") {
                 scheduleHeightSync(machine.id, () => recalcHeight(card));
@@ -1056,7 +1064,7 @@ if (mount) {
               return;
             }
             if (res.machineId && res.machineId !== id) {
-              statusEl.textContent = "Tag ya estÃ¡ asignado";
+              statusEl.textContent = t("config.tagAlreadyAssigned", "Tag ya está asignado");
               statusEl.dataset.state = "error";
               if (card.dataset.expanded === "true") {
                 scheduleHeightSync(machine.id, () => recalcHeight(card));
@@ -1064,15 +1072,15 @@ if (mount) {
               return;
             }
             updateMachine(id, { tagId });
-            state.tagStatusById[id] = { text: "Tag enlazado", state: "ok" };
-            notifyTopbar("Tag enlazado");
+            state.tagStatusById[id] = { text: t("dashboard.tagLinked", "Tag enlazado"), state: "ok" };
+            notifyTopbar(t("dashboard.tagLinked", "Tag enlazado"));
             if (!state.selectedTabById) state.selectedTabById = {};
             state.selectedTabById[id] = "configuracion";
             state.expandedById = Array.from(expandedById);
             renderCards({ preserveScroll: true });
             autoSave.saveNow(id, "tag");
           } catch {
-            statusEl.textContent = "Error al validar el tag";
+            statusEl.textContent = t("dashboard.tagValidateError", "Error al validar el tag");
             statusEl.dataset.state = "error";
             if (card.dataset.expanded === "true") {
               scheduleHeightSync(machine.id, () => recalcHeight(card));
@@ -1082,8 +1090,8 @@ if (mount) {
 
         hooks.onDisconnectTag = (id) => {
           updateMachine(id, { tagId: null });
-          state.tagStatusById[id] = { text: "Tag desconectado", state: "error" };
-          notifyTopbar("Tag desconectado");
+          state.tagStatusById[id] = { text: t("dashboard.tagDisconnected", "Tag desconectado"), state: "error" };
+          notifyTopbar(t("dashboard.tagDisconnected", "Tag desconectado"));
           if (!state.selectedTabById) state.selectedTabById = {};
           state.selectedTabById[id] = "configuracion";
           state.expandedById = Array.from(expandedById);
@@ -1096,7 +1104,7 @@ if (mount) {
           const current = getDraftById(id);
           const tenantId = current ? current.tenantId || state.uid : state.uid;
           const newId = await createTagToken(tenantId);
-          notifyTopbar("Tag ID generado");
+          notifyTopbar(t("dashboard.tagGenerated", "Tag ID generado"));
           return newId;
         };
 
@@ -1110,7 +1118,7 @@ if (mount) {
             })
             .finally(() => {
               const prev = btn.textContent;
-              btn.textContent = "Copiado";
+              btn.textContent = t("config.copied", "Copiado");
               setTimeout(() => (btn.textContent = prev), 1000);
             });
         };
@@ -1137,7 +1145,7 @@ if (mount) {
             userInput.setAttribute("aria-invalid", "true");
             if (addBtn) {
               const prev = addBtn.textContent;
-              addBtn.textContent = "Error";
+              addBtn.textContent = t("dashboard.genericError", "Error");
               setTimeout(() => (addBtn.textContent = prev), 1000);
             }
             return;
@@ -1149,12 +1157,12 @@ if (mount) {
           if (users.some((u) => normalizeName(u.username) === normalizedUser)) {
             if (addBtn) {
               const prev = addBtn.textContent;
-              addBtn.textContent = "Error";
+              addBtn.textContent = t("dashboard.genericError", "Error");
               setTimeout(() => (addBtn.textContent = prev), 1000);
             }
             const statusEl = card.querySelector(".mc-user-status");
             if (statusEl) {
-              statusEl.textContent = "El usuario ya existe";
+              statusEl.textContent = t("dashboard.userExists", "El usuario ya existe");
               statusEl.dataset.state = "error";
               if (card.dataset.expanded === "true") scheduleHeightSync(machine.id, () => recalcHeight(card));
               if (statusEl._timer) clearTimeout(statusEl._timer);
@@ -1179,7 +1187,7 @@ if (mount) {
             if (!passwordHashBase64 || !saltBase64) {
               if (addBtn) {
                 const prev = addBtn.textContent;
-                addBtn.textContent = "Error";
+                addBtn.textContent = t("dashboard.genericError", "Error");
                 setTimeout(() => (addBtn.textContent = prev), 1000);
               }
               return;
@@ -1192,7 +1200,7 @@ if (mount) {
               saltBase64,
               passwordHashBase64
             };
-            updateSaveState("Guardando...");
+            updateSaveState(t("dashboard.saving", "Guardando..."));
             const updatedUsers = await addUserWithRegistry(tenantId, id, newUser, {
               normalizeName,
               allowExisting: usingExisting
@@ -1204,18 +1212,22 @@ if (mount) {
                 users: updatedUsers
               }, state.uid);
             }
-            updateSaveState(usingExisting ? "Usuario asignado" : "Usuario creado");
+            updateSaveState(
+              usingExisting
+                ? t("dashboard.userAssigned", "Usuario asignado")
+                : t("dashboard.userCreated", "Usuario creado")
+            );
             userInput.value = "";
             passInput.value = "";
           } catch {
             if (addBtn) {
               const prev = addBtn.textContent;
-              addBtn.textContent = "Error";
+              addBtn.textContent = t("dashboard.genericError", "Error");
               setTimeout(() => (addBtn.textContent = prev), 1000);
             }
             const statusEl = card.querySelector(".mc-user-status");
             if (statusEl) {
-              statusEl.textContent = "El usuario ya existe";
+              statusEl.textContent = t("dashboard.userExists", "El usuario ya existe");
               statusEl.dataset.state = "error";
               if (card.dataset.expanded === "true") scheduleHeightSync(machine.id, () => recalcHeight(card));
               if (statusEl._timer) clearTimeout(statusEl._timer);
@@ -1225,7 +1237,7 @@ if (mount) {
                 if (card.dataset.expanded === "true") scheduleHeightSync(machine.id, () => recalcHeight(card));
               }, 2200);
             }
-            updateSaveState("Error al guardar");
+            updateSaveState(t("dashboard.saveError", "Error al guardar"));
             return;
           }
           if (!state.selectedTabById) state.selectedTabById = {};
@@ -1322,37 +1334,38 @@ if (mount) {
 
         hooks.onDownloadLogs = (machineData) => {
           const logs = machineData.logs || [];
+          const historyLocale = document.documentElement.lang === "en" ? "en-GB" : "es-ES";
           const lines = logs.map((log) => {
-            const time = new Date(log.ts).toLocaleString("es-ES");
+            const time = new Date(log.ts).toLocaleString(historyLocale);
             if (log.type === "task") {
-              const title = log.title || "Tarea";
-              const user = log.user ? ` - por ${log.user}` : "";
+              const title = log.title || t("history.task", "Tarea");
+              const user = log.user ? t("history.completedBy", (value) => ` - por ${value}`)(log.user) : "";
               if (log.punctual) {
                 const duration = log.completionDuration ? ` (${log.completionDuration})` : "";
-                return `[${time}] Tarea puntual completada${duration}: ${title}${user}`;
+                return `[${time}] ${t("history.oneOffCompleted", "Tarea puntual completada")}${duration}: ${title}${user}`;
               }
               const overdueText = log.overdueDuration
-                ? `, ${log.overdueDuration} tarde`
+                ? t("history.lateSuffix", (text) => `, ${text} tarde`)(log.overdueDuration)
                 : "";
               const prefix = log.overdue
-                ? `Tarea completada fuera de plazo${overdueText}: `
-                : "Tarea completada: ";
+                ? t("history.completedLate", (text) => `Tarea completada fuera de plazo${text}: `)(overdueText)
+                : t("history.completed", "Tarea completada: ");
               return `[${time}] ${prefix}${title}${user}`;
             }
             if (log.type === "location") {
-              const value = log.value ? log.value : "Sin ubicaci\u00f3n";
-              return `[${time}] Ubicaci\u00f3n -> ${value}`;
+              const value = log.value ? log.value : t("history.noLocation", "Sin ubicación");
+              return `[${time}] ${t("history.location", "Ubicación")} -> ${value}`;
             }
             if (log.type === "intervencion") {
               const message = log.message || "";
-              const user = log.user ? ` - por ${log.user}` : "";
-              return `[${time}] Intervencion: ${message}${user}`;
+              const user = log.user ? t("history.completedBy", (value) => ` - por ${value}`)(log.user) : "";
+              return `[${time}] ${t("history.interventionLog", "Intervención")}: ${message}${user}`;
             }
             const value =
               log.value === "operativa"
-                ? "Operativo"
-                : "Fuera de servicio";
-            return `[${time}] Estado -> ${value}`;
+                ? t("dashboard.statusByValue.operativa", "Operativo")
+                : t("dashboard.statusByValue.fuera_de_servicio", "Fuera de servicio");
+            return `[${time}] ${t("history.status", "Estado")} -> ${value}`;
           });
           const blob = new Blob([lines.join("\n")], {
             type: "text/plain;charset=utf-8"
@@ -1410,7 +1423,7 @@ if (mount) {
 
         hooks.onAddIntervention = (machineData, message) => {
           const current = getDraftById(machineData.id) || machineData;
-          const user = state.adminLabel || "Administrador";
+          const user = state.adminLabel || t("dashboard.admin", "Administrador");
           const logs = [
             ...(current.logs || []),
             { ts: new Date().toISOString(), type: "intervencion", message, user }
@@ -1420,7 +1433,7 @@ if (mount) {
           state.selectedTabById[machineData.id] = "historial";
           state.expandedById = Array.from(expandedById);
           renderCards({ preserveScroll: true });
-          notifyTopbar("IntervenciÃ³n realizada");
+          notifyTopbar(t("dashboard.interventionDone", "Intervención realizada"));
           autoSave.saveNow(machineData.id, "intervencion");
         };
 
@@ -1428,7 +1441,7 @@ if (mount) {
           const current = getDraftById(id);
           const tasks = Array.isArray(current.tasks) ? [...current.tasks] : [];
           tasks.unshift(task);
-          const user = state.adminLabel || "Administrador";
+          const user = state.adminLabel || t("dashboard.admin", "Administrador");
           const logs = [
             ...(current.logs || []),
             {
@@ -1444,7 +1457,7 @@ if (mount) {
           state.selectedTabById[id] = "quehaceres";
           state.expandedById = Array.from(expandedById);
           renderCards({ preserveScroll: true });
-          notifyTopbar("Tarea creada");
+          notifyTopbar(t("dashboard.taskCreated", "Tarea creada"));
           autoSave.saveNow(id, "add-task");
         };
 
@@ -1452,7 +1465,7 @@ if (mount) {
           const current = getDraftById(id);
           const removed = (current.tasks || []).find((t) => t.id === taskId);
           const tasks = (current.tasks || []).filter((t) => t.id !== taskId);
-          const user = state.adminLabel || "Administrador";
+          const user = state.adminLabel || t("dashboard.admin", "Administrador");
           const logs = [
             ...(current.logs || []),
             {
@@ -1504,7 +1517,7 @@ if (mount) {
           if (ownerNormalized && nextEmail === ownerNormalized) {
             updateMachine(id, {
               adminEmail: "",
-              adminStatus: "Introduce otra direcciÃ³n de correo que no se la tuya"
+              adminStatus: t("dashboard.adminOwnEmail", "Introduce otra dirección de correo que no sea la tuya")
             });
             state.selectedTabById = { ...(state.selectedTabById || {}), [id]: "configuracion" };
             state.expandedById = Array.from(expandedById);
@@ -1514,13 +1527,13 @@ if (mount) {
           try {
             await createAdminInvite(id, nextEmail);
           } catch {
-            notifyTopbar("No tienes permisos para asignar administrador");
+            notifyTopbar(t("dashboard.adminAssignNoPermission", "No tienes permisos para asignar administrador"));
             return;
           }
 
           updateMachine(id, {
             adminEmail: nextEmail,
-            adminStatus: "Pendiente aceptaciÃ³n"
+            adminStatus: t("dashboard.adminPending", "Pendiente aceptación")
           });
           if (!state.selectedTabById) state.selectedTabById = {};
           state.selectedTabById[id] = "configuracion";
@@ -1552,7 +1565,7 @@ if (mount) {
             {
               ts: new Date().toISOString(),
               type: "notification",
-              message: "NotificaciÃ³n de prueba solicitada"
+              message: t("dashboard.testNotificationRequested", "Notificación de prueba solicitada")
             }
           ];
           updateMachine(machineData.id, { logs });
@@ -1576,7 +1589,7 @@ if (mount) {
             )
             .filter((t) => !(t.id === taskId && t.frequency === "puntual"));
           const task = baseTasks.find((t) => t.id === taskId);
-          const user = state.adminLabel || "Administrador";
+          const user = state.adminLabel || t("dashboard.admin", "Administrador");
           const logs = [
             ...(current.logs || []),
             {
@@ -1595,7 +1608,7 @@ if (mount) {
           state.selectedTabById[id] = "quehaceres";
           state.expandedById = Array.from(expandedById);
           renderCards({ preserveScroll: true });
-          notifyTopbar("Tarea completada");
+          notifyTopbar(t("dashboard.taskCompleted", "Tarea completada"));
           autoSave.saveNow(id, "task-complete");
         };
 
@@ -1663,10 +1676,10 @@ if (mount) {
       state.draftMachines.map((m) => (m.title || "").trim().toLowerCase())
     );
     let idx = 1;
-    let title = `Equipo ${idx}`;
+    let title = t("dashboard.machineDefaultName", (value) => `Machine ${value}`)(idx);
     while (existing.has(title.toLowerCase())) {
       idx += 1;
-      title = `Equipo ${idx}`;
+      title = t("dashboard.machineDefaultName", (value) => `Machine ${value}`)(idx);
     }
     return title;
   };
@@ -1704,7 +1717,7 @@ if (mount) {
 
   const initDashboard = async (uid, user) => {
     state.uid = uid;
-    state.adminLabel = user.displayName || user.email || "Administrador";
+    state.adminLabel = user.displayName || user.email || t("dashboard.admin", "Administrador");
     state.adminEmail = user.email || "";
     armLoadingGuard();
     try {
@@ -1773,7 +1786,7 @@ if (mount) {
 
   onAuthStateChanged(auth, (user) => {
     if (!user) {
-      window.location.href = "/es/auth/login.html";
+      window.location.href = localizeEsPath("/es/auth/login.html");
       return;
     }
     initDashboard(user.uid, user);

@@ -945,6 +945,44 @@ textarea.field {
   display:inline-flex;
 }
 
+.topbar-lang-toggle{
+  display:inline-flex;
+  align-items:center;
+  gap:2px;
+  height:32px;
+  padding:2px;
+  border:1px solid var(--border-subtle);
+  border-radius:0.75rem;
+  background:color-mix(in srgb, var(--bg) 80%, transparent);
+  backdrop-filter:blur(8px);
+}
+
+.topbar-lang-link{
+  min-width:36px;
+  height:26px;
+  padding:0 10px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:0.6rem;
+  color:var(--fg);
+  text-decoration:none;
+  font-size:0.82rem;
+  line-height:1;
+  opacity:0.88;
+}
+
+.topbar-lang-link:hover,
+.topbar-lang-link:focus-visible{
+  opacity:1;
+}
+
+.topbar-lang-link.is-active,
+.topbar-lang-link[aria-current="page"]{
+  background:color-mix(in srgb, var(--fg) 12%, transparent);
+  opacity:1;
+}
+
 #msg-menu-btn,
 #notif-menu-btn,
 #session-menu-btn{

@@ -1,10 +1,12 @@
+import { t } from "/static/js/dashboard/i18n.js";
+
 export const createDashboardLoading = () => {
   const wrap = document.createElement("div");
   wrap.className = "dashboard-loading";
 
   const text = document.createElement("div");
   text.className = "dashboard-loading-text";
-  text.textContent = "Cargando... ";
+  text.textContent = t("dashboard.loading", "Loading... ");
 
   const percent = document.createElement("span");
   percent.className = "dashboard-loading-percent";

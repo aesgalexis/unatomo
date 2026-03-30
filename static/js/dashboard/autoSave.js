@@ -1,19 +1,21 @@
+import { t } from "./i18n.js";
+
 export const initAutoSave = ({ saveFn, notify, debounceMs = 750, onSaveStart }) => {
   const timers = new Map();
 
   const runSave = async (machineId, reason, customFn) => {
     if (!machineId) return;
     if (onSaveStart) onSaveStart(machineId, reason);
-    if (notify) notify("Guardando...");
+    if (notify) notify(t("dashboard.saving", "Guardando..."));
     try {
       if (customFn) {
         await customFn();
       } else if (saveFn) {
         await saveFn(machineId, reason);
       }
-      if (notify) notify("Guardado");
+      if (notify) notify(t("dashboard.saved", "Guardado"));
     } catch {
-      if (notify) notify("Error al guardar");
+      if (notify) notify(t("dashboard.saveError", "Error al guardar"));
     }
   };
 

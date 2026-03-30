@@ -1,0 +1,65 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Register · unatomo</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <script src="/static/js/theme/theme-init.js"></script>
+  <script src="/static/js/config/runtime-config.js"></script>
+  <link rel="icon" href="/static/img/favicon/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    html{visibility:hidden}
+    main.shell.login-shell{max-width:600px;padding:110px 1.5rem 2.5rem;margin:0 auto}
+  </style>
+</head>
+<body class="page" data-topbar-title="Register" data-back-mode="history">
+  <div id="topbar-mount"></div>
+  <script type="module" src="/static/js/topbar.js"></script>
+  <main class="shell login-shell">
+    <section class="page-section" aria-label="Register">
+      <section class="card" aria-label="Create account">
+        <h3>Create account</h3>
+        <p>Continue with Google or create an account with email and password.</p>
+        <div class="form-actions" style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
+          <button type="button" class="btn-secondary" id="btn-google">Continue with Google</button>
+        </div>
+        <br>
+        <form id="register-email-form" class="contact-form" novalidate>
+          <div class="form-grid">
+            <div class="form-field">
+              <label for="nombre">Name</label>
+              <input id="nombre" name="nombre" type="text" class="field" autocomplete="name" />
+            </div>
+            <div class="form-field">
+              <label for="email">Email<span aria-hidden="true"> *</span></label>
+              <input id="email" name="email" type="email" required class="field" autocomplete="email" />
+            </div>
+            <div class="form-field">
+              <label for="password">Password<span aria-hidden="true"> *</span></label>
+              <input id="password" name="password" type="password" required class="field" autocomplete="new-password" />
+            </div>
+            <div class="form-field">
+              <label for="password2">Repeat password<span aria-hidden="true"> *</span></label>
+              <input id="password2" name="password2" type="password" required class="field" autocomplete="new-password" />
+            </div>
+          </div>
+          <p id="reg-status" class="form-status" role="status" aria-live="polite" hidden></p>
+          <div class="form-actions" style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
+            <button type="submit" class="btn-primary" id="btn-email">Create account</button>
+          </div>
+        </form>
+      </section>
+    </section>
+    <div id="page-nav-mount"></div>
+    <script type="module" src="/static/js/page-nav.js"></script>
+    <div id="legal-footer" class="legal-footer"></div>
+    <div class="footer-link">
+      <a href="/en/privacidad.html">Privacy and cookie policy</a>
+    </div>
+  </main>
+  <script src="/static/js/footer.js"></script>
+  <script type="module" src="/static/js/registro/app.js"></script>
+</body>
+</html>

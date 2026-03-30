@@ -1,8 +1,18 @@
+import { getCurrentLang } from "/static/js/site/locale.js";
+
 let menuEl = null;
 let labelEl = null;
 let listEl = null;
 let badgeEl = null;
 let buttonEl = null;
+const isEn = getCurrentLang() === "en";
+const text = {
+  pendingCount: (count) =>
+    isEn ? `${count} pending notifications` : `${count} notificaciones pendientes`,
+  notifications: isEn ? "Notifications" : "Notificaciones",
+  noNotifications: isEn ? "There are no pending notifications" : "No hay notificaciones pendientes",
+  action: isEn ? "Action" : "Acción",
+};
 
 export function initTopbarNotifications() {
   const wrap = document.getElementById("notif-menu-wrap");
@@ -79,12 +89,12 @@ export function setTopbarNotifications(items = []) {
     if (hasItems) {
       const count = items.length;
       badgeEl.textContent = String(count);
-      badgeEl.setAttribute("aria-label", `${count} notificaciones pendientes`);
+      badgeEl.setAttribute("aria-label", text.pendingCount(count));
     }
   }
   labelEl.textContent = hasItems
-    ? "Notificaciones"
-    : "No hay notificaciones pendientes";
+    ? text.notifications
+    : text.noNotifications;
   listEl.innerHTML = "";
   if (!hasItems) return;
   items.forEach((item) => {
@@ -102,7 +112,7 @@ export function setTopbarNotifications(items = []) {
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = action.className || "btn-secondary";
-      btn.textContent = action.label || "Accion";
+      btn.textContent = action.label || text.action;
       btn.addEventListener("click", (event) => {
         event.preventDefault();
         event.stopPropagation();
