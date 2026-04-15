@@ -11,6 +11,7 @@
 import {setGlobalOptions} from "firebase-functions";
 import {onCall, HttpsError} from "firebase-functions/v2/https";
 import * as admin from "firebase-admin";
+import {createHash} from "node:crypto";
 
 // Start writing functions
 // https://firebase.google.com/docs/functions/typescript
@@ -32,10 +33,25 @@ const db = admin.firestore();
 
 const normalizeEmail = (email: string) =>
   (email || "").toString().trim().toLowerCase();
+const CONTROL_PANEL_EMAIL_HASH =
+  "361be737851cc08e4a603606a25f7dc0649d8d75823f9e6244df97f14fd5ebd5";
+
+const hashEmail = (email: string) =>
+  createHash("sha256").update(normalizeEmail(email)).digest("hex");
+
+const assertControlPanelAccess = (auth: {
+  token?: {email?: string | null};
+} | null | undefined) => {
+  const email = (auth?.token?.email || "").toString();
+  if (!email || hashEmail(email) !== CONTROL_PANEL_EMAIL_HASH) {
+    throw new HttpsError("permission-denied", "not-allowed");
+  }
+};
 
 const machinesCol = () => db.collection("machines");
 const invitesCol = () => db.collection("admin_machine_invites");
 const linksCol = () => db.collection("admin_machine_links");
+const accountDirectoryCol = () => db.collection("account_directory");
 
 export const createAdminInvite = onCall(async (request) => {
   const auth = request.auth;
@@ -328,4 +344,26 @@ export const ensureAdminLink = onCall(async (request) => {
     {merge: true},
   );
   return {ok: true, created: true};
+});
+
+export const listControlPanelUsers = onCall(async (request) => {
+  const auth = request.auth;
+  if (!auth) throw new HttpsError("unauthenticated", "auth-required");
+  assertControlPanelAccess(auth);
+
+  const snap = await accountDirectoryCol()
+    .orderBy("updatedAt", "desc")
+    .limit(1000)
+    .get();
+
+  const items = snap.docs.map((docSnap) => {
+    const data = docSnap.data() || {};
+    return {
+      uid: (data.uid || "").toString(),
+      email: (data.email || "").toString(),
+      displayName: (data.displayName || "").toString(),
+    };
+  });
+
+  return {ok: true, items};
 });

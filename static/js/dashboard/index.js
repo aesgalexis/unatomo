@@ -257,16 +257,25 @@ if (mount) {
   const guardAddBarAfterMobileBack = () => {
     mount.dataset.mobileReturning = "true";
     addBar.style.pointerEvents = "none";
+    addBtn.disabled = true;
+    searchInput.disabled = true;
+    orderBtn.disabled = true;
+    searchInput.blur();
     if (addBarTapGuardTimer) clearTimeout(addBarTapGuardTimer);
     if (mobileReturnGuardTimer) clearTimeout(mobileReturnGuardTimer);
     addBarTapGuardTimer = setTimeout(() => {
       addBar.style.pointerEvents = "";
+      if (!state.loading) {
+        addBtn.disabled = false;
+        searchInput.disabled = false;
+        orderBtn.disabled = false;
+      }
       addBarTapGuardTimer = null;
-    }, 360);
+    }, 650);
     mobileReturnGuardTimer = setTimeout(() => {
       if (mount.dataset.mobileReturning === "true") mount.dataset.mobileReturning = "false";
       mobileReturnGuardTimer = null;
-    }, 420);
+    }, 700);
   };
 
   const syncMobileDetailUI = () => {

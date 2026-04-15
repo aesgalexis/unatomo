@@ -27,10 +27,17 @@ if (titleEl) {
 const currentLang = getCurrentLang();
 const langEs = document.getElementById("lang-link-es");
 const langEn = document.getElementById("lang-link-en");
+const isControlPanelPage = /^\/controlpanel(?:\/|$)/i.test(window.location.pathname);
 
 if (langEs && langEn) {
-  langEs.href = getLocalizedHref("es");
-  langEn.href = getLocalizedHref("en");
+  if (isControlPanelPage) {
+    const currentHref = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+    langEs.href = currentHref;
+    langEn.href = currentHref;
+  } else {
+    langEs.href = getLocalizedHref("es");
+    langEn.href = getLocalizedHref("en");
+  }
   langEs.setAttribute("aria-current", currentLang === "es" ? "page" : "false");
   langEn.setAttribute("aria-current", currentLang === "en" ? "page" : "false");
   langEs.classList.toggle("is-active", currentLang === "es");

@@ -1,0 +1,87 @@
+.controlpanel-wrap {
+  display: grid;
+  gap: 16px;
+}
+
+.controlpanel-card {
+  border: 1px solid var(--border-subtle);
+  background: var(--panel-bg);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.controlpanel-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px;
+  background: transparent;
+  border: none;
+  color: var(--fg);
+  font: inherit;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.controlpanel-title {
+  font-weight: 600;
+}
+
+.controlpanel-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.controlpanel-body {
+  padding: 0 18px 16px;
+}
+
+.controlpanel-note {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: color-mix(in srgb, var(--fg) 70%, transparent);
+}
+
+.controlpanel-state {
+  margin: 0;
+  font-size: 14px;
+  color: color-mix(in srgb, var(--fg) 78%, transparent);
+}
+
+.controlpanel-state[data-state="error"] {
+  color: var(--danger, #d33);
+}
+
+.controlpanel-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.controlpanel-user {
+  display: grid;
+  gap: 4px;
+  padding: 10px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--fg) 8%, transparent);
+}
+
+.controlpanel-user:last-child {
+  border-bottom: none;
+}
+
+.controlpanel-user-name {
+  font-size: 14px;
+  color: var(--fg);
+  font-weight: 600;
+  word-break: break-word;
+}
+
+.controlpanel-user-meta {
+  font-size: 13px;
+  color: color-mix(in srgb, var(--fg) 70%, transparent);
+  word-break: break-word;
+}
