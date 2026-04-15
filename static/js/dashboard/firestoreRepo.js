@@ -130,8 +130,11 @@ export const upsertMachine = async (uid, machine) => {
 };
 
 export const deleteMachine = async (uid, machineId) => {
-  const ref = doc(db, "machines", machineId);
-  await deleteDoc(ref);
+  const refs = [doc(db, "machines", machineId)];
+  if (uid) {
+    refs.push(doc(db, "tenants", uid, "machines", machineId));
+  }
+  await Promise.allSettled(refs.map((ref) => deleteDoc(ref)));
 };
 
 export const addUserWithRegistry = async (uid, machineId, user, options = {}) => {
