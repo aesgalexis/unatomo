@@ -1513,6 +1513,10 @@
 }
 
 @media (max-width: 768px) {
+  [data-mobile-returning="true"] .add-bar {
+    display: none !important;
+  }
+
   #machineList[data-mobile-detail="true"] .machine-card:not(.is-mobile-focus),
   [data-mobile-detail="true"] .add-bar,
   [data-mobile-detail="true"] .filter-info,

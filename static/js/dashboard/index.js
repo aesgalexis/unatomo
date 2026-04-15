@@ -244,6 +244,7 @@ if (mount) {
     setTopbarSaveStatus(message);
   };
   let addBarTapGuardTimer = null;
+  let mobileReturnGuardTimer = null;
 
   const isMobileDashboardViewport = () =>
     !!(window.matchMedia && window.matchMedia("(max-width: 768px)").matches);
@@ -254,12 +255,18 @@ if (mount) {
   };
 
   const guardAddBarAfterMobileBack = () => {
+    mount.dataset.mobileReturning = "true";
     addBar.style.pointerEvents = "none";
     if (addBarTapGuardTimer) clearTimeout(addBarTapGuardTimer);
+    if (mobileReturnGuardTimer) clearTimeout(mobileReturnGuardTimer);
     addBarTapGuardTimer = setTimeout(() => {
       addBar.style.pointerEvents = "";
       addBarTapGuardTimer = null;
     }, 360);
+    mobileReturnGuardTimer = setTimeout(() => {
+      if (mount.dataset.mobileReturning === "true") mount.dataset.mobileReturning = "false";
+      mobileReturnGuardTimer = null;
+    }, 420);
   };
 
   const syncMobileDetailUI = () => {
