@@ -351,18 +351,49 @@ export const listControlPanelUsers = onCall(async (request) => {
   if (!auth) throw new HttpsError("unauthenticated", "auth-required");
   assertControlPanelAccess(auth);
 
-  const snap = await accountDirectoryCol()
+  const [directorySnap, usersSnap] = await Promise.all([
+    accountDirectoryCol()
     .orderBy("updatedAt", "desc")
     .limit(1000)
-    .get();
+    .get(),
+    db.collection("users")
+      .orderBy("updatedAt", "desc")
+      .limit(1000)
+      .get(),
+  ]);
 
-  const items = snap.docs.map((docSnap) => {
-    const data = docSnap.data() || {};
-    return {
-      uid: (data.uid || "").toString(),
-      email: (data.email || "").toString(),
-      displayName: (data.displayName || "").toString(),
-    };
+  const map = new Map<string, {
+    uid: string;
+    email: string;
+    displayName: string;
+  }>();
+
+  const upsertItem = (raw: {uid?: unknown; email?: unknown; displayName?: unknown}) => {
+    const uid = (raw.uid || "").toString().trim();
+    const email = (raw.email || "").toString().trim();
+    const displayName = (raw.displayName || "").toString().trim();
+    const key = uid || normalizeEmail(email);
+    if (!key) return;
+    const current = map.get(key);
+    map.set(key, {
+      uid: uid || (current?.uid || ""),
+      email: email || (current?.email || ""),
+      displayName: displayName || (current?.displayName || ""),
+    });
+  };
+
+  directorySnap.forEach((docSnap) => {
+    upsertItem(docSnap.data() || {});
+  });
+
+  usersSnap.forEach((docSnap) => {
+    upsertItem(docSnap.data() || {});
+  });
+
+  const items = Array.from(map.values()).sort((a, b) => {
+    const left = (a.displayName || a.email || a.uid).toLowerCase();
+    const right = (b.displayName || b.email || b.uid).toLowerCase();
+    return left.localeCompare(right, "en");
   });
 
   return {ok: true, items};
