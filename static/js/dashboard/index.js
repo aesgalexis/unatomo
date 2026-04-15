@@ -35,6 +35,14 @@ const DEFAULT_COLLAPSED_HEIGHT = 108;
 const EXPAND_FACTOR = 2.5;
 
 const mount = document.getElementById("dashboard-mount");
+const getPublicSectionFromHash = () =>
+  (window.location.hash || "")
+    .replace(/^#/, "")
+    .replace(/^\/+/, "")
+    .trim()
+    .toLowerCase();
+const isPublicSectionHash = () =>
+  ["faqs", "tags", "contacto"].includes(getPublicSectionFromHash());
 
 if (mount) {
   const state = {
@@ -1805,6 +1813,10 @@ if (mount) {
 
   onAuthStateChanged(auth, (user) => {
     if (!user) {
+      if (isPublicSectionHash()) {
+        mount.hidden = true;
+        return;
+      }
       window.location.href = localizeEsPath("/es/auth/login.html");
       return;
     }
