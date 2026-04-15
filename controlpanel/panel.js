@@ -76,13 +76,13 @@ const listTagsCallable = httpsCallable(functions, "listControlPanelTags");
 const createCard = (title) => {
   const card = document.createElement("section");
   card.className = "controlpanel-card";
-  card.dataset.expanded = "true";
+  card.dataset.expanded = "false";
   card.innerHTML = `
-    <button type="button" class="controlpanel-toggle" aria-expanded="true">
+    <button type="button" class="controlpanel-toggle" aria-expanded="false">
       <span class="controlpanel-title">${title}</span>
-      <span class="controlpanel-icon">-</span>
+      <span class="controlpanel-icon">+</span>
     </button>
-    <div class="controlpanel-body"></div>
+    <div class="controlpanel-body" hidden></div>
   `;
   return card;
 };
@@ -437,5 +437,6 @@ if (mount) {
     }
 
     await loadCodes();
+    await loadTags();
   });
 }
