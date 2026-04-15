@@ -53,6 +53,7 @@ const invitesCol = () => db.collection("admin_machine_invites");
 const linksCol = () => db.collection("admin_machine_links");
 const accountDirectoryCol = () => db.collection("account_directory");
 const registrationCodesCol = () => db.collection("registration_codes");
+const tagsCol = () => db.collection("tags");
 
 const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
@@ -520,4 +521,91 @@ export const deleteControlPanelRegistrationCode = onCall(async (request) => {
   );
 
   return {ok: true, code};
+});
+
+
+export const listControlPanelTags = onCall(async (request) => {
+  const auth = request.auth;
+  if (!auth) throw new HttpsError("unauthenticated", "auth-required");
+  assertControlPanelAccess(auth);
+
+  const [tagsSnap, machinesSnap, machineAccessSnap, directorySnap, usersSnap] =
+    await Promise.all([
+      tagsCol().orderBy("createdAt", "desc").limit(1000).get(),
+      machinesCol().limit(1000).get(),
+      db.collection("machine_access").limit(1000).get(),
+      accountDirectoryCol().limit(1000).get(),
+      db.collection("users").limit(1000).get(),
+    ]);
+
+  const machineById = new Map<string, FirebaseFirestore.DocumentData>();
+  machinesSnap.forEach((docSnap) => {
+    machineById.set(docSnap.id, docSnap.data() || {});
+  });
+
+  const accessByTagId = new Map<string, FirebaseFirestore.DocumentData>();
+  machineAccessSnap.forEach((docSnap) => {
+    accessByTagId.set(docSnap.id, docSnap.data() || {});
+  });
+
+  const usersByUid = new Map<string, {
+    email: string;
+    displayName: string;
+  }>();
+  const upsertUser = (raw: {
+    uid?: unknown;
+    email?: unknown;
+    displayName?: unknown;
+  }) => {
+    const uid = (raw.uid || "").toString().trim();
+    if (!uid) return;
+    const current = usersByUid.get(uid);
+    usersByUid.set(uid, {
+      email: (raw.email || "").toString().trim() || current?.email || "",
+      displayName:
+        (raw.displayName || "").toString().trim() || current?.displayName || "",
+    });
+  };
+  directorySnap.forEach((docSnap) => upsertUser(docSnap.data() || {}));
+  usersSnap.forEach((docSnap) => upsertUser(docSnap.data() || {}));
+
+  const items = tagsSnap.docs.map((docSnap) => {
+    const data = docSnap.data() || {};
+    const tagId = docSnap.id;
+    const machineId = (data.machineId || "").toString().trim();
+    const access = accessByTagId.get(tagId) || {};
+    const machine = machineId ? (machineById.get(machineId) || {}) : {};
+    const tenantUid = (data.tenantId || machine.ownerUid || "")
+      .toString()
+      .trim();
+    const tenantUser = tenantUid ? usersByUid.get(tenantUid) : null;
+    const createdByUid = (data.createdBy || "").toString().trim();
+    const createdByUser = createdByUid ? usersByUid.get(createdByUid) : null;
+    const assignedByUid = (data.assignedBy || "").toString().trim();
+    const assignedByUser = assignedByUid ? usersByUid.get(assignedByUid) : null;
+    const machineTitle =
+      (access.title || machine.title || "").toString().trim() || "";
+
+    return {
+      tagId,
+      state: (data.state || "").toString().trim() || "unknown",
+      machineId,
+      machineTitle,
+      urlPath: `/es/m.html?tag=${encodeURIComponent(tagId)}`,
+      tenantUid,
+      tenantEmail: tenantUser?.email || "",
+      tenantDisplayName: tenantUser?.displayName || "",
+      createdByUid,
+      createdByEmail: createdByUser?.email || "",
+      createdByDisplayName: createdByUser?.displayName || "",
+      assignedByUid,
+      assignedByEmail: assignedByUser?.email || "",
+      assignedByDisplayName: assignedByUser?.displayName || "",
+      createdAt: data.createdAt || null,
+      assignedAt: data.assignedAt || null,
+      updatedAt: access.updatedAt || null,
+    };
+  });
+
+  return {ok: true, items};
 });
