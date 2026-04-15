@@ -91,6 +91,33 @@ a:hover {
   opacity: 0.7;
 }
 
+.footer-nav-links {
+  margin-top: 0.15rem;
+  margin-bottom: 1.35rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  font-size: 0.78rem;
+}
+
+.footer-nav-links a {
+  color: var(--fg);
+  text-decoration: none;
+  opacity: 0.82;
+}
+
+.footer-nav-links a:hover,
+.footer-nav-links a:focus-visible {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+.footer-nav-links + .legal-footer {
+  margin-top: 2.1rem;
+}
+
 h1,
 h2,
 h3,
@@ -552,149 +579,13 @@ body.page li {
 .topbar-logo-link {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
   text-decoration: none;
 }
 
 .topbar-logo-group {
-  position: relative;
   display: flex;
   align-items: center;
-}
-
-.topbar-menu {
-  position: absolute;
-  left: 0;
-  top: calc(100% + 8px);
-  z-index: 1201;
-  background: transparent;
-  padding: 10px;
-  display: grid;
-  gap: 6px;
-  min-width: 220px;
-  box-shadow: none;
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(-6px);
-  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
-  z-index: 1100;
-}
-
-.topbar-menu-backdrop {
-  z-index: 900;
-}
-
-.topbar-logo-group:hover .topbar-menu,
-.topbar-logo-group:focus-within .topbar-menu {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
-}
-
-body.menu-locked .topbar-menu {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
-}
-
-body.menu-locked .topbar-menu-backdrop {
-  opacity: 1;
-  visibility: visible;
-}
-
-body.menu-locked .topbar-logo-group:hover .topbar-menu,
-body.menu-locked .topbar-logo-group:focus-within .topbar-menu,
-body.menu-locked .topbar-logo-group:hover .topbar-menu-backdrop,
-body.menu-locked .topbar-logo-group:focus-within .topbar-menu-backdrop {
-  opacity: 1 !important;
-  visibility: visible !important;
-  transform: translateY(0);
-}
-
-body.menu-closing .topbar-menu,
-body.menu-closing .topbar-menu-backdrop,
-body.menu-closing .topbar-logo-group:hover .topbar-menu,
-body.menu-closing .topbar-logo-group:focus-within .topbar-menu,
-body.menu-closing .topbar-logo-group:hover .topbar-menu-backdrop,
-body.menu-closing .topbar-logo-group:focus-within .topbar-menu-backdrop {
-  opacity: 0 !important;
-  visibility: hidden !important;
-  transform: translateY(-6px) !important;
-}
-
-body.menu-suppress-open .topbar-menu,
-body.menu-suppress-open .topbar-menu-backdrop,
-body.menu-suppress-open .topbar-logo-group:hover .topbar-menu,
-body.menu-suppress-open .topbar-logo-group:focus-within .topbar-menu,
-body.menu-suppress-open .topbar-logo-group:hover .topbar-menu-backdrop,
-body.menu-suppress-open .topbar-logo-group:focus-within .topbar-menu-backdrop {
-  opacity: 0 !important;
-  visibility: hidden !important;
-  transform: translateY(-6px) !important;
-}
-
-.topbar-menu-backdrop {
-  position: fixed;
-  top: 75px;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.9);
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.2s ease, visibility 0.2s ease;
-  z-index: 940;
-  pointer-events: none;
-}
-
-html[data-theme="light"] .topbar-menu-backdrop,
-body[data-theme="light"] .topbar-menu-backdrop {
-  background: rgba(255, 255, 255, 0.9);
-}
-
-.topbar-logo-group:hover .topbar-menu-backdrop,
-.topbar-logo-group:focus-within .topbar-menu-backdrop {
-  opacity: 1;
-  visibility: visible;
-}
-
-.topbar-logo-link:hover ~ .topbar-menu-backdrop,
-.topbar-logo-link:focus-visible ~ .topbar-menu-backdrop {
-  opacity: 1;
-  visibility: visible;
-}
-
-body.menu-open .topbar-menu-backdrop {
-  opacity: 1;
-  visibility: visible;
-}
-
-.topbar-menu-link {
-  display: inline-flex;
-  align-items: center;
-  padding: 6px 0;
-  border-radius: 10px;
-  text-decoration: none;
-  color: color-mix(in srgb, var(--fg) 70%, transparent);
-  font-weight: 600;
-  position: relative;
-}
-
-.topbar-menu-link:hover,
-.topbar-menu-link.is-active {
-  color: var(--fg);
-}
-
-.topbar-menu-link.is-active::after {
-  content: "";
-  position: absolute;
-  left: -12px;
-  top: 50%;
-  width: 6px;
-  height: 6px;
-  margin-top: -3px;
-  border-radius: 999px;
-  background: #ffffff;
+  gap: 0.75rem;
 }
 
 .topbar-title-wrap {
@@ -704,6 +595,8 @@ body.menu-open .topbar-menu-backdrop {
   gap: 0.05rem;
   height: 52px;
   justify-content: flex-end;
+  pointer-events: none;
+  cursor: default;
 }
 
 .topbar-title {
@@ -970,12 +863,6 @@ textarea.field {
   display:inline-flex;
 }
 
-#msg-menu-wrap{
-  position:relative;
-  display:inline-flex;
-  height:32px;
-}
-
 #notif-menu-wrap{
   position:relative;
   display:inline-flex;
@@ -1019,7 +906,6 @@ textarea.field {
   opacity:1;
 }
 
-#msg-menu-btn,
 #notif-menu-btn,
 #session-menu-btn{
   margin-top:0;
@@ -1046,26 +932,8 @@ textarea.field {
   line-height:1;
 }
 
-#msg-menu-btn{
-  opacity:0.58;
-  color:color-mix(in srgb, var(--fg) 55%, transparent);
-  cursor:default;
-}
-
 #notif-menu-btn{
   position:relative;
-}
-
-#msg-menu-btn svg{
-  width:18px;
-  height:18px;
-  display:block;
-}
-
-#msg-menu-btn{
-  height:32px;
-  min-height:32px;
-  max-height:32px;
 }
 
 #notif-menu-btn svg{
@@ -1142,7 +1010,6 @@ textarea.field {
   display:block;
 }
 
-#msg-menu-btn:hover,
 #notif-menu-btn:hover,
 #session-menu-btn:hover{
   opacity:1;
@@ -1154,40 +1021,6 @@ textarea.field {
 #session-menu-btn:hover,
 #session-menu-btn:focus-visible{
   border-color:#ffffff;
-}
-
-#msg-menu-btn:hover,
-#msg-menu-btn:focus-visible{
-  opacity:0.58;
-  filter:none;
-}
-
-#msg-menu-wrap::after{
-  content:"Soon";
-  position:absolute;
-  left:50%;
-  top:calc(100% + 8px);
-  transform:translate(-50%, -4px);
-  background:var(--bg);
-  color:var(--fg);
-  border:1px solid var(--border-subtle);
-  border-radius:6px;
-  padding:4px 8px;
-  font-size:0.75rem;
-  line-height:1;
-  white-space:nowrap;
-  opacity:0;
-  visibility:hidden;
-  pointer-events:none;
-  transition:opacity 0.15s ease, transform 0.15s ease, visibility 0.15s ease;
-  z-index:1100;
-}
-
-#msg-menu-wrap:hover::after,
-#msg-menu-wrap:focus-within::after{
-  opacity:1;
-  visibility:visible;
-  transform:translate(-50%, 0);
 }
 
 #session-menu{

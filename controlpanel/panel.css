@@ -141,3 +141,36 @@
 .controlpanel-link-danger:hover {
   text-decoration: underline;
 }
+
+
+.controlpanel-table-wrap {
+  overflow-x: auto;
+}
+
+.controlpanel-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.controlpanel-table th,
+.controlpanel-table td {
+  padding: 10px 8px;
+  border-bottom: 1px solid color-mix(in srgb, var(--fg) 8%, transparent);
+  text-align: left;
+  vertical-align: top;
+}
+
+.controlpanel-table th {
+  color: color-mix(in srgb, var(--fg) 72%, transparent);
+  font-weight: 600;
+}
+
+.controlpanel-table td {
+  color: var(--fg);
+  word-break: break-word;
+}
+
+.controlpanel-table a {
+  color: inherit;
+}

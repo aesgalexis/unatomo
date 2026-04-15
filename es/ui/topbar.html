@@ -1,48 +1,21 @@
 <header class="topbar">
   <div class="topbar-inner">
     <div class="topbar-logo-group">
-      <a href="/es/index.html#/" class="topbar-logo-link">
+      <a href="/es/index.html#/dashboard" class="topbar-logo-link" aria-label="Ir al dashboard">
         <img
           src="/static/img/logo-unatomo-v1.6.svg"
           alt="unatomo"
           class="topbar-logo"
           loading="lazy"
         />
-        <div class="topbar-title-wrap">
-          <h2 class="topbar-title" id="topbar-title">Inicio</h2>
-          <div class="topbar-status" id="topbar-status" aria-live="polite"></div>
-        </div>
       </a>
-      <nav class="topbar-menu" aria-label="Navegación">
-        <a class="topbar-menu-link" data-panel="dashboard" href="/es/index.html#/dashboard">Dashboard</a>
-        <a class="topbar-menu-link" data-panel="faqs" href="/es/index.html#/faqs">FAQs</a>
-        <a class="topbar-menu-link" data-panel="tags" href="/es/index.html#/tags">Tags físicos</a>
-        <a class="topbar-menu-link" data-panel="contacto" href="/es/index.html#/contacto">Contacto</a>
-      </nav>
+      <div class="topbar-title-wrap" aria-hidden="true">
+        <h2 class="topbar-title" id="topbar-title">Inicio</h2>
+        <div class="topbar-status" id="topbar-status" aria-live="polite"></div>
+      </div>
     </div>
 
     <div class="topbar-actions" aria-label="Sesión">
-      <div id="msg-menu-wrap">
-        <button
-          id="msg-menu-btn"
-          type="button"
-          aria-label="Mensajes (Soon)"
-        >
-          <svg
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-            focusable="false"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M4 5h16v10H8l-4 4z"></path>
-          </svg>
-        </button>
-      </div>
-
       <div id="notif-menu-wrap">
         <button
           id="notif-menu-btn"

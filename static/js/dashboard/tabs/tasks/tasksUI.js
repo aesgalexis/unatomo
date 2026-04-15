@@ -91,6 +91,14 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
 
       list.appendChild(item);
     });
+  } else {
+    const empty = document.createElement("div");
+    empty.className = "task-item task-empty";
+    empty.textContent = t(
+      "tasks.emptyList",
+      "No hay tareas que mostrar, crea una tarea para comenzar"
+    );
+    list.appendChild(empty);
   }
 
   panel.appendChild(list);

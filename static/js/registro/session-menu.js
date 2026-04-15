@@ -36,7 +36,11 @@ if (!btn || !menu || !label || !action) {
     panelLink.className = "session-menu-link";
     panelLink.hidden = true;
     panelLink.textContent = lang === "en" ? "Panel" : "Panel";
-    if (action && action.parentNode) action.parentNode.insertBefore(panelLink, action);
+    if (profileLink && profileLink.parentNode) {
+      profileLink.parentNode.insertBefore(panelLink, profileLink);
+    } else if (action && action.parentNode) {
+      action.parentNode.insertBefore(panelLink, action);
+    }
   }
 
   const FG = "var(--fg)";

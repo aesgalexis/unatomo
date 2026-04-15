@@ -258,6 +258,11 @@
   margin-bottom: 0.6rem;
 }
 
+.task-empty {
+  font-size: 0.9rem;
+  color: color-mix(in srgb, var(--fg) 70%, transparent);
+}
+
 :root[data-theme="dark"] .machine-card {
   background: #000;
 }

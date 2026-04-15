@@ -47,6 +47,22 @@ const text = {
     : "No se han podido actualizar los c\u00f3digos de registro.",
   noName: isEn ? "Unnamed user" : "Usuario sin nombre",
   noEmail: isEn ? "No email" : "Sin correo",
+  tagsTitle: isEn ? "Tag IDs" : "Tag ID",
+  tagsLoading: isEn ? "Loading generated Tag IDs..." : "Cargando Tag ID generados...",
+  tagsEmpty: isEn ? "No Tag IDs found." : "No se han encontrado Tag ID.",
+  tagsError: isEn ? "Unable to load Tag IDs." : "No se han podido cargar los Tag ID.",
+  tagsHint: isEn ? "Generated Tag IDs and their current assignment details." : "Tag ID generados y su informacion actual de asignacion.",
+  tagIdLabel: isEn ? "Tag ID" : "Tag ID",
+  tagMachineLabel: isEn ? "Machine" : "Maquina",
+  tagUrlLabel: isEn ? "URL" : "URL",
+  tagOwnerLabel: isEn ? "Owner" : "Propietario",
+  tagCreatedByLabel: isEn ? "Created by" : "Creado por",
+  tagAssignedByLabel: isEn ? "Assigned by" : "Asignado por",
+  tagStateLabel: isEn ? "State" : "Estado",
+  tagCreatedAtLabel: isEn ? "Created" : "Creado",
+  tagAssignedAtLabel: isEn ? "Assigned" : "Asignado",
+  noMachine: isEn ? "No machine" : "Sin maquina",
+  noData: "-",
   backToHome: localizeEsPath("/es/index.html"),
   login: localizeEsPath("/es/auth/login.html")
 };
@@ -55,6 +71,7 @@ const listUsersCallable = httpsCallable(functions, "listControlPanelUsers");
 const listCodesCallable = httpsCallable(functions, "listControlPanelRegistrationCodes");
 const createCodeCallable = httpsCallable(functions, "createControlPanelRegistrationCode");
 const deleteCodeCallable = httpsCallable(functions, "deleteControlPanelRegistrationCode");
+const listTagsCallable = httpsCallable(functions, "listControlPanelTags");
 
 const createCard = (title) => {
   const card = document.createElement("section");
@@ -129,6 +146,90 @@ const renderUsers = (body, items) => {
     list.appendChild(row);
   });
   body.appendChild(list);
+};
+
+
+const formatMaybeDate = (value) => {
+  if (!value) return text.noData;
+  const date =
+    typeof value?.toDate === "function"
+      ? value.toDate()
+      : value instanceof Date
+        ? value
+        : value?.seconds
+          ? new Date(value.seconds * 1000)
+          : new Date(value);
+  if (!(date instanceof Date) || Number.isNaN(date.getTime())) return text.noData;
+  return new Intl.DateTimeFormat(isEn ? "en" : "es", {
+    dateStyle: "short",
+    timeStyle: "short",
+  }).format(date);
+};
+
+const renderTags = (body, items) => {
+  body.innerHTML = "";
+  const note = document.createElement("p");
+  note.className = "controlpanel-note";
+  note.textContent = text.tagsHint;
+  body.appendChild(note);
+
+  if (!items.length) {
+    const empty = document.createElement("p");
+    empty.className = "controlpanel-state";
+    empty.textContent = text.tagsEmpty;
+    body.appendChild(empty);
+    return;
+  }
+
+  const tableWrap = document.createElement("div");
+  tableWrap.className = "controlpanel-table-wrap";
+
+  const table = document.createElement("table");
+  table.className = "controlpanel-table";
+
+  const head = document.createElement("thead");
+  head.innerHTML = `
+    <tr>
+      <th>${text.tagIdLabel}</th>
+      <th>${text.tagMachineLabel}</th>
+      <th>${text.tagUrlLabel}</th>
+      <th>${text.tagOwnerLabel}</th>
+      <th>${text.tagCreatedByLabel}</th>
+      <th>${text.tagAssignedByLabel}</th>
+      <th>${text.tagStateLabel}</th>
+      <th>${text.tagCreatedAtLabel}</th>
+      <th>${text.tagAssignedAtLabel}</th>
+    </tr>
+  `;
+  table.appendChild(head);
+
+  const tbody = document.createElement("tbody");
+  items.forEach((item) => {
+    const row = document.createElement("tr");
+    const tagUrl = `${window.location.origin}${item.urlPath || ""}`;
+    row.innerHTML = `
+      <td>${item.tagId || text.noData}</td>
+      <td>${item.machineTitle || text.noMachine}</td>
+      <td></td>
+      <td>${item.tenantDisplayName || item.tenantEmail || text.noData}</td>
+      <td>${item.createdByDisplayName || item.createdByEmail || text.noData}</td>
+      <td>${item.assignedByDisplayName || item.assignedByEmail || text.noData}</td>
+      <td>${item.state || text.noData}</td>
+      <td>${formatMaybeDate(item.createdAt)}</td>
+      <td>${formatMaybeDate(item.assignedAt)}</td>
+    `;
+    const linkCell = row.children[2];
+    const link = document.createElement("a");
+    link.href = tagUrl;
+    link.target = "_blank";
+    link.rel = "noreferrer";
+    link.textContent = tagUrl;
+    linkCell.appendChild(link);
+    tbody.appendChild(row);
+  });
+  table.appendChild(tbody);
+  tableWrap.appendChild(table);
+  body.appendChild(tableWrap);
 };
 
 const renderCodes = (body, items, handlers = {}) => {
@@ -222,8 +323,10 @@ if (mount) {
   wrap.className = "controlpanel-wrap";
   const usersCard = createCard(text.usersTitle);
   const codesCard = createCard(text.codesTitle);
+  const tagsCard = createCard(text.tagsTitle);
   wrap.appendChild(usersCard);
   wrap.appendChild(codesCard);
+  wrap.appendChild(tagsCard);
   mount.appendChild(wrap);
 
   usersCard
@@ -232,9 +335,13 @@ if (mount) {
   codesCard
     .querySelector(".controlpanel-toggle")
     ?.addEventListener("click", () => toggleCard(codesCard));
+  tagsCard
+    .querySelector(".controlpanel-toggle")
+    ?.addEventListener("click", () => toggleCard(tagsCard));
 
   const usersBody = usersCard.querySelector(".controlpanel-body");
   const codesBody = codesCard.querySelector(".controlpanel-body");
+  const tagsBody = tagsCard.querySelector(".controlpanel-body");
   let updateCodesStatus = () => {};
   let addCodeButton = null;
   let addCodeInput = null;
@@ -260,6 +367,7 @@ if (mount) {
             const response = await createCodeCallable(code ? { code } : {});
             const created = response?.data?.code ? String(response.data.code) : "";
             await loadCodes();
+    await loadTags();
             if (addCodeInput) addCodeInput.value = "";
             updateCodesStatus(created ? text.codeCreated(created) : "", "");
           } catch {
@@ -287,8 +395,23 @@ if (mount) {
     }
   };
 
+
+
+  const loadTags = async () => {
+    if (!tagsBody) return;
+    renderState(tagsBody, text.tagsHint, text.tagsLoading);
+    try {
+      const response = await listTagsCallable();
+      const items = Array.isArray(response?.data?.items) ? response.data.items : [];
+      renderTags(tagsBody, items);
+    } catch {
+      renderState(tagsBody, text.tagsHint, text.tagsError, "error");
+    }
+  };
+
   if (usersBody) renderState(usersBody, text.usersHint, text.usersLoading);
   if (codesBody) renderState(codesBody, text.codesHint, text.codesLoading);
+  if (tagsBody) renderState(tagsBody, text.tagsHint, text.tagsLoading);
 
   onAuthStateChanged(auth, async (user) => {
     if (!user) {
@@ -302,7 +425,7 @@ if (mount) {
       return;
     }
 
-    if (!usersBody || !codesBody) return;
+    if (!usersBody || !codesBody || !tagsBody) return;
     renderState(usersBody, text.usersHint, text.usersLoading);
 
     try {
