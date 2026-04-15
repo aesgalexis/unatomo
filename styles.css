@@ -1214,6 +1214,10 @@ textarea.field {
   margin-top:8px;
 }
 
+#session-menu #session-menu-panel{
+  color:#7c3aed;
+}
+
 #session-menu .session-menu-link:hover{
   background:color-mix(in srgb, var(--fg) 8%, transparent);
 }
