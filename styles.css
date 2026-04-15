@@ -543,6 +543,24 @@ body.page li {
   text-align: left;
 }
 
+.section-tags p,
+.section-tags li {
+  line-height: 1.5;
+}
+
+.section-tags p + p,
+.section-tags p + ul,
+.section-tags ul + p,
+.section-tags h3 + p,
+.section-tags h3 + ul {
+  margin-top: 0.75rem;
+}
+
+.section-tags ul {
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
 .page-shell {
   max-width: 800px;
   padding: 110px 1.5rem 2.5rem;
