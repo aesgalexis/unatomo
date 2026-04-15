@@ -243,6 +243,7 @@ if (mount) {
   const notifyTopbar = (message = "") => {
     setTopbarSaveStatus(message);
   };
+  let addBarTapGuardTimer = null;
 
   const isMobileDashboardViewport = () =>
     !!(window.matchMedia && window.matchMedia("(max-width: 768px)").matches);
@@ -250,6 +251,15 @@ if (mount) {
   const clearMobileDetailState = () => {
     state.mobileFocusedMachineId = "";
     state.mobileDetailJustEntered = false;
+  };
+
+  const guardAddBarAfterMobileBack = () => {
+    addBar.style.pointerEvents = "none";
+    if (addBarTapGuardTimer) clearTimeout(addBarTapGuardTimer);
+    addBarTapGuardTimer = setTimeout(() => {
+      addBar.style.pointerEvents = "";
+      addBarTapGuardTimer = null;
+    }, 360);
   };
 
   const syncMobileDetailUI = () => {
@@ -268,7 +278,12 @@ if (mount) {
     state.mobileDetailJustEntered = false;
   };
 
-  mobileBackBtn.addEventListener("click", () => {
+  mobileBackBtn.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    mobileBackBtn.blur();
+    searchInput.blur();
+    guardAddBarAfterMobileBack();
     state.expandedById = [];
     clearMobileDetailState();
     Array.from(list.querySelectorAll(".machine-card")).forEach((card) =>
