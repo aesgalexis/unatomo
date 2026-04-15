@@ -3,6 +3,7 @@ import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/
 import { requestInviteCodeAndRedirect } from "/static/js/registro/invite-gate.js";
 import { upsertAccountDirectory } from "/static/js/dashboard/admin/accountDirectoryRepo.js";
 import { getCurrentLang, getLocaleText, localizeEsPath } from "/static/js/site/locale.js";
+import { getControlPanelPath, isControlPanelUser } from "/controlpanel/access.js";
 
 const btn = document.getElementById("session-menu-btn");
 const menu = document.getElementById("session-menu");
@@ -23,7 +24,20 @@ if (!btn || !menu || !label || !action) {
     register: localizeEsPath("/es/auth/registro.html", lang),
     settings: localizeEsPath("/es/configuracion.html", lang),
     home: localizeEsPath("/es/index.html", lang),
+    panel: getControlPanelPath(),
   };
+
+  let panelLink = document.getElementById("session-menu-panel");
+  if (!panelLink) {
+    panelLink = document.createElement("a");
+    panelLink.id = "session-menu-panel";
+    panelLink.href = paths.panel;
+    panelLink.setAttribute("role", "menuitem");
+    panelLink.className = "session-menu-link";
+    panelLink.hidden = true;
+    panelLink.textContent = lang === "en" ? "Panel" : "Panel";
+    if (action && action.parentNode) action.parentNode.insertBefore(panelLink, action);
+  }
 
   const FG = "var(--fg)";
   const ACCENT = "var(--accent)";
@@ -63,6 +77,11 @@ if (!btn || !menu || !label || !action) {
       profileLink.textContent = "";
     }
 
+    if (panelLink) {
+      panelLink.hidden = true;
+      panelLink.textContent = "";
+    }
+
     action.textContent = text.session.login;
     action.setAttribute("href", paths.login);
     action.onclick = () => {
@@ -85,7 +104,7 @@ if (!btn || !menu || !label || !action) {
     applyButtonColor();
   }
 
-  function setUser(user) {
+  async function setUser(user) {
     setAuthState("user");
     currentUser = user;
 
@@ -96,6 +115,13 @@ if (!btn || !menu || !label || !action) {
       profileLink.hidden = false;
       profileLink.textContent = text.session.settings;
       profileLink.setAttribute("href", paths.settings);
+    }
+
+    if (panelLink) {
+      const allowed = await isControlPanelUser(user);
+      panelLink.hidden = !allowed;
+      panelLink.textContent = allowed ? (lang === "en" ? "Panel" : "Panel") : "";
+      panelLink.setAttribute("href", paths.panel);
     }
 
     action.textContent = text.session.logout;
@@ -133,6 +159,14 @@ if (!btn || !menu || !label || !action) {
     });
   }
 
+  if (panelLink) {
+    panelLink.addEventListener("click", (event) => {
+      if (!currentUser || panelLink.hidden) return;
+      event.stopPropagation();
+      closeMenu();
+    });
+  }
+
   window.addEventListener("unatomo:topbar-open", (event) => {
     if (event.detail && event.detail.id !== "session") closeMenu();
   });
@@ -147,9 +181,9 @@ if (!btn || !menu || !label || !action) {
 
   setGuest();
 
-  onAuthStateChanged(auth, (user) => {
+  onAuthStateChanged(auth, async (user) => {
     if (user) {
-      setUser(user);
+      await setUser(user);
       upsertAccountDirectory(user).catch(() => {});
     } else {
       setGuest();
