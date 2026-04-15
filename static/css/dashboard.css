@@ -1,5 +1,4 @@
 @import "/static/css/effects/inactive_sections/inactive.css";
-@import "/static/css/effects/card_reveal/reveal.css";
 
 .add-bar {
   margin: 0.5rem 0 1rem;
@@ -154,6 +153,26 @@
   margin: 0 0 0.75rem;
   font-size: 0.85rem;
   color: color-mix(in srgb, var(--fg) 70%, transparent);
+}
+
+.dashboard-mobile-back {
+  display: none;
+  margin: 0 0 0.85rem;
+  border: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--bg) 96%, transparent);
+  color: var(--fg);
+  border-radius: 0.75rem;
+  padding: 0.6rem 0.95rem;
+  font: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.dashboard-mobile-back::before {
+  content: "<";
+  display: inline-block;
+  margin-right: 0.5rem;
+  font-weight: 700;
 }
 
 .dashboard-loading {
@@ -1491,6 +1510,40 @@
   padding: 0.6rem 1.4rem;
   font-size: 0.95rem;
   line-height: 1.2;
+}
+
+@media (max-width: 768px) {
+  #machineList[data-mobile-detail="true"] .machine-card:not(.is-mobile-focus),
+  [data-mobile-detail="true"] .add-bar,
+  [data-mobile-detail="true"] .filter-info,
+  [data-mobile-detail="true"] .admin-invite-banner {
+    display: none !important;
+  }
+
+  [data-mobile-detail="true"] .dashboard-mobile-back {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  #machineList[data-mobile-detail="true"] .machine-card.is-mobile-focus {
+    margin-bottom: 0;
+    width: 100%;
+  }
+
+  #machineList[data-mobile-detail="true"] .machine-card.is-mobile-focus.is-mobile-detail-enter {
+    animation: mobileCardDrillIn 220ms ease;
+  }
+}
+
+@keyframes mobileCardDrillIn {
+  from {
+    opacity: 0;
+    transform: translateX(32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 

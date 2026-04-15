@@ -51,14 +51,12 @@ if (mount) {
     tagStatusById: {},
     searchQuery: "",
     pendingInvites: [],
+    mobileFocusedMachineId: "",
+    mobileDetailJustEntered: false,
     loading: true,
     ownerReady: false,
     adminReady: false,
     loadingGuardTimer: null,
-    revealPending: false,
-    revealedOnce: false,
-    lastRenderAt: 0,
-    renderSeq: 0,
     ownerUnsub: null,
     adminLinksUnsub: null,
     adminMachineUnsubs: new Map(),
@@ -219,9 +217,14 @@ if (mount) {
   filterInfo.className = "filter-info";
   filterInfo.style.display = "none";
 
+  const mobileBackBtn = document.createElement("button");
+  mobileBackBtn.type = "button";
+  mobileBackBtn.className = "dashboard-mobile-back";
+  mobileBackBtn.textContent = t("dashboard.mobileBack", "Volver");
+  mobileBackBtn.hidden = true;
+
   const list = document.createElement("div");
   list.id = "machineList";
-  list.className = "cards-reveal";
 
   const inviteBanner = document.createElement("div");
   inviteBanner.className = "admin-invite-banner";
@@ -229,6 +232,7 @@ if (mount) {
 
   addBar.appendChild(loadingEl);
   mount.appendChild(addBar);
+  mount.appendChild(mobileBackBtn);
   mount.appendChild(inviteBanner);
   mount.appendChild(filterInfo);
   mount.appendChild(list);
@@ -240,6 +244,56 @@ if (mount) {
     setTopbarSaveStatus(message);
   };
 
+  const isMobileDashboardViewport = () =>
+    !!(window.matchMedia && window.matchMedia("(max-width: 768px)").matches);
+
+  const clearMobileDetailState = () => {
+    state.mobileFocusedMachineId = "";
+    state.mobileDetailJustEntered = false;
+  };
+
+  const syncMobileDetailUI = () => {
+    const focusedId = state.mobileFocusedMachineId || "";
+    const enabled = isMobileDashboardViewport() && !!focusedId;
+    mount.dataset.mobileDetail = enabled ? "true" : "false";
+    list.dataset.mobileDetail = enabled ? "true" : "false";
+    list.dataset.mobileFocusedId = enabled ? focusedId : "";
+    mobileBackBtn.hidden = !enabled;
+
+    Array.from(list.querySelectorAll(".machine-card")).forEach((card) => {
+      const isFocused = enabled && card.dataset.machineId === focusedId;
+      card.classList.toggle("is-mobile-focus", isFocused);
+      card.classList.toggle("is-mobile-detail-enter", isFocused && state.mobileDetailJustEntered);
+    });
+    state.mobileDetailJustEntered = false;
+  };
+
+  mobileBackBtn.addEventListener("click", () => {
+    state.expandedById = [];
+    clearMobileDetailState();
+    Array.from(list.querySelectorAll(".machine-card")).forEach((card) =>
+      collapseCard(card, { suppressAnimation: true })
+    );
+    syncMobileDetailUI();
+  });
+
+  if (window.matchMedia) {
+    const mobileMedia = window.matchMedia("(max-width: 768px)");
+    const handleMobileViewportChange = () => {
+      if (!mobileMedia.matches) {
+        clearMobileDetailState();
+      } else if (!state.mobileFocusedMachineId && Array.isArray(state.expandedById) && state.expandedById[0]) {
+        state.mobileFocusedMachineId = state.expandedById[0];
+      }
+      syncMobileDetailUI();
+    };
+    if (typeof mobileMedia.addEventListener === "function") {
+      mobileMedia.addEventListener("change", handleMobileViewportChange);
+    } else if (typeof mobileMedia.addListener === "function") {
+      mobileMedia.addListener(handleMobileViewportChange);
+    }
+  }
+
   const updateLoading = () => {
     const total = 2;
     const ready = (state.ownerReady ? 1 : 0) + (state.adminReady ? 1 : 0);
@@ -250,9 +304,6 @@ if (mount) {
       if (state.loadingGuardTimer) {
         clearTimeout(state.loadingGuardTimer);
         state.loadingGuardTimer = null;
-      }
-      if (!state.revealedOnce) {
-        state.revealPending = true;
       }
       addBtn.disabled = false;
       searchInput.disabled = false;
@@ -283,47 +334,6 @@ if (mount) {
         renderCards({ preserveScroll: true });
       }
     }, 8000);
-  };
-
-  let revealTimer = null;
-  let revealIdleTimer = null;
-  const scheduleReveal = (seq) => {
-    if (state.revealedOnce) return;
-    if (revealTimer) clearTimeout(revealTimer);
-    revealTimer = setTimeout(() => {
-      if (state.revealedOnce) return;
-      if (seq !== state.renderSeq) return;
-      const cards = Array.from(list.querySelectorAll(".machine-card"));
-      if (!cards.length) {
-        state.revealPending = true;
-        return;
-      }
-      list.dataset.reveal = "true";
-      requestAnimationFrame(() => {
-        cards.forEach((card) => card.classList.add("is-reveal"));
-      });
-      setTimeout(() => {
-        if (seq !== state.renderSeq) return;
-        list.dataset.reveal = "false";
-        cards.forEach((card) => card.classList.remove("is-reveal"));
-        state.revealedOnce = true;
-        state.revealPending = false;
-      }, cards.length * 68 + 600);
-    }, 40);
-  };
-  const queueRevealAfterIdle = (seq) => {
-    if (state.revealedOnce) return;
-    if (revealIdleTimer) clearTimeout(revealIdleTimer);
-    revealIdleTimer = setTimeout(() => {
-      if (state.revealedOnce) return;
-      if (state.renderSeq !== seq) return;
-      const idleFor = Date.now() - state.lastRenderAt;
-      if (idleFor < 70) {
-        queueRevealAfterIdle(state.renderSeq);
-        return;
-      }
-      scheduleReveal(seq);
-    }, 80);
   };
 
   addBtn.disabled = true;
@@ -831,15 +841,7 @@ if (mount) {
 
   const renderCards = ({ preserveScroll = false } = {}) => {
     const prevScrollY = preserveScroll ? window.scrollY : null;
-    state.renderSeq += 1;
-    const renderSeq = state.renderSeq;
-    state.lastRenderAt = Date.now();
     list.innerHTML = "";
-    if (state.revealPending && !state.revealedOnce) {
-      list.dataset.reveal = "true";
-    } else {
-      list.dataset.reveal = "false";
-    }
     const machines = Array.isArray(state.draftMachines) ? state.draftMachines : [];
     const query = (state.searchQuery || "").trim();
     const visibleMachines = filterMachines(machines, query);
@@ -862,6 +864,8 @@ if (mount) {
       filterInfo.style.display = "none";
     }
     if (!machines.length) {
+      clearMobileDetailState();
+      syncMobileDetailUI();
       renderPlaceholder();
       if (preserveScroll) {
         requestAnimationFrame(() => window.scrollTo(0, prevScrollY || 0));
@@ -869,6 +873,8 @@ if (mount) {
       return;
     }
     if (!visibleMachines.length) {
+      clearMobileDetailState();
+      syncMobileDetailUI();
       list.innerHTML = "";
       const placeholder = document.createElement("div");
       placeholder.className = "machine-placeholder";
@@ -895,7 +901,7 @@ if (mount) {
     visibleMachines
       .slice()
       .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-      .forEach((machine, idx) => {
+      .forEach((machine) => {
         if (machine.tagId && !state.tagStatusById[machine.id]) {
           state.tagStatusById[machine.id] = { text: t("dashboard.tagLinked", "Tag enlazado"), state: "ok" };
         }
@@ -940,16 +946,22 @@ if (mount) {
           const isExpanded = node.dataset.expanded === "true";
           if (isExpanded) {
             expandedById.delete(machine.id);
+            if (state.mobileFocusedMachineId === machine.id) clearMobileDetailState();
             collapseCard(node);
           } else {
             expandedById.clear();
             expandedById.add(machine.id);
+            if (isMobileDashboardViewport()) {
+              state.mobileFocusedMachineId = machine.id;
+              state.mobileDetailJustEntered = true;
+            }
             list.querySelectorAll(".machine-card").forEach((cardEl) => {
               if (cardEl !== node) collapseCard(cardEl);
             });
             expandCard(node);
           }
           state.expandedById = Array.from(expandedById);
+          syncMobileDetailUI();
         };
 
         hooks.onSelectTab = (node, tabId) => {
@@ -1618,11 +1630,6 @@ if (mount) {
           }
         };
 
-        if (!state.revealedOnce) {
-          card.style.setProperty("--reveal-delay", `${idx * 68}ms`);
-        } else {
-          card.style.removeProperty("--reveal-delay");
-        }
         list.appendChild(card);
         cardRefs.set(machine.id, { card, hooks });
 
@@ -1646,15 +1653,23 @@ if (mount) {
           scheduleHeightSync(machine.id, () => recalcHeight(card));
         }
       });
+    if (isMobileDashboardViewport()) {
+      const expandedId = Array.from(expandedById)[0] || "";
+      if (expandedId) {
+        if (!state.mobileFocusedMachineId) state.mobileFocusedMachineId = expandedId;
+      } else {
+        clearMobileDetailState();
+      }
+    } else {
+      clearMobileDetailState();
+    }
+    syncMobileDetailUI();
     if (preserveScroll) {
       requestAnimationFrame(() => window.scrollTo(0, prevScrollY || 0));
     }
     syncMachineAccessListeners(state.draftMachines);
     if (state.loading && state.ownerReady && state.adminReady) {
       updateLoading();
-    }
-    if (state.revealPending && !state.revealedOnce) {
-      queueRevealAfterIdle(renderSeq);
     }
   };
 

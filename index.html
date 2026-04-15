@@ -31,13 +31,6 @@
 </head>
 <body>
   <main class="shell">
-    <div style="display:flex; justify-content:center; margin-bottom:1rem;">
-      <div class="topbar-lang-toggle" aria-label="Language">
-        <a id="lang-link-es" class="topbar-lang-link" href="#">ES</a>
-        <a id="lang-link-en" class="topbar-lang-link" href="#">EN</a>
-      </div>
-    </div>
-
     <img
       src="/static/img/logo-unatomo-v1.5.svg"
       alt="unatomo"
@@ -192,26 +185,11 @@
       document.getElementById("intro-line-1").textContent = text.intro;
       document.getElementById("enter-site").textContent = text.contact;
       document.getElementById("privacy-link").textContent = text.privacy;
-      document.getElementById("lang-link-es").classList.toggle("is-active", lang === "es");
-      document.getElementById("lang-link-en").classList.toggle("is-active", lang === "en");
-      document.getElementById("lang-link-es").setAttribute("aria-current", lang === "es" ? "page" : "false");
-      document.getElementById("lang-link-en").setAttribute("aria-current", lang === "en" ? "page" : "false");
 
       document.getElementById("reset-link").href = lang === "en" ? "/en/auth/reset.html" : "/es/auth/reset.html";
       document.getElementById("request-code-link").href = lang === "en" ? "/en/contacto.html" : "/es/contacto.html";
       document.getElementById("privacy-link").href = lang === "en" ? "/en/privacidad.html" : "/es/privacidad.html";
       document.querySelector(".auth-actions").setAttribute("aria-label", lang === "en" ? "Access" : "Acceso");
-
-      document.getElementById("lang-link-es").addEventListener("click", function (e) {
-        e.preventDefault();
-        try { localStorage.setItem("unatomo_lang", "es"); } catch (err) {}
-        window.location.reload();
-      });
-      document.getElementById("lang-link-en").addEventListener("click", function (e) {
-        e.preventDefault();
-        try { localStorage.setItem("unatomo_lang", "en"); } catch (err) {}
-        window.location.reload();
-      });
     })();
   </script>
   <script type="module" src="/static/js/theme/theme.js"></script>

@@ -578,23 +578,45 @@ body.page li {
 }
 
 body.menu-locked .topbar-menu {
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(-6px);
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
 }
 
 body.menu-locked .topbar-menu-backdrop {
-  opacity: 0;
-  visibility: hidden;
+  opacity: 1;
+  visibility: visible;
 }
 
 body.menu-locked .topbar-logo-group:hover .topbar-menu,
 body.menu-locked .topbar-logo-group:focus-within .topbar-menu,
 body.menu-locked .topbar-logo-group:hover .topbar-menu-backdrop,
 body.menu-locked .topbar-logo-group:focus-within .topbar-menu-backdrop {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: translateY(0);
+}
+
+body.menu-closing .topbar-menu,
+body.menu-closing .topbar-menu-backdrop,
+body.menu-closing .topbar-logo-group:hover .topbar-menu,
+body.menu-closing .topbar-logo-group:focus-within .topbar-menu,
+body.menu-closing .topbar-logo-group:hover .topbar-menu-backdrop,
+body.menu-closing .topbar-logo-group:focus-within .topbar-menu-backdrop {
   opacity: 0 !important;
   visibility: hidden !important;
-  transform: translateY(-6px);
+  transform: translateY(-6px) !important;
+}
+
+body.menu-suppress-open .topbar-menu,
+body.menu-suppress-open .topbar-menu-backdrop,
+body.menu-suppress-open .topbar-logo-group:hover .topbar-menu,
+body.menu-suppress-open .topbar-logo-group:focus-within .topbar-menu,
+body.menu-suppress-open .topbar-logo-group:hover .topbar-menu-backdrop,
+body.menu-suppress-open .topbar-logo-group:focus-within .topbar-menu-backdrop {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  transform: translateY(-6px) !important;
 }
 
 .topbar-menu-backdrop {

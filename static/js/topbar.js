@@ -56,24 +56,44 @@ if (!backdrop) {
 }
 
 const logoGroup = document.querySelector(".topbar-logo-group");
+let menuClosingTimer = null;
+const hideTopbarMenuImmediately = () => {
+  document.body.classList.add("menu-closing");
+  if (menuClosingTimer) window.clearTimeout(menuClosingTimer);
+  menuClosingTimer = window.setTimeout(() => {
+    document.body.classList.remove("menu-closing");
+  }, 220);
+};
+const suppressTopbarMenuOpen = () => {
+  document.body.classList.add("menu-suppress-open");
+};
+const clearTopbarMenuSuppression = () => {
+  document.body.classList.remove("menu-suppress-open");
+};
 const closeTopbarMenu = () => {
   document.body.classList.remove("menu-open");
   document.body.classList.remove("menu-locked");
+  suppressTopbarMenuOpen();
+  hideTopbarMenuImmediately();
 };
 if (logoGroup) {
   logoGroup.addEventListener("mouseenter", () => {
+    if (document.body.classList.contains("menu-suppress-open")) return;
     document.body.classList.add("menu-open");
   });
   logoGroup.addEventListener("mouseleave", () => {
+    clearTopbarMenuSuppression();
+    if (document.body.classList.contains("menu-locked")) return;
     document.body.classList.remove("menu-open");
-    document.body.classList.remove("menu-locked");
   });
   logoGroup.addEventListener("focusin", () => {
+    if (document.body.classList.contains("menu-suppress-open")) return;
     document.body.classList.add("menu-open");
   });
   logoGroup.addEventListener("focusout", () => {
+    clearTopbarMenuSuppression();
+    if (document.body.classList.contains("menu-locked")) return;
     document.body.classList.remove("menu-open");
-    document.body.classList.remove("menu-locked");
   });
 }
 
@@ -92,11 +112,18 @@ if (backdrop) {
 
 const logoLink = document.querySelector(".topbar-logo-link");
 if (logoLink) {
-  logoLink.addEventListener("click", () => {
+  logoLink.addEventListener("click", (event) => {
+    event.preventDefault();
     if (document.activeElement && document.activeElement.blur) {
       document.activeElement.blur();
     }
-    closeTopbarMenu();
+    clearTopbarMenuSuppression();
+    const isLocked = document.body.classList.contains("menu-locked");
+    if (isLocked) {
+      closeTopbarMenu();
+      return;
+    }
+    document.body.classList.add("menu-open");
     document.body.classList.add("menu-locked");
   });
 }
