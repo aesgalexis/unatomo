@@ -116,13 +116,6 @@
       </p>
     </section>
 
-    <section class="intro">
-      <h5 id="intro-title"></h5>
-      <h5 id="intro-line-1"></h5>
-    </section>
-
-    <button id="enter-site" type="button" class="btn-pill btn-pill-outline"></button>
-
     <p id="legal-footer" class="legal-footer"></p>
     <p class="footer-link">
       <a id="privacy-link" href="/es/privacidad.html"></a>
@@ -149,8 +142,6 @@
           registerPlaceholder: "C\u00f3digo",
           registerSubmit: "Continuar",
           requestCode: "Solicitar c\u00f3digo",
-          intro: "Sistema de gesti\u00f3n de maquinaria y equipamiento basado en tecnolog\u00eda NFC",
-          contact: "Contactar",
           privacy: "Pol\u00edtica de privacidad y cookies"
         },
         en: {
@@ -169,8 +160,6 @@
           registerPlaceholder: "Code",
           registerSubmit: "Continue",
           requestCode: "Request code",
-          intro: "Machinery and equipment management system based on NFC technology",
-          contact: "Contact",
           privacy: "Privacy and cookie policy"
         }
       }[lang];
@@ -190,8 +179,6 @@
       document.getElementById("register-code-input").placeholder = text.registerPlaceholder;
       document.getElementById("register-code-submit").textContent = text.registerSubmit;
       document.getElementById("request-code-link").textContent = text.requestCode;
-      document.getElementById("intro-line-1").textContent = text.intro;
-      document.getElementById("enter-site").textContent = text.contact;
       document.getElementById("privacy-link").textContent = text.privacy;
 
       document.getElementById("reset-link").href = lang === "en" ? "/en/auth/reset.html" : "/es/auth/reset.html";
