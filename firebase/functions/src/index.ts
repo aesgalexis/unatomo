@@ -353,9 +353,9 @@ export const listControlPanelUsers = onCall(async (request) => {
 
   const [directorySnap, usersSnap] = await Promise.all([
     accountDirectoryCol()
-    .orderBy("updatedAt", "desc")
-    .limit(1000)
-    .get(),
+      .orderBy("updatedAt", "desc")
+      .limit(1000)
+      .get(),
     db.collection("users")
       .orderBy("updatedAt", "desc")
       .limit(1000)
@@ -368,7 +368,9 @@ export const listControlPanelUsers = onCall(async (request) => {
     displayName: string;
   }>();
 
-  const upsertItem = (raw: {uid?: unknown; email?: unknown; displayName?: unknown}) => {
+  const upsertItem = (
+    raw: {uid?: unknown; email?: unknown; displayName?: unknown},
+  ) => {
     const uid = (raw.uid || "").toString().trim();
     const email = (raw.email || "").toString().trim();
     const displayName = (raw.displayName || "").toString().trim();
