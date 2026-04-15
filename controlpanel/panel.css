@@ -62,11 +62,53 @@
   gap: 10px;
 }
 
+.controlpanel-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 12px;
+  flex-wrap: wrap;
+}
+
+.controlpanel-input {
+  flex: 1 1 220px;
+  min-width: 180px;
+  border: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--bg) 96%, transparent);
+  color: var(--fg);
+  border-radius: 10px;
+  padding: 8px 10px;
+  font: inherit;
+}
+
+.controlpanel-btn {
+  border: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--bg) 96%, transparent);
+  color: var(--fg);
+  border-radius: 10px;
+  padding: 8px 12px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.controlpanel-btn:disabled,
+.controlpanel-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .controlpanel-user {
   display: grid;
   gap: 4px;
   padding: 10px 0;
   border-bottom: 1px solid color-mix(in srgb, var(--fg) 8%, transparent);
+}
+
+.controlpanel-user--action {
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 12px;
 }
 
 .controlpanel-user:last-child {
@@ -84,4 +126,18 @@
   font-size: 13px;
   color: color-mix(in srgb, var(--fg) 70%, transparent);
   word-break: break-word;
+}
+
+.controlpanel-link-danger {
+  border: none;
+  background: transparent;
+  color: var(--danger, #d33);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.controlpanel-link-danger:hover {
+  text-decoration: underline;
 }
