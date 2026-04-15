@@ -243,8 +243,6 @@ if (mount) {
   const notifyTopbar = (message = "") => {
     setTopbarSaveStatus(message);
   };
-  let addBarTapGuardTimer = null;
-  let mobileReturnGuardTimer = null;
 
   const isMobileDashboardViewport = () =>
     !!(window.matchMedia && window.matchMedia("(max-width: 768px)").matches);
@@ -252,30 +250,6 @@ if (mount) {
   const clearMobileDetailState = () => {
     state.mobileFocusedMachineId = "";
     state.mobileDetailJustEntered = false;
-  };
-
-  const guardAddBarAfterMobileBack = () => {
-    mount.dataset.mobileReturning = "true";
-    addBar.style.pointerEvents = "none";
-    addBtn.disabled = true;
-    searchInput.disabled = true;
-    orderBtn.disabled = true;
-    searchInput.blur();
-    if (addBarTapGuardTimer) clearTimeout(addBarTapGuardTimer);
-    if (mobileReturnGuardTimer) clearTimeout(mobileReturnGuardTimer);
-    addBarTapGuardTimer = setTimeout(() => {
-      addBar.style.pointerEvents = "";
-      if (!state.loading) {
-        addBtn.disabled = false;
-        searchInput.disabled = false;
-        orderBtn.disabled = false;
-      }
-      addBarTapGuardTimer = null;
-    }, 650);
-    mobileReturnGuardTimer = setTimeout(() => {
-      if (mount.dataset.mobileReturning === "true") mount.dataset.mobileReturning = "false";
-      mobileReturnGuardTimer = null;
-    }, 700);
   };
 
   const syncMobileDetailUI = () => {
@@ -299,7 +273,6 @@ if (mount) {
     event.stopPropagation();
     mobileBackBtn.blur();
     searchInput.blur();
-    guardAddBarAfterMobileBack();
     state.expandedById = [];
     clearMobileDetailState();
     Array.from(list.querySelectorAll(".machine-card")).forEach((card) =>
