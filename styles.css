@@ -1075,6 +1075,10 @@ textarea.field {
   border-radius:10px;
 }
 
+#session-menu .session-menu-link[hidden]{
+  display:none !important;
+}
+
 #session-menu .session-menu-link + .session-menu-link{
   margin-top:8px;
 }
