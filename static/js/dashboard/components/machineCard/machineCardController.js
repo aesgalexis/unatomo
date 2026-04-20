@@ -15,6 +15,10 @@ const TAB_RENDER = {
 };
 
 export const createMachineCard = (machine, options = {}) => {
+  const supportsHoverTooltips = () =>
+    window.matchMedia &&
+    window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+
   const card = buildMachineCardTemplate();
   card.dataset.machineId = machine.id;
   card.draggable = options.disableDrag ? false : true;
@@ -346,6 +350,7 @@ export const createMachineCard = (machine, options = {}) => {
     const label = t(`tabs.${key}`, key);
     tab.setAttribute("aria-label", label);
     tab.setAttribute("data-tooltip", label);
+    if (!supportsHoverTooltips()) return;
     let tipEl = null;
     const showTip = (event) => {
       const tooltip = tab.getAttribute("data-tooltip");

@@ -1436,11 +1436,15 @@
 }
 
 .task-complete-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 0.5rem;
   border: 1px solid var(--border-subtle);
   background: color-mix(in srgb, var(--bg) 96%, transparent);
   color: var(--fg);
   padding: 0.25rem 0.6rem;
+  line-height: 1;
   font: inherit;
   cursor: pointer;
 }
@@ -1595,5 +1599,4 @@
     transform: translateX(0);
   }
 }
-
 
