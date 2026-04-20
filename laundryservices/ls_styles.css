@@ -1054,8 +1054,9 @@ body.page .ls-topbar #lang-toggle {
 
 .ls-about-person {
   margin: 0;
-  display: flex;
-  align-items: flex-start;
+  display: grid;
+  grid-template-columns: 125px minmax(0, 1fr);
+  align-items: start;
   gap: 0.95rem;
 }
 
@@ -1111,8 +1112,15 @@ body.page .ls-topbar #lang-toggle {
   line-height: 1.45;
 }
 
-.ls-about-social {
+.ls-about-person-links {
   margin-top: 0.35rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  grid-column: 2;
+}
+
+.ls-about-social {
   width: 1.5rem;
   height: 1.5rem;
   display: inline-flex;
@@ -1123,23 +1131,6 @@ body.page .ls-topbar #lang-toggle {
   font-weight: 700;
   line-height: 1;
   align-self: flex-start;
-}
-
-.ls-about-social-row {
-  display: inline-flex;
-  gap: 0.45rem;
-}
-
-.ls-about-social-grid {
-  margin-top: -1.35rem;
-  margin-bottom: 2rem;
-}
-
-.ls-about-social-slot {
-  min-height: 1.5rem;
-  display: flex;
-  align-items: flex-start;
-  padding-left: calc(125px + 0.95rem);
 }
 
 .ls-about-social svg {
@@ -1246,13 +1237,18 @@ body.ls-privacy-page {
     gap: 1rem;
   }
 
-  .ls-about-social-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.75rem;
+  .ls-about-person {
+    grid-template-columns: 1fr;
+    gap: 0.7rem;
   }
 
-  .ls-about-person {
-    align-items: flex-start;
+  .ls-about-person-copy {
+    width: 100%;
+  }
+
+  .ls-about-person-links {
+    margin-top: 0.55rem;
+    grid-column: 1;
   }
 }
 
