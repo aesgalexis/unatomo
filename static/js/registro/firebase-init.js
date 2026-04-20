@@ -46,6 +46,33 @@ export async function validateRegistrationCode(code) {
   return { valid: true, code: normalized, data };
 }
 
+
+export async function getUserProfile(userOrUid) {
+  const uid = typeof userOrUid === "string"
+    ? userOrUid.trim()
+    : (userOrUid?.uid || "").toString().trim();
+  if (!uid) return null;
+  const ref = doc(db, "users", uid);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) return null;
+  return { id: snap.id, ...(snap.data() || {}) };
+}
+
+export async function getUserRegistrationState(userOrUid) {
+  const profile = await getUserProfile(userOrUid);
+  if (!profile) return { allowed: false, reason: "missing_profile" };
+
+  const code = (profile.regCode || "").toString().trim().toUpperCase();
+  if (!code) return { allowed: false, reason: "missing_code", profile };
+
+  const check = await validateRegistrationCode(code);
+  if (!check.valid) {
+    return { allowed: false, reason: check.reason || "invalid_code", code, profile };
+  }
+
+  return { allowed: true, reason: "ok", code, profile };
+}
+
 async function upsertUserProfile(user, regCode) {
   const userRef = doc(db, "users", user.uid);
 
@@ -74,6 +101,15 @@ export async function registerWithGoogle(regCode) {
   return { ok: true, uid: user.uid };
 }
 
+export async function completeCurrentUserRegistration(regCode) {
+  const code = (regCode || "").toString().trim().toUpperCase();
+  const user = auth.currentUser;
+  if (!user || !code) return { ok: false };
+
+  await upsertUserProfile(user, code);
+  return { ok: true, uid: user.uid };
+}
+
 export async function registerWithEmail(regCode, email, password, displayName) {
   const code = (regCode || "").toString().trim().toUpperCase();
   const em = (email || "").toString().trim();
@@ -95,7 +131,13 @@ export async function loginWithGoogle() {
   const provider = new GoogleAuthProvider();
   const result = await signInWithPopup(auth, provider);
   if (!result.user) return { ok: false };
-  return { ok: true, uid: result.user.uid };
+  const registration = await getUserRegistrationState(result.user);
+  return {
+    ok: registration.allowed,
+    uid: result.user.uid,
+    needsRegistration: !registration.allowed,
+    registrationReason: registration.reason || ""
+  };
 }
 
 export async function loginWithEmail(email, password) {
@@ -103,7 +145,13 @@ export async function loginWithEmail(email, password) {
   const pw = (password || "").toString();
   const cred = await signInWithEmailAndPassword(auth, em, pw);
   if (!cred.user) return { ok: false };
-  return { ok: true, uid: cred.user.uid };
+  const registration = await getUserRegistrationState(cred.user);
+  return {
+    ok: registration.allowed,
+    uid: cred.user.uid,
+    needsRegistration: !registration.allowed,
+    registrationReason: registration.reason || ""
+  };
 }
 
 export async function sendPasswordReset(email) {

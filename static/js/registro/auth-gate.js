@@ -1,4 +1,4 @@
-import { auth } from "/static/js/registro/firebase-init.js";
+import { auth, getUserRegistrationState } from "/static/js/registro/firebase-init.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 import { getCurrentLang } from "/static/js/site/locale.js";
 
@@ -101,8 +101,17 @@ function applyAuthState(isAuthed) {
 
 applyAuthState(document.documentElement.dataset.auth === "user" || !!auth.currentUser);
 
-onAuthStateChanged(auth, (user) => {
-  applyAuthState(!!user);
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    applyAuthState(false);
+    return;
+  }
+  try {
+    const registration = await getUserRegistrationState(user);
+    applyAuthState(!!registration.allowed);
+  } catch {
+    applyAuthState(false);
+  }
 });
 
 window.addEventListener("unatomo:auth", (e) => {

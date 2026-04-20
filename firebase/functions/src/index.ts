@@ -37,6 +37,7 @@ const normalizeEmail = (email: string) =>
 const CONTROL_PANEL_EMAIL_HASH =
   "361be737851cc08e4a603606a25f7dc0649d8d75823f9e6244df97f14fd5ebd5";
 const PUBLIC_SITE_ORIGIN = "https://unatomo.com";
+const QR_CANVAS_SIZE = 300;
 
 const hashEmail = (email: string) =>
   createHash("sha256").update(normalizeEmail(email)).digest("hex");
@@ -79,6 +80,8 @@ const buildMachineTagUrl = (tagId: string, lang = "es") =>
   `${PUBLIC_SITE_ORIGIN}/${normalizeLang(lang)}/m.html?tag=${encodeURIComponent(
     tagId,
   )}`;
+
+const decorateQrSvg = (svgMarkup: string) => svgMarkup;
 
 const buildStorageDownloadUrl = (path: string, token: string) => {
   const encodedPath = encodeURIComponent(path);
@@ -593,18 +596,23 @@ export const generateMachineTagQr = onCall(async (request) => {
 
   const tagUrl = buildMachineTagUrl(tagId, requestedLang);
 
-  const pngBuffer = await QRCode.toBuffer(tagUrl, {
-    type: "png",
-    width: 1200,
+  const rawSvg = await QRCode.toString(tagUrl, {
+    type: "svg",
+    width: QR_CANVAS_SIZE,
     margin: 2,
-    errorCorrectionLevel: "M",
+    errorCorrectionLevel: "H",
+    color: {
+      dark: "#0f172a",
+      light: "#ffffff",
+    },
   });
+  const qrSvg = decorateQrSvg(rawSvg);
 
-  const qrPath = `tag-qrs/${tagId}.png`;
+  const qrPath = `tag-qrs/${tagId}.svg`;
   const downloadToken = randomUUID();
-  await storageBucket.file(qrPath).save(pngBuffer, {
+  await storageBucket.file(qrPath).save(qrSvg, {
     resumable: false,
-    contentType: "image/png",
+    contentType: "image/svg+xml",
     metadata: {
       cacheControl: "private, max-age=31536000",
       metadata: {

@@ -4,7 +4,9 @@ import {
   loginWithEmail,
   validateRegistrationCode,
   registerWithGoogle,
-  registerWithEmail
+  registerWithEmail,
+  completeCurrentUserRegistration,
+  getUserRegistrationState
 } from "/static/js/registro/firebase-init.js";
 import {
   requestInviteCodeAndRedirect,
@@ -39,6 +41,7 @@ const text = {
   invalidEmail: isEn ? "Invalid email." : "Correo no válido.",
   tooManyRequests: isEn ? "Too many attempts. Try again later." : "Demasiados intentos. Prueba más tarde.",
   loginError: isEn ? "Error signing in." : "Error iniciando sesión.",
+  activationRequired: isEn ? "This account needs a valid registration code before access." : "Esta cuenta necesita un c\u00f3digo de registro v\u00e1lido antes de acceder.",
   enterValidCode: isEn ? "Enter a valid code." : "Introduce un código válido.",
   validatingCode: isEn ? "Validating code..." : "Validando código...",
   invalidCode: isEn ? "Invalid code." : "Código no válido.",
@@ -57,6 +60,25 @@ const text = {
   login: isEn ? "Sign in" : "Iniciar sesión",
   user: isEn ? "User" : "Usuario",
   logout: isEn ? "Sign out" : "Cerrar sesión",
+};
+
+
+const rememberActivationTarget = () => {
+  try { sessionStorage.setItem("unatomo_register_target", paths.register); } catch {}
+};
+
+const goActivationFlow = () => {
+  rememberActivationTarget();
+  window.location.href = "/setup=1";
+};
+
+const handleLoginResult = (res, setStatus) => {
+  if (res?.needsRegistration) {
+    setStatus(text.activationRequired);
+    setTimeout(goActivationFlow, 650);
+    return true;
+  }
+  return false;
 };
 
 function initSetupLogin() {
@@ -91,8 +113,12 @@ function initSetupLogin() {
 
   btnOpen.addEventListener("click", toggleBox);
 
-  onAuthStateChanged(auth, (user) => {
-    if (user) window.location.href = paths.home;
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) return;
+    try {
+      const registration = await getUserRegistrationState(user);
+      if (registration.allowed) window.location.href = paths.home;
+    } catch {}
   });
 
   btnGoogle.addEventListener("click", async () => {
@@ -102,6 +128,7 @@ function initSetupLogin() {
       showStatus(text.connectingGoogle);
 
       const res = await loginWithGoogle();
+      if (handleLoginResult(res, showStatus)) return;
       if (!res.ok) return showStatus(text.loginFailed);
 
       showStatus(text.loginSuccess);
@@ -126,6 +153,7 @@ function initSetupLogin() {
       showStatus(text.signingIn);
 
       const res = await loginWithEmail(email, pw);
+      if (handleLoginResult(res, showStatus)) return;
       if (!res.ok) return showStatus(text.loginFailed);
 
       showStatus(text.loginSuccess);
@@ -206,7 +234,7 @@ function initSetupRegisterCode() {
       try { localStorage.setItem("unatomo_access_code", res.code); } catch {}
 
       setStatus(text.validCode);
-const rawTarget = getRegisterTarget() || paths.register;
+      const rawTarget = getRegisterTarget() || paths.register;
       clearRegisterTarget();
       const sep = rawTarget.includes("?") ? "&" : "?";
       const target = `${rawTarget}${sep}code=${encodeURIComponent(res.code)}`;
@@ -246,8 +274,15 @@ function initLoginPage() {
 
   document.documentElement.style.visibility = "visible";
 
-  onAuthStateChanged(auth, (user) => {
-    if (user) goHome();
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) return;
+    try {
+      const registration = await getUserRegistrationState(user);
+      if (registration.allowed) goHome();
+      else goActivationFlow();
+    } catch {
+      goActivationFlow();
+    }
   });
 
   btnGoogle.addEventListener("click", async () => {
@@ -257,6 +292,7 @@ function initLoginPage() {
       setStatus(text.connectingGoogle);
 
       const res = await loginWithGoogle();
+      if (handleLoginResult(res, setStatus)) return;
       if (!res.ok) return setStatus(text.loginFailed);
 
       setStatus(text.loginSuccess);
@@ -281,6 +317,7 @@ function initLoginPage() {
       setStatus(text.signingIn);
 
       const res = await loginWithEmail(email, password);
+      if (handleLoginResult(res, setStatus)) return;
       if (!res.ok) return setStatus(text.loginFailed);
 
       setStatus(text.loginSuccess);
@@ -359,7 +396,9 @@ function initRegisterPage() {
         btnGoogle.disabled = true;
         setStatus(text.connectingGoogle);
 
-        const res = await registerWithGoogle(code);
+        const res = auth.currentUser
+          ? await completeCurrentUserRegistration(code)
+          : await registerWithGoogle(code);
         if (!res.ok) return setStatus(text.registerFailed);
 
         setStatus(text.registerSuccess);
@@ -448,9 +487,18 @@ function initSessionUI() {
     }
   });
 
-  onAuthStateChanged(auth, (user) => {
-    if (user) setUser(user);
-    else setGuest();
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      setGuest();
+      return;
+    }
+    try {
+      const registration = await getUserRegistrationState(user);
+      if (registration.allowed) setUser(user);
+      else setGuest();
+    } catch {
+      setGuest();
+    }
   });
 }
 

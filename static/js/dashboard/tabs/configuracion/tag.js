@@ -173,7 +173,8 @@ export const render = (container, machine, hooks, options = {}) => {
   qrDownload.hidden = !machine.tagQrUrl;
   qrDownload.target = "_blank";
   qrDownload.rel = "noreferrer";
-  qrDownload.download = machine.tagId ? `${machine.tagId}.png` : "tag-qr.png";
+  const qrExt = (machine.tagQrPath || "").toLowerCase().endsWith(".svg") ? "svg" : "png";
+  qrDownload.download = machine.tagId ? `${machine.tagId}.${qrExt}` : `tag-qr.${qrExt}`;
   qrDownload.addEventListener("click", (event) => event.stopPropagation());
 
   qrControls.appendChild(qrGenerate);
