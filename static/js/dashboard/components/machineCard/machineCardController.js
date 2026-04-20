@@ -345,7 +345,29 @@ export const createMachineCard = (machine, options = {}) => {
     const key = tab.dataset.tab;
     const label = t(`tabs.${key}`, key);
     tab.setAttribute("aria-label", label);
-    tab.setAttribute("title", label);
+    tab.setAttribute("data-tooltip", label);
+    let tipEl = null;
+    const showTip = (event) => {
+      const tooltip = tab.getAttribute("data-tooltip");
+      if (!tooltip) return;
+      tipEl = document.createElement("div");
+      tipEl.className = "mc-tooltip";
+      tipEl.textContent = tooltip;
+      document.body.appendChild(tipEl);
+      const x = (event && event.clientX) || 0;
+      const y = (event && event.clientY) || 0;
+      const left = x + 12;
+      const top = y - tipEl.offsetHeight - 10;
+      tipEl.style.top = `${Math.max(8, top)}px`;
+      tipEl.style.left = `${Math.max(8, left)}px`;
+    };
+    const hideTip = () => {
+      if (tipEl && tipEl.parentNode) tipEl.parentNode.removeChild(tipEl);
+      tipEl = null;
+    };
+    tab.addEventListener("mouseenter", showTip);
+    tab.addEventListener("mouseleave", hideTip);
+    tab.addEventListener("blur", hideTip);
   });
 
   const renderTab = (key) => {

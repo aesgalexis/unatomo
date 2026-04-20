@@ -11,7 +11,8 @@
 import {setGlobalOptions} from "firebase-functions";
 import {onCall, HttpsError} from "firebase-functions/v2/https";
 import * as admin from "firebase-admin";
-import {createHash} from "node:crypto";
+import {createHash, randomUUID} from "node:crypto";
+import QRCode from "qrcode";
 
 // Start writing functions
 // https://firebase.google.com/docs/functions/typescript
@@ -35,6 +36,7 @@ const normalizeEmail = (email: string) =>
   (email || "").toString().trim().toLowerCase();
 const CONTROL_PANEL_EMAIL_HASH =
   "361be737851cc08e4a603606a25f7dc0649d8d75823f9e6244df97f14fd5ebd5";
+const PUBLIC_SITE_ORIGIN = "https://unatomo.com";
 
 const hashEmail = (email: string) =>
   createHash("sha256").update(normalizeEmail(email)).digest("hex");
@@ -54,6 +56,8 @@ const linksCol = () => db.collection("admin_machine_links");
 const accountDirectoryCol = () => db.collection("account_directory");
 const registrationCodesCol = () => db.collection("registration_codes");
 const tagsCol = () => db.collection("tags");
+const machineAccessCol = () => db.collection("machine_access");
+const storageBucket = admin.storage().bucket();
 
 const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
@@ -68,6 +72,53 @@ const generateRegistrationCode = (length = 8) => {
 
 const normalizeRegistrationCode = (value: string) =>
   (value || "").toString().trim().toUpperCase();
+const normalizeLang = (value: string) =>
+  (value || "").toString().trim().toLowerCase() === "en" ? "en" : "es";
+
+const buildMachineTagUrl = (tagId: string, lang = "es") =>
+  `${PUBLIC_SITE_ORIGIN}/${normalizeLang(lang)}/m.html?tag=${encodeURIComponent(
+    tagId,
+  )}`;
+
+const buildStorageDownloadUrl = (path: string, token: string) => {
+  const encodedPath = encodeURIComponent(path);
+  return (
+    `https://firebasestorage.googleapis.com/v0/b/${storageBucket.name}/o/` +
+    `${encodedPath}?alt=media&token=${token}`
+  );
+};
+
+const deleteStorageFileIfExists = async (path: string) => {
+  const safePath = (path || "").toString().trim();
+  if (!safePath) return;
+  try {
+    await storageBucket.file(safePath).delete({ignoreNotFound: true});
+  } catch {
+    // ignore storage cleanup failures
+  }
+};
+
+const getOwnedMachineForAuth = async (
+  auth: {uid?: string | null} | null | undefined,
+  machineId: string,
+) => {
+  if (!auth?.uid) throw new HttpsError("unauthenticated", "auth-required");
+  const safeMachineId = (machineId || "").toString().trim();
+  if (!safeMachineId) {
+    throw new HttpsError("invalid-argument", "machineId-required");
+  }
+  const machineRef = machinesCol().doc(safeMachineId);
+  const machineSnap = await machineRef.get();
+  if (!machineSnap.exists) {
+    throw new HttpsError("not-found", "machine-not-found");
+  }
+  const machine = machineSnap.data() || {};
+  if ((machine.ownerUid || "").toString().trim() !== auth.uid) {
+    throw new HttpsError("permission-denied", "not-owner");
+  }
+  return {machineRef, machine};
+};
+
 
 export const createAdminInvite = onCall(async (request) => {
   const auth = request.auth;
@@ -523,6 +574,119 @@ export const deleteControlPanelRegistrationCode = onCall(async (request) => {
   return {ok: true, code};
 });
 
+
+export const generateMachineTagQr = onCall(async (request) => {
+  const auth = request.auth;
+  if (!auth) throw new HttpsError("unauthenticated", "auth-required");
+  const machineId = (request.data?.machineId || "").toString().trim();
+  const requestedLang = (request.data?.lang || "").toString().trim();
+  const {machineRef, machine} = await getOwnedMachineForAuth(auth, machineId);
+  const tagId = (machine.tagId || "").toString().trim();
+  if (!tagId) {
+    throw new HttpsError("failed-precondition", "tag-not-connected");
+  }
+
+  const tagSnap = await tagsCol().doc(tagId).get();
+  if (!tagSnap.exists) {
+    throw new HttpsError("not-found", "tag-not-found");
+  }
+
+  const tagUrl = buildMachineTagUrl(tagId, requestedLang);
+
+  const pngBuffer = await QRCode.toBuffer(tagUrl, {
+    type: "png",
+    width: 1200,
+    margin: 2,
+    errorCorrectionLevel: "M",
+  });
+
+  const qrPath = `tag-qrs/${tagId}.png`;
+  const downloadToken = randomUUID();
+  await storageBucket.file(qrPath).save(pngBuffer, {
+    resumable: false,
+    contentType: "image/png",
+    metadata: {
+      cacheControl: "private, max-age=31536000",
+      metadata: {
+        firebaseStorageDownloadTokens: downloadToken,
+      },
+    },
+  });
+  const qrUrl = buildStorageDownloadUrl(qrPath, downloadToken);
+  const now = admin.firestore.FieldValue.serverTimestamp();
+
+  await Promise.all([
+    machineRef.set(
+      {
+        tagUrl,
+        tagQrUrl: qrUrl,
+        tagQrPath: qrPath,
+        updatedAt: now,
+        updatedBy: auth.uid,
+      },
+      {merge: true},
+    ),
+    tagsCol().doc(tagId).set(
+      {
+        tenantId: auth.uid,
+        machineId,
+        qrUrl,
+        qrPath,
+        url: tagUrl,
+        updatedAt: now,
+        updatedBy: auth.uid,
+      },
+      {merge: true},
+    ),
+  ]);
+
+  return {ok: true, tagId, tagUrl, qrUrl, qrPath};
+});
+
+export const disconnectMachineTag = onCall(async (request) => {
+  const auth = request.auth;
+  if (!auth) throw new HttpsError("unauthenticated", "auth-required");
+  const machineId = (request.data?.machineId || "").toString().trim();
+  const {machineRef, machine} = await getOwnedMachineForAuth(auth, machineId);
+  const tagId = (machine.tagId || "").toString().trim();
+  const qrPath = (machine.tagQrPath || "").toString().trim();
+
+  if (!tagId) {
+    await machineRef.set(
+      {
+        tagId: null,
+        tagUrl: "",
+        tagQrUrl: "",
+        tagQrPath: "",
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        updatedBy: auth.uid,
+      },
+      {merge: true},
+    );
+    return {ok: true, machineId, tagId: ""};
+  }
+
+  await deleteStorageFileIfExists(qrPath);
+
+  const now = admin.firestore.FieldValue.serverTimestamp();
+  await Promise.all([
+    machineRef.set(
+      {
+        tagId: null,
+        tagUrl: "",
+        tagQrUrl: "",
+        tagQrPath: "",
+        updatedAt: now,
+        updatedBy: auth.uid,
+      },
+      {merge: true},
+    ),
+    tagsCol().doc(tagId).delete().catch(() => undefined),
+    machineAccessCol().doc(tagId).delete().catch(() => undefined),
+  ]);
+
+  return {ok: true, machineId, tagId};
+});
 
 export const listControlPanelTags = onCall(async (request) => {
   const auth = request.auth;
