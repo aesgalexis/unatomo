@@ -15,6 +15,17 @@ const text = {
   usersHint: isEn
     ? "Accounts detected through Unatomo sign-in flows."
     : "Cuentas detectadas a trav\u00e9s de los flujos de acceso de Unatomo.",
+  deleteUser: isEn ? "Delete account" : "Eliminar cuenta",
+  usersDeleting: isEn ? "Deleting account..." : "Eliminando cuenta...",
+  usersDeleted: isEn
+    ? "Account deleted."
+    : "Cuenta eliminada.",
+  usersActionError: isEn
+    ? "Unable to delete account."
+    : "No se ha podido eliminar la cuenta.",
+  confirmDeleteUser: isEn
+    ? (label) => `Delete account ${label}? This will permanently remove the account and all related data, including machines, Tag IDs and QR files. This action cannot be undone.`
+    : (label) => `¿Eliminar la cuenta ${label}? Esto eliminará de forma permanente la cuenta y todos sus datos relacionados, incluidas máquinas, Tag ID y archivos QR. Este cambio no se puede deshacer.`,
   codesTitle: isEn ? "Registration codes" : "C\u00f3digos de registro",
   codesLoading: isEn
     ? "Loading active registration codes..."
@@ -72,6 +83,7 @@ const listCodesCallable = httpsCallable(functions, "listControlPanelRegistration
 const createCodeCallable = httpsCallable(functions, "createControlPanelRegistrationCode");
 const deleteCodeCallable = httpsCallable(functions, "deleteControlPanelRegistrationCode");
 const listTagsCallable = httpsCallable(functions, "listControlPanelTags");
+const deleteUserCallable = httpsCallable(functions, "deleteControlPanelUser");
 
 const createCard = (title) => {
   const card = document.createElement("section");
@@ -112,12 +124,26 @@ const renderState = (body, hint, message, state = "") => {
   body.appendChild(status);
 };
 
-const renderUsers = (body, items) => {
+const renderUsers = (body, items, handlers = {}) => {
   body.innerHTML = "";
   const note = document.createElement("p");
   note.className = "controlpanel-note";
   note.textContent = text.usersHint;
   body.appendChild(note);
+
+  const status = document.createElement("p");
+  status.className = "controlpanel-state";
+  status.hidden = true;
+  body.appendChild(status);
+
+  const setStatus = (message = "", state = "") => {
+    status.hidden = !message;
+    status.textContent = message;
+    if (state) status.dataset.state = state;
+    else status.removeAttribute("data-state");
+  };
+
+  if (handlers.setStatusRef) handlers.setStatusRef(setStatus);
 
   if (!items.length) {
     const empty = document.createElement("p");
@@ -131,7 +157,10 @@ const renderUsers = (body, items) => {
   list.className = "controlpanel-list";
   items.forEach((item) => {
     const row = document.createElement("li");
-    row.className = "controlpanel-user";
+    row.className = "controlpanel-user controlpanel-user--action";
+
+    const identity = document.createElement("div");
+    identity.className = "controlpanel-user-copy";
 
     const name = document.createElement("div");
     name.className = "controlpanel-user-name";
@@ -141,8 +170,19 @@ const renderUsers = (body, items) => {
     meta.className = "controlpanel-user-meta";
     meta.textContent = item.email || text.noEmail;
 
-    row.appendChild(name);
-    row.appendChild(meta);
+    identity.appendChild(name);
+    identity.appendChild(meta);
+    row.appendChild(identity);
+
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.className = "controlpanel-link-danger";
+    remove.textContent = text.deleteUser;
+    remove.addEventListener("click", () => {
+      if (handlers.onDeleteUser) handlers.onDeleteUser(item);
+    });
+
+    row.appendChild(remove);
     list.appendChild(row);
   });
   body.appendChild(list);
@@ -428,14 +468,39 @@ if (mount) {
     if (!usersBody || !codesBody || !tagsBody) return;
     renderState(usersBody, text.usersHint, text.usersLoading);
 
-    try {
-      const usersResponse = await listUsersCallable();
-      const users = Array.isArray(usersResponse?.data?.items) ? usersResponse.data.items : [];
-      renderUsers(usersBody, users);
-    } catch {
-      renderState(usersBody, text.usersHint, text.usersError, "error");
-    }
+    let updateUsersStatus = () => {};
+    const loadUsers = async () => {
+      if (!usersBody) return;
+      renderState(usersBody, text.usersHint, text.usersLoading);
+      try {
+        const usersResponse = await listUsersCallable();
+        const users = Array.isArray(usersResponse?.data?.items) ? usersResponse.data.items : [];
+        renderUsers(usersBody, users, {
+          setStatusRef: (setStatus) => {
+            updateUsersStatus = setStatus;
+          },
+          onDeleteUser: async (item) => {
+            const uid = (item?.uid || "").toString().trim();
+            if (!uid) return;
+            const label = item.displayName || item.email || uid;
+            if (!window.confirm(text.confirmDeleteUser(label))) return;
+            updateUsersStatus(text.usersDeleting);
+            try {
+              await deleteUserCallable({ uid });
+              await loadUsers();
+              await loadTags();
+              updateUsersStatus(text.usersDeleted, "");
+            } catch {
+              updateUsersStatus(text.usersActionError, "error");
+            }
+          },
+        });
+      } catch {
+        renderState(usersBody, text.usersHint, text.usersError, "error");
+      }
+    };
 
+    await loadUsers();
     await loadCodes();
     await loadTags();
   });
