@@ -517,7 +517,8 @@ body.page {
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI",
                Roboto, "Helvetica Neue", Arial, sans-serif;
   font-size: 0.95rem;
-  display: block;
+  display: flex;
+  flex-direction: column;
   text-align: left;
 }
 
@@ -562,6 +563,10 @@ body.page li {
 }
 
 .page-shell {
+  width: 100%;
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
   max-width: 800px;
   padding: 110px 1.5rem 2.5rem;
   margin: 0 auto;
@@ -630,6 +635,7 @@ body.page li {
 }
 
 .page-section {
+  flex: 1 0 auto;
   margin-bottom: 2.5rem;
 }
 
