@@ -1,6 +1,6 @@
 ﻿import { onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 import { collection, getDocs } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
-import { auth, db } from "/static/js/firebase/firebaseApp.js";
+import { auth, db, getUserRegistrationState } from "/static/js/firebase/firebaseApp.js";
 import { fetchLinksForAdmin } from "/static/js/dashboard/admin/adminLinksRepo.js";
 import { upsertAccountDirectory } from "/static/js/dashboard/admin/accountDirectoryRepo.js";
 import { getCurrentLang, localizeEsPath } from "/static/js/site/locale.js";
@@ -171,6 +171,16 @@ if (mount) {
   onAuthStateChanged(auth, async (user) => {
     if (!user) {
       window.location.href = localizeEsPath("/es/auth/login.html");
+      return;
+    }
+    try {
+      const registration = await getUserRegistrationState(user);
+      if (!registration.allowed) {
+        window.location.href = "/setup=1";
+        return;
+      }
+    } catch {
+      window.location.href = "/setup=1";
       return;
     }
 

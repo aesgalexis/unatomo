@@ -1,5 +1,5 @@
 ﻿import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
-import { auth, db } from "/static/js/firebase/firebaseApp.js";
+import { auth, db, getUserRegistrationState } from "/static/js/firebase/firebaseApp.js";
 import { fetchMachines, fetchLegacyMachines, migrateLegacyMachines, fetchMachine, upsertMachine, deleteMachine, addUserWithRegistry, deleteUserRegistry } from "./firestoreRepo.js";
 import { upsertAccountDirectory, normalizeEmail, getDisplayNameByEmail } from "./admin/accountDirectoryRepo.js";
 import { fetchInvitesForAdmin } from "./admin/adminInvitesRepo.js";
@@ -1901,13 +1901,23 @@ if (mount) {
     initDragAndDrop(list, handleReorder);
   };
 
-  onAuthStateChanged(auth, (user) => {
+  onAuthStateChanged(auth, async (user) => {
     if (!user) {
       if (isPublicSectionHash()) {
         mount.hidden = true;
         return;
       }
       window.location.href = localizeEsPath("/es/auth/login.html");
+      return;
+    }
+    try {
+      const registration = await getUserRegistrationState(user);
+      if (!registration.allowed) {
+        window.location.href = "/setup=1";
+        return;
+      }
+    } catch {
+      window.location.href = "/setup=1";
       return;
     }
     initDashboard(user.uid, user);

@@ -1,4 +1,4 @@
-import { auth } from "/static/js/registro/firebase-init.js";
+import { auth, getUserRegistrationState } from "/static/js/registro/firebase-init.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 import { requestInviteCodeAndRedirect } from "/static/js/registro/invite-gate.js";
 import { upsertAccountDirectory } from "/static/js/dashboard/admin/accountDirectoryRepo.js";
@@ -186,10 +186,19 @@ if (!btn || !menu || !label || !action) {
   setGuest();
 
   onAuthStateChanged(auth, async (user) => {
-    if (user) {
+    if (!user) {
+      setGuest();
+      return;
+    }
+    try {
+      const registration = await getUserRegistrationState(user);
+      if (!registration.allowed) {
+        setGuest();
+        return;
+      }
       await setUser(user);
       upsertAccountDirectory(user).catch(() => {});
-    } else {
+    } catch {
       setGuest();
     }
   });

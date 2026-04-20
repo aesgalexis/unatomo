@@ -1114,10 +1114,17 @@ body.page .ls-topbar #lang-toggle {
 
 .ls-about-person-links {
   margin-top: 0.35rem;
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 0.45rem;
   grid-column: 2;
+  width: 100%;
+}
+
+.ls-about-social-inline {
+  display: inline-flex;
+  margin: 0;
+  vertical-align: middle;
 }
 
 .ls-about-social {
