@@ -111,6 +111,12 @@
   gap: 12px;
 }
 
+.controlpanel-user-copy {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
 .controlpanel-user:last-child {
   border-bottom: none;
 }
