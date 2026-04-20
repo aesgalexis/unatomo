@@ -8,6 +8,7 @@ import { createAdminInvite, respondAdminInvite, leaveAdminRole, revokeAdminInvit
 import { validateTag, assignTag } from "./tagRepo.js";
 import { createTagToken } from "/static/js/tokens/tagTokens.js";
 import { upsertMachineAccessFromMachine, fetchMachineAccess } from "./machineAccessRepo.js";
+import { buildMachineTagUrl, generateMachineTagQr, disconnectMachineTag } from "./tags/tagAssetsRepo.js";
 import { createMachineCard } from "./machineCardTemplate.js";
 import { initDragAndDrop } from "./dragAndDrop.js";
 import { cloneMachines, normalizeMachine, createDraftMachine } from "./machineStore.js";
@@ -20,7 +21,7 @@ import { createMachineSearchBar } from "./components/machineSearch/machineSearch
 import { createDashboardLoading } from "./components/loading/dashboardLoading.js";
 import { setTopbarSaveStatus } from "/static/js/topbar/save-status.js";
 import { setTopbarNotifications } from "/static/js/notifications/topbar-notifications.js";
-import { localizeEsPath } from "/static/js/site/locale.js";
+import { getCurrentLang, localizeEsPath } from "/static/js/site/locale.js";
 import { t } from "./i18n.js";
 import {
   doc,
@@ -1088,14 +1089,19 @@ if (mount) {
               return;
             }
             if (res.machineId && res.machineId !== id) {
-              statusEl.textContent = t("config.tagAlreadyAssigned", "Tag ya está asignado");
+              statusEl.textContent = t("config.tagAlreadyAssigned", "Tag ya est\u00e1 asignado");
               statusEl.dataset.state = "error";
               if (card.dataset.expanded === "true") {
                 scheduleHeightSync(machine.id, () => recalcHeight(card));
               }
               return;
             }
-            updateMachine(id, { tagId });
+            updateMachine(id, {
+              tagId,
+              tagUrl: buildMachineTagUrl(tagId),
+              tagQrUrl: "",
+              tagQrPath: ""
+            });
             state.tagStatusById[id] = { text: t("dashboard.tagLinked", "Tag enlazado"), state: "ok" };
             notifyTopbar(t("dashboard.tagLinked", "Tag enlazado"));
             if (!state.selectedTabById) state.selectedTabById = {};
@@ -1112,15 +1118,53 @@ if (mount) {
           }
         };
 
-        hooks.onDisconnectTag = (id) => {
-          updateMachine(id, { tagId: null });
-          state.tagStatusById[id] = { text: t("dashboard.tagDisconnected", "Tag desconectado"), state: "error" };
-          notifyTopbar(t("dashboard.tagDisconnected", "Tag desconectado"));
-          if (!state.selectedTabById) state.selectedTabById = {};
-          state.selectedTabById[id] = "configuracion";
-          state.expandedById = Array.from(expandedById);
-          renderCards({ preserveScroll: true });
-          autoSave.saveNow(id, "tag-disconnect");
+        hooks.onDisconnectTag = async (id, _tagInput, statusEl) => {
+          const current = getDraftById(id);
+          if (!current?.tagId) return;
+          const confirmed = window.confirm(
+            t(
+              "config.disconnectTagConfirm",
+              "\u00bfSeguro que quieres desconectar este Tag ID? Se eliminar\u00e1n el Tag ID, la URL asociada y el QR. Este cambio no se puede deshacer."
+            )
+          );
+          if (!confirmed) return;
+          if (statusEl) {
+            statusEl.textContent = t("config.disconnecting", "Desconectando...");
+            statusEl.dataset.state = "neutral";
+          }
+          if (card.dataset.expanded === "true") {
+            scheduleHeightSync(machine.id, () => recalcHeight(card));
+          }
+          try {
+            markLocalWrite(id);
+            await disconnectMachineTag(id);
+            updateMachine(id, {
+              tagId: null,
+              tagUrl: "",
+              tagQrUrl: "",
+              tagQrPath: ""
+            });
+            state.tagStatusById[id] = {
+              text: t("dashboard.tagDisconnected", "Tag desconectado"),
+              state: "error"
+            };
+            notifyTopbar(t("dashboard.tagDisconnected", "Tag desconectado"));
+            if (!state.selectedTabById) state.selectedTabById = {};
+            state.selectedTabById[id] = "configuracion";
+            state.expandedById = Array.from(expandedById);
+            renderCards({ preserveScroll: true });
+          } catch {
+            if (statusEl) {
+              statusEl.textContent = t(
+                "config.disconnectError",
+                "No se pudo desconectar el Tag ID"
+              );
+              statusEl.dataset.state = "error";
+            }
+            if (card.dataset.expanded === "true") {
+              scheduleHeightSync(machine.id, () => recalcHeight(card));
+            }
+          }
         };
 
         hooks.onGenerateTag = async (id) => {
@@ -1145,6 +1189,52 @@ if (mount) {
               btn.textContent = t("config.copied", "Copiado");
               setTimeout(() => (btn.textContent = prev), 1000);
             });
+        };
+
+        hooks.onGenerateTagQr = async (id, statusEl) => {
+          if (!state.uid) throw new Error("no-auth");
+          const current = getDraftById(id);
+          if (!current?.tagId) throw new Error("tag-missing");
+          const tenantId = current.tenantId || state.uid;
+          const tagUrl = current.tagUrl || buildMachineTagUrl(current.tagId);
+          const machineForSave = {
+            ...current,
+            tagUrl,
+            tagQrUrl: "",
+            tagQrPath: ""
+          };
+          markLocalWrite(id);
+          updateMachine(id, { tagUrl, isNew: false });
+          if (statusEl) {
+            statusEl.textContent = t("config.generatingQr", "Generando QR...");
+            statusEl.dataset.state = "neutral";
+          }
+          try {
+            await upsertMachine(tenantId, machineForSave);
+            machineForSave.isNew = false;
+            await assignTag(machineForSave.tagId, tenantId, machineForSave.id);
+            await upsertMachineAccessFromMachine(tenantId, machineForSave, state.uid);
+            const result = await generateMachineTagQr(id, getCurrentLang());
+            updateMachine(id, {
+              tagUrl: result.tagUrl || tagUrl,
+              tagQrUrl: result.qrUrl || "",
+              tagQrPath: result.qrPath || "",
+              isNew: false
+            });
+            state.tagStatusById[id] = { text: t("config.qrGenerated", "QR generado"), state: "ok" };
+            if (statusEl) {
+              statusEl.textContent = t("config.qrGenerated", "QR generado");
+              statusEl.dataset.state = "ok";
+            }
+            renderCards({ preserveScroll: true });
+            notifyTopbar(t("config.qrGenerated", "QR generado"));
+          } catch (error) {
+            if (statusEl) {
+              statusEl.textContent = t("config.qrGenerateError", "Error al generar QR");
+              statusEl.dataset.state = "error";
+            }
+            throw error;
+          }
         };
 
         hooks.onAddUser = async (id, userInput, passInput, addBtn) => {

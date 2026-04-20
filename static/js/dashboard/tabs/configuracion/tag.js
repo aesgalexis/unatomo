@@ -1,8 +1,10 @@
 import { t } from "../../i18n.js";
-import { localizeEsPath } from "/static/js/site/locale.js";
+import { buildMachineTagUrl } from "../../tags/tagAssetsRepo.js";
+
 export const render = (container, machine, hooks, options = {}) => {
   const tagStatusData = options.tagStatus || {};
   const canEditConfig = options.canEditConfig !== false;
+  const tagUrl = machine.tagUrl || buildMachineTagUrl(machine.tagId);
 
   const tagRow = document.createElement("div");
   tagRow.className = "mc-config-row mc-config-row-tag";
@@ -21,12 +23,16 @@ export const render = (container, machine, hooks, options = {}) => {
   const tagBtn = document.createElement("button");
   tagBtn.type = "button";
   tagBtn.className = "mc-tag-connect";
-  tagBtn.textContent = machine.tagId ? t("config.disconnect", "Desconectar") : t("config.connect", "Conectar");
+  tagBtn.textContent = machine.tagId
+    ? t("config.disconnect", "Desconectar")
+    : t("config.connect", "Conectar");
   tagBtn.disabled = !tagInput.value.trim() && !machine.tagId;
-  tagBtn.addEventListener("click", (event) => {
+  tagBtn.addEventListener("click", async (event) => {
     event.stopPropagation();
     if (machine.tagId) {
-      if (hooks.onDisconnectTag) hooks.onDisconnectTag(machine.id, tagInput, tagStatus);
+      if (hooks.onDisconnectTag) {
+        await hooks.onDisconnectTag(machine.id, tagInput, tagStatus);
+      }
       return;
     }
     if (hooks.onConnectTag) hooks.onConnectTag(machine.id, tagInput, tagStatus);
@@ -72,9 +78,7 @@ export const render = (container, machine, hooks, options = {}) => {
   accessInput.className = "mc-url-input";
   accessInput.type = "text";
   accessInput.readOnly = true;
-  accessInput.value = machine.tagId
-    ? `${window.location.origin}${localizeEsPath(`/es/m.html?tag=${encodeURIComponent(machine.tagId)}`)}`
-    : "";
+  accessInput.value = tagUrl;
   accessInput.addEventListener("click", (event) => event.stopPropagation());
 
   const accessCopy = document.createElement("button");
@@ -82,7 +86,12 @@ export const render = (container, machine, hooks, options = {}) => {
   accessCopy.className = "mc-url-copy";
   accessCopy.setAttribute("title", t("config.copy", "Copiar"));
   accessCopy.setAttribute("aria-label", t("config.copy", "Copiar"));
-  accessCopy.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><rect x="4" y="4" width="11" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="2"/></svg>';
+  accessCopy.innerHTML =
+    '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">' +
+    '<rect x="9" y="9" width="11" height="11" rx="2" fill="none" ' +
+    'stroke="currentColor" stroke-width="2"/>' +
+    '<rect x="4" y="4" width="11" height="11" rx="2" fill="none" ' +
+    'stroke="currentColor" stroke-width="2"/></svg>';
   accessCopy.addEventListener("click", (event) => {
     event.stopPropagation();
     if (hooks.onCopyTagUrl) hooks.onCopyTagUrl(machine.id, accessCopy, accessInput);
@@ -122,11 +131,65 @@ export const render = (container, machine, hooks, options = {}) => {
   accessRow.appendChild(accessLabel);
   accessRow.appendChild(accessControls);
 
+  const qrRow = document.createElement("div");
+  qrRow.className = "mc-config-row mc-config-row-qr";
+
+  const qrLabel = document.createElement("span");
+  qrLabel.className = "mc-config-label";
+  qrLabel.textContent = t("config.qr", "QR");
+
+  const qrControls = document.createElement("div");
+  qrControls.className = "mc-config-controls";
+
+  const qrGenerate = document.createElement("button");
+  qrGenerate.type = "button";
+  qrGenerate.className = "mc-tag-generate";
+  qrGenerate.textContent = machine.tagQrUrl
+    ? t("config.regenerateQr", "Regenerar QR")
+    : t("config.generateQr", "Generar QR");
+  qrGenerate.disabled = !machine.tagId;
+  qrGenerate.addEventListener("click", async (event) => {
+    event.stopPropagation();
+    if (!machine.tagId || !hooks.onGenerateTagQr) return;
+    qrGenerate.disabled = true;
+    qrStatus.textContent = t("config.generatingQr", "Generando QR...");
+    qrStatus.dataset.state = "neutral";
+    if (hooks.onContentResize) hooks.onContentResize();
+    try {
+      await hooks.onGenerateTagQr(machine.id, qrStatus);
+    } catch {
+      qrStatus.textContent = t("config.qrGenerateError", "Error al generar QR");
+      qrStatus.dataset.state = "error";
+      if (hooks.onContentResize) hooks.onContentResize();
+    } finally {
+      qrGenerate.disabled = !machine.tagId;
+    }
+  });
+
+  const qrDownload = document.createElement("a");
+  qrDownload.className = "mc-qr-download";
+  qrDownload.href = machine.tagQrUrl || "#";
+  qrDownload.textContent = t("config.downloadQr", "Descargar QR");
+  qrDownload.hidden = !machine.tagQrUrl;
+  qrDownload.target = "_blank";
+  qrDownload.rel = "noreferrer";
+  qrDownload.download = machine.tagId ? `${machine.tagId}.png` : "tag-qr.png";
+  qrDownload.addEventListener("click", (event) => event.stopPropagation());
+
+  qrControls.appendChild(qrGenerate);
+  qrControls.appendChild(qrDownload);
+  qrRow.appendChild(qrLabel);
+  qrRow.appendChild(qrControls);
+
+  const qrStatus = document.createElement("div");
+  qrStatus.className = "mc-tag-status";
+
   if (!canEditConfig || options.disableConfigActions) {
     tagInput.readOnly = true;
     tagBtn.disabled = true;
     accessGenerate.disabled = true;
     accessCopy.disabled = true;
+    qrGenerate.disabled = true;
   } else if (!machine.tagId) {
     accessCopy.disabled = true;
   }
@@ -138,4 +201,6 @@ export const render = (container, machine, hooks, options = {}) => {
   container.appendChild(tagRow);
   container.appendChild(tagStatus);
   container.appendChild(accessRow);
+  container.appendChild(qrRow);
+  container.appendChild(qrStatus);
 };
