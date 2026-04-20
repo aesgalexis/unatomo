@@ -61,16 +61,12 @@ export async function getUserProfile(userOrUid) {
 export async function getUserRegistrationState(userOrUid) {
   const profile = await getUserProfile(userOrUid);
   if (!profile) return { allowed: false, reason: "missing_profile" };
-
-  const code = (profile.regCode || "").toString().trim().toUpperCase();
-  if (!code) return { allowed: false, reason: "missing_code", profile };
-
-  const check = await validateRegistrationCode(code);
-  if (!check.valid) {
-    return { allowed: false, reason: check.reason || "invalid_code", code, profile };
-  }
-
-  return { allowed: true, reason: "ok", code, profile };
+  return {
+    allowed: true,
+    reason: "ok",
+    code: (profile.regCode || "").toString().trim().toUpperCase(),
+    profile
+  };
 }
 
 async function upsertUserProfile(user, regCode) {
