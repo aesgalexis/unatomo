@@ -40,13 +40,7 @@
       card3_title: "Control de productividad y captura de datos",
       card3_p1:
         "Contamos con soluciones de software específico para recabar datos de todo lo que se pueda considerar relevante para la producción. Contadores de piezas por tipo de ropa y cliente, que implementamos en plegadores o líneas de planchado de cualquier tipo. Conectamos el sistema con bases de datos nuevas o con bases existentes.",
-      card3_price:
-        "Desde 7.990 EUR/Sistema de base.",
-      card3_price_2:
-        "Desde 4.990 EUR/Línea adicional.",
-      card3_price_note:
-        "* El sistema de base incluye: Autómata para conteo, HMI para selección de cliente y/o Identificación de personal, Ordenador y pantalla de 24” para muestreo de datos. Instalación e implementación del sistema incluida.",
-      card3_cta: "Solicitar",
+      card3_cta: "Más información",
       card6_title: "Maquinaria",
       card6_p1_before: "Contamos con un amplio espectro de maquinaria nueva y ",
       card6_p1_link: "de ocasión",
@@ -135,13 +129,7 @@
       card3_title: "Productivity control and data capture",
       card3_p1:
         "We provide dedicated software solutions to collect data from everything considered relevant to production. Piece counters by garment type and customer, implemented on folders or ironing lines of any kind. We connect the system to new databases or to existing databases.",
-      card3_price:
-        "From 7.990 EUR/Base system.",
-      card3_price_2:
-        "From 4.990 EUR/Additional line.",
-      card3_price_note:
-        "* The base system includes: Counting PLC, HMI for customer selection and/or staff identification, computer and 24-inch display for data sampling. System installation and implementation included.",
-      card3_cta: "Request",
+      card3_cta: "More information",
       card6_title: "Machinery",
       card6_p1_before: "We offer a wide range of new and ",
       card6_p1_link: "used machinery",
@@ -230,13 +218,7 @@
       card3_title: "Controllo della produttivita e acquisizione dati",
       card3_p1:
         "Disponiamo di soluzioni software specifiche per raccogliere dati su tutto cio che puo essere considerato rilevante per la produzione. Contatori di pezzi per tipologia di biancheria e cliente, che implementiamo su piegatrici o linee di stiratura di qualsiasi tipo. Colleghiamo il sistema a nuove basi dati o a basi dati esistenti.",
-      card3_price:
-        "Da 7.990 EUR/Sistema base.",
-      card3_price_2:
-        "Da 4.990 EUR/Linea aggiuntiva.",
-      card3_price_note:
-        "* Il sistema base include: automa per il conteggio, HMI per selezione cliente e/o identificazione del personale, computer e schermo da 24 pollici per campionamento dati. Installazione e implementazione del sistema incluse.",
-      card3_cta: "Richiedi",
+      card3_cta: "Maggiori informazioni",
       card6_title: "Macchinari",
       card6_p1_before: "Disponiamo di un'ampia gamma di macchinari nuovi e ",
       card6_p1_link: "usati",
@@ -325,13 +307,7 @@
       card3_title: "Ελεγχος παραγωγικοτητας και συλλογη δεδομενων",
       card3_p1:
         "Διαθετουμε ειδικες λυσεις λογισμικου για τη συλλογη δεδομενων απο καθε στοιχειο που θεωρειται σημαντικο για την παραγωγη. Μετρητες τεμαχιων ανα τυπο ρουχου και πελατη, που υλοποιουμε σε διπλωτικα ή γραμμες σιδερωματος καθε τυπου. Συνδεουμε το συστημα με νεες ή υπαρχουσες βασεις δεδομενων.",
-      card3_price:
-        "Απο 7.990 EUR/Βασικο συστημα.",
-      card3_price_2:
-        "Απο 4.990 EUR/Επιπλεον γραμμη.",
-      card3_price_note:
-        "* Το βασικο συστημα περιλαμβανει: αυτοματο μετρησης, HMI για επιλογη πελατη και/ή ταυτοποιηση προσωπικου, υπολογιστη και οθονη 24 ιντσων για δειγματοληψια δεδομενων. Περιλαμβανονται εγκατασταση και υλοποιηση του συστηματος.",
-      card3_cta: "Αιτηση",
+      card3_cta: "Περισσότερες πληροφορίες",
       card6_title: "Μηχανηματα",
       card6_p1_before: "Διαθετουμε ευρυ φασμα νεων και ",
       card6_p1_link: "μεταχειρισμενων μηχανηματων",
