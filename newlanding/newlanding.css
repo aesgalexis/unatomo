@@ -21,7 +21,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 0;
   background: #fff;
   color: color-mix(in srgb, var(--fg) 85%, transparent);
@@ -31,12 +31,19 @@ body {
   text-align: left;
 }
 
+.newlanding-main {
+  width: min(100%, 876px);
+  min-height: 600px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .closing-claim {
   text-align: center;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: 6.8rem;
   margin-bottom: 0;
 }
 
@@ -94,8 +101,8 @@ body {
   padding-top: 1.5rem;
   border-top: 1px solid color-mix(in srgb, var(--fg) 12%, transparent);
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1.25rem;
+  grid-template-columns: 1fr;
+  gap: 0;
   align-items: start;
   user-select: none;
   -webkit-user-select: none;
@@ -113,6 +120,10 @@ body {
 
 .ls-upperfooter-col {
   min-width: 0;
+}
+
+.ls-upperfooter-brand {
+  padding-bottom: 3.2rem;
 }
 
 .ls-upperfooter-col-main {
@@ -144,6 +155,7 @@ body {
   margin-top: 0;
   display: grid;
   row-gap: 0.65rem;
+  justify-content: center;
 }
 
 .ls-upperfooter-contact .contact-info-item {
@@ -152,6 +164,7 @@ body {
   grid-template-columns: 18px minmax(0, 1fr);
   column-gap: 0.5rem;
   align-items: start;
+  justify-content: center;
 }
 
 .ls-upperfooter-contact .contact-icon-link {
@@ -177,13 +190,14 @@ body {
 .ls-upperfooter-contact .contact-info-item p {
   line-height: 1.35;
   margin: 0;
+  text-align: left;
 }
 
 .ls-upperfooter-brand {
   position: relative;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
   width: 100%;
   gap: 0.6rem;
@@ -191,8 +205,8 @@ body {
 }
 
 .ls-upperfooter-brand.is-logo-right {
-  justify-content: flex-end;
-  align-items: flex-end;
+  justify-content: center;
+  align-items: center;
 }
 
 .ls-upperfooter-logo {
@@ -244,24 +258,11 @@ body {
   body {
     padding: 24px;
   }
-
-  .closing-claim {
-    margin-top: 4.4rem;
-  }
 }
 
 @media (max-width: 900px) {
-  .ls-upperfooter {
-    grid-template-columns: 1fr;
-    gap: 0;
-  }
-
   .ls-upperfooter-col {
     padding: 0.95rem 0;
-  }
-
-  .ls-upperfooter-col-main {
-    grid-column: auto;
   }
 
   .ls-upperfooter-col + .ls-upperfooter-col {
@@ -269,6 +270,6 @@ body {
   }
 
   .ls-upperfooter-brand {
-    justify-content: flex-start;
+    padding-bottom: 2.4rem;
   }
 }
