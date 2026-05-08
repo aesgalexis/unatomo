@@ -4,8 +4,8 @@
 
   mount.innerHTML = `
     <section class="ls-upperfooter" aria-label="Laundry Services upperfooter">
-      <div class="ls-upperfooter-col ls-upperfooter-brand is-logo-right">
-        <img src="/static/img/logo-unatomo-v1.5.svg" alt="unatomo" class="ls-upperfooter-logo js-upperfooter-logo" loading="lazy" />
+      <div class="ls-upperfooter-col ls-upperfooter-brand">
+        <img src="/static/img/logo-unatomo-v1.5.svg" alt="unatomo" class="ls-upperfooter-logo" loading="lazy" />
       </div>
 
       <div class="ls-upperfooter-col ls-upperfooter-contact">
@@ -57,12 +57,4 @@
       </div>
     </section>
   `;
-
-  const logo = mount.querySelector(".js-upperfooter-logo");
-  const brandCol = mount.querySelector(".ls-upperfooter-brand");
-  if (logo && brandCol) {
-    logo.addEventListener("click", () => {
-      brandCol.classList.toggle("is-logo-right");
-    });
-  }
 })();
