@@ -21,12 +21,12 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   gap: 0;
   background:
     radial-gradient(circle at 85% 10%, rgba(148, 163, 184, 0.08), transparent 45%),
     radial-gradient(circle at 12% 18%, rgba(203, 213, 225, 0.12), transparent 40%),
-    linear-gradient(180deg, #ffffff 0%, #f5f7fb 52%, #e5e7eb 100%);
+    linear-gradient(180deg, #ffffff 0%, #ffffff 28%, #f5f7fb 58%, #e5e7eb 100%);
   color: color-mix(in srgb, var(--fg) 85%, transparent);
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI",
                Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -102,7 +102,7 @@ body {
 .ls-upperfooter {
   margin-top: 1.6rem;
   padding-top: 1.5rem;
-  border-top: 1px solid color-mix(in srgb, var(--fg) 12%, transparent);
+  border-top: none;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1.25rem;

@@ -5,7 +5,7 @@
   mount.innerHTML = `
     <section class="ls-upperfooter" aria-label="Laundry Services upperfooter">
       <div class="ls-upperfooter-col ls-upperfooter-brand">
-        <img src="/static/img/logo-unatomo-v1.5.svg" alt="unatomo" class="ls-upperfooter-logo" loading="lazy" />
+        <img src="/static/img/logo-unatomo-v1.5.svg" alt="unatomo" class="ls-upperfooter-logo js-upperfooter-reload" loading="lazy" />
       </div>
 
       <div class="ls-upperfooter-col ls-upperfooter-contact">
@@ -57,4 +57,11 @@
       </div>
     </section>
   `;
+
+  const reloadButton = mount.querySelector(".js-upperfooter-reload");
+  if (reloadButton) {
+    reloadButton.addEventListener("click", () => {
+      window.location.reload();
+    });
+  }
 })();
