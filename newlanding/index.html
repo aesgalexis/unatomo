@@ -6,37 +6,46 @@
   <title>unatomo</title>
   <meta name="robots" content="noindex, nofollow">
   <link rel="icon" href="/static/img/favicon/favicon.svg" type="image/svg+xml">
-  <style>
-    :root {
-      color-scheme: light;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      display: grid;
-      place-items: center;
-      background: #fff;
-    }
-
-    .newlanding-logo {
-      width: min(100%, 150px);
-      height: auto;
-      display: block;
-      opacity: 0.95;
-    }
-  </style>
+  <link rel="stylesheet" href="/newlanding/newlanding.css">
+  <link rel="stylesheet" href="/newlanding/newlanding-atom-widget.css">
 </head>
 <body>
+  <div class="newlanding-atom-shell">
+    <div id="newlanding-atom" class="hero-atom" aria-hidden="true"></div>
+  </div>
+  <section class="closing-claim">
+    <div class="closing-claim-head claim-loop-banner" aria-live="polite">
+      <h2 id="newlanding-claim-text" class="claim-loop-text">Nos gustan las m&aacute;quinas</h2>
+    </div>
+  </section>
   <img
     src="/static/img/logo-unatomo-v1.5.svg"
     alt="unatomo"
     class="newlanding-logo"
     loading="lazy"
   >
+  <div id="newlanding-upperfooter-mount"></div>
+  <div id="legal-footer" class="legal-footer"></div>
+  <script src="/newlanding/newlanding-claim-loop.js"></script>
+  <script src="/newlanding/newlanding-upperfooter.js"></script>
+  <script src="/newlanding/newlanding-footer.js"></script>
+  <script type="module">
+    import { initAtomWidget } from "/newlanding/newlanding-atom-widget.js";
+
+    const atomContainer = document.getElementById("newlanding-atom");
+    if (atomContainer) {
+      initAtomWidget({
+        container: atomContainer,
+        pixelRatioCap: 1.8,
+        atomScale: 0.8267,
+        renderMode: "floating",
+        interactionTarget: atomContainer,
+        canvasScale: 1.9,
+        enableZoom: true,
+        zoomMaxPercent: 100,
+        initialZoomLevel: 8,
+      });
+    }
+  </script>
 </body>
 </html>
