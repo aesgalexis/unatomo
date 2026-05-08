@@ -31,31 +31,6 @@ body {
   text-align: left;
 }
 
-.newlanding-atom-shell {
-  width: min(100%, 310px);
-  display: flex;
-  justify-content: center;
-  margin-top: calc(9rem - 20px);
-  margin-bottom: calc(2.2rem - 20px);
-}
-
-.hero-atom {
-  width: 135px;
-  height: 135px;
-  justify-self: center;
-  align-self: center;
-  color: color-mix(in srgb, var(--fg) 85%, transparent);
-  cursor: grab;
-  position: relative;
-  z-index: 1;
-  border-radius: 50%;
-  overflow: visible;
-}
-
-.hero-atom:active {
-  cursor: grabbing;
-}
-
 .closing-claim {
   text-align: center;
   display: flex;
@@ -268,11 +243,6 @@ body {
 @media (max-width: 640px) {
   body {
     padding: 24px;
-  }
-
-  .newlanding-atom-shell {
-    margin-top: calc(5.8rem - 20px);
-    margin-bottom: calc(1.4rem - 20px);
   }
 
   .closing-claim {

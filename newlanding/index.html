@@ -7,12 +7,8 @@
   <meta name="robots" content="noindex, nofollow">
   <link rel="icon" href="/static/img/favicon/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/newlanding/newlanding.css">
-  <link rel="stylesheet" href="/newlanding/newlanding-atom-widget.css">
 </head>
 <body>
-  <div class="newlanding-atom-shell">
-    <div id="newlanding-atom" class="hero-atom" aria-hidden="true"></div>
-  </div>
   <section class="closing-claim">
     <div class="closing-claim-head claim-loop-banner" aria-live="polite">
       <h2 id="newlanding-claim-text" class="claim-loop-text">Nos gustan las m&aacute;quinas</h2>
@@ -29,23 +25,5 @@
   <script src="/newlanding/newlanding-claim-loop.js"></script>
   <script src="/newlanding/newlanding-upperfooter.js"></script>
   <script src="/newlanding/newlanding-footer.js"></script>
-  <script type="module">
-    import { initAtomWidget } from "/newlanding/newlanding-atom-widget.js";
-
-    const atomContainer = document.getElementById("newlanding-atom");
-    if (atomContainer) {
-      initAtomWidget({
-        container: atomContainer,
-        pixelRatioCap: 1.8,
-        atomScale: 0.8267,
-        renderMode: "floating",
-        interactionTarget: atomContainer,
-        canvasScale: 1.9,
-        enableZoom: true,
-        zoomMaxPercent: 100,
-        initialZoomLevel: 8,
-      });
-    }
-  </script>
 </body>
 </html>
