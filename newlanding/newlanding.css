@@ -101,8 +101,8 @@ body {
   padding-top: 1.5rem;
   border-top: 1px solid color-mix(in srgb, var(--fg) 12%, transparent);
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
   align-items: start;
   user-select: none;
   -webkit-user-select: none;
@@ -123,39 +123,36 @@ body {
 }
 
 .ls-upperfooter-brand {
-  padding-bottom: 3.2rem;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  width: 100%;
+  gap: 0.6rem;
+  min-height: 72px;
 }
 
-.ls-upperfooter-col-main {
-  grid-column: 1 / -1;
+.ls-upperfooter-brand.is-logo-right {
+  justify-content: flex-end;
+  align-items: flex-end;
 }
 
-.ls-upperfooter-kicker {
-  margin: 0;
-  font-size: 0.78rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: color-mix(in srgb, var(--fg) 70%, transparent);
-}
-
-.ls-upperfooter-list {
-  margin: 0.55rem 0 0;
-  padding: 0;
-  list-style: none;
-  display: grid;
-  gap: 0.35rem;
-}
-
-.ls-upperfooter-list li {
-  font-size: 0.9rem;
-  color: color-mix(in srgb, var(--fg) 88%, transparent);
+.ls-upperfooter-logo {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 150px);
+  height: auto;
+  display: block;
+  opacity: 0.95;
+  cursor: pointer;
+  touch-action: manipulation;
 }
 
 .ls-upperfooter-contact .contact-info {
   margin-top: 0;
   display: grid;
   row-gap: 0.65rem;
-  justify-content: center;
 }
 
 .ls-upperfooter-contact .contact-info-item {
@@ -164,7 +161,6 @@ body {
   grid-template-columns: 18px minmax(0, 1fr);
   column-gap: 0.5rem;
   align-items: start;
-  justify-content: center;
 }
 
 .ls-upperfooter-contact .contact-icon-link {
@@ -191,33 +187,6 @@ body {
   line-height: 1.35;
   margin: 0;
   text-align: left;
-}
-
-.ls-upperfooter-brand {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  gap: 0.6rem;
-  min-height: 72px;
-}
-
-.ls-upperfooter-brand.is-logo-right {
-  justify-content: center;
-  align-items: center;
-}
-
-.ls-upperfooter-logo {
-  position: relative;
-  z-index: 1;
-  width: min(100%, 150px);
-  height: auto;
-  display: block;
-  opacity: 0.95;
-  cursor: pointer;
-  touch-action: manipulation;
 }
 
 .contact-info-icon {
@@ -261,15 +230,29 @@ body {
 }
 
 @media (max-width: 900px) {
+  .ls-upperfooter {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
   .ls-upperfooter-col {
     padding: 0.95rem 0;
   }
 
   .ls-upperfooter-col + .ls-upperfooter-col {
-    border-top: 1px solid color-mix(in srgb, var(--fg) 12%, transparent);
+    border-top: none;
   }
 
   .ls-upperfooter-brand {
-    padding-bottom: 2.4rem;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .ls-upperfooter-contact .contact-info {
+    justify-content: center;
+  }
+
+  .ls-upperfooter-contact .contact-info-item {
+    justify-content: center;
   }
 }
