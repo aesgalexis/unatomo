@@ -129,16 +129,11 @@ body {
   position: relative;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: flex-end;
   justify-content: center;
   width: 100%;
   gap: 0.6rem;
   min-height: 72px;
-}
-
-.ls-upperfooter-brand.is-logo-right {
-  justify-content: flex-end;
-  align-items: flex-end;
 }
 
 .ls-upperfooter-logo {
@@ -156,6 +151,7 @@ body {
   margin-top: 0;
   display: grid;
   row-gap: 0.65rem;
+  transform: translateY(14px);
 }
 
 .ls-upperfooter-contact .contact-info-item {
@@ -253,6 +249,7 @@ body {
 
   .ls-upperfooter-contact .contact-info {
     justify-content: center;
+    transform: none;
   }
 
   .ls-upperfooter-contact .contact-info-item {
