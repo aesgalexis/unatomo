@@ -23,7 +23,10 @@ body {
   align-items: center;
   justify-content: flex-start;
   gap: 0;
-  background: #fff;
+  background:
+    radial-gradient(circle at 85% 10%, rgba(148, 163, 184, 0.08), transparent 45%),
+    radial-gradient(circle at 12% 18%, rgba(203, 213, 225, 0.12), transparent 40%),
+    linear-gradient(180deg, #ffffff 0%, #f5f7fb 52%, #e5e7eb 100%);
   color: color-mix(in srgb, var(--fg) 85%, transparent);
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI",
                Roboto, "Helvetica Neue", Arial, sans-serif;
