@@ -3,9 +3,10 @@ import { collection, getDocs } from "https://www.gstatic.com/firebasejs/12.7.0/f
 import { auth, db, getUserRegistrationState } from "/static/js/firebase/firebaseApp.js";
 import { fetchLinksForAdmin } from "/static/js/dashboard/admin/adminLinksRepo.js";
 import { upsertAccountDirectory } from "/static/js/dashboard/admin/accountDirectoryRepo.js";
-import { getCurrentLang, localizeEsPath } from "/static/js/site/locale.js";
+import { getAppBasePrefix, getCurrentLang, localizeEsPath } from "/static/js/site/locale.js";
 
 const isEn = getCurrentLang() === "en";
+const appBasePrefix = getAppBasePrefix();
 const textMap = {
   account: isEn ? "Account" : "Cuenta",
   preferences: isEn ? "Preferences" : "Preferencias",
@@ -176,11 +177,11 @@ if (mount) {
     try {
       const registration = await getUserRegistrationState(user);
       if (!registration.allowed) {
-        window.location.href = "/setup=1";
+        window.location.href = `${appBasePrefix || ""}/?setup=1`;
         return;
       }
     } catch {
-      window.location.href = "/setup=1";
+      window.location.href = `${appBasePrefix || ""}/?setup=1`;
       return;
     }
 

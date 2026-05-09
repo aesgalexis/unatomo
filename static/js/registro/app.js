@@ -20,14 +20,16 @@ import {
   onAuthStateChanged,
   signOut
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
-import { getCurrentLang, localizeEsPath } from "/static/js/site/locale.js";
+import { getAppBasePrefix, getCurrentLang, localizeEsPath } from "/static/js/site/locale.js";
 
 const lang = getCurrentLang();
 const isEn = lang === "en";
+const appBasePrefix = getAppBasePrefix();
 const paths = {
   home: localizeEsPath("/es/index.html", lang),
   login: localizeEsPath("/es/auth/login.html", lang),
   register: localizeEsPath("/es/auth/registro.html", lang),
+  setup: `${appBasePrefix || ""}/?setup=1`,
 };
 
 const text = {
@@ -69,7 +71,7 @@ const rememberActivationTarget = () => {
 
 const goActivationFlow = () => {
   rememberActivationTarget();
-  window.location.href = "/setup=1";
+  window.location.href = paths.setup;
 };
 
 const handleLoginResult = (res, setStatus) => {
@@ -368,7 +370,7 @@ function initRegisterPage() {
       try { code = (localStorage.getItem("unatomo_access_code") || "").trim(); } catch {}
     }
 
-    if (!code) return window.location.replace("/setup=1");
+    if (!code) return window.location.replace(paths.setup);
 
     try { sessionStorage.setItem("unatomo_access_code", code); } catch {}
     try { localStorage.setItem("unatomo_access_code", code); } catch {}
@@ -385,7 +387,7 @@ function initRegisterPage() {
     if (!check.valid) {
       try { sessionStorage.removeItem("unatomo_access_code"); } catch {}
       try { localStorage.removeItem("unatomo_access_code"); } catch {}
-      return window.location.replace("/setup=1");
+      return window.location.replace(paths.setup);
     }
 
     document.documentElement.style.visibility = "visible";
@@ -481,7 +483,7 @@ function initSessionUI() {
     try {
       actionBtn.disabled = true;
       await signOut(auth);
-      window.location.href = "/setup=1";
+      window.location.href = paths.setup;
     } catch {
       actionBtn.disabled = false;
     }

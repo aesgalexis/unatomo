@@ -22,7 +22,7 @@ const walk = (dir, files = []) => {
 };
 
 const normalizeTarget = (url) => {
-  let target = url;
+  let target = url.replace(/[`;,.]+$/, "");
   if (target.includes("#")) target = target.split("#")[0];
   if (target.includes("?")) target = target.split("?")[0];
   if (target.endsWith("/")) target += "index.html";
@@ -31,7 +31,7 @@ const normalizeTarget = (url) => {
 
 const rawMatches = [];
 const files = walk(root);
-const regex = /\/(?:static|es)\/[^\s"'<>)]*/g;
+const regex = /\/(?:static|es|en|nfc|controlpanel)\/[^\s"'<>)]*/g;
 
 for (const file of files) {
   const content = fs.readFileSync(file, "utf8");

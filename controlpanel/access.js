@@ -1,11 +1,12 @@
-import { createHash } from "/controlpanel/hash.js";
+import { createHash } from "./hash.js";
 
 const CONTROL_PANEL_EMAIL_HASH =
   "361be737851cc08e4a603606a25f7dc0649d8d75823f9e6244df97f14fd5ebd5";
 
 const normalizeEmail = (email) => (email || "").toString().trim().toLowerCase();
 
-export const getControlPanelPath = () => "/controlpanel/";
+export const getControlPanelPath = () =>
+  /^\/nfc(?:\/|$)/i.test(window.location.pathname) ? "/nfc/controlpanel/" : "/controlpanel/";
 
 export async function isControlPanelUser(userOrEmail) {
   const email =

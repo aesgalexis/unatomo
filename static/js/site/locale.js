@@ -1,6 +1,9 @@
 const SUPPORTED_LANGS = ["es", "en"];
 const LANG_STORAGE_KEY = "unatomo_lang";
 
+export const getAppBasePrefix = (pathname = window.location.pathname) =>
+  /^\/nfc(?:\/|$)/i.test(pathname) ? "/nfc" : "";
+
 const TEXT = {
   es: {
     session: {
@@ -31,7 +34,7 @@ const TEXT = {
 };
 
 export const getCurrentLang = () => {
-  const pathMatch = window.location.pathname.match(/^\/([a-z]{2})(?:\/|$)/i);
+  const pathMatch = window.location.pathname.match(/^\/(?:nfc\/)?([a-z]{2})(?:\/|$)/i);
   const fromPath = pathMatch ? pathMatch[1].toLowerCase() : "";
   if (SUPPORTED_LANGS.includes(fromPath)) return fromPath;
 
@@ -74,12 +77,15 @@ export const resolvePreferredLang = () => {
 };
 
 export const getLangPrefix = (lang = getCurrentLang()) =>
-  SUPPORTED_LANGS.includes(lang) ? `/${lang}` : "/es";
+  SUPPORTED_LANGS.includes(lang)
+    ? `${getAppBasePrefix()}/${lang}`
+    : `${getAppBasePrefix()}/es`;
 
 export const localizeEsPath = (path, lang = getCurrentLang()) => {
   const targetPrefix = getLangPrefix(lang);
   if (!path) return targetPrefix;
   if (/^https?:\/\//i.test(path)) return path;
+  if (path === "/") return `${getAppBasePrefix() || ""}/`;
   if (path === "/es") return targetPrefix;
   if (path.startsWith("/es/")) return `${targetPrefix}${path.slice(3)}`;
   return path;
@@ -96,11 +102,13 @@ export const getLocalizedHref = (targetLang, href = window.location.href) => {
   const lang = SUPPORTED_LANGS.includes(targetLang) ? targetLang : getCurrentLang();
   const url = new URL(href, window.location.origin);
   const path = url.pathname;
+  const basePrefix = getAppBasePrefix(path);
+  const targetPrefix = `${basePrefix}/${lang}`;
 
-  if (/^\/(?:es|en)(?:\/|$)/i.test(path)) {
-    url.pathname = path.replace(/^\/(?:es|en)(?=\/|$)/i, `/${lang}`);
+  if (/^\/(?:nfc\/)?(?:es|en)(?:\/|$)/i.test(path)) {
+    url.pathname = path.replace(/^\/(?:nfc\/)?(?:es|en)(?=\/|$)/i, targetPrefix);
   } else {
-    url.pathname = `${getLangPrefix(lang)}${path === "/" ? "/index.html" : path}`;
+    url.pathname = `${targetPrefix}${path === "/" ? "/index.html" : path}`;
   }
 
   return `${url.pathname}${url.search}${url.hash}`;

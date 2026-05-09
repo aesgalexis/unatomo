@@ -27,7 +27,7 @@ if (titleEl) {
 const currentLang = getCurrentLang();
 const langEs = document.getElementById("lang-link-es");
 const langEn = document.getElementById("lang-link-en");
-const isControlPanelPage = /^\/controlpanel(?:\/|$)/i.test(window.location.pathname);
+const isControlPanelPage = /^\/(?:nfc\/)?controlpanel(?:\/|$)/i.test(window.location.pathname);
 
 if (langEs && langEn) {
   if (isControlPanelPage) {

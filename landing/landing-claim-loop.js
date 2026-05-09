@@ -1,5 +1,5 @@
 (() => {
-  const target = document.getElementById("newlanding-claim-text");
+  const target = document.getElementById("landing-claim-text");
   if (!target) return;
 
   const phrases = [

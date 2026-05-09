@@ -1,5 +1,6 @@
 const TARGET_KEY = "unatomo_register_target";
 const OPEN_KEY = "unatomo_open_register";
+const getBasePrefix = () => (/^\/nfc(?:\/|$)/i.test(window.location.pathname) ? "/nfc" : "");
 
 const setTarget = (targetUrl) => {
   if (!targetUrl) return;
@@ -37,7 +38,7 @@ export const requestInviteCodeAndRedirect = (targetUrl, options = {}) => {
   }
 
   try { sessionStorage.setItem(OPEN_KEY, "1"); } catch {}
-  window.location.href = "/?setup=1";
+  window.location.href = `${getBasePrefix() || ""}/?setup=1`;
 };
 
 export const shouldOpenInviteGate = () => {

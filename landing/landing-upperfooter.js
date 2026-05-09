@@ -1,5 +1,5 @@
 (() => {
-  const mount = document.getElementById("newlanding-upperfooter-mount");
+  const mount = document.getElementById("landing-upperfooter-mount");
   if (!mount) return;
 
   mount.innerHTML = `

@@ -73,19 +73,20 @@ npm run dev:static
 
 ## Probar rutas de máquina (hash)
 
-- Listado: `/es/index.html#/`
-- Detalle: `/es/index.html#/m/mx-101`
-- Config: `/es/index.html#/m/mx-101/config`
+- Listado: `/nfc/es/index.html#/`
+- Detalle: `/nfc/es/index.html#/m/mx-101`
+- Config: `/nfc/es/index.html#/m/mx-101/config`
 
 ## Checklist antes de publicar
 
 - `npm run lint:links`
 - Navegar:
   - `/`
-  - `/es/index.html`
-  - `/es/contacto.html`
-  - `/es/privacidad.html`
-  - `/es/auth/login.html`
-  - `/es/auth/registro.html`
-  - `/es/auth/reset.html`
+  - `/nfc/index.html`
+  - `/nfc/es/index.html`
+  - `/nfc/es/contacto.html`
+  - `/nfc/es/privacidad.html`
+  - `/nfc/es/auth/login.html`
+  - `/nfc/es/auth/registro.html`
+  - `/nfc/es/auth/reset.html`
 - Sin errores en consola.

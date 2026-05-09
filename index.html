@@ -2,194 +2,30 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>unatomo</title>
-  <meta name="robots" content="index, follow" />
-  <link rel="stylesheet" href="/styles.css">
+  <meta name="robots" content="index, follow">
   <link rel="icon" href="/static/img/favicon/favicon.svg" type="image/svg+xml">
-  <script src="/static/js/config/runtime-config.js"></script>
-  <script>
-    (function () {
-      var STORAGE_KEY = "unatomo_lang";
-      function pickLang() {
-        try {
-          var saved = (localStorage.getItem(STORAGE_KEY) || "").trim().toLowerCase();
-          if (saved === "es" || saved === "en") return saved;
-        } catch (e) {}
-        var langs = Array.isArray(navigator.languages) && navigator.languages.length
-          ? navigator.languages
-          : [navigator.language || navigator.userLanguage || ""];
-        var first = String(langs[0] || "").trim().toLowerCase();
-        return first.indexOf("es") === 0 ? "es" : "en";
-      }
-      var lang = pickLang();
-      document.documentElement.lang = lang;
-      document.documentElement.dataset.lang = lang;
-      try { localStorage.setItem(STORAGE_KEY, lang); } catch (e) {}
-    })();
-  </script>
+  <link rel="stylesheet" href="/landing/landing.css">
 </head>
 <body>
-  <main class="shell">
-    <img
-      src="/static/img/logo-unatomo-v1.5.svg"
-      alt="unatomo"
-      class="logo"
-      loading="lazy"
-    />
-
-    <h1 id="title-main">unatomo</h1>
-    <h2 id="subtitle-main"></h2>
-
-    <br><br>
-
-    <div class="auth-actions" aria-label="Access">
-      <button type="button" class="btn-pill btn-pill-solid" id="go-login"></button>
-    </div>
-
-    <section id="login-box" class="card" hidden>
-      <h3 id="login-title"></h3>
-      <p id="login-copy"></p>
-
-      <div class="form-actions" style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
-        <button type="button" class="btn-secondary btn-google" id="login-google">
-          <svg class="btn-google-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-            <path fill="#EA4335" d="M12 10.2v3.9h5.5c-.2 1.3-.9 2.4-1.9 3.2l3.1 2.4c1.8-1.7 2.9-4.1 2.9-7 0-.7-.1-1.3-.2-1.9H12z"/>
-            <path fill="#34A853" d="M12 22c2.6 0 4.8-.9 6.4-2.4l-3.1-2.4c-.9.6-2 .9-3.3.9-2.5 0-4.6-1.7-5.4-4H3.4v2.5A10 10 0 0 0 12 22z"/>
-            <path fill="#4A90E2" d="M6.6 14.1A6 6 0 0 1 6.3 12c0-.7.1-1.4.3-2.1V7.4H3.4A10 10 0 0 0 2.3 12c0 1.6.4 3.1 1.1 4.6l3.2-2.5z"/>
-            <path fill="#FBBC05" d="M12 5.9c1.4 0 2.6.5 3.5 1.4l2.6-2.6A10 10 0 0 0 3.4 7.4l3.2 2.5c.8-2.3 2.9-4 5.4-4z"/>
-          </svg>
-          <span class="btn-google-label"></span>
-        </button>
+  <main class="landing-main">
+    <section class="closing-claim">
+      <div class="closing-claim-head claim-loop-banner" aria-live="polite">
+        <h2 id="landing-claim-text" class="claim-loop-text">Nos gustan las m&aacute;quinas</h2>
       </div>
-
-      <br>
-
-      <form id="login-email-form" class="contact-form" novalidate>
-        <div class="form-grid">
-          <div class="form-field form-field--full">
-            <label for="login-email" id="label-login-email"></label>
-            <input id="login-email" name="email" type="email" required class="field" autocomplete="email" />
-          </div>
-
-          <div class="form-field form-field--full">
-            <label for="login-password" id="label-login-password"></label>
-            <input id="login-password" name="password" type="password" required class="field" autocomplete="current-password" />
-          </div>
-        </div>
-
-        <p id="login-status" class="form-status" role="status" aria-live="polite" hidden></p>
-
-        <div class="form-actions" style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
-          <button type="submit" class="btn-primary" id="login-email-submit"></button>
-        </div>
-
-        <p class="footer-link" style="text-align:center; margin-top:0.75rem;">
-          <a id="reset-link" href="/es/auth/reset.html"></a>
-        </p>
-      </form>
     </section>
-
-    <br>
-
-    <button type="button" class="btn-pill btn-pill-outline" id="go-register"></button>
-
-    <section id="register-code-box" class="card" hidden>
-      <h3 id="register-title"></h3>
-      <p id="register-copy"></p>
-      <br>
-
-      <div class="inline-field-row">
-        <input
-          id="register-code-input"
-          class="field"
-          type="text"
-          autocomplete="one-time-code"
-        >
-        <button id="register-code-submit" type="button" class="btn-secondary"></button>
-      </div>
-
-      <p id="register-code-status" class="form-status" role="status" aria-live="polite" hidden></p>
-
-      <p class="footer-link">
-        <a id="request-code-link" href="/es/contacto.html"></a>
-      </p>
-    </section>
-
-    <p id="legal-footer" class="legal-footer"></p>
-    <p class="footer-link">
-      <a id="privacy-link" href="/es/privacidad.html"></a>
-    </p>
   </main>
-
-  <script>
-    (function () {
-      var lang = document.documentElement.lang === "en" ? "en" : "es";
-      var text = {
-        es: {
-          subtitle: "\u00bfYa hablas con tus maquinas?",
-          loginButton: "Iniciar sesi\u00f3n",
-          loginTitle: "Iniciar sesi\u00f3n",
-          loginCopy: "Accede con Google o con tu correo y contrase\u00f1a.",
-          loginGoogle: "Continuar con Google",
-          loginEmail: 'Correo electr\u00f3nico<span aria-hidden="true"> *</span>',
-          loginPassword: 'Contrase\u00f1a<span aria-hidden="true"> *</span>',
-          loginSubmit: "Entrar",
-          resetLink: "Olvid\u00e9 mi contrase\u00f1a",
-          registerButton: "Registrarse",
-          registerTitle: "C\u00f3digo de acceso",
-          registerCopy: "Introduce el c\u00f3digo de invitaci\u00f3n para registrarte.",
-          registerPlaceholder: "C\u00f3digo",
-          registerSubmit: "Continuar",
-          requestCode: "Solicitar c\u00f3digo",
-          privacy: "Pol\u00edtica de privacidad y cookies"
-        },
-        en: {
-          subtitle: "Do you already talk to your machines?",
-          loginButton: "Sign in",
-          loginTitle: "Sign in",
-          loginCopy: "Continue with Google or sign in with email and password.",
-          loginGoogle: "Continue with Google",
-          loginEmail: 'Email<span aria-hidden="true"> *</span>',
-          loginPassword: 'Password<span aria-hidden="true"> *</span>',
-          loginSubmit: "Enter",
-          resetLink: "I forgot my password",
-          registerButton: "Register",
-          registerTitle: "Access code",
-          registerCopy: "Enter the invitation code to register.",
-          registerPlaceholder: "Code",
-          registerSubmit: "Continue",
-          requestCode: "Request code",
-          privacy: "Privacy and cookie policy"
-        }
-      }[lang];
-
-      document.getElementById("subtitle-main").textContent = text.subtitle;
-      document.getElementById("go-login").textContent = text.loginButton;
-      document.getElementById("login-title").textContent = text.loginTitle;
-      document.getElementById("login-copy").textContent = text.loginCopy;
-      document.querySelector("#login-google .btn-google-label").textContent = text.loginGoogle;
-      document.getElementById("label-login-email").innerHTML = text.loginEmail;
-      document.getElementById("label-login-password").innerHTML = text.loginPassword;
-      document.getElementById("login-email-submit").textContent = text.loginSubmit;
-      document.getElementById("reset-link").textContent = text.resetLink;
-      document.getElementById("go-register").textContent = text.registerButton;
-      document.getElementById("register-title").textContent = text.registerTitle;
-      document.getElementById("register-copy").textContent = text.registerCopy;
-      document.getElementById("register-code-input").placeholder = text.registerPlaceholder;
-      document.getElementById("register-code-submit").textContent = text.registerSubmit;
-      document.getElementById("request-code-link").textContent = text.requestCode;
-      document.getElementById("privacy-link").textContent = text.privacy;
-
-      document.getElementById("reset-link").href = lang === "en" ? "/en/auth/reset.html" : "/es/auth/reset.html";
-      document.getElementById("request-code-link").href = lang === "en" ? "/en/contacto.html" : "/es/contacto.html";
-      document.getElementById("privacy-link").href = lang === "en" ? "/en/privacidad.html" : "/es/privacidad.html";
-      document.querySelector(".auth-actions").setAttribute("aria-label", lang === "en" ? "Access" : "Acceso");
-    })();
-  </script>
-  <script type="module" src="/static/js/theme/theme.js"></script>
-  <script src="/static/js/setup.js"></script>
-  <script type="module" src="/static/js/registro/app.js"></script>
-  <script src="/static/js/footer.js"></script>
+  <img
+    src="/static/img/logo-unatomo-v1.5.svg"
+    alt="unatomo"
+    class="landing-logo"
+    loading="lazy"
+  >
+  <div id="landing-upperfooter-mount"></div>
+  <div id="legal-footer" class="legal-footer"></div>
+  <script src="/landing/landing-claim-loop.js"></script>
+  <script src="/landing/landing-upperfooter.js"></script>
+  <script src="/landing/landing-footer.js"></script>
 </body>
 </html>
