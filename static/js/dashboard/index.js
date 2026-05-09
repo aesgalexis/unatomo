@@ -21,7 +21,7 @@ import { createMachineSearchBar } from "./components/machineSearch/machineSearch
 import { createDashboardLoading } from "./components/loading/dashboardLoading.js";
 import { setTopbarSaveStatus } from "/static/js/topbar/save-status.js";
 import { setTopbarNotifications } from "/static/js/notifications/topbar-notifications.js";
-import { getCurrentLang, localizeEsPath } from "/static/js/site/locale.js";
+import { getAppBasePrefix, getCurrentLang, localizeEsPath } from "/static/js/site/locale.js";
 import { t } from "./i18n.js";
 import {
   doc,
@@ -36,6 +36,7 @@ const DEFAULT_COLLAPSED_HEIGHT = 108;
 const EXPAND_FACTOR = 2.5;
 
 const mount = document.getElementById("dashboard-mount");
+const appBasePrefix = getAppBasePrefix();
 const getPublicSectionFromHash = () =>
   (window.location.hash || "")
     .replace(/^#/, "")
@@ -1913,17 +1914,16 @@ if (mount) {
     try {
       const registration = await getUserRegistrationState(user);
       if (!registration.allowed) {
-        window.location.href = "/setup=1";
+        window.location.href = `${appBasePrefix || ""}/?setup=1`;
         return;
       }
     } catch {
-      window.location.href = "/setup=1";
+      window.location.href = `${appBasePrefix || ""}/?setup=1`;
       return;
     }
     initDashboard(user.uid, user);
   });
 }
-
 
 
 

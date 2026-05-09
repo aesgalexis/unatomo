@@ -7,6 +7,7 @@
       ? "en"
       : "es";
   const isEn = lang === "en";
+  const basePrefix = window.location.pathname.startsWith("/nfc") ? "/nfc" : "";
 
   const themeInputs = document.querySelectorAll('input[name="theme"]');
   const cookieInputs = document.querySelectorAll("[data-cookie-key]");
@@ -92,6 +93,8 @@
       localStorage.setItem(PREF_KEY, JSON.stringify(prefs));
     } catch (e) {}
 
-    window.location.href = isEn ? "/en/contacto.html" : "/es/contacto.html";
+    window.location.href = isEn
+      ? `${basePrefix}/en/contacto.html`
+      : `${basePrefix}/es/contacto.html`;
   });
 })();

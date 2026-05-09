@@ -1,6 +1,7 @@
-﻿(function () {
+(function () {
+  const getBasePrefix = () => (/^\/nfc(?:\/|$)/i.test(window.location.pathname) ? "/nfc" : "");
   const getCurrentLang = () => {
-    const pathMatch = window.location.pathname.match(/^\/([a-z]{2})(?:\/|$)/i);
+    const pathMatch = window.location.pathname.match(/^\/(?:nfc\/)?([a-z]{2})(?:\/|$)/i);
     const fromPath = pathMatch ? pathMatch[1].toLowerCase() : "";
     if (fromPath === "en") return "en";
     const fromHtml = (document.documentElement.lang || "").trim().toLowerCase();
@@ -9,6 +10,7 @@
   };
 
   const lang = getCurrentLang();
+  const basePrefix = getBasePrefix();
   const legalFooter = document.getElementById("legal-footer");
   if (!legalFooter) return;
 
@@ -23,14 +25,14 @@
 
   const links = lang === "en"
     ? [
-        { href: "/en/index.html#/faqs", label: "FAQs" },
-        { href: "/en/index.html#/tags", label: "Physical tags" },
-        { href: "/en/index.html#/contacto", label: "Contact" }
+        { href: `${basePrefix}/en/index.html#/faqs`, label: "FAQs" },
+        { href: `${basePrefix}/en/index.html#/tags`, label: "Physical tags" },
+        { href: `${basePrefix}/en/index.html#/contacto`, label: "Contact" }
       ]
     : [
-        { href: "/es/index.html#/faqs", label: "FAQs" },
-        { href: "/es/index.html#/tags", label: "Tags f\u00edsicos" },
-        { href: "/es/index.html#/contacto", label: "Contacto" }
+        { href: `${basePrefix}/es/index.html#/faqs`, label: "FAQs" },
+        { href: `${basePrefix}/es/index.html#/tags`, label: "Tags f\u00edsicos" },
+        { href: `${basePrefix}/es/index.html#/contacto`, label: "Contacto" }
       ];
 
   links.forEach(({ href, label }) => {

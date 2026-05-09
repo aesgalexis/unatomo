@@ -1,5 +1,7 @@
 # Arquitectura base (dashboard + NFC)
 
+La app operativa vive bajo `/nfc/`. La home pública queda en `/`.
+
 ## Estructura de carpetas
 
 ```
@@ -20,9 +22,9 @@ static/
 
 ## Rutas hash (NFC-friendly)
 
-- Listado: `/es/index.html#/`
-- Detalle de máquina: `/es/index.html#/m/<machineId>`
-- Subrutas: `/es/index.html#/m/<machineId>/<tab>`
+- Listado: `/nfc/es/index.html#/`
+- Detalle de máquina: `/nfc/es/index.html#/m/<machineId>`
+- Subrutas: `/nfc/es/index.html#/m/<machineId>/<tab>`
   - Tabs sugeridas: `general`, `historial`, `config`, `respaldo`
 
 Esto evita 404 al abrir desde NFC en hosting estático.
@@ -40,7 +42,7 @@ Esto evita 404 al abrir desde NFC en hosting estático.
 
 **Etiqueta NFC**
 - URL base + hash:
-  - `https://dominio.com/es/index.html#/m/<id>`
+  - `https://dominio.com/nfc/es/index.html#/m/<id>`
 
 ## Cómo pregrabar una etiqueta
 
@@ -48,7 +50,7 @@ Esto evita 404 al abrir desde NFC en hosting estático.
 2) Programar la etiqueta con:
 
 ```
-https://dominio.com/es/index.html#/m/<id>
+https://dominio.com/nfc/es/index.html#/m/<id>
 ```
 
 ## Evolución prevista
