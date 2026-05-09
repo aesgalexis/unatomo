@@ -13,6 +13,7 @@
   const fadeMs = prefersReducedMotion ? 0 : 340;
   const holdMs = prefersReducedMotion ? 3200 : 4600;
   const intervalMs = fadeMs + holdMs;
+  const langOrder = { es: 0, en: 1, it: 2, el: 3 };
 
   let index = 0;
   let intervalId = null;
@@ -54,7 +55,11 @@
     }
   };
 
-  applyPhrase(0);
+  const initialLang =
+    window.unatomoI18n && typeof window.unatomoI18n.getLanguage === "function"
+      ? window.unatomoI18n.getLanguage()
+      : "es";
+  applyPhrase(langOrder[initialLang] ?? 0);
   start();
 
   document.addEventListener("visibilitychange", () => {
