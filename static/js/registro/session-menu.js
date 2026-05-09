@@ -3,7 +3,7 @@ import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/
 import { requestInviteCodeAndRedirect } from "/static/js/registro/invite-gate.js";
 import { upsertAccountDirectory } from "/static/js/dashboard/admin/accountDirectoryRepo.js";
 import { getCurrentLang, getLocaleText, localizeEsPath } from "/static/js/site/locale.js";
-import { getControlPanelPath, isControlPanelUser } from "/controlpanel/access.js";
+import { getControlPanelPath, isControlPanelUser } from "/nfc/controlpanel/access.js";
 
 const btn = document.getElementById("session-menu-btn");
 const menu = document.getElementById("session-menu");

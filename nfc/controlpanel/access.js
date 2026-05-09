@@ -5,8 +5,7 @@ const CONTROL_PANEL_EMAIL_HASH =
 
 const normalizeEmail = (email) => (email || "").toString().trim().toLowerCase();
 
-export const getControlPanelPath = () =>
-  /^\/nfc(?:\/|$)/i.test(window.location.pathname) ? "/nfc/controlpanel/" : "/controlpanel/";
+export const getControlPanelPath = () => "/nfc/controlpanel/";
 
 export async function isControlPanelUser(userOrEmail) {
   const email =
