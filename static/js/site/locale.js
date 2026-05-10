@@ -91,8 +91,12 @@ export const localizeEsPath = (path, lang = getCurrentLang()) => {
   return path;
 };
 
-export const getUiPath = (fileName, lang = getCurrentLang()) =>
-  `${getLangPrefix(lang)}/ui/${fileName}`;
+export const getUiPath = (fileName, lang = getCurrentLang()) => {
+  const safeLang = SUPPORTED_LANGS.includes(lang) ? lang : "es";
+  const basePrefix = getAppBasePrefix();
+  if (basePrefix) return `${basePrefix}/${safeLang}/ui/${fileName}`;
+  return `/nfc/${safeLang}/ui/${fileName}`;
+};
 
 export const getLocaleText = (lang = getCurrentLang()) => TEXT[lang] || TEXT.es;
 

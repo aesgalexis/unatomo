@@ -2,12 +2,14 @@ import { getUiPath } from "/static/js/site/locale.js";
 
 const mount = document.getElementById("page-nav-mount");
 if (mount) {
-  try {
-    const res = await fetch(getUiPath("page-nav.html"), { cache: "no-store" });
-    if (!res.ok) throw new Error("page-nav fetch failed");
-    mount.innerHTML = await res.text();
-  } catch {
-    mount.innerHTML = "";
+  if (!mount.children.length) {
+    try {
+      const res = await fetch(getUiPath("page-nav.html"), { cache: "no-store" });
+      if (!res.ok) throw new Error("page-nav fetch failed");
+      mount.innerHTML = await res.text();
+    } catch {
+      mount.innerHTML = "";
+    }
   }
 
   const topBtn = document.getElementById("scroll-top-button");

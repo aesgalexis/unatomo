@@ -1,0 +1,87 @@
+.landing-privacy-page {
+  min-height: 100vh;
+  justify-content: flex-start;
+  padding: 0 24px 32px;
+}
+
+.page-shell.legal-doc {
+  width: min(100%, 876px);
+  padding: 56px 0 0;
+  margin: 0 auto;
+}
+
+.legal-copy[hidden] {
+  display: none;
+}
+
+.legal-copy h1 {
+  margin: 0 0 1.1rem;
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  letter-spacing: -0.03em;
+}
+
+.legal-copy h3 {
+  margin: 2rem 0 0.8rem;
+  font-size: 1.06rem;
+}
+
+.legal-copy h5 {
+  margin: 1.1rem 0 0.45rem;
+  font-size: 0.92rem;
+}
+
+.legal-copy p,
+.legal-copy li {
+  line-height: 1.65;
+}
+
+.legal-copy ul {
+  margin: 0.6rem 0 0.9rem 1.1rem;
+  padding: 0;
+}
+
+.scroll-top-container {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+  gap: 0.4rem;
+  text-align: center;
+}
+
+.scroll-top-button {
+  padding: 0.5rem 1.5rem;
+  border-radius: 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--fg) 55%, transparent);
+  background: transparent;
+  color: var(--fg);
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.scroll-top-button[hidden] {
+  display: none !important;
+}
+
+.scroll-top-button:hover {
+  opacity: 0.9;
+}
+
+.landing-privacy-page .legal-footer {
+  margin-top: 3.5rem;
+  margin-bottom: 0;
+}
+
+@media (max-width: 640px) {
+  .landing-privacy-page {
+    padding: 0 20px 28px;
+  }
+
+  .page-shell.legal-doc {
+    padding-top: 40px;
+  }
+}

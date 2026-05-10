@@ -5,6 +5,7 @@
     es: {
       page_title: "unatomo",
       claim: "Nos gustan las máquinas",
+      privacy_link: "Política de privacidad y cookies",
       contact_email_aria: "Correo electrónico",
       contact_phone_aria: "Teléfono",
       contact_hours_aria: "Horario",
@@ -15,6 +16,7 @@
     en: {
       page_title: "unatomo",
       claim: "We like machines",
+      privacy_link: "Privacy and cookies policy",
       contact_email_aria: "Email",
       contact_phone_aria: "Phone",
       contact_hours_aria: "Hours",
@@ -25,6 +27,7 @@
     it: {
       page_title: "unatomo",
       claim: "Ci piacciono le macchine",
+      privacy_link: "Politica sulla privacy e cookie",
       contact_email_aria: "Email",
       contact_phone_aria: "Telefono",
       contact_hours_aria: "Orario",
@@ -35,6 +38,7 @@
     el: {
       page_title: "unatomo",
       claim: "Μας αρέσουν οι μηχανές",
+      privacy_link: "Πολιτικη απορρητου και cookies",
       contact_email_aria: "Email",
       contact_phone_aria: "Τηλέφωνο",
       contact_hours_aria: "Ωράριο",
