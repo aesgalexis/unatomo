@@ -30,9 +30,20 @@ const getSectionFromHash = () => {
 };
 
 const setTitle = (sectionId) => {
-  const titleEl = document.getElementById("section-title");
-  if (!titleEl) return;
-  titleEl.textContent = sectionMap[sectionId]?.title || "Dashboard";
+  const nextTitle = sectionMap[sectionId]?.title || "Dashboard";
+  document.body.dataset.topbarTitle = nextTitle;
+
+  const titleEl = document.getElementById("topbar-title");
+  if (titleEl) {
+    titleEl.textContent = nextTitle;
+  }
+};
+
+const scrollToTop = () => {
+  window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  window.requestAnimationFrame(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  });
 };
 
 const renderSection = () => {
@@ -54,6 +65,8 @@ const renderSection = () => {
     }
     return;
   }
+
+  scrollToTop();
 
   if (dashboardMount) dashboardMount.hidden = true;
   if (!sectionMount) return;
