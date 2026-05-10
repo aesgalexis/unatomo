@@ -24,8 +24,9 @@ body {
   justify-content: center;
   gap: 0;
   background:
-    radial-gradient(circle at 85% 18%, rgba(148, 163, 184, 0.05), transparent 45%),
-    radial-gradient(circle at 12% 24%, rgba(203, 213, 225, 0.08), transparent 40%),
+    linear-gradient(180deg, #ffffff 0%, #ffffff 18%, rgba(255, 255, 255, 0) 30%),
+    radial-gradient(circle at 85% 26%, rgba(148, 163, 184, 0.05), transparent 45%),
+    radial-gradient(circle at 12% 30%, rgba(203, 213, 225, 0.08), transparent 40%),
     linear-gradient(180deg, #ffffff 0%, #ffffff 48%, #f5f7fb 72%, #e5e7eb 100%);
   color: color-mix(in srgb, var(--fg) 85%, transparent);
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI",
@@ -204,7 +205,7 @@ body {
 
 .legal-footer {
   margin-top: 4.5rem;
-  margin-bottom: 2rem;
+  margin-bottom: 0;
   text-align: center;
   font-size: 0.7rem;
   opacity: 0.7;
