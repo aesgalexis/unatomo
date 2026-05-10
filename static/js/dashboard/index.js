@@ -21,7 +21,7 @@ import { createMachineSearchBar } from "./components/machineSearch/machineSearch
 import { createDashboardLoading } from "./components/loading/dashboardLoading.js";
 import { setTopbarSaveStatus } from "/static/js/topbar/save-status.js";
 import { setTopbarNotifications } from "/static/js/notifications/topbar-notifications.js";
-import { getAppBasePrefix, getCurrentLang, localizeEsPath } from "/static/js/site/locale.js";
+import { getAppBasePrefix, getCurrentLang, setSavedLang } from "/static/js/site/locale.js";
 import { t } from "./i18n.js";
 import {
   doc,
@@ -37,6 +37,11 @@ const EXPAND_FACTOR = 2.5;
 
 const mount = document.getElementById("dashboard-mount");
 const appBasePrefix = getAppBasePrefix();
+const lang = getCurrentLang();
+const redirectToEntry = () => {
+  setSavedLang(lang);
+  window.location.href = `${appBasePrefix || ""}/`;
+};
 const getPublicSectionFromHash = () =>
   (window.location.hash || "")
     .replace(/^#/, "")
@@ -1908,7 +1913,7 @@ if (mount) {
         mount.hidden = true;
         return;
       }
-      window.location.href = localizeEsPath("/es/auth/login.html");
+      redirectToEntry();
       return;
     }
     try {
@@ -1924,8 +1929,6 @@ if (mount) {
     initDashboard(user.uid, user);
   });
 }
-
-
 
 
 
