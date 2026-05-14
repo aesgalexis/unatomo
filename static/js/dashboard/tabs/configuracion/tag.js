@@ -171,11 +171,29 @@ export const render = (container, machine, hooks, options = {}) => {
   qrDownload.href = machine.tagQrUrl || "#";
   qrDownload.textContent = t("config.downloadQr", "Descargar QR");
   qrDownload.hidden = !machine.tagQrUrl;
-  qrDownload.target = "_blank";
   qrDownload.rel = "noreferrer";
   const qrExt = (machine.tagQrPath || "").toLowerCase().endsWith(".svg") ? "svg" : "png";
   qrDownload.download = machine.tagId ? `${machine.tagId}.${qrExt}` : `tag-qr.${qrExt}`;
-  qrDownload.addEventListener("click", (event) => event.stopPropagation());
+  qrDownload.addEventListener("click", async (event) => {
+    event.stopPropagation();
+    const isLegacySvg = (machine.tagQrPath || "").toLowerCase().endsWith(".svg");
+    if (!isLegacySvg || !hooks.onGenerateTagQr) return;
+    event.preventDefault();
+    const previousText = qrDownload.textContent;
+    qrDownload.textContent = t("config.generatingQr", "Generando QR...");
+    try {
+      const result = await hooks.onGenerateTagQr(machine.id, qrStatus);
+      if (!result?.qrUrl) return;
+      const link = document.createElement("a");
+      link.href = result.qrUrl;
+      link.download = result.tagId ? `${result.tagId}.png` : "tag-qr.png";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } finally {
+      qrDownload.textContent = previousText;
+    }
+  });
 
   qrControls.appendChild(qrGenerate);
   qrControls.appendChild(qrDownload);

@@ -37,7 +37,7 @@ const normalizeEmail = (email: string) =>
 const CONTROL_PANEL_EMAIL_HASH =
   "361be737851cc08e4a603606a25f7dc0649d8d75823f9e6244df97f14fd5ebd5";
 const PUBLIC_SITE_ORIGIN = "https://unatomo.com";
-const QR_CANVAS_SIZE = 300;
+const QR_CANVAS_SIZE = 100;
 
 const hashEmail = (email: string) =>
   createHash("sha256").update(normalizeEmail(email)).digest("hex");
@@ -71,17 +71,18 @@ const generateRegistrationCode = (length = 8) => {
   return value;
 };
 
+const generateTagChunk = () => generateRegistrationCode(4);
+const generateTagId = () => `G-${generateTagChunk()}-${generateTagChunk()}`;
+
 const normalizeRegistrationCode = (value: string) =>
   (value || "").toString().trim().toUpperCase();
 const normalizeLang = (value: string) =>
   (value || "").toString().trim().toLowerCase() === "en" ? "en" : "es";
 
 const buildMachineTagUrl = (tagId: string, lang = "es") =>
-  `${PUBLIC_SITE_ORIGIN}/${normalizeLang(lang)}/m.html?tag=${encodeURIComponent(
-    tagId,
-  )}`;
-
-const decorateQrSvg = (svgMarkup: string) => svgMarkup;
+  `${PUBLIC_SITE_ORIGIN}/nfc/${normalizeLang(
+    lang,
+  )}/m.html?tag=${encodeURIComponent(tagId)}`;
 
 const buildStorageDownloadUrl = (path: string, token: string) => {
   const encodedPath = encodeURIComponent(path);
@@ -119,7 +120,32 @@ const deleteCollectedDocRefs = async (
   );
 };
 
-const getOwnedMachineForAuth = async (
+const assertRegisteredAccount = async (
+  auth: {uid?: string | null} | null | undefined,
+) => {
+  if (!auth?.uid) throw new HttpsError("unauthenticated", "auth-required");
+  const userSnap = await db.collection("users").doc(auth.uid).get();
+  if (!userSnap.exists) {
+    throw new HttpsError("permission-denied", "account-not-registered");
+  }
+};
+
+const isAcceptedAdminOfMachine = async (
+  uid: string,
+  ownerUid: string,
+  machineId: string,
+) => {
+  const linkSnap = await linksCol().doc(`${machineId}_${uid}`).get();
+  if (!linkSnap.exists) return false;
+  const link = linkSnap.data() || {};
+  return (
+    (link.adminUid || "").toString() === uid &&
+    (link.ownerUid || "").toString() === ownerUid &&
+    (link.status || "").toString() === "accepted"
+  );
+};
+
+const getManagedMachineForAuth = async (
   auth: {uid?: string | null} | null | undefined,
   machineId: string,
 ) => {
@@ -134,10 +160,16 @@ const getOwnedMachineForAuth = async (
     throw new HttpsError("not-found", "machine-not-found");
   }
   const machine = machineSnap.data() || {};
-  if ((machine.ownerUid || "").toString().trim() !== auth.uid) {
-    throw new HttpsError("permission-denied", "not-owner");
+  const ownerUid = (machine.ownerUid || machine.tenantId || "")
+    .toString()
+    .trim();
+  if (
+    ownerUid !== auth.uid &&
+    !(await isAcceptedAdminOfMachine(auth.uid, ownerUid, safeMachineId))
+  ) {
+    throw new HttpsError("permission-denied", "not-machine-manager");
   }
-  return {machineRef, machine};
+  return {machineRef, machine, ownerUid};
 };
 
 
@@ -754,14 +786,127 @@ export const deleteControlPanelRegistrationCode = onCall(async (request) => {
   return {ok: true, code};
 });
 
+export const createMachineTagToken = onCall(async (request) => {
+  const auth = request.auth;
+  await assertRegisteredAccount(auth);
+  const machineId = (request.data?.machineId || "").toString().trim();
+  const {ownerUid} = await getManagedMachineForAuth(auth, machineId);
+
+  let tagId = "";
+  for (let tries = 0; tries < 10; tries += 1) {
+    const candidate = generateTagId();
+    const snap = await tagsCol().doc(candidate).get();
+    if (!snap.exists) {
+      tagId = candidate;
+      break;
+    }
+  }
+  if (!tagId) {
+    throw new HttpsError("resource-exhausted", "tag-generate-failed");
+  }
+
+  const now = admin.firestore.FieldValue.serverTimestamp();
+  await tagsCol().doc(tagId).set({
+    state: "available",
+    tenantId: ownerUid,
+    machineId: null,
+    createdAt: now,
+    createdBy: auth?.uid || ownerUid,
+  });
+
+  return {ok: true, tagId};
+});
+
+export const assignMachineTag = onCall(async (request) => {
+  const auth = request.auth;
+  await assertRegisteredAccount(auth);
+  const machineId = (request.data?.machineId || "").toString().trim();
+  const tagId = (request.data?.tagId || "").toString().trim();
+  const requestedLang = (request.data?.lang || "").toString().trim();
+  if (!tagId) throw new HttpsError("invalid-argument", "tagId-required");
+
+  const {machineRef, machine, ownerUid} = await getManagedMachineForAuth(
+    auth,
+    machineId,
+  );
+  const tagRef = tagsCol().doc(tagId);
+  const tagSnap = await tagRef.get();
+  if (!tagSnap.exists) {
+    throw new HttpsError("not-found", "tag-not-found");
+  }
+  const tag = tagSnap.data() || {};
+  const tagTenantId = (tag.tenantId || "").toString().trim();
+  const tagMachineId = (tag.machineId || "").toString().trim();
+  if (tagTenantId && tagTenantId !== ownerUid) {
+    throw new HttpsError("permission-denied", "tag-owned-by-other-account");
+  }
+  if (tagMachineId && tagMachineId !== machineId) {
+    throw new HttpsError("failed-precondition", "tag-already-assigned");
+  }
+
+  const now = admin.firestore.FieldValue.serverTimestamp();
+  const tagUrl = buildMachineTagUrl(tagId, requestedLang);
+  await Promise.all([
+    machineRef.set(
+      {
+        tagId,
+        tagUrl,
+        tagQrUrl: "",
+        tagQrPath: "",
+        updatedAt: now,
+        updatedBy: auth?.uid || ownerUid,
+      },
+      {merge: true},
+    ),
+    tagRef.set(
+      {
+        state: "assigned",
+        tenantId: ownerUid,
+        machineId,
+        url: tagUrl,
+        assignedAt: now,
+        assignedBy: auth?.uid || ownerUid,
+        updatedAt: now,
+        updatedBy: auth?.uid || ownerUid,
+      },
+      {merge: true},
+    ),
+    machineAccessCol().doc(tagId).set(
+      {
+        tenantId: ownerUid,
+        machineId,
+        title: machine.title || "",
+        brand: machine.brand || "",
+        model: machine.model || "",
+        serial: machine.serial || "",
+        year: machine.year ?? null,
+        location: machine.location || "",
+        status: machine.status || "",
+        logs: Array.isArray(machine.logs) ? machine.logs : [],
+        tasks: Array.isArray(machine.tasks) ? machine.tasks : [],
+        users: Array.isArray(machine.users) ? machine.users : [],
+        updatedAt: now,
+        updatedBy: auth?.uid || ownerUid,
+      },
+      {merge: true},
+    ),
+  ]);
+
+  return {ok: true, tagId, tagUrl};
+});
+
 
 export const generateMachineTagQr = onCall(async (request) => {
   const auth = request.auth;
-  if (!auth) throw new HttpsError("unauthenticated", "auth-required");
+  await assertRegisteredAccount(auth);
   const machineId = (request.data?.machineId || "").toString().trim();
   const requestedLang = (request.data?.lang || "").toString().trim();
-  const {machineRef, machine} = await getOwnedMachineForAuth(auth, machineId);
+  const {machineRef, machine, ownerUid} = await getManagedMachineForAuth(
+    auth,
+    machineId,
+  );
   const tagId = (machine.tagId || "").toString().trim();
+  const previousQrPath = (machine.tagQrPath || "").toString().trim();
   if (!tagId) {
     throw new HttpsError("failed-precondition", "tag-not-connected");
   }
@@ -770,11 +915,23 @@ export const generateMachineTagQr = onCall(async (request) => {
   if (!tagSnap.exists) {
     throw new HttpsError("not-found", "tag-not-found");
   }
+  const tag = tagSnap.data() || {};
+  const tagTenantId = (tag.tenantId || "").toString().trim();
+  const tagMachineId = (tag.machineId || "").toString().trim();
+  if (tagTenantId && tagTenantId !== ownerUid) {
+    throw new HttpsError("permission-denied", "tag-owned-by-other-account");
+  }
+  if (tagMachineId && tagMachineId !== machineId) {
+    throw new HttpsError(
+      "failed-precondition",
+      "tag-assigned-to-other-machine",
+    );
+  }
 
   const tagUrl = buildMachineTagUrl(tagId, requestedLang);
 
-  const rawSvg = await QRCode.toString(tagUrl, {
-    type: "svg",
+  const qrPng = await QRCode.toBuffer(tagUrl, {
+    type: "png",
     width: QR_CANVAS_SIZE,
     margin: 2,
     errorCorrectionLevel: "H",
@@ -783,20 +940,23 @@ export const generateMachineTagQr = onCall(async (request) => {
       light: "#ffffff",
     },
   });
-  const qrSvg = decorateQrSvg(rawSvg);
 
-  const qrPath = `tag-qrs/${tagId}.svg`;
+  const qrPath = `tag-qrs/${tagId}.png`;
   const downloadToken = randomUUID();
-  await storageBucket.file(qrPath).save(qrSvg, {
+  await storageBucket.file(qrPath).save(qrPng, {
     resumable: false,
-    contentType: "image/svg+xml",
+    contentType: "image/png",
     metadata: {
       cacheControl: "private, max-age=31536000",
+      contentDisposition: `attachment; filename="${tagId}.png"`,
       metadata: {
         firebaseStorageDownloadTokens: downloadToken,
       },
     },
   });
+  if (previousQrPath && previousQrPath !== qrPath) {
+    await deleteStorageFileIfExists(previousQrPath);
+  }
   const qrUrl = buildStorageDownloadUrl(qrPath, downloadToken);
   const now = admin.firestore.FieldValue.serverTimestamp();
 
@@ -807,19 +967,19 @@ export const generateMachineTagQr = onCall(async (request) => {
         tagQrUrl: qrUrl,
         tagQrPath: qrPath,
         updatedAt: now,
-        updatedBy: auth.uid,
+        updatedBy: auth?.uid || ownerUid,
       },
       {merge: true},
     ),
     tagsCol().doc(tagId).set(
       {
-        tenantId: auth.uid,
+        tenantId: ownerUid,
         machineId,
         qrUrl,
         qrPath,
         url: tagUrl,
         updatedAt: now,
-        updatedBy: auth.uid,
+        updatedBy: auth?.uid || ownerUid,
       },
       {merge: true},
     ),
@@ -830,9 +990,12 @@ export const generateMachineTagQr = onCall(async (request) => {
 
 export const disconnectMachineTag = onCall(async (request) => {
   const auth = request.auth;
-  if (!auth) throw new HttpsError("unauthenticated", "auth-required");
+  await assertRegisteredAccount(auth);
   const machineId = (request.data?.machineId || "").toString().trim();
-  const {machineRef, machine} = await getOwnedMachineForAuth(auth, machineId);
+  const {machineRef, machine, ownerUid} = await getManagedMachineForAuth(
+    auth,
+    machineId,
+  );
   const tagId = (machine.tagId || "").toString().trim();
   const qrPath = (machine.tagQrPath || "").toString().trim();
 
@@ -844,7 +1007,7 @@ export const disconnectMachineTag = onCall(async (request) => {
         tagQrUrl: "",
         tagQrPath: "",
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-        updatedBy: auth.uid,
+        updatedBy: auth?.uid || ownerUid,
       },
       {merge: true},
     );
@@ -862,7 +1025,7 @@ export const disconnectMachineTag = onCall(async (request) => {
         tagQrUrl: "",
         tagQrPath: "",
         updatedAt: now,
-        updatedBy: auth.uid,
+        updatedBy: auth?.uid || ownerUid,
       },
       {merge: true},
     ),
@@ -940,7 +1103,7 @@ export const listControlPanelTags = onCall(async (request) => {
       state: (data.state || "").toString().trim() || "unknown",
       machineId,
       machineTitle,
-      urlPath: `/es/m.html?tag=${encodeURIComponent(tagId)}`,
+      urlPath: `/nfc/es/m.html?tag=${encodeURIComponent(tagId)}`,
       tenantUid,
       tenantEmail: tenantUser?.email || "",
       tenantDisplayName: tenantUser?.displayName || "",

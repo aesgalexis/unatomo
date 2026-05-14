@@ -1,6 +1,6 @@
 import { functions } from "/static/js/firebase/firebaseApp.js";
 import { httpsCallable } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-functions.js";
-import { getCurrentLang, localizeEsPath } from "/static/js/site/locale.js";
+import { getCurrentLang } from "/static/js/site/locale.js";
 
 const generateMachineTagQrCallable = httpsCallable(
   functions,
@@ -14,11 +14,8 @@ const CANONICAL_SITE_ORIGIN = "https://unatomo.com";
 
 export const buildMachineTagUrl = (tagId, lang = getCurrentLang()) => {
   if (!tagId) return "";
-  const localizedPath = localizeEsPath(
-    `/es/m.html?tag=${encodeURIComponent(tagId)}` ,
-    lang
-  );
-  return `${CANONICAL_SITE_ORIGIN}${localizedPath}`;
+  const safeLang = lang === "en" ? "en" : "es";
+  return `${CANONICAL_SITE_ORIGIN}/nfc/${safeLang}/m.html?tag=${encodeURIComponent(tagId)}`;
 };
 
 export const generateMachineTagQr = async (machineId, lang = getCurrentLang()) => {

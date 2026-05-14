@@ -1,10 +1,12 @@
-import { db } from "/static/js/firebase/firebaseApp.js";
+import { db, functions } from "/static/js/firebase/firebaseApp.js";
 import {
   doc,
-  getDoc,
-  setDoc,
-  serverTimestamp
+  getDoc
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+import { httpsCallable } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-functions.js";
+import { getCurrentLang } from "/static/js/site/locale.js";
+
+const assignMachineTagCallable = httpsCallable(functions, "assignMachineTag");
 
 export const validateTag = async (tagId) => {
   const ref = doc(db, "tags", tagId);
@@ -13,17 +15,6 @@ export const validateTag = async (tagId) => {
   return { exists: true, id: tagId, ...snap.data() };
 };
 
-export const assignTag = async (tagId, uid, machineId) => {
-  const ref = doc(db, "tags", tagId);
-  await setDoc(
-    ref,
-    {
-      state: "assigned",
-      tenantId: uid,
-      machineId,
-      assignedAt: serverTimestamp(),
-      assignedBy: uid
-    },
-    { merge: true }
-  );
+export const assignTag = async (tagId, _uid, machineId) => {
+  await assignMachineTagCallable({ tagId, machineId, lang: getCurrentLang() });
 };

@@ -1177,7 +1177,11 @@ if (mount) {
           if (!state.uid) throw new Error("no-auth");
           const current = getDraftById(id);
           const tenantId = current ? current.tenantId || state.uid : state.uid;
-          const newId = await createTagToken(tenantId);
+          if (current?.isNew) {
+            await upsertMachine(tenantId, current);
+            current.isNew = false;
+          }
+          const newId = await createTagToken(tenantId, id);
           notifyTopbar(t("dashboard.tagGenerated", "Tag ID generado"));
           return newId;
         };
@@ -1234,6 +1238,7 @@ if (mount) {
             }
             renderCards({ preserveScroll: true });
             notifyTopbar(t("config.qrGenerated", "QR generado"));
+            return result;
           } catch (error) {
             if (statusEl) {
               statusEl.textContent = t("config.qrGenerateError", "Error al generar QR");
@@ -1929,6 +1934,3 @@ if (mount) {
     initDashboard(user.uid, user);
   });
 }
-
-
-
