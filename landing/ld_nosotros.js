@@ -4,20 +4,20 @@
 
   const META = {
     es: {
-      title: "Sobre nosotros | Laundry Services",
-      desc: "Informacion sobre Laundry Services y UNATOMO CORE SL.",
+      title: "Sobre nosotros | unatomo",
+      desc: "Informacion sobre UNATOMO CORE SL.",
     },
     en: {
-      title: "About us | Laundry Services",
-      desc: "Information about Laundry Services and UNATOMO CORE SL.",
+      title: "About us | unatomo",
+      desc: "Information about UNATOMO CORE SL.",
     },
     it: {
-      title: "Chi siamo | Laundry Services",
-      desc: "Informazioni su Laundry Services e UNATOMO CORE SL.",
+      title: "Chi siamo | unatomo",
+      desc: "Informazioni su UNATOMO CORE SL.",
     },
     el: {
-      title: "Schetika me emas | Laundry Services",
-      desc: "Plirofories gia to Laundry Services kai tin UNATOMO CORE SL.",
+      title: "Schetika me emas | unatomo",
+      desc: "Plirofories gia tin UNATOMO CORE SL.",
     },
   };
 
@@ -26,11 +26,13 @@
   const applyLanguage = (lang) => {
     const active = normalize(lang);
     let visible = false;
+
     copies.forEach((el) => {
       const match = el.getAttribute("data-legal-lang") === active;
       el.hidden = !match;
       if (match) visible = true;
     });
+
     if (!visible) {
       const fallback = copies.find((el) => el.getAttribute("data-legal-lang") === "en");
       if (fallback) fallback.hidden = false;
