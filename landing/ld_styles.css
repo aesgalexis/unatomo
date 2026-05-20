@@ -38,7 +38,7 @@ body {
 
 .landing-main {
   width: min(100%, 876px);
-  min-height: 600px;
+  min-height: 560px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -97,6 +97,7 @@ body {
 
 #landing-upperfooter-mount,
 #legal-footer,
+.footer-nav-links,
 .footer-link {
   width: min(100%, 876px);
 }
@@ -210,6 +211,29 @@ body {
   text-align: center;
   font-size: 0.7rem;
   opacity: 0.7;
+}
+
+.footer-nav-links {
+  margin-top: 0.15rem;
+  margin-bottom: 1.35rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  font-size: 0.78rem;
+}
+
+.footer-nav-links a {
+  color: var(--fg);
+  text-decoration: none;
+  opacity: 0.82;
+}
+
+.footer-nav-links a:hover,
+.footer-nav-links a:focus-visible {
+  opacity: 1;
+  text-decoration: underline;
 }
 
 .footer-link {
