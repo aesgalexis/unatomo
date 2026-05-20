@@ -54,12 +54,6 @@
       card8_title: "Alcance",
       card8_p1:
         "Damos soporte a lavanderías industriales, hoteleras, autoservicio y tintorerías en toda España y gran parte de Europa. Contamos con un conocimiento técnico integral en todas las áreas y colaboramos con los aliados estratégicos necesarios para cubrir cualquier desafío técnico específico que pueda presentarse.",
-      card7_title: "Sobre nosotros",
-      card7_p1:
-        "Laundry Services es la división especializada de UNATOMO CORE SL orientada al soporte técnico, la auditoría de procesos, la validación de inversiones y la comercialización de maquinaria para lavanderías industriales.",
-      card7_p2:
-        "Trabajamos con un enfoque independiente y técnico. Nuestro objetivo es ayudar a cada cliente a tomar mejores decisiones operativas, reducir incidencias y mejorar el rendimiento real de su planta.",
-      card7_cta: "Conocer más",
       card5_title: "Recambios y consumibles",
       card5_p1:
         "Tenemos acceso a recambios originales de las principales marcas del sector, así como recambios genéricos. También suministramos consumibles de todo tipo, desde bandas de algodón o muletones hasta convertidores de frecuencia o pantallas. Dinos que necesitas y te ayudamos a encontrarlo.",
@@ -88,7 +82,6 @@
       contact_message_label: "Mensaje",
       contact_send: "Enviar",
       privacy_link: "Política de privacidad y cookies",
-      about_us_link: "Sobre nosotros",
       legal_footer: "UNATOMO CORE SL - Todos los derechos reservados.",
     },
     en: {
@@ -143,12 +136,6 @@
       card8_title: "Scope",
       card8_p1:
         "We support industrial laundries, hotel laundries, self-service laundries and dry cleaners throughout Spain and much of Europe. We have comprehensive technical knowledge across all areas and work with the strategic partners needed to cover any specific technical challenge that may arise.",
-      card7_title: "About us",
-      card7_p1:
-        "Laundry Services is the specialized division of UNATOMO CORE SL focused on technical support, process audits, investment validation, and machinery supply for industrial laundries.",
-      card7_p2:
-        "We work with an independent and technical approach. Our goal is to help each client make better operational decisions, reduce incidents, and improve the real performance of their plant.",
-      card7_cta: "Learn more",
       card5_title: "Spare parts and consumables",
       card5_p1:
         "We have access to original spare parts from the leading brands in the industry, as well as generic spare parts. We also supply all kinds of consumables, from cotton belts or padding covers to frequency converters or displays. Tell us what you need and we'll help you find it.",
@@ -177,7 +164,6 @@
       contact_message_label: "Message",
       contact_send: "Send",
       privacy_link: "Privacy and cookies policy",
-      about_us_link: "About us",
       legal_footer: "UNATOMO CORE SL - All rights reserved.",
     },
     it: {
@@ -232,12 +218,6 @@
       card8_title: "Ambito",
       card8_p1:
         "Forniamo supporto a lavanderie industriali, alberghiere, self-service e tintorie in tutta la Spagna e in gran parte dell'Europa. Disponiamo di una conoscenza tecnica completa in tutte le aree e collaboriamo con i partner strategici necessari per coprire qualsiasi sfida tecnica specifica che possa presentarsi.",
-      card7_title: "Chi siamo",
-      card7_p1:
-        "Laundry Services e la divisione specializzata di UNATOMO CORE SL dedicata al supporto tecnico, all'audit dei processi, alla validazione degli investimenti e alla fornitura di macchinari per lavanderie industriali.",
-      card7_p2:
-        "Lavoriamo con un approccio indipendente e tecnico. Il nostro obiettivo e aiutare ogni cliente a prendere decisioni operative migliori, ridurre gli imprevisti e migliorare le prestazioni reali del proprio impianto.",
-      card7_cta: "Scopri di piu",
       card5_title: "Ricambi e consumabili",
       card5_p1:
         "Abbiamo accesso a ricambi originali dei principali marchi del settore, cosi come a ricambi generici. Forniamo anche consumabili di ogni tipo, da nastri in cotone o molettone fino a convertitori di frequenza o schermi. Dicci di cosa hai bisogno e ti aiuteremo a trovarlo.",
@@ -266,7 +246,6 @@
       contact_message_label: "Messaggio",
       contact_send: "Invia",
       privacy_link: "Politica sulla privacy e cookie",
-      about_us_link: "Chi siamo",
       legal_footer: "UNATOMO CORE SL - Tutti i diritti riservati.",
     },
     el: {
@@ -321,12 +300,6 @@
       card8_title: "Πεδιο",
       card8_p1:
         "Παρεχουμε υποστηριξη σε βιομηχανικα πλυντηρια, ξενοδοχειακες μοναδες πλυντηριων, self-service πλυντηρια και καθαριστηρια σε ολη την Ισπανια και σε μεγαλο μερος της Ευρωπης. Διαθετουμε ολοκληρωμενη τεχνικη γνωση σε ολους τους τομεις και συνεργαζομαστε με τους απαραιτητους στρατηγικους συνεργατες για να καλυψουμε καθε ειδικη τεχνικη προκληση που μπορει να προκυψει.",
-      card7_title: "Σχετικα με εμας",
-      card7_p1:
-        "Το Laundry Services ειναι η εξειδικευμενη μοναδα της UNATOMO CORE SL για τεχνικη υποστηριξη, ελεγχο διαδικασιων, αξιολογηση επενδυσεων και διαθεση μηχανηματων για βιομηχανικα πλυντηρια.",
-      card7_p2:
-        "Εργαζομαστε με ανεξαρτητη και τεχνικη προσεγγιση. Στοχος μας ειναι να βοηθαμε καθε πελατη να παιρνει καλυτερες λειτουργικες αποφασεις, να μειωνει τα προβληματα και να βελτιωνει την πραγματικη αποδοση της μοναδας του.",
-      card7_cta: "Μαθετε περισσοτερα",
       card5_title: "Ανταλλακτικα και αναλωσιμα",
       card5_p1:
         "Εχουμε προσβαση σε γνησια ανταλλακτικα απο τις κυριοτερες μαρκες του κλαδου, καθως και σε γενικα ανταλλακτικα. Επισης προμηθευουμε καθε ειδους αναλωσιμα, απο βαμβακερες ταινιες ή μουλετον μεχρι μετατροπεις συχνοτητας ή οθονες. Πειτε μας τι χρειαζεστε και θα σας βοηθησουμε να το βρειτε.",
@@ -355,7 +328,6 @@
       contact_message_label: "Μήνυμα",
       contact_send: "Αποστολή",
       privacy_link: "Πολιτικη απορρητου και cookies",
-      about_us_link: "Σχετικα με εμας",
       legal_footer: "UNATOMO CORE SL - Με επιφυλαξη παντος δικαιωματος.",
     },
   };

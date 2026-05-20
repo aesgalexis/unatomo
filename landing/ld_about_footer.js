@@ -6,15 +6,13 @@
     const year = new Date().getFullYear();
     const text = dict?.legal_footer || "UNATOMO CORE SL - Todos los derechos reservados.";
     const lang = document.documentElement.lang;
-    const aboutLabel = lang === "en" ? "About us" : lang === "it" ? "Chi siamo" : lang === "el" ? "Σχετικά με εμάς" : "Nosotros";
-    const contactLabel = lang === "en" ? "Contact" : lang === "it" ? "Contatto" : lang === "el" ? "Επικοινωνία" : "Contacto";
+    const contactLabel = lang === "en" ? "Contact" : lang === "it" ? "Contatto" : lang === "el" ? "Epikoinonia" : "Contacto";
     legalFooter.textContent = "\u00a9 " + year + " " + text;
 
     const nav = document.createElement("div");
     nav.className = "footer-nav-links";
 
     [
-      { href: "/landing/nosotros/", label: dict?.about_link || aboutLabel },
       { href: "/nfc/", label: dict?.nfc_link || "NFC" },
       { href: "/landing/contacto/", label: dict?.contact_link || contactLabel },
     ].forEach(({ href, label }) => {
@@ -35,7 +33,7 @@
             : document.documentElement.lang === "it"
               ? "UNATOMO CORE SL - Tutti i diritti riservati."
               : document.documentElement.lang === "el"
-                ? "UNATOMO CORE SL - Με επιφύλαξη παντός δικαιώματος."
+                ? "UNATOMO CORE SL - Me epifylaxi pantos dikaiomatos."
                 : "UNATOMO CORE SL - Todos los derechos reservados.",
       }
     : null);

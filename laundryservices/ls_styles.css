@@ -1041,120 +1041,6 @@ body.page .ls-topbar #lang-toggle {
   margin-bottom: 1.1rem;
 }
 
-.legal-copy h1 + .ls-about-people {
-  margin-top: 2.35rem;
-}
-
-.ls-about-people {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1.5rem;
-  margin: 1.85rem 0 2.5rem;
-}
-
-.ls-about-person {
-  margin: 0;
-  display: grid;
-  grid-template-columns: 125px minmax(0, 1fr);
-  align-items: start;
-  gap: 0.95rem;
-}
-
-.ls-about-person-media {
-  width: 125px;
-  height: 125px;
-  border-radius: 999px;
-  overflow: hidden;
-  flex: 0 0 125px;
-  border: 1px solid var(--border-subtle);
-  background: var(--panel-bg);
-  display: block;
-  cursor: pointer;
-  transition: transform 160ms ease, border-color 160ms ease;
-}
-
-.ls-about-person-media:hover {
-  transform: translateY(-1px);
-  opacity: 1;
-}
-
-.ls-about-person-media img {
-  width: 100%;
-  height: 100%;
-  display: block;
-  object-fit: cover;
-}
-
-.ls-about-person-copy {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.ls-about-person-copy strong {
-  font-size: 1rem;
-}
-
-.ls-about-person-copy span {
-  color: var(--text-muted);
-}
-
-.ls-about-person-copy em {
-  margin-top: 0.2rem;
-  color: var(--text-muted);
-  font-style: italic;
-  line-height: 1.45;
-}
-
-.ls-about-person-meta {
-  margin-top: 0.2rem;
-  color: var(--text-muted);
-  line-height: 1.45;
-}
-
-.ls-about-person-links {
-  margin-top: 0.35rem;
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  grid-column: 2;
-  width: 100%;
-}
-
-.ls-about-social-inline {
-  display: inline-flex;
-  margin: 0;
-  vertical-align: middle;
-}
-
-.ls-about-social {
-  width: 1.5rem;
-  height: 1.5rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--fg);
-  text-decoration: none;
-  font-weight: 700;
-  line-height: 1;
-  align-self: flex-start;
-}
-
-.ls-about-social svg {
-  width: 1.104rem;
-  height: 1.104rem;
-  display: block;
-}
-
-.ls-about-social-mail svg {
-  width: 1.3248rem;
-  height: 1.3248rem;
-}
-
-.ls-about-social:hover {
-  opacity: 0.9;
-}
-
 .page-section + .page-section {
   margin-top: 1.1rem;
 }
@@ -1170,27 +1056,6 @@ body.page .ls-topbar #lang-toggle {
 
 .page-section li + li {
   margin-top: 0.3rem;
-}
-
-.ls-about-checks ul {
-  list-style: none;
-  margin-left: 0;
-}
-
-.ls-about-checks li {
-  position: relative;
-  padding-left: 1.2rem;
-}
-
-.ls-about-checks li::before {
-  content: "\2713";
-  position: absolute;
-  left: 0;
-  top: 0.02rem;
-  color: var(--text);
-  font-size: 0.95rem;
-  line-height: 1;
-  font-weight: 700;
 }
 
 .card {
@@ -1236,27 +1101,6 @@ body.ls-contact-page .page-shell {
 html:has(body.ls-privacy-page),
 body.ls-privacy-page {
   scrollbar-gutter: auto;
-}
-
-@media (max-width: 720px) {
-  .ls-about-people {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-
-  .ls-about-person {
-    grid-template-columns: 1fr;
-    gap: 0.7rem;
-  }
-
-  .ls-about-person-copy {
-    width: 100%;
-  }
-
-  .ls-about-person-links {
-    margin-top: 0.55rem;
-    grid-column: 1;
-  }
 }
 
 body.ls-contact-page .contacto {

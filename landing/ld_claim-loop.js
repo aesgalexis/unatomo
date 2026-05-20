@@ -69,4 +69,11 @@
     }
     start();
   });
+
+  document.addEventListener("app:language-change", (event) => {
+    const lang = event?.detail?.lang || "es";
+    stop();
+    applyPhrase(langOrder[lang] ?? 0);
+    start();
+  });
 })();
