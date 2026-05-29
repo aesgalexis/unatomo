@@ -937,10 +937,14 @@ if (mount) {
           : machine.adminEmail
             ? getAdminDisplayName(machine.adminEmail)
             : "";
+        const ownerDisplayName = machine.ownerEmail
+          ? getAdminDisplayName(machine.ownerEmail)
+          : "";
         const { card, hooks } = createMachineCard(machine, {
           tagStatus: state.tagStatusById[machine.id],
           adminLabel: state.adminLabel,
           adminDisplayName,
+          ownerDisplayName,
           mode: "dashboard",
           role: machine.role || "owner",
           disableDrag: query.length > 0,

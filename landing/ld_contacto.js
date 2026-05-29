@@ -11,8 +11,8 @@
     es: {
       sending: "Enviando...",
       success: "Mensaje enviado correctamente.",
-      sendError: "Ha habido un problema al enviar el mensaje. Por favor, intentalo de nuevo mas tarde.",
-      networkError: "Ha habido un problema de conexion. Por favor, intentalo de nuevo.",
+      sendError: "Ha habido un problema al enviar el mensaje. Por favor, inténtalo de nuevo más tarde.",
+      networkError: "Ha habido un problema de conexión. Por favor, inténtalo de nuevo.",
     },
     en: {
       sending: "Sending...",
