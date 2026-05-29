@@ -471,7 +471,28 @@ export const listControlPanelUsers = onCall(async (request) => {
   if (!auth) throw new HttpsError("unauthenticated", "auth-required");
   assertControlPanelAccess(auth);
 
-  const [directorySnap, usersSnap] = await Promise.all([
+  const listAuthUsers = async () => {
+    const users: Array<{
+      uid: string;
+      email: string;
+      displayName: string;
+    }> = [];
+    let pageToken: string | undefined;
+    do {
+      const page = await admin.auth().listUsers(1000, pageToken);
+      page.users.forEach((user) => {
+        users.push({
+          uid: user.uid,
+          email: user.email || "",
+          displayName: user.displayName || "",
+        });
+      });
+      pageToken = page.pageToken;
+    } while (pageToken);
+    return users;
+  };
+
+  const [directorySnap, usersSnap, authUsers] = await Promise.all([
     accountDirectoryCol()
       .orderBy("updatedAt", "desc")
       .limit(1000)
@@ -480,6 +501,7 @@ export const listControlPanelUsers = onCall(async (request) => {
       .orderBy("updatedAt", "desc")
       .limit(1000)
       .get(),
+    listAuthUsers(),
   ]);
 
   const map = new Map<string, {
@@ -510,6 +532,10 @@ export const listControlPanelUsers = onCall(async (request) => {
 
   usersSnap.forEach((docSnap) => {
     upsertItem(docSnap.data() || {});
+  });
+
+  authUsers.forEach((user) => {
+    upsertItem(user);
   });
 
   const items = Array.from(map.values()).sort((a, b) => {
