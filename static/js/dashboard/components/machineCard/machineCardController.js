@@ -204,9 +204,14 @@ export const createMachineCard = (machine, options = {}) => {
       share.className = "mc-share-icon";
       const isAdmin = options.role === "admin";
       if (isAdmin) {
+        const ownerName = (options.ownerDisplayName || "").trim()
+          || (machine.ownerEmail || "").trim();
+        const label = ownerName
+          ? t("card.adminManagingFor", (name) => `Administrando para ${name}`)(ownerName)
+          : t("card.adminManaging", "Administrando");
         share.classList.add("is-admin");
-        share.setAttribute("aria-label", t("card.adminManaging", "Administrando"));
-        share.setAttribute("data-tooltip", t("card.adminManaging", "Administrando"));
+        share.setAttribute("aria-label", label);
+        share.setAttribute("data-tooltip", label);
         share.innerHTML =
           '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">' +
           '<path fill="currentColor" d="M5 8l2-3 2 3h10a1 1 0 0 1 .8 1.6L17 13v3a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1v-3L4.2 9.6A1 1 0 0 1 5 8zm3.4 2-1.2 1.6L9 14.2V15h6v-.8l1.8-2.6L15.6 10h-7.2z"/>' +

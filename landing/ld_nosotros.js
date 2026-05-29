@@ -5,7 +5,7 @@
   const META = {
     es: {
       title: "Sobre nosotros | unatomo",
-      desc: "Informacion sobre UNATOMO CORE SL.",
+      desc: "Información sobre UNATOMO CORE SL.",
     },
     en: {
       title: "About us | unatomo",
