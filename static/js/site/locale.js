@@ -1,5 +1,15 @@
 const SUPPORTED_LANGS = ["es", "en"];
 const LANG_STORAGE_KEY = "unatomo_lang";
+const LOCALIZED_PAGE_MAP = {
+  "impresion-qr.html": {
+    es: "impresion-qr.html",
+    en: "qr-print.html",
+  },
+  "qr-print.html": {
+    es: "impresion-qr.html",
+    en: "qr-print.html",
+  },
+};
 
 export const getAppBasePrefix = (pathname = window.location.pathname) =>
   /^\/nfc(?:\/|$)/i.test(pathname) ? "/nfc" : "";
@@ -87,6 +97,9 @@ export const localizeEsPath = (path, lang = getCurrentLang()) => {
   if (/^https?:\/\//i.test(path)) return path;
   if (path === "/") return `${getAppBasePrefix() || ""}/`;
   if (path === "/es") return targetPrefix;
+  const fileName = path.split("/").pop();
+  const mappedFileName = LOCALIZED_PAGE_MAP[fileName]?.[lang];
+  if (mappedFileName) return `${targetPrefix}/${mappedFileName}`;
   if (path.startsWith("/es/")) return `${targetPrefix}${path.slice(3)}`;
   return path;
 };
@@ -110,7 +123,13 @@ export const getLocalizedHref = (targetLang, href = window.location.href) => {
   const targetPrefix = `${basePrefix}/${lang}`;
 
   if (/^\/(?:nfc\/)?(?:es|en)(?:\/|$)/i.test(path)) {
-    url.pathname = path.replace(/^\/(?:nfc\/)?(?:es|en)(?=\/|$)/i, targetPrefix);
+    const fileName = path.split("/").pop();
+    const mappedFileName = LOCALIZED_PAGE_MAP[fileName]?.[lang];
+    if (mappedFileName) {
+      url.pathname = `${targetPrefix}/${mappedFileName}`;
+    } else {
+      url.pathname = path.replace(/^\/(?:nfc\/)?(?:es|en)(?=\/|$)/i, targetPrefix);
+    }
   } else {
     url.pathname = `${targetPrefix}${path === "/" ? "/index.html" : path}`;
   }
