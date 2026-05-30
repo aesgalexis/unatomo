@@ -1,10 +1,30 @@
 import { t } from "../../i18n.js";
 import { buildMachineTagUrl } from "../../tags/tagAssetsRepo.js";
+import { getCurrentLang, localizeEsPath } from "/static/js/site/locale.js";
+
+const buildQrPrintHref = (machineId) => {
+  const href = localizeEsPath("/es/impresion-qr.html", getCurrentLang());
+  if (!machineId) return href;
+  return `${href}?machineId=${encodeURIComponent(machineId)}`;
+};
 
 export const render = (container, machine, hooks, options = {}) => {
   const tagStatusData = options.tagStatus || {};
   const canEditConfig = options.canEditConfig !== false;
   const tagUrl = machine.tagUrl || buildMachineTagUrl(machine.tagId);
+  let qrStatus = null;
+
+  const connectAndGenerateQr = async () => {
+    if (!hooks.onConnectTag) return false;
+    const connected = await hooks.onConnectTag(machine.id, tagInput, tagStatus);
+    if (!connected || !hooks.onGenerateTagQr) return connected;
+    if (qrStatus) {
+      qrStatus.textContent = t("config.generatingQr", "Generando QR...");
+      qrStatus.dataset.state = "neutral";
+    }
+    await hooks.onGenerateTagQr(machine.id, qrStatus);
+    return true;
+  };
 
   const tagRow = document.createElement("div");
   tagRow.className = "mc-config-row mc-config-row-tag";
@@ -35,7 +55,15 @@ export const render = (container, machine, hooks, options = {}) => {
       }
       return;
     }
-    if (hooks.onConnectTag) hooks.onConnectTag(machine.id, tagInput, tagStatus);
+    try {
+      await connectAndGenerateQr();
+    } catch {
+      if (qrStatus) {
+        qrStatus.textContent = t("config.qrGenerateError", "Error al generar QR");
+        qrStatus.dataset.state = "error";
+      }
+      if (hooks.onContentResize) hooks.onContentResize();
+    }
   });
 
   tagInput.addEventListener("input", (event) => {
@@ -109,14 +137,19 @@ export const render = (container, machine, hooks, options = {}) => {
     tagStatus.textContent = t("config.generating", "Generando...");
     tagStatus.dataset.state = "neutral";
     if (hooks.onContentResize) hooks.onContentResize();
+    let tagCreated = false;
     try {
       const newTagId = await hooks.onGenerateTag(machine.id);
+      tagCreated = true;
       tagInput.value = newTagId;
       tagBtn.disabled = false;
       accessRow.style.display = "";
-      if (hooks.onConnectTag) hooks.onConnectTag(machine.id, tagInput, tagStatus);
+      const connected = await connectAndGenerateQr();
+      if (!connected) accessGenerate.disabled = false;
     } catch {
-      tagStatus.textContent = t("config.generateError", "Error al generar tag");
+      tagStatus.textContent = tagCreated
+        ? t("config.qrGenerateError", "Error al generar QR")
+        : t("config.generateError", "Error al generar tag");
       tagStatus.dataset.state = "error";
       accessGenerate.disabled = false;
       if (hooks.onContentResize) hooks.onContentResize();
@@ -141,66 +174,21 @@ export const render = (container, machine, hooks, options = {}) => {
   const qrControls = document.createElement("div");
   qrControls.className = "mc-config-controls";
 
-  const qrGenerate = document.createElement("button");
-  qrGenerate.type = "button";
-  qrGenerate.className = "mc-tag-generate";
-  qrGenerate.textContent = machine.tagQrUrl
-    ? t("config.regenerateQr", "Regenerar QR")
-    : t("config.generateQr", "Generar QR");
-  qrGenerate.disabled = !machine.tagId;
-  qrGenerate.addEventListener("click", async (event) => {
-    event.stopPropagation();
-    if (!machine.tagId || !hooks.onGenerateTagQr) return;
-    qrGenerate.disabled = true;
-    qrStatus.textContent = t("config.generatingQr", "Generando QR...");
-    qrStatus.dataset.state = "neutral";
-    if (hooks.onContentResize) hooks.onContentResize();
-    try {
-      await hooks.onGenerateTagQr(machine.id, qrStatus);
-    } catch {
-      qrStatus.textContent = t("config.qrGenerateError", "Error al generar QR");
-      qrStatus.dataset.state = "error";
-      if (hooks.onContentResize) hooks.onContentResize();
-    } finally {
-      qrGenerate.disabled = !machine.tagId;
-    }
-  });
-
   const qrDownload = document.createElement("a");
   qrDownload.className = "mc-qr-download";
-  qrDownload.href = machine.tagQrUrl || "#";
-  qrDownload.textContent = t("config.downloadQr", "Descargar QR");
-  qrDownload.hidden = !machine.tagQrUrl;
+  qrDownload.href = buildQrPrintHref(machine.id);
+  qrDownload.textContent = t("config.viewQr", "Ver QR");
+  qrDownload.hidden = !machine.tagId;
   qrDownload.rel = "noreferrer";
-  const qrExt = (machine.tagQrPath || "").toLowerCase().endsWith(".svg") ? "svg" : "png";
-  qrDownload.download = machine.tagId ? `${machine.tagId}.${qrExt}` : `tag-qr.${qrExt}`;
-  qrDownload.addEventListener("click", async (event) => {
+  qrDownload.addEventListener("click", (event) => {
     event.stopPropagation();
-    const isLegacySvg = (machine.tagQrPath || "").toLowerCase().endsWith(".svg");
-    if (!isLegacySvg || !hooks.onGenerateTagQr) return;
-    event.preventDefault();
-    const previousText = qrDownload.textContent;
-    qrDownload.textContent = t("config.generatingQr", "Generando QR...");
-    try {
-      const result = await hooks.onGenerateTagQr(machine.id, qrStatus);
-      if (!result?.qrUrl) return;
-      const link = document.createElement("a");
-      link.href = result.qrUrl;
-      link.download = result.tagId ? `${result.tagId}.png` : "tag-qr.png";
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-    } finally {
-      qrDownload.textContent = previousText;
-    }
   });
 
-  qrControls.appendChild(qrGenerate);
   qrControls.appendChild(qrDownload);
   qrRow.appendChild(qrLabel);
   qrRow.appendChild(qrControls);
 
-  const qrStatus = document.createElement("div");
+  qrStatus = document.createElement("div");
   qrStatus.className = "mc-tag-status";
 
   if (!canEditConfig || options.disableConfigActions) {
@@ -208,7 +196,6 @@ export const render = (container, machine, hooks, options = {}) => {
     tagBtn.disabled = true;
     accessGenerate.disabled = true;
     accessCopy.disabled = true;
-    qrGenerate.disabled = true;
   } else if (!machine.tagId) {
     accessCopy.disabled = true;
   }
