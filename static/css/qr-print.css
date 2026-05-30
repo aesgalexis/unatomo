@@ -95,6 +95,21 @@
   accent-color: var(--fg);
 }
 
+.qr-print-frame-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.qr-print-frame-toggle input {
+  width: 1rem;
+  height: 1rem;
+  accent-color: #2c974b;
+}
+
 .qr-print-state {
   margin: 1rem 0 0;
   color: var(--muted);
@@ -171,6 +186,32 @@
   image-rendering: pixelated;
 }
 
+.qr-print-qr-wrap {
+  width: var(--qr-size);
+  height: var(--qr-size);
+  display: grid;
+  place-items: center;
+}
+
+.qr-print--framed .qr-print-qr-wrap {
+  width: calc(var(--qr-size) * 1.08);
+  height: calc(var(--qr-size) * 1.08);
+  position: relative;
+  background-image: url("/static/img/LOGO%20unatomo%20v1.6%20baseQR.jpg");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.qr-print--framed .qr-print-image {
+  position: absolute;
+  width: calc(var(--qr-size) * 0.94);
+  height: calc(var(--qr-size) * 0.94);
+  left: 5.9%;
+  top: 5.9%;
+  mix-blend-mode: multiply;
+}
+
 @media print {
   @page {
     size: A4;
@@ -189,6 +230,7 @@
   .footer-link,
   .qr-print-toolbar,
   .qr-print-actions,
+  .qr-print-frame-toggle,
   .qr-print-state {
     display: none !important;
   }

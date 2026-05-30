@@ -27,6 +27,7 @@ const text = {
   reload: isEn ? "Reload QR codes" : "Recargar QRs",
   remove: isEn ? "Remove from print sheet" : "Quitar de la hoja",
   size: isEn ? "QR size" : "Tamaño QR",
+  frame: isEn ? "Frame" : "Marco",
   count: isEn
     ? (visible, total) => `Showing ${visible} of ${total} QR ${total === 1 ? "code" : "codes"}`
     : (visible, total) => `Mostrando ${visible} de ${total} ${total === 1 ? "QR" : "QRs"}`,
@@ -39,6 +40,7 @@ const GRID_GAP_BY_STEP = ["0.85rem", "1rem", "1.2rem", "1.45rem", "1.65rem"];
 let currentMachines = [];
 let totalMachinesCount = 0;
 let currentSizeIndex = 0;
+let useFrame = false;
 
 const setState = (message, state = "") => {
   if (!mount) return;
@@ -144,6 +146,7 @@ const renderQrGrid = (machines, options = {}) => {
 
   const wrap = document.createElement("section");
   wrap.className = "qr-print";
+  wrap.classList.toggle("qr-print--framed", useFrame);
   setQrSize(wrap, currentSizeIndex);
 
   const toolbar = document.createElement("div");
@@ -175,6 +178,20 @@ const renderQrGrid = (machines, options = {}) => {
   });
   sizeControl.appendChild(sizeLabel);
   sizeControl.appendChild(sizeInput);
+
+  const frameControl = document.createElement("label");
+  frameControl.className = "qr-print-frame-toggle";
+  const frameInput = document.createElement("input");
+  frameInput.type = "checkbox";
+  frameInput.checked = useFrame;
+  const frameLabel = document.createElement("span");
+  frameLabel.textContent = text.frame;
+  frameInput.addEventListener("change", () => {
+    useFrame = frameInput.checked;
+    wrap.classList.toggle("qr-print--framed", useFrame);
+  });
+  frameControl.appendChild(frameInput);
+  frameControl.appendChild(frameLabel);
 
   const reloadBtn = document.createElement("button");
   reloadBtn.type = "button";
@@ -210,6 +227,7 @@ const renderQrGrid = (machines, options = {}) => {
   printBtn.addEventListener("click", () => window.print());
 
   actions.appendChild(sizeControl);
+  actions.appendChild(frameControl);
   actions.appendChild(reloadBtn);
   actions.appendChild(printBtn);
 
@@ -247,6 +265,9 @@ const renderQrGrid = (machines, options = {}) => {
     name.className = "qr-print-machine";
     name.textContent = machine.title || machine.id;
 
+    const qrWrap = document.createElement("div");
+    qrWrap.className = "qr-print-qr-wrap";
+
     const img = document.createElement("img");
     img.className = "qr-print-image";
     img.src = machine.tagQrUrl;
@@ -256,7 +277,8 @@ const renderQrGrid = (machines, options = {}) => {
 
     item.appendChild(removeBtn);
     item.appendChild(name);
-    item.appendChild(img);
+    qrWrap.appendChild(img);
+    item.appendChild(qrWrap);
     grid.appendChild(item);
   });
   wrap.appendChild(grid);
