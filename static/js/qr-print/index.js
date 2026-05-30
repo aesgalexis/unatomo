@@ -35,12 +35,20 @@ const text = {
   home: localizeEsPath("/es/index.html", lang),
 };
 const QR_SIZE_STEPS = [100, 132, 168, 210, 260];
-const PRINT_COLUMNS_BY_STEP = [5, 4, 3, 2, 2];
+const PRINT_COLUMNS_BY_STEP = [4, 3, 2, 2, 1];
 const GRID_GAP_BY_STEP = ["0.85rem", "1rem", "1.2rem", "1.45rem", "1.65rem"];
 let currentMachines = [];
 let totalMachinesCount = 0;
 let currentSizeIndex = 0;
 let useFrame = false;
+
+const getFocusedMachineId = () => {
+  try {
+    return new URLSearchParams(window.location.search).get("machineId") || "";
+  } catch {
+    return "";
+  }
+};
 
 const setState = (message, state = "") => {
   if (!mount) return;
@@ -140,7 +148,9 @@ const renderQrGrid = (machines, options = {}) => {
   if (!mount) return;
   if (!options.preserveList) {
     currentMachines = machines;
-    totalMachinesCount = machines.length;
+    totalMachinesCount = Number.isFinite(options.totalCount)
+      ? options.totalCount
+      : machines.length;
   }
   mount.innerHTML = "";
 
@@ -268,6 +278,13 @@ const renderQrGrid = (machines, options = {}) => {
     const qrWrap = document.createElement("div");
     qrWrap.className = "qr-print-qr-wrap";
 
+    const frameImg = document.createElement("img");
+    frameImg.className = "qr-print-frame";
+    frameImg.src = "/static/img/LOGO%20unatomo%20v1.6%20baseQR.jpg";
+    frameImg.alt = "";
+    frameImg.loading = "eager";
+    frameImg.decoding = "async";
+
     const img = document.createElement("img");
     img.className = "qr-print-image";
     img.src = machine.tagQrUrl;
@@ -277,6 +294,7 @@ const renderQrGrid = (machines, options = {}) => {
 
     item.appendChild(removeBtn);
     item.appendChild(name);
+    qrWrap.appendChild(frameImg);
     qrWrap.appendChild(img);
     item.appendChild(qrWrap);
     grid.appendChild(item);
@@ -299,7 +317,11 @@ if (mount) {
         return;
       }
       const machines = await fetchQrMachines(user.uid);
-      renderQrGrid(machines);
+      const focusedMachineId = getFocusedMachineId();
+      const visibleMachines = focusedMachineId
+        ? machines.filter((machine) => machine.id === focusedMachineId)
+        : machines;
+      renderQrGrid(visibleMachines, { totalCount: machines.length });
     } catch {
       setState(text.error, "error");
     }

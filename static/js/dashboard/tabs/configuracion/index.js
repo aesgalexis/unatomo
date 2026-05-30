@@ -137,7 +137,9 @@ export const render = (panel, machine, hooks, options = {}) => {
       .toLowerCase();
     status.dataset.state = pendingNorm.startsWith("pendiente")
       ? "pending"
-      : (currentStatus ? "error" : "pending");
+      : pendingNorm.startsWith("administrado")
+        ? "accepted"
+        : (currentStatus ? "error" : "pending");
     status.textContent = statusText;
     adminRow.appendChild(status);
   } else {

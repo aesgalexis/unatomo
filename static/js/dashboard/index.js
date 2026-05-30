@@ -1082,7 +1082,7 @@ if (mount) {
 
         hooks.onConnectTag = async (id, tagInput, statusEl) => {
           const tagId = tagInput.value.trim();
-          if (!tagId) return;
+          if (!tagId) return false;
           statusEl.textContent = t("dashboard.checking", "Comprobando...");
           statusEl.dataset.state = "neutral";
           if (card.dataset.expanded === "true") {
@@ -1096,7 +1096,7 @@ if (mount) {
               if (card.dataset.expanded === "true") {
                 scheduleHeightSync(machine.id, () => recalcHeight(card));
               }
-              return;
+              return false;
             }
             if (res.machineId && res.machineId !== id) {
               statusEl.textContent = t("config.tagAlreadyAssigned", "Tag ya est\u00e1 asignado");
@@ -1104,7 +1104,7 @@ if (mount) {
               if (card.dataset.expanded === "true") {
                 scheduleHeightSync(machine.id, () => recalcHeight(card));
               }
-              return;
+              return false;
             }
             updateMachine(id, {
               tagId,
@@ -1119,12 +1119,14 @@ if (mount) {
             state.expandedById = Array.from(expandedById);
             renderCards({ preserveScroll: true });
             autoSave.saveNow(id, "tag");
+            return true;
           } catch {
             statusEl.textContent = t("dashboard.tagValidateError", "Error al validar el tag");
             statusEl.dataset.state = "error";
             if (card.dataset.expanded === "true") {
               scheduleHeightSync(machine.id, () => recalcHeight(card));
             }
+            return false;
           }
         };
 

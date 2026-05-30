@@ -151,11 +151,12 @@
   background: color-mix(in srgb, var(--bg) 92%, transparent);
   color: var(--muted);
   font: inherit;
-  font-size: 1rem;
-  line-height: 1;
+  font-size: 1.05rem;
+  line-height: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  padding: 0 0 0.08rem;
   cursor: pointer;
 }
 
@@ -197,10 +198,21 @@
   width: calc(var(--qr-size) * 1.08);
   height: calc(var(--qr-size) * 1.08);
   position: relative;
-  background-image: url("/static/img/LOGO%20unatomo%20v1.6%20baseQR.jpg");
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.qr-print-frame {
+  display: none;
+}
+
+.qr-print--framed .qr-print-frame {
+  display: block;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .qr-print--framed .qr-print-image {
@@ -210,18 +222,21 @@
   left: 5.9%;
   top: 5.9%;
   mix-blend-mode: multiply;
+  z-index: 1;
 }
 
 @media print {
   @page {
     size: A4;
-    margin: 12mm;
+    margin: 10mm;
   }
 
   html,
   body {
     background: #fff !important;
     color: #000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
   #topbar-mount,
@@ -245,16 +260,22 @@
   }
 
   .qr-print-grid {
-    grid-template-columns: repeat(var(--qr-print-columns), 1fr);
-    gap: calc(var(--qr-grid-gap) * 0.82);
+    grid-template-columns: repeat(var(--qr-print-columns), max-content);
+    justify-content: center;
+    gap: 6mm 8mm;
+    width: 100%;
+    margin: 0 auto;
+    box-sizing: border-box;
   }
 
   .qr-print-item {
     border: 1px solid #d1d5db;
     background: #fff;
     border-radius: 0;
-    padding: 6mm;
+    padding: 4mm;
     min-height: auto;
+    box-sizing: border-box;
+    overflow: visible;
   }
 
   .qr-print-machine {

@@ -1163,6 +1163,10 @@
   color: #f97316;
 }
 
+.mc-admin-status[data-state="accepted"] {
+  color: #2c974b;
+}
+
 .mc-user-status {
   font-size: 0.85rem;
   color: color-mix(in srgb, var(--fg) 70%, transparent);
@@ -1599,4 +1603,3 @@
     transform: translateX(0);
   }
 }
-
