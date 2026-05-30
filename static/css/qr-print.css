@@ -1,0 +1,231 @@
+.qr-print {
+  --qr-size: 100px;
+  --qr-print-columns: 5;
+  --qr-card-min: calc(var(--qr-size) + 76px);
+  --qr-grid-gap: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.qr-print-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin: 0.25rem 0 0.5rem;
+}
+
+.qr-print-summary {
+  min-height: 2.45rem;
+  display: flex;
+  align-items: center;
+}
+
+.qr-print-count {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.qr-print-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.qr-print-icon-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 0.75rem;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.qr-print-icon-button:hover {
+  opacity: 0.88;
+}
+
+.qr-print-icon-button svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.qr-print-icon-button--print {
+  border: 1px solid #2c974b;
+  background: linear-gradient(135deg, #2da44e, #2c974b);
+  color: #fff;
+}
+
+.qr-print-icon-button--reload {
+  border: 1px solid var(--border-subtle);
+  background-color: color-mix(in srgb, var(--bg) 96%, transparent);
+  color: var(--fg);
+}
+
+.qr-print-icon-button--reload:hover {
+  border-color: var(--fg);
+  opacity: 1;
+}
+
+.qr-print-size {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.qr-print-size input {
+  width: 9rem;
+  accent-color: var(--fg);
+}
+
+.qr-print-state {
+  margin: 1rem 0 0;
+  color: var(--muted);
+}
+
+.qr-print-state[data-state="error"] {
+  color: #b91c1c;
+}
+
+.qr-print-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--qr-card-min), 1fr));
+  gap: var(--qr-grid-gap);
+  align-items: start;
+}
+
+.qr-print-item {
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.7rem;
+  min-height: calc(var(--qr-size) + 88px);
+  break-inside: avoid;
+  background: color-mix(in srgb, var(--bg) 96%, var(--fg) 4%);
+  position: relative;
+}
+
+.qr-print-remove {
+  position: absolute;
+  top: 0.45rem;
+  right: 0.45rem;
+  width: 1.45rem;
+  height: 1.45rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  color: var(--muted);
+  font: inherit;
+  font-size: 1rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.qr-print-remove:hover {
+  border-color: var(--fg);
+  color: var(--fg);
+  background: var(--bg);
+}
+
+.qr-print-machine {
+  width: 100%;
+  min-height: 2.4em;
+  margin: 0;
+  color: var(--fg);
+  font-size: 0.95rem;
+  line-height: 1.2;
+  font-weight: 650;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.qr-print-image {
+  width: var(--qr-size);
+  height: var(--qr-size);
+  object-fit: contain;
+  background: #fff;
+  image-rendering: crisp-edges;
+  image-rendering: pixelated;
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  #topbar-mount,
+  #page-nav-mount,
+  #legal-footer,
+  .footer-link,
+  .qr-print-toolbar,
+  .qr-print-actions,
+  .qr-print-state {
+    display: none !important;
+  }
+
+  .shell,
+  .page-shell,
+  .page-section {
+    width: auto !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .qr-print-grid {
+    grid-template-columns: repeat(var(--qr-print-columns), 1fr);
+    gap: calc(var(--qr-grid-gap) * 0.82);
+  }
+
+  .qr-print-item {
+    border: 1px solid #d1d5db;
+    background: #fff;
+    border-radius: 0;
+    padding: 6mm;
+    min-height: auto;
+  }
+
+  .qr-print-machine {
+    color: #000;
+    font-size: 10pt;
+  }
+
+  .qr-print-image {
+    width: var(--qr-size);
+    height: var(--qr-size);
+  }
+
+  .qr-print-remove {
+    display: none !important;
+  }
+}
