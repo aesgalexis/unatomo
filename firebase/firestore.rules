@@ -71,6 +71,11 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    match /dashboard_layout/{uid} {
+      allow read, create, update: if isSignedIn() && request.auth.uid == uid;
+      allow delete: if false;
+    }
+
     match /admin_machine_invites/{inviteId} {
       function ownerInviteSide() {
         return isSignedIn()

@@ -286,6 +286,11 @@
   box-shadow: 0 8px 18px rgba(0,0,0,0.15);
 }
 
+.machine-card.is-drop-target {
+  outline: 2px solid color-mix(in srgb, #2da44e 70%, transparent);
+  outline-offset: 3px;
+}
+
 .machine-drop-placeholder {
   border: 2px dashed color-mix(in srgb, var(--fg) 35%, transparent);
   border-radius: 1rem;
@@ -762,6 +767,78 @@
   margin-left: auto;
 }
 
+.machine-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.machine-group + .machine-group {
+  margin-top: 0.6rem;
+}
+
+.machine-group-header {
+  width: 100%;
+  min-height: 32px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--fg);
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.15rem 0 0.35rem;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+
+.machine-group-caret {
+  width: 1.4rem;
+  color: color-mix(in srgb, var(--fg) 70%, transparent);
+  font-weight: 700;
+  text-align: center;
+}
+
+.machine-group-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-weight: 650;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.machine-group-count {
+  min-width: 1.55rem;
+  min-height: 1.55rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--fg) 10%, transparent);
+  color: color-mix(in srgb, var(--fg) 72%, transparent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.82rem;
+}
+
+.machine-group-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: 100%;
+  transform: translateX(1.2rem);
+}
+
+.machine-group-body[hidden] {
+  display: none;
+}
+
+.machine-card-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
 .mc-manual {
   display: flex;
   flex-direction: column;
@@ -900,17 +977,11 @@
   right: 0.5rem;
   bottom: 0.45rem;
   display: inline-flex;
+  flex-direction: row-reverse;
   align-items: center;
   justify-content: flex-end;
   gap: 0.35rem;
-  max-width: 1.7rem;
-  overflow: hidden;
-  transition: max-width 0.16s ease;
-}
-
-.mc-doc-menu:hover,
-.mc-doc-menu:focus-within {
-  max-width: 6rem;
+  overflow: visible;
 }
 
 .mc-doc-menu-dots {
@@ -925,6 +996,16 @@
   cursor: pointer;
 }
 
+.mc-expand .mc-doc-menu-dots {
+  border: 0;
+  background: transparent;
+  color: color-mix(in srgb, var(--fg) 74%, transparent);
+}
+
+.mc-expand .mc-doc-tile.has-preview .mc-doc-menu-dots {
+  color: rgba(255, 255, 255, 0.78);
+}
+
 .mc-doc-menu-link {
   color: color-mix(in srgb, var(--fg) 74%, transparent);
   font: inherit;
@@ -932,9 +1013,22 @@
   line-height: 1;
   text-decoration: underline;
   text-underline-offset: 2px;
-  padding: 0.15rem;
+  max-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  padding: 0.15rem 0;
   white-space: nowrap;
   cursor: pointer;
+  pointer-events: none;
+  transition: max-width 0.16s ease, opacity 0.16s ease, padding 0.16s ease;
+}
+
+.mc-doc-menu:hover .mc-doc-menu-link,
+.mc-doc-menu:focus-within .mc-doc-menu-link {
+  max-width: 5rem;
+  opacity: 1;
+  padding: 0.15rem;
+  pointer-events: auto;
 }
 
 .mc-doc-menu-link:hover {

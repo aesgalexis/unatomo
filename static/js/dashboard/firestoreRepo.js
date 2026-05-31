@@ -16,11 +16,36 @@ import {
 const machinesCollection = collection(db, "machines");
 const usernamesDoc = (ownerUid, normalized) =>
   doc(db, "usernames", `${ownerUid}_${normalized}`);
+const dashboardLayoutDoc = (uid) => doc(db, "dashboard_layout", uid);
 
 export const fetchMachines = async (uid) => {
   const q = query(machinesCollection, where("ownerUid", "==", uid));
   const snap = await getDocs(q);
   return snap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
+};
+
+export const fetchDashboardLayout = async (uid) => {
+  if (!uid) return null;
+  const snap = await getDoc(dashboardLayoutDoc(uid));
+  if (!snap.exists()) return null;
+  return snap.data() || null;
+};
+
+export const upsertDashboardLayout = async (uid, layout) => {
+  if (!uid) return;
+  await setDoc(
+    dashboardLayoutDoc(uid),
+    {
+      groups: Array.isArray(layout?.groups) ? layout.groups : [],
+      placements:
+        layout?.placements && typeof layout.placements === "object" && !Array.isArray(layout.placements)
+          ? layout.placements
+          : {},
+      updatedAt: serverTimestamp(),
+      updatedBy: uid
+    },
+    { merge: true }
+  );
 };
 
 export const fetchLegacyMachines = async (uid) => {
