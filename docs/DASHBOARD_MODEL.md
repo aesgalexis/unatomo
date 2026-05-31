@@ -38,6 +38,22 @@ Current implemented scope:
 
 Other documentation may appear in the UI, but persistent upload support should be treated as a separate feature.
 
+## Dashboard Groups
+
+Groups are a user dashboard layout preference, not machine data. The layout is stored in Firestore at:
+
+```text
+dashboard_layout/{uid}
+```
+
+Current scope:
+
+- Create groups by dragging one machine card onto the center of another card.
+- Render group headers as collapsible sections.
+- Move a machine into an existing group by dropping it onto a card in that group.
+- Reorder machines with drag and drop in the flat list, ungrouped list, and group bodies.
+- The dashboard intentionally has no group creation button or per-card group selector.
+
 ## Current Tag/QR Flow
 
 1. User generates or connects a Tag ID from machine config.

@@ -1,6 +1,6 @@
 ﻿import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 import { auth, db, getUserRegistrationState } from "/static/js/firebase/firebaseApp.js";
-import { fetchMachines, fetchLegacyMachines, migrateLegacyMachines, fetchMachine, upsertMachine, deleteMachine, addUserWithRegistry, deleteUserRegistry } from "./firestoreRepo.js";
+import { fetchMachines, fetchLegacyMachines, migrateLegacyMachines, fetchMachine, upsertMachine, deleteMachine, addUserWithRegistry, deleteUserRegistry, fetchDashboardLayout, upsertDashboardLayout } from "./firestoreRepo.js";
 import { upsertAccountDirectory, normalizeEmail, getDisplayNameByEmail } from "./admin/accountDirectoryRepo.js";
 import { fetchInvitesForAdmin } from "./admin/adminInvitesRepo.js";
 import { fetchLinksForAdmin } from "./admin/adminLinksRepo.js";
@@ -15,7 +15,7 @@ import {
   uploadPlateDocument
 } from "./documents/machineDocumentsRepo.js";
 import { createMachineCard } from "./machineCardTemplate.js";
-import { initDragAndDrop } from "./dragAndDrop.js";
+import { initGroupedDragAndDrop } from "./dragAndDrop.js";
 import { cloneMachines, normalizeMachine, createDraftMachine } from "./machineStore.js";
 import { generateSaltBase64, hashPassword } from "/static/js/utils/crypto.js";
 import { initAutoSave } from "./autoSave.js";
@@ -69,6 +69,7 @@ if (mount) {
     selectedTabById: {},
     configSubtabById: {},
     tagStatusById: {},
+    dashboardLayout: { groups: [], placements: {} },
     searchQuery: "",
     pendingInvites: [],
     mobileFocusedMachineId: "",
@@ -373,6 +374,44 @@ if (mount) {
     list.appendChild(placeholder);
   };
 
+  const createGroupSection = (group, machinesCount) => {
+    const section = document.createElement("section");
+    section.className = "machine-group";
+    section.dataset.groupId = group.id || "";
+    section.dataset.collapsed = group.collapsed ? "true" : "false";
+
+    const header = document.createElement("button");
+    header.type = "button";
+    header.className = "machine-group-header";
+    const caret = document.createElement("span");
+    caret.className = "machine-group-caret";
+    caret.textContent = group.collapsed ? "+" : "−";
+    const title = document.createElement("span");
+    title.className = "machine-group-title";
+    title.textContent = group.title || t("dashboard.groupUntitled", "Grupo");
+    const count = document.createElement("span");
+    count.className = "machine-group-count";
+    count.textContent = String(machinesCount);
+    header.appendChild(caret);
+    header.appendChild(title);
+    header.appendChild(count);
+    header.addEventListener("click", () => {
+      state.dashboardLayout = normalizeDashboardLayout(state.dashboardLayout);
+      const target = state.dashboardLayout.groups.find((entry) => entry.id === group.id);
+      if (!target) return;
+      target.collapsed = !target.collapsed;
+      saveDashboardLayout();
+      renderCards({ preserveScroll: true });
+    });
+
+    const body = document.createElement("div");
+    body.className = "machine-group-body";
+    if (group.collapsed) body.hidden = true;
+    section.appendChild(header);
+    section.appendChild(body);
+    return { section, body };
+  };
+
   const recalcHeight = (card) => {
     const header = card.querySelector(".mc-header");
     const expand = card.querySelector(".mc-expand");
@@ -493,6 +532,66 @@ if (mount) {
 
   const getDraftIndex = (id) => state.draftMachines.findIndex((m) => m.id === id);
   const getDraftById = (id) => state.draftMachines.find((m) => m.id === id);
+
+  const normalizeDashboardLayout = (layout = {}) => {
+    const groups = Array.isArray(layout.groups)
+      ? layout.groups
+          .filter((group) => group && group.id)
+          .map((group, index) => ({
+            id: String(group.id),
+            title: (group.title || t("dashboard.groupUntitled", "Grupo")).toString().trim() || t("dashboard.groupUntitled", "Grupo"),
+            order: typeof group.order === "number" ? group.order : index,
+            collapsed: !!group.collapsed
+          }))
+          .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+      : [];
+    const knownGroupIds = new Set(groups.map((group) => group.id));
+    const placements = {};
+    const rawPlacements =
+      layout.placements && typeof layout.placements === "object" && !Array.isArray(layout.placements)
+        ? layout.placements
+        : {};
+    Object.entries(rawPlacements).forEach(([machineId, placement]) => {
+      if (!machineId || !placement || typeof placement !== "object") return;
+      const groupId = knownGroupIds.has(placement.groupId) ? placement.groupId : "";
+      placements[machineId] = {
+        groupId,
+        order: typeof placement.order === "number" ? placement.order : 0
+      };
+    });
+    return { groups, placements };
+  };
+
+  const saveDashboardLayout = async () => {
+    if (!state.uid) return;
+    state.dashboardLayout = normalizeDashboardLayout(state.dashboardLayout);
+    try {
+      await upsertDashboardLayout(state.uid, state.dashboardLayout);
+    } catch {
+      notifyTopbar(t("dashboard.saveError", "Error al guardar"));
+    }
+  };
+
+  const createGroupId = () => {
+    if (window.crypto?.randomUUID) return window.crypto.randomUUID();
+    return `g_${Math.random().toString(36).slice(2, 10)}`;
+  };
+
+  const getNextGroupTitle = () => {
+    const base = t("dashboard.groupUntitled", "Grupo");
+    const existing = new Set(
+      (state.dashboardLayout?.groups || [])
+        .map((group) => (group.title || "").trim().toLowerCase())
+        .filter(Boolean)
+    );
+    let index = 1;
+    let title = `${base} ${index}`;
+    while (existing.has(title.toLowerCase())) {
+      index += 1;
+      title = `${base} ${index}`;
+    }
+    return title;
+  };
 
   const localWriteAt = new Map();
   const markLocalWrite = (machineId) => {
@@ -922,10 +1021,48 @@ if (mount) {
 
     cardRefs.clear();
     state.locations = computeLocations(state.draftMachines);
-    visibleMachines
+    state.dashboardLayout = normalizeDashboardLayout(state.dashboardLayout);
+    const layoutGroups = state.dashboardLayout.groups || [];
+    const layoutPlacements = state.dashboardLayout.placements || {};
+    const useGroupedLayout = layoutGroups.length > 0 && !query;
+    const validGroupIds = new Set(layoutGroups.map((group) => group.id));
+    const groupAnchorOrder = new Map();
+    visibleMachines.forEach((machine) => {
+      const groupId = layoutPlacements[machine.id]?.groupId || "";
+      if (!validGroupIds.has(groupId)) return;
+      const current = groupAnchorOrder.get(groupId);
+      const next = machine.order ?? 0;
+      if (typeof current !== "number" || next < current) groupAnchorOrder.set(groupId, next);
+    });
+    const sortedVisibleMachines = visibleMachines
       .slice()
-      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-      .forEach((machine) => {
+      .sort((a, b) => {
+        if (!useGroupedLayout) return (a.order ?? 0) - (b.order ?? 0);
+        const aPlacement = layoutPlacements[a.id] || {};
+        const bPlacement = layoutPlacements[b.id] || {};
+        const aGroupId = validGroupIds.has(aPlacement.groupId) ? aPlacement.groupId : "";
+        const bGroupId = validGroupIds.has(bPlacement.groupId) ? bPlacement.groupId : "";
+        const aAnchor = aGroupId ? groupAnchorOrder.get(aGroupId) ?? a.order ?? 0 : a.order ?? 0;
+        const bAnchor = bGroupId ? groupAnchorOrder.get(bGroupId) ?? b.order ?? 0 : b.order ?? 0;
+        if (aAnchor !== bAnchor) return aAnchor - bAnchor;
+        if (aGroupId && aGroupId === bGroupId) {
+          return (aPlacement.order ?? a.order ?? 0) - (bPlacement.order ?? b.order ?? 0);
+        }
+        return (a.order ?? 0) - (b.order ?? 0);
+      });
+    const groupTargets = new Map();
+    const renderedGroups = new Set();
+    if (useGroupedLayout) {
+      const groupCounts = new Map(layoutGroups.map((group) => [group.id, 0]));
+      sortedVisibleMachines.forEach((machine) => {
+        const groupId = layoutPlacements[machine.id]?.groupId || "";
+        if (groupCounts.has(groupId)) groupCounts.set(groupId, (groupCounts.get(groupId) || 0) + 1);
+      });
+      groupTargets.set("", list);
+    } else {
+      groupTargets.set("", list);
+    }
+    sortedVisibleMachines.forEach((machine) => {
         if (machine.tagId && !state.tagStatusById[machine.id]) {
           state.tagStatusById[machine.id] = { text: t("dashboard.tagLinked", "Tag enlazado"), state: "ok" };
         }
@@ -1819,7 +1956,28 @@ if (mount) {
           }
         };
 
-        list.appendChild(card);
+        const targetGroupId = useGroupedLayout && validGroupIds.has(layoutPlacements[machine.id]?.groupId)
+          ? layoutPlacements[machine.id]?.groupId || ""
+          : "";
+        if (targetGroupId && !groupTargets.has(targetGroupId) && !renderedGroups.has(targetGroupId)) {
+          const group = layoutGroups.find((entry) => entry.id === targetGroupId);
+          if (group) {
+            const groupCount = sortedVisibleMachines.filter((entry) => layoutPlacements[entry.id]?.groupId === targetGroupId).length;
+            const { section, body } = createGroupSection(group, groupCount);
+            list.appendChild(section);
+            groupTargets.set(targetGroupId, body);
+            renderedGroups.add(targetGroupId);
+          }
+        }
+        const target = groupTargets.get(targetGroupId) || groupTargets.get("") || list;
+        if (targetGroupId) {
+          const cardWrap = document.createElement("div");
+          cardWrap.className = "machine-card-wrap";
+          cardWrap.appendChild(card);
+          target.appendChild(cardWrap);
+        } else {
+          target.appendChild(card);
+        }
         cardRefs.set(machine.id, { card, hooks });
 
         const isExpanded = expandedById.has(machine.id);
@@ -1875,6 +2033,89 @@ if (mount) {
     renderCards();
   };
 
+  const compactPlacementOrders = (groupId) => {
+    const placements = state.dashboardLayout?.placements || {};
+    state.draftMachines
+      .filter((machine) => (placements[machine.id]?.groupId || "") === (groupId || ""))
+      .sort((a, b) => (placements[a.id]?.order ?? a.order ?? 0) - (placements[b.id]?.order ?? b.order ?? 0))
+      .forEach((machine, index) => {
+        placements[machine.id] = {
+          groupId: groupId || "",
+          order: index
+        };
+      });
+  };
+
+  const handleGroupedReorder = (groupId, orderIds) => {
+    if (!state.dashboardLayout?.groups?.length) {
+      handleReorder(orderIds);
+      return;
+    }
+    state.dashboardLayout = normalizeDashboardLayout(state.dashboardLayout);
+    const placements = { ...(state.dashboardLayout.placements || {}) };
+    orderIds.forEach((id, index) => {
+      placements[id] = { groupId: groupId || "", order: index };
+    });
+    state.dashboardLayout.placements = placements;
+    saveDashboardLayout();
+    renderCards({ preserveScroll: true });
+  };
+
+  const createGroupFromDrop = (draggedId, targetId) => {
+    if (!draggedId || !targetId || draggedId === targetId) return;
+    state.dashboardLayout = normalizeDashboardLayout(state.dashboardLayout);
+    const suggestedTitle = getNextGroupTitle();
+    const title = window.prompt(t("dashboard.addGroupPrompt", "Nombre del grupo"), suggestedTitle);
+    if (title === null) return;
+    const cleanTitle = (title || "").trim() || suggestedTitle;
+    const previousDraggedGroupId = state.dashboardLayout.placements?.[draggedId]?.groupId || "";
+    const previousTargetGroupId = state.dashboardLayout.placements?.[targetId]?.groupId || "";
+    const groupId = createGroupId();
+    state.dashboardLayout.groups = [
+      ...(state.dashboardLayout.groups || []),
+      {
+        id: groupId,
+        title: cleanTitle,
+        order: state.dashboardLayout.groups.length,
+        collapsed: false
+      }
+    ];
+    state.dashboardLayout.placements = {
+      ...(state.dashboardLayout.placements || {}),
+      [targetId]: { groupId, order: 0 },
+      [draggedId]: { groupId, order: 1 }
+    };
+    compactPlacementOrders(previousDraggedGroupId);
+    compactPlacementOrders(previousTargetGroupId);
+    saveDashboardLayout();
+    renderCards({ preserveScroll: true });
+  };
+
+  const moveMachineToTargetGroup = (draggedId, targetId) => {
+    state.dashboardLayout = normalizeDashboardLayout(state.dashboardLayout);
+    const placements = state.dashboardLayout.placements || {};
+    const targetGroupId = placements[targetId]?.groupId || "";
+    if (!targetGroupId) {
+      createGroupFromDrop(draggedId, targetId);
+      return;
+    }
+    const previousGroupId = placements[draggedId]?.groupId || "";
+    const orderedIds = state.draftMachines
+      .filter((machine) => (placements[machine.id]?.groupId || "") === targetGroupId && machine.id !== draggedId)
+      .sort((a, b) => (placements[a.id]?.order ?? a.order ?? 0) - (placements[b.id]?.order ?? b.order ?? 0))
+      .map((machine) => machine.id);
+    const targetIndex = orderedIds.indexOf(targetId);
+    orderedIds.splice(targetIndex >= 0 ? targetIndex + 1 : orderedIds.length, 0, draggedId);
+    orderedIds.forEach((id, index) => {
+      placements[id] = { groupId: targetGroupId, order: index };
+    });
+    state.dashboardLayout.placements = placements;
+    compactPlacementOrders(previousGroupId);
+    compactPlacementOrders(targetGroupId);
+    saveDashboardLayout();
+    renderCards({ preserveScroll: true });
+  };
+
   const getUniqueTitle = () => {
     const existing = new Set(
       state.draftMachines.map((m) => (m.title || "").trim().toLowerCase())
@@ -1928,6 +2169,11 @@ if (mount) {
       await upsertAccountDirectory(user);
     } catch {
       // ignore directory write errors
+    }
+    try {
+      state.dashboardLayout = normalizeDashboardLayout(await fetchDashboardLayout(uid));
+    } catch {
+      state.dashboardLayout = { groups: [], placements: {} };
     }
 
     let ownerFetchResolved = false;
@@ -1985,7 +2231,10 @@ if (mount) {
       // ignore invite ensure failures
     }
     renderCards();
-    initDragAndDrop(list, handleReorder);
+    initGroupedDragAndDrop(list, {
+      onReorder: handleGroupedReorder,
+      onDropOnCard: moveMachineToTargetGroup
+    });
   };
 
   onAuthStateChanged(auth, async (user) => {
