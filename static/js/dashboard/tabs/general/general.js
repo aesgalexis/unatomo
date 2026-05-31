@@ -100,160 +100,260 @@ export const render = (panel, machine, hooks, options = {}) => {
   const manualWrap = document.createElement("div");
   manualWrap.className = "mc-manual";
 
-  const createManualRow = (labelText, { withSearch = false } = {}) => {
-    const row = document.createElement("div");
-    row.className = "mc-manual-row";
-
-    const label = document.createElement("span");
-    label.className = "mc-row-label";
-    label.textContent = labelText;
-
-    const fileInput = document.createElement("input");
-    fileInput.type = "file";
-    fileInput.accept = "application/pdf,image/*";
-    fileInput.className = "mc-manual-input";
-    fileInput.addEventListener("click", (event) => event.stopPropagation());
-
-    const drop = document.createElement("button");
-    drop.type = "button";
-    drop.className = "mc-manual-drop";
-    drop.textContent = t("general.upload", "Cargar");
-    drop.addEventListener("click", (event) => {
-      event.stopPropagation();
-      fileInput.click();
-    });
-    fileInput.addEventListener("change", () => {
-      const file = fileInput.files && fileInput.files[0];
-      const nextLabel = file ? file.name : t("general.upload", "Cargar");
-      drop.textContent = nextLabel;
-      drop.classList.toggle("is-file", !!file);
-      saveBtn.style.display = file ? "" : "none";
-      if (searchBtn) searchBtn.style.display = file ? "none" : "";
-      if (hooks.onContentResize) hooks.onContentResize();
-    });
-
-    const saveBtn = document.createElement("button");
-    saveBtn.type = "button";
-    saveBtn.className = "mc-manual-btn";
-    saveBtn.textContent = t("general.save", "Guardar");
-    saveBtn.style.display = "none";
-    saveBtn.addEventListener("click", (event) => {
-      event.stopPropagation();
-      status.textContent = t("general.uploadError", "Error al cargar el archivo");
-      status.dataset.state = "error";
-      if (hooks.onContentResize) hooks.onContentResize();
-    });
-
-    let searchBtn = null;
-    if (withSearch) {
-      searchBtn = document.createElement("button");
-      searchBtn.type = "button";
-      searchBtn.className = "mc-manual-btn";
-      searchBtn.textContent = t("general.search", "Buscar");
-      searchBtn.addEventListener("click", (event) => {
-        event.stopPropagation();
-        const hasBrand = !!(machine.brand || "").trim();
-        const hasModel = !!(machine.model || "").trim();
-        if (!hasBrand || !hasModel) {
-          status.textContent = !hasBrand && !hasModel
-            ? t("general.searchNeedBoth", "Introduce marca y modelo para buscar")
-            : !hasBrand
-            ? t("general.searchNeedBrand", "Introduce marca para buscar")
-            : t("general.searchNeedModel", "Introduce modelo para buscar");
-          status.dataset.state = "error";
-          if (hooks.onContentResize) hooks.onContentResize();
-          return;
-        }
-        const query = `${machine.brand} ${machine.model} manual filetype:pdf`.trim();
-        const url = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
-        window.open(url, "_blank", "noopener");
-      });
-    }
-
-    const status = document.createElement("div");
-    status.className = "mc-tag-status";
-
-    const actions = document.createElement("div");
-    actions.className = "mc-manual-actions";
-    if (searchBtn) actions.appendChild(searchBtn);
-    actions.appendChild(drop);
-
-    row.appendChild(label);
-    row.appendChild(actions);
-    row.appendChild(fileInput);
-    row.appendChild(saveBtn);
-    const wrap = document.createElement("div");
-    wrap.appendChild(row);
-    wrap.appendChild(status);
-    return wrap;
-  };
-
   const docHeader = document.createElement("div");
   docHeader.className = "mc-doc-row";
   const docLabel = document.createElement("span");
   docLabel.className = "mc-row-label";
   docLabel.textContent = t("general.documentation", "Documentación");
-  const docSelect = document.createElement("select");
-  docSelect.className = "mc-doc-select";
-  const docOptions = [
-    t("general.plate", "Placa"),
-    t("general.manual", "Manual"),
-    t("general.wiring", "Esquema eléctrico"),
-  ];
-  const docPlaceholder = document.createElement("option");
-  docPlaceholder.value = "";
-  docPlaceholder.textContent = t("general.add", "Añadir...");
-  docPlaceholder.hidden = true;
-  docPlaceholder.disabled = true;
-  docPlaceholder.selected = true;
-  docSelect.appendChild(docPlaceholder);
-  const emptyOption = document.createElement("option");
-  emptyOption.value = "__empty__";
-  emptyOption.textContent = t("general.nothingToAdd", "Nada que añadir");
-  emptyOption.disabled = true;
-  emptyOption.hidden = true;
-  docSelect.appendChild(emptyOption);
-  const optionEls = {};
-  docOptions.forEach((labelText) => {
-    const opt = document.createElement("option");
-    opt.value = labelText;
-    opt.textContent = labelText;
-    docSelect.appendChild(opt);
-    optionEls[labelText] = opt;
-  });
   docHeader.appendChild(docLabel);
-  docHeader.appendChild(docSelect);
   manualWrap.appendChild(docHeader);
 
-  const rowsByLabel = {
-    [t("general.plate", "Placa")]: createManualRow(t("general.plate", "Placa")),
-    [t("general.manual", "Manual")]: createManualRow(t("general.manual", "Manual"), { withSearch: true }),
-    [t("general.wiring", "Esquema eléctrico")]: createManualRow(t("general.wiring", "Esquema eléctrico")),
-  };
+  const createDocumentTile = (kind, labelText) => {
+    const savedDoc = machine.documents?.[kind] || null;
+    const canUpload = canEditGeneral && ["plate", "manual"].includes(kind);
+    let currentUrl = savedDoc?.url || "";
 
-  const refreshDocOptions = () => {
-    let available = 0;
-    docOptions.forEach((labelText) => {
-      const opt = optionEls[labelText];
-      if (!opt) return;
-      opt.disabled = manualWrap.contains(rowsByLabel[labelText]);
-      opt.hidden = manualWrap.contains(rowsByLabel[labelText]);
-      if (!opt.hidden) available += 1;
-    });
-    emptyOption.hidden = available > 0;
-  };
+    const wrap = document.createElement("div");
+    wrap.className = "mc-doc-tile-wrap";
 
-  docSelect.addEventListener("change", () => {
-    const value = docSelect.value;
-    if (!value || !rowsByLabel[value]) return;
-    if (!manualWrap.contains(rowsByLabel[value])) {
-      manualWrap.appendChild(rowsByLabel[value]);
+    const tile = document.createElement("div");
+    tile.className = "mc-doc-tile";
+    tile.classList.toggle("is-file", !!savedDoc);
+    tile.classList.toggle("is-disabled", !canUpload && !currentUrl);
+    if (kind === "plate" && currentUrl) {
+      tile.classList.add("has-preview");
+      tile.style.setProperty("--mc-doc-preview", `url("${currentUrl.replace(/"/g, "%22")}")`);
     }
-    docSelect.value = "";
-    refreshDocOptions();
-    if (hooks.onContentResize) hooks.onContentResize();
-  });
+    tile.setAttribute("role", canUpload || currentUrl ? "button" : "group");
+    if (canUpload || currentUrl) tile.tabIndex = 0;
 
-  refreshDocOptions();
+    const icon = document.createElement("span");
+    icon.className = "mc-doc-tile-icon";
+    icon.dataset.symbol = savedDoc ? "✓" : "+";
+
+    const label = document.createElement("span");
+    label.className = "mc-doc-tile-label";
+    label.textContent = labelText;
+
+    const fileName = document.createElement("span");
+    fileName.className = "mc-doc-tile-file";
+    fileName.textContent = savedDoc?.name || t("general.upload", "Cargar");
+
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.accept = kind === "plate" ? "image/jpeg,image/png,image/webp" : "application/pdf";
+    fileInput.className = "mc-manual-input";
+    fileInput.addEventListener("click", (event) => event.stopPropagation());
+
+    const status = document.createElement("div");
+    status.className = "mc-tag-status mc-doc-status";
+
+    const saveBtn = document.createElement("button");
+    saveBtn.type = "button";
+    saveBtn.className = "mc-manual-btn";
+    saveBtn.textContent = t("general.save", "Guardar");
+    saveBtn.hidden = true;
+
+    const openFilePicker = () => {
+      if (canUpload) fileInput.click();
+    };
+
+    const openSavedDocument = () => {
+      if (currentUrl) window.open(currentUrl, "_blank", "noopener");
+    };
+
+    const uploadFile = async (file) => {
+      if (!file || !canUpload) return;
+      if (!hooks.onUploadMachineDocument) {
+        status.textContent = t("general.uploadError", "Error al cargar el archivo");
+        status.dataset.state = "error";
+        if (hooks.onContentResize) hooks.onContentResize();
+        return;
+      }
+
+      saveBtn.disabled = true;
+      tile.classList.add("is-uploading");
+      status.textContent = t("general.uploading", "Subiendo...");
+      status.dataset.state = "neutral";
+      if (hooks.onContentResize) hooks.onContentResize();
+
+      try {
+        const doc = await hooks.onUploadMachineDocument(machine.id, kind, file, status);
+        fileName.textContent = doc?.name || file.name;
+        tile.classList.add("is-file");
+        icon.dataset.symbol = "✓";
+        saveBtn.hidden = true;
+        currentUrl = doc?.url || currentUrl;
+        if (kind === "plate" && currentUrl) {
+          tile.classList.add("has-preview");
+          tile.style.setProperty("--mc-doc-preview", `url("${currentUrl.replace(/"/g, "%22")}")`);
+        }
+        fileInput.value = "";
+        window.setTimeout(() => {
+          status.textContent = "";
+          status.dataset.state = "";
+          if (hooks.onContentResize) hooks.onContentResize();
+        }, 2200);
+      } catch (err) {
+        const code = err?.message || "";
+        status.textContent =
+          code === "file-type"
+            ? kind === "manual"
+              ? t("general.uploadPdfTypeError", "Usa un archivo PDF")
+              : t("general.uploadTypeError", "Usa una imagen JPG, PNG o WebP")
+            : code === "file-too-large"
+            ? kind === "manual"
+              ? t("general.uploadPdfSizeError", "El PDF es demasiado grande")
+              : t("general.uploadSizeError", "La imagen es demasiado grande")
+            : t("general.uploadError", "Error al cargar el archivo");
+        status.dataset.state = "error";
+      } finally {
+        saveBtn.disabled = false;
+        tile.classList.remove("is-uploading");
+        if (hooks.onContentResize) hooks.onContentResize();
+      }
+    };
+
+    const clearSavedState = () => {
+      currentUrl = "";
+      tile.classList.remove("is-file", "has-preview");
+      tile.style.removeProperty("--mc-doc-preview");
+      tile.classList.toggle("is-disabled", !canUpload);
+      tile.setAttribute("role", canUpload ? "button" : "group");
+      if (canUpload) tile.tabIndex = 0;
+      else tile.removeAttribute("tabindex");
+      icon.dataset.symbol = "+";
+      fileName.textContent = t("general.upload", "Cargar");
+      saveBtn.hidden = true;
+    };
+
+    const deleteDocument = async () => {
+      if (!savedDoc || !hooks.onDeleteMachineDocument) return;
+      const confirmed = window.confirm(
+        t(
+          "general.deleteConfirm",
+          "Esta acción es irreversible. Se eliminará el archivo de la base de datos. ¿Quieres continuar?"
+        )
+      );
+      if (!confirmed) return;
+      try {
+        tile.classList.add("is-uploading");
+        await hooks.onDeleteMachineDocument(machine.id, kind, status);
+        clearSavedState();
+        menu?.remove();
+        window.setTimeout(() => {
+          status.textContent = "";
+          status.dataset.state = "";
+          if (hooks.onContentResize) hooks.onContentResize();
+        }, 2200);
+      } catch {
+        status.textContent = t("general.deleteError", "No se pudo eliminar el archivo");
+        status.dataset.state = "error";
+      } finally {
+        tile.classList.remove("is-uploading");
+        if (hooks.onContentResize) hooks.onContentResize();
+      }
+    };
+
+    tile.addEventListener("click", (event) => {
+      event.stopPropagation();
+      if (currentUrl) openSavedDocument();
+      else openFilePicker();
+    });
+
+    tile.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      event.stopPropagation();
+      if (currentUrl) openSavedDocument();
+      else openFilePicker();
+    });
+
+    tile.addEventListener("dragover", (event) => {
+      if (!canUpload || currentUrl) return;
+      event.preventDefault();
+      event.stopPropagation();
+      tile.classList.add("is-dragover");
+    });
+
+    tile.addEventListener("dragleave", (event) => {
+      if (!canUpload || currentUrl) return;
+      event.preventDefault();
+      event.stopPropagation();
+      tile.classList.remove("is-dragover");
+    });
+
+    tile.addEventListener("drop", async (event) => {
+      if (!canUpload || currentUrl) return;
+      event.preventDefault();
+      event.stopPropagation();
+      tile.classList.remove("is-dragover");
+      const file = event.dataTransfer?.files?.[0];
+      if (file) await uploadFile(file);
+    });
+
+    fileInput.addEventListener("change", () => {
+      const file = fileInput.files && fileInput.files[0];
+      fileName.textContent = file ? file.name : savedDoc?.name || t("general.upload", "Cargar");
+      tile.classList.toggle("is-file", !!file || !!savedDoc);
+      saveBtn.hidden = !file;
+      if (hooks.onContentResize) hooks.onContentResize();
+    });
+
+    saveBtn.addEventListener("click", async (event) => {
+      event.stopPropagation();
+      await uploadFile(fileInput.files && fileInput.files[0]);
+    });
+
+    const actions = document.createElement("div");
+    actions.className = "mc-manual-actions mc-doc-actions";
+
+    let menu = null;
+    if (canUpload && savedDoc) {
+      menu = document.createElement("div");
+      menu.className = "mc-doc-menu";
+      const dots = document.createElement("button");
+      dots.type = "button";
+      dots.className = "mc-doc-menu-dots";
+      dots.setAttribute("aria-label", t("general.moreOptions", "Más opciones"));
+      dots.textContent = "...";
+      dots.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+      });
+
+      const deleteLink = document.createElement("a");
+      deleteLink.href = "#";
+      deleteLink.className = "mc-doc-menu-link";
+      deleteLink.textContent = t("general.delete", "Eliminar");
+      deleteLink.addEventListener("click", async (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        await deleteDocument();
+      });
+
+      menu.appendChild(dots);
+      menu.appendChild(deleteLink);
+      tile.appendChild(menu);
+    }
+
+    actions.appendChild(saveBtn);
+    tile.appendChild(icon);
+    tile.appendChild(label);
+    tile.appendChild(fileName);
+    wrap.appendChild(tile);
+    wrap.appendChild(fileInput);
+    wrap.appendChild(actions);
+    wrap.appendChild(status);
+    return wrap;
+  };
+
+  const tiles = document.createElement("div");
+  tiles.className = "mc-doc-tiles";
+  tiles.appendChild(createDocumentTile("plate", t("general.plate", "Placa")));
+  tiles.appendChild(createDocumentTile("manual", t("general.manual", "Manual")));
+  tiles.appendChild(createDocumentTile("other", t("general.otherDocumentation", "Otra documentación")));
+  manualWrap.appendChild(tiles);
+
   panel.appendChild(manualWrap);
 };

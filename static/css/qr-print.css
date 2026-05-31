@@ -150,13 +150,13 @@
   border-radius: 999px;
   background: color-mix(in srgb, var(--bg) 92%, transparent);
   color: var(--muted);
-  font: inherit;
+  font-family: Arial, sans-serif;
   font-size: 1.05rem;
-  line-height: 0;
+  line-height: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0 0 0.08rem;
+  padding: 0.08rem 0 0;
   cursor: pointer;
 }
 

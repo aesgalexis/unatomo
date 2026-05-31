@@ -9,6 +9,7 @@ import {
   updateProfile,
   sendPasswordResetEmail
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+import { getStorage } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-storage.js";
 
 const runtimeConfig = window.__UNATOMO_CONFIG__ || {};
 const firebaseConfig = {
@@ -30,6 +31,7 @@ export const app = initializeApp(firebaseConfig);
 
 export const db = getFirestore(app);
 export const auth = getAuth(app);
+export const storage = getStorage(app);
 
 export async function validateRegistrationCode(code) {
   const normalized = (code || "").toString().trim().toUpperCase();
@@ -156,4 +158,3 @@ export async function sendPasswordReset(email) {
   await sendPasswordResetEmail(auth, em);
   return { ok: true };
 }
-
