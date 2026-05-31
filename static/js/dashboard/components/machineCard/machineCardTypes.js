@@ -5,5 +5,5 @@ export const STATUS_LABELS = {
   fuera_de_servicio: t("status.fuera_de_servicio", "Fuera de servicio")
 };
 
-export const TAB_KEYS = ["quehaceres", "general", "historial", "configuracion"];
+export const TAB_KEYS = ["quehaceres", "historial", "general", "configuracion"];
 export const CONFIG_SUBTABS = ["tag", "usuarios", "notificaciones"];

@@ -1,0 +1,53 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function acceptedAdminLink(machineId) {
+      return /databases/(default)/documents/admin_machine_links/$(machineId + "_" + request.auth.uid);
+    }
+
+    function isAcceptedAdminOfMachine(ownerUid, machineId) {
+      return isSignedIn()
+        && firestore.exists(acceptedAdminLink(machineId))
+        && firestore.get(acceptedAdminLink(machineId)).data.adminUid == request.auth.uid
+        && firestore.get(acceptedAdminLink(machineId)).data.ownerUid == ownerUid
+        && firestore.get(acceptedAdminLink(machineId)).data.status == "accepted";
+    }
+
+    function canManageMachine(ownerUid, machineId) {
+      return isSignedIn()
+        && (request.auth.uid == ownerUid || isAcceptedAdminOfMachine(ownerUid, machineId));
+    }
+
+    function isPlateImage() {
+      return request.resource != null
+        && request.resource.size <= 12 * 1024 * 1024
+        && request.resource.contentType.matches('image/(jpeg|png|webp)');
+    }
+
+    function isManualPdf() {
+      return request.resource != null
+        && request.resource.size <= 25 * 1024 * 1024
+        && request.resource.contentType == 'application/pdf';
+    }
+
+    match /machine-docs/{ownerUid}/{machineId}/plate/{fileName} {
+      allow read: if canManageMachine(ownerUid, machineId);
+      allow create, update: if canManageMachine(ownerUid, machineId) && isPlateImage();
+      allow delete: if canManageMachine(ownerUid, machineId);
+    }
+
+    match /machine-docs/{ownerUid}/{machineId}/manual/{fileName} {
+      allow read: if canManageMachine(ownerUid, machineId);
+      allow create, update: if canManageMachine(ownerUid, machineId) && isManualPdf();
+      allow delete: if canManageMachine(ownerUid, machineId);
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

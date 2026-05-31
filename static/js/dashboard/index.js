@@ -9,6 +9,11 @@ import { validateTag, assignTag } from "./tagRepo.js";
 import { createTagToken } from "/static/js/tokens/tagTokens.js";
 import { upsertMachineAccessFromMachine, fetchMachineAccess } from "./machineAccessRepo.js";
 import { buildMachineTagUrl, generateMachineTagQr, disconnectMachineTag } from "./tags/tagAssetsRepo.js";
+import {
+  deleteMachineDocumentFile,
+  uploadManualDocument,
+  uploadPlateDocument
+} from "./documents/machineDocumentsRepo.js";
 import { createMachineCard } from "./machineCardTemplate.js";
 import { initDragAndDrop } from "./dragAndDrop.js";
 import { cloneMachines, normalizeMachine, createDraftMachine } from "./machineStore.js";
@@ -955,7 +960,7 @@ if (mount) {
           canEditLocation: true,
           canDownloadHistory: true,
           canEditConfig: true,
-          visibleTabs: ["quehaceres", "general", "historial", "configuracion"],
+          visibleTabs: ["quehaceres", "historial", "general", "configuracion"],
           userRoles: ["usuario", "tecnico", "externo"],
           createdBy: state.adminLabel || null,
           operationalSource: machine._operationalSource || "local",
@@ -1059,6 +1064,71 @@ if (mount) {
             machine[field] = value;
           }
           autoSave.scheduleSave(id, `general:${field}`);
+        };
+
+        hooks.onUploadMachineDocument = async (id, kind, file, statusEl) => {
+          if (!["plate", "manual"].includes(kind)) throw new Error("unsupported-document");
+          const current = getDraftById(id);
+          if (!current || !state.uid) throw new Error("missing-context");
+          const tenantId = current.tenantId || current.ownerUid || state.uid;
+          const machineForUpload = { ...current, tenantId };
+          if (current.isNew) {
+            await upsertMachine(tenantId, machineForUpload);
+            current.isNew = false;
+          }
+          const uploadDocument = kind === "manual" ? uploadManualDocument : uploadPlateDocument;
+          const uploaded = await uploadDocument({
+            machine: machineForUpload,
+            file,
+            uploadedBy: state.uid
+          });
+          const documents = {
+            ...(current.documents || {}),
+            [kind]: uploaded
+          };
+          updateMachine(id, { documents, isNew: false });
+          current.documents = documents;
+          current.isNew = false;
+          if (statusEl) {
+            statusEl.textContent = t("general.uploadSaved", "Archivo guardado");
+            statusEl.dataset.state = "ok";
+          }
+          if (!state.selectedTabById) state.selectedTabById = {};
+          state.selectedTabById[id] = "general";
+          state.expandedById = Array.from(expandedById);
+          await upsertMachine(tenantId, getDraftById(id));
+          notifyTopbar(t("general.uploadSaved", "Archivo guardado"));
+          return uploaded;
+        };
+
+        hooks.onDeleteMachineDocument = async (id, kind, statusEl) => {
+          if (!["plate", "manual"].includes(kind)) throw new Error("unsupported-document");
+          const current = getDraftById(id);
+          if (!current || !state.uid) throw new Error("missing-context");
+          const doc = current.documents?.[kind] || null;
+          if (!doc) return null;
+          const tenantId = current.tenantId || current.ownerUid || state.uid;
+          if (statusEl) {
+            statusEl.textContent = t("general.deleting", "Eliminando...");
+            statusEl.dataset.state = "neutral";
+          }
+          await deleteMachineDocumentFile(doc.storagePath).catch((error) => {
+            if (error?.code !== "storage/object-not-found") throw error;
+          });
+          const documents = { ...(current.documents || {}) };
+          delete documents[kind];
+          updateMachine(id, { documents });
+          current.documents = documents;
+          if (!state.selectedTabById) state.selectedTabById = {};
+          state.selectedTabById[id] = "general";
+          state.expandedById = Array.from(expandedById);
+          await upsertMachine(tenantId, getDraftById(id));
+          notifyTopbar(t("general.deleted", "Archivo eliminado"));
+          if (statusEl) {
+            statusEl.textContent = t("general.deleted", "Archivo eliminado");
+            statusEl.dataset.state = "ok";
+          }
+          return doc;
         };
 
         hooks.onUpdateLocation = (id, nextValue) => {
