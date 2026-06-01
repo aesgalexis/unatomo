@@ -123,10 +123,14 @@ export const render = (panel, machine, hooks, options = {}) => {
     download.setAttribute("aria-label", t("history.download", "Descargar registro completo"));
     download.setAttribute("data-tooltip", t("history.download", "Descargar registro completo"));
     download.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 3a1 1 0 0 1 1 1v8.59l2.3-2.3a1 1 0 1 1 1.4 1.42l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 0 1 1.4-1.42l2.3 2.3V4a1 1 0 0 1 1-1Zm-7 14a1 1 0 0 1 1 1v2h12v-2a1 1 0 1 1 2 0v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1Z"/></svg>';
+    const clearTooltips = () => {
+      document.querySelectorAll(".mc-tooltip").forEach((node) => node.remove());
+    };
     let tipEl = null;
     const showTip = (event) => {
       const labelText = download.getAttribute("data-tooltip");
       if (!labelText) return;
+      clearTooltips();
       tipEl = document.createElement("div");
       tipEl.className = "mc-tooltip";
       tipEl.textContent = labelText;

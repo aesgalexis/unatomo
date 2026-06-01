@@ -45,6 +45,10 @@
   outline: none;
 }
 
+.add-search.is-active-search {
+  border-color: var(--fg);
+}
+
 .add-search:focus {
   width: 280px;
   padding: 0.55rem 1.2rem 0.55rem 2.2rem;
@@ -848,11 +852,20 @@
   color: #fff;
 }
 
+.machine-group-down-count {
+  background: #dc2626;
+  color: #fff;
+}
+
 .machine-group-body {
   display: flex;
   flex-direction: column;
   gap: 0;
   width: 100%;
+}
+
+.machine-group-body > .machine-subgroup:first-child {
+  margin-top: 0.6rem;
 }
 
 .machine-group-body[hidden] {
