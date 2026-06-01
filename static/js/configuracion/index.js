@@ -3,11 +3,22 @@ import { collection, getDocs } from "https://www.gstatic.com/firebasejs/12.7.0/f
 import { auth, db, getUserRegistrationState } from "/static/js/firebase/firebaseApp.js";
 import { fetchLinksForAdmin } from "/static/js/dashboard/admin/adminLinksRepo.js";
 import { upsertAccountDirectory } from "/static/js/dashboard/admin/accountDirectoryRepo.js";
-import { getAppBasePrefix, getCurrentLang, localizeEsPath } from "/static/js/site/locale.js";
+import {
+  getAppBasePrefix,
+  getCurrentLang,
+  getLocalizedHref,
+  localizeEsPath,
+  setSavedLang
+} from "/static/js/site/locale.js";
 
-const isEn = getCurrentLang() === "en";
+const currentLang = getCurrentLang();
+const isEn = currentLang === "en";
 const appBasePrefix = getAppBasePrefix();
 const textMap = {
+  settings: isEn ? "Settings" : "Configuraci\u00f3n",
+  language: isEn ? "Language" : "Idioma",
+  spanish: isEn ? "Spanish" : "Espa\u00f1ol",
+  english: isEn ? "English" : "Ingl\u00e9s",
   account: isEn ? "Account" : "Cuenta",
   preferences: isEn ? "Preferences" : "Preferencias",
   activity: isEn ? "Activity" : "Actividad",
@@ -54,24 +65,49 @@ const toggleCard = (card) => {
 };
 
 if (mount) {
+  const topbarTitle = document.getElementById("topbar-title");
+  if (topbarTitle) topbarTitle.textContent = textMap.settings;
+  document.title = `${textMap.settings} | unatomo`;
+
   const wrap = document.createElement("div");
   wrap.className = "profile-wrap";
 
+  const languageCard = createCard(textMap.language);
   const accountCard = createCard(textMap.account);
   const preferencesCard = createCard(textMap.preferences);
   const activityCard = createCard(textMap.activity);
   const securityCard = createCard(textMap.security);
 
+  wrap.appendChild(languageCard);
   wrap.appendChild(accountCard);
   wrap.appendChild(preferencesCard);
   wrap.appendChild(activityCard);
   wrap.appendChild(securityCard);
   mount.appendChild(wrap);
 
+  const languageBody = languageCard.querySelector(".profile-card-body");
   const accountBody = accountCard.querySelector(".profile-card-body");
   const prefsBody = preferencesCard.querySelector(".profile-card-body");
   const activityBody = activityCard.querySelector(".profile-card-body");
   const securityBody = securityCard.querySelector(".profile-card-body");
+
+  if (languageBody) {
+    languageBody.innerHTML = `
+      <div class="profile-row">
+        <span class="profile-label">${textMap.language}</span>
+        <div class="profile-theme-options" role="radiogroup" aria-label="${textMap.language}">
+          <label class="profile-theme-option">
+            <input type="radio" name="profile-language" value="es" />
+            <span>${textMap.spanish}</span>
+          </label>
+          <label class="profile-theme-option">
+            <input type="radio" name="profile-language" value="en" />
+            <span>${textMap.english}</span>
+          </label>
+        </div>
+      </div>
+    `;
+  }
 
   if (accountBody) {
     accountBody.innerHTML = `
@@ -147,6 +183,20 @@ if (mount) {
   const ownerCountEl = activityBody?.querySelector("#profile-owner-count");
   const adminCountEl = activityBody?.querySelector("#profile-admin-count");
   const logoutLink = securityBody?.querySelector("#profile-logout");
+  const languageInputs = languageBody?.querySelectorAll(
+    "input[name=\"profile-language\"]"
+  );
+
+  if (languageInputs && languageInputs.length) {
+    languageInputs.forEach((input) => {
+      input.checked = input.value === currentLang;
+      input.addEventListener("change", () => {
+        if (!input.checked || input.value === currentLang) return;
+        setSavedLang(input.value);
+        window.location.href = getLocalizedHref(input.value);
+      });
+    });
+  }
 
   const setText = (el, value) => {
     if (!el) return;

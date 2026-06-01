@@ -89,6 +89,7 @@ if (!btn || !menu || !label || !action) {
   function setGuest() {
     setAuthState("guest");
     currentUser = null;
+    delete document.documentElement.dataset.superadmin;
 
     label.hidden = false;
     label.textContent = text.session.guest;
@@ -151,6 +152,7 @@ if (!btn || !menu || !label || !action) {
 
     if (panelLink) {
       const allowed = await isControlPanelUser(user);
+      document.documentElement.dataset.superadmin = allowed ? "true" : "false";
       panelLink.hidden = !allowed;
       panelLink.textContent = allowed ? (lang === "en" ? "Panel" : "Panel") : "";
       panelLink.setAttribute("href", paths.panel);

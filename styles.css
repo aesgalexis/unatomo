@@ -893,7 +893,7 @@ textarea.field {
 }
 
 .topbar-lang-toggle{
-  display:inline-flex;
+  display:none;
   align-items:center;
   gap:2px;
   height:32px;
@@ -902,6 +902,11 @@ textarea.field {
   border-radius:0.75rem;
   background:color-mix(in srgb, var(--bg) 80%, transparent);
   backdrop-filter:blur(8px);
+}
+
+html[data-superadmin="true"] .topbar-lang-toggle{
+  display:inline-flex;
+  border-color:#7c3aed;
 }
 
 .topbar-lang-link{

@@ -93,3 +93,18 @@ When adding pages or menu links, update both Spanish and English where applicabl
 - `static/js/site/locale.js`
 - `static/js/registro/session-menu.js`
 - Relevant i18n file, often `static/js/dashboard/i18n.js`.
+
+## Superadmin UI
+
+Use `superadmin` to describe UI/features that only the project owner account should see. In the current codebase this is implemented through the existing `control panel user` predicate:
+
+- `nfc/controlpanel/access.js`
+- `isControlPanelUser(userOrEmail)`
+
+The special account email is not stored in plain text; access is checked by comparing the normalized email hash. The visible control panel link and any future owner-only controls should reuse this predicate.
+
+Visual rule:
+
+- Purple/violet `#7c3aed` is reserved for superadmin-only UI signals.
+- The `Panel` link and the ES/EN topbar language toggle are superadmin-only signals.
+- Machine Tag ID/NFC connected state is not superadmin UI and should use blue, not violet.
