@@ -120,6 +120,7 @@ export const render = (panel, machine, hooks, options = {}) => {
     tile.className = "mc-doc-tile";
     tile.classList.toggle("is-file", !!savedDoc);
     tile.classList.toggle("is-disabled", !canUpload && !currentUrl);
+    tile.classList.toggle("is-unavailable", kind === "other");
     if (kind === "plate" && currentUrl) {
       tile.classList.add("has-preview");
       tile.style.setProperty("--mc-doc-preview", `url("${currentUrl.replace(/"/g, "%22")}")`);
