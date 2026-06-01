@@ -81,7 +81,9 @@ if (mount) {
     ownerUnsub: null,
     adminLinksUnsub: null,
     adminMachineUnsubs: new Map(),
-    inviteUnsub: null
+    inviteUnsub: null,
+    initialGroupPriorityOrder: {},
+    initialGroupPriorityReady: false
   };
 
   const cardRefs = new Map();
@@ -113,6 +115,18 @@ if (mount) {
   let rebuildToken = 0;
   let rebuildTimer = null;
   let pendingRebuildOptions = null;
+
+  const clearDashboardTooltips = () => {
+    document.querySelectorAll(".mc-tooltip").forEach((node) => node.remove());
+  };
+
+  ["pointerdown", "dragstart", "scroll", "resize"].forEach((eventName) => {
+    window.addEventListener(eventName, clearDashboardTooltips, true);
+  });
+  window.addEventListener("blur", clearDashboardTooltips);
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) clearDashboardTooltips();
+  });
 
   const statusLabels = {
     operativa: t("dashboard.statusByValue.operativa", "Operativo"),
@@ -374,7 +388,7 @@ if (mount) {
     list.appendChild(placeholder);
   };
 
-  const createGroupSection = (group, pendingTasksCount = 0) => {
+  const createGroupSection = (group, pendingTasksCount = 0, downMachinesCount = 0) => {
     const section = document.createElement("section");
     section.className = "machine-group";
     section.classList.toggle("machine-subgroup", !!group.parentGroupId);
@@ -398,8 +412,14 @@ if (mount) {
     pendingCount.textContent = String(pendingTasksCount);
     pendingCount.title = t("dashboard.groupPendingCountTooltip", "Tareas pendientes en este grupo");
     pendingCount.hidden = pendingTasksCount <= 0;
+    const downCount = document.createElement("span");
+    downCount.className = "machine-group-count machine-group-down-count";
+    downCount.textContent = String(downMachinesCount);
+    downCount.title = t("dashboard.groupDownCountTooltip", "Máquinas fuera de servicio en este grupo");
+    downCount.hidden = downMachinesCount <= 0;
     header.appendChild(caret);
     header.appendChild(title);
+    header.appendChild(downCount);
     header.appendChild(pendingCount);
     header.addEventListener("click", () => {
       state.dashboardLayout = normalizeDashboardLayout(state.dashboardLayout);
@@ -615,6 +635,57 @@ if (mount) {
     return tasks.filter((task) => getTaskTiming(task).pending).length;
   };
 
+  const compareMachineDefaultPriority = (a, b) => {
+    const aDown = normalizeStatus(a.status) === "fuera_de_servicio" ? 0 : 1;
+    const bDown = normalizeStatus(b.status) === "fuera_de_servicio" ? 0 : 1;
+    if (aDown !== bDown) return aDown - bDown;
+    const aPending = getPendingTaskCount(a);
+    const bPending = getPendingTaskCount(b);
+    if (aPending !== bPending) return bPending - aPending;
+    return 0;
+  };
+
+  const buildInitialGroupPriorityOrder = (machines) => {
+    const layout = normalizeDashboardLayout(state.dashboardLayout);
+    const groups = layout.groups || [];
+    const placements = layout.placements || {};
+    const validGroupIds = new Set(groups.map((group) => group.id));
+    const grouped = new Map();
+    (machines || []).forEach((machine) => {
+      const groupId = placements[machine.id]?.groupId || "";
+      if (!validGroupIds.has(groupId)) return;
+      if (!grouped.has(groupId)) grouped.set(groupId, []);
+      grouped.get(groupId).push(machine);
+    });
+    const orderByGroup = {};
+    grouped.forEach((groupMachines, groupId) => {
+      orderByGroup[groupId] = {};
+      groupMachines
+        .slice()
+        .sort((a, b) => {
+          const priority = compareMachineDefaultPriority(a, b);
+          if (priority !== 0) return priority;
+          const aPlacement = placements[a.id] || {};
+          const bPlacement = placements[b.id] || {};
+          return (aPlacement.order ?? a.order ?? 0) - (bPlacement.order ?? b.order ?? 0);
+        })
+        .forEach((machine, index) => {
+          orderByGroup[groupId][machine.id] = index;
+        });
+    });
+    state.initialGroupPriorityOrder = orderByGroup;
+    state.initialGroupPriorityReady = true;
+  };
+
+  const clearInitialGroupPriorityOrder = (groupId = "") => {
+    if (!state.initialGroupPriorityOrder) return;
+    if (groupId) {
+      delete state.initialGroupPriorityOrder[groupId];
+      return;
+    }
+    state.initialGroupPriorityOrder = {};
+  };
+
   const localWriteAt = new Map();
   const markLocalWrite = (machineId) => {
     if (!machineId) return;
@@ -637,6 +708,9 @@ if (mount) {
     );
     const merged = await mergeOperationalFromTag(withOrder);
     if (token !== rebuildToken) return;
+    if (!state.initialGroupPriorityReady) {
+      buildInitialGroupPriorityOrder(merged);
+    }
     setRemote(merged);
     renderCards({ preserveScroll });
   };
@@ -986,6 +1060,7 @@ if (mount) {
 
   const renderCards = ({ preserveScroll = false } = {}) => {
     const prevScrollY = preserveScroll ? window.scrollY : null;
+    clearDashboardTooltips();
     list.innerHTML = "";
     const machines = Array.isArray(state.draftMachines) ? state.draftMachines : [];
     const query = (state.searchQuery || "").trim();
@@ -1086,6 +1161,16 @@ if (mount) {
         const bAnchor = bTopGroupId ? groupAnchorOrder.get(bTopGroupId) ?? b.order ?? 0 : b.order ?? 0;
         if (aAnchor !== bAnchor) return aAnchor - bAnchor;
         if (aGroupId && aGroupId === bGroupId) {
+          const priorityOrder = state.initialGroupPriorityOrder?.[aGroupId] || {};
+          const aPriorityOrder = priorityOrder[a.id];
+          const bPriorityOrder = priorityOrder[b.id];
+          const aOrder = Number.isFinite(aPriorityOrder)
+            ? aPriorityOrder
+            : aPlacement.order ?? a.order ?? 0;
+          const bOrder = Number.isFinite(bPriorityOrder)
+            ? bPriorityOrder
+            : bPlacement.order ?? b.order ?? 0;
+          if (aOrder !== bOrder) return aOrder - bOrder;
           return (aPlacement.order ?? a.order ?? 0) - (bPlacement.order ?? b.order ?? 0);
         }
         if (aTopGroupId && aTopGroupId === bTopGroupId) {
@@ -1109,18 +1194,22 @@ if (mount) {
     const groupCounts = new Map(layoutGroups.map((group) => [group.id, 0]));
     const groupTotalCounts = new Map(layoutGroups.map((group) => [group.id, 0]));
     const groupPendingCounts = new Map(layoutGroups.map((group) => [group.id, 0]));
+    const groupDownCounts = new Map(layoutGroups.map((group) => [group.id, 0]));
     if (useGroupedLayout) {
       sortedVisibleMachines.forEach((machine) => {
         const groupId = layoutPlacements[machine.id]?.groupId || "";
         if (!groupCounts.has(groupId)) return;
         const machinePendingCount = getPendingTaskCount(machine);
+        const machineDownCount = normalizeStatus(machine.status) === "fuera_de_servicio" ? 1 : 0;
         groupCounts.set(groupId, (groupCounts.get(groupId) || 0) + 1);
         groupTotalCounts.set(groupId, (groupTotalCounts.get(groupId) || 0) + 1);
         groupPendingCounts.set(groupId, (groupPendingCounts.get(groupId) || 0) + machinePendingCount);
+        groupDownCounts.set(groupId, (groupDownCounts.get(groupId) || 0) + machineDownCount);
         const parentGroupId = groupById.get(groupId)?.parentGroupId || "";
         if (parentGroupId) {
           groupTotalCounts.set(parentGroupId, (groupTotalCounts.get(parentGroupId) || 0) + 1);
           groupPendingCounts.set(parentGroupId, (groupPendingCounts.get(parentGroupId) || 0) + machinePendingCount);
+          groupDownCounts.set(parentGroupId, (groupDownCounts.get(parentGroupId) || 0) + machineDownCount);
         }
       });
       groupTargets.set("", list);
@@ -1135,9 +1224,11 @@ if (mount) {
       if (parentGroupId) renderGroup(parentGroupId);
       const parentTarget = parentGroupId ? groupTargets.get(parentGroupId) : list;
       if (!parentTarget) return;
+      const showGroupCounts = !!group.collapsed;
       const { section, body } = createGroupSection(
         group,
-        groupPendingCounts.get(groupId) || 0
+        showGroupCounts ? groupPendingCounts.get(groupId) || 0 : 0,
+        showGroupCounts ? groupDownCounts.get(groupId) || 0 : 0
       );
       parentTarget.appendChild(section);
       groupTargets.set(groupId, body);
@@ -2094,6 +2185,7 @@ if (mount) {
 
   const handleReorder = (orderIds) => {
     if (!Array.isArray(orderIds) || !orderIds.length) return;
+    clearInitialGroupPriorityOrder();
     const orderMap = new Map(orderIds.map((id, index) => [id, index]));
     const orderedSet = new Set(orderIds);
     const maxCurrentOrder = state.draftMachines.reduce(
@@ -2118,6 +2210,7 @@ if (mount) {
 
   const updateUngroupedOrder = (orderIds) => {
     if (!Array.isArray(orderIds) || !orderIds.length) return;
+    clearInitialGroupPriorityOrder("");
     const orderMap = new Map(orderIds.map((id, index) => [id, index]));
     state.draftMachines = state.draftMachines.map((machine) => {
       if (!orderMap.has(machine.id)) return machine;
@@ -2128,6 +2221,7 @@ if (mount) {
   };
 
   const updateGroupedPlacementOrder = (groupId, orderIds) => {
+    clearInitialGroupPriorityOrder(groupId || "");
     const placements = { ...(state.dashboardLayout.placements || {}) };
     orderIds.forEach((id, idx) => {
       placements[id] = { groupId: groupId || "", order: idx };
@@ -2137,6 +2231,7 @@ if (mount) {
 
   const handleMixedItemReorder = (parentGroupId, items = []) => {
     if (!Array.isArray(items) || !items.length) return;
+    clearInitialGroupPriorityOrder(parentGroupId || "");
     state.dashboardLayout = normalizeDashboardLayout(state.dashboardLayout);
     const groups = state.dashboardLayout.groups || [];
     const placements = { ...(state.dashboardLayout.placements || {}) };
@@ -2207,6 +2302,7 @@ if (mount) {
 
   const createGroupFromDrop = (draggedId, targetId) => {
     if (!draggedId || !targetId || draggedId === targetId) return;
+    clearInitialGroupPriorityOrder();
     state.dashboardLayout = normalizeDashboardLayout(state.dashboardLayout);
     const suggestedTitle = getNextGroupTitle();
     const title = window.prompt(t("dashboard.addGroupPrompt", "Nombre del grupo"), suggestedTitle);
@@ -2236,6 +2332,7 @@ if (mount) {
   };
 
   const moveMachineToTargetGroup = (draggedId, targetId) => {
+    clearInitialGroupPriorityOrder();
     state.dashboardLayout = normalizeDashboardLayout(state.dashboardLayout);
     const placements = state.dashboardLayout.placements || {};
     const targetGroupId = placements[targetId]?.groupId || "";
@@ -2262,6 +2359,7 @@ if (mount) {
 
   const moveMachineToGroup = (draggedId, targetGroupId) => {
     if (!draggedId || !targetGroupId) return;
+    clearInitialGroupPriorityOrder(targetGroupId);
     state.dashboardLayout = normalizeDashboardLayout(state.dashboardLayout);
     const groups = state.dashboardLayout.groups || [];
     if (!groups.some((group) => group.id === targetGroupId)) return;
@@ -2280,6 +2378,7 @@ if (mount) {
 
   const moveGroupToTargetGroup = (draggedGroupId, targetGroupId) => {
     if (!draggedGroupId || !targetGroupId || draggedGroupId === targetGroupId) return;
+    clearInitialGroupPriorityOrder();
     state.dashboardLayout = normalizeDashboardLayout(state.dashboardLayout);
     const groups = state.dashboardLayout.groups || [];
     const draggedGroup = groups.find((group) => group.id === draggedGroupId);

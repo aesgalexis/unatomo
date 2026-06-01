@@ -18,6 +18,9 @@ export const createMachineCard = (machine, options = {}) => {
   const supportsHoverTooltips = () =>
     window.matchMedia &&
     window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+  const clearTooltips = () => {
+    document.querySelectorAll(".mc-tooltip").forEach((node) => node.remove());
+  };
 
   const card = buildMachineCardTemplate();
   card.dataset.machineId = machine.id;
@@ -246,6 +249,7 @@ export const createMachineCard = (machine, options = {}) => {
       const showTip = (event) => {
         const label = share.getAttribute("data-tooltip");
         if (!label) return;
+        clearTooltips();
         tipEl = document.createElement("div");
         tipEl.className = "mc-tooltip";
         tipEl.textContent = label;
@@ -285,6 +289,7 @@ export const createMachineCard = (machine, options = {}) => {
       const showTip = (event) => {
         const label = nfc.getAttribute("data-tooltip");
         if (!label) return;
+        clearTooltips();
         tipEl = document.createElement("div");
         tipEl.className = "mc-tooltip";
         tipEl.textContent = label;
@@ -360,6 +365,7 @@ export const createMachineCard = (machine, options = {}) => {
     const showTip = (event) => {
       const tooltip = tab.getAttribute("data-tooltip");
       if (!tooltip) return;
+      clearTooltips();
       tipEl = document.createElement("div");
       tipEl.className = "mc-tooltip";
       tipEl.textContent = tooltip;
@@ -453,6 +459,7 @@ export const createMachineCard = (machine, options = {}) => {
     const showTip = (event) => {
       const label = pendingBtn.getAttribute("data-tooltip");
       if (!label) return;
+      clearTooltips();
       tipEl = document.createElement("div");
       tipEl.className = "mc-tooltip";
       tipEl.textContent = label;
