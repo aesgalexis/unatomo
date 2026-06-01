@@ -291,6 +291,16 @@
   outline-offset: 3px;
 }
 
+.machine-group.is-dragging {
+  opacity: 0.65;
+}
+
+.machine-group.is-drop-target > .machine-group-header {
+  outline: 2px solid color-mix(in srgb, #2da44e 70%, transparent);
+  outline-offset: 3px;
+  border-radius: 0.45rem;
+}
+
 .machine-drop-placeholder {
   border: 2px dashed color-mix(in srgb, var(--fg) 35%, transparent);
   border-radius: 1rem;
@@ -777,6 +787,10 @@
   margin-top: 0.6rem;
 }
 
+.machine-group {
+  margin-bottom: 1.1rem;
+}
+
 .machine-group-header {
   width: 100%;
   min-height: 32px;
@@ -791,6 +805,10 @@
   text-align: left;
   font: inherit;
   cursor: pointer;
+}
+
+.machine-subgroup > .machine-group-header {
+  padding-left: 1rem;
 }
 
 .machine-group-caret {
@@ -821,12 +839,16 @@
   font-size: 0.82rem;
 }
 
+.machine-group-pending-count {
+  background: #f97316;
+  color: #fff;
+}
+
 .machine-group-body {
   display: flex;
   flex-direction: column;
   gap: 0;
   width: 100%;
-  transform: translateX(1.2rem);
 }
 
 .machine-group-body[hidden] {
@@ -837,6 +859,19 @@
   display: flex;
   flex-direction: column;
   gap: 0;
+  width: 100%;
+}
+
+#machineList[data-has-ungrouped="true"] > .machine-group:not(.machine-subgroup) > .machine-group-body > .machine-card-wrap {
+  transform: translateX(1.2rem);
+}
+
+#machineList .machine-subgroup > .machine-group-body > .machine-card-wrap {
+  transform: translateX(1.2rem);
+}
+
+#machineList[data-has-ungrouped="true"] .machine-subgroup > .machine-group-body > .machine-card-wrap {
+  transform: translateX(2.4rem);
 }
 
 .mc-manual {
