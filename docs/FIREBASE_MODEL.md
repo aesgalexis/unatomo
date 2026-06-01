@@ -28,7 +28,7 @@ Read this before changing data flows, callable functions, machine ownership, adm
 - `machine_access`: public/operational access data keyed by Tag ID.
 - `admin_machine_links`: accepted admin access links.
 - `admin_invites`: pending/accepted admin invitations.
-- `dashboard_layout/{uid}`: per-user dashboard grouping/layout preferences.
+- `dashboard_layout/{uid}`: per-user dashboard grouping/layout preferences. Groups may include `parentGroupId` for one-level subgroups.
 - Account directory/registry collections may exist for account lookup and admin display names; inspect the repo before changing them.
 
 Machine documents are stored as metadata on `machines.documents`. The actual files live in Firebase Storage under:

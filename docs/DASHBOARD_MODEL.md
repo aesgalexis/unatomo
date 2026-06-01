@@ -51,8 +51,10 @@ Current scope:
 - Create groups by dragging one machine card onto the center of another card.
 - Render group headers as collapsible sections.
 - Move a machine into an existing group by dropping it onto a card in that group.
+- Create one-level subgroups by dragging a group header onto another group.
 - Reorder machines with drag and drop in the flat list, ungrouped list, and group bodies.
 - The dashboard intentionally has no group creation button or per-card group selector.
+- Group records may include `parentGroupId`; nesting deeper than one sublevel is intentionally flattened.
 
 ## Current Tag/QR Flow
 
