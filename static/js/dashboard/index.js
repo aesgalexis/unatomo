@@ -401,10 +401,11 @@ if (mount) {
     pendingCount.className = "machine-group-count machine-group-pending-count";
     pendingCount.textContent = String(pendingTasksCount);
     pendingCount.title = t("dashboard.groupPendingCountTooltip", "Tareas pendientes en este grupo");
+    pendingCount.hidden = pendingTasksCount <= 0;
     header.appendChild(caret);
     header.appendChild(title);
-    header.appendChild(count);
     header.appendChild(pendingCount);
+    header.appendChild(count);
     header.addEventListener("click", () => {
       state.dashboardLayout = normalizeDashboardLayout(state.dashboardLayout);
       const target = state.dashboardLayout.groups.find((entry) => entry.id === group.id);
