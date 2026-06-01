@@ -996,6 +996,26 @@
   cursor: default;
 }
 
+.mc-doc-tile.is-unavailable {
+  cursor: not-allowed;
+  opacity: 0.58;
+  filter: grayscale(0.35);
+  border-style: dashed;
+  background: color-mix(in srgb, var(--bg) 92%, var(--fg) 8%);
+}
+
+.mc-doc-tile.is-unavailable:hover {
+  border-color: color-mix(in srgb, var(--fg) 30%, transparent);
+  background: color-mix(in srgb, var(--bg) 92%, var(--fg) 8%);
+  transform: none;
+}
+
+.mc-doc-tile.is-unavailable .mc-doc-tile-icon,
+.mc-doc-tile.is-unavailable .mc-doc-tile-label,
+.mc-doc-tile.is-unavailable .mc-doc-tile-file {
+  opacity: 0.62;
+}
+
 .mc-doc-tile.is-file {
   border-style: solid;
   border-color: color-mix(in srgb, var(--fg) 30%, transparent);
