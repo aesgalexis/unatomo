@@ -374,7 +374,7 @@ if (mount) {
     list.appendChild(placeholder);
   };
 
-  const createGroupSection = (group, machinesCount, pendingTasksCount = 0) => {
+  const createGroupSection = (group, pendingTasksCount = 0) => {
     const section = document.createElement("section");
     section.className = "machine-group";
     section.classList.toggle("machine-subgroup", !!group.parentGroupId);
@@ -393,10 +393,6 @@ if (mount) {
     const title = document.createElement("span");
     title.className = "machine-group-title";
     title.textContent = group.title || t("dashboard.groupUntitled", "Grupo");
-    const count = document.createElement("span");
-    count.className = "machine-group-count";
-    count.textContent = String(machinesCount);
-    count.title = t("dashboard.groupMachineCountTooltip", "Máquinas en este grupo");
     const pendingCount = document.createElement("span");
     pendingCount.className = "machine-group-count machine-group-pending-count";
     pendingCount.textContent = String(pendingTasksCount);
@@ -405,7 +401,6 @@ if (mount) {
     header.appendChild(caret);
     header.appendChild(title);
     header.appendChild(pendingCount);
-    header.appendChild(count);
     header.addEventListener("click", () => {
       state.dashboardLayout = normalizeDashboardLayout(state.dashboardLayout);
       const target = state.dashboardLayout.groups.find((entry) => entry.id === group.id);
@@ -1096,6 +1091,9 @@ if (mount) {
         if (aTopGroupId && aTopGroupId === bTopGroupId) {
           const aGroup = groupById.get(aGroupId);
           const bGroup = groupById.get(bGroupId);
+          if (!!aGroup?.parentGroupId !== !!bGroup?.parentGroupId) {
+            return aGroup?.parentGroupId ? -1 : 1;
+          }
           const aLocalOrder = aGroup?.parentGroupId
             ? aGroup.order ?? 0
             : aPlacement.order ?? a.order ?? 0;
@@ -1139,7 +1137,6 @@ if (mount) {
       if (!parentTarget) return;
       const { section, body } = createGroupSection(
         group,
-        groupTotalCounts.get(groupId) || 0,
         groupPendingCounts.get(groupId) || 0
       );
       parentTarget.appendChild(section);
@@ -2147,12 +2144,10 @@ if (mount) {
     if (parentGroup?.parentGroupId) return;
 
     const machineOrderMap = new Map();
-    const orderedItems = parentGroupId
-      ? items
-      : [
-          ...items.filter((item) => item.type === "group"),
-          ...items.filter((item) => item.type === "machine")
-        ];
+    const orderedItems = [
+      ...items.filter((item) => item.type === "group"),
+      ...items.filter((item) => item.type === "machine")
+    ];
     orderedItems.forEach((item, index) => {
       if (item.type === "machine") {
         placements[item.id] = { groupId: parentGroupId || "", order: index };
@@ -2258,6 +2253,24 @@ if (mount) {
     orderedIds.forEach((id, index) => {
       placements[id] = { groupId: targetGroupId, order: index };
     });
+    state.dashboardLayout.placements = placements;
+    compactPlacementOrders(previousGroupId);
+    compactPlacementOrders(targetGroupId);
+    saveDashboardLayout();
+    renderCards({ preserveScroll: true });
+  };
+
+  const moveMachineToGroup = (draggedId, targetGroupId) => {
+    if (!draggedId || !targetGroupId) return;
+    state.dashboardLayout = normalizeDashboardLayout(state.dashboardLayout);
+    const groups = state.dashboardLayout.groups || [];
+    if (!groups.some((group) => group.id === targetGroupId)) return;
+    const placements = state.dashboardLayout.placements || {};
+    const previousGroupId = placements[draggedId]?.groupId || "";
+    const nextOrder = state.draftMachines
+      .filter((machine) => (placements[machine.id]?.groupId || "") === targetGroupId && machine.id !== draggedId)
+      .reduce((max, machine) => Math.max(max, placements[machine.id]?.order ?? machine.order ?? 0), -1) + 1;
+    placements[draggedId] = { groupId: targetGroupId, order: nextOrder };
     state.dashboardLayout.placements = placements;
     compactPlacementOrders(previousGroupId);
     compactPlacementOrders(targetGroupId);
@@ -2408,6 +2421,7 @@ if (mount) {
       onReorder: handleGroupedReorder,
       onReorderItems: handleMixedItemReorder,
       onDropOnCard: moveMachineToTargetGroup,
+      onDropMachineOnGroup: moveMachineToGroup,
       onDropGroupOnGroup: moveGroupToTargetGroup
     });
   };
