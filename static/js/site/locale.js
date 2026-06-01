@@ -19,13 +19,13 @@ const TEXT = {
     session: {
       guest: "Invitado",
       user: "Usuario",
-      login: "Iniciar sesión",
-      logout: "Cerrar sesión",
+      login: "Iniciar sesi\u00f3n",
+      logout: "Cerrar sesi\u00f3n",
       register: "Registrarse",
-      settings: "Configuración",
+      settings: "Configuraci\u00f3n",
     },
     footer: {
-      rights: (year) => `© ${year} UNATOMO CORE SL · Todos los derechos reservados.`,
+      rights: (year) => `\u00a9 ${year} UNATOMO CORE SL \u00b7 Todos los derechos reservados.`,
     },
   },
   en: {
@@ -38,7 +38,7 @@ const TEXT = {
       settings: "Settings",
     },
     footer: {
-      rights: (year) => `© ${year} UNATOMO CORE SL · All rights reserved.`,
+      rights: (year) => `\u00a9 ${year} UNATOMO CORE SL \u00b7 All rights reserved.`,
     },
   },
 };

@@ -6,6 +6,8 @@ Unatomo is a static web app with a Firebase backend. The active operational area
 
 The dashboard manages machines, users, tasks, history, notifications, administrators, Tag IDs, machine access pages, and QR printing.
 
+Project-owner-only UI is called `superadmin` in conversation and docs. In code it currently maps to the `control panel user` check in `nfc/controlpanel/access.js`. Purple/violet `#7c3aed` is reserved for superadmin-only UI signals, such as the `Panel` link and the topbar ES/EN language toggle. Ordinary machine states, Tag ID, NFC, and administrator relationships should not use violet.
+
 ## Main Paths
 
 - `nfc/es/` and `nfc/en/`: localized dashboard/auth/static pages.
@@ -32,4 +34,3 @@ The dashboard manages machines, users, tasks, history, notifications, administra
 ## Working Style
 
 Before editing, read the smallest relevant module and follow existing patterns. The codebase is mostly vanilla JS modules plus Firebase CDN imports. Avoid broad refactors unless the requested change requires them.
-

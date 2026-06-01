@@ -26,6 +26,7 @@ npm.cmd run scan:secrets
 - Do not leave temporary Firebase/admin scripts in the repo after one-off operations.
 - Do not change Firebase ownership/admin/tag cleanup flows without reading `docs/FIREBASE_MODEL.md`.
 - Preserve Spanish and English routes, labels, and menu entries when touching user-facing pages.
+- Use `superadmin` for UI/features visible only to the project owner account. In code this maps to the existing `control panel user` check in `nfc/controlpanel/access.js`.
+- Purple/violet (`#7c3aed`) is reserved for superadmin-only UI signals. Do not use it for ordinary machine states, tags, NFC, admin-machine relationships, or general accents.
 - Do not revert user changes unless explicitly asked.
 - Keep edits scoped; this project has live production data behind the dashboard.
-
