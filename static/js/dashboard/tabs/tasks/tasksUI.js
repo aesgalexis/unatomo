@@ -94,10 +94,22 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
   } else {
     const empty = document.createElement("div");
     empty.className = "task-item task-empty";
-    empty.textContent = t(
+    const emptyIcon = document.createElement("span");
+    emptyIcon.className = "task-empty-icon";
+    emptyIcon.innerHTML =
+      '<svg viewBox="0 0 64 64" aria-hidden="true" focusable="false">' +
+      '<rect x="14" y="10" width="36" height="44" rx="6" fill="none" stroke="currentColor" stroke-width="4"/>' +
+      '<path d="M24 25h16M24 35h9" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>' +
+      '<path d="M25 45l5 5 11-13" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>' +
+      '</svg>';
+    const emptyText = document.createElement("span");
+    emptyText.className = "task-empty-text";
+    emptyText.textContent = t(
       "tasks.emptyList",
       "No hay tareas que mostrar, crea una tarea para comenzar"
     );
+    empty.appendChild(emptyIcon);
+    empty.appendChild(emptyText);
     list.appendChild(empty);
   }
 
