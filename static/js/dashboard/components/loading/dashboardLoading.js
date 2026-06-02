@@ -10,13 +10,13 @@ export const createDashboardLoading = () => {
 
   const percent = document.createElement("span");
   percent.className = "dashboard-loading-percent";
-  percent.textContent = "1%";
+  percent.textContent = "0%";
 
   text.appendChild(percent);
   wrap.appendChild(text);
 
-  let displayed = 1;
-  let target = 1;
+  let displayed = 0;
+  let target = 0;
   let frame = null;
 
   const paint = () => {
@@ -38,7 +38,7 @@ export const createDashboardLoading = () => {
   };
 
   const setProgress = (value) => {
-    const safe = Number.isFinite(value) ? Math.max(1, Math.min(100, value)) : 1;
+    const safe = Number.isFinite(value) ? Math.max(0, Math.min(100, value)) : 0;
     target = Math.max(target, safe);
     if (!frame) frame = window.requestAnimationFrame(animate);
   };
