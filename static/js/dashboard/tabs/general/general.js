@@ -23,15 +23,20 @@ export const render = (panel, machine, hooks, options = {}) => {
 
   const setupDocMenu = (menu, dots) => {
     dots.setAttribute("aria-expanded", "false");
+    menu.addEventListener("mouseleave", () => {
+      menu.classList.remove("is-hover-suppressed");
+    });
     dots.addEventListener("click", (event) => {
       event.preventDefault();
       event.stopPropagation();
       const isOpen = menu.classList.contains("is-open");
       closeDocMenus();
       if (!isOpen) {
+        menu.classList.remove("is-hover-suppressed");
         menu.classList.add("is-open");
         dots.setAttribute("aria-expanded", "true");
       } else {
+        menu.classList.add("is-hover-suppressed");
         try {
           dots.blur({ preventScroll: true });
         } catch {
