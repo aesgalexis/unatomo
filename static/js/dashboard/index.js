@@ -440,13 +440,24 @@ if (mount) {
     header.appendChild(title);
     header.appendChild(downCount);
     header.appendChild(pendingCount);
-    header.addEventListener("click", () => {
+    header.addEventListener("click", (event) => {
+      event.preventDefault();
+      try {
+        header.blur({ preventScroll: true });
+      } catch {
+        header.blur();
+      }
       state.dashboardLayout = normalizeDashboardLayout(state.dashboardLayout);
       const target = state.dashboardLayout.groups.find((entry) => entry.id === group.id);
       if (!target) return;
       target.collapsed = !target.collapsed;
+      if (target.collapsed && !target.parentGroupId) {
+        state.dashboardLayout.groups.forEach((entry) => {
+          if (entry.parentGroupId === target.id) entry.collapsed = true;
+        });
+      }
       saveDashboardLayout();
-      renderCards({ preserveScroll: true });
+      renderCards();
     });
 
     const body = document.createElement("div");
