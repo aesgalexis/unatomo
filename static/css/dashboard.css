@@ -1009,6 +1009,10 @@
   color: #fff;
 }
 
+.mc-doc-tile.has-preview .mc-doc-menu-delete {
+  color: #ffb4b4;
+}
+
 .mc-doc-tile.is-disabled,
 .mc-doc-tile.is-uploading {
   cursor: default;
@@ -1113,8 +1117,8 @@
   transition: max-width 0.16s ease, opacity 0.16s ease, padding 0.16s ease;
 }
 
-.mc-doc-menu:hover .mc-doc-menu-link,
-.mc-doc-menu:focus-within .mc-doc-menu-link {
+.mc-doc-menu:focus-within .mc-doc-menu-link,
+.mc-doc-menu.is-open .mc-doc-menu-link {
   max-width: 5rem;
   opacity: 1;
   padding: 0.15rem;
@@ -1123,6 +1127,14 @@
 
 .mc-doc-menu-link:hover {
   color: var(--fg);
+}
+
+.mc-doc-menu-delete {
+  color: var(--danger, #d33);
+}
+
+.mc-doc-menu-delete:hover {
+  color: var(--danger, #d33);
 }
 
 .mc-doc-tile-label {
@@ -1136,7 +1148,8 @@
   max-width: 100%;
   color: color-mix(in srgb, var(--fg) 62%, transparent);
   font-size: 0.78rem;
-  line-height: 1.15;
+  line-height: 1.35;
+  padding-bottom: 0.06rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1179,6 +1192,8 @@
 }
 
 .mc-other-doc-link {
+  flex: 0 1 50%;
+  max-width: 50%;
   min-width: 0;
   color: color-mix(in srgb, var(--fg) 86%, transparent);
   font-size: 0.86rem;
@@ -1195,6 +1210,24 @@
 
 .mc-other-doc-remove {
   flex: 0 0 auto;
+}
+
+.mc-other-doc-menu {
+  position: static;
+  flex: 0 0 auto;
+}
+
+.mc-other-doc-menu .mc-doc-menu-link {
+  max-width: 0;
+}
+
+.mc-other-doc-menu:focus-within .mc-doc-menu-link,
+.mc-other-doc-menu.is-open .mc-doc-menu-link {
+  max-width: 6.2rem;
+}
+
+.mc-other-doc-menu .mc-doc-menu-delete {
+  color: var(--danger, #d33);
 }
 
 .mc-doc-select {

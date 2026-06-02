@@ -27,7 +27,10 @@ export const normalizeTask = (raw) => {
     frequency: raw.frequency || "diaria",
     createdAt: toIso(raw.createdAt),
     lastCompletedAt: raw.lastCompletedAt ?? null,
-    createdBy: raw.createdBy || null
+    createdBy: raw.createdBy || null,
+    source: raw.source || null,
+    automated: raw.automated === true,
+    statusTarget: raw.statusTarget || null
   };
 };
 

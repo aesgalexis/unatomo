@@ -36,10 +36,11 @@ Current implemented scope:
 - Plate images are compressed/resized in the browser before upload.
 - Uploads the image to Firebase Storage, not to the repository.
 - Stores single-file metadata in `machines.documents.<kind>` and additional documentation in `machines.documents.other[]`.
+- Additional documentation can use `displayName` for a UI-only label, capped at 40 characters. Do not rename the underlying Storage object just to change the visible label.
 
 ## Dashboard Groups
 
-Groups are a user dashboard layout preference, not machine data. The layout is stored in Firestore at:
+Groups and the global machine-card tab order are user dashboard layout preferences, not machine data. The layout is stored in Firestore at:
 
 ```text
 dashboard_layout/{uid}
@@ -54,6 +55,11 @@ Current scope:
 - Reorder machines with drag and drop in the flat list, ungrouped list, and group bodies.
 - The dashboard intentionally has no group creation button or per-card group selector.
 - Group records may include `parentGroupId`; nesting deeper than one sublevel is intentionally flattened.
+- `tabOrder` stores the global order for machine-card tabs and applies to all machines. It is edited from the Settings/Configuración page preferences card.
+
+## Status-Linked Tasks
+
+When a machine changes from `operativa` to `fuera_de_servicio`, the dashboard creates one pending one-off task with `source: "status-out-of-service"` to return the machine to operation. Completing that task automatically changes the machine back to `operativa` and writes the status event to history. Do not duplicate this task while one pending status-linked restore task already exists.
 
 ## Current Tag/QR Flow
 

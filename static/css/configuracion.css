@@ -50,6 +50,11 @@
   border-bottom: none;
 }
 
+.profile-row-stack {
+  align-items: stretch;
+  flex-direction: column;
+}
+
 .profile-label {
   color: color-mix(in srgb, var(--fg) 70%, transparent);
   font-size: 13px;
@@ -90,6 +95,45 @@
 
 .profile-theme-option input {
   accent-color: var(--fg);
+}
+
+.profile-tab-order {
+  display: grid;
+  gap: 6px;
+}
+
+.profile-tab-order-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 0;
+}
+
+.profile-tab-order-label {
+  color: var(--fg);
+  font-size: 14px;
+}
+
+.profile-tab-order-actions {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.profile-mini-btn {
+  border: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--bg) 96%, transparent);
+  color: var(--fg);
+  border-radius: 8px;
+  padding: 4px 8px;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.profile-mini-btn:disabled {
+  opacity: 0.42;
+  cursor: default;
 }
 
 .profile-storage {
@@ -164,6 +208,11 @@
 
   .profile-theme-options {
     width: 100%;
+  }
+
+  .profile-tab-order-row {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .profile-storage-head,

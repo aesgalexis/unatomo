@@ -13,6 +13,22 @@ const TAB_RENDER = {
   historial: renderHistorial,
   configuracion: renderConfiguracion
 };
+const DEFAULT_TAB_ORDER = ["quehaceres", "historial", "general", "configuracion"];
+
+const normalizeTabOrder = (value) => {
+  const seen = new Set();
+  const ordered = Array.isArray(value)
+    ? value.filter((id) => {
+        if (!DEFAULT_TAB_ORDER.includes(id) || seen.has(id)) return false;
+        seen.add(id);
+        return true;
+      })
+    : [];
+  DEFAULT_TAB_ORDER.forEach((id) => {
+    if (!seen.has(id)) ordered.push(id);
+  });
+  return ordered;
+};
 
 export const createMachineCard = (machine, options = {}) => {
   const supportsHoverTooltips = () =>
@@ -353,6 +369,15 @@ export const createMachineCard = (machine, options = {}) => {
         tabs.appendChild(btn);
       }
     }
+  }
+
+  const tabsWrap = card.querySelector(".mc-tabs");
+  if (tabsWrap) {
+    const orderedIds = normalizeTabOrder(options.tabOrder);
+    orderedIds.forEach((tabId) => {
+      const tab = tabsWrap.querySelector(`.mc-tab[data-tab="${tabId}"]`);
+      if (tab) tabsWrap.appendChild(tab);
+    });
   }
 
   card.querySelectorAll(".mc-tab").forEach((tab) => {

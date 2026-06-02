@@ -41,6 +41,7 @@ import {
 
 const DEFAULT_COLLAPSED_HEIGHT = 108;
 const EXPAND_FACTOR = 2.5;
+const RESTORE_OPERATION_TASK_SOURCE = "status-out-of-service";
 
 const mount = document.getElementById("dashboard-mount");
 const appBasePrefix = getAppBasePrefix();
@@ -71,7 +72,7 @@ if (mount) {
     selectedTabById: {},
     configSubtabById: {},
     tagStatusById: {},
-    dashboardLayout: { groups: [], placements: {} },
+    dashboardLayout: { groups: [], placements: {}, tabOrder: [] },
     searchQuery: "",
     pendingInvites: [],
     mobileFocusedMachineId: "",
@@ -140,6 +141,29 @@ if (mount) {
 
   const normalizeStatus = (value) =>
     value === "desconectada" ? "fuera_de_servicio" : value || "operativa";
+
+  const createRestoreOperationTask = (createdBy) => ({
+    id:
+      (window.crypto?.randomUUID && window.crypto.randomUUID()) ||
+      `restore_${Date.now().toString(36)}`,
+    title: t("tasks.restoreOperation", "Volver a poner la máquina en operatividad"),
+    description: "",
+    frequency: "puntual",
+    createdAt: new Date().toISOString(),
+    lastCompletedAt: null,
+    createdBy: createdBy || null,
+    source: RESTORE_OPERATION_TASK_SOURCE,
+    automated: true,
+    statusTarget: "operativa"
+  });
+
+  const hasPendingRestoreOperationTask = (tasks = []) =>
+    normalizeTasks(tasks).some(
+      (task) =>
+        task.source === RESTORE_OPERATION_TASK_SOURCE &&
+        task.frequency === "puntual" &&
+        getTaskTiming(task).pending
+    );
 
   const normalizeLocation = (value) =>
     (value || "")
@@ -589,6 +613,21 @@ if (mount) {
 
   const getDraftIndex = (id) => state.draftMachines.findIndex((m) => m.id === id);
   const getDraftById = (id) => state.draftMachines.find((m) => m.id === id);
+  const DEFAULT_TAB_ORDER = ["quehaceres", "historial", "general", "configuracion"];
+  const normalizeTabOrder = (value) => {
+    const seen = new Set();
+    const ordered = Array.isArray(value)
+      ? value.filter((id) => {
+          if (!DEFAULT_TAB_ORDER.includes(id) || seen.has(id)) return false;
+          seen.add(id);
+          return true;
+        })
+      : [];
+    DEFAULT_TAB_ORDER.forEach((id) => {
+      if (!seen.has(id)) ordered.push(id);
+    });
+    return ordered;
+  };
 
   const normalizeDashboardLayout = (layout = {}) => {
     const groups = Array.isArray(layout.groups)
@@ -627,7 +666,7 @@ if (mount) {
         order: typeof placement.order === "number" ? placement.order : 0
       };
     });
-    return { groups, placements };
+    return { groups, placements, tabOrder: normalizeTabOrder(layout.tabOrder) };
   };
 
   const saveDashboardLayout = async () => {
@@ -1400,6 +1439,7 @@ if (mount) {
           canDownloadHistory: true,
           canEditConfig: true,
           visibleTabs: ["quehaceres", "historial", "general", "configuracion"],
+          tabOrder: state.dashboardLayout.tabOrder,
           userRoles: ["usuario", "tecnico", "externo"],
           createdBy: state.adminLabel || null,
           operationalSource: machine._operationalSource || "local",
@@ -1453,13 +1493,47 @@ if (mount) {
           const nextStatus = statusOrder[(idx + 1) % statusOrder.length];
           const keepExpanded = node.dataset.expanded === "true";
           const user = state.adminLabel || t("dashboard.admin", "Administrador");
+          const now = new Date().toISOString();
+          let nextTasks = normalizeTasks(current.tasks || []);
+          const nextLogs = [
+            ...(current.logs || []),
+            { ts: now, type: "status", value: nextStatus, user }
+          ];
+          if (currentStatus !== "fuera_de_servicio" && nextStatus === "fuera_de_servicio") {
+            if (!hasPendingRestoreOperationTask(nextTasks)) {
+              const restoreTask = createRestoreOperationTask(user);
+              nextTasks = [restoreTask, ...nextTasks];
+              nextLogs.push({
+                ts: now,
+                type: "task_created",
+                title: restoreTask.title,
+                description: restoreTask.description || "",
+                user
+              });
+            }
+          } else if (currentStatus === "fuera_de_servicio" && nextStatus === "operativa") {
+            const restoreTask = nextTasks.find(
+              (task) => task.source === RESTORE_OPERATION_TASK_SOURCE && task.frequency === "puntual"
+            );
+            if (restoreTask) {
+              nextTasks = nextTasks.filter((task) => task.id !== restoreTask.id);
+              nextLogs.push({
+                ts: now,
+                type: "task",
+                title: restoreTask.title || t("tasks.restoreOperation", "Volver a poner la máquina en operatividad"),
+                user,
+                overdue: false,
+                overdueDuration: "",
+                punctual: true,
+                completionDuration: getCompletionDuration(restoreTask)
+              });
+            }
+          }
           replaceMachine(machine.id, {
             ...current,
             status: nextStatus,
-            logs: [
-              ...(current.logs || []),
-              { ts: new Date().toISOString(), type: "status", value: nextStatus, user }
-            ]
+            tasks: nextTasks,
+            logs: nextLogs
           });
           renderCards({ preserveScroll: true });
           autoSave.saveNow(machine.id, "status");
@@ -1511,7 +1585,7 @@ if (mount) {
           autoSave.scheduleSave(id, `general:${field}`);
         };
 
-        hooks.onUploadMachineDocument = async (id, kind, file, statusEl) => {
+        hooks.onUploadMachineDocument = async (id, kind, file, statusEl, options = {}) => {
           if (!["plate", "manual", "other"].includes(kind)) throw new Error("unsupported-document");
           const current = getDraftById(id);
           if (!current || !state.uid) throw new Error("missing-context");
@@ -1560,11 +1634,42 @@ if (mount) {
           state.expandedById = Array.from(expandedById);
           await upsertMachine(tenantId, getDraftById(id));
           await refreshStorageFullState(tenantId);
-          notifyTopbar(t("general.uploadSaved", "Archivo guardado"));
-          if (kind === "other") {
+          if (!options.silent) {
+            notifyTopbar(t("general.uploadSaved", "Archivo guardado"));
+          }
+          if (kind === "other" && !options.deferRender) {
             window.setTimeout(() => renderCards({ preserveScroll: true }), 0);
           }
           return uploaded;
+        };
+
+        hooks.onRefreshMachineDocuments = () => {
+          renderCards({ preserveScroll: true });
+        };
+
+        hooks.onRenameMachineDocument = async (id, documentId = "", displayName = "") => {
+          const current = getDraftById(id);
+          if (!current || !state.uid) throw new Error("missing-context");
+          const tenantId = current.tenantId || current.ownerUid || state.uid;
+          const cleanName = (displayName || "").toString().trim().replace(/\s+/g, " ").slice(0, 40);
+          const documents = { ...(current.documents || {}) };
+          const otherDocs = Array.isArray(documents.other) ? documents.other : [];
+          const nextOtherDocs = otherDocs.map((entry) => {
+            if (entry?.id !== documentId && entry?.storagePath !== documentId) return entry;
+            const nextEntry = { ...entry };
+            if (cleanName) nextEntry.displayName = cleanName;
+            else delete nextEntry.displayName;
+            return nextEntry;
+          });
+          documents.other = nextOtherDocs;
+          updateMachine(id, { documents });
+          current.documents = documents;
+          if (!state.selectedTabById) state.selectedTabById = {};
+          state.selectedTabById[id] = "general";
+          state.expandedById = Array.from(expandedById);
+          await upsertMachine(tenantId, getDraftById(id));
+          notifyTopbar(t("general.renamed", "Nombre actualizado"));
+          return nextOtherDocs.find((entry) => entry?.id === documentId || entry?.storagePath === documentId) || null;
         };
 
         hooks.onDeleteMachineDocument = async (id, kind, statusEl, documentId = "") => {
@@ -2283,6 +2388,9 @@ if (mount) {
           const wasOverdue = before ? getTaskTiming(before).pending : false;
           const overdueDuration = before ? getOverdueDuration(before) : "";
           const completionDuration = before ? getCompletionDuration(before) : "";
+          const shouldRestoreOperation =
+            before?.source === RESTORE_OPERATION_TASK_SOURCE &&
+            before?.statusTarget === "operativa";
           const tasks = baseTasks
             .map((t) =>
               t.id === taskId ? { ...t, lastCompletedAt: new Date().toISOString() } : t
@@ -2303,7 +2411,17 @@ if (mount) {
               completionDuration
             }
           ];
-          updateMachine(id, { tasks, logs });
+          const updates = { tasks, logs };
+          if (shouldRestoreOperation && normalizeStatus(current.status) !== "operativa") {
+            updates.status = "operativa";
+            logs.push({
+              ts: new Date().toISOString(),
+              type: "status",
+              value: "operativa",
+              user
+            });
+          }
+          updateMachine(id, updates);
           if (!state.selectedTabById) state.selectedTabById = {};
           state.selectedTabById[id] = "quehaceres";
           state.expandedById = Array.from(expandedById);
@@ -2651,7 +2769,7 @@ if (mount) {
     try {
       state.dashboardLayout = normalizeDashboardLayout(await fetchDashboardLayout(uid));
     } catch {
-      state.dashboardLayout = { groups: [], placements: {} };
+      state.dashboardLayout = { groups: [], placements: {}, tabOrder: normalizeTabOrder() };
     }
 
     let ownerFetchResolved = false;

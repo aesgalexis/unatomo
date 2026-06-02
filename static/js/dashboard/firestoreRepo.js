@@ -17,6 +17,22 @@ const machinesCollection = collection(db, "machines");
 const usernamesDoc = (ownerUid, normalized) =>
   doc(db, "usernames", `${ownerUid}_${normalized}`);
 const dashboardLayoutDoc = (uid) => doc(db, "dashboard_layout", uid);
+const VALID_TAB_IDS = ["quehaceres", "general", "historial", "configuracion"];
+
+const normalizeTabOrder = (value) => {
+  const seen = new Set();
+  const ordered = Array.isArray(value)
+    ? value.filter((id) => {
+        if (!VALID_TAB_IDS.includes(id) || seen.has(id)) return false;
+        seen.add(id);
+        return true;
+      })
+    : [];
+  VALID_TAB_IDS.forEach((id) => {
+    if (!seen.has(id)) ordered.push(id);
+  });
+  return ordered;
+};
 
 export const fetchMachines = async (uid) => {
   const q = query(machinesCollection, where("ownerUid", "==", uid));
@@ -41,6 +57,7 @@ export const upsertDashboardLayout = async (uid, layout) => {
         layout?.placements && typeof layout.placements === "object" && !Array.isArray(layout.placements)
           ? layout.placements
           : {},
+      tabOrder: normalizeTabOrder(layout?.tabOrder),
       updatedAt: serverTimestamp(),
       updatedBy: uid
     },

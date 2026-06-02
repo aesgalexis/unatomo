@@ -3,6 +3,43 @@ import { t } from "/static/js/dashboard/i18n.js";
 export const render = (panel, machine, hooks, options = {}) => {
   panel.innerHTML = "";
   const canEditGeneral = options.canEditGeneral !== false;
+  const maxOtherDocDisplayName = 40;
+
+  const closeDocMenus = () => {
+    panel.querySelectorAll(".mc-doc-menu.is-open").forEach((menu) => {
+      menu.classList.remove("is-open");
+      const dots = menu.querySelector(".mc-doc-menu-dots");
+      if (dots) dots.setAttribute("aria-expanded", "false");
+    });
+  };
+
+  if (panel.__unatomoDocMenuHandler) {
+    panel.removeEventListener("click", panel.__unatomoDocMenuHandler);
+  }
+  panel.__unatomoDocMenuHandler = (event) => {
+    if (!event.target.closest(".mc-doc-menu")) closeDocMenus();
+  };
+  panel.addEventListener("click", panel.__unatomoDocMenuHandler);
+
+  const setupDocMenu = (menu, dots) => {
+    dots.setAttribute("aria-expanded", "false");
+    dots.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const isOpen = menu.classList.contains("is-open");
+      closeDocMenus();
+      if (!isOpen) {
+        menu.classList.add("is-open");
+        dots.setAttribute("aria-expanded", "true");
+      } else {
+        try {
+          dots.blur({ preventScroll: true });
+        } catch {
+          dots.blur();
+        }
+      }
+    });
+  };
 
   const rowTop = document.createElement("div");
   rowTop.className = "mc-row mc-row-input mc-row-inline";
@@ -108,10 +145,85 @@ export const render = (panel, machine, hooks, options = {}) => {
   docHeader.appendChild(docLabel);
   manualWrap.appendChild(docHeader);
 
+  let otherDocsList = null;
+  const appendOtherDocRow = (doc) => {
+    if (!otherDocsList || !doc?.url) return;
+    const row = document.createElement("div");
+    row.className = "mc-other-doc-row";
+
+    const link = document.createElement("a");
+    link.className = "mc-other-doc-link";
+    link.href = doc.url;
+    link.target = "_blank";
+    link.rel = "noopener";
+    link.textContent = doc.displayName || doc.name || t("general.otherDocumentation", "Otra documentación");
+    link.addEventListener("click", (event) => event.stopPropagation());
+
+    row.appendChild(link);
+
+    if (canEditGeneral && hooks.onDeleteMachineDocument) {
+      const menu = document.createElement("div");
+      menu.className = "mc-doc-menu mc-other-doc-menu";
+
+      const dots = document.createElement("button");
+      dots.type = "button";
+      dots.className = "mc-doc-menu-dots";
+      dots.setAttribute("aria-label", t("general.moreOptions", "Más opciones"));
+      dots.textContent = "...";
+
+      const rename = document.createElement("a");
+      rename.className = "mc-doc-menu-link mc-other-doc-rename";
+      rename.href = "#";
+      rename.textContent = t("general.rename", "Renombrar");
+      rename.addEventListener("click", async (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        closeDocMenus();
+        const currentName = doc.displayName || doc.name || "";
+        const nextName = window.prompt(
+          t("general.renamePrompt", "Nombre para mostrar"),
+          currentName.slice(0, maxOtherDocDisplayName)
+        );
+        if (nextName === null) return;
+        const cleanName = nextName.trim().replace(/\s+/g, " ").slice(0, maxOtherDocDisplayName);
+        if (cleanName === currentName) return;
+        if (!hooks.onRenameMachineDocument) return;
+        await hooks.onRenameMachineDocument(machine.id, doc.id || doc.storagePath || "", cleanName);
+        link.textContent = cleanName || doc.name || t("general.otherDocumentation", "Otra documentación");
+      });
+
+      const remove = document.createElement("a");
+      remove.className = "mc-doc-menu-link mc-doc-menu-delete mc-other-doc-remove";
+      remove.href = "#";
+      remove.textContent = t("general.delete", "Eliminar");
+      remove.addEventListener("click", async (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        closeDocMenus();
+        const confirmed = window.confirm(
+          t(
+            "general.deleteConfirm",
+            "Esta acción es irreversible. Se eliminará el archivo de la base de datos. ¿Quieres continuar?"
+          )
+        );
+        if (!confirmed) return;
+        await hooks.onDeleteMachineDocument(machine.id, "other", null, doc.id || doc.storagePath || "");
+      });
+      setupDocMenu(menu, dots);
+      menu.appendChild(dots);
+      menu.appendChild(remove);
+      menu.appendChild(rename);
+      row.appendChild(menu);
+    }
+
+    otherDocsList.appendChild(row);
+  };
+
   const createDocumentTile = (kind, labelText) => {
     const savedDoc = kind === "other" ? null : machine.documents?.[kind] || null;
     const canUpload = canEditGeneral && ["plate", "manual", "other"].includes(kind);
     const isMultiDocument = kind === "other";
+    const maxBatchFiles = 10;
     let currentUrl = savedDoc?.url || "";
 
     const wrap = document.createElement("div");
@@ -148,6 +260,7 @@ export const render = (panel, machine, hooks, options = {}) => {
         : kind === "manual"
           ? "application/pdf"
           : "application/pdf,image/jpeg,image/png,image/webp";
+    fileInput.multiple = isMultiDocument;
     fileInput.className = "mc-manual-input";
     fileInput.addEventListener("click", (event) => event.stopPropagation());
 
@@ -168,7 +281,7 @@ export const render = (panel, machine, hooks, options = {}) => {
       if (currentUrl) window.open(currentUrl, "_blank", "noopener");
     };
 
-    const uploadFile = async (file) => {
+    const uploadFile = async (file, options = {}) => {
       if (!file || !canUpload) return;
       if (!hooks.onUploadMachineDocument) {
         status.textContent = t("general.uploadError", "Error al cargar el archivo");
@@ -179,12 +292,14 @@ export const render = (panel, machine, hooks, options = {}) => {
 
       saveBtn.disabled = true;
       tile.classList.add("is-uploading");
-      status.textContent = t("general.uploading", "Subiendo...");
-      status.dataset.state = "neutral";
+      if (!options.silent) {
+        status.textContent = t("general.uploading", "Subiendo...");
+        status.dataset.state = "neutral";
+      }
       if (hooks.onContentResize) hooks.onContentResize();
 
       try {
-        const doc = await hooks.onUploadMachineDocument(machine.id, kind, file, status);
+        const doc = await hooks.onUploadMachineDocument(machine.id, kind, file, status, options);
         fileName.textContent = isMultiDocument
           ? t("general.upload", "Cargar")
           : doc?.name || file.name;
@@ -197,11 +312,14 @@ export const render = (panel, machine, hooks, options = {}) => {
           tile.style.setProperty("--mc-doc-preview", `url("${currentUrl.replace(/"/g, "%22")}")`);
         }
         fileInput.value = "";
-        window.setTimeout(() => {
-          status.textContent = "";
-          status.dataset.state = "";
-          if (hooks.onContentResize) hooks.onContentResize();
-        }, 2200);
+        if (!options.silent) {
+          window.setTimeout(() => {
+            status.textContent = "";
+            status.dataset.state = "";
+            if (hooks.onContentResize) hooks.onContentResize();
+          }, 2200);
+        }
+        return doc;
       } catch (err) {
         const code = err?.message || "";
         status.textContent =
@@ -221,6 +339,61 @@ export const render = (panel, machine, hooks, options = {}) => {
             ? t("dashboard.storageFullAction", "Almacenamiento lleno")
             : t("general.uploadError", "Error al cargar el archivo");
         status.dataset.state = "error";
+        if (options.rethrow) throw err;
+      } finally {
+        saveBtn.disabled = false;
+        tile.classList.remove("is-uploading");
+        if (hooks.onContentResize) hooks.onContentResize();
+      }
+    };
+
+    const uploadFiles = async (files) => {
+      const selectedFiles = Array.from(files || []).filter(Boolean);
+      if (!selectedFiles.length) return;
+      if (!isMultiDocument) {
+        await uploadFile(selectedFiles[0]);
+        return;
+      }
+      if (selectedFiles.length > maxBatchFiles) {
+        status.textContent = t("general.uploadBatchLimitError", "Puedes subir hasta 10 archivos a la vez");
+        status.dataset.state = "error";
+        saveBtn.hidden = true;
+        fileInput.value = "";
+        if (hooks.onContentResize) hooks.onContentResize();
+        return;
+      }
+
+      saveBtn.disabled = true;
+      tile.classList.add("is-uploading");
+      try {
+        const uploadedDocs = [];
+        for (let index = 0; index < selectedFiles.length; index += 1) {
+          status.textContent = t(
+            "general.uploadingMany",
+            (current, total) => `Subiendo ${current}/${total}...`
+          )(index + 1, selectedFiles.length);
+          status.dataset.state = "neutral";
+          const uploadedDoc = await uploadFile(selectedFiles[index], {
+            silent: true,
+            deferRender: true,
+            rethrow: true
+          });
+          if (uploadedDoc) uploadedDocs.push(uploadedDoc);
+        }
+        uploadedDocs.forEach(appendOtherDocRow);
+        fileName.textContent = t("general.upload", "Cargar");
+        saveBtn.hidden = true;
+        fileInput.value = "";
+        status.textContent = t("general.uploadSaved", "Archivo guardado");
+        status.dataset.state = "ok";
+        window.setTimeout(() => {
+          status.textContent = "";
+          status.dataset.state = "";
+          if (hooks.onRefreshMachineDocuments) {
+            hooks.onRefreshMachineDocuments();
+          }
+          if (hooks.onContentResize) hooks.onContentResize();
+        }, 2200);
       } finally {
         saveBtn.disabled = false;
         tile.classList.remove("is-uploading");
@@ -302,21 +475,26 @@ export const render = (panel, machine, hooks, options = {}) => {
       event.preventDefault();
       event.stopPropagation();
       tile.classList.remove("is-dragover");
-      const file = event.dataTransfer?.files?.[0];
-      if (file) await uploadFile(file);
+      const files = event.dataTransfer?.files || [];
+      await uploadFiles(files);
     });
 
     fileInput.addEventListener("change", () => {
-      const file = fileInput.files && fileInput.files[0];
-      fileName.textContent = file ? file.name : savedDoc?.name || t("general.upload", "Cargar");
+      const files = Array.from(fileInput.files || []);
+      const file = files[0];
+      fileName.textContent = isMultiDocument && files.length > 1
+        ? t("general.filesSelected", (count) => `${count} archivos seleccionados`)(files.length)
+        : file
+          ? file.name
+          : savedDoc?.name || t("general.upload", "Cargar");
       tile.classList.toggle("is-file", !isMultiDocument && (!!file || !!savedDoc));
-      saveBtn.hidden = !file;
+      saveBtn.hidden = !files.length;
       if (hooks.onContentResize) hooks.onContentResize();
     });
 
     saveBtn.addEventListener("click", async (event) => {
       event.stopPropagation();
-      await uploadFile(fileInput.files && fileInput.files[0]);
+      await uploadFiles(fileInput.files || []);
     });
 
     const actions = document.createElement("div");
@@ -331,21 +509,19 @@ export const render = (panel, machine, hooks, options = {}) => {
       dots.className = "mc-doc-menu-dots";
       dots.setAttribute("aria-label", t("general.moreOptions", "Más opciones"));
       dots.textContent = "...";
-      dots.addEventListener("click", (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-      });
 
       const deleteLink = document.createElement("a");
       deleteLink.href = "#";
-      deleteLink.className = "mc-doc-menu-link";
+      deleteLink.className = "mc-doc-menu-link mc-doc-menu-delete";
       deleteLink.textContent = t("general.delete", "Eliminar");
       deleteLink.addEventListener("click", async (event) => {
         event.preventDefault();
         event.stopPropagation();
+        closeDocMenus();
         await deleteDocument();
       });
 
+      setupDocMenu(menu, dots);
       menu.appendChild(dots);
       menu.appendChild(deleteLink);
       tile.appendChild(menu);
@@ -374,46 +550,10 @@ export const render = (panel, machine, hooks, options = {}) => {
   otherDocsSep.className = "mc-doc-list-sep";
   manualWrap.appendChild(otherDocsSep);
 
-  const otherDocsList = document.createElement("div");
+  otherDocsList = document.createElement("div");
   otherDocsList.className = "mc-other-doc-list";
   if (otherDocs.length) {
-    otherDocs.forEach((doc) => {
-      if (!doc?.url) return;
-      const row = document.createElement("div");
-      row.className = "mc-other-doc-row";
-
-      const link = document.createElement("a");
-      link.className = "mc-other-doc-link";
-      link.href = doc.url;
-      link.target = "_blank";
-      link.rel = "noopener";
-      link.textContent = doc.name || t("general.otherDocumentation", "Otra documentación");
-      link.addEventListener("click", (event) => event.stopPropagation());
-
-      row.appendChild(link);
-
-      if (canEditGeneral && hooks.onDeleteMachineDocument) {
-        const remove = document.createElement("a");
-        remove.className = "mc-user-remove mc-other-doc-remove";
-        remove.href = "#";
-        remove.textContent = t("general.delete", "Eliminar");
-        remove.addEventListener("click", async (event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          const confirmed = window.confirm(
-            t(
-              "general.deleteConfirm",
-              "Esta acción es irreversible. Se eliminará el archivo de la base de datos. ¿Quieres continuar?"
-            )
-          );
-          if (!confirmed) return;
-          await hooks.onDeleteMachineDocument(machine.id, "other", null, doc.id || doc.storagePath || "");
-        });
-        row.appendChild(remove);
-      }
-
-      otherDocsList.appendChild(row);
-    });
+    otherDocs.forEach(appendOtherDocRow);
   }
   manualWrap.appendChild(otherDocsList);
 
