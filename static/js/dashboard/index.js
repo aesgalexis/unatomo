@@ -411,19 +411,7 @@ if (mount) {
       state.loadingGuardTimer = null;
     }
     state.loadingGuardTimer = setTimeout(() => {
-      let changed = false;
-      if (!state.ownerReady) {
-        state.ownerReady = true;
-        changed = true;
-      }
-      if (!state.adminReady) {
-        state.adminReady = true;
-        changed = true;
-      }
-      if (changed) {
-        updateLoading();
-        renderCards({ preserveScroll: true });
-      }
+      updateLoading();
     }, 8000);
   };
 
@@ -1262,6 +1250,10 @@ if (mount) {
     if (!machines.length) {
       clearMobileDetailState();
       syncMobileDetailUI();
+      if (state.loading) {
+        list.innerHTML = "";
+        return;
+      }
       renderPlaceholder();
       if (preserveScroll) {
         restoreViewport(prevScrollY || 0, renderAnchor);
