@@ -113,7 +113,10 @@ function initSetupLogin() {
     if (!box.hidden) emailInput.focus();
   }
 
-  btnOpen.addEventListener("click", toggleBox);
+  btnOpen.addEventListener("click", (event) => {
+    event.preventDefault();
+    toggleBox();
+  });
 
   onAuthStateChanged(auth, async (user) => {
     if (!user) return;

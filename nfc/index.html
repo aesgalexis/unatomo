@@ -44,7 +44,7 @@
     <br><br>
 
     <div class="auth-actions" aria-label="Access">
-      <button type="button" class="btn-pill btn-pill-solid" id="go-login"></button>
+      <a href="/nfc/es/auth/login.html" class="btn-pill btn-pill-solid" id="go-login"></a>
     </div>
 
     <section id="login-box" class="card" hidden>
@@ -182,6 +182,7 @@
       document.getElementById("privacy-link").textContent = text.privacy;
 
       document.getElementById("reset-link").href = lang === "en" ? "/nfc/en/auth/reset.html" : "/nfc/es/auth/reset.html";
+      document.getElementById("go-login").href = lang === "en" ? "/nfc/en/auth/login.html" : "/nfc/es/auth/login.html";
       document.getElementById("request-code-link").href = lang === "en" ? "/nfc/en/contacto.html" : "/nfc/es/contacto.html";
       document.getElementById("privacy-link").href = lang === "en" ? "/nfc/en/privacidad.html" : "/nfc/es/privacidad.html";
       document.querySelector(".auth-actions").setAttribute("aria-label", lang === "en" ? "Access" : "Acceso");
