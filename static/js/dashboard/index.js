@@ -84,6 +84,8 @@ if (mount) {
     adminMachineUnsubs: new Map(),
     inviteUnsub: null,
     storageFull: false,
+    nextScrollRestoreY: null,
+    nextScrollAnchor: null,
     initialGroupPriorityOrder: {},
     initialGroupPriorityReady: false
   };
@@ -214,6 +216,21 @@ if (mount) {
       searchInput.classList.remove("is-active-search");
     }
   });
+  searchInput.addEventListener("change", () => {
+    if (searchInput.value.trim()) {
+      searchInput.classList.add("is-active-search");
+    } else {
+      searchInput.classList.remove("is-active-search");
+    }
+  });
+  const syncSearchVisualState = () => {
+    const query = (state.searchQuery || "").trim();
+    if (document.activeElement !== searchInput) {
+      searchInput.value = query;
+      if (!query) searchInput.blur();
+    }
+    searchInput.classList.toggle("is-active-search", !!query);
+  };
   const orderBtn = document.createElement("button");
   orderBtn.type = "button";
   orderBtn.className = "btn-order";
@@ -1111,8 +1128,55 @@ if (mount) {
     heightRAF.set(id, requestAnimationFrame(fn));
   };
 
+  const captureViewportAnchor = () => {
+    const cards = Array.from(list.querySelectorAll(".machine-card"));
+    if (!cards.length) return null;
+    const expanded = state.expandedById?.[0]
+      ? list.querySelector(`.machine-card[data-machine-id="${state.expandedById[0]}"]`)
+      : null;
+    const candidates = expanded ? [expanded, ...cards.filter((card) => card !== expanded)] : cards;
+    const viewportTop = 96;
+    const target =
+      candidates.find((card) => card.getBoundingClientRect().bottom > viewportTop) ||
+      candidates[0];
+    if (!target) return null;
+    return {
+      id: target.dataset.machineId || "",
+      top: target.getBoundingClientRect().top
+    };
+  };
+
+  const restoreViewport = (scrollY, anchor) => {
+    requestAnimationFrame(() => {
+      if (anchor?.id) {
+        const anchoredCard = list.querySelector(`.machine-card[data-machine-id="${anchor.id}"]`);
+        if (anchoredCard) {
+          const nextTop = anchoredCard.getBoundingClientRect().top;
+          window.scrollBy(0, nextTop - anchor.top);
+          syncSearchVisualState();
+          return;
+        }
+      }
+      window.scrollTo(0, scrollY || 0);
+      syncSearchVisualState();
+    });
+  };
+
   const renderCards = ({ preserveScroll = false } = {}) => {
-    const prevScrollY = preserveScroll ? window.scrollY : null;
+    const capturedAnchor = preserveScroll ? captureViewportAnchor() : null;
+    const prevScrollY = preserveScroll
+      ? (typeof state.nextScrollRestoreY === "number" ? state.nextScrollRestoreY : window.scrollY)
+      : null;
+    const renderAnchor = state.nextScrollAnchor || capturedAnchor;
+    state.nextScrollRestoreY = null;
+    const activeEl = document.activeElement;
+    if (activeEl && list.contains(activeEl) && typeof activeEl.blur === "function") {
+      try {
+        activeEl.blur({ preventScroll: true });
+      } catch {
+        activeEl.blur();
+      }
+    }
     clearDashboardTooltips();
     list.innerHTML = "";
     const machines = Array.isArray(state.draftMachines) ? state.draftMachines : [];
@@ -1141,7 +1205,7 @@ if (mount) {
       syncMobileDetailUI();
       renderPlaceholder();
       if (preserveScroll) {
-        requestAnimationFrame(() => window.scrollTo(0, prevScrollY || 0));
+        restoreViewport(prevScrollY || 0, renderAnchor);
       }
       return;
     }
@@ -1154,7 +1218,7 @@ if (mount) {
       placeholder.textContent = t("dashboard.noResults", (value) => `No results for "${value}".`)(query);
       list.appendChild(placeholder);
       if (preserveScroll) {
-        requestAnimationFrame(() => window.scrollTo(0, prevScrollY || 0));
+        restoreViewport(prevScrollY || 0, renderAnchor);
       }
       return;
     }
@@ -1307,6 +1371,7 @@ if (mount) {
         const ownerDisplayName = machine.ownerEmail
           ? getAdminDisplayName(machine.ownerEmail)
           : "";
+        const isExpanded = expandedById.has(machine.id);
         const { card, hooks } = createMachineCard(machine, {
           tagStatus: state.tagStatusById[machine.id],
           adminLabel: state.adminLabel,
@@ -1329,7 +1394,13 @@ if (mount) {
           locations: state.locations,
           knownUsers: state.knownUsers
         });
-        card.style.maxHeight = `${getCollapsedHeightPx()}px`;
+        if (isExpanded) {
+          card.dataset.expanded = "true";
+          card.classList.add("mc-no-anim");
+          card.style.maxHeight = "none";
+        } else {
+          card.style.maxHeight = `${getCollapsedHeightPx()}px`;
+        }
 
         hooks.onToggleExpand = (node) => {
           if (node.classList.contains("is-dragging")) return;
@@ -2102,22 +2173,28 @@ if (mount) {
             renderCards({ preserveScroll: true });
             return;
           }
+          const restoreY = window.scrollY;
+          const anchorCard = list.querySelector(`.machine-card[data-machine-id="${id}"]`);
+          state.nextScrollAnchor = anchorCard
+            ? { id, top: anchorCard.getBoundingClientRect().top }
+            : null;
+          state.nextScrollRestoreY = restoreY;
+          setTimeout(() => {
+            if (state.nextScrollRestoreY === restoreY) state.nextScrollRestoreY = null;
+            if (state.nextScrollAnchor?.id === id) state.nextScrollAnchor = null;
+          }, 3000);
           try {
             await createAdminInvite(id, nextEmail);
           } catch {
+            state.nextScrollRestoreY = null;
+            state.nextScrollAnchor = null;
             notifyTopbar(t("dashboard.adminAssignNoPermission", "No tienes permisos para asignar administrador"));
             return;
           }
-
-          updateMachine(id, {
-            adminEmail: nextEmail,
-            adminStatus: t("dashboard.adminPending", "Pendiente aceptación")
-          });
           if (!state.selectedTabById) state.selectedTabById = {};
           state.selectedTabById[id] = "configuracion";
           state.expandedById = Array.from(expandedById);
-          renderCards({ preserveScroll: true });
-          autoSave.scheduleSave(id, "admin");
+          notifyTopbar(t("dashboard.adminPending", "Pendiente aceptación"));
         };
 
         hooks.onRemoveAdmin = async (id) => {
@@ -2211,10 +2288,7 @@ if (mount) {
         }
         cardRefs.set(machine.id, { card, hooks });
 
-        const isExpanded = expandedById.has(machine.id);
-        if (isExpanded) {
-          expandCard(card, { suppressAnimation: true });
-        } else {
+        if (!isExpanded) {
           collapseCard(card, { suppressAnimation: true });
         }
 
@@ -2228,7 +2302,10 @@ if (mount) {
         }
 
         if (isExpanded) {
-          scheduleHeightSync(machine.id, () => recalcHeight(card));
+          scheduleHeightSync(machine.id, () => {
+            recalcHeight(card);
+            requestAnimationFrame(() => card.classList.remove("mc-no-anim"));
+          });
         }
       });
     if (isMobileDashboardViewport()) {
@@ -2243,8 +2320,10 @@ if (mount) {
     }
     syncMobileDetailUI();
     if (preserveScroll) {
-      requestAnimationFrame(() => window.scrollTo(0, prevScrollY || 0));
+      state.nextScrollAnchor = null;
+      restoreViewport(prevScrollY || 0, renderAnchor);
     }
+    syncSearchVisualState();
     syncMachineAccessListeners(state.draftMachines);
     if (state.loading && state.ownerReady && state.adminReady) {
       updateLoading();

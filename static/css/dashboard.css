@@ -22,8 +22,11 @@
   padding: 0;
   font: inherit;
   font-size: 0.95rem;
+  line-height: 1;
   text-align: center;
   transition: width 180ms ease, color 120ms ease, padding 180ms ease;
+  color: transparent;
+  caret-color: transparent;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: center;
@@ -63,6 +66,23 @@
 
 .add-search:focus::placeholder {
   color: transparent;
+}
+
+.add-search:-webkit-autofill,
+.add-search:-webkit-autofill:hover,
+.add-search:-webkit-autofill:focus {
+  -webkit-text-fill-color: transparent;
+  box-shadow: 0 0 0 1000px color-mix(in srgb, var(--bg) 96%, transparent) inset;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat;
+  background-size: 18px 18px;
+  background-position: center;
+}
+
+.add-search:focus:-webkit-autofill,
+.add-search:hover:-webkit-autofill {
+  -webkit-text-fill-color: var(--fg);
+  background-position: 0.75rem center;
 }
 
 @media (hover: hover) and (pointer: fine) {
