@@ -25,6 +25,7 @@ export const normalizeMachine = (raw, index = 0) => {
     tagUrl: typeof raw.tagUrl === "string" ? raw.tagUrl : "",
     tagQrUrl: typeof raw.tagQrUrl === "string" ? raw.tagQrUrl : "",
     tagQrPath: typeof raw.tagQrPath === "string" ? raw.tagQrPath : "",
+    tagQrSize: Number(raw.tagQrSize || raw.qrSize || 0),
     documents:
       raw.documents && typeof raw.documents === "object" && !Array.isArray(raw.documents)
         ? raw.documents
@@ -75,6 +76,7 @@ export const createDraftMachine = (count, order) => {
     tagUrl: "",
     tagQrUrl: "",
     tagQrPath: "",
+    tagQrSize: 0,
     documents: {},
     logs: [],
     tasks: [],

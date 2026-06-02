@@ -206,6 +206,8 @@ const TEXT = {
       tagLinked: "Tag enlazado",
       tagDisconnected: "Tag desconectado",
       tagGenerated: "Tag ID generado",
+      storageFullNotification: "Almacenamiento lleno. Libera espacio para subir documentos o generar nuevos Tag ID/QR.",
+      storageFullAction: "Almacenamiento lleno",
       admin: "Administrador",
       adminPending: "Pendiente aceptaci\u00f3n",
       statusByValue: {
@@ -442,6 +444,8 @@ const TEXT = {
       tagLinked: "Tag linked",
       tagDisconnected: "Tag disconnected",
       tagGenerated: "Tag ID generated",
+      storageFullNotification: "Storage is full. Free up space before uploading documents or generating new Tag IDs/QR codes.",
+      storageFullAction: "Storage full",
       admin: "Administrator",
       adminPending: "Pending acceptance",
       statusByValue: {

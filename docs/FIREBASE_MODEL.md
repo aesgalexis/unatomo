@@ -15,6 +15,7 @@ Read this before changing data flows, callable functions, machine ownership, adm
   - `tagUrl`
   - `tagQrUrl`
   - `tagQrPath`
+  - `tagQrSize`
   - `users`
   - `tasks`
   - `logs`
@@ -25,6 +26,7 @@ Read this before changing data flows, callable functions, machine ownership, adm
   - `url`
   - `qrUrl`
   - `qrPath`
+  - `qrSize`
 - `machine_access`: public/operational access data keyed by Tag ID.
 - `admin_machine_links`: accepted admin access links.
 - `admin_invites`: pending/accepted admin invitations.
@@ -40,12 +42,22 @@ machine-docs/{ownerUid}/{machineId}/manual/{fileName}
 
 Implemented document types are `plate`, intended for machine plate photos, and `manual`, intended for PDF manuals up to 25 MB. Do not store uploaded files in the repository.
 
+## Account Storage Limit
+
+Each account is limited to 1 GB of stored machine assets. The usage model sums:
+
+- `machines.documents.*.size` for uploaded plates and manuals.
+- `machines.tagQrSize` / `tags.qrSize` for generated Tag ID QR PNG files.
+- Existing QR metadata/path fallback for older records that do not yet have a stored size.
+
+When the account is full, the dashboard must block plate uploads, manual uploads, Tag ID generation, and QR generation. The topbar notification bell must keep showing the storage-full notification until usage drops below the limit. Backend callables `createMachineTagToken` and `generateMachineTagQr` also enforce the limit with `resource-exhausted: storage-full`.
+
 ## Callable Functions
 
 Backend callables live in `firebase/functions/src/index.ts`. Common frontend wrappers live under `static/js/dashboard/`.
 
 - `assignMachineTag`: assigns an existing Tag ID to a machine and updates access data.
-- `generateMachineTagQr`: generates/stores a QR PNG and writes `tagQrUrl`, `tagQrPath`, `qrUrl`, and `qrPath` metadata.
+- `generateMachineTagQr`: generates/stores a QR PNG and writes `tagQrUrl`, `tagQrPath`, `tagQrSize`, `qrUrl`, `qrPath`, and `qrSize` metadata.
 - `disconnectMachineTag`: disconnects Tag ID data and deletes the associated QR file/path. Preserve this cleanup behavior.
 
 ## Tag ID And QR Rules

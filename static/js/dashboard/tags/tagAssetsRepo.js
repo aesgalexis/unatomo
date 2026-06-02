@@ -19,8 +19,17 @@ export const buildMachineTagUrl = (tagId, lang = getCurrentLang()) => {
 };
 
 export const generateMachineTagQr = async (machineId, lang = getCurrentLang()) => {
-  const response = await generateMachineTagQrCallable({ machineId, lang });
-  return response?.data || {};
+  try {
+    const response = await generateMachineTagQrCallable({ machineId, lang });
+    return response?.data || {};
+  } catch (error) {
+    const code = (error?.code || "").toString();
+    const message = (error?.message || "").toString();
+    if (code.includes("resource-exhausted") || message.includes("storage-full")) {
+      throw new Error("storage-full");
+    }
+    throw error;
+  }
 };
 
 export const disconnectMachineTag = async (machineId) => {

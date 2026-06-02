@@ -59,8 +59,82 @@ const registrationCodesCol = () => db.collection("registration_codes");
 const tagsCol = () => db.collection("tags");
 const machineAccessCol = () => db.collection("machine_access");
 const storageBucket = admin.storage().bucket();
+const ACCOUNT_STORAGE_LIMIT_BYTES = 1024 * 1024 * 1024;
+const QR_FALLBACK_BYTES = 4 * 1024;
 
 const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+const toSafeStorageSize = (value: unknown) => {
+  const parsed = Number(value || 0);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+};
+
+const getMachineDocumentsStorageBytes = (
+  machine: FirebaseFirestore.DocumentData,
+) => {
+  const documents = machine.documents;
+  if (!documents || typeof documents !== "object" || Array.isArray(documents)) {
+    return 0;
+  }
+  return Object.values(documents as Record<string, {size?: unknown}>).reduce(
+    (total, docData) =>
+      total + toSafeStorageSize(docData?.size),
+    0,
+  );
+};
+
+const getStorageObjectSize = async (path: string) => {
+  const safePath = (path || "").toString().trim();
+  if (!safePath) return 0;
+  try {
+    const [metadata] = await storageBucket.file(safePath).getMetadata();
+    return toSafeStorageSize(metadata.size);
+  } catch {
+    return 0;
+  }
+};
+
+const getMachineQrStorageBytes = async (
+  machine: FirebaseFirestore.DocumentData,
+) => {
+  const storedSize = toSafeStorageSize(machine.tagQrSize || machine.qrSize);
+  if (storedSize) return storedSize;
+  const qrPath = (machine.tagQrPath || machine.qrPath || "").toString().trim();
+  const pathSize = await getStorageObjectSize(qrPath);
+  if (pathSize) return pathSize;
+  const hasQr = !!(
+    (machine.tagQrUrl || machine.qrUrl || qrPath || "").toString().trim()
+  );
+  return hasQr ? QR_FALLBACK_BYTES : 0;
+};
+
+const getAccountStorageUsageBytes = async (ownerUid: string) => {
+  const safeOwnerUid = (ownerUid || "").toString().trim();
+  if (!safeOwnerUid) return 0;
+  const snap = await machinesCol().where("ownerUid", "==", safeOwnerUid).get();
+  const sizes: number[] = await Promise.all(
+    snap.docs.map(async (docSnap) => {
+      const machine = (docSnap.data() || {}) as FirebaseFirestore.DocumentData;
+      return (
+        getMachineDocumentsStorageBytes(machine) +
+        (await getMachineQrStorageBytes(machine))
+      );
+    }),
+  );
+  return sizes.reduce((total: number, size: number) => total + size, 0);
+};
+
+const assertAccountStorageAvailable = async (
+  ownerUid: string,
+  additionalBytes = 0,
+) => {
+  const usageBytes = await getAccountStorageUsageBytes(ownerUid);
+  const requestedBytes = Math.max(0, toSafeStorageSize(additionalBytes));
+  if (usageBytes + requestedBytes >= ACCOUNT_STORAGE_LIMIT_BYTES) {
+    throw new HttpsError("resource-exhausted", "storage-full");
+  }
+  return usageBytes;
+};
 
 const generateRegistrationCode = (length = 8) => {
   let value = "";
@@ -817,6 +891,7 @@ export const createMachineTagToken = onCall(async (request) => {
   await assertRegisteredAccount(auth);
   const machineId = (request.data?.machineId || "").toString().trim();
   const {ownerUid} = await getManagedMachineForAuth(auth, machineId);
+  await assertAccountStorageAvailable(ownerUid);
 
   let tagId = "";
   for (let tries = 0; tries < 10; tries += 1) {
@@ -879,6 +954,7 @@ export const assignMachineTag = onCall(async (request) => {
         tagUrl,
         tagQrUrl: "",
         tagQrPath: "",
+        tagQrSize: 0,
         updatedAt: now,
         updatedBy: auth?.uid || ownerUid,
       },
@@ -969,6 +1045,13 @@ export const generateMachineTagQr = onCall(async (request) => {
 
   const qrPath = `tag-qrs/${tagId}.png`;
   const downloadToken = randomUUID();
+  const previousQrBytes =
+    toSafeStorageSize(machine.tagQrSize || machine.qrSize) ||
+    (await getStorageObjectSize(previousQrPath));
+  await assertAccountStorageAvailable(
+    ownerUid,
+    Math.max(0, qrPng.length - previousQrBytes),
+  );
   await storageBucket.file(qrPath).save(qrPng, {
     resumable: false,
     contentType: "image/png",
@@ -992,6 +1075,7 @@ export const generateMachineTagQr = onCall(async (request) => {
         tagUrl,
         tagQrUrl: qrUrl,
         tagQrPath: qrPath,
+        tagQrSize: qrPng.length,
         updatedAt: now,
         updatedBy: auth?.uid || ownerUid,
       },
@@ -1003,6 +1087,7 @@ export const generateMachineTagQr = onCall(async (request) => {
         machineId,
         qrUrl,
         qrPath,
+        qrSize: qrPng.length,
         url: tagUrl,
         updatedAt: now,
         updatedBy: auth?.uid || ownerUid,
@@ -1011,7 +1096,7 @@ export const generateMachineTagQr = onCall(async (request) => {
     ),
   ]);
 
-  return {ok: true, tagId, tagUrl, qrUrl, qrPath};
+  return {ok: true, tagId, tagUrl, qrUrl, qrPath, qrSize: qrPng.length};
 });
 
 export const disconnectMachineTag = onCall(async (request) => {
@@ -1032,6 +1117,7 @@ export const disconnectMachineTag = onCall(async (request) => {
         tagUrl: "",
         tagQrUrl: "",
         tagQrPath: "",
+        tagQrSize: 0,
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
         updatedBy: auth?.uid || ownerUid,
       },
@@ -1050,6 +1136,7 @@ export const disconnectMachineTag = onCall(async (request) => {
         tagUrl: "",
         tagQrUrl: "",
         tagQrPath: "",
+        tagQrSize: 0,
         updatedAt: now,
         updatedBy: auth?.uid || ownerUid,
       },

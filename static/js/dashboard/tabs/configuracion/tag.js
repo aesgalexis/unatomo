@@ -57,9 +57,11 @@ export const render = (container, machine, hooks, options = {}) => {
     }
     try {
       await connectAndGenerateQr();
-    } catch {
+    } catch (err) {
       if (qrStatus) {
-        qrStatus.textContent = t("config.qrGenerateError", "Error al generar QR");
+        qrStatus.textContent = err?.message === "storage-full"
+          ? t("dashboard.storageFullAction", "Almacenamiento lleno")
+          : t("config.qrGenerateError", "Error al generar QR");
         qrStatus.dataset.state = "error";
       }
       if (hooks.onContentResize) hooks.onContentResize();
@@ -146,10 +148,12 @@ export const render = (container, machine, hooks, options = {}) => {
       accessRow.style.display = "";
       const connected = await connectAndGenerateQr();
       if (!connected) accessGenerate.disabled = false;
-    } catch {
-      tagStatus.textContent = tagCreated
-        ? t("config.qrGenerateError", "Error al generar QR")
-        : t("config.generateError", "Error al generar tag");
+    } catch (err) {
+      tagStatus.textContent = err?.message === "storage-full"
+        ? t("dashboard.storageFullAction", "Almacenamiento lleno")
+        : tagCreated
+          ? t("config.qrGenerateError", "Error al generar QR")
+          : t("config.generateError", "Error al generar tag");
       tagStatus.dataset.state = "error";
       accessGenerate.disabled = false;
       if (hooks.onContentResize) hooks.onContentResize();

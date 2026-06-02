@@ -26,6 +26,7 @@ import { createMachineSearchBar } from "./components/machineSearch/machineSearch
 import { createDashboardLoading } from "./components/loading/dashboardLoading.js";
 import { setTopbarSaveStatus } from "/static/js/topbar/save-status.js";
 import { setTopbarNotifications } from "/static/js/notifications/topbar-notifications.js";
+import { calculateStorageUsage, STORAGE_LIMIT_BYTES } from "/static/js/configuracion/storageUsage.js";
 import { getAppBasePrefix, getCurrentLang, setSavedLang } from "/static/js/site/locale.js";
 import { t } from "./i18n.js";
 import {
@@ -82,6 +83,7 @@ if (mount) {
     adminLinksUnsub: null,
     adminMachineUnsubs: new Map(),
     inviteUnsub: null,
+    storageFull: false,
     initialGroupPriorityOrder: {},
     initialGroupPriorityReady: false
   };
@@ -896,12 +898,72 @@ if (mount) {
   const getMachineTenantId = (machine) => machine.tenantId || state.uid;
   const isOwnerMachine = (machine) => (machine.role || "owner") === "owner";
 
+  const getStorageFullText = () =>
+    t(
+      "dashboard.storageFullNotification",
+      "Almacenamiento lleno. Libera espacio para subir documentos o generar nuevos Tag ID/QR."
+    );
+
+  const renderTopbarNotifications = () => {
+    const items = [];
+    if (state.storageFull) {
+      items.push({
+        id: "storage-full",
+        persistent: true,
+        text: getStorageFullText()
+      });
+    }
+    const invites = Array.isArray(state.pendingInvites) ? state.pendingInvites : [];
+    const formatInviteText = (ownerLabel, count) =>
+      t("dashboard.inviteManage", (value, total) => `${value} wants you to manage ${total} machines`)(
+        ownerLabel,
+        count
+      );
+    invites.forEach((invite) => {
+      items.push({
+        text: formatInviteText(invite.ownerEmail || t("dashboard.anonymousUser", "Un usuario"), 1),
+        actions: [
+          { label: t("card.accept", "Aceptar"), className: "mc-location-accept", onClick: () => handleInviteDecision(invite, "accepted") },
+          { label: t("dashboard.reject", "Rechazar"), className: "mc-location-cancel", onClick: () => handleInviteDecision(invite, "rejected") }
+        ]
+      });
+    });
+    setTopbarNotifications(items);
+  };
+
+  const refreshStorageFullState = async (uid = state.uid) => {
+    if (!uid) return false;
+    try {
+      const usage = await calculateStorageUsage(uid);
+      state.storageFull = usage.totalBytes >= usage.limitBytes;
+      renderTopbarNotifications();
+      return state.storageFull;
+    } catch {
+      return state.storageFull;
+    }
+  };
+
+  const assertStorageAvailable = async (uid = state.uid, additionalBytes = 0) => {
+    if (!uid) throw new Error("no-auth");
+    const usage = await calculateStorageUsage(uid);
+    const full = usage.totalBytes + Math.max(0, Number(additionalBytes) || 0) >= STORAGE_LIMIT_BYTES;
+    state.storageFull = usage.totalBytes >= usage.limitBytes;
+    if (full) {
+      state.storageFull = true;
+      renderTopbarNotifications();
+      notifyTopbar(t("dashboard.storageFullAction", "Almacenamiento lleno"));
+      throw new Error("storage-full");
+    }
+    renderTopbarNotifications();
+    return usage;
+  };
+
   const renderInviteBanner = () => {
     const invites = Array.isArray(state.pendingInvites) ? state.pendingInvites : [];
     if (!invites.length) {
       inviteBanner.innerHTML = "";
       inviteBanner.style.display = "none";
-      setTopbarNotifications([]);
+      renderTopbarNotifications();
       return;
     }
     const formatInviteText = (ownerLabel, count) =>
@@ -953,16 +1015,7 @@ if (mount) {
       row.appendChild(actions);
       inviteBanner.appendChild(row);
     });
-
-    setTopbarNotifications(
-      invites.map((invite) => ({
-        text: formatInviteText(invite.ownerEmail || t("dashboard.anonymousUser", "Un usuario"), 1),
-        actions: [
-          { label: t("card.accept", "Aceptar"), className: "mc-location-accept", onClick: () => handleInviteDecision(invite, "accepted") },
-          { label: t("dashboard.reject", "Rechazar"), className: "mc-location-cancel", onClick: () => handleInviteDecision(invite, "rejected") }
-        ]
-      }))
-    );
+    renderTopbarNotifications();
   };
 
   const handleInviteDecision = async (invite, decision) => {
@@ -1380,6 +1433,8 @@ if (mount) {
           const current = getDraftById(id);
           if (!current || !state.uid) throw new Error("missing-context");
           const tenantId = current.tenantId || current.ownerUid || state.uid;
+          const previousSize = Number(current.documents?.[kind]?.size || 0);
+          await assertStorageAvailable(tenantId, Math.max(0, Number(file?.size || 0) - previousSize));
           const machineForUpload = { ...current, tenantId };
           if (current.isNew) {
             await upsertMachine(tenantId, machineForUpload);
@@ -1406,6 +1461,7 @@ if (mount) {
           state.selectedTabById[id] = "general";
           state.expandedById = Array.from(expandedById);
           await upsertMachine(tenantId, getDraftById(id));
+          await refreshStorageFullState(tenantId);
           notifyTopbar(t("general.uploadSaved", "Archivo guardado"));
           return uploaded;
         };
@@ -1432,6 +1488,7 @@ if (mount) {
           state.selectedTabById[id] = "general";
           state.expandedById = Array.from(expandedById);
           await upsertMachine(tenantId, getDraftById(id));
+          await refreshStorageFullState(tenantId);
           notifyTopbar(t("general.deleted", "Archivo eliminado"));
           if (statusEl) {
             statusEl.textContent = t("general.deleted", "Archivo eliminado");
@@ -1462,6 +1519,9 @@ if (mount) {
         hooks.onConnectTag = async (id, tagInput, statusEl) => {
           const tagId = tagInput.value.trim();
           if (!tagId) return false;
+          const current = getDraftById(id);
+          const tenantId = current ? current.tenantId || current.ownerUid || state.uid : state.uid;
+          await assertStorageAvailable(tenantId);
           statusEl.textContent = t("dashboard.checking", "Comprobando...");
           statusEl.dataset.state = "neutral";
           if (card.dataset.expanded === "true") {
@@ -1489,7 +1549,8 @@ if (mount) {
               tagId,
               tagUrl: buildMachineTagUrl(tagId),
               tagQrUrl: "",
-              tagQrPath: ""
+              tagQrPath: "",
+              tagQrSize: 0
             });
             state.tagStatusById[id] = { text: t("dashboard.tagLinked", "Tag enlazado"), state: "ok" };
             notifyTopbar(t("dashboard.tagLinked", "Tag enlazado"));
@@ -1533,13 +1594,15 @@ if (mount) {
               tagId: null,
               tagUrl: "",
               tagQrUrl: "",
-              tagQrPath: ""
+              tagQrPath: "",
+              tagQrSize: 0
             });
             state.tagStatusById[id] = {
               text: t("dashboard.tagDisconnected", "Tag desconectado"),
               state: "error"
             };
             notifyTopbar(t("dashboard.tagDisconnected", "Tag desconectado"));
+            await refreshStorageFullState(current.tenantId || current.ownerUid || state.uid);
             if (!state.selectedTabById) state.selectedTabById = {};
             state.selectedTabById[id] = "configuracion";
             state.expandedById = Array.from(expandedById);
@@ -1562,6 +1625,7 @@ if (mount) {
           if (!state.uid) throw new Error("no-auth");
           const current = getDraftById(id);
           const tenantId = current ? current.tenantId || state.uid : state.uid;
+          await assertStorageAvailable(tenantId);
           if (current?.isNew) {
             await upsertMachine(tenantId, current);
             current.isNew = false;
@@ -1591,12 +1655,14 @@ if (mount) {
           const current = getDraftById(id);
           if (!current?.tagId) throw new Error("tag-missing");
           const tenantId = current.tenantId || state.uid;
+          await assertStorageAvailable(tenantId);
           const tagUrl = current.tagUrl || buildMachineTagUrl(current.tagId);
           const machineForSave = {
             ...current,
             tagUrl,
             tagQrUrl: "",
-            tagQrPath: ""
+            tagQrPath: "",
+            tagQrSize: 0
           };
           markLocalWrite(id);
           updateMachine(id, { tagUrl, isNew: false });
@@ -1614,6 +1680,7 @@ if (mount) {
               tagUrl: result.tagUrl || tagUrl,
               tagQrUrl: result.qrUrl || "",
               tagQrPath: result.qrPath || "",
+              tagQrSize: Number(result.qrSize || 0),
               isNew: false
             });
             state.tagStatusById[id] = { text: t("config.qrGenerated", "QR generado"), state: "ok" };
@@ -1622,6 +1689,7 @@ if (mount) {
               statusEl.dataset.state = "ok";
             }
             renderCards({ preserveScroll: true });
+            await refreshStorageFullState(tenantId);
             notifyTopbar(t("config.qrGenerated", "QR generado"));
             return result;
           } catch (error) {
@@ -2449,6 +2517,7 @@ if (mount) {
     state.uid = uid;
     state.adminLabel = user.displayName || user.email || t("dashboard.admin", "Administrador");
     state.adminEmail = user.email || "";
+    refreshStorageFullState(uid);
     armLoadingGuard();
     try {
       await upsertAccountDirectory(user);
