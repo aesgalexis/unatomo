@@ -3,6 +3,8 @@ import { collection, getDocs } from "https://www.gstatic.com/firebasejs/12.7.0/f
 import { auth, db, getUserRegistrationState } from "/static/js/firebase/firebaseApp.js";
 import { fetchLinksForAdmin } from "/static/js/dashboard/admin/adminLinksRepo.js";
 import { upsertAccountDirectory } from "/static/js/dashboard/admin/accountDirectoryRepo.js";
+import { setTopbarNotifications } from "/static/js/notifications/topbar-notifications.js";
+import { calculateStorageUsage, formatBytes, STORAGE_LIMIT_BYTES } from "./storageUsage.js";
 import {
   getAppBasePrefix,
   getCurrentLang,
@@ -20,6 +22,7 @@ const textMap = {
   spanish: isEn ? "Spanish" : "Espa\u00f1ol",
   english: isEn ? "English" : "Ingl\u00e9s",
   account: isEn ? "Account" : "Cuenta",
+  storage: isEn ? "Storage" : "Almacenamiento",
   preferences: isEn ? "Preferences" : "Preferencias",
   activity: isEn ? "Activity" : "Actividad",
   security: isEn ? "Security" : "Seguridad",
@@ -31,6 +34,16 @@ const textMap = {
   dark: isEn ? "Dark" : "Oscuro",
   ownMachines: isEn ? "Owned machines" : "M\u00e1quinas propias",
   adminMachines: isEn ? "Machines as administrator" : "M\u00e1quinas como administrador",
+  storageUsed: isEn ? "Used" : "Usado",
+  storageLimit: isEn ? "Limit" : "L\u00edmite",
+  storageDocuments: isEn ? "Documents" : "Documentos",
+  storageQr: isEn ? "QR codes" : "C\u00f3digos QR",
+  storageLoading: isEn ? "Calculating..." : "Calculando...",
+  storageEstimated: isEn ? "QR usage may be estimated" : "El uso de QR puede ser estimado",
+  storageError: isEn ? "Could not calculate storage usage" : "No se pudo calcular el uso de almacenamiento",
+  storageFullNotification: isEn
+    ? "Storage is full. Free up space before uploading documents or generating new Tag IDs/QR codes."
+    : "Almacenamiento lleno. Libera espacio para subir documentos o generar nuevos Tag ID/QR.",
   changePassword: isEn ? "Change password" : "Cambiar contrase\u00f1a",
   logout: isEn ? "Sign out" : "Cerrar sesi\u00f3n",
   user: isEn ? "User" : "Usuario",
@@ -74,12 +87,14 @@ if (mount) {
 
   const languageCard = createCard(textMap.language);
   const accountCard = createCard(textMap.account);
+  const storageCard = createCard(textMap.storage);
   const preferencesCard = createCard(textMap.preferences);
   const activityCard = createCard(textMap.activity);
   const securityCard = createCard(textMap.security);
 
   wrap.appendChild(languageCard);
   wrap.appendChild(accountCard);
+  wrap.appendChild(storageCard);
   wrap.appendChild(preferencesCard);
   wrap.appendChild(activityCard);
   wrap.appendChild(securityCard);
@@ -87,6 +102,7 @@ if (mount) {
 
   const languageBody = languageCard.querySelector(".profile-card-body");
   const accountBody = accountCard.querySelector(".profile-card-body");
+  const storageBody = storageCard.querySelector(".profile-card-body");
   const prefsBody = preferencesCard.querySelector(".profile-card-body");
   const activityBody = activityCard.querySelector(".profile-card-body");
   const securityBody = securityCard.querySelector(".profile-card-body");
@@ -126,6 +142,35 @@ if (mount) {
       <div class="profile-row">
         <span class="profile-label">UID</span>
         <span class="profile-value" id="profile-uid">-</span>
+      </div>
+    `;
+  }
+
+  if (storageBody) {
+    storageBody.innerHTML = `
+      <div class="profile-storage">
+        <div class="profile-storage-head">
+          <span class="profile-label">${textMap.storageUsed}</span>
+          <span class="profile-value" id="profile-storage-total">${textMap.storageLoading}</span>
+        </div>
+        <div class="profile-storage-bar" aria-label="${textMap.storage}">
+          <span id="profile-storage-fill" style="width: 0%"></span>
+        </div>
+        <div class="profile-storage-meta">
+          <span id="profile-storage-percent">0%</span>
+          <span>${textMap.storageLimit}: ${formatBytes(STORAGE_LIMIT_BYTES)}</span>
+        </div>
+        <div class="profile-storage-breakdown">
+          <div class="profile-row">
+            <span class="profile-label">${textMap.storageDocuments}</span>
+            <span class="profile-value" id="profile-storage-documents">-</span>
+          </div>
+          <div class="profile-row">
+            <span class="profile-label">${textMap.storageQr}</span>
+            <span class="profile-value" id="profile-storage-qr">-</span>
+          </div>
+        </div>
+        <div class="profile-storage-note" id="profile-storage-note"></div>
       </div>
     `;
   }
@@ -182,6 +227,12 @@ if (mount) {
   const uidEl = accountBody?.querySelector("#profile-uid");
   const ownerCountEl = activityBody?.querySelector("#profile-owner-count");
   const adminCountEl = activityBody?.querySelector("#profile-admin-count");
+  const storageTotalEl = storageBody?.querySelector("#profile-storage-total");
+  const storageFillEl = storageBody?.querySelector("#profile-storage-fill");
+  const storagePercentEl = storageBody?.querySelector("#profile-storage-percent");
+  const storageDocumentsEl = storageBody?.querySelector("#profile-storage-documents");
+  const storageQrEl = storageBody?.querySelector("#profile-storage-qr");
+  const storageNoteEl = storageBody?.querySelector("#profile-storage-note");
   const logoutLink = securityBody?.querySelector("#profile-logout");
   const languageInputs = languageBody?.querySelectorAll(
     "input[name=\"profile-language\"]"
@@ -219,6 +270,34 @@ if (mount) {
     }
   };
 
+  const loadStorageUsage = async (uid) => {
+    if (!storageBody) return;
+    setText(storageTotalEl, textMap.storageLoading);
+    setText(storageDocumentsEl, "-");
+    setText(storageQrEl, "-");
+    setText(storagePercentEl, "0%");
+    if (storageFillEl) storageFillEl.style.width = "0%";
+    setText(storageNoteEl, "");
+    try {
+      const usage = await calculateStorageUsage(uid);
+      const percentText = `${usage.percent.toFixed(1)}%`;
+      setText(storageTotalEl, `${formatBytes(usage.totalBytes)} / ${formatBytes(usage.limitBytes)}`);
+      setText(storageDocumentsEl, formatBytes(usage.documentsBytes));
+      setText(storageQrEl, formatBytes(usage.qrBytes));
+      setText(storagePercentEl, percentText);
+      if (storageFillEl) storageFillEl.style.width = `${usage.percent}%`;
+      setText(storageNoteEl, usage.estimated ? textMap.storageEstimated : "");
+      setTopbarNotifications(
+        usage.totalBytes >= usage.limitBytes
+          ? [{ id: "storage-full", persistent: true, text: textMap.storageFullNotification }]
+          : []
+      );
+    } catch {
+      setText(storageTotalEl, textMap.storageError);
+      if (storageNoteEl) storageNoteEl.dataset.state = "error";
+    }
+  };
+
   onAuthStateChanged(auth, async (user) => {
     if (!user) {
       window.location.href = localizeEsPath("/es/auth/login.html");
@@ -250,6 +329,7 @@ if (mount) {
     setText(uidEl, user.uid || "-");
 
     loadCounts(user.uid);
+    loadStorageUsage(user.uid);
     upsertAccountDirectory(user).catch(() => {});
 
     if (nameInput) {

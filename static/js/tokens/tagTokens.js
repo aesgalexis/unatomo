@@ -49,6 +49,10 @@ export const createTagToken = async (uid, machineId) => {
     return tagId;
   } catch (error) {
     const code = (error?.code || "").toString();
+    const message = (error?.message || "").toString();
+    if (code.includes("resource-exhausted") || message.includes("storage-full")) {
+      throw new Error("storage-full");
+    }
     if (
       code.includes("functions/not-found") ||
       code.includes("functions/unimplemented") ||

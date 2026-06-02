@@ -140,6 +140,7 @@ export const upsertMachine = async (uid, machine) => {
     tagUrl: machine.tagUrl || "",
     tagQrUrl: machine.tagQrUrl || "",
     tagQrPath: machine.tagQrPath || "",
+    tagQrSize: Number(machine.tagQrSize || 0),
     documents:
       machine.documents && typeof machine.documents === "object" && !Array.isArray(machine.documents)
         ? machine.documents

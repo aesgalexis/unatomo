@@ -206,6 +206,8 @@ export const render = (panel, machine, hooks, options = {}) => {
             ? kind === "manual"
               ? t("general.uploadPdfSizeError", "El PDF es demasiado grande")
               : t("general.uploadSizeError", "La imagen es demasiado grande")
+            : code === "storage-full"
+            ? t("dashboard.storageFullAction", "Almacenamiento lleno")
             : t("general.uploadError", "Error al cargar el archivo");
         status.dataset.state = "error";
       } finally {
