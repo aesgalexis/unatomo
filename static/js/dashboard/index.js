@@ -344,6 +344,14 @@ if (mount) {
       card.classList.toggle("is-mobile-focus", isFocused);
       card.classList.toggle("is-mobile-detail-enter", isFocused && state.mobileDetailJustEntered);
     });
+    Array.from(list.querySelectorAll(".machine-group")).forEach((group) => {
+      const containsFocused = enabled && !!group.querySelector(`.machine-card[data-machine-id="${focusedId}"]`);
+      group.classList.toggle("is-mobile-focus-path", containsFocused);
+    });
+    Array.from(list.querySelectorAll(".machine-card-wrap")).forEach((wrap) => {
+      const containsFocused = enabled && !!wrap.querySelector(`.machine-card[data-machine-id="${focusedId}"]`);
+      wrap.classList.toggle("is-mobile-focus-path", containsFocused);
+    });
     state.mobileDetailJustEntered = false;
   };
 
