@@ -2069,6 +2069,35 @@
 }
 
 @media (max-width: 768px) {
+  .machine-card[data-expanded="true"] .mc-status {
+    width: 28px;
+    min-width: 28px;
+    padding: 0;
+  }
+
+  .machine-card[data-expanded="true"] .mc-status .mc-status-text {
+    opacity: 0 !important;
+    visibility: hidden;
+    max-width: 0;
+    padding: 0;
+    overflow: hidden;
+    display: none;
+  }
+
+  .machine-card[data-expanded="true"] .mc-status:hover,
+  .machine-card[data-expanded="true"] .mc-status:focus-visible {
+    width: auto;
+  }
+
+  .machine-card[data-expanded="true"] .mc-status:hover .mc-status-text,
+  .machine-card[data-expanded="true"] .mc-status:focus-visible .mc-status-text {
+    opacity: 1 !important;
+    visibility: visible;
+    max-width: 200px;
+    padding: 0 0.6rem;
+    display: inline-flex;
+  }
+
   #machineList[data-has-ungrouped="true"] > .machine-group:not(.machine-subgroup) > .machine-group-body > .machine-card-wrap,
   #machineList .machine-subgroup > .machine-group-body > .machine-card-wrap,
   #machineList[data-has-ungrouped="true"] .machine-subgroup > .machine-group-body > .machine-card-wrap {
