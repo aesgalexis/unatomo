@@ -3,6 +3,7 @@ import { collection, getDocs } from "https://www.gstatic.com/firebasejs/12.7.0/f
 import { auth, db, getUserRegistrationState } from "/static/js/firebase/firebaseApp.js";
 import { fetchLinksForAdmin } from "/static/js/dashboard/admin/adminLinksRepo.js";
 import { upsertAccountDirectory } from "/static/js/dashboard/admin/accountDirectoryRepo.js";
+import { fetchDashboardLayout, upsertDashboardLayout } from "/static/js/dashboard/firestoreRepo.js";
 import { setTopbarNotifications } from "/static/js/notifications/topbar-notifications.js";
 import { calculateStorageUsage, formatBytes, STORAGE_LIMIT_BYTES } from "./storageUsage.js";
 import {
@@ -30,6 +31,13 @@ const textMap = {
   email: isEn ? "Email" : "Correo electr\u00f3nico",
   createdAt: isEn ? "Created at" : "Fecha de creaci\u00f3n",
   theme: isEn ? "Theme" : "Tema",
+  tabOrder: isEn ? "Machine tab order" : "Orden de pesta\u00f1as",
+  moveUp: isEn ? "Up" : "Subir",
+  moveDown: isEn ? "Down" : "Bajar",
+  tasksTab: isEn ? "Tasks" : "Tareas",
+  generalTab: isEn ? "General" : "General",
+  historyTab: isEn ? "History" : "Historial",
+  settingsTab: isEn ? "Settings" : "Configuraci\u00f3n",
   light: isEn ? "Light" : "Claro",
   dark: isEn ? "Dark" : "Oscuro",
   ownMachines: isEn ? "Owned machines" : "M\u00e1quinas propias",
@@ -51,6 +59,28 @@ const textMap = {
 };
 
 const mount = document.getElementById("profile-mount");
+const DEFAULT_TAB_ORDER = ["quehaceres", "historial", "general", "configuracion"];
+const tabLabels = {
+  quehaceres: textMap.tasksTab,
+  general: textMap.generalTab,
+  historial: textMap.historyTab,
+  configuracion: textMap.settingsTab
+};
+
+const normalizeTabOrder = (value) => {
+  const seen = new Set();
+  const ordered = Array.isArray(value)
+    ? value.filter((id) => {
+        if (!DEFAULT_TAB_ORDER.includes(id) || seen.has(id)) return false;
+        seen.add(id);
+        return true;
+      })
+    : [];
+  DEFAULT_TAB_ORDER.forEach((id) => {
+    if (!seen.has(id)) ordered.push(id);
+  });
+  return ordered;
+};
 
 const createCard = (title) => {
   const card = document.createElement("div");
@@ -190,6 +220,10 @@ if (mount) {
           </label>
         </div>
       </div>
+      <div class="profile-row profile-row-stack">
+        <span class="profile-label">${textMap.tabOrder}</span>
+        <div class="profile-tab-order" id="profile-tab-order"></div>
+      </div>
     `;
   }
 
@@ -234,6 +268,7 @@ if (mount) {
   const storageQrEl = storageBody?.querySelector("#profile-storage-qr");
   const storageNoteEl = storageBody?.querySelector("#profile-storage-note");
   const logoutLink = securityBody?.querySelector("#profile-logout");
+  const tabOrderEl = prefsBody?.querySelector("#profile-tab-order");
   const languageInputs = languageBody?.querySelectorAll(
     "input[name=\"profile-language\"]"
   );
@@ -298,6 +333,73 @@ if (mount) {
     }
   };
 
+  const initTabOrderPreferences = async (uid) => {
+    if (!tabOrderEl) return;
+    let layout = null;
+    let tabOrder = normalizeTabOrder();
+
+    const saveTabOrder = async () => {
+      layout = {
+        ...(layout || {}),
+        tabOrder
+      };
+      await upsertDashboardLayout(uid, layout);
+    };
+
+    const renderTabOrder = () => {
+      tabOrderEl.innerHTML = "";
+      tabOrder.forEach((tabId, index) => {
+        const row = document.createElement("div");
+        row.className = "profile-tab-order-row";
+        const label = document.createElement("span");
+        label.className = "profile-tab-order-label";
+        label.textContent = tabLabels[tabId] || tabId;
+
+        const actions = document.createElement("div");
+        actions.className = "profile-tab-order-actions";
+
+        const up = document.createElement("button");
+        up.type = "button";
+        up.className = "profile-mini-btn";
+        up.textContent = textMap.moveUp;
+        up.disabled = index === 0;
+        up.addEventListener("click", async () => {
+          if (index === 0) return;
+          [tabOrder[index - 1], tabOrder[index]] = [tabOrder[index], tabOrder[index - 1]];
+          renderTabOrder();
+          await saveTabOrder();
+        });
+
+        const down = document.createElement("button");
+        down.type = "button";
+        down.className = "profile-mini-btn";
+        down.textContent = textMap.moveDown;
+        down.disabled = index === tabOrder.length - 1;
+        down.addEventListener("click", async () => {
+          if (index >= tabOrder.length - 1) return;
+          [tabOrder[index + 1], tabOrder[index]] = [tabOrder[index], tabOrder[index + 1]];
+          renderTabOrder();
+          await saveTabOrder();
+        });
+
+        actions.appendChild(up);
+        actions.appendChild(down);
+        row.appendChild(label);
+        row.appendChild(actions);
+        tabOrderEl.appendChild(row);
+      });
+    };
+
+    try {
+      layout = await fetchDashboardLayout(uid);
+      tabOrder = normalizeTabOrder(layout?.tabOrder);
+    } catch {
+      layout = null;
+      tabOrder = normalizeTabOrder();
+    }
+    renderTabOrder();
+  };
+
   onAuthStateChanged(auth, async (user) => {
     if (!user) {
       window.location.href = localizeEsPath("/es/auth/login.html");
@@ -330,6 +432,7 @@ if (mount) {
 
     loadCounts(user.uid);
     loadStorageUsage(user.uid);
+    initTabOrderPreferences(user.uid);
     upsertAccountDirectory(user).catch(() => {});
 
     if (nameInput) {
