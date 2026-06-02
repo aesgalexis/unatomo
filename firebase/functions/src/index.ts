@@ -76,9 +76,19 @@ const getMachineDocumentsStorageBytes = (
   if (!documents || typeof documents !== "object" || Array.isArray(documents)) {
     return 0;
   }
-  return Object.values(documents as Record<string, {size?: unknown}>).reduce(
-    (total, docData) =>
-      total + toSafeStorageSize(docData?.size),
+  return Object.values(documents as Record<string, unknown>).reduce(
+    (total: number, docData: unknown) => {
+      if (Array.isArray(docData)) {
+        return docData.reduce(
+          (sum: number, item: unknown) =>
+            sum + toSafeStorageSize((item as {size?: unknown})?.size),
+          total,
+        );
+      }
+      return total + toSafeStorageSize(
+        (docData as {size?: unknown})?.size,
+      );
+    },
     0,
   );
 };

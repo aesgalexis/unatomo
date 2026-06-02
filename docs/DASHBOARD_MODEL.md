@@ -32,11 +32,10 @@ Current implemented scope:
 
 - `Plate` / `Placa`: accepts JPG, PNG, and WebP images.
 - `Manual`: accepts PDF files up to 25 MB.
+- `Other documentation` / `Otra documentación`: accepts PDFs and JPG, PNG, or WebP images up to 25 MB each; supports multiple files and lists them below the upload tiles.
 - Plate images are compressed/resized in the browser before upload.
 - Uploads the image to Firebase Storage, not to the repository.
-- Stores metadata in `machines.documents.<kind>`.
-
-Other documentation may appear in the UI, but persistent upload support should be treated as a separate feature.
+- Stores single-file metadata in `machines.documents.<kind>` and additional documentation in `machines.documents.other[]`.
 
 ## Dashboard Groups
 

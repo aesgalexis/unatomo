@@ -8,15 +8,37 @@ import {
 
 const MAX_ORIGINAL_BYTES = 12 * 1024 * 1024;
 const MAX_MANUAL_BYTES = 25 * 1024 * 1024;
+const MAX_OTHER_BYTES = 25 * 1024 * 1024;
 const MAX_IMAGE_SIDE = 1800;
 const JPEG_QUALITY = 0.82;
 const ALLOWED_PLATE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
+const ALLOWED_OTHER_TYPES = new Set([
+  "application/pdf",
+  "image/jpeg",
+  "image/png",
+  "image/webp"
+]);
 
 const extensionForType = (type) => {
   if (type === "image/png") return "png";
   if (type === "image/webp") return "webp";
+  if (type === "application/pdf") return "pdf";
   return "jpg";
 };
+
+const createDocumentId = () => {
+  if (window.crypto?.randomUUID) return window.crypto.randomUUID();
+  return `doc_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+};
+
+const sanitizeFileName = (name = "document") =>
+  (name || "document")
+    .toString()
+    .trim()
+    .replace(/[^\w.\-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 80) || "document";
 
 const loadImage = (file) =>
   new Promise((resolve, reject) => {
@@ -71,6 +93,12 @@ export const validateManualPdf = (file) => {
   if (!file) throw new Error("file-missing");
   if (file.type !== "application/pdf") throw new Error("file-type");
   if (file.size > MAX_MANUAL_BYTES) throw new Error("file-too-large");
+};
+
+export const validateOtherDocument = (file) => {
+  if (!file) throw new Error("file-missing");
+  if (!ALLOWED_OTHER_TYPES.has(file.type)) throw new Error("file-type");
+  if (file.size > MAX_OTHER_BYTES) throw new Error("file-too-large");
 };
 
 export const uploadPlateDocument = async ({ machine, file, uploadedBy }) => {
@@ -143,6 +171,45 @@ export const uploadManualDocument = async ({ machine, file, uploadedBy }) => {
   return {
     kind: "manual",
     name: file.name || "manual.pdf",
+    contentType: metadata.contentType,
+    size: file.size,
+    originalSize: file.size,
+    storagePath,
+    url,
+    uploadedAt: new Date().toISOString(),
+    uploadedBy
+  };
+};
+
+export const uploadOtherDocument = async ({ machine, file, uploadedBy }) => {
+  validateOtherDocument(file);
+  const ownerUid = (machine.tenantId || machine.ownerUid || "").trim();
+  const machineId = (machine.id || "").trim();
+  if (!ownerUid || !machineId || !uploadedBy) throw new Error("missing-context");
+
+  const docId = createDocumentId();
+  const ext = extensionForType(file.type);
+  const baseName = sanitizeFileName(file.name || `document.${ext}`);
+  const storagePath = `machine-docs/${ownerUid}/${machineId}/other/${docId}-${baseName}`;
+  const storageRef = ref(storage, storagePath);
+  const metadata = {
+    contentType: file.type || "application/octet-stream",
+    customMetadata: {
+      kind: "other",
+      ownerUid,
+      machineId,
+      uploadedBy,
+      originalName: file.name || baseName
+    }
+  };
+
+  await uploadBytes(storageRef, file, metadata);
+  const url = await getDownloadURL(storageRef);
+
+  return {
+    id: docId,
+    kind: "other",
+    name: file.name || baseName,
     contentType: metadata.contentType,
     size: file.size,
     originalSize: file.size,

@@ -109,8 +109,9 @@ export const render = (panel, machine, hooks, options = {}) => {
   manualWrap.appendChild(docHeader);
 
   const createDocumentTile = (kind, labelText) => {
-    const savedDoc = machine.documents?.[kind] || null;
-    const canUpload = canEditGeneral && ["plate", "manual"].includes(kind);
+    const savedDoc = kind === "other" ? null : machine.documents?.[kind] || null;
+    const canUpload = canEditGeneral && ["plate", "manual", "other"].includes(kind);
+    const isMultiDocument = kind === "other";
     let currentUrl = savedDoc?.url || "";
 
     const wrap = document.createElement("div");
@@ -120,7 +121,6 @@ export const render = (panel, machine, hooks, options = {}) => {
     tile.className = "mc-doc-tile";
     tile.classList.toggle("is-file", !!savedDoc);
     tile.classList.toggle("is-disabled", !canUpload && !currentUrl);
-    tile.classList.toggle("is-unavailable", kind === "other");
     if (kind === "plate" && currentUrl) {
       tile.classList.add("has-preview");
       tile.style.setProperty("--mc-doc-preview", `url("${currentUrl.replace(/"/g, "%22")}")`);
@@ -142,7 +142,12 @@ export const render = (panel, machine, hooks, options = {}) => {
 
     const fileInput = document.createElement("input");
     fileInput.type = "file";
-    fileInput.accept = kind === "plate" ? "image/jpeg,image/png,image/webp" : "application/pdf";
+    fileInput.accept =
+      kind === "plate"
+        ? "image/jpeg,image/png,image/webp"
+        : kind === "manual"
+          ? "application/pdf"
+          : "application/pdf,image/jpeg,image/png,image/webp";
     fileInput.className = "mc-manual-input";
     fileInput.addEventListener("click", (event) => event.stopPropagation());
 
@@ -180,11 +185,13 @@ export const render = (panel, machine, hooks, options = {}) => {
 
       try {
         const doc = await hooks.onUploadMachineDocument(machine.id, kind, file, status);
-        fileName.textContent = doc?.name || file.name;
-        tile.classList.add("is-file");
-        icon.dataset.symbol = "✓";
+        fileName.textContent = isMultiDocument
+          ? t("general.upload", "Cargar")
+          : doc?.name || file.name;
+        tile.classList.toggle("is-file", !isMultiDocument);
+        icon.dataset.symbol = isMultiDocument ? "+" : "✓";
         saveBtn.hidden = true;
-        currentUrl = doc?.url || currentUrl;
+        currentUrl = isMultiDocument ? "" : doc?.url || currentUrl;
         if (kind === "plate" && currentUrl) {
           tile.classList.add("has-preview");
           tile.style.setProperty("--mc-doc-preview", `url("${currentUrl.replace(/"/g, "%22")}")`);
@@ -201,11 +208,15 @@ export const render = (panel, machine, hooks, options = {}) => {
           code === "file-type"
             ? kind === "manual"
               ? t("general.uploadPdfTypeError", "Usa un archivo PDF")
-              : t("general.uploadTypeError", "Usa una imagen JPG, PNG o WebP")
+              : kind === "other"
+                ? t("general.uploadDocumentTypeError", "Usa un PDF o una imagen JPG, PNG o WebP")
+                : t("general.uploadTypeError", "Usa una imagen JPG, PNG o WebP")
             : code === "file-too-large"
             ? kind === "manual"
               ? t("general.uploadPdfSizeError", "El PDF es demasiado grande")
-              : t("general.uploadSizeError", "La imagen es demasiado grande")
+              : kind === "other"
+                ? t("general.uploadDocumentSizeError", "El archivo es demasiado grande")
+                : t("general.uploadSizeError", "La imagen es demasiado grande")
             : code === "storage-full"
             ? t("dashboard.storageFullAction", "Almacenamiento lleno")
             : t("general.uploadError", "Error al cargar el archivo");
@@ -273,21 +284,21 @@ export const render = (panel, machine, hooks, options = {}) => {
     });
 
     tile.addEventListener("dragover", (event) => {
-      if (!canUpload || currentUrl) return;
+      if (!canUpload || (!isMultiDocument && currentUrl)) return;
       event.preventDefault();
       event.stopPropagation();
       tile.classList.add("is-dragover");
     });
 
     tile.addEventListener("dragleave", (event) => {
-      if (!canUpload || currentUrl) return;
+      if (!canUpload || (!isMultiDocument && currentUrl)) return;
       event.preventDefault();
       event.stopPropagation();
       tile.classList.remove("is-dragover");
     });
 
     tile.addEventListener("drop", async (event) => {
-      if (!canUpload || currentUrl) return;
+      if (!canUpload || (!isMultiDocument && currentUrl)) return;
       event.preventDefault();
       event.stopPropagation();
       tile.classList.remove("is-dragover");
@@ -298,7 +309,7 @@ export const render = (panel, machine, hooks, options = {}) => {
     fileInput.addEventListener("change", () => {
       const file = fileInput.files && fileInput.files[0];
       fileName.textContent = file ? file.name : savedDoc?.name || t("general.upload", "Cargar");
-      tile.classList.toggle("is-file", !!file || !!savedDoc);
+      tile.classList.toggle("is-file", !isMultiDocument && (!!file || !!savedDoc));
       saveBtn.hidden = !file;
       if (hooks.onContentResize) hooks.onContentResize();
     });
@@ -357,6 +368,54 @@ export const render = (panel, machine, hooks, options = {}) => {
   tiles.appendChild(createDocumentTile("manual", t("general.manual", "Manual")));
   tiles.appendChild(createDocumentTile("other", t("general.otherDocumentation", "Otra documentación")));
   manualWrap.appendChild(tiles);
+
+  const otherDocs = Array.isArray(machine.documents?.other) ? machine.documents.other : [];
+  const otherDocsSep = document.createElement("hr");
+  otherDocsSep.className = "mc-doc-list-sep";
+  manualWrap.appendChild(otherDocsSep);
+
+  const otherDocsList = document.createElement("div");
+  otherDocsList.className = "mc-other-doc-list";
+  if (otherDocs.length) {
+    otherDocs.forEach((doc) => {
+      if (!doc?.url) return;
+      const row = document.createElement("div");
+      row.className = "mc-other-doc-row";
+
+      const link = document.createElement("a");
+      link.className = "mc-other-doc-link";
+      link.href = doc.url;
+      link.target = "_blank";
+      link.rel = "noopener";
+      link.textContent = doc.name || t("general.otherDocumentation", "Otra documentación");
+      link.addEventListener("click", (event) => event.stopPropagation());
+
+      row.appendChild(link);
+
+      if (canEditGeneral && hooks.onDeleteMachineDocument) {
+        const remove = document.createElement("a");
+        remove.className = "mc-user-remove mc-other-doc-remove";
+        remove.href = "#";
+        remove.textContent = t("general.delete", "Eliminar");
+        remove.addEventListener("click", async (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          const confirmed = window.confirm(
+            t(
+              "general.deleteConfirm",
+              "Esta acción es irreversible. Se eliminará el archivo de la base de datos. ¿Quieres continuar?"
+            )
+          );
+          if (!confirmed) return;
+          await hooks.onDeleteMachineDocument(machine.id, "other", null, doc.id || doc.storagePath || "");
+        });
+        row.appendChild(remove);
+      }
+
+      otherDocsList.appendChild(row);
+    });
+  }
+  manualWrap.appendChild(otherDocsList);
 
   panel.appendChild(manualWrap);
 };

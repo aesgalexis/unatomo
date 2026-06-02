@@ -12,6 +12,7 @@ import { buildMachineTagUrl, generateMachineTagQr, disconnectMachineTag } from "
 import {
   deleteMachineDocumentFile,
   uploadManualDocument,
+  uploadOtherDocument,
   uploadPlateDocument
 } from "./documents/machineDocumentsRepo.js";
 import { createMachineCard } from "./machineCardTemplate.js";
@@ -1511,27 +1512,42 @@ if (mount) {
         };
 
         hooks.onUploadMachineDocument = async (id, kind, file, statusEl) => {
-          if (!["plate", "manual"].includes(kind)) throw new Error("unsupported-document");
+          if (!["plate", "manual", "other"].includes(kind)) throw new Error("unsupported-document");
           const current = getDraftById(id);
           if (!current || !state.uid) throw new Error("missing-context");
           const tenantId = current.tenantId || current.ownerUid || state.uid;
-          const previousSize = Number(current.documents?.[kind]?.size || 0);
+          const previousSize = kind === "other" ? 0 : Number(current.documents?.[kind]?.size || 0);
           await assertStorageAvailable(tenantId, Math.max(0, Number(file?.size || 0) - previousSize));
           const machineForUpload = { ...current, tenantId };
           if (current.isNew) {
             await upsertMachine(tenantId, machineForUpload);
             current.isNew = false;
           }
-          const uploadDocument = kind === "manual" ? uploadManualDocument : uploadPlateDocument;
+          const uploadDocument =
+            kind === "manual"
+              ? uploadManualDocument
+              : kind === "other"
+                ? uploadOtherDocument
+                : uploadPlateDocument;
           const uploaded = await uploadDocument({
             machine: machineForUpload,
             file,
             uploadedBy: state.uid
           });
-          const documents = {
-            ...(current.documents || {}),
-            [kind]: uploaded
-          };
+          const currentDocuments = current.documents || {};
+          const documents =
+            kind === "other"
+              ? {
+                  ...currentDocuments,
+                  other: [
+                    ...(Array.isArray(currentDocuments.other) ? currentDocuments.other : []),
+                    uploaded
+                  ]
+                }
+              : {
+                  ...currentDocuments,
+                  [kind]: uploaded
+                };
           updateMachine(id, { documents, isNew: false });
           current.documents = documents;
           current.isNew = false;
@@ -1545,14 +1561,23 @@ if (mount) {
           await upsertMachine(tenantId, getDraftById(id));
           await refreshStorageFullState(tenantId);
           notifyTopbar(t("general.uploadSaved", "Archivo guardado"));
+          if (kind === "other") {
+            window.setTimeout(() => renderCards({ preserveScroll: true }), 0);
+          }
           return uploaded;
         };
 
-        hooks.onDeleteMachineDocument = async (id, kind, statusEl) => {
-          if (!["plate", "manual"].includes(kind)) throw new Error("unsupported-document");
+        hooks.onDeleteMachineDocument = async (id, kind, statusEl, documentId = "") => {
+          if (!["plate", "manual", "other"].includes(kind)) throw new Error("unsupported-document");
           const current = getDraftById(id);
           if (!current || !state.uid) throw new Error("missing-context");
-          const doc = current.documents?.[kind] || null;
+          const doc = kind === "other"
+            ? (Array.isArray(current.documents?.other)
+                ? current.documents.other.find((entry) =>
+                    entry?.id === documentId || entry?.storagePath === documentId
+                  )
+                : null)
+            : current.documents?.[kind] || null;
           if (!doc) return null;
           const tenantId = current.tenantId || current.ownerUid || state.uid;
           if (statusEl) {
@@ -1563,7 +1588,13 @@ if (mount) {
             if (error?.code !== "storage/object-not-found") throw error;
           });
           const documents = { ...(current.documents || {}) };
-          delete documents[kind];
+          if (kind === "other") {
+            documents.other = (Array.isArray(documents.other) ? documents.other : [])
+              .filter((entry) => entry?.id !== documentId && entry?.storagePath !== documentId);
+            if (!documents.other.length) delete documents.other;
+          } else {
+            delete documents[kind];
+          }
           updateMachine(id, { documents });
           current.documents = documents;
           if (!state.selectedTabById) state.selectedTabById = {};
@@ -1575,6 +1606,9 @@ if (mount) {
           if (statusEl) {
             statusEl.textContent = t("general.deleted", "Archivo eliminado");
             statusEl.dataset.state = "ok";
+          }
+          if (kind === "other") {
+            window.setTimeout(() => renderCards({ preserveScroll: true }), 0);
           }
           return doc;
         };

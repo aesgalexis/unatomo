@@ -47,7 +47,12 @@ const getDocumentUsage = (machine) => {
   const documents = machine?.documents && typeof machine.documents === "object"
     ? machine.documents
     : {};
-  return Object.values(documents).reduce((total, doc) => total + toSafeBytes(doc?.size), 0);
+  return Object.values(documents).reduce((total, doc) => {
+    if (Array.isArray(doc)) {
+      return doc.reduce((sum, item) => sum + toSafeBytes(item?.size), total);
+    }
+    return total + toSafeBytes(doc?.size);
+  }, 0);
 };
 
 const fetchQrSizeFromUrl = async (url) => {

@@ -34,6 +34,15 @@ service firebase.storage {
         && request.resource.contentType == 'application/pdf';
     }
 
+    function isOtherDocument() {
+      return request.resource != null
+        && request.resource.size <= 25 * 1024 * 1024
+        && (
+          request.resource.contentType == 'application/pdf'
+          || request.resource.contentType.matches('image/(jpeg|png|webp)')
+        );
+    }
+
     match /machine-docs/{ownerUid}/{machineId}/plate/{fileName} {
       allow read: if canManageMachine(ownerUid, machineId);
       allow create, update: if canManageMachine(ownerUid, machineId) && isPlateImage();
@@ -43,6 +52,12 @@ service firebase.storage {
     match /machine-docs/{ownerUid}/{machineId}/manual/{fileName} {
       allow read: if canManageMachine(ownerUid, machineId);
       allow create, update: if canManageMachine(ownerUid, machineId) && isManualPdf();
+      allow delete: if canManageMachine(ownerUid, machineId);
+    }
+
+    match /machine-docs/{ownerUid}/{machineId}/other/{fileName} {
+      allow read: if canManageMachine(ownerUid, machineId);
+      allow create, update: if canManageMachine(ownerUid, machineId) && isOtherDocument();
       allow delete: if canManageMachine(ownerUid, machineId);
     }
 
