@@ -1564,6 +1564,11 @@
   background: color-mix(in srgb, var(--bg) 92%, transparent);
 }
 
+.mc-qr-download[aria-disabled="true"] {
+  opacity: 0.65;
+  pointer-events: none;
+}
+
 .mc-qr-download[hidden] {
   display: none;
 }

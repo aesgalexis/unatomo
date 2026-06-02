@@ -1905,9 +1905,11 @@ if (mount) {
             await assignTag(machineForSave.tagId, tenantId, machineForSave.id);
             await upsertMachineAccessFromMachine(tenantId, machineForSave, state.uid);
             const result = await generateMachineTagQr(id, getCurrentLang());
+            const qrUrl = (result.qrUrl || "").toString().trim();
+            if (!qrUrl) throw new Error("qr-missing");
             updateMachine(id, {
               tagUrl: result.tagUrl || tagUrl,
-              tagQrUrl: result.qrUrl || "",
+              tagQrUrl: qrUrl,
               tagQrPath: result.qrPath || "",
               tagQrSize: Number(result.qrSize || 0),
               isNew: false

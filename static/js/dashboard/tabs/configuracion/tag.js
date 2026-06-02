@@ -184,8 +184,35 @@ export const render = (container, machine, hooks, options = {}) => {
   qrDownload.textContent = t("config.viewQr", "Ver QR");
   qrDownload.hidden = !machine.tagId;
   qrDownload.rel = "noreferrer";
-  qrDownload.addEventListener("click", (event) => {
+  qrDownload.addEventListener("click", async (event) => {
     event.stopPropagation();
+    const hasQr = !!((machine.tagQrUrl || machine.qrUrl || "").toString().trim());
+    if (hasQr || !machine.tagId || !hooks.onGenerateTagQr) return;
+
+    event.preventDefault();
+    qrDownload.setAttribute("aria-disabled", "true");
+    qrDownload.classList.add("is-loading");
+    if (qrStatus) {
+      qrStatus.textContent = t("config.generatingQr", "Generando QR...");
+      qrStatus.dataset.state = "neutral";
+    }
+    if (hooks.onContentResize) hooks.onContentResize();
+
+    try {
+      await hooks.onGenerateTagQr(machine.id, qrStatus);
+      window.location.href = qrDownload.href;
+    } catch (err) {
+      if (qrStatus) {
+        qrStatus.textContent = err?.message === "storage-full"
+          ? t("dashboard.storageFullAction", "Almacenamiento lleno")
+          : t("config.qrGenerateError", "Error al generar QR");
+        qrStatus.dataset.state = "error";
+      }
+      if (hooks.onContentResize) hooks.onContentResize();
+    } finally {
+      qrDownload.removeAttribute("aria-disabled");
+      qrDownload.classList.remove("is-loading");
+    }
   });
 
   qrControls.appendChild(qrDownload);
