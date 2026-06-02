@@ -35,9 +35,15 @@ export const render = (panel, machine, hooks, options = {}) => {
     btnPlaceholder.innerHTML = "";
     const input = document.createElement("input");
     input.type = "email";
+    input.name = "admin-email";
+    input.autocomplete = "email";
+    input.inputMode = "email";
+    input.spellcheck = false;
     input.className = "mc-admin-input";
     input.placeholder = t("config.email", "Correo electrónico");
     input.addEventListener("click", (event) => event.stopPropagation());
+    input.addEventListener("input", (event) => event.stopPropagation());
+    input.addEventListener("change", (event) => event.stopPropagation());
 
     const actions = document.createElement("div");
     actions.className = "mc-admin-actions";
