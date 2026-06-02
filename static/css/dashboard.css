@@ -1009,8 +1009,9 @@
   color: #fff;
 }
 
-.mc-doc-tile.has-preview .mc-doc-menu-delete {
-  color: #ffb4b4;
+.mc-doc-tile.has-preview .mc-doc-menu-delete,
+.mc-doc-tile.has-preview .mc-doc-menu-delete:hover {
+  color: var(--danger, #d33);
 }
 
 .mc-doc-tile.is-disabled,
@@ -1068,6 +1069,7 @@
 
 .mc-doc-menu {
   position: absolute;
+  z-index: 2;
   right: 0.5rem;
   bottom: 0.45rem;
   display: inline-flex;
@@ -1117,12 +1119,20 @@
   transition: max-width 0.16s ease, opacity 0.16s ease, padding 0.16s ease;
 }
 
+.mc-doc-menu:hover .mc-doc-menu-link,
 .mc-doc-menu:focus-within .mc-doc-menu-link,
 .mc-doc-menu.is-open .mc-doc-menu-link {
   max-width: 5rem;
   opacity: 1;
   padding: 0.15rem;
   pointer-events: auto;
+}
+
+.mc-doc-menu.is-hover-suppressed:hover .mc-doc-menu-link {
+  max-width: 0;
+  opacity: 0;
+  padding: 0.15rem 0;
+  pointer-events: none;
 }
 
 .mc-doc-menu-link:hover {
@@ -1221,6 +1231,7 @@
   max-width: 0;
 }
 
+.mc-other-doc-menu:hover .mc-doc-menu-link,
 .mc-other-doc-menu:focus-within .mc-doc-menu-link,
 .mc-other-doc-menu.is-open .mc-doc-menu-link {
   max-width: 6.2rem;
