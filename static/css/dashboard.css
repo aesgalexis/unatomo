@@ -2093,10 +2093,31 @@
   }
 
   #machineList[data-mobile-detail="true"] .machine-card:not(.is-mobile-focus),
+  #machineList[data-mobile-detail="true"] .machine-card-wrap:not(.is-mobile-focus-path),
+  #machineList[data-mobile-detail="true"] .machine-group:not(.is-mobile-focus-path),
   [data-mobile-detail="true"] .add-bar,
   [data-mobile-detail="true"] .filter-info,
   [data-mobile-detail="true"] .admin-invite-banner {
     display: none !important;
+  }
+
+  #machineList[data-mobile-detail="true"] .machine-group.is-mobile-focus-path {
+    display: block;
+    margin: 0;
+    gap: 0;
+  }
+
+  #machineList[data-mobile-detail="true"] .machine-group.is-mobile-focus-path > .machine-group-header {
+    display: none !important;
+  }
+
+  #machineList[data-mobile-detail="true"] .machine-group.is-mobile-focus-path > .machine-group-body {
+    display: block;
+  }
+
+  #machineList[data-mobile-detail="true"] .machine-card-wrap.is-mobile-focus-path {
+    display: block;
+    width: 100%;
   }
 
   [data-mobile-detail="true"] .dashboard-mobile-back {
