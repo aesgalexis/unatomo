@@ -1979,6 +1979,29 @@
 }
 
 @media (max-width: 768px) {
+  #machineList[data-has-ungrouped="true"] > .machine-group:not(.machine-subgroup) > .machine-group-body > .machine-card-wrap,
+  #machineList .machine-subgroup > .machine-group-body > .machine-card-wrap,
+  #machineList[data-has-ungrouped="true"] .machine-subgroup > .machine-group-body > .machine-card-wrap {
+    transform: none;
+  }
+
+  .mc-admin-line {
+    grid-template-columns: 1fr;
+    gap: 0.35rem;
+    align-items: start;
+  }
+
+  .mc-admin-line .mc-user-role,
+  .mc-admin-line .mc-user-pin-wrap,
+  .mc-admin-line .mc-user-pin-actions {
+    display: none;
+  }
+
+  .mc-admin-line .mc-user-remove {
+    justify-self: start;
+    align-self: start;
+  }
+
   #machineList[data-mobile-detail="true"] .machine-card:not(.is-mobile-focus),
   [data-mobile-detail="true"] .add-bar,
   [data-mobile-detail="true"] .filter-info,
