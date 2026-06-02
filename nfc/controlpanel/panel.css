@@ -54,6 +54,23 @@
   color: var(--danger, #d33);
 }
 
+.controlpanel-metric {
+  display: grid;
+  gap: 4px;
+}
+
+.controlpanel-metric-value {
+  color: #7c3aed;
+  font-size: clamp(28px, 5vw, 46px);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.controlpanel-metric-label {
+  color: color-mix(in srgb, var(--fg) 78%, transparent);
+  font-size: 14px;
+}
+
 .controlpanel-list {
   list-style: none;
   margin: 0;

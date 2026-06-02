@@ -8,6 +8,15 @@ const mount = document.getElementById("controlpanel-mount");
 const isEn = getCurrentLang() === "en";
 
 const text = {
+  codeStatsTitle: isEn ? "Application code" : "C\u00f3digo de aplicaci\u00f3n",
+  codeStatsLoading: isEn ? "Loading code stats..." : "Cargando estad\u00edsticas de c\u00f3digo...",
+  codeStatsError: isEn ? "Unable to load code stats." : "No se han podido cargar las estad\u00edsticas de c\u00f3digo.",
+  codeStatsHint: isEn
+    ? "Source lines counted during the last static build."
+    : "L\u00edneas fuente contadas durante el \u00faltimo build est\u00e1tico.",
+  codeStatsLines: isEn
+    ? (value) => `${value} lines of code running this application`
+    : (value) => `${value} l\u00edneas de c\u00f3digo corriendo esta aplicaci\u00f3n`,
   usersTitle: isEn ? "Users" : "Usuarios",
   usersLoading: isEn ? "Loading users..." : "Cargando usuarios...",
   usersEmpty: isEn ? "No users found." : "No se han encontrado usuarios.",
@@ -122,6 +131,31 @@ const renderState = (body, hint, message, state = "") => {
   if (state) status.dataset.state = state;
   status.textContent = message;
   body.appendChild(status);
+};
+
+const renderCodeStats = (body, stats) => {
+  body.innerHTML = "";
+  const note = document.createElement("p");
+  note.className = "controlpanel-note";
+  note.textContent = text.codeStatsHint;
+  body.appendChild(note);
+
+  const totalLines = Number(stats?.totalLines || 0);
+  const formatted = new Intl.NumberFormat(isEn ? "en" : "es").format(totalLines);
+  const metric = document.createElement("div");
+  metric.className = "controlpanel-metric";
+
+  const value = document.createElement("div");
+  value.className = "controlpanel-metric-value";
+  value.textContent = formatted;
+
+  const label = document.createElement("div");
+  label.className = "controlpanel-metric-label";
+  label.textContent = text.codeStatsLines(formatted);
+
+  metric.appendChild(value);
+  metric.appendChild(label);
+  body.appendChild(metric);
 };
 
 const renderUsers = (body, items, handlers = {}) => {
@@ -361,14 +395,19 @@ const renderCodes = (body, items, handlers = {}) => {
 if (mount) {
   const wrap = document.createElement("div");
   wrap.className = "controlpanel-wrap";
+  const codeStatsCard = createCard(text.codeStatsTitle);
   const usersCard = createCard(text.usersTitle);
   const codesCard = createCard(text.codesTitle);
   const tagsCard = createCard(text.tagsTitle);
+  wrap.appendChild(codeStatsCard);
   wrap.appendChild(usersCard);
   wrap.appendChild(codesCard);
   wrap.appendChild(tagsCard);
   mount.appendChild(wrap);
 
+  codeStatsCard
+    .querySelector(".controlpanel-toggle")
+    ?.addEventListener("click", () => toggleCard(codeStatsCard));
   usersCard
     .querySelector(".controlpanel-toggle")
     ?.addEventListener("click", () => toggleCard(usersCard));
@@ -379,6 +418,7 @@ if (mount) {
     .querySelector(".controlpanel-toggle")
     ?.addEventListener("click", () => toggleCard(tagsCard));
 
+  const codeStatsBody = codeStatsCard.querySelector(".controlpanel-body");
   const usersBody = usersCard.querySelector(".controlpanel-body");
   const codesBody = codesCard.querySelector(".controlpanel-body");
   const tagsBody = tagsCard.querySelector(".controlpanel-body");
@@ -449,6 +489,23 @@ if (mount) {
     }
   };
 
+  const loadCodeStats = async () => {
+    if (!codeStatsBody) return;
+    renderState(codeStatsBody, text.codeStatsHint, text.codeStatsLoading);
+    try {
+      const response = await fetch(`/static/data/code-stats.json?ts=${Date.now()}`, {
+        cache: "no-store"
+      });
+      if (!response.ok) throw new Error("code-stats-unavailable");
+      const stats = await response.json();
+      renderCodeStats(codeStatsBody, stats);
+    } catch {
+      renderState(codeStatsBody, text.codeStatsHint, text.codeStatsError, "error");
+    }
+  };
+
+  toggleCard(codeStatsCard);
+  if (codeStatsBody) renderState(codeStatsBody, text.codeStatsHint, text.codeStatsLoading);
   if (usersBody) renderState(usersBody, text.usersHint, text.usersLoading);
   if (codesBody) renderState(codesBody, text.codesHint, text.codesLoading);
   if (tagsBody) renderState(tagsBody, text.tagsHint, text.tagsLoading);
@@ -465,7 +522,8 @@ if (mount) {
       return;
     }
 
-    if (!usersBody || !codesBody || !tagsBody) return;
+    if (!codeStatsBody || !usersBody || !codesBody || !tagsBody) return;
+    await loadCodeStats();
     renderState(usersBody, text.usersHint, text.usersLoading);
 
     let updateUsersStatus = () => {};
