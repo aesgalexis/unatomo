@@ -38,15 +38,16 @@ Machine documents are stored as metadata on `machines.documents`. The actual fil
 ```text
 machine-docs/{ownerUid}/{machineId}/plate/{fileName}
 machine-docs/{ownerUid}/{machineId}/manual/{fileName}
+machine-docs/{ownerUid}/{machineId}/other/{fileName}
 ```
 
-Implemented document types are `plate`, intended for machine plate photos, and `manual`, intended for PDF manuals up to 25 MB. Do not store uploaded files in the repository.
+Implemented document types are `plate`, intended for machine plate photos; `manual`, intended for one PDF manual up to 25 MB; and `other`, an array of additional PDFs or images up to 25 MB each. Do not store uploaded files in the repository.
 
 ## Account Storage Limit
 
 Each account is limited to 1 GB of stored machine assets. The usage model sums:
 
-- `machines.documents.*.size` for uploaded plates and manuals.
+- `machines.documents.*.size` for uploaded plates and manuals, plus array entries such as `machines.documents.other[].size`.
 - `machines.tagQrSize` / `tags.qrSize` for generated Tag ID QR PNG files.
 - Existing QR metadata/path fallback for older records that do not yet have a stored size.
 
