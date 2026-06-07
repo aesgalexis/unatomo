@@ -40,7 +40,7 @@
                 </svg>
               </span>
             </span>
-            <p data-i18n-html="contact_hours_html">De lunes a viernes, de 09:00 a 15:00<br>(Horario de Espa\u00f1a / CET).</p>
+            <p data-i18n-html="contact_hours_html">De lunes a viernes, de 09:00 a 15:00 <br>(Horario de Espa\u00f1a / CET).</p>
           </div>
 
           <div class="contact-info-item">

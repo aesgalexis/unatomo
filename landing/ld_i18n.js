@@ -17,7 +17,7 @@
       contact_phone_aria: "Teléfono",
       contact_hours_aria: "Horario",
       contact_address_aria: "Dirección",
-      contact_hours_html: "De lunes a viernes, de 09:00 a 15:00<br>(Horario de España / CET).",
+      contact_hours_html: "De lunes a viernes, de 09:00 a 15:00 <br>(Horario de España / CET).",
       legal_footer: "UNATOMO CORE SL - Todos los derechos reservados.",
     },
     en: {
@@ -35,7 +35,7 @@
       contact_phone_aria: "Phone",
       contact_hours_aria: "Hours",
       contact_address_aria: "Address",
-      contact_hours_html: "Monday to Friday, from 09:00 to 15:00<br>(Spain time / CET).",
+      contact_hours_html: "Monday to Friday, from 09:00 to 15:00 <br>(Spain time / CET).",
       legal_footer: "UNATOMO CORE SL - All rights reserved.",
     },
     it: {
@@ -53,7 +53,7 @@
       contact_phone_aria: "Telefono",
       contact_hours_aria: "Orario",
       contact_address_aria: "Indirizzo",
-      contact_hours_html: "Dal lunedì al venerdì, dalle 09:00 alle 15:00<br>(Orario della Spagna / CET).",
+      contact_hours_html: "Dal lunedì al venerdì, dalle 09:00 alle 15:00 <br>(Orario della Spagna / CET).",
       legal_footer: "UNATOMO CORE SL - Tutti i diritti riservati.",
     },
     el: {
@@ -71,7 +71,7 @@
       contact_phone_aria: "Τηλέφωνο",
       contact_hours_aria: "Ωράριο",
       contact_address_aria: "Διεύθυνση",
-      contact_hours_html: "Δευτέρα έως Παρασκευή, 09:00 έως 15:00<br>(Ώρα Ισπανίας / CET).",
+      contact_hours_html: "Δευτέρα έως Παρασκευή, 09:00 έως 15:00 <br>(Ώρα Ισπανίας / CET).",
       legal_footer: "UNATOMO CORE SL - Με επιφύλαξη παντός δικαιώματος.",
     },
   };
