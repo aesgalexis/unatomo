@@ -386,18 +386,12 @@ body {
   }
 
   #landing-upperfooter-mount {
-    position: fixed;
-    left: 24px;
-    right: 24px;
-    bottom: calc(42px + env(safe-area-inset-bottom));
-    z-index: 1700;
-    width: auto;
+    width: min(100%, 360px);
   }
 
   .ls-upperfooter {
     margin: 0 auto;
     padding: 0;
-    width: min(100%, 360px);
   }
 
   .ls-upperfooter-brand {
