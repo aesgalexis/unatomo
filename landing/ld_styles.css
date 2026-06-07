@@ -445,6 +445,16 @@ body {
     padding: 24px 24px 62px;
   }
 
+  .landing-logo {
+    display: block !important;
+    position: fixed;
+    left: 24px;
+    bottom: calc(48px + env(safe-area-inset-bottom));
+    z-index: 1601;
+    width: 118px;
+    margin: 0;
+  }
+
   #landing-upperfooter-mount {
     position: static;
     left: auto;
@@ -466,6 +476,7 @@ body {
     position: static;
     left: auto;
     bottom: auto;
+    width: 118px;
   }
 
   .ls-upperfooter-col {
