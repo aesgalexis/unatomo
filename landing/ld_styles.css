@@ -384,6 +384,47 @@ body {
   body {
     padding: 24px 24px 62px;
   }
+
+  #landing-upperfooter-mount {
+    position: fixed;
+    left: 24px;
+    right: 24px;
+    bottom: calc(42px + env(safe-area-inset-bottom));
+    z-index: 1700;
+    width: auto;
+  }
+
+  .ls-upperfooter {
+    margin: 0 auto;
+    padding: 0;
+    width: min(100%, 360px);
+  }
+
+  .ls-upperfooter-brand {
+    display: none;
+  }
+
+  .ls-upperfooter-col {
+    padding: 0;
+  }
+
+  .ls-upperfooter-contact .contact-info {
+    row-gap: 0.38rem;
+    justify-content: center;
+  }
+
+  .ls-upperfooter-contact .contact-info-item {
+    grid-template-columns: 16px minmax(0, auto);
+    column-gap: 0.42rem;
+    justify-content: center;
+    font-size: 0.76rem;
+  }
+
+  .ls-upperfooter-contact .contact-icon-link,
+  .contact-info-icon {
+    width: 16px;
+    height: 16px;
+  }
 }
 
 @media (max-width: 900px) {
