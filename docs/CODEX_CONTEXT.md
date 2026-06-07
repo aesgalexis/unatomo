@@ -36,3 +36,9 @@ Project-owner-only UI is called `superadmin` in conversation and docs. In code i
 Before editing, read the smallest relevant module and follow existing patterns. The codebase is mostly vanilla JS modules plus Firebase CDN imports. Avoid broad refactors unless the requested change requires them.
 
 The owner usually tests unpublished local changes in Microsoft Edge and checks published changes in Chrome. When investigating UI glitches, account for browser-specific autofill, focus, and scroll anchoring behavior in Edge as well as Chrome.
+
+## Product Feel
+
+Added: 2026-06-07
+
+The project should feel alive and directional, but not fragile. As features grow, prioritize load stability, small reliability fixes, and visual coherence so the app keeps feeling clear and trustworthy while new functionality is added.
