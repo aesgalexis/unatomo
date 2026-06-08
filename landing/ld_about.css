@@ -26,9 +26,10 @@ body {
 body {
   min-height: 100vh;
   background:
-    radial-gradient(circle at 85% 10%, rgba(148, 163, 184, 0.08), transparent 45%),
-    radial-gradient(circle at 12% 18%, rgba(203, 213, 225, 0.12), transparent 40%),
-    linear-gradient(180deg, #ffffff 0%, #f5f7fb 52%, #e5e7eb 100%);
+    linear-gradient(180deg, #ffffff 0%, #ffffff 18%, rgba(255, 255, 255, 0) 30%),
+    radial-gradient(circle at 85% 26%, rgba(148, 163, 184, 0.05), transparent 45%),
+    radial-gradient(circle at 12% 30%, rgba(203, 213, 225, 0.08), transparent 40%),
+    linear-gradient(180deg, #ffffff 0%, #ffffff 48%, #f5f7fb 72%, #e5e7eb 100%);
   color: color-mix(in srgb, var(--fg) 85%, transparent);
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI",
                Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -106,7 +107,7 @@ p {
 .landing-topbar-inner {
   height: 100%;
   margin: 0;
-  padding: 0 1.5rem;
+  padding: 0 18px 0 1.5rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -624,7 +625,7 @@ textarea.field {
   }
 
   .landing-topbar-inner {
-    padding: 0 0.75rem;
+    padding: 0 18px 0 0.75rem;
   }
 
   .landing-topbar-name {
