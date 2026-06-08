@@ -446,13 +446,7 @@ body {
   }
 
   .landing-logo {
-    display: block !important;
-    position: fixed;
-    left: 24px;
-    bottom: calc(48px + env(safe-area-inset-bottom));
-    z-index: 1601;
-    width: 118px;
-    margin: 0;
+    display: none !important;
   }
 
   #landing-upperfooter-mount {
@@ -469,7 +463,9 @@ body {
   }
 
   .ls-upperfooter-brand {
-    display: none;
+    display: flex;
+    min-height: auto;
+    margin-bottom: 0.75rem;
   }
 
   .ls-upperfooter-logo {
