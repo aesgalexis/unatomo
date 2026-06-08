@@ -194,20 +194,18 @@ body {
 }
 
 #landing-upperfooter-mount {
-  position: fixed;
-  left: 48px;
-  bottom: calc(48px + env(safe-area-inset-bottom));
-  z-index: 1600;
-  width: min(520px, calc(100% - 48px));
+  position: static;
+  width: min(100%, 876px);
 }
 
 .ls-upperfooter {
-  margin-top: 0;
-  padding-top: 0;
+  margin-top: 1.6rem;
+  padding-top: 1.5rem;
   border-top: none;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1.25rem;
+  grid-template-columns: auto auto;
+  gap: 0;
+  justify-content: center;
   align-items: start;
   user-select: none;
   -webkit-user-select: none;
@@ -231,18 +229,16 @@ body {
   position: relative;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
-  width: 100%;
+  width: auto;
   gap: 0.6rem;
   min-height: 72px;
 }
 
 .ls-upperfooter-logo {
-  position: fixed;
-  left: 48px;
-  bottom: calc(48px + env(safe-area-inset-bottom));
-  z-index: 1601;
+  position: relative;
+  z-index: 1;
   width: min(100%, 150px);
   height: auto;
   display: block;
@@ -256,6 +252,12 @@ body {
   display: grid;
   row-gap: 0.65rem;
   transform: translateY(14px);
+}
+
+@media (min-width: 901px) {
+  .ls-upperfooter-contact {
+    margin-left: -52px;
+  }
 }
 
 .ls-upperfooter-contact .contact-info-item {
@@ -290,57 +292,6 @@ body {
   line-height: 1.35;
   margin: 0;
   text-align: left;
-}
-
-@media (min-width: 901px) {
-  #landing-upperfooter-mount {
-    width: min(780px, calc(100% - 48px));
-  }
-
-  .ls-upperfooter {
-    grid-template-columns: auto minmax(0, 1fr);
-    align-items: end;
-  }
-
-  .ls-upperfooter-contact .contact-info {
-    position: fixed;
-    left: calc(48px + 150px + 18px);
-    top: calc(100svh - 198px - env(safe-area-inset-bottom));
-    z-index: 1602;
-    display: flex;
-    align-items: center;
-    flex-wrap: nowrap;
-    gap: 0;
-    transform: none;
-    white-space: nowrap;
-  }
-
-  .ls-upperfooter-contact .contact-info-item {
-    display: inline-flex;
-    align-items: center;
-    grid-template-columns: none;
-    column-gap: 0.35rem;
-    white-space: nowrap;
-  }
-
-  .ls-upperfooter-contact .contact-icon-link {
-    display: none;
-  }
-
-  .ls-upperfooter-contact .contact-info-item:not(:last-child)::after {
-    content: ",";
-    margin-right: 0.45rem;
-  }
-
-  .ls-upperfooter-contact .contact-info-item p {
-    display: inline;
-    font-size: 0.78rem;
-    line-height: 1;
-  }
-
-  .ls-upperfooter-contact .contact-info-item p br {
-    display: none;
-  }
 }
 
 .contact-info-icon {
