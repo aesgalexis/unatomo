@@ -63,6 +63,16 @@ Current scope:
 
 When a machine changes from `operativa` to `fuera_de_servicio`, the dashboard creates one pending one-off task with `source: "status-out-of-service"` to return the machine to operation. This behavior is account-independent and must apply to every dashboard user who can change the machine status, not only to the `superadmin`. Status-linked restore tasks are always rendered before ordinary tasks. Completing that task automatically changes the machine back to `operativa` and writes the status event to history. Do not duplicate this task while one pending status-linked restore task already exists.
 
+Task implementation files:
+
+- `static/js/dashboard/tabs/tasks/tasksModel.js`: task normalization, limits, and ordering. Current limits are 64 characters for titles, 1024 for descriptions, and 512 for notes.
+- `static/js/dashboard/tabs/tasks/tasksUI.js`: task list rendering, create/edit/note forms, complete button, external add-note icon, and three-dot edit/delete menu.
+- `static/js/dashboard/tabs/tasks/tasksTime.js`: frequency and due/overdue calculation, including custom frequency.
+- `static/js/dashboard/tabs/historial.js`: history rendering. Task notes are grouped under the original task-created log when the log has a matching `taskId`; title fallback exists for older records.
+- `static/js/dashboard/index.js`: task hooks passed to machine cards and persistence/autosave behavior.
+
+When creating task-related logs, include `taskId` whenever possible. This keeps history notes attached below the corresponding task creation record instead of appearing as independent chronological entries.
+
 ## Current Tag/QR Flow
 
 1. User generates or connects a Tag ID from machine config.
