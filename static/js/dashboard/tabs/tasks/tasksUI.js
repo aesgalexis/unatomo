@@ -127,9 +127,9 @@ const createTaskMenu = ({ machine, task, hooks, openNoteForm, openEditForm }) =>
   });
 
   menu.appendChild(dots);
-  menu.appendChild(remove);
-  menu.appendChild(edit);
   menu.appendChild(note);
+  menu.appendChild(edit);
+  menu.appendChild(remove);
   return menu;
 };
 
@@ -204,24 +204,6 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
         });
         meta.appendChild(completeBtn);
       }
-
-      line1.appendChild(title);
-      const side = document.createElement("div");
-      side.className = "task-side";
-      if (canEditTasks) {
-        side.appendChild(createTaskMenu({ machine, task, hooks, openNoteForm, openEditForm }));
-      }
-      side.appendChild(meta);
-      line1.appendChild(side);
-      body.appendChild(line1);
-
-      const line2 = document.createElement("div");
-      line2.className = "task-line task-line-desc";
-      const desc = document.createElement("span");
-      desc.className = "task-desc";
-      desc.textContent = task.description || "";
-      line2.appendChild(desc);
-      body.appendChild(line2);
 
       const forms = document.createElement("div");
       forms.className = "task-inline-forms";
@@ -306,6 +288,24 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
         forms.appendChild(wrap);
         titleInput.focus();
       };
+
+      line1.appendChild(title);
+      const side = document.createElement("div");
+      side.className = "task-side";
+      if (canEditTasks) {
+        side.appendChild(createTaskMenu({ machine, task, hooks, openNoteForm, openEditForm }));
+      }
+      side.appendChild(meta);
+      line1.appendChild(side);
+      body.appendChild(line1);
+
+      const line2 = document.createElement("div");
+      line2.className = "task-line task-line-desc";
+      const desc = document.createElement("span");
+      desc.className = "task-desc";
+      desc.textContent = task.description || "";
+      line2.appendChild(desc);
+      body.appendChild(line2);
 
       item.appendChild(body);
       item.appendChild(forms);

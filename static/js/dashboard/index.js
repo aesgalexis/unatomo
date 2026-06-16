@@ -1561,6 +1561,7 @@ if (mount) {
               nextLogs.push({
                 ts: now,
                 type: "task_created",
+                taskId: restoreTask.id,
                 title: restoreTask.title,
                 description: restoreTask.description || "",
                 user
@@ -2303,6 +2304,7 @@ if (mount) {
             {
               ts: new Date().toISOString(),
               type: "task_created",
+              taskId: task.id,
               title: task.title || "Tarea",
               description: task.description || "",
               user
@@ -2327,6 +2329,7 @@ if (mount) {
             {
               ts: new Date().toISOString(),
               type: "task_removed",
+              taskId,
               title: (removed && removed.title) || "Tarea",
               description: (removed && removed.description) || "",
               user
@@ -2362,6 +2365,7 @@ if (mount) {
             {
               ts: note.createdAt,
               type: "task_note_added",
+              taskId,
               title: task?.title || "Tarea",
               note: note.text,
               user
@@ -2400,6 +2404,7 @@ if (mount) {
             {
               ts: new Date().toISOString(),
               type: "task_edited",
+              taskId,
               title: task?.title || "Tarea",
               description: task?.description || "",
               user
