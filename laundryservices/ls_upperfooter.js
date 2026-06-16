@@ -69,7 +69,7 @@
                 </svg>
               </span>
             </span>
-            <p>CL. Lluna 2 1, 07440 Muro, Mallorca, Espa\u00f1a</p>
+            <p>07440 Muro, Mallorca, Espa\u00f1a</p>
           </div>
         </div>
       </div>
