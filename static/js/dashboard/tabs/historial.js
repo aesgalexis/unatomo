@@ -89,6 +89,16 @@ export const render = (panel, machine, hooks, options = {}) => {
         const desc = log.description ? ` - ${log.description}` : "";
         const user = completedBy(log.user);
         item.textContent = `${time} - ${t("history.taskRemoved", "Tarea eliminada")}: ${title}${desc}${user}`;
+      } else if (log.type === "task_note_added") {
+        item.classList.add("mc-log-item-indent");
+        const title = log.title || t("history.task", "Tarea");
+        const note = log.note ? ` - ${log.note}` : "";
+        const user = completedBy(log.user);
+        item.textContent = `${time} - ${t("history.taskNoteAdded", "Nota en tarea")}: ${title}${note}${user}`;
+      } else if (log.type === "task_edited") {
+        const title = log.title || t("history.task", "Tarea");
+        const user = completedBy(log.user);
+        item.textContent = `${time} - ${t("history.taskEdited", "Tarea editada")}: ${title}${user}`;
       } else if (log.type === "admin_accept") {
         const admin = log.admin ? ` ${log.admin}` : "";
         const user = completedBy(log.user);

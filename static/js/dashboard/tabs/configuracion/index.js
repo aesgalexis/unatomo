@@ -267,7 +267,7 @@ export const render = (panel, machine, hooks, options = {}) => {
 
     if (currentTransferEmail) {
       const line = document.createElement("div");
-      line.className = "mc-user-row mc-admin-line";
+      line.className = "mc-user-row mc-admin-line mc-transfer-pending-line";
       const email = document.createElement("span");
       email.className = "mc-user-name";
       email.textContent = t(
@@ -275,6 +275,22 @@ export const render = (panel, machine, hooks, options = {}) => {
         (value) => `Transferencia pendiente para ${value}`
       )(currentTransferEmail);
       line.appendChild(email);
+      const rolePlaceholder = document.createElement("select");
+      rolePlaceholder.className = "mc-user-role";
+      rolePlaceholder.disabled = true;
+      rolePlaceholder.style.visibility = "hidden";
+      const roleOpt = document.createElement("option");
+      roleOpt.textContent = t("config.user", "Usuario");
+      rolePlaceholder.appendChild(roleOpt);
+      const pinWrap = document.createElement("div");
+      pinWrap.className = "mc-user-pin-wrap";
+      pinWrap.style.visibility = "hidden";
+      const pinToggle = document.createElement("button");
+      pinToggle.type = "button";
+      pinToggle.className = "mc-user-pin-toggle";
+      pinToggle.tabIndex = -1;
+      pinToggle.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 1 1 8 0v3"></path></svg>`;
+      pinWrap.appendChild(pinToggle);
       const cancel = document.createElement("a");
       cancel.className = "mc-user-remove";
       cancel.href = "#";
@@ -286,7 +302,13 @@ export const render = (panel, machine, hooks, options = {}) => {
           hooks.onCancelOwnershipTransfer(machine.id);
         }
       });
+      const pinActions = document.createElement("div");
+      pinActions.className = "mc-user-pin-actions";
+      pinActions.style.visibility = "hidden";
+      line.appendChild(rolePlaceholder);
+      line.appendChild(pinWrap);
       line.appendChild(cancel);
+      line.appendChild(pinActions);
       transferRow.appendChild(line);
     }
     if (currentTransferStatus) {

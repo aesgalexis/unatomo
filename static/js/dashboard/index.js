@@ -2340,6 +2340,79 @@ if (mount) {
           autoSave.saveNow(id, "remove-task");
         };
 
+        hooks.onAddTaskNote = (id, taskId, text) => {
+          const current = getDraftById(id);
+          if (!current) return;
+          const user = state.adminLabel || t("dashboard.admin", "Administrador");
+          const note = {
+            id: (window.crypto.randomUUID && window.crypto.randomUUID()) || `n_${Date.now()}`,
+            text: (text || "").toString().trim().slice(0, 512),
+            createdAt: new Date().toISOString(),
+            createdBy: user
+          };
+          if (!note.text) return;
+          const tasks = normalizeTasks(current.tasks || []).map((task) =>
+            task.id === taskId
+              ? { ...task, notes: [...(task.notes || []), note] }
+              : task
+          );
+          const task = tasks.find((item) => item.id === taskId);
+          const logs = [
+            ...(current.logs || []),
+            {
+              ts: note.createdAt,
+              type: "task_note_added",
+              title: task?.title || "Tarea",
+              note: note.text,
+              user
+            }
+          ];
+          updateMachine(id, { tasks, logs });
+          if (!state.selectedTabById) state.selectedTabById = {};
+          state.selectedTabById[id] = "quehaceres";
+          state.expandedById = Array.from(expandedById);
+          renderCards({ preserveScroll: true });
+          autoSave.saveNow(id, "task-note");
+        };
+
+        hooks.onEditTask = (id, taskId, patch) => {
+          const current = getDraftById(id);
+          if (!current) return;
+          const user = state.adminLabel || t("dashboard.admin", "Administrador");
+          const tasks = normalizeTasks(current.tasks || []).map((task) => {
+            if (task.id !== taskId) return task;
+            const frequency = patch.frequency || task.frequency || "puntual";
+            return {
+              ...task,
+              title: (patch.title || task.title || "Tarea").toString().trim().slice(0, 64),
+              description: (patch.description || "").toString().trim().slice(0, 1024),
+              frequency,
+              customDueAmount:
+                frequency === "custom"
+                  ? Math.max(1, Math.min(999, Number(patch.customDueAmount || 1) || 1))
+                  : null,
+              customDueUnit: frequency === "custom" ? patch.customDueUnit || "days" : null
+            };
+          });
+          const task = tasks.find((item) => item.id === taskId);
+          const logs = [
+            ...(current.logs || []),
+            {
+              ts: new Date().toISOString(),
+              type: "task_edited",
+              title: task?.title || "Tarea",
+              description: task?.description || "",
+              user
+            }
+          ];
+          updateMachine(id, { tasks, logs });
+          if (!state.selectedTabById) state.selectedTabById = {};
+          state.selectedTabById[id] = "quehaceres";
+          state.expandedById = Array.from(expandedById);
+          renderCards({ preserveScroll: true });
+          autoSave.saveNow(id, "task-edit");
+        };
+
         hooks.onUpdateNotifications = (id, next) => {
           updateMachine(id, { notifications: next });
           if (!state.selectedTabById) state.selectedTabById = {};
