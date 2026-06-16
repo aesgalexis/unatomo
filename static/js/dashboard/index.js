@@ -2360,6 +2360,21 @@ if (mount) {
           const nextEmail = normalizeEmail(email);
           const ownerNormalized = normalizeEmail(ownerEmail);
           const tenantId = state.uid;
+          const transferStatus = (current.ownershipTransferStatus || "")
+            .toString()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toLowerCase();
+
+          if (transferStatus.startsWith("pendiente")) {
+            notifyTopbar(
+              t(
+                "dashboard.adminBlockedByTransfer",
+                "No puedes asignar administrador con una transferencia pendiente"
+              )
+            );
+            return;
+          }
 
           if (!nextEmail) {
             updateMachine(id, { adminEmail: "", adminStatus: "" });
@@ -2426,6 +2441,21 @@ if (mount) {
           if (!current) return;
           if (!isOwnerMachine(current)) {
             notifyTopbar(t("dashboard.transferOnlyOwner", "Solo el propietario puede transferir la máquina"));
+            return;
+          }
+          if ((current.adminEmail || "").trim()) {
+            const status = t(
+              "dashboard.transferBlockedByAdmin",
+              "Quita el administrador antes de transferir la propiedad"
+            );
+            updateMachine(id, {
+              ownershipTransferEmail: "",
+              ownershipTransferStatus: status
+            });
+            state.selectedTabById[id] = "configuracion";
+            state.expandedById = Array.from(expandedById);
+            renderCards({ preserveScroll: true });
+            notifyTopbar(status);
             return;
           }
           const nextEmail = normalizeEmail(email);

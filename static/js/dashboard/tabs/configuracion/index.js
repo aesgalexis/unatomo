@@ -182,6 +182,7 @@ export const render = (panel, machine, hooks, options = {}) => {
     const ownerEmail = (machine.ownerEmail || "").trim();
     const currentTransferEmail = (machine.ownershipTransferEmail || "").trim();
     const currentTransferStatus = (machine.ownershipTransferStatus || "").trim();
+    const hasAssignedAdmin = !!currentEmail;
 
     const renderTransferButton = () => {
       transferPlaceholder.innerHTML = "";
@@ -189,8 +190,16 @@ export const render = (panel, machine, hooks, options = {}) => {
       btn.type = "button";
       btn.className = "mc-admin-assign";
       btn.textContent = t("config.transfer", "Transferir");
+      btn.disabled = hasAssignedAdmin;
+      if (hasAssignedAdmin) {
+        btn.title = t(
+          "config.transferBlockedByAdmin",
+          "Quita el administrador antes de transferir"
+        );
+      }
       btn.addEventListener("click", (event) => {
         event.stopPropagation();
+        if (hasAssignedAdmin) return;
         renderTransferForm();
       });
       transferPlaceholder.appendChild(btn);
@@ -276,6 +285,15 @@ export const render = (panel, machine, hooks, options = {}) => {
           ? "pending"
           : "error";
       status.textContent = currentTransferStatus;
+      transferRow.appendChild(status);
+    } else if (hasAssignedAdmin) {
+      const status = document.createElement("div");
+      status.className = "mc-admin-status";
+      status.dataset.state = "empty";
+      status.textContent = t(
+        "config.transferBlockedByAdmin",
+        "Quita el administrador antes de transferir"
+      );
       transferRow.appendChild(status);
     }
     if (!currentTransferEmail) renderTransferButton();

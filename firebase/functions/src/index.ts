@@ -374,6 +374,17 @@ export const createAdminInvite = onCall(async (request) => {
   if (machine.ownerUid !== auth.uid) {
     throw new HttpsError("permission-denied", "not-owner");
   }
+  const transferStatus = (machine.ownershipTransferStatus || "")
+    .toString()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+  if (transferStatus.startsWith("pendiente")) {
+    throw new HttpsError(
+      "failed-precondition",
+      "ownership-transfer-pending",
+    );
+  }
 
   const inviteId = `${machineId}_${adminEmailLower}`;
   const now = admin.firestore.FieldValue.serverTimestamp();
@@ -560,6 +571,10 @@ export const revokeAdminInvite = onCall(async (request) => {
   const machine = machineSnap.data() || {};
   if (machine.ownerUid !== auth.uid) {
     throw new HttpsError("permission-denied", "not-owner");
+  }
+  const currentAdminEmail = (machine.adminEmail || "").toString().trim();
+  if (currentAdminEmail) {
+    throw new HttpsError("failed-precondition", "admin-already-assigned");
   }
 
   const now = admin.firestore.FieldValue.serverTimestamp();
