@@ -25,6 +25,7 @@ import { getTaskTiming, getOverdueDuration, getCompletionDuration } from "/stati
 import { filterMachines } from "./components/machineSearch/machineFilter.js";
 import { createMachineSearchBar } from "./components/machineSearch/machineSearchBar.js";
 import { createDashboardLoading } from "./components/loading/dashboardLoading.js";
+import { GLOBAL_REGISTRY_PAGE_SIZE, renderGlobalRegistryView } from "./views/registry/globalRegistryView.js";
 import { setTopbarSaveStatus } from "/static/js/topbar/save-status.js";
 import { setTopbarNotifications } from "/static/js/notifications/topbar-notifications.js";
 import { calculateStorageUsage, STORAGE_LIMIT_BYTES } from "/static/js/configuracion/storageUsage.js";
@@ -58,6 +59,8 @@ const getPublicSectionFromHash = () =>
     .toLowerCase();
 const isPublicSectionHash = () =>
   ["faqs", "tags", "contacto"].includes(getPublicSectionFromHash());
+const getDashboardInternalView = () =>
+  getPublicSectionFromHash() === "registro" ? "registro" : "dashboard";
 
 if (mount) {
   const state = {
@@ -73,6 +76,8 @@ if (mount) {
     configSubtabById: {},
     tagStatusById: {},
     dashboardLayout: { groups: [], placements: {}, tabOrder: [] },
+    activeView: getDashboardInternalView(),
+    registryVisibleCount: GLOBAL_REGISTRY_PAGE_SIZE,
     searchQuery: "",
     pendingInvites: [],
     pendingTransferInvites: [],
@@ -220,6 +225,24 @@ if (mount) {
   const addBar = document.createElement("div");
   addBar.className = "add-bar";
 
+  const sectionNav = document.createElement("nav");
+  sectionNav.className = "dashboard-section-nav";
+  sectionNav.setAttribute("aria-label", t("dashboard.sectionNavAria", "Secciones"));
+
+  const dashboardLink = document.createElement("a");
+  dashboardLink.className = "dashboard-section-link is-active";
+  dashboardLink.href = "#/dashboard";
+  dashboardLink.setAttribute("aria-current", "page");
+  dashboardLink.textContent = t("dashboard.navDashboard", "Dashboard");
+
+  const registryLink = document.createElement("a");
+  registryLink.className = "dashboard-section-link";
+  registryLink.href = "#/registro";
+  registryLink.textContent = t("dashboard.navRegistry", "Registro");
+
+  sectionNav.appendChild(dashboardLink);
+  sectionNav.appendChild(registryLink);
+
   const { wrap: loadingEl, setProgress: setLoadingProgress } = createDashboardLoading();
 
   const addBtn = document.createElement("button");
@@ -312,11 +335,33 @@ if (mount) {
   inviteBanner.style.display = "none";
 
   addBar.appendChild(loadingEl);
+  mount.appendChild(sectionNav);
   mount.appendChild(addBar);
   mount.appendChild(mobileBackBtn);
   mount.appendChild(inviteBanner);
   mount.appendChild(filterInfo);
   mount.appendChild(list);
+
+  const syncDashboardViewChrome = () => {
+    const isRegistry = state.activeView === "registro";
+    dashboardLink.classList.toggle("is-active", !isRegistry);
+    registryLink.classList.toggle("is-active", isRegistry);
+    if (isRegistry) {
+      dashboardLink.removeAttribute("aria-current");
+      registryLink.setAttribute("aria-current", "page");
+    } else {
+      dashboardLink.setAttribute("aria-current", "page");
+      registryLink.removeAttribute("aria-current");
+    }
+    addBar.classList.toggle("is-registry-view", isRegistry);
+    const disabled = state.loading || isRegistry;
+    addBtn.disabled = disabled;
+    searchInput.disabled = disabled;
+    orderBtn.disabled = disabled;
+    addBtn.setAttribute("aria-disabled", disabled ? "true" : "false");
+    searchInput.setAttribute("aria-disabled", disabled ? "true" : "false");
+    orderBtn.setAttribute("aria-disabled", disabled ? "true" : "false");
+  };
 
   const updateSaveState = (message = "") => {
     setTopbarSaveStatus(message);
@@ -398,9 +443,7 @@ if (mount) {
         clearTimeout(state.loadingGuardTimer);
         state.loadingGuardTimer = null;
       }
-      addBtn.disabled = false;
-      searchInput.disabled = false;
-      orderBtn.disabled = false;
+      syncDashboardViewChrome();
       setTimeout(() => {
         loadingEl.style.display = "none";
       }, 2000);
@@ -420,6 +463,7 @@ if (mount) {
   addBtn.disabled = true;
   searchInput.disabled = true;
   orderBtn.disabled = true;
+  syncDashboardViewChrome();
 
   const renderPlaceholder = () => {
     list.innerHTML = "";
@@ -1265,6 +1309,8 @@ if (mount) {
   };
 
   const renderCards = ({ preserveScroll = false } = {}) => {
+    state.activeView = getDashboardInternalView();
+    syncDashboardViewChrome();
     const capturedAnchor = preserveScroll ? captureViewportAnchor() : null;
     const prevScrollY = preserveScroll
       ? (typeof state.nextScrollRestoreY === "number" ? state.nextScrollRestoreY : window.scrollY)
@@ -1282,6 +1328,26 @@ if (mount) {
     clearDashboardTooltips();
     list.innerHTML = "";
     const machines = Array.isArray(state.draftMachines) ? state.draftMachines : [];
+    if (state.activeView === "registro") {
+      clearMobileDetailState();
+      syncMobileDetailUI();
+      filterInfo.textContent = "";
+      filterInfo.style.display = "none";
+      cardRefs.clear();
+      renderGlobalRegistryView(list, machines, {
+        visibleCount: state.registryVisibleCount,
+        onLoadMore: () => {
+          state.registryVisibleCount += GLOBAL_REGISTRY_PAGE_SIZE;
+          renderCards({ preserveScroll: true });
+        }
+      });
+      syncMachineAccessListeners(state.draftMachines);
+      if (state.loading && state.ownerReady && state.adminReady) {
+        updateLoading();
+      }
+      return;
+    }
+    list.className = "";
     const query = (state.searchQuery || "").trim();
     const visibleMachines = filterMachines(machines, query);
     state.knownUsers = Array.from(
@@ -3064,6 +3130,16 @@ if (mount) {
       onDropGroupOnGroup: moveGroupToTargetGroup
     });
   };
+
+  window.addEventListener("hashchange", () => {
+    const nextView = getDashboardInternalView();
+    if (nextView === state.activeView) return;
+    state.activeView = nextView;
+    if (nextView === "registro") {
+      state.registryVisibleCount = GLOBAL_REGISTRY_PAGE_SIZE;
+    }
+    renderCards({ preserveScroll: false });
+  });
 
   onAuthStateChanged(auth, async (user) => {
     if (!user) {

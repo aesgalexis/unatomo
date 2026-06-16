@@ -59,6 +59,34 @@ Current scope:
 - Group records may include `parentGroupId`; nesting deeper than one sublevel is intentionally flattened.
 - `tabOrder` stores the global order for machine-card tabs and applies to all machines. It is edited from the Settings/Configuración page preferences card.
 
+## Dashboard-Level Views
+
+The main dashboard page has internal hash views:
+
+- `#/dashboard`: the normal machine-card and group view.
+- `#/registro`: the global registry view.
+
+Files:
+
+- `static/js/dashboard/index.js`: owns the view switch, section nav, disabled control state, and hash routing.
+- `static/js/dashboard/history/historyEventFormatter.js`: shared formatter and grouping helpers for machine history events. It preserves known legacy event text and falls back to `summary`, `message`, `messageKey`, or `type` for future events.
+- `static/js/dashboard/views/registry/globalRegistryModel.js`: flattens logs from all machines visible to the current account, sorts them newest-first, and groups task notes under their task-created event.
+- `static/js/dashboard/views/registry/globalRegistryView.js`: renders the global registry and `Cargar más` / `Load more` pagination.
+
+Global registry scope:
+
+- Uses only machines already visible to the current account, including owner and accepted-admin machines.
+- Does not fetch hidden machines from other accounts.
+- Shows 254 main log entries first, then each `Cargar más` click adds another 254 main entries.
+- Task note logs stay visually grouped under their related task creation when `taskId` or title fallback can match them.
+- The add, search, and order/filter controls remain visible in `Registro`, but are disabled until those features are explicitly implemented for the registry view.
+
+History event contract:
+
+- The machine history array remains the source of truth. The global registry should aggregate and render those events, not maintain its own list of known product actions.
+- For new event types, store enough display data in the log itself: prefer `messageKey` plus `messageParams` for bilingual text, or `summary` / `message` when the text is already suitable for display.
+- Keep `taskId` on task-related logs whenever possible so notes can remain grouped below their task creation event.
+
 ## Status-Linked Tasks
 
 When a machine changes from `operativa` to `fuera_de_servicio`, the dashboard creates one pending one-off task with `source: "status-out-of-service"` to return the machine to operation. This behavior is account-independent and must apply to every dashboard user who can change the machine status, not only to the `superadmin`. Status-linked restore tasks are always rendered before ordinary tasks. Completing that task automatically changes the machine back to `operativa` and writes the status event to history. Do not duplicate this task while one pending status-linked restore task already exists.
@@ -66,7 +94,7 @@ When a machine changes from `operativa` to `fuera_de_servicio`, the dashboard cr
 Task implementation files:
 
 - `static/js/dashboard/tabs/tasks/tasksModel.js`: task normalization, limits, and ordering. Current limits are 64 characters for titles, 1024 for descriptions, and 512 for notes.
-- `static/js/dashboard/tabs/tasks/tasksUI.js`: task list rendering, create/edit/note forms, complete button, external add-note icon, and three-dot edit/delete menu.
+- `static/js/dashboard/tabs/tasks/tasksUI.js`: task list rendering, create/edit/note forms, complete button, and three-dot add-note/edit/delete menu.
 - `static/js/dashboard/tabs/tasks/tasksTime.js`: frequency and due/overdue calculation, including custom frequency.
 - `static/js/dashboard/tabs/historial.js`: history rendering. Task notes are grouped under the original task-created log when the log has a matching `taskId`; title fallback exists for older records.
 - `static/js/dashboard/index.js`: task hooks passed to machine cards and persistence/autosave behavior.

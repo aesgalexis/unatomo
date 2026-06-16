@@ -12,6 +12,8 @@ Project-owner-only UI is called `superadmin` in conversation and docs. In code i
 
 - `nfc/es/` and `nfc/en/`: localized dashboard/auth/static pages.
 - `static/js/dashboard/`: dashboard bootstrap, machine state, cards, tabs, repositories, Firebase client calls.
+- `static/js/dashboard/history/`: shared history event formatting and grouping helpers.
+- `static/js/dashboard/views/`: dashboard-level views that are not machine-card tabs, such as the global registry.
 - `static/js/dashboard/tabs/configuracion/`: machine configuration UI.
 - `static/js/dashboard/tags/`: Tag ID URL, QR generation, and disconnect client wrappers.
 - `static/js/qr-print/index.js`: QR print page logic.
@@ -30,8 +32,10 @@ Project-owner-only UI is called `superadmin` in conversation and docs. In code i
 - The QR action in machine config is `View QR` / `Ver QR`; it opens QR print focused on one machine.
 - QR print can reload to show all available QR codes, temporarily remove items from the print layout, resize QR output, and optionally use the Unatomo frame image.
 - Disconnecting a Tag ID must also remove the associated QR to avoid stale database/storage data.
-- Machine tasks support title, description, frequency, custom frequency, notes, edit, completion, and delete. The task action menu uses an external add-note icon plus a three-dot menu for edit/delete.
+- Machine tasks support title, description, frequency, custom frequency, notes, edit, completion, and delete. The task action menu uses a three-dot menu for add-note/edit/delete.
 - Changing a machine to `fuera_de_servicio` creates a one-off restore task for all permitted dashboard users. That status-linked task is always rendered before ordinary tasks and completing it restores the machine to `operativa`.
+- The dashboard has internal views at `#/dashboard` and `#/registro`. `Registro` shows a global registry made from the histories of all machines visible to the current account.
+- Global registry event text comes from `static/js/dashboard/history/historyEventFormatter.js`; new history event types should provide `summary`, `message`, or `messageKey` so the global registry can show them without view-specific code.
 
 ## Working Style
 
