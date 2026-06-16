@@ -43,6 +43,7 @@ import {
 const DEFAULT_COLLAPSED_HEIGHT = 108;
 const EXPAND_FACTOR = 2.5;
 const RESTORE_OPERATION_TASK_SOURCE = "status-out-of-service";
+const MAX_DASHBOARD_TITLE_LENGTH = 32;
 
 const mount = document.getElementById("dashboard-mount");
 const appBasePrefix = getAppBasePrefix();
@@ -75,7 +76,7 @@ if (mount) {
     selectedTabById: {},
     configSubtabById: {},
     tagStatusById: {},
-    dashboardLayout: { groups: [], placements: {}, tabOrder: [] },
+    dashboardLayout: { groups: [], placements: {}, tabOrder: [], dashboardTitle: "" },
     activeView: getDashboardInternalView(),
     registryVisibleCount: GLOBAL_REGISTRY_PAGE_SIZE,
     searchQuery: "",
@@ -148,6 +149,86 @@ if (mount) {
 
   const normalizeStatus = (value) =>
     value === "desconectada" ? "fuera_de_servicio" : value || "operativa";
+
+  const normalizeDashboardTitle = (value) =>
+    (value || "")
+      .toString()
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, MAX_DASHBOARD_TITLE_LENGTH);
+
+  const getDefaultDashboardTitle = () => t("dashboard.navDashboard", "Dashboard");
+
+  const getDashboardTitle = () =>
+    normalizeDashboardTitle(state.dashboardLayout?.dashboardTitle) || getDefaultDashboardTitle();
+
+  const applyDashboardTitle = () => {
+    const titleEl = document.getElementById("topbar-title");
+    if (!titleEl || titleEl.dataset.editing === "true") return;
+    titleEl.textContent = getDashboardTitle();
+  };
+
+  const initDashboardTitleEditor = () => {
+    const titleEl = document.getElementById("topbar-title");
+    if (!titleEl || titleEl.dataset.dashboardTitleEditor === "true") return;
+    titleEl.dataset.dashboardTitleEditor = "true";
+    titleEl.classList.add("topbar-title-editable");
+    titleEl.setAttribute("contenteditable", "plaintext-only");
+    titleEl.setAttribute("spellcheck", "false");
+    titleEl.setAttribute("role", "textbox");
+    titleEl.setAttribute("aria-label", t("dashboard.titleEditAria", "Editar título del dashboard"));
+    titleEl.setAttribute("title", t("dashboard.titleEditHint", "Editar título del dashboard"));
+
+    let beforeEdit = "";
+    const clampTitle = () => {
+      const raw = titleEl.textContent || "";
+      if (raw.length <= MAX_DASHBOARD_TITLE_LENGTH) return;
+      titleEl.textContent = raw.slice(0, MAX_DASHBOARD_TITLE_LENGTH);
+      const range = document.createRange();
+      range.selectNodeContents(titleEl);
+      range.collapse(false);
+      const selection = window.getSelection();
+      if (selection) {
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+    };
+
+    titleEl.addEventListener("focus", () => {
+      titleEl.dataset.editing = "true";
+      beforeEdit = getDashboardTitle();
+    });
+    titleEl.addEventListener("input", clampTitle);
+    titleEl.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        titleEl.blur();
+      }
+      if (event.key === "Escape") {
+        event.preventDefault();
+        titleEl.textContent = beforeEdit;
+        titleEl.blur();
+      }
+    });
+    titleEl.addEventListener("blur", async () => {
+      titleEl.dataset.editing = "false";
+      const nextTitle = normalizeDashboardTitle(titleEl.textContent);
+      const previousTitle = normalizeDashboardTitle(state.dashboardLayout?.dashboardTitle);
+      state.dashboardLayout = {
+        ...normalizeDashboardLayout(state.dashboardLayout),
+        dashboardTitle: nextTitle
+      };
+      applyDashboardTitle();
+      if (nextTitle === previousTitle) return;
+      updateSaveState(t("dashboard.saving", "Guardando..."));
+      try {
+        await upsertDashboardLayout(state.uid, state.dashboardLayout);
+        updateSaveState(t("dashboard.saved", "Guardado"));
+      } catch {
+        updateSaveState(t("dashboard.saveError", "Error al guardar"));
+      }
+    });
+  };
 
   const createRestoreOperationTask = (createdBy) => ({
     id:
@@ -715,7 +796,12 @@ if (mount) {
         order: typeof placement.order === "number" ? placement.order : 0
       };
     });
-    return { groups, placements, tabOrder: normalizeTabOrder(layout.tabOrder) };
+    return {
+      groups,
+      placements,
+      tabOrder: normalizeTabOrder(layout.tabOrder),
+      dashboardTitle: normalizeDashboardTitle(layout.dashboardTitle)
+    };
   };
 
   const saveDashboardLayout = async () => {
@@ -3071,8 +3157,15 @@ if (mount) {
     try {
       state.dashboardLayout = normalizeDashboardLayout(await fetchDashboardLayout(uid));
     } catch {
-      state.dashboardLayout = { groups: [], placements: {}, tabOrder: normalizeTabOrder() };
+      state.dashboardLayout = {
+        groups: [],
+        placements: {},
+        tabOrder: normalizeTabOrder(),
+        dashboardTitle: ""
+      };
     }
+    applyDashboardTitle();
+    initDashboardTitleEditor();
 
     let ownerFetchResolved = false;
     let ownerBootstrap = [];

@@ -42,7 +42,7 @@ Current implemented scope:
 
 ## Dashboard Groups
 
-Groups and the global machine-card tab order are user dashboard layout preferences, not machine data. The layout is stored in Firestore at:
+Groups, the editable topbar dashboard title, and the global machine-card tab order are user dashboard layout preferences, not machine data. The layout is stored in Firestore at:
 
 ```text
 dashboard_layout/{uid}
@@ -57,6 +57,7 @@ Current scope:
 - Reorder machines with drag and drop in the flat list, ungrouped list, and group bodies.
 - The dashboard intentionally has no group creation button or per-card group selector.
 - Group records may include `parentGroupId`; nesting deeper than one sublevel is intentionally flattened.
+- `dashboardTitle` stores the user's editable dashboard topbar title, capped at 32 characters. Empty value falls back to `Dashboard`.
 - `tabOrder` stores the global order for machine-card tabs and applies to all machines. It is edited from the Settings/Configuración page preferences card.
 
 ## Dashboard-Level Views

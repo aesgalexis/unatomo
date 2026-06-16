@@ -18,6 +18,7 @@ const usernamesDoc = (ownerUid, normalized) =>
   doc(db, "usernames", `${ownerUid}_${normalized}`);
 const dashboardLayoutDoc = (uid) => doc(db, "dashboard_layout", uid);
 const VALID_TAB_IDS = ["quehaceres", "general", "historial", "configuracion"];
+const MAX_DASHBOARD_TITLE_LENGTH = 32;
 
 const normalizeTabOrder = (value) => {
   const seen = new Set();
@@ -49,6 +50,10 @@ export const fetchDashboardLayout = async (uid) => {
 
 export const upsertDashboardLayout = async (uid, layout) => {
   if (!uid) return;
+  const dashboardTitle = (layout?.dashboardTitle || "")
+    .toString()
+    .trim()
+    .slice(0, MAX_DASHBOARD_TITLE_LENGTH);
   await setDoc(
     dashboardLayoutDoc(uid),
     {
@@ -58,6 +63,7 @@ export const upsertDashboardLayout = async (uid, layout) => {
           ? layout.placements
           : {},
       tabOrder: normalizeTabOrder(layout?.tabOrder),
+      dashboardTitle,
       updatedAt: serverTimestamp(),
       updatedBy: uid
     },
