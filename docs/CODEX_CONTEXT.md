@@ -23,6 +23,7 @@ Project-owner-only UI is called `superadmin` in conversation and docs. In code i
 - `static/js/registro/session-menu.js`: authenticated user menu.
 - `firebase/functions/src/index.ts`: callable backend functions.
 - `scripts/`: local build, static server, publish, syntax, and maintenance scripts.
+- `docs/PRODUCT_NOTES.md`: lightweight product-direction notes from owner conversations; context only, not hard rules.
 
 ## Current Important Features
 
@@ -49,6 +50,8 @@ The owner usually tests unpublished local changes in Microsoft Edge and checks p
 Added: 2026-06-07
 
 The project should feel alive and directional, but not fragile. As features grow, prioritize load stability, small reliability fixes, and visual coherence so the app keeps feeling clear and trustworthy while new functionality is added.
+
+For product-direction discussions, check `docs/PRODUCT_NOTES.md`. It captures provisional thinking about incidents, quick mobile photos, registry/read states, and avoiding a generic chat product.
 
 ## Recent Continuity Notes
 
