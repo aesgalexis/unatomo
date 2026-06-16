@@ -256,6 +256,9 @@ if (mount) {
     placeholder: t("dashboard.searchPlaceholder", "Buscar por nombre o ubicación..."),
     onQuery: (value) => {
       state.searchQuery = value || "";
+      if (state.activeView === "registro") {
+        state.registryVisibleCount = GLOBAL_REGISTRY_PAGE_SIZE;
+      }
       renderCards({ preserveScroll: true });
     }
   });
@@ -354,13 +357,17 @@ if (mount) {
       registryLink.removeAttribute("aria-current");
     }
     addBar.classList.toggle("is-registry-view", isRegistry);
-    const disabled = state.loading || isRegistry;
-    addBtn.disabled = disabled;
-    searchInput.disabled = disabled;
-    orderBtn.disabled = disabled;
-    addBtn.setAttribute("aria-disabled", disabled ? "true" : "false");
-    searchInput.setAttribute("aria-disabled", disabled ? "true" : "false");
-    orderBtn.setAttribute("aria-disabled", disabled ? "true" : "false");
+    searchInput.placeholder = isRegistry
+      ? t("dashboard.registrySearchPlaceholder", "Buscar en registro...")
+      : t("dashboard.searchPlaceholder", "Buscar por nombre o ubicación...");
+    const primaryControlsDisabled = state.loading || isRegistry;
+    const searchDisabled = state.loading;
+    addBtn.disabled = primaryControlsDisabled;
+    searchInput.disabled = searchDisabled;
+    orderBtn.disabled = primaryControlsDisabled;
+    addBtn.setAttribute("aria-disabled", primaryControlsDisabled ? "true" : "false");
+    searchInput.setAttribute("aria-disabled", searchDisabled ? "true" : "false");
+    orderBtn.setAttribute("aria-disabled", primaryControlsDisabled ? "true" : "false");
   };
 
   const updateSaveState = (message = "") => {
@@ -1335,6 +1342,7 @@ if (mount) {
       filterInfo.style.display = "none";
       cardRefs.clear();
       renderGlobalRegistryView(list, machines, {
+        query: state.searchQuery,
         visibleCount: state.registryVisibleCount,
         onLoadMore: () => {
           state.registryVisibleCount += GLOBAL_REGISTRY_PAGE_SIZE;

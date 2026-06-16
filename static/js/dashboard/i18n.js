@@ -186,6 +186,7 @@ const TEXT = {
     },
     dashboard: {
       searchPlaceholder: "Buscar por nombre o ubicaci\u00f3n...",
+      registrySearchPlaceholder: "Buscar en registro...",
       sectionNavAria: "Secciones",
       navDashboard: "Dashboard",
       navRegistry: "Registro",
@@ -463,6 +464,7 @@ const TEXT = {
     },
     dashboard: {
       searchPlaceholder: "Search by name or location...",
+      registrySearchPlaceholder: "Search registry...",
       sectionNavAria: "Sections",
       navDashboard: "Dashboard",
       navRegistry: "Registry",

@@ -19,7 +19,7 @@
 }
 
 .dashboard-section-link.is-active {
-  color: color-mix(in srgb, #fff 88%, var(--fg) 12%);
+  color: var(--fg);
 }
 
 .add-bar {
@@ -32,15 +32,10 @@
 }
 
 .add-bar.is-registry-view .btn-add,
-.add-bar.is-registry-view .add-search,
 .add-bar.is-registry-view .btn-order {
   opacity: 0.42;
   filter: grayscale(0.4);
   cursor: not-allowed;
-}
-
-.add-bar.is-registry-view .add-search {
-  pointer-events: none;
 }
 
 .add-search {
