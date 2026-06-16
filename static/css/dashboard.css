@@ -655,7 +655,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  padding: 0.35rem 0.75rem;
+  padding: 0.42rem 0.82rem;
   border-radius: 999px;
   border: 1px solid var(--border-subtle);
   background: transparent;
@@ -665,8 +665,8 @@
 }
 
 .mc-tab svg {
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
   display: block;
 }
 

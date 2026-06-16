@@ -14,7 +14,7 @@
         <div class="mc-tabs" role="tablist">
           <button class="mc-tab" data-tab="quehaceres" type="button">
             <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <path fill="currentColor" d="M9 11.4 7.6 10l-1.4 1.4L9 14.2l6.8-6.8-1.4-1.4zM4 5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2 0h12v14H6z"/>
+              <path fill="currentColor" d="m7.8 6.6-1-1-1.3 1.3 2.3 2.3 3.8-3.8-1.3-1.3zM13 6h6v2h-6zm-5.2 6.1-1-1-1.3 1.3 2.3 2.3 3.8-3.8-1.3-1.3zM13 11.5h6v2h-6zm-5.2 6.1-1-1-1.3 1.3 2.3 2.3 3.8-3.8-1.3-1.3zM13 17h6v2h-6z"/>
             </svg></button>
           <button class="mc-tab" data-tab="historial" type="button">
             <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -28,7 +28,7 @@
             </svg></button>
           <button class="mc-tab" data-tab="configuracion" type="button">
             <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <path fill="currentColor" d="M4 6h10v2H4zm0 10h10v2H4zm14-8h2v2h-2zm0 10h2v2h-2zM10 10h10v2H10z"/>
+              <path fill="currentColor" d="M13.4 2.5h-2.8l-.5 2.4a7.3 7.3 0 0 0-1.8.7L6.2 4.3 4.3 6.2l1.3 2.1c-.3.6-.6 1.2-.7 1.8l-2.4.5v2.8l2.4.5c.2.6.4 1.2.7 1.8l-1.3 2.1 1.9 1.9 2.1-1.3c.6.3 1.2.6 1.8.7l.5 2.4h2.8l.5-2.4c.6-.2 1.2-.4 1.8-.7l2.1 1.3 1.9-1.9-1.3-2.1c.3-.6.6-1.2.7-1.8l2.4-.5v-2.8l-2.4-.5a7.3 7.3 0 0 0-.7-1.8l1.3-2.1-1.9-1.9-2.1 1.3a7.3 7.3 0 0 0-1.8-.7zM12 15.8a3.8 3.8 0 1 1 0-7.6 3.8 3.8 0 0 1 0 7.6z"/>
             </svg></button>
         </div>
         <div class="mc-panel" data-panel="quehaceres"></div>
