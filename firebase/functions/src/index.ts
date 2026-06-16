@@ -969,6 +969,61 @@ export const respondMachineTransferInvite = onCall(async (request) => {
   return {ok: true, machineId};
 });
 
+export const cancelMachineTransferInvite = onCall(async (request) => {
+  const auth = request.auth;
+  if (!auth) throw new HttpsError("unauthenticated", "auth-required");
+  const machineId = (request.data?.machineId || "").toString().trim();
+  if (!machineId) {
+    throw new HttpsError("invalid-argument", "machineId-required");
+  }
+
+  const machineRef = machinesCol().doc(machineId);
+  const machineSnap = await machineRef.get();
+  if (!machineSnap.exists) {
+    throw new HttpsError("not-found", "machine-not-found");
+  }
+  const machine = machineSnap.data() || {};
+  if ((machine.ownerUid || "").toString() !== auth.uid) {
+    throw new HttpsError("permission-denied", "not-owner");
+  }
+
+  const toEmailLower = normalizeEmail(machine.ownershipTransferEmail || "");
+  const now = admin.firestore.FieldValue.serverTimestamp();
+  const updates: Array<Promise<unknown>> = [
+    machineRef.set(
+      {
+        ownershipTransferEmail: "",
+        ownershipTransferStatus: "",
+        updatedAt: now,
+        updatedBy: auth.uid,
+      },
+      {merge: true},
+    ),
+  ];
+
+  if (toEmailLower) {
+    const targetAccountSnap = await accountDirectoryCol()
+      .doc(toEmailLower)
+      .get();
+    const targetUid = (targetAccountSnap.data()?.uid || "").toString().trim();
+    if (targetUid) {
+      updates.push(
+        transferInvitesCol().doc(`${machineId}_${targetUid}`).set(
+          {
+            status: "canceled",
+            respondedAt: now,
+            updatedAt: now,
+          },
+          {merge: true},
+        ),
+      );
+    }
+  }
+
+  await Promise.all(updates);
+  return {ok: true, machineId};
+});
+
 export const listControlPanelUsers = onCall(async (request) => {
   const auth = request.auth;
   if (!auth) throw new HttpsError("unauthenticated", "auth-required");

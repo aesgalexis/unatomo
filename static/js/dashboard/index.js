@@ -4,7 +4,7 @@ import { fetchMachines, fetchLegacyMachines, migrateLegacyMachines, fetchMachine
 import { upsertAccountDirectory, normalizeEmail, getDisplayNameByEmail } from "./admin/accountDirectoryRepo.js";
 import { fetchInvitesForAdmin } from "./admin/adminInvitesRepo.js";
 import { fetchLinksForAdmin } from "./admin/adminLinksRepo.js";
-import { createAdminInvite, respondAdminInvite, leaveAdminRole, revokeAdminInvite, ensureAdminLink, createMachineTransferInvite, respondMachineTransferInvite } from "./admin/adminFunctionsRepo.js";
+import { createAdminInvite, respondAdminInvite, leaveAdminRole, revokeAdminInvite, ensureAdminLink, createMachineTransferInvite, respondMachineTransferInvite, cancelMachineTransferInvite } from "./admin/adminFunctionsRepo.js";
 import { validateTag, assignTag } from "./tagRepo.js";
 import { createTagToken } from "/static/js/tokens/tagTokens.js";
 import { upsertMachineAccessFromMachine, fetchMachineAccess } from "./machineAccessRepo.js";
@@ -2492,6 +2492,25 @@ if (mount) {
             });
             renderCards({ preserveScroll: true });
             notifyTopbar(status);
+          }
+        };
+
+        hooks.onCancelOwnershipTransfer = async (id) => {
+          const current = getDraftById(id);
+          if (!current) return;
+          updateMachine(id, {
+            ownershipTransferEmail: "",
+            ownershipTransferStatus: ""
+          });
+          if (!state.selectedTabById) state.selectedTabById = {};
+          state.selectedTabById[id] = "configuracion";
+          state.expandedById = Array.from(expandedById);
+          renderCards({ preserveScroll: true });
+          try {
+            await cancelMachineTransferInvite(id);
+            notifyTopbar(t("dashboard.transferCanceled", "Transferencia cancelada"));
+          } catch {
+            notifyTopbar(t("dashboard.transferError", "No se pudo procesar la transferencia"));
           }
         };
 

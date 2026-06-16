@@ -10,6 +10,7 @@ const revokeAdminCallable = httpsCallable(functions, "revokeAdminInvite");
 const ensureLinkCallable = httpsCallable(functions, "ensureAdminLink");
 const createTransferCallable = httpsCallable(functions, "createMachineTransferInvite");
 const respondTransferCallable = httpsCallable(functions, "respondMachineTransferInvite");
+const cancelTransferCallable = httpsCallable(functions, "cancelMachineTransferInvite");
 
 export const createAdminInvite = async (machineId, adminEmail) => {
   const res = await createInviteCallable({ machineId, adminEmail });
@@ -43,5 +44,10 @@ export const createMachineTransferInvite = async (machineId, toEmail) => {
 
 export const respondMachineTransferInvite = async (inviteId, decision) => {
   const res = await respondTransferCallable({ inviteId, decision });
+  return res.data || null;
+};
+
+export const cancelMachineTransferInvite = async (machineId) => {
+  const res = await cancelTransferCallable({ machineId });
   return res.data || null;
 };
