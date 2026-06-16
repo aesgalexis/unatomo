@@ -1,6 +1,9 @@
 import { t } from "/static/js/dashboard/i18n.js";
 import { formatHistoryLog } from "../../history/historyEventFormatter.js";
-import { buildGlobalRegistryEntries } from "./globalRegistryModel.js";
+import {
+  buildGlobalRegistryEntries,
+  filterGlobalRegistryEntries,
+} from "./globalRegistryModel.js";
 
 export const GLOBAL_REGISTRY_PAGE_SIZE = 254;
 
@@ -78,8 +81,10 @@ export const renderGlobalRegistryView = (container, machines = [], options = {})
     Number(options.visibleCount || GLOBAL_REGISTRY_PAGE_SIZE)
   );
   const onLoadMore = options.onLoadMore;
+  const query = (options.query || "").toString().trim();
   const locale = getLocale();
-  const entries = buildGlobalRegistryEntries(machines);
+  const allEntries = buildGlobalRegistryEntries(machines);
+  const entries = filterGlobalRegistryEntries(allEntries, query);
 
   container.innerHTML = "";
   container.className = "global-registry-view";
@@ -99,7 +104,9 @@ export const renderGlobalRegistryView = (container, machines = [], options = {})
   if (!entries.length) {
     const empty = document.createElement("div");
     empty.className = "global-registry-empty";
-    empty.textContent = t("dashboard.registryEmpty", "Sin registros.");
+    empty.textContent = query
+      ? t("dashboard.noResults", (value) => `No results for "${value}".`)(query)
+      : t("dashboard.registryEmpty", "Sin registros.");
     container.appendChild(empty);
     return;
   }

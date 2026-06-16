@@ -78,8 +78,9 @@ Global registry scope:
 - Uses only machines already visible to the current account, including owner and accepted-admin machines.
 - Does not fetch hidden machines from other accounts.
 - Shows 254 main log entries first, then each `Cargar más` click adds another 254 main entries.
+- The shared dashboard search input is active in `Registro` and filters the global registry by machine, location, formatted event text, task title/description, task note, user/admin fields, and common date formats.
 - Task note logs stay visually grouped under their related task creation when `taskId` or title fallback can match them.
-- The add, search, and order/filter controls remain visible in `Registro`, but are disabled until those features are explicitly implemented for the registry view.
+- The add and order/filter controls remain visible in `Registro`, but are disabled until those features are explicitly implemented for the registry view.
 
 History event contract:
 

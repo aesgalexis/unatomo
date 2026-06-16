@@ -11,7 +11,7 @@ export const createMachineSearchBar = ({ placeholder, onQuery } = {}) => {
   input.inputMode = "search";
   input.spellcheck = false;
   input.placeholder = placeholder || t("dashboard.searchPlaceholder", "Buscar por nombre o ubicacion...");
-  input.maxLength = 24;
+  input.maxLength = 80;
   input.setAttribute("aria-label", t("dashboard.searchAria", "Buscar maquinas"));
   let acceptedValue = "";
   const handleQueryChange = () => {
