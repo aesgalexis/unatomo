@@ -150,20 +150,18 @@ export const render = (panel, machine, hooks, options = {}) => {
     adminRow.appendChild(status);
   } else {
     renderAdminButton();
-    if (currentStatus) {
-      const status = document.createElement("div");
-      status.className = "mc-admin-status";
-      const statusText = currentStatus.toString();
-      const pendingNorm = statusText
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .toLowerCase();
-      status.dataset.state = pendingNorm.startsWith("pendiente")
-        ? "pending"
-        : "error";
-      status.textContent = statusText;
-      adminRow.appendChild(status);
-    }
+    const status = document.createElement("div");
+    status.className = "mc-admin-status";
+    const statusText = (currentStatus || t("config.noAdministrator", "No hay administrador asignado")).toString();
+    const pendingNorm = statusText
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase();
+    status.dataset.state = currentStatus
+      ? (pendingNorm.startsWith("pendiente") ? "pending" : "error")
+      : "empty";
+    status.textContent = statusText;
+    adminRow.appendChild(status);
   }
 
   adminHeader.appendChild(adminTitle);

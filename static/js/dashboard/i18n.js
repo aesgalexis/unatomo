@@ -126,6 +126,7 @@ const TEXT = {
     },
     config: {
       administrator: "Administrador",
+      noAdministrator: "No hay administrador asignado",
       owner: "Propietario",
       transferOwnership: "Transferir propiedad",
       transfer: "Transferir",
@@ -384,6 +385,7 @@ const TEXT = {
     },
     config: {
       administrator: "Administrator",
+      noAdministrator: "No administrator assigned",
       owner: "Owner",
       transferOwnership: "Transfer ownership",
       transfer: "Transfer",
