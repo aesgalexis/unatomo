@@ -1,5 +1,27 @@
 @import "/static/css/effects/inactive_sections/inactive.css";
 
+.topbar-title-editable {
+  display: block;
+  max-width: min(50vw, 32ch);
+  min-height: 1.2em;
+  line-height: 1.15;
+  overflow-x: hidden;
+  overflow-y: visible;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: text;
+  border-radius: 4px;
+}
+
+.topbar-title-wrap:has(.topbar-title-editable) {
+  pointer-events: auto;
+}
+
+.topbar-title-editable:focus {
+  outline: 1px solid color-mix(in srgb, var(--fg) 42%, transparent);
+  outline-offset: 3px;
+}
+
 .dashboard-section-nav {
   display: flex;
   justify-content: flex-end;
