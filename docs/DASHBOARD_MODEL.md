@@ -61,7 +61,7 @@ Current scope:
 
 ## Status-Linked Tasks
 
-When a machine changes from `operativa` to `fuera_de_servicio`, the dashboard creates one pending one-off task with `source: "status-out-of-service"` to return the machine to operation. Completing that task automatically changes the machine back to `operativa` and writes the status event to history. Do not duplicate this task while one pending status-linked restore task already exists.
+When a machine changes from `operativa` to `fuera_de_servicio`, the dashboard creates one pending one-off task with `source: "status-out-of-service"` to return the machine to operation. This behavior is account-independent and must apply to every dashboard user who can change the machine status, not only to the `superadmin`. Status-linked restore tasks are always rendered before ordinary tasks. Completing that task automatically changes the machine back to `operativa` and writes the status event to history. Do not duplicate this task while one pending status-linked restore task already exists.
 
 ## Current Tag/QR Flow
 

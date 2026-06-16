@@ -82,7 +82,26 @@ const createCustomControls = (task = {}) => {
   return { wrap, amount, unit };
 };
 
-const createTaskMenu = ({ machine, task, hooks, openNoteForm, openEditForm }) => {
+const createTaskActions = ({ machine, task, hooks, openNoteForm, openEditForm }) => {
+  const actions = document.createElement("span");
+  actions.className = "task-actions";
+
+  const note = document.createElement("button");
+  note.type = "button";
+  note.className = "task-note-action";
+  note.setAttribute("aria-label", t("tasks.addNote", "Añadir nota"));
+  note.setAttribute("data-tooltip", t("tasks.addNote", "Añadir nota"));
+  note.innerHTML =
+    '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
+    '<path d="M5 4h10l4 4v12H5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>' +
+    '<path d="M15 4v5h5M8 14h8M12 10v8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>' +
+    '</svg>';
+  note.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    openNoteForm();
+  });
+
   const menu = document.createElement("span");
   menu.className = "mc-doc-menu task-menu";
 
@@ -97,20 +116,10 @@ const createTaskMenu = ({ machine, task, hooks, openNoteForm, openEditForm }) =>
     menu.classList.toggle("is-open");
   });
 
-  const note = document.createElement("button");
-  note.type = "button";
-  note.className = "mc-doc-menu-link task-menu-link";
-  note.textContent = t("tasks.addNote", "Añadir nota");
-  note.addEventListener("click", (event) => {
-    event.stopPropagation();
-    menu.classList.remove("is-open");
-    openNoteForm();
-  });
-
   const edit = document.createElement("button");
   edit.type = "button";
   edit.className = "mc-doc-menu-link task-menu-link";
-  edit.textContent = t("tasks.editTask", "Editar tarea");
+  edit.textContent = t("general.edit", "Editar");
   edit.addEventListener("click", (event) => {
     event.stopPropagation();
     menu.classList.remove("is-open");
@@ -120,17 +129,18 @@ const createTaskMenu = ({ machine, task, hooks, openNoteForm, openEditForm }) =>
   const remove = document.createElement("button");
   remove.type = "button";
   remove.className = "mc-doc-menu-link mc-doc-menu-delete task-menu-link";
-  remove.textContent = t("tasks.remove", "eliminar");
+  remove.textContent = t("tasks.remove", "Eliminar");
   remove.addEventListener("click", (event) => {
     event.stopPropagation();
     if (hooks.onRemoveTask) hooks.onRemoveTask(machine.id, task.id);
   });
 
   menu.appendChild(dots);
-  menu.appendChild(note);
-  menu.appendChild(edit);
   menu.appendChild(remove);
-  return menu;
+  menu.appendChild(edit);
+  actions.appendChild(note);
+  actions.appendChild(menu);
+  return actions;
 };
 
 const renderNotes = (item, task) => {
@@ -293,7 +303,7 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
       const side = document.createElement("div");
       side.className = "task-side";
       if (canEditTasks) {
-        side.appendChild(createTaskMenu({ machine, task, hooks, openNoteForm, openEditForm }));
+        side.appendChild(createTaskActions({ machine, task, hooks, openNoteForm, openEditForm }));
       }
       side.appendChild(meta);
       line1.appendChild(side);

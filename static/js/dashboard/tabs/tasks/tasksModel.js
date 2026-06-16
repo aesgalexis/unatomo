@@ -2,6 +2,7 @@ const MAX_TITLE = 64;
 const MAX_DESCRIPTION = 1024;
 const MAX_NOTE = 512;
 const CUSTOM_UNITS = ["hours", "days", "weeks", "months"];
+const RESTORE_OPERATION_TASK_SOURCE = "status-out-of-service";
 
 const toIso = (value) => {
   const date = value ? new Date(value) : null;
@@ -63,7 +64,17 @@ export const normalizeTask = (raw) => {
 
 export const normalizeTasks = (tasks) => {
   if (!Array.isArray(tasks)) return [];
-  return tasks.map(normalizeTask).filter(Boolean);
+  return tasks
+    .map(normalizeTask)
+    .filter(Boolean)
+    .map((task, index) => ({ task, index }))
+    .sort((a, b) => {
+      const aRestore = a.task.source === RESTORE_OPERATION_TASK_SOURCE ? 0 : 1;
+      const bRestore = b.task.source === RESTORE_OPERATION_TASK_SOURCE ? 0 : 1;
+      if (aRestore !== bRestore) return aRestore - bRestore;
+      return a.index - b.index;
+    })
+    .map(({ task }) => task);
 };
 
 export const createTask = ({
