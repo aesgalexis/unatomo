@@ -2008,6 +2008,42 @@
   transform: translateY(-0.1rem);
 }
 
+.task-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transform: translateY(-0.1rem);
+}
+
+.task-actions .task-menu {
+  transform: none;
+}
+
+.task-note-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: color-mix(in srgb, var(--fg) 74%, transparent);
+  cursor: pointer;
+  padding: 0;
+}
+
+.task-note-action svg {
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+.task-note-action:hover,
+.task-note-action:focus-visible {
+  color: var(--fg);
+  background: color-mix(in srgb, var(--fg) 8%, transparent);
+}
+
 .task-menu .mc-doc-menu-link {
   border: 0;
   background: transparent;
