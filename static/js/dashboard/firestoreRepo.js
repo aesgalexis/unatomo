@@ -169,6 +169,8 @@ export const upsertMachine = async (uid, machine) => {
     adminEmail: machine.adminEmail || "",
     adminName: machine.adminName || "",
     adminStatus: machine.adminStatus || "",
+    ownershipTransferEmail: machine.ownershipTransferEmail || "",
+    ownershipTransferStatus: machine.ownershipTransferStatus || "",
     notifications: machine.notifications || null,
     updatedAt: serverTimestamp(),
     updatedBy: uid

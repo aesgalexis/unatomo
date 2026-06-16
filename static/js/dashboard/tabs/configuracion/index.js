@@ -270,7 +270,10 @@ export const render = (panel, machine, hooks, options = {}) => {
       line.className = "mc-user-row mc-admin-line";
       const email = document.createElement("span");
       email.className = "mc-user-name";
-      email.textContent = currentTransferEmail;
+      email.textContent = t(
+        "config.transferPendingFor",
+        (value) => `Transferencia pendiente para ${value}`
+      )(currentTransferEmail);
       line.appendChild(email);
       transferRow.appendChild(line);
     }

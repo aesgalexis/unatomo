@@ -36,6 +36,14 @@ export const normalizeMachine = (raw, index = 0) => {
     adminEmail: typeof raw.adminEmail === "string" ? raw.adminEmail : "",
     adminName: typeof raw.adminName === "string" ? raw.adminName : "",
     adminStatus: typeof raw.adminStatus === "string" ? raw.adminStatus : "",
+    ownershipTransferEmail:
+      typeof raw.ownershipTransferEmail === "string"
+        ? raw.ownershipTransferEmail
+        : "",
+    ownershipTransferStatus:
+      typeof raw.ownershipTransferStatus === "string"
+        ? raw.ownershipTransferStatus
+        : "",
     tenantId:
       typeof raw.tenantId === "string"
         ? raw.tenantId
@@ -84,6 +92,8 @@ export const createDraftMachine = (count, order) => {
     adminEmail: "",
     adminName: "",
     adminStatus: "",
+    ownershipTransferEmail: "",
+    ownershipTransferStatus: "",
     tenantId: "",
     role: "owner",
     ownerEmail: "",
