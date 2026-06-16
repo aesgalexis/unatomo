@@ -1906,7 +1906,7 @@
 
 .task-item {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.35rem;
   font-size: 0.9rem;
   padding-bottom: 0.5rem;
@@ -1994,11 +1994,18 @@
   text-decoration: underline;
 }
 
+.task-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.55rem;
+  margin-left: auto;
+}
+
 .task-menu {
   position: static;
-  grid-column: 2;
-  grid-row: 1;
-  align-self: start;
+  align-self: flex-end;
+  transform: translateY(-0.1rem);
 }
 
 .task-menu .mc-doc-menu-link {

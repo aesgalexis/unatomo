@@ -1,6 +1,22 @@
 import { t } from "/static/js/dashboard/i18n.js";
 import { STATUS_LABELS } from "../components/machineCard/machineCardTypes.js";
 
+const taskLogKey = (log = {}) => {
+  const taskId = String(log.taskId || "").trim();
+  if (taskId) return `id:${taskId}`;
+  const title = String(log.title || "").trim().toLowerCase();
+  return title ? `title:${title}` : "";
+};
+
+const taskLogKeys = (log = {}) => {
+  const keys = [];
+  const taskId = String(log.taskId || "").trim();
+  const title = String(log.title || "").trim().toLowerCase();
+  if (taskId) keys.push(`id:${taskId}`);
+  if (title) keys.push(`title:${title}`);
+  return keys;
+};
+
 export const render = (panel, machine, hooks, options = {}) => {
   panel.innerHTML = "";
   const total = machine.logs ? machine.logs.length : 0;
@@ -51,9 +67,32 @@ export const render = (panel, machine, hooks, options = {}) => {
     list.appendChild(empty);
   }
 
-  [...(machine.logs || [])]
+  const rawLogs = [...(machine.logs || [])];
+  const notesByTaskKey = new Map();
+  rawLogs.forEach((log) => {
+    if (log.type !== "task_note_added") return;
+    taskLogKeys(log).forEach((key) => {
+      const notes = notesByTaskKey.get(key) || [];
+      if (!notes.includes(log)) notes.push(log);
+      notesByTaskKey.set(key, notes);
+    });
+  });
+
+  const appendTaskNote = (log) => {
+    const item = document.createElement("div");
+    item.className = "mc-log-item mc-log-item-indent";
+    const time = new Date(log.ts).toLocaleString(locale);
+    const title = log.title || t("history.task", "Tarea");
+    const note = log.note ? ` - ${log.note}` : "";
+    const user = completedBy(log.user);
+    item.textContent = `${time} - ${t("history.taskNoteAdded", "Nota en tarea")}: ${title}${note}${user}`;
+    list.appendChild(item);
+  };
+
+  rawLogs
     .slice()
     .reverse()
+    .filter((log) => log.type !== "task_note_added")
     .slice(0, 16)
     .forEach((log) => {
       const item = document.createElement("div");
@@ -89,12 +128,6 @@ export const render = (panel, machine, hooks, options = {}) => {
         const desc = log.description ? ` - ${log.description}` : "";
         const user = completedBy(log.user);
         item.textContent = `${time} - ${t("history.taskRemoved", "Tarea eliminada")}: ${title}${desc}${user}`;
-      } else if (log.type === "task_note_added") {
-        item.classList.add("mc-log-item-indent");
-        const title = log.title || t("history.task", "Tarea");
-        const note = log.note ? ` - ${log.note}` : "";
-        const user = completedBy(log.user);
-        item.textContent = `${time} - ${t("history.taskNoteAdded", "Nota en tarea")}: ${title}${note}${user}`;
       } else if (log.type === "task_edited") {
         const title = log.title || t("history.task", "Tarea");
         const user = completedBy(log.user);
@@ -111,6 +144,14 @@ export const render = (panel, machine, hooks, options = {}) => {
         item.textContent = `${time} - ${log.type || t("history.event", "Evento")}`;
       }
       list.appendChild(item);
+      if (log.type === "task_created") {
+        const key = taskLogKey(log);
+        const notes = key ? notesByTaskKey.get(key) || [] : [];
+        notes
+          .slice()
+          .sort((a, b) => new Date(a.ts) - new Date(b.ts))
+          .forEach(appendTaskNote);
+      }
     });
   panel.appendChild(list);
 
