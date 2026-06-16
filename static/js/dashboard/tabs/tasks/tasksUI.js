@@ -1,10 +1,18 @@
 import { t } from "/static/js/dashboard/i18n.js";
-import { normalizeTasks, createTask, MAX_TASK_TITLE } from "./tasksModel.js";
+import {
+  CUSTOM_TASK_UNITS,
+  MAX_TASK_DESCRIPTION,
+  MAX_TASK_NOTE,
+  MAX_TASK_TITLE,
+  createTask,
+  normalizeTasks
+} from "./tasksModel.js";
 import { getTaskTiming } from "./tasksTime.js";
 
 const frequencyLabel = (key) =>
   ({
-    puntual: t("tasks.frequency", "Frecuencia"),
+    puntual: t("tasks.oneOff", "Tarea puntual"),
+    custom: t("tasks.custom", "Personalizada"),
     diaria: t("tasks.daily", "Diaria"),
     semanal: t("tasks.weekly", "Semanal"),
     mensual: t("tasks.monthly", "Mensual"),
@@ -12,6 +20,138 @@ const frequencyLabel = (key) =>
     semestral: t("tasks.semiannual", "Semestral"),
     anual: t("tasks.annual", "Anual"),
   })[key] || key;
+
+const unitLabel = (key) =>
+  ({
+    hours: t("tasks.hours", "horas"),
+    days: t("tasks.days", "días"),
+    weeks: t("tasks.weeks", "semanas"),
+    months: t("tasks.months", "meses"),
+  })[key] || key;
+
+const frequencyKeys = [
+  "puntual",
+  "diaria",
+  "semanal",
+  "mensual",
+  "trimestral",
+  "semestral",
+  "anual",
+  "custom"
+];
+
+const createFrequencySelect = (value = "puntual") => {
+  const select = document.createElement("select");
+  select.className = "task-frequency-select";
+  frequencyKeys.forEach((key) => {
+    const option = document.createElement("option");
+    option.value = key;
+    option.textContent = frequencyLabel(key);
+    select.appendChild(option);
+  });
+  select.value = value || "puntual";
+  select.addEventListener("click", (event) => event.stopPropagation());
+  return select;
+};
+
+const createCustomControls = (task = {}) => {
+  const wrap = document.createElement("div");
+  wrap.className = "task-custom-controls";
+  const amount = document.createElement("input");
+  amount.className = "task-custom-amount";
+  amount.type = "number";
+  amount.min = "1";
+  amount.max = "999";
+  amount.step = "1";
+  amount.value = String(task.customDueAmount || 1);
+  amount.addEventListener("click", (event) => event.stopPropagation());
+
+  const unit = document.createElement("select");
+  unit.className = "task-custom-unit";
+  CUSTOM_TASK_UNITS.forEach((key) => {
+    const option = document.createElement("option");
+    option.value = key;
+    option.textContent = unitLabel(key);
+    unit.appendChild(option);
+  });
+  unit.value = task.customDueUnit || "days";
+  unit.addEventListener("click", (event) => event.stopPropagation());
+
+  wrap.appendChild(amount);
+  wrap.appendChild(unit);
+  return { wrap, amount, unit };
+};
+
+const createTaskMenu = ({ machine, task, hooks, openNoteForm, openEditForm }) => {
+  const menu = document.createElement("span");
+  menu.className = "mc-doc-menu task-menu";
+
+  const dots = document.createElement("button");
+  dots.type = "button";
+  dots.className = "mc-doc-menu-dots";
+  dots.setAttribute("aria-label", t("general.moreOptions", "Más opciones"));
+  dots.textContent = "...";
+  dots.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    menu.classList.toggle("is-open");
+  });
+
+  const note = document.createElement("button");
+  note.type = "button";
+  note.className = "mc-doc-menu-link task-menu-link";
+  note.textContent = t("tasks.addNote", "Añadir nota");
+  note.addEventListener("click", (event) => {
+    event.stopPropagation();
+    menu.classList.remove("is-open");
+    openNoteForm();
+  });
+
+  const edit = document.createElement("button");
+  edit.type = "button";
+  edit.className = "mc-doc-menu-link task-menu-link";
+  edit.textContent = t("tasks.editTask", "Editar tarea");
+  edit.addEventListener("click", (event) => {
+    event.stopPropagation();
+    menu.classList.remove("is-open");
+    openEditForm();
+  });
+
+  const remove = document.createElement("button");
+  remove.type = "button";
+  remove.className = "mc-doc-menu-link mc-doc-menu-delete task-menu-link";
+  remove.textContent = t("tasks.remove", "eliminar");
+  remove.addEventListener("click", (event) => {
+    event.stopPropagation();
+    if (hooks.onRemoveTask) hooks.onRemoveTask(machine.id, task.id);
+  });
+
+  menu.appendChild(dots);
+  menu.appendChild(remove);
+  menu.appendChild(edit);
+  menu.appendChild(note);
+  return menu;
+};
+
+const renderNotes = (item, task) => {
+  const notes = Array.isArray(task.notes) ? task.notes : [];
+  if (!notes.length) return;
+  const details = document.createElement("details");
+  details.className = "task-notes";
+  const summary = document.createElement("summary");
+  summary.textContent = t("tasks.notesCount", (count) => `Notas (${count})`)(notes.length);
+  details.appendChild(summary);
+  const list = document.createElement("div");
+  list.className = "task-notes-list";
+  notes.forEach((note) => {
+    const row = document.createElement("div");
+    row.className = "task-note";
+    row.textContent = note.text || "";
+    list.appendChild(row);
+  });
+  details.appendChild(list);
+  item.appendChild(details);
+};
 
 export const renderTasksPanel = (panel, machine, hooks, options = {}, context = {}) => {
   panel.innerHTML = "";
@@ -26,6 +166,9 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
     tasks.forEach((task) => {
       const item = document.createElement("div");
       item.className = "task-item";
+
+      const body = document.createElement("div");
+      body.className = "task-body";
 
       const line1 = document.createElement("div");
       line1.className = "task-line task-line-main";
@@ -63,32 +206,110 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
       }
 
       line1.appendChild(title);
-      line1.appendChild(meta);
+      const side = document.createElement("div");
+      side.className = "task-side";
+      if (canEditTasks) {
+        side.appendChild(createTaskMenu({ machine, task, hooks, openNoteForm, openEditForm }));
+      }
+      side.appendChild(meta);
+      line1.appendChild(side);
+      body.appendChild(line1);
 
       const line2 = document.createElement("div");
       line2.className = "task-line task-line-desc";
-
       const desc = document.createElement("span");
       desc.className = "task-desc";
       desc.textContent = task.description || "";
       line2.appendChild(desc);
+      body.appendChild(line2);
 
-      item.appendChild(line1);
-      item.appendChild(line2);
+      const forms = document.createElement("div");
+      forms.className = "task-inline-forms";
 
-      if (canEditTasks) {
-        const remove = document.createElement("a");
-        remove.className = "task-remove-link";
-        remove.textContent = t("tasks.remove", "eliminar");
-        remove.href = "#";
-        remove.addEventListener("click", (event) => {
-          event.preventDefault();
+      const openNoteForm = () => {
+        forms.innerHTML = "";
+        const wrap = document.createElement("div");
+        wrap.className = "task-note-form";
+        const textarea = document.createElement("textarea");
+        textarea.className = "task-note-input";
+        textarea.maxLength = MAX_TASK_NOTE;
+        textarea.placeholder = t("tasks.note", "Nota");
+        textarea.addEventListener("click", (event) => event.stopPropagation());
+        const save = document.createElement("button");
+        save.type = "button";
+        save.className = "task-create-btn";
+        save.textContent = t("general.save", "Guardar");
+        save.addEventListener("click", (event) => {
           event.stopPropagation();
-          if (hooks.onRemoveTask) hooks.onRemoveTask(machine.id, task.id);
+          const text = textarea.value.trim();
+          if (!text) return;
+          if (hooks.onAddTaskNote) hooks.onAddTaskNote(machine.id, task.id, text);
         });
-        item.appendChild(remove);
-      }
+        const cancel = document.createElement("button");
+        cancel.type = "button";
+        cancel.className = "task-create-btn";
+        cancel.textContent = t("card.cancel", "Cancelar");
+        cancel.addEventListener("click", (event) => {
+          event.stopPropagation();
+          forms.innerHTML = "";
+        });
+        wrap.appendChild(textarea);
+        wrap.appendChild(save);
+        wrap.appendChild(cancel);
+        forms.appendChild(wrap);
+        textarea.focus();
+      };
 
+      const openEditForm = () => {
+        forms.innerHTML = "";
+        const wrap = document.createElement("div");
+        wrap.className = "task-edit-form";
+        const titleInput = document.createElement("input");
+        titleInput.className = "task-title-input";
+        titleInput.type = "text";
+        titleInput.maxLength = MAX_TASK_TITLE;
+        titleInput.value = task.title || "";
+        titleInput.addEventListener("click", (event) => event.stopPropagation());
+        const descInput = document.createElement("input");
+        descInput.className = "task-desc-input";
+        descInput.type = "text";
+        descInput.maxLength = MAX_TASK_DESCRIPTION;
+        descInput.value = task.description || "";
+        descInput.addEventListener("click", (event) => event.stopPropagation());
+        const freqSelect = createFrequencySelect(task.frequency);
+        const custom = createCustomControls(task);
+        custom.wrap.hidden = freqSelect.value !== "custom";
+        freqSelect.addEventListener("change", () => {
+          custom.wrap.hidden = freqSelect.value !== "custom";
+        });
+        const save = document.createElement("button");
+        save.type = "button";
+        save.className = "task-create-btn";
+        save.textContent = t("general.save", "Guardar");
+        save.addEventListener("click", (event) => {
+          event.stopPropagation();
+          if (hooks.onEditTask) {
+            hooks.onEditTask(machine.id, task.id, {
+              title: titleInput.value,
+              description: descInput.value,
+              frequency: freqSelect.value,
+              customDueAmount: custom.amount.value,
+              customDueUnit: custom.unit.value
+            });
+          }
+        });
+        wrap.appendChild(titleInput);
+        wrap.appendChild(descInput);
+        wrap.appendChild(freqSelect);
+        wrap.appendChild(custom.wrap);
+        wrap.appendChild(save);
+        forms.appendChild(wrap);
+        titleInput.focus();
+      };
+
+      item.appendChild(body);
+      item.appendChild(forms);
+      renderNotes(item, task);
       list.appendChild(item);
     });
   } else {
@@ -104,10 +325,7 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
       '</svg>';
     const emptyText = document.createElement("span");
     emptyText.className = "task-empty-text";
-    emptyText.textContent = t(
-      "tasks.emptyList",
-      "No hay tareas que mostrar, crea una tarea para comenzar"
-    );
+    emptyText.textContent = t("tasks.emptyList", "No hay tareas que mostrar, crea una tarea para comenzar");
     empty.appendChild(emptyIcon);
     empty.appendChild(emptyText);
     list.appendChild(empty);
@@ -130,18 +348,15 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
     descInput.className = "task-desc-input";
     descInput.type = "text";
     descInput.placeholder = t("tasks.description", "Descripción");
-    descInput.maxLength = 255;
+    descInput.maxLength = MAX_TASK_DESCRIPTION;
     descInput.addEventListener("click", (event) => event.stopPropagation());
 
-    const freqSelect = document.createElement("select");
-    freqSelect.className = "task-frequency-select";
-    ["puntual", "diaria", "semanal", "mensual", "trimestral", "semestral", "anual"].forEach((key) => {
-      const option = document.createElement("option");
-      option.value = key;
-      option.textContent = frequencyLabel(key);
-      freqSelect.appendChild(option);
+    const freqSelect = createFrequencySelect("puntual");
+    const custom = createCustomControls();
+    custom.wrap.hidden = true;
+    freqSelect.addEventListener("change", () => {
+      custom.wrap.hidden = freqSelect.value !== "custom";
     });
-    freqSelect.addEventListener("click", (event) => event.stopPropagation());
 
     const createBtn = document.createElement("button");
     createBtn.type = "button";
@@ -153,6 +368,8 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
         title: titleInput.value,
         description: descInput.value,
         frequency: freqSelect.value,
+        customDueAmount: custom.amount.value,
+        customDueUnit: custom.unit.value,
         createdBy: context.createdBy || null,
       });
       if (error) {
@@ -161,16 +378,17 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
         setTimeout(() => (createBtn.textContent = prev), 1000);
         return;
       }
-      titleInput.removeAttribute("aria-invalid");
-      descInput.removeAttribute("aria-invalid");
       if (hooks.onAddTask) hooks.onAddTask(machine.id, task, createBtn);
       titleInput.value = "";
       descInput.value = "";
+      custom.amount.value = "1";
+      custom.unit.value = "days";
     });
 
     formRow.appendChild(titleInput);
     formRow.appendChild(descInput);
     formRow.appendChild(freqSelect);
+    formRow.appendChild(custom.wrap);
     formRow.appendChild(createBtn);
 
     panel.appendChild(formRow);

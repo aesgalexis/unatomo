@@ -1905,12 +1905,23 @@
 }
 
 .task-item {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 0.35rem;
   font-size: 0.9rem;
   padding-bottom: 0.5rem;
   border-bottom: 1px solid var(--border-subtle);
+}
+
+.task-item.task-empty {
+  display: flex;
+  flex-direction: column;
+}
+
+.task-body,
+.task-inline-forms,
+.task-notes {
+  min-width: 0;
 }
 
 .task-line {
@@ -1981,6 +1992,92 @@
 
 .task-remove-link:hover {
   text-decoration: underline;
+}
+
+.task-menu {
+  position: static;
+  grid-column: 2;
+  grid-row: 1;
+  align-self: start;
+}
+
+.task-menu .mc-doc-menu-link {
+  border: 0;
+  background: transparent;
+}
+
+.task-inline-forms,
+.task-notes {
+  grid-column: 1 / -1;
+}
+
+.task-note-form,
+.task-edit-form,
+.task-custom-controls {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.task-note-input {
+  flex: 1 1 260px;
+  min-height: 64px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.6rem;
+  background: color-mix(in srgb, var(--bg) 96%, transparent);
+  color: var(--fg);
+  font: inherit;
+  padding: 0.45rem 0.55rem;
+  resize: vertical;
+}
+
+.task-notes {
+  margin-left: 1rem;
+  color: color-mix(in srgb, var(--fg) 78%, transparent);
+}
+
+.task-notes summary {
+  cursor: pointer;
+  font-size: 0.82rem;
+  color: color-mix(in srgb, var(--fg) 68%, transparent);
+}
+
+.task-notes-list {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 0.35rem;
+}
+
+.task-note {
+  border-left: 2px solid var(--border-subtle);
+  padding-left: 0.65rem;
+  line-height: 1.45;
+}
+
+.task-custom-controls[hidden] {
+  display: none;
+}
+
+.task-custom-amount {
+  width: 76px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.6rem;
+  background: color-mix(in srgb, var(--bg) 96%, transparent);
+  color: var(--fg);
+  font: inherit;
+  height: 32px;
+  padding: 0.25rem 0.45rem;
+}
+
+.task-custom-unit {
+  border-radius: 0.6rem;
+}
+
+.mc-log-item-indent {
+  margin-left: 1rem;
+  padding-left: 0.65rem;
+  border-left: 2px solid var(--border-subtle);
 }
 
 .task-form {

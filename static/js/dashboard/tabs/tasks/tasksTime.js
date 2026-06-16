@@ -10,6 +10,15 @@ const durationDays = {
   anual: 365,
 };
 
+const customDurationMs = (task) => {
+  const amount = Math.max(1, Number(task.customDueAmount || 1) || 1);
+  const unit = task.customDueUnit || "days";
+  if (unit === "hours") return amount * 60 * 60 * 1000;
+  if (unit === "weeks") return amount * 7 * DAY;
+  if (unit === "months") return amount * 30 * DAY;
+  return amount * DAY;
+};
+
 const toMs = (value) => {
   const date = value ? new Date(value) : null;
   if (!date || Number.isNaN(date.getTime())) return Date.now();
@@ -66,8 +75,10 @@ const formatOverdue = (ms) => {
 
 export const getOverdueDuration = (task, nowMs = Date.now()) => {
   const baseMs = toMs(task.lastCompletedAt || task.createdAt);
-  const days = durationDays[task.frequency] || 1;
-  const nextDue = baseMs + days * DAY;
+  const nextDue =
+    task.frequency === "custom"
+      ? baseMs + customDurationMs(task)
+      : baseMs + (durationDays[task.frequency] || 1) * DAY;
   const diff = nowMs - nextDue;
   if (diff <= 0) return "";
   const dayCount = Math.max(1, Math.ceil(diff / DAY));
@@ -106,8 +117,10 @@ export const getTaskTiming = (task, nowMs = Date.now()) => {
     };
   }
   const baseMs = toMs(task.lastCompletedAt || task.createdAt);
-  const days = durationDays[task.frequency] || 1;
-  const nextDue = baseMs + days * DAY;
+  const nextDue =
+    task.frequency === "custom"
+      ? baseMs + customDurationMs(task)
+      : baseMs + (durationDays[task.frequency] || 1) * DAY;
   const remaining = nextDue - nowMs;
   if (remaining <= 0) {
     return {
