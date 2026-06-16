@@ -30,6 +30,8 @@ Project-owner-only UI is called `superadmin` in conversation and docs. In code i
 - The QR action in machine config is `View QR` / `Ver QR`; it opens QR print focused on one machine.
 - QR print can reload to show all available QR codes, temporarily remove items from the print layout, resize QR output, and optionally use the Unatomo frame image.
 - Disconnecting a Tag ID must also remove the associated QR to avoid stale database/storage data.
+- Machine tasks support title, description, frequency, custom frequency, notes, edit, completion, and delete. The task action menu uses an external add-note icon plus a three-dot menu for edit/delete.
+- Changing a machine to `fuera_de_servicio` creates a one-off restore task for all permitted dashboard users. That status-linked task is always rendered before ordinary tasks and completing it restores the machine to `operativa`.
 
 ## Working Style
 
@@ -42,3 +44,11 @@ The owner usually tests unpublished local changes in Microsoft Edge and checks p
 Added: 2026-06-07
 
 The project should feel alive and directional, but not fragile. As features grow, prioritize load stability, small reliability fixes, and visual coherence so the app keeps feeling clear and trustworthy while new functionality is added.
+
+## Recent Continuity Notes
+
+Updated: 2026-06-16 15:58 Europe/Madrid
+
+- Last successful publish from this workspace pushed commit `5870cdf` to `main`.
+- Owner-requested local browser workflow: unpublished changes are usually tested in Microsoft Edge; published changes are checked in Chrome.
+- Before future task/history work, inspect `static/js/dashboard/tabs/tasks/`, `static/js/dashboard/tabs/historial.js`, and the hooks in `static/js/dashboard/index.js` around task add/edit/remove/complete.
