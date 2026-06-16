@@ -275,6 +275,18 @@ export const render = (panel, machine, hooks, options = {}) => {
         (value) => `Transferencia pendiente para ${value}`
       )(currentTransferEmail);
       line.appendChild(email);
+      const cancel = document.createElement("a");
+      cancel.className = "mc-user-remove";
+      cancel.href = "#";
+      cancel.textContent = t("card.cancel", "Cancelar");
+      cancel.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (hooks.onCancelOwnershipTransfer) {
+          hooks.onCancelOwnershipTransfer(machine.id);
+        }
+      });
+      line.appendChild(cancel);
       transferRow.appendChild(line);
     }
     if (currentTransferStatus) {
