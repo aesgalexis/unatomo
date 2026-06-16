@@ -119,6 +119,24 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    match /machine_transfer_invites/{inviteId} {
+      function transferSenderSide() {
+        return isSignedIn()
+          && resource != null
+          && resource.data.fromOwnerUid == request.auth.uid;
+      }
+
+      function transferRecipientSide() {
+        return isSignedIn()
+          && resource != null
+          && resource.data.toOwnerUid == request.auth.uid;
+      }
+
+      allow get: if (resource != null) && (transferSenderSide() || transferRecipientSide());
+      allow list: if isSignedIn();
+      allow write: if false;
+    }
+
     match /machines/{machineId} {
       allow read: if isSignedIn()
         && resource.data.ownerUid is string

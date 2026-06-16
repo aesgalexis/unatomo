@@ -4,7 +4,7 @@ import { fetchMachines, fetchLegacyMachines, migrateLegacyMachines, fetchMachine
 import { upsertAccountDirectory, normalizeEmail, getDisplayNameByEmail } from "./admin/accountDirectoryRepo.js";
 import { fetchInvitesForAdmin } from "./admin/adminInvitesRepo.js";
 import { fetchLinksForAdmin } from "./admin/adminLinksRepo.js";
-import { createAdminInvite, respondAdminInvite, leaveAdminRole, revokeAdminInvite, ensureAdminLink } from "./admin/adminFunctionsRepo.js";
+import { createAdminInvite, respondAdminInvite, leaveAdminRole, revokeAdminInvite, ensureAdminLink, createMachineTransferInvite, respondMachineTransferInvite } from "./admin/adminFunctionsRepo.js";
 import { validateTag, assignTag } from "./tagRepo.js";
 import { createTagToken } from "/static/js/tokens/tagTokens.js";
 import { upsertMachineAccessFromMachine, fetchMachineAccess } from "./machineAccessRepo.js";
@@ -75,6 +75,7 @@ if (mount) {
     dashboardLayout: { groups: [], placements: {}, tabOrder: [] },
     searchQuery: "",
     pendingInvites: [],
+    pendingTransferInvites: [],
     mobileFocusedMachineId: "",
     mobileDetailJustEntered: false,
     loading: true,
@@ -85,6 +86,7 @@ if (mount) {
     adminLinksUnsub: null,
     adminMachineUnsubs: new Map(),
     inviteUnsub: null,
+    transferInviteUnsub: null,
     storageFull: false,
     nextScrollRestoreY: null,
     nextScrollAnchor: null,
@@ -914,6 +916,27 @@ if (mount) {
     });
   };
 
+  const subscribePendingTransferInvites = (uid) => {
+    if (state.transferInviteUnsub) state.transferInviteUnsub();
+    if (!uid) {
+      state.pendingTransferInvites = [];
+      renderTopbarNotifications();
+      return;
+    }
+    const q = query(
+      collection(db, "machine_transfer_invites"),
+      where("toOwnerUid", "==", uid),
+      where("status", "==", "pending")
+    );
+    state.transferInviteUnsub = onSnapshot(q, (snap) => {
+      state.pendingTransferInvites = snap.docs.map((docSnap) => ({
+        id: docSnap.id,
+        ...docSnap.data()
+      }));
+      renderTopbarNotifications();
+    });
+  };
+
   const updateMachine = (id, patch) => {
     const idx = getDraftIndex(id);
     if (idx === -1) return;
@@ -989,6 +1012,21 @@ if (mount) {
         actions: [
           { label: t("card.accept", "Aceptar"), className: "mc-location-accept", onClick: () => handleInviteDecision(invite, "accepted") },
           { label: t("dashboard.reject", "Rechazar"), className: "mc-location-cancel", onClick: () => handleInviteDecision(invite, "rejected") }
+        ]
+      });
+    });
+    const transferInvites = Array.isArray(state.pendingTransferInvites) ? state.pendingTransferInvites : [];
+    transferInvites.forEach((invite) => {
+      const ownerLabel = invite.fromOwnerEmail || t("dashboard.anonymousUser", "Un usuario");
+      const machineTitle = invite.machineTitle || t("machine.machine", "Equipo");
+      items.push({
+        text: t(
+          "dashboard.transferReceive",
+          (owner, machine) => `${owner} quiere transferirte ${machine}`
+        )(ownerLabel, machineTitle),
+        actions: [
+          { label: t("card.accept", "Aceptar"), className: "mc-location-accept", onClick: () => handleTransferDecision(invite, "accepted") },
+          { label: t("dashboard.reject", "Rechazar"), className: "mc-location-cancel", onClick: () => handleTransferDecision(invite, "rejected") }
         ]
       });
     });
@@ -1127,6 +1165,23 @@ if (mount) {
 
     state.pendingInvites = state.pendingInvites.filter((i) => i.id !== invite.id);
     renderInviteBanner();
+  };
+
+  const handleTransferDecision = async (invite, decision) => {
+    if (!invite || !invite.id) return;
+    try {
+      await respondMachineTransferInvite(invite.id, decision);
+      notifyTopbar(
+        decision === "accepted"
+          ? t("dashboard.transferAccepted", "Transferencia aceptada")
+          : t("dashboard.transferRejected", "Transferencia rechazada")
+      );
+    } catch {
+      notifyTopbar(t("dashboard.transferError", "No se pudo procesar la transferencia"));
+      return;
+    }
+    state.pendingTransferInvites = state.pendingTransferInvites.filter((i) => i.id !== invite.id);
+    renderTopbarNotifications();
   };
 
   const autoSave = initAutoSave({
@@ -2366,6 +2421,50 @@ if (mount) {
           autoSave.scheduleSave(id, "admin");
         };
 
+        hooks.onTransferOwnership = async (id, email) => {
+          const current = getDraftById(id);
+          if (!current) return;
+          if (!isOwnerMachine(current)) {
+            notifyTopbar(t("dashboard.transferOnlyOwner", "Solo el propietario puede transferir la máquina"));
+            return;
+          }
+          const nextEmail = normalizeEmail(email);
+          if (!nextEmail) return;
+          if (nextEmail === normalizeEmail(state.adminEmail || "")) {
+            updateMachine(id, {
+              ownershipTransferEmail: "",
+              ownershipTransferStatus: t("dashboard.transferOwnEmail", "Introduce otra cuenta registrada")
+            });
+            state.selectedTabById[id] = "configuracion";
+            state.expandedById = Array.from(expandedById);
+            renderCards({ preserveScroll: true });
+            return;
+          }
+          updateMachine(id, {
+            ownershipTransferEmail: nextEmail,
+            ownershipTransferStatus: t("config.pendingAcceptance", "Pendiente aceptación")
+          });
+          if (!state.selectedTabById) state.selectedTabById = {};
+          state.selectedTabById[id] = "configuracion";
+          state.expandedById = Array.from(expandedById);
+          renderCards({ preserveScroll: true });
+          try {
+            await createMachineTransferInvite(id, nextEmail);
+            notifyTopbar(t("dashboard.transferPending", "Transferencia pendiente de aceptación"));
+          } catch (error) {
+            const message = (error?.message || error?.code || "").toString();
+            const status = message.includes("target-account-not-found") || message.includes("not-found")
+              ? t("dashboard.transferAccountNotFound", "La cuenta no existe")
+              : t("dashboard.transferError", "No se pudo procesar la transferencia");
+            updateMachine(id, {
+              ownershipTransferEmail: "",
+              ownershipTransferStatus: status
+            });
+            renderCards({ preserveScroll: true });
+            notifyTopbar(status);
+          }
+        };
+
         hooks.onTestNotification = (machineData) => {
           const logs = [
             ...(machineData.logs || []),
@@ -2820,6 +2919,7 @@ if (mount) {
     subscribeOwnerMachines(uid);
     subscribeAdminLinks(uid);
     subscribePendingInvites(emailLower);
+    subscribePendingTransferInvites(uid);
     try {
       const acceptedInvites = await fetchInvitesForAdmin(emailLower, "accepted");
       await Promise.all(

@@ -30,6 +30,7 @@ Read this before changing data flows, callable functions, machine ownership, adm
 - `machine_access`: public/operational access data keyed by Tag ID.
 - `admin_machine_links`: accepted admin access links.
 - `admin_invites`: pending/accepted admin invitations.
+- `machine_transfer_invites`: pending/accepted/rejected machine ownership transfer requests.
 - `dashboard_layout/{uid}`: per-user dashboard grouping/layout preferences. Groups may include `parentGroupId` for one-level subgroups.
 - Account directory/registry collections may exist for account lookup and admin display names; inspect the repo before changing them.
 
@@ -42,6 +43,8 @@ machine-docs/{ownerUid}/{machineId}/other/{fileName}
 ```
 
 Implemented document types are `plate`, intended for machine plate photos; `manual`, intended for one PDF manual up to 25 MB; and `other`, an array of additional PDFs or images up to 25 MB each. Do not store uploaded files in the repository.
+
+Ownership transfers are accepted through Cloud Functions, not by direct client writes. The function validates that the recipient exists in `account_directory`, rewrites the machine owner fields, copies any Storage object referenced by `machines.documents.*.storagePath` from `machine-docs/{oldOwnerUid}/{machineId}/...` to `machine-docs/{newOwnerUid}/{machineId}/...`, updates document URLs/paths, updates Tag/QR ownership metadata, and leaves the previous owner as an accepted administrator.
 
 ## Account Storage Limit
 
