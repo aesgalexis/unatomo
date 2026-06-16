@@ -40,16 +40,21 @@ const frequencyKeys = [
   "custom"
 ];
 
-const createFrequencySelect = (value = "puntual") => {
+const createFrequencySelect = (value = "") => {
   const select = document.createElement("select");
   select.className = "task-frequency-select";
+  const placeholder = document.createElement("option");
+  placeholder.value = "";
+  placeholder.textContent = t("tasks.frequency", "Frecuencia");
+  placeholder.disabled = true;
+  select.appendChild(placeholder);
   frequencyKeys.forEach((key) => {
     const option = document.createElement("option");
     option.value = key;
     option.textContent = frequencyLabel(key);
     select.appendChild(option);
   });
-  select.value = value || "puntual";
+  select.value = value || "";
   select.addEventListener("click", (event) => event.stopPropagation());
   return select;
 };
@@ -82,26 +87,7 @@ const createCustomControls = (task = {}) => {
   return { wrap, amount, unit };
 };
 
-const createTaskActions = ({ machine, task, hooks, openNoteForm, openEditForm }) => {
-  const actions = document.createElement("span");
-  actions.className = "task-actions";
-
-  const note = document.createElement("button");
-  note.type = "button";
-  note.className = "task-note-action";
-  note.setAttribute("aria-label", t("tasks.addNote", "Añadir nota"));
-  note.setAttribute("data-tooltip", t("tasks.addNote", "Añadir nota"));
-  note.innerHTML =
-    '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
-    '<path d="M5 4h10l4 4v12H5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>' +
-    '<path d="M15 4v5h5M8 14h8M12 10v8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>' +
-    '</svg>';
-  note.addEventListener("click", (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    openNoteForm();
-  });
-
+const createTaskMenu = ({ machine, task, hooks, openNoteForm, openEditForm }) => {
   const menu = document.createElement("span");
   menu.className = "mc-doc-menu task-menu";
 
@@ -109,11 +95,40 @@ const createTaskActions = ({ machine, task, hooks, openNoteForm, openEditForm })
   dots.type = "button";
   dots.className = "mc-doc-menu-dots";
   dots.setAttribute("aria-label", t("general.moreOptions", "Más opciones"));
+  dots.setAttribute("aria-expanded", "false");
   dots.textContent = "...";
+  menu.addEventListener("mouseleave", () => {
+    menu.classList.remove("is-hover-suppressed");
+  });
   dots.addEventListener("click", (event) => {
     event.preventDefault();
     event.stopPropagation();
-    menu.classList.toggle("is-open");
+    const isOpen = menu.classList.contains("is-open");
+    if (!isOpen) {
+      menu.classList.remove("is-hover-suppressed");
+      menu.classList.add("is-open");
+      dots.setAttribute("aria-expanded", "true");
+    } else {
+      menu.classList.remove("is-open");
+      menu.classList.add("is-hover-suppressed");
+      dots.setAttribute("aria-expanded", "false");
+      try {
+        dots.blur({ preventScroll: true });
+      } catch {
+        dots.blur();
+      }
+    }
+  });
+
+  const note = document.createElement("button");
+  note.type = "button";
+  note.className = "mc-doc-menu-link task-menu-link";
+  note.textContent = t("tasks.addNote", "Añadir nota");
+  note.addEventListener("click", (event) => {
+    event.stopPropagation();
+    menu.classList.remove("is-open");
+    dots.setAttribute("aria-expanded", "false");
+    openNoteForm();
   });
 
   const edit = document.createElement("button");
@@ -123,6 +138,7 @@ const createTaskActions = ({ machine, task, hooks, openNoteForm, openEditForm })
   edit.addEventListener("click", (event) => {
     event.stopPropagation();
     menu.classList.remove("is-open");
+    dots.setAttribute("aria-expanded", "false");
     openEditForm();
   });
 
@@ -132,22 +148,38 @@ const createTaskActions = ({ machine, task, hooks, openNoteForm, openEditForm })
   remove.textContent = t("tasks.remove", "Eliminar");
   remove.addEventListener("click", (event) => {
     event.stopPropagation();
+    menu.classList.remove("is-open");
+    dots.setAttribute("aria-expanded", "false");
     if (hooks.onRemoveTask) hooks.onRemoveTask(machine.id, task.id);
   });
 
   menu.appendChild(dots);
-  menu.appendChild(remove);
+  menu.appendChild(note);
   menu.appendChild(edit);
-  actions.appendChild(note);
-  actions.appendChild(menu);
-  return actions;
+  menu.appendChild(remove);
+  return menu;
 };
 
-const renderNotes = (item, task) => {
+const renderNotes = (item, task, hooks) => {
   const notes = Array.isArray(task.notes) ? task.notes : [];
   if (!notes.length) return;
   const details = document.createElement("details");
   details.className = "task-notes";
+  details.addEventListener("toggle", () => {
+    if (hooks.onContentResize) {
+      const preserveScroll = !details.open;
+      const scrollX = window.scrollX;
+      const scrollY = window.scrollY;
+      requestAnimationFrame(() => {
+        hooks.onContentResize();
+        if (preserveScroll) {
+          requestAnimationFrame(() => {
+            window.scrollTo(scrollX, scrollY);
+          });
+        }
+      });
+    }
+  });
   const summary = document.createElement("summary");
   summary.textContent = t("tasks.notesCount", (count) => `Notas (${count})`)(notes.length);
   details.appendChild(summary);
@@ -207,7 +239,10 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
         const completeBtn = document.createElement("button");
         completeBtn.type = "button";
         completeBtn.className = "task-complete-btn";
-        completeBtn.textContent = t("tasks.completed", "Completada");
+        const completeText = document.createElement("span");
+        completeText.className = "task-complete-text";
+        completeText.textContent = t("tasks.completed", "Completada");
+        completeBtn.appendChild(completeText);
         completeBtn.addEventListener("click", (event) => {
           event.stopPropagation();
           if (hooks.onCompleteTask) hooks.onCompleteTask(machine.id, task.id, context);
@@ -250,6 +285,9 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
         wrap.appendChild(cancel);
         forms.appendChild(wrap);
         textarea.focus();
+        if (hooks.onContentResize) {
+          requestAnimationFrame(() => hooks.onContentResize());
+        }
       };
 
       const openEditForm = () => {
@@ -273,6 +311,9 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
         custom.wrap.hidden = freqSelect.value !== "custom";
         freqSelect.addEventListener("change", () => {
           custom.wrap.hidden = freqSelect.value !== "custom";
+          if (hooks.onContentResize) {
+            requestAnimationFrame(() => hooks.onContentResize());
+          }
         });
         const save = document.createElement("button");
         save.type = "button";
@@ -297,16 +338,25 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
         wrap.appendChild(save);
         forms.appendChild(wrap);
         titleInput.focus();
+        if (hooks.onContentResize) {
+          requestAnimationFrame(() => hooks.onContentResize());
+        }
       };
 
-      line1.appendChild(title);
+      const actions = document.createElement("div");
+      actions.className = "task-actions-left";
+      if (canEditTasks) {
+        actions.appendChild(createTaskMenu({ machine, task, hooks, openNoteForm, openEditForm }));
+      }
+
       const side = document.createElement("div");
       side.className = "task-side";
-      if (canEditTasks) {
-        side.appendChild(createTaskActions({ machine, task, hooks, openNoteForm, openEditForm }));
-      }
       side.appendChild(meta);
+      line1.appendChild(title);
       line1.appendChild(side);
+      if (canEditTasks) {
+        body.appendChild(actions);
+      }
       body.appendChild(line1);
 
       const line2 = document.createElement("div");
@@ -319,7 +369,7 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
 
       item.appendChild(body);
       item.appendChild(forms);
-      renderNotes(item, task);
+      renderNotes(item, task, hooks);
       list.appendChild(item);
     });
   } else {
@@ -361,11 +411,14 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
     descInput.maxLength = MAX_TASK_DESCRIPTION;
     descInput.addEventListener("click", (event) => event.stopPropagation());
 
-    const freqSelect = createFrequencySelect("puntual");
+    const freqSelect = createFrequencySelect("");
     const custom = createCustomControls();
     custom.wrap.hidden = true;
     freqSelect.addEventListener("change", () => {
       custom.wrap.hidden = freqSelect.value !== "custom";
+      if (hooks.onContentResize) {
+        requestAnimationFrame(() => hooks.onContentResize());
+      }
     });
 
     const createBtn = document.createElement("button");
