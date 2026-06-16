@@ -1660,6 +1660,10 @@
   color: #2c974b;
 }
 
+.mc-admin-status[data-state="empty"] {
+  color: color-mix(in srgb, var(--fg) 58%, transparent);
+}
+
 .mc-user-status {
   font-size: 0.85rem;
   color: color-mix(in srgb, var(--fg) 70%, transparent);
