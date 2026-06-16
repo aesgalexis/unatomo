@@ -171,6 +171,118 @@ export const render = (panel, machine, hooks, options = {}) => {
   adminPanel.appendChild(adminHeader);
   adminPanel.appendChild(adminRow);
 
+  if (!isAdminView) {
+    const transferRow = document.createElement("div");
+    transferRow.className = "mc-transfer-row";
+    const transferHeader = document.createElement("div");
+    transferHeader.className = "mc-config-row";
+    const transferTitle = document.createElement("div");
+    transferTitle.className = "mc-config-label";
+    transferTitle.textContent = t("config.owner", "Propietario");
+    const transferPlaceholder = document.createElement("div");
+    transferPlaceholder.className = "mc-admin-assign-wrap";
+    const ownerEmail = (machine.ownerEmail || "").trim();
+    const currentTransferEmail = (machine.ownershipTransferEmail || "").trim();
+    const currentTransferStatus = (machine.ownershipTransferStatus || "").trim();
+
+    const renderTransferButton = () => {
+      transferPlaceholder.innerHTML = "";
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "mc-admin-assign";
+      btn.textContent = t("config.transfer", "Transferir");
+      btn.addEventListener("click", (event) => {
+        event.stopPropagation();
+        renderTransferForm();
+      });
+      transferPlaceholder.appendChild(btn);
+    };
+
+    const renderTransferForm = () => {
+      transferRow.innerHTML = "";
+      transferPlaceholder.innerHTML = "";
+      const input = document.createElement("input");
+      input.type = "email";
+      input.name = "transfer-owner-email";
+      input.autocomplete = "email";
+      input.inputMode = "email";
+      input.spellcheck = false;
+      input.className = "mc-admin-input";
+      input.placeholder = t("config.email", "Correo electrónico");
+      input.addEventListener("click", (event) => event.stopPropagation());
+      input.addEventListener("input", (event) => event.stopPropagation());
+      input.addEventListener("change", (event) => event.stopPropagation());
+
+      const actions = document.createElement("div");
+      actions.className = "mc-admin-actions";
+      const acceptBtn = document.createElement("button");
+      acceptBtn.type = "button";
+      acceptBtn.className = "mc-location-accept";
+      acceptBtn.textContent = t("card.accept", "Aceptar");
+      acceptBtn.addEventListener("click", (event) => {
+        event.stopPropagation();
+        const email = input.value.trim();
+        if (!email) return;
+        if (hooks.onTransferOwnership) hooks.onTransferOwnership(machine.id, email);
+      });
+
+      const cancelBtn = document.createElement("button");
+      cancelBtn.type = "button";
+      cancelBtn.className = "mc-location-cancel";
+      cancelBtn.textContent = t("card.cancel", "Cancelar");
+      cancelBtn.addEventListener("click", (event) => {
+        event.stopPropagation();
+        transferRow.innerHTML = "";
+        renderTransferButton();
+      });
+
+      actions.appendChild(acceptBtn);
+      actions.appendChild(cancelBtn);
+      transferPlaceholder.appendChild(input);
+      transferPlaceholder.appendChild(actions);
+      input.focus();
+    };
+
+    transferHeader.appendChild(transferTitle);
+    transferHeader.appendChild(transferPlaceholder);
+    adminPanel.appendChild(transferHeader);
+    adminPanel.appendChild(transferRow);
+
+    if (ownerEmail) {
+      const ownerLine = document.createElement("div");
+      ownerLine.className = "mc-user-row mc-admin-line";
+      const email = document.createElement("span");
+      email.className = "mc-user-name";
+      email.textContent = ownerEmail;
+      ownerLine.appendChild(email);
+      transferRow.appendChild(ownerLine);
+    }
+
+    if (currentTransferEmail) {
+      const line = document.createElement("div");
+      line.className = "mc-user-row mc-admin-line";
+      const email = document.createElement("span");
+      email.className = "mc-user-name";
+      email.textContent = currentTransferEmail;
+      line.appendChild(email);
+      transferRow.appendChild(line);
+    }
+    if (currentTransferStatus) {
+      const status = document.createElement("div");
+      status.className = "mc-admin-status";
+      status.dataset.state = currentTransferStatus
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .startsWith("pendiente")
+          ? "pending"
+          : "error";
+      status.textContent = currentTransferStatus;
+      transferRow.appendChild(status);
+    }
+    if (!currentTransferEmail) renderTransferButton();
+  }
+
   const sepAdmin = document.createElement("hr");
   sepAdmin.className = "mc-sep";
 

@@ -14,6 +14,8 @@ The configuration tab is split into modules. Tag ID and QR UI live in:
 
 - `static/js/dashboard/tabs/configuracion/tag.js`
 
+The administrator section also exposes ownership transfer for owner-view machines. Transfer requests create `machine_transfer_invites`; the recipient accepts/rejects from the topbar notification. The actual transfer is performed by backend callables so Firestore ownership, Storage document paths, Tag metadata, and machine access data move together.
+
 Tag-related backend/client wrappers:
 
 - `static/js/tokens/tagTokens.js`: creates Tag IDs.
