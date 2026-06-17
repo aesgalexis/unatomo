@@ -19,6 +19,7 @@ Read this before changing data flows, callable functions, machine ownership, adm
   - `users`
   - `tasks`
   - `logs`
+  - `activeStatusCycleId` while an out-of-service restore cycle is active
 - `tags`: Tag ID registry and QR metadata. Important fields include:
   - `tagId`
   - `machineId`

@@ -81,6 +81,7 @@ Global registry scope:
 - Shows 254 main log entries first, then each `Cargar más` click adds another 254 main entries.
 - The shared dashboard search input is active in `Registro` and filters the global registry by machine, location, formatted event text, task title/description, task note, user/admin fields, and common date formats.
 - Task note logs stay visually grouped under their related task creation when `taskId` or title fallback can match them.
+- Out-of-service operational cycles are grouped as one registry block when possible: status changed to `fuera_de_servicio`, the automatic restore task, notes/edits/completion for that task, and the return to `operativa`. The block sorts by its latest activity so long repairs move back to the top when updated.
 - The add and order/filter controls remain visible in `Registro`, but are disabled until those features are explicitly implemented for the registry view.
 
 History event contract:
@@ -91,7 +92,7 @@ History event contract:
 
 ## Status-Linked Tasks
 
-When a machine changes from `operativa` to `fuera_de_servicio`, the dashboard creates one pending one-off task with `source: "status-out-of-service"` to return the machine to operation. This behavior is account-independent and must apply to every dashboard user who can change the machine status, not only to the `superadmin`. Status-linked restore tasks are always rendered before ordinary tasks. Completing that task automatically changes the machine back to `operativa` and writes the status event to history. Do not duplicate this task while one pending status-linked restore task already exists.
+When a machine changes from `operativa` to `fuera_de_servicio`, the dashboard creates one pending one-off task with `source: "status-out-of-service"` to return the machine to operation. This behavior is account-independent and must apply to every dashboard user who can change the machine status, not only to the `superadmin`. Status-linked restore tasks are always rendered before ordinary tasks. Completing that task automatically changes the machine back to `operativa` and writes the status event to history. Changing the machine back to `operativa` manually completes/removes the pending status-linked restore task and logs that completion. Do not duplicate this task while one pending status-linked restore task already exists.
 
 Task implementation files:
 
@@ -101,7 +102,7 @@ Task implementation files:
 - `static/js/dashboard/tabs/historial.js`: history rendering. Task notes are grouped under the original task-created log when the log has a matching `taskId`; title fallback exists for older records.
 - `static/js/dashboard/index.js`: task hooks passed to machine cards and persistence/autosave behavior.
 
-When creating task-related logs, include `taskId` whenever possible. This keeps history notes attached below the corresponding task creation record instead of appearing as independent chronological entries.
+When creating task-related logs, include `taskId` whenever possible. This keeps history notes attached below the corresponding task creation record instead of appearing as independent chronological entries. Status-linked restore task logs should also carry `source: "status-out-of-service"` and `statusCycleId` so the global registry can keep the full operational cycle together.
 
 ## Current Tag/QR Flow
 

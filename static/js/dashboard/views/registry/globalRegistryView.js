@@ -50,6 +50,33 @@ const appendRow = (list, entry, locale) => {
   row.appendChild(body);
   list.appendChild(row);
 
+  if (Array.isArray(entry.relatedLogs) && entry.relatedLogs.length) {
+    entry.relatedLogs
+      .slice()
+      .sort((a, b) => new Date(a.ts) - new Date(b.ts))
+      .forEach((relatedLog) => {
+        const related = document.createElement("article");
+        related.className = "global-registry-row global-registry-row-note";
+
+        const relatedMeta = document.createElement("div");
+        relatedMeta.className = "global-registry-meta";
+        const relatedTime = document.createElement("time");
+        relatedTime.className = "global-registry-time";
+        relatedTime.dateTime = relatedLog.ts || "";
+        relatedTime.textContent = formatDate(relatedLog.ts, locale);
+        relatedMeta.appendChild(relatedTime);
+
+        const relatedBody = document.createElement("div");
+        relatedBody.className = "global-registry-message";
+        relatedBody.textContent = formatHistoryLog(relatedLog);
+
+        related.appendChild(relatedMeta);
+        related.appendChild(relatedBody);
+        list.appendChild(related);
+      });
+    return;
+  }
+
   entry.notes
     .slice()
     .sort((a, b) => new Date(a.ts) - new Date(b.ts))

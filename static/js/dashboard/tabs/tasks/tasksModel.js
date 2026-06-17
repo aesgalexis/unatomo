@@ -58,7 +58,8 @@ export const normalizeTask = (raw) => {
     createdBy: raw.createdBy || null,
     source: raw.source || null,
     automated: raw.automated === true,
-    statusTarget: raw.statusTarget || null
+    statusTarget: raw.statusTarget || null,
+    statusCycleId: raw.statusCycleId || null
   };
 };
 

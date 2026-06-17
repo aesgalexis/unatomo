@@ -12,6 +12,28 @@ const toTime = (value) => {
   return date && !Number.isNaN(date.getTime()) ? date.getTime() : 0;
 };
 
+const RESTORE_OPERATION_TASK_SOURCE = "status-out-of-service";
+
+const normalizeText = (value) => normalizeForSearch(value || "");
+
+const isRestoreOperationLog = (log = {}) => {
+  const title = normalizeText(log.title || "");
+  return (
+    log.source === RESTORE_OPERATION_TASK_SOURCE ||
+    title.includes("operatividad") ||
+    title.includes("operation")
+  );
+};
+
+const isStatusDownLog = (log = {}) =>
+  log.type === "status" && log.value === "fuera_de_servicio";
+
+const isStatusOperativeLog = (log = {}) =>
+  log.type === "status" && log.value === "operativa";
+
+const entryId = (machine, log, index) =>
+  `${machine.id || "machine"}-${log.ts || index}-${index}`;
+
 const buildDateSearchText = (value) => {
   const date = value ? new Date(value) : null;
   if (!date || Number.isNaN(date.getTime())) return "";
@@ -28,10 +50,16 @@ export const buildGlobalRegistryEntries = (machines = []) => {
   const entries = [];
 
   machines.forEach((machine) => {
-    const rawLogs = Array.isArray(machine.logs) ? machine.logs : [];
+    const rawLogs = Array.isArray(machine.logs)
+      ? machine.logs.map((log, index) => ({ log, index, time: toTime(log.ts) }))
+      : [];
+    const orderedLogs = rawLogs
+      .slice()
+      .sort((a, b) => (a.time - b.time) || (a.index - b.index));
     const notesByTaskKey = new Map();
+    const consumed = new Set();
 
-    rawLogs.forEach((log) => {
+    rawLogs.forEach(({ log }) => {
       if (!isTaskNoteLog(log)) return;
       getTaskLogKeys(log).forEach((key) => {
         const notes = notesByTaskKey.get(key) || [];
@@ -40,12 +68,88 @@ export const buildGlobalRegistryEntries = (machines = []) => {
       });
     });
 
+    const pushCycleEntry = (cycleLogs, fallbackIndex = 0) => {
+      const uniqueLogs = cycleLogs
+        .filter(Boolean)
+        .filter((item, index, list) => list.findIndex((entry) => entry.index === item.index) === index)
+        .sort((a, b) => (a.time - b.time) || (a.index - b.index));
+      if (!uniqueLogs.length) return;
+      uniqueLogs.forEach((item) => consumed.add(item.index));
+      const main = uniqueLogs.find((item) => isStatusDownLog(item.log)) || uniqueLogs[0];
+      const relatedLogs = uniqueLogs
+        .filter((item) => item.index !== main.index)
+        .map((item) => item.log);
+      entries.push({
+        id: `cycle-${entryId(machine, main.log, fallbackIndex)}`,
+        machine,
+        log: main.log,
+        time: uniqueLogs.reduce((max, item) => Math.max(max, item.time), main.time),
+        notes: [],
+        relatedLogs,
+      });
+    };
+
+    const explicitCycles = new Map();
+    orderedLogs.forEach((item) => {
+      const cycleId = String(item.log.statusCycleId || "").trim();
+      if (!cycleId) return;
+      const items = explicitCycles.get(cycleId) || [];
+      items.push(item);
+      explicitCycles.set(cycleId, items);
+    });
+    explicitCycles.forEach((cycleLogs) => {
+      if (cycleLogs.some((item) => isStatusDownLog(item.log) || isRestoreOperationLog(item.log))) {
+        pushCycleEntry(cycleLogs, cycleLogs[0]?.index || 0);
+      }
+    });
+
+    orderedLogs.forEach((item, position) => {
+      if (consumed.has(item.index) || !isStatusDownLog(item.log)) return;
+      const cycleLogs = [item];
+      const taskKeys = new Set();
+      let foundRestoreTask = false;
+
+      for (let cursor = position + 1; cursor < orderedLogs.length; cursor += 1) {
+        const candidate = orderedLogs[cursor];
+        if (consumed.has(candidate.index)) continue;
+        const log = candidate.log;
+        const restoreLog = isRestoreOperationLog(log);
+        const taskKey = getPrimaryTaskLogKey(log);
+
+        if (restoreLog) {
+          foundRestoreTask = true;
+          cycleLogs.push(candidate);
+          getTaskLogKeys(log).forEach((key) => taskKeys.add(key));
+          continue;
+        }
+
+        if (isTaskNoteLog(log)) {
+          const belongsToRestoreTask = getTaskLogKeys(log).some((key) => taskKeys.has(key));
+          if (belongsToRestoreTask) cycleLogs.push(candidate);
+          continue;
+        }
+
+        if (isStatusOperativeLog(log)) {
+          cycleLogs.push(candidate);
+          break;
+        }
+
+        if (taskKey && taskKeys.has(taskKey)) {
+          cycleLogs.push(candidate);
+        }
+      }
+
+      if (foundRestoreTask || cycleLogs.some((entry) => isStatusOperativeLog(entry.log))) {
+        pushCycleEntry(cycleLogs, item.index);
+      }
+    });
+
     rawLogs
-      .filter((log) => !isTaskNoteLog(log))
-      .forEach((log, index) => {
+      .filter(({ log, index }) => !consumed.has(index) && !isTaskNoteLog(log))
+      .forEach(({ log, index }) => {
         const key = isTaskCreatedLog(log) ? getPrimaryTaskLogKey(log) : "";
         entries.push({
-          id: `${machine.id || "machine"}-${log.ts || index}-${index}`,
+          id: entryId(machine, log, index),
           machine,
           log,
           time: toTime(log.ts),
@@ -82,13 +186,17 @@ export const filterGlobalRegistryEntries = (entries = [], query = "") => {
 
   return entries.reduce((matches, entry) => {
     const entryMatches = buildRegistrySearchText(entry).includes(needle);
+    const matchingRelatedLogs = (entry.relatedLogs || []).filter((relatedLog) =>
+      buildRegistrySearchText(entry, relatedLog).includes(needle)
+    );
     const matchingNotes = (entry.notes || []).filter((noteLog) =>
       buildRegistrySearchText(entry, noteLog).includes(needle)
     );
 
-    if (entryMatches || matchingNotes.length) {
+    if (entryMatches || matchingRelatedLogs.length || matchingNotes.length) {
       matches.push({
         ...entry,
+        relatedLogs: entryMatches ? entry.relatedLogs || [] : matchingRelatedLogs,
         notes: entryMatches ? entry.notes || [] : matchingNotes,
       });
     }
