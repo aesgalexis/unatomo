@@ -61,7 +61,7 @@ const createDialog = () => {
 
         <div class="form-field">
           <label for="ls-add-year">Año</label>
-          <input id="ls-add-year" class="field" type="number" min="1900" max="2100" required />
+          <input id="ls-add-year" class="field" type="number" min="1900" max="2100" />
         </div>
 
         <div class="form-field">
@@ -104,9 +104,14 @@ const createDialog = () => {
           </select>
         </div>
 
-        <div class="form-field form-field--full">
-          <label for="ls-add-warranty">Detalle de garantía</label>
-          <input id="ls-add-warranty" class="field" type="text" placeholder="1 año de garantía de piezas" autocomplete="off" />
+        <div class="form-field">
+          <label for="ls-add-warranty">Duración de garantía</label>
+          <select id="ls-add-warranty" class="field">
+            <option value="">Seleccionar...</option>
+            <option value="6">6 meses</option>
+            <option value="12">12 meses</option>
+            <option value="24">24 meses</option>
+          </select>
         </div>
 
         <div class="form-field form-field--full">
@@ -187,6 +192,24 @@ const normalizePricePreview = (value) => {
   return `${Number.parseInt(numeric, 10).toLocaleString("es-ES")} EUR`;
 };
 
+const getWarrantyDurationText = () => {
+  const months = Number.parseInt(warrantyField.value, 10);
+  return Number.isFinite(months) && months > 0 ? `${months} meses` : "";
+};
+
+const getWarrantyMonthsFromMachine = (machine = {}) => {
+  const months = Number.parseInt(machine.garantiaMeses, 10);
+  if (Number.isFinite(months) && months > 0) return String(months);
+  const years = Number.parseInt(machine.garantiaPiezasAnos, 10);
+  if (Number.isFinite(years) && years > 0) return String(years * 12);
+  const text = String(machine.garantiaTexto || "");
+  const match = text.match(/(\d+)/);
+  if (!match) return "";
+  const value = Number.parseInt(match[1], 10);
+  if (!Number.isFinite(value) || value <= 0) return "";
+  return /mes/i.test(text) ? String(value) : String(value * 12);
+};
+
 const setBusy = (busy) => {
   submitButton.disabled = busy;
   submitButton.textContent = busy ? "Guardando..." : dialogMode === "edit" ? "Guardar cambios" : "Preparar alta";
@@ -247,7 +270,9 @@ const renderDerivedState = async () => {
   if (shippingField.checked && startupField.checked) extras.push("envío y puesta en marcha incluida");
   else if (shippingField.checked) extras.push("envío incluido");
   else if (startupField.checked) extras.push("puesta en marcha incluida");
-  if (warrantyTypeField.value && warrantyField.value.trim()) extras.push(warrantyField.value.trim());
+  if (warrantyTypeField.value && warrantyField.value) {
+    extras.push(getWarrantyDurationText());
+  }
   if (isDryer && heatingField.value) extras.push(`calefacción ${heatingField.value}`);
   if (commentsField.value.trim()) extras.push("comentarios");
 
@@ -293,7 +318,7 @@ const fillFormForEdit = (machine) => {
   shippingField.checked = Boolean(machine.envioIncluido);
   startupField.checked = Boolean(machine.puestaEnMarchaIncluida);
   warrantyTypeField.value = machine.garantiaTipo || (machine.garantiaPiezasAnos ? "piezas" : machine.garantiaTexto ? "total" : "");
-  warrantyField.value = machine.garantiaTexto || "";
+  warrantyField.value = getWarrantyMonthsFromMachine(machine);
   commentsField.value = machine.comentarios || "";
   imagesField.value = "";
   submitButton.textContent = "Guardar cambios";

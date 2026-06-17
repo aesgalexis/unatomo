@@ -1,5 +1,11 @@
 ﻿import { onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
-import { collection, getDocs } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+import {
+  collection,
+  doc,
+  getDocs,
+  serverTimestamp,
+  setDoc
+} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 import { auth, db, getUserRegistrationState } from "/static/js/firebase/firebaseApp.js";
 import { fetchLinksForAdmin } from "/static/js/dashboard/admin/adminLinksRepo.js";
 import { upsertAccountDirectory } from "/static/js/dashboard/admin/accountDirectoryRepo.js";
@@ -28,6 +34,7 @@ const textMap = {
   activity: isEn ? "Activity" : "Actividad",
   security: isEn ? "Security" : "Seguridad",
   name: isEn ? "Name" : "Nombre",
+  company: isEn ? "Company" : "Empresa",
   email: isEn ? "Email" : "Correo electr\u00f3nico",
   createdAt: isEn ? "Created at" : "Fecha de creaci\u00f3n",
   theme: isEn ? "Theme" : "Tema",
@@ -162,6 +169,10 @@ if (mount) {
         <input class="profile-input" id="profile-name" type="text" maxlength="40" />
       </div>
       <div class="profile-row">
+        <span class="profile-label">${textMap.company}</span>
+        <input class="profile-input" id="profile-company" type="text" maxlength="60" />
+      </div>
+      <div class="profile-row">
         <span class="profile-label">${textMap.email}</span>
         <span class="profile-value" id="profile-email">-</span>
       </div>
@@ -256,6 +267,7 @@ if (mount) {
   });
 
   const nameInput = accountBody?.querySelector("#profile-name");
+  const companyInput = accountBody?.querySelector("#profile-company");
   const emailEl = accountBody?.querySelector("#profile-email");
   const createdEl = accountBody?.querySelector("#profile-created");
   const uidEl = accountBody?.querySelector("#profile-uid");
@@ -405,12 +417,14 @@ if (mount) {
       window.location.href = localizeEsPath("/es/auth/login.html");
       return;
     }
+    let profile = {};
     try {
       const registration = await getUserRegistrationState(user);
       if (!registration.allowed) {
         window.location.href = `${appBasePrefix || ""}/?setup=1`;
         return;
       }
+      profile = registration.profile || {};
     } catch {
       window.location.href = `${appBasePrefix || ""}/?setup=1`;
       return;
@@ -418,6 +432,9 @@ if (mount) {
 
     const displayName = user.displayName || user.email || textMap.user;
     if (nameInput) nameInput.value = displayName;
+    if (companyInput) {
+      companyInput.value = (profile.company || profile.companyName || "").toString();
+    }
     setText(emailEl, user.email || "-");
     if (createdEl) {
       const created = user.metadata?.creationTime
@@ -444,6 +461,29 @@ if (mount) {
           await upsertAccountDirectory(user);
         } catch {
           nameInput.value = user.displayName || user.email || textMap.user;
+        }
+      });
+    }
+
+    if (companyInput) {
+      companyInput.addEventListener("blur", async () => {
+        const next = companyInput.value.trim().replace(/\s+/g, " ").slice(0, 60);
+        const previous = (profile.company || profile.companyName || "").toString().trim();
+        companyInput.value = next;
+        if (next === previous) return;
+        try {
+          await setDoc(
+            doc(db, "users", user.uid),
+            {
+              company: next,
+              updatedAt: serverTimestamp()
+            },
+            { merge: true }
+          );
+          profile = { ...profile, company: next };
+          await upsertAccountDirectory({ ...user, company: next });
+        } catch {
+          companyInput.value = previous;
         }
       });
     }

@@ -20,16 +20,21 @@ export const upsertAccountDirectory = async (user) => {
   const normalized = normalizeEmail(user.email);
   if (!normalized) return null;
   const displayName = (user.displayName || "").toString().trim();
+  const hasCompany = Object.prototype.hasOwnProperty.call(user, "company") ||
+    Object.prototype.hasOwnProperty.call(user, "companyName");
+  const company = (user.company || user.companyName || "").toString().trim();
   const ref = doc(db, DIRECTORY_COLLECTION, normalized);
+  const payload = {
+    uid: user.uid,
+    email: user.email,
+    emailLower: normalized,
+    displayName,
+    updatedAt: serverTimestamp()
+  };
+  if (hasCompany) payload.company = company;
   await setDoc(
     ref,
-    {
-      uid: user.uid,
-      email: user.email,
-      emailLower: normalized,
-      displayName,
-      updatedAt: serverTimestamp()
-    },
+    payload,
     { merge: true }
   );
   return { uid: user.uid, email: user.email };
