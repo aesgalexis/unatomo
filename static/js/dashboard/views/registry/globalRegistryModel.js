@@ -31,6 +31,9 @@ const isStatusDownLog = (log = {}) =>
 const isStatusOperativeLog = (log = {}) =>
   log.type === "status" && log.value === "operativa";
 
+const isStatusCycleLog = (log = {}) =>
+  isStatusDownLog(log) || isStatusOperativeLog(log) || isRestoreOperationLog(log);
+
 const entryId = (machine, log, index) =>
   `${machine.id || "machine"}-${log.ts || index}-${index}`;
 
@@ -98,8 +101,9 @@ export const buildGlobalRegistryEntries = (machines = []) => {
       explicitCycles.set(cycleId, items);
     });
     explicitCycles.forEach((cycleLogs) => {
-      if (cycleLogs.some((item) => isStatusDownLog(item.log) || isRestoreOperationLog(item.log))) {
-        pushCycleEntry(cycleLogs, cycleLogs[0]?.index || 0);
+      const scopedCycleLogs = cycleLogs.filter((item) => isStatusCycleLog(item.log));
+      if (scopedCycleLogs.some((item) => isStatusDownLog(item.log) || isRestoreOperationLog(item.log))) {
+        pushCycleEntry(scopedCycleLogs, scopedCycleLogs[0]?.index || 0);
       }
     });
 
@@ -148,12 +152,14 @@ export const buildGlobalRegistryEntries = (machines = []) => {
       .filter(({ log, index }) => !consumed.has(index) && !isTaskNoteLog(log))
       .forEach(({ log, index }) => {
         const key = isTaskCreatedLog(log) ? getPrimaryTaskLogKey(log) : "";
+        const notes = key ? notesByTaskKey.get(key) || [] : [];
+        const noteTime = notes.reduce((max, note) => Math.max(max, toTime(note.ts)), 0);
         entries.push({
           id: entryId(machine, log, index),
           machine,
           log,
-          time: toTime(log.ts),
-          notes: key ? notesByTaskKey.get(key) || [] : [],
+          time: Math.max(toTime(log.ts), noteTime),
+          notes,
         });
       });
   });
@@ -203,4 +209,9 @@ export const filterGlobalRegistryEntries = (entries = [], query = "") => {
 
     return matches;
   }, []);
+};
+
+export const countUnseenGlobalRegistryEntries = (machines = [], seenAt = "") => {
+  const seenTime = toTime(seenAt);
+  return buildGlobalRegistryEntries(machines).filter((entry) => entry.time > seenTime).length;
 };
