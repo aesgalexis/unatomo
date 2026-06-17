@@ -9,8 +9,8 @@ const PAGE_SIZE = 10;
 
 const META = {
   es: {
-    title: "Maquinaria de ocasion | Laundry Services",
-    desc: "Listado de maquinaria de ocasion de Laundry Services.",
+    title: "Maquinaria de ocasión | Laundry Services",
+    desc: "Listado de maquinaria de ocasión de Laundry Services.",
     loading: "Cargando maquinaria...",
     empty: "No hay maquinaria disponible en este momento.",
     error: "No se pudo cargar el listado de maquinaria.",
@@ -19,27 +19,31 @@ const META = {
       info: "+ info",
       edit: "Editar",
       photos: "Ver fotos",
-      gallery: "Imagenes de",
+      gallery: "Imágenes de",
       image: "imagen",
-      shippingOnly: "Envio incluido",
+      shippingOnly: "Envío incluido",
       startupOnly: "Puesta en marcha incluida",
-      shippingStartup: "Envio y puesta en marcha incluida",
+      shippingStartup: "Envío y puesta en marcha incluida",
       heating: "Calefacción:",
-      fullWarranty: (years) => `${years} ano de garantia`,
-      fullWarrantyPlural: (years) => `${years} anos de garantia`,
-      partsWarranty: (years) => `${years} ano de garantia de piezas`,
-      partsWarrantyPlural: (years) => `${years} anos de garantia de piezas`,
+      fullWarranty: (years) =>
+        years === 1 ? "un año de garantía" : `${years} años de garantía`,
+      fullWarrantyPlural: (years) => `${years} años de garantía`,
+      partsWarranty: (years) =>
+        years === 1 ? "un año de garantía de piezas" : `${years} años de garantía de piezas`,
+      partsWarrantyPlural: (years) => `${years} años de garantía de piezas`,
+      fullWarrantyMonths: (months) => `${months} meses de garantía`,
+      partsWarrantyMonths: (months) => `${months} meses de garantía de piezas`,
       type: "Tipo",
       brand: "Marca",
       model: "Modelo",
       capacity: "Capacidad",
-      year: "Ano",
+      year: "Año",
       status: "Estado",
-      location: "Ubicacion",
+      location: "Ubicación",
       id: "ID:",
       prev: "Anterior",
       next: "Siguiente",
-      page: (current, total) => `Pagina ${current} de ${total}`,
+      page: (current, total) => `Página ${current} de ${total}`,
       consult: "Consultar",
     },
   },
@@ -64,6 +68,8 @@ const META = {
       fullWarrantyPlural: (years) => `${years} years warranty`,
       partsWarranty: (years) => `${years} year parts warranty`,
       partsWarrantyPlural: (years) => `${years} years parts warranty`,
+      fullWarrantyMonths: (months) => `${months} months warranty`,
+      partsWarrantyMonths: (months) => `${months} months parts warranty`,
       type: "Type",
       brand: "Brand",
       model: "Model",
@@ -99,6 +105,8 @@ const META = {
       fullWarrantyPlural: (years) => `${years} anni di garanzia`,
       partsWarranty: (years) => `${years} anno di garanzia sui ricambi`,
       partsWarrantyPlural: (years) => `${years} anni di garanzia sui ricambi`,
+      fullWarrantyMonths: (months) => `${months} mesi di garanzia`,
+      partsWarrantyMonths: (months) => `${months} mesi di garanzia sui ricambi`,
       type: "Tipo",
       brand: "Marca",
       model: "Modello",
@@ -134,6 +142,8 @@ const META = {
       fullWarrantyPlural: (years) => `${years} \u03b5\u03c4\u03b7 \u03b5\u03b3\u03b3\u03c5\u03b7\u03c3\u03b7`,
       partsWarranty: (years) => `${years} \u03b5\u03c4\u03bf\u03c2 \u03b5\u03b3\u03b3\u03c5\u03b7\u03c3\u03b7 \u03b1\u03bd\u03c4\u03b1\u03bb\u03bb\u03b1\u03ba\u03c4\u03b9\u03ba\u03c9\u03bd`,
       partsWarrantyPlural: (years) => `${years} \u03b5\u03c4\u03b7 \u03b5\u03b3\u03b3\u03c5\u03b7\u03c3\u03b7 \u03b1\u03bd\u03c4\u03b1\u03bb\u03bb\u03b1\u03ba\u03c4\u03b9\u03ba\u03c9\u03bd`,
+      fullWarrantyMonths: (months) => `${months} \u03bc\u03b7\u03bd\u03b5\u03c2 \u03b5\u03b3\u03b3\u03c5\u03b7\u03c3\u03b7`,
+      partsWarrantyMonths: (months) => `${months} \u03bc\u03b7\u03bd\u03b5\u03c2 \u03b5\u03b3\u03b3\u03c5\u03b7\u03c3\u03b7 \u03b1\u03bd\u03c4\u03b1\u03bb\u03bb\u03b1\u03ba\u03c4\u03b9\u03ba\u03c9\u03bd`,
       type: "\u03a4\u03c5\u03c0\u03bf\u03c2",
       brand: "\u039c\u03b1\u03c1\u03ba\u03b1",
       model: "\u039c\u03bf\u03bd\u03c4\u03b5\u03bb\u03bf",
@@ -224,8 +234,15 @@ if (copies.length) {
 
   const getWarrantyText = (machine, lang) => {
     const labels = META[lang].labels;
+    const months = Number.parseInt(machine.garantiaMeses, 10);
     const years = Number.parseInt(machine.garantiaPiezasAnos, 10);
     const warrantyType = String(machine.garantiaTipo || "").trim();
+    if (Number.isFinite(months) && months > 0) {
+      if (warrantyType === "total") {
+        return labels.fullWarrantyMonths(months);
+      }
+      return labels.partsWarrantyMonths(months);
+    }
     if (Number.isFinite(years) && years > 0) {
       if (warrantyType === "total") {
         return years === 1 ? labels.fullWarranty(years) : labels.fullWarrantyPlural(years);

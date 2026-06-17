@@ -621,6 +621,7 @@ if (mount) {
   mount.appendChild(list);
 
   const syncDashboardViewChrome = () => {
+    applyDashboardTitle();
     const isRegistry = state.activeView === "registro";
     const isSuggestions = state.activeView === "sugerencias";
     dashboardLink.classList.toggle("is-active", !isRegistry && !isSuggestions);

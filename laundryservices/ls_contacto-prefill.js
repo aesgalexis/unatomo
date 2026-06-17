@@ -25,8 +25,9 @@
   };
 
   const buildMachineMessage = () => {
-    if (!machineType || !machineBrand || !machineModel || !machineYear) return "";
-    const parts = [machineType, machineBrand, machineModel, machineYear];
+    if (!machineType || !machineBrand || !machineModel) return "";
+    const parts = [machineType, machineBrand, machineModel];
+    if (machineYear) parts.push(machineYear);
     if (machineId) parts.push(machineId);
     const machineLabel = parts.join(", ");
     const lang = getLang();

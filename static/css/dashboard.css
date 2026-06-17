@@ -383,9 +383,9 @@
 
 .suggestions-form {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.65rem;
-  align-items: end;
+  align-items: start;
   padding-bottom: 0.35rem;
 }
 
@@ -407,7 +407,12 @@
 }
 
 .suggestions-submit {
+  justify-self: center;
+  margin-top: 0.25rem;
   min-width: 5.5rem;
+  background: linear-gradient(135deg, #2da44e, #2c974b);
+  border-color: #2c974b;
+  color: #fff;
 }
 
 .suggestions-status {
@@ -1019,6 +1024,17 @@
   border: 1px solid var(--border-subtle);
 }
 
+.mc-expand select:not(.mc-location-select) {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding-right: 1.8rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%239CA3AF' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 7 5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.65rem center;
+  background-size: 0.85rem 0.85rem;
+}
+
 .mc-row {
   display: flex;
   justify-content: space-between;
@@ -1183,14 +1199,21 @@
 
 .machine-group-count {
   min-width: 1.55rem;
-  min-height: 1.55rem;
+  height: 1.55rem;
+  box-sizing: border-box;
   border-radius: 999px;
   background: color-mix(in srgb, var(--fg) 10%, transparent);
   color: color-mix(in srgb, var(--fg) 72%, transparent);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.82rem;
+  font-size: 0.78rem;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  padding: 0 0.32rem 0.1rem;
+  text-align: center;
+  text-indent: 0.06rem;
 }
 
 .machine-group-count[hidden] {
@@ -2605,7 +2628,7 @@
   }
 
   .suggestions-submit {
-    justify-self: start;
+    justify-self: center;
   }
 
   .suggestions-row {

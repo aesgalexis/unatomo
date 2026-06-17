@@ -60,6 +60,14 @@ if (!btn || !menu || !label || !action) {
     }
   }
 
+  const syncSessionMenuOrder = () => {
+    const parent = profileLink?.parentNode || action?.parentNode || null;
+    if (!parent || !profileLink) return;
+    if (panelLink) parent.insertBefore(panelLink, profileLink);
+    if (qrPrintLink) parent.insertBefore(qrPrintLink, profileLink);
+  };
+  syncSessionMenuOrder();
+
   const FG = "var(--fg)";
   const ACCENT = "var(--accent)";
 

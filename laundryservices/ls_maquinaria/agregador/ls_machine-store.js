@@ -296,6 +296,7 @@ export const subscribeMachines = (onData, onError) =>
             puestaEnMarchaIncluida: data.puestaEnMarchaIncluida !== false,
             garantiaTexto: data.garantiaTexto || "",
             garantiaPiezasAnos: data.garantiaPiezasAnos ?? null,
+            garantiaMeses: data.garantiaMeses ?? null,
             garantiaTipo: data.garantiaTipo || "",
             comentarios: data.comentarios || "",
             calefaccion: data.calefaccion || "",
@@ -376,21 +377,28 @@ const buildWarrantyData = (type, detail) => {
     return {
       garantiaTexto: "",
       garantiaPiezasAnos: null,
+      garantiaMeses: null,
       garantiaTipo: "",
     };
   }
 
-  let warrantyText = String(detail || "").trim();
-  if (!warrantyText && warrantyType === "total") {
-    warrantyText = "1 año de garantía";
+  const months = Number.parseInt(detail, 10);
+  const safeMonths = Number.isFinite(months) && months > 0 ? months : null;
+  if (!safeMonths) {
+    return {
+      garantiaTexto: "",
+      garantiaPiezasAnos: null,
+      garantiaMeses: null,
+      garantiaTipo: "",
+    };
   }
-  if (!warrantyText && warrantyType === "piezas") {
-    warrantyText = "1 año de garantía de piezas";
-  }
-  const yearsMatch = warrantyText.match(/(\d+)/);
+  const suffix = warrantyType === "total" ? "garantía" : "garantía de piezas";
+  const warrantyText = `${safeMonths} meses de ${suffix}`;
+  const years = safeMonths % 12 === 0 ? safeMonths / 12 : null;
   return {
     garantiaTexto: warrantyText,
-    garantiaPiezasAnos: yearsMatch ? Number.parseInt(yearsMatch[1], 10) || null : null,
+    garantiaPiezasAnos: years,
+    garantiaMeses: safeMonths,
     garantiaTipo: warrantyType,
   };
 };
@@ -432,6 +440,7 @@ export const createMachine = async (draft, files, user) => {
     puestaEnMarchaIncluida: Boolean(draft?.puestaEnMarchaIncluida),
     garantiaTexto: warranty.garantiaTexto,
     garantiaPiezasAnos: warranty.garantiaPiezasAnos,
+    garantiaMeses: warranty.garantiaMeses,
     garantiaTipo: warranty.garantiaTipo,
     comentarios: String(draft?.comentarios || "").trim(),
     calefaccion: String(draft?.calefaccion || "").trim(),
@@ -495,6 +504,7 @@ export const updateMachine = async (machineId, draft, files, user, currentMachin
     puestaEnMarchaIncluida: Boolean(draft?.puestaEnMarchaIncluida),
     garantiaTexto: warranty.garantiaTexto,
     garantiaPiezasAnos: warranty.garantiaPiezasAnos,
+    garantiaMeses: warranty.garantiaMeses,
     garantiaTipo: warranty.garantiaTipo,
     comentarios: String(draft?.comentarios || "").trim(),
     calefaccion: String(draft?.calefaccion || "").trim(),
