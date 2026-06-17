@@ -3,6 +3,7 @@ import { getStorage } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-s
 
 export const ADMIN_EMAILS = new Set([
   "aesg.alexis@gmail.com",
+  "alcalatriasm@gmail.com",
   "alcalatriasmonica@gmail.com",
 ]);
 
