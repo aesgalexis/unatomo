@@ -14,7 +14,9 @@
     "site:publish": "node scripts/site-publish.mjs",
     "lint:links": "node scripts/lint-links.mjs",
     "scan:secrets": "node scripts/scan-secrets.mjs",
-    "doctor": "node scripts/doctor.mjs"
+    "doctor": "node scripts/doctor.mjs",
+    "backup:nfc:firestore": "node scripts/backup-firestore-nfc.mjs",
+    "backup:nfc:storage": "node scripts/backup-storage-inventory-nfc.mjs"
   },
   "repository": {
     "type": "git",

@@ -71,6 +71,73 @@
   font-size: 14px;
 }
 
+.controlpanel-backup-list {
+  display: grid;
+  gap: 12px;
+}
+
+.controlpanel-backup-item {
+  border: 1px solid color-mix(in srgb, var(--fg) 10%, transparent);
+  border-radius: 10px;
+  padding: 12px;
+  background: color-mix(in srgb, var(--bg) 94%, transparent);
+}
+
+.controlpanel-backup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.controlpanel-backup-header h3 {
+  margin: 0;
+  font-size: 14px;
+  color: var(--fg);
+}
+
+.controlpanel-backup-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 24px;
+  border-radius: 999px;
+  padding: 3px 9px;
+  font-size: 12px;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--fg) 86%, transparent);
+  background: color-mix(in srgb, var(--fg) 10%, transparent);
+}
+
+.controlpanel-backup-item[data-state="ok"] .controlpanel-backup-badge {
+  color: #0f7a3e;
+  background: color-mix(in srgb, #20b05c 18%, transparent);
+}
+
+.controlpanel-backup-item[data-state="error"] .controlpanel-backup-badge {
+  color: var(--danger, #d33);
+  background: color-mix(in srgb, var(--danger, #d33) 14%, transparent);
+}
+
+.controlpanel-backup-meta {
+  display: grid;
+  grid-template-columns: minmax(110px, auto) 1fr;
+  gap: 10px;
+  font-size: 13px;
+  color: color-mix(in srgb, var(--fg) 72%, transparent);
+}
+
+.controlpanel-backup-meta + .controlpanel-backup-meta {
+  margin-top: 6px;
+}
+
+.controlpanel-backup-meta strong {
+  color: color-mix(in srgb, var(--fg) 88%, transparent);
+  font-weight: 500;
+  word-break: break-word;
+}
+
 .controlpanel-list {
   list-style: none;
   margin: 0;

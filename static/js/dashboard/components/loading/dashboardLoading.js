@@ -43,5 +43,13 @@ export const createDashboardLoading = () => {
     if (!frame) frame = window.requestAnimationFrame(animate);
   };
 
-  return { wrap, setProgress };
+  const resetProgress = () => {
+    if (frame) window.cancelAnimationFrame(frame);
+    frame = null;
+    displayed = 0;
+    target = 0;
+    paint();
+  };
+
+  return { wrap, setProgress, resetProgress };
 };

@@ -56,3 +56,43 @@ Firebase artifacts live under `firebase/`:
 - `firebase/functions`
 
 Be careful with production callable functions and data scripts. Temporary scripts for Firebase data maintenance should not remain in the repository after use unless explicitly requested.
+
+## NFC Backups
+
+Before architecture work, risky dashboard persistence changes, ownership
+maintenance, or broad Firebase edits, create a local backup snapshot.
+
+Backups are written to `.backups/`, which is intentionally ignored by Git.
+These scripts are read-only and use the local Firebase CLI login
+(`firebase login`) to request temporary API tokens. Do not commit service account
+JSON files or backup snapshots.
+
+```powershell
+npm.cmd run backup:nfc:firestore
+npm.cmd run backup:nfc:storage
+```
+
+The Firestore backup exports the main NFC collections to JSON:
+
+- `machines`
+- `dashboard_layout`
+- `machine_access`
+- `tags`
+- admin invite/link/transfer collections
+- `users`
+- `account_directory`
+- `dashboard_suggestions`
+- `registration_codes`
+
+The Storage backup writes an inventory JSON and downloads the matching files.
+It covers:
+
+- `machine-docs/`
+- `tag-qrs/`
+
+Use optional comma-separated filters when needed:
+
+```powershell
+node scripts\backup-firestore-nfc.mjs --collections=machines,dashboard_layout
+node scripts\backup-storage-inventory-nfc.mjs --prefixes=machine-docs/
+```

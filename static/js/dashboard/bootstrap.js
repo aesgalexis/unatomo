@@ -18,6 +18,8 @@ const text = {
 
 const DASHBOARD_MODULE = "/static/js/dashboard/index.js";
 const PUBLIC_SECTIONS = new Set(["faqs", "tags", "contacto"]);
+const LOADING_NOTICE_DELAY_MS = 1800;
+const STALL_NOTICE_DELAY_MS = 12000;
 
 let loading = false;
 let attempts = 0;
@@ -82,14 +84,14 @@ const armLoadingTimer = (message) => {
   clearLoadingTimer();
   loadingTimer = window.setTimeout(() => {
     if (!hasDashboardChrome()) renderState(message);
-  }, 900);
+  }, LOADING_NOTICE_DELAY_MS);
 };
 
 const armStallTimer = () => {
   clearStallTimer();
   stallTimer = window.setTimeout(() => {
     if (!hasDashboardChrome()) renderState(text.failed, { action: true });
-  }, 9000);
+  }, STALL_NOTICE_DELAY_MS);
 };
 
 const finishIfMounted = () => {
