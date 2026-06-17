@@ -27,6 +27,18 @@ import { createMachineSearchBar } from "./components/machineSearch/machineSearch
 import { createDashboardLoading } from "./components/loading/dashboardLoading.js";
 import { GLOBAL_REGISTRY_PAGE_SIZE, renderGlobalRegistryView } from "./views/registry/globalRegistryView.js";
 import { countUnseenGlobalRegistryEntries } from "./views/registry/globalRegistryModel.js";
+import { isControlPanelUser } from "/nfc/controlpanel/access.js";
+import {
+  createDashboardSuggestion,
+  fetchDashboardSuggestions,
+  markDashboardSuggestionsSeen
+} from "./views/suggestions/suggestionsRepo.js";
+import {
+  countUnseenSuggestions,
+  SUGGESTIONS_PAGE_SIZE,
+  MAX_SUGGESTION_LENGTH,
+  renderSuggestionsView
+} from "./views/suggestions/suggestionsView.js";
 import { setTopbarSaveStatus } from "/static/js/topbar/save-status.js";
 import { setTopbarNotifications } from "/static/js/notifications/topbar-notifications.js";
 import { calculateStorageUsage, STORAGE_LIMIT_BYTES } from "/static/js/configuracion/storageUsage.js";
@@ -63,7 +75,9 @@ const getPublicSectionFromHash = () =>
 const isPublicSectionHash = () =>
   ["faqs", "tags", "contacto"].includes(getPublicSectionFromHash());
 const getDashboardInternalView = () =>
-  getPublicSectionFromHash() === "registro" ? "registro" : "dashboard";
+  ["registro", "sugerencias"].includes(getPublicSectionFromHash())
+    ? getPublicSectionFromHash()
+    : "dashboard";
 
 const isMobileViewport = () =>
   !!(window.matchMedia && window.matchMedia("(max-width: 768px)").matches);
@@ -92,10 +106,16 @@ if (mount) {
       placements: {},
       tabOrder: [],
       dashboardTitle: "",
-      registrySeenAt: ""
+      registrySeenAt: "",
+      suggestionsSeenAt: ""
     },
     activeView: getDashboardInternalView(),
     registryVisibleCount: GLOBAL_REGISTRY_PAGE_SIZE,
+    suggestionsVisibleCount: SUGGESTIONS_PAGE_SIZE,
+    suggestions: [],
+    suggestionsReady: false,
+    canSuggest: false,
+    isSuperadmin: false,
     searchQuery: "",
     pendingInvites: [],
     pendingTransferInvites: [],
@@ -190,14 +210,29 @@ if (mount) {
 
   const getDefaultDashboardTitle = () => t("dashboard.navDashboard", "Dashboard");
 
+  const getCachedDashboardTitle = () => {
+    try {
+      return normalizeDashboardTitle(localStorage.getItem(DASHBOARD_TITLE_CACHE_KEY) || "");
+    } catch {
+      return "";
+    }
+  };
+
   const getDashboardTitle = () =>
-    normalizeDashboardTitle(state.dashboardLayout?.dashboardTitle) || getDefaultDashboardTitle();
+    normalizeDashboardTitle(state.dashboardLayout?.dashboardTitle) ||
+    getCachedDashboardTitle() ||
+    getDefaultDashboardTitle();
 
   const cacheDashboardTitle = (title) => {
     try {
       const normalized = normalizeDashboardTitle(title);
       if (normalized) localStorage.setItem(DASHBOARD_TITLE_CACHE_KEY, normalized);
-      else localStorage.removeItem(DASHBOARD_TITLE_CACHE_KEY);
+    } catch {}
+  };
+
+  const clearCachedDashboardTitle = () => {
+    try {
+      localStorage.removeItem(DASHBOARD_TITLE_CACHE_KEY);
     } catch {}
   };
 
@@ -259,6 +294,8 @@ if (mount) {
         ...normalizeDashboardLayout(state.dashboardLayout),
         dashboardTitle: nextTitle
       };
+      if (nextTitle) cacheDashboardTitle(nextTitle);
+      else clearCachedDashboardTitle();
       applyDashboardTitle();
       if (nextTitle === previousTitle) return;
       updateSaveState(t("dashboard.saving", "Guardando..."));
@@ -379,8 +416,21 @@ if (mount) {
   registryLink.appendChild(registryBadge);
   registryLink.appendChild(registryLabel);
 
+  const suggestionsLink = document.createElement("a");
+  suggestionsLink.className = "dashboard-section-link";
+  suggestionsLink.href = "#/sugerencias";
+  suggestionsLink.hidden = true;
+  const suggestionsBadge = document.createElement("span");
+  suggestionsBadge.className = "dashboard-section-badge";
+  suggestionsBadge.hidden = true;
+  const suggestionsLabel = document.createElement("span");
+  suggestionsLabel.textContent = t("dashboard.navSuggestions", "Sugerencias");
+  suggestionsLink.appendChild(suggestionsBadge);
+  suggestionsLink.appendChild(suggestionsLabel);
+
   sectionNav.appendChild(dashboardLink);
   sectionNav.appendChild(registryLink);
+  sectionNav.appendChild(suggestionsLink);
 
   const { wrap: loadingEl, setProgress: setLoadingProgress } = createDashboardLoading();
 
@@ -397,6 +447,8 @@ if (mount) {
       state.searchQuery = value || "";
       if (state.activeView === "registro") {
         state.registryVisibleCount = GLOBAL_REGISTRY_PAGE_SIZE;
+      } else if (state.activeView === "sugerencias") {
+        state.suggestionsVisibleCount = SUGGESTIONS_PAGE_SIZE;
       }
       renderCards({ preserveScroll: true });
     }
@@ -434,6 +486,20 @@ if (mount) {
     registryLink.classList.toggle("has-unseen", count > 0);
   };
 
+  const updateSuggestionsBadge = () => {
+    const visible = state.canSuggest || state.isSuperadmin;
+    suggestionsLink.hidden = !visible;
+    const count = state.isSuperadmin
+      ? countUnseenSuggestions(
+          state.suggestions || [],
+          state.dashboardLayout?.suggestionsSeenAt || ""
+        )
+      : 0;
+    suggestionsBadge.hidden = count <= 0;
+    suggestionsBadge.textContent = count > 99 ? "99+" : String(count);
+    suggestionsLink.classList.toggle("has-unseen", count > 0);
+  };
+
   const markRegistrySeen = async () => {
     if (!state.uid) return;
     const seenAt = new Date().toISOString();
@@ -446,6 +512,51 @@ if (mount) {
       await upsertDashboardLayout(state.uid, state.dashboardLayout);
     } catch {
       notifyTopbar(t("dashboard.saveError", "Error al guardar"));
+    }
+  };
+
+  const markSuggestionsSeen = async () => {
+    if (!state.uid || !state.isSuperadmin) return;
+    const seenAt = new Date().toISOString();
+    state.dashboardLayout = {
+      ...normalizeDashboardLayout(state.dashboardLayout),
+      suggestionsSeenAt: seenAt
+    };
+    updateSuggestionsBadge();
+    try {
+      const response = await markDashboardSuggestionsSeen();
+      if (response?.suggestionsSeenAt) {
+        state.dashboardLayout = {
+          ...normalizeDashboardLayout(state.dashboardLayout),
+          suggestionsSeenAt: response.suggestionsSeenAt
+        };
+      }
+    } catch {
+      notifyTopbar(t("dashboard.saveError", "Error al guardar"));
+    }
+  };
+
+  const loadSuggestions = async ({ preserveScroll = true } = {}) => {
+    if (!state.canSuggest && !state.isSuperadmin) return;
+    try {
+      const result = await fetchDashboardSuggestions(500);
+      state.canSuggest = result.canSuggest;
+      state.isSuperadmin = result.isSuperadmin;
+      state.suggestions = result.items;
+      state.suggestionsReady = true;
+      if (result.suggestionsSeenAt) {
+        state.dashboardLayout = {
+          ...normalizeDashboardLayout(state.dashboardLayout),
+          suggestionsSeenAt: result.suggestionsSeenAt
+        };
+      }
+      updateSuggestionsBadge();
+      if (state.activeView === "sugerencias") {
+        renderCards({ preserveScroll });
+      }
+    } catch {
+      state.suggestionsReady = true;
+      updateSuggestionsBadge();
     }
   };
   const orderBtn = document.createElement("button");
@@ -511,20 +622,30 @@ if (mount) {
 
   const syncDashboardViewChrome = () => {
     const isRegistry = state.activeView === "registro";
-    dashboardLink.classList.toggle("is-active", !isRegistry);
+    const isSuggestions = state.activeView === "sugerencias";
+    dashboardLink.classList.toggle("is-active", !isRegistry && !isSuggestions);
     registryLink.classList.toggle("is-active", isRegistry);
+    suggestionsLink.classList.toggle("is-active", isSuggestions);
     if (isRegistry) {
       dashboardLink.removeAttribute("aria-current");
       registryLink.setAttribute("aria-current", "page");
+      suggestionsLink.removeAttribute("aria-current");
+    } else if (isSuggestions) {
+      dashboardLink.removeAttribute("aria-current");
+      registryLink.removeAttribute("aria-current");
+      suggestionsLink.setAttribute("aria-current", "page");
     } else {
       dashboardLink.setAttribute("aria-current", "page");
       registryLink.removeAttribute("aria-current");
+      suggestionsLink.removeAttribute("aria-current");
     }
-    addBar.classList.toggle("is-registry-view", isRegistry);
+    addBar.classList.toggle("is-registry-view", isRegistry || isSuggestions);
     searchInput.placeholder = isRegistry
       ? t("dashboard.registrySearchPlaceholder", "Buscar en registro...")
-      : t("dashboard.searchPlaceholder", "Buscar por nombre o ubicación...");
-    const primaryControlsDisabled = state.loading || isRegistry;
+      : isSuggestions
+        ? t("dashboard.suggestionsSearchPlaceholder", "Buscar sugerencias...")
+        : t("dashboard.searchPlaceholder", "Buscar por nombre o ubicación...");
+    const primaryControlsDisabled = state.loading || isRegistry || isSuggestions;
     const searchDisabled = state.loading;
     addBtn.disabled = primaryControlsDisabled;
     searchInput.disabled = searchDisabled;
@@ -900,7 +1021,8 @@ if (mount) {
       placements,
       tabOrder: normalizeTabOrder(layout.tabOrder),
       dashboardTitle: normalizeDashboardTitle(layout.dashboardTitle),
-      registrySeenAt: normalizeIsoString(layout.registrySeenAt)
+      registrySeenAt: normalizeIsoString(layout.registrySeenAt),
+      suggestionsSeenAt: normalizeIsoString(layout.suggestionsSeenAt)
     };
   };
 
@@ -1548,6 +1670,11 @@ if (mount) {
     list.innerHTML = "";
     const machines = Array.isArray(state.draftMachines) ? state.draftMachines : [];
     updateRegistryBadge();
+    updateSuggestionsBadge();
+    if (state.activeView === "sugerencias" && !state.canSuggest && !state.isSuperadmin) {
+      window.location.hash = "#/dashboard";
+      return;
+    }
     if (state.activeView === "registro") {
       clearMobileDetailState();
       syncMobileDetailUI();
@@ -1563,6 +1690,68 @@ if (mount) {
           renderCards({ preserveScroll: true });
         }
       });
+      syncMachineAccessListeners(state.draftMachines);
+      if (state.loading && state.ownerReady && state.adminReady) {
+        updateLoading();
+      }
+      return;
+    }
+    if (state.activeView === "sugerencias") {
+      clearMobileDetailState();
+      syncMobileDetailUI();
+      filterInfo.textContent = "";
+      filterInfo.style.display = "none";
+      cardRefs.clear();
+      if (!state.suggestionsReady) {
+        const loading = document.createElement("div");
+        loading.className = "suggestions-empty";
+        loading.textContent = t("dashboard.suggestionsLoading", "Cargando sugerencias...");
+        list.appendChild(loading);
+      } else {
+        renderSuggestionsView(list, {
+          items: state.suggestions,
+          canSuggest: state.canSuggest || state.isSuperadmin,
+          isSuperadmin: state.isSuperadmin,
+          seenAt: state.dashboardLayout?.suggestionsSeenAt || "",
+          query: state.searchQuery,
+          visibleCount: state.suggestionsVisibleCount,
+          onLoadMore: () => {
+            state.suggestionsVisibleCount += SUGGESTIONS_PAGE_SIZE;
+            renderCards({ preserveScroll: true });
+          },
+          onSubmit: async (rawText, controls = {}) => {
+            const textValue = (rawText || "").toString().trim();
+            const status = controls.status;
+            if (!textValue) return;
+            if (controls.input) controls.input.disabled = true;
+            if (controls.submit) controls.submit.disabled = true;
+            if (status) {
+              status.hidden = false;
+              status.textContent = t("dashboard.suggestionsSending", "Enviando...");
+              status.removeAttribute("data-state");
+            }
+            try {
+              await createDashboardSuggestion(textValue.slice(0, MAX_SUGGESTION_LENGTH));
+              if (controls.input) controls.input.value = "";
+              if (status) {
+                status.textContent = t("dashboard.suggestionsSent", "Sugerencia enviada");
+              }
+              await loadSuggestions({ preserveScroll: true });
+            } catch {
+              if (status) {
+                status.textContent = t(
+                  "dashboard.suggestionsError",
+                  "No se pudo enviar la sugerencia"
+                );
+                status.dataset.state = "error";
+              }
+            } finally {
+              if (controls.input) controls.input.disabled = false;
+              if (controls.submit) controls.submit.disabled = false;
+            }
+          }
+        });
+      }
       syncMachineAccessListeners(state.draftMachines);
       if (state.loading && state.ownerReady && state.adminReady) {
         updateLoading();
@@ -3107,19 +3296,22 @@ if (mount) {
     const groups = state.dashboardLayout.groups || [];
     const placements = { ...(state.dashboardLayout.placements || {}) };
     const parentGroup = groups.find((group) => group.id === parentGroupId);
-    if (parentGroup?.parentGroupId) return;
+    const isSubgroupTarget = !!parentGroup?.parentGroupId;
 
     const machineOrderMap = new Map();
-    const orderedItems = [
-      ...items.filter((item) => item.type === "group"),
-      ...items.filter((item) => item.type === "machine")
-    ];
+    const orderedItems = isSubgroupTarget
+      ? items.filter((item) => item.type === "machine")
+      : [
+          ...items.filter((item) => item.type === "group"),
+          ...items.filter((item) => item.type === "machine")
+        ];
     orderedItems.forEach((item, index) => {
       if (item.type === "machine") {
         placements[item.id] = { groupId: parentGroupId || "", order: index };
         if (!parentGroupId) machineOrderMap.set(item.id, index);
       }
       if (item.type === "group") {
+        if (isSubgroupTarget) return;
         const group = groups.find((entry) => entry.id === item.id);
         if (!group) return;
         if (parentGroupId && group.id === parentGroupId) return;
@@ -3336,15 +3528,21 @@ if (mount) {
         placements: {},
         tabOrder: normalizeTabOrder(),
         dashboardTitle: "",
-        registrySeenAt: ""
+        registrySeenAt: "",
+        suggestionsSeenAt: ""
       };
     }
     if (!state.dashboardLayout.registrySeenAt) {
       state.dashboardLayout.registrySeenAt = new Date().toISOString();
       upsertDashboardLayout(uid, state.dashboardLayout).catch(() => {});
     }
+    if (state.isSuperadmin && !state.dashboardLayout.suggestionsSeenAt) {
+      state.dashboardLayout.suggestionsSeenAt = new Date().toISOString();
+      upsertDashboardLayout(uid, state.dashboardLayout).catch(() => {});
+    }
     applyDashboardTitle();
     initDashboardTitleEditor();
+    loadSuggestions({ preserveScroll: false });
 
     let ownerFetchResolved = false;
     let ownerBootstrap = [];
@@ -3426,8 +3624,15 @@ if (mount) {
     if (previousView === "registro" && nextView !== "registro") {
       markRegistrySeen();
     }
+    if (previousView === "sugerencias" && nextView !== "sugerencias") {
+      markSuggestionsSeen();
+    }
     if (nextView === "registro") {
       state.registryVisibleCount = GLOBAL_REGISTRY_PAGE_SIZE;
+    }
+    if (nextView === "sugerencias") {
+      state.suggestionsVisibleCount = SUGGESTIONS_PAGE_SIZE;
+      loadSuggestions({ preserveScroll: false });
     }
     renderCards({ preserveScroll: false });
   });
@@ -3447,6 +3652,8 @@ if (mount) {
         window.location.href = `${appBasePrefix || ""}/?setup=1`;
         return;
       }
+      state.canSuggest = registration.profile?.suggestionsCollaborator === true;
+      state.isSuperadmin = await isControlPanelUser(user);
     } catch {
       window.location.href = `${appBasePrefix || ""}/?setup=1`;
       return;

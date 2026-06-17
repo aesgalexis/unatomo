@@ -45,8 +45,7 @@ const hashEmail = (email: string) =>
 const assertControlPanelAccess = (auth: {
   token?: {email?: string | null};
 } | null | undefined) => {
-  const email = (auth?.token?.email || "").toString();
-  if (!email || hashEmail(email) !== CONTROL_PANEL_EMAIL_HASH) {
+  if (!isControlPanelAuth(auth)) {
     throw new HttpsError("permission-denied", "not-allowed");
   }
 };
@@ -59,6 +58,7 @@ const accountDirectoryCol = () => db.collection("account_directory");
 const registrationCodesCol = () => db.collection("registration_codes");
 const tagsCol = () => db.collection("tags");
 const machineAccessCol = () => db.collection("machine_access");
+const dashboardSuggestionsCol = () => db.collection("dashboard_suggestions");
 const storageBucket = admin.storage().bucket();
 const ACCOUNT_STORAGE_LIMIT_BYTES = 1024 * 1024 * 1024;
 const QR_FALLBACK_BYTES = 4 * 1024;
@@ -163,6 +163,13 @@ const normalizeRegistrationCode = (value: string) =>
   (value || "").toString().trim().toUpperCase();
 const normalizeLang = (value: string) =>
   (value || "").toString().trim().toLowerCase() === "en" ? "en" : "es";
+
+const isControlPanelAuth = (auth: {
+  token?: {email?: string | null};
+} | null | undefined) => {
+  const email = (auth?.token?.email || "").toString();
+  return !!email && hashEmail(email) === CONTROL_PANEL_EMAIL_HASH;
+};
 
 const buildMachineTagUrl = (tagId: string, lang = "es") =>
   `${PUBLIC_SITE_ORIGIN}/nfc/${normalizeLang(
@@ -1066,10 +1073,16 @@ export const listControlPanelUsers = onCall(async (request) => {
     uid: string;
     email: string;
     displayName: string;
+    suggestionsCollaborator: boolean;
   }>();
 
   const upsertItem = (
-    raw: {uid?: unknown; email?: unknown; displayName?: unknown},
+    raw: {
+      uid?: unknown;
+      email?: unknown;
+      displayName?: unknown;
+      suggestionsCollaborator?: unknown;
+    },
   ) => {
     const uid = (raw.uid || "").toString().trim();
     const email = (raw.email || "").toString().trim();
@@ -1081,6 +1094,10 @@ export const listControlPanelUsers = onCall(async (request) => {
       uid: uid || (current?.uid || ""),
       email: email || (current?.email || ""),
       displayName: displayName || (current?.displayName || ""),
+      suggestionsCollaborator:
+        typeof raw.suggestionsCollaborator === "boolean" ?
+          raw.suggestionsCollaborator :
+          !!current?.suggestionsCollaborator,
     });
   };
 
@@ -1103,6 +1120,147 @@ export const listControlPanelUsers = onCall(async (request) => {
   });
 
   return {ok: true, items};
+});
+
+export const setControlPanelUserCollaborator = onCall(async (request) => {
+  const auth = request.auth;
+  if (!auth) throw new HttpsError("unauthenticated", "auth-required");
+  assertControlPanelAccess(auth);
+
+  const uid = (request.data?.uid || "").toString().trim();
+  if (!uid) throw new HttpsError("invalid-argument", "uid-required");
+
+  const enabled = request.data?.enabled === true;
+  await db.collection("users").doc(uid).set(
+    {
+      suggestionsCollaborator: enabled,
+      suggestionsCollaboratorUpdatedAt:
+        admin.firestore.FieldValue.serverTimestamp(),
+      suggestionsCollaboratorUpdatedBy: auth.uid || "",
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    },
+    {merge: true},
+  );
+
+  return {ok: true, uid, suggestionsCollaborator: enabled};
+});
+
+export const createDashboardSuggestion = onCall(async (request) => {
+  const auth = request.auth;
+  if (!auth) throw new HttpsError("unauthenticated", "auth-required");
+
+  const userRef = db.collection("users").doc(auth.uid);
+  const userSnap = await userRef.get();
+  const userData = userSnap.data() || {};
+  const canSuggest =
+    isControlPanelAuth(auth) || userData.suggestionsCollaborator === true;
+  if (!canSuggest) {
+    throw new HttpsError("permission-denied", "suggestions-disabled");
+  }
+
+  const text = (request.data?.text || "")
+    .toString()
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 1024);
+  if (!text) throw new HttpsError("invalid-argument", "text-required");
+
+  const now = admin.firestore.FieldValue.serverTimestamp();
+  const authorEmail = normalizeEmail(auth.token?.email || userData.email || "");
+  const authorName = (
+    auth.token?.name ||
+    userData.displayName ||
+    authorEmail ||
+    ""
+  ).toString().trim();
+
+  const ref = dashboardSuggestionsCol().doc();
+  await ref.set({
+    text,
+    authorUid: auth.uid,
+    authorEmail,
+    authorName,
+    createdAt: now,
+    updatedAt: now,
+  });
+
+  return {ok: true, id: ref.id};
+});
+
+export const listDashboardSuggestions = onCall(async (request) => {
+  const auth = request.auth;
+  if (!auth) throw new HttpsError("unauthenticated", "auth-required");
+
+  const userSnap = await db.collection("users").doc(auth.uid).get();
+  const userData = userSnap.data() || {};
+  const isSuperadmin = isControlPanelAuth(auth);
+  const canSuggest =
+    isSuperadmin || userData.suggestionsCollaborator === true;
+  if (!canSuggest) {
+    return {
+      ok: true,
+      canSuggest: false,
+      isSuperadmin,
+      items: [],
+      suggestionsSeenAt: "",
+    };
+  }
+
+  const rawLimit = Number(request.data?.limit || 254);
+  const limit = Math.max(1, Math.min(500, Math.floor(rawLimit)));
+  let query: FirebaseFirestore.Query = dashboardSuggestionsCol()
+    .orderBy("createdAt", "desc")
+    .limit(limit);
+  if (!isSuperadmin) {
+    query = dashboardSuggestionsCol()
+      .where("authorUid", "==", auth.uid)
+      .limit(limit);
+  }
+
+  const [suggestionsSnap, layoutSnap] = await Promise.all([
+    query.get(),
+    db.collection("dashboard_layout").doc(auth.uid).get(),
+  ]);
+  const items = suggestionsSnap.docs.map((docSnap) => {
+    const data = docSnap.data() || {};
+    return {
+      id: docSnap.id,
+      text: data.text || "",
+      authorUid: data.authorUid || "",
+      authorEmail: data.authorEmail || "",
+      authorName: data.authorName || "",
+      createdAt: data.createdAt?.toDate?.()?.toISOString?.() || "",
+    };
+  }).sort((a, b) => {
+    const left = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+    const right = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+    return right - left;
+  });
+
+  return {
+    ok: true,
+    canSuggest,
+    isSuperadmin,
+    items,
+    suggestionsSeenAt: layoutSnap.data()?.suggestionsSeenAt || "",
+  };
+});
+
+export const markDashboardSuggestionsSeen = onCall(async (request) => {
+  const auth = request.auth;
+  if (!auth) throw new HttpsError("unauthenticated", "auth-required");
+  if (!isControlPanelAuth(auth)) return {ok: true};
+
+  const seenAt = new Date().toISOString();
+  await db.collection("dashboard_layout").doc(auth.uid).set(
+    {
+      suggestionsSeenAt: seenAt,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      updatedBy: auth.uid,
+    },
+    {merge: true},
+  );
+  return {ok: true, suggestionsSeenAt: seenAt};
 });
 
 export const deleteControlPanelUser = onCall(async (request) => {

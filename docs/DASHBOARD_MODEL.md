@@ -66,12 +66,14 @@ The main dashboard page has internal hash views:
 
 - `#/dashboard`: the normal machine-card and group view.
 - `#/registro`: the global registry view.
+- `#/sugerencias`: the collaborator suggestions view.
 
 Files:
 
 - `static/js/dashboard/index.js`: owns the view switch, section nav, disabled control state, and hash routing.
 - `static/js/dashboard/history/historyEventFormatter.js`: shared formatter and grouping helpers for machine history events. It preserves known legacy event text and falls back to `summary`, `message`, `messageKey`, or `type` for future events.
 - `static/js/dashboard/views/registry/globalRegistryModel.js`: flattens logs from all machines visible to the current account, sorts them newest-first, and groups task notes under their task-created event.
+- `static/js/dashboard/views/suggestions/`: renders and submits dashboard suggestions through callable functions.
 - `static/js/dashboard/views/registry/globalRegistryView.js`: renders the global registry and `Cargar más` / `Load more` pagination.
 
 Global registry scope:
@@ -87,6 +89,13 @@ Global registry scope:
 - When task notes are rendered under their parent task in the global registry, omit the repeated task title; the indentation already provides the context.
 - Out-of-service operational cycles are grouped as one registry block when possible: status changed to `fuera_de_servicio`, the automatic restore task, notes/edits/completion for that task, and the return to `operativa`. The block sorts by its latest activity so long repairs move back to the top when updated.
 - The add and order/filter controls remain visible in `Registro`, but are disabled until those features are explicitly implemented for the registry view.
+
+Suggestions scope:
+
+- The `Sugerencias` / `Suggestions` link appears only for `superadmin` or users with `users/{uid}.suggestionsCollaborator === true`.
+- The collaborator flag is controlled from the superadmin control panel user list.
+- Normal collaborators can submit and see their own suggestions. The superadmin can see all suggestions and gets an unseen badge over the `Sugerencias` nav link.
+- Suggestions use callable functions instead of direct Firestore reads so global access stays behind the existing hashed superadmin check.
 
 History event contract:
 

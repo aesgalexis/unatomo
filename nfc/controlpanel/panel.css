@@ -123,7 +123,7 @@
 }
 
 .controlpanel-user--action {
-  grid-template-columns: 1fr auto;
+  grid-template-columns: 1fr auto auto;
   align-items: center;
   gap: 12px;
 }
@@ -149,6 +149,21 @@
   font-size: 13px;
   color: color-mix(in srgb, var(--fg) 70%, transparent);
   word-break: break-word;
+}
+
+.controlpanel-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: color-mix(in srgb, var(--fg) 82%, transparent);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.controlpanel-check input {
+  width: 15px;
+  height: 15px;
+  accent-color: #7c3aed;
 }
 
 .controlpanel-link-danger {
@@ -196,4 +211,11 @@
 
 .controlpanel-table a {
   color: inherit;
+}
+
+@media (max-width: 640px) {
+  .controlpanel-user--action {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
 }
