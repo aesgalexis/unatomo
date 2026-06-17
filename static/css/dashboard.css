@@ -2452,6 +2452,32 @@
 }
 
 @media (max-width: 768px) {
+  html,
+  body {
+    overflow-x: hidden;
+  }
+
+  #dashboard-mount,
+  #machineList,
+  .global-registry-view {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .global-registry-row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.3rem;
+  }
+
+  .global-registry-row-note {
+    margin-left: 0;
+    padding-left: 0.55rem;
+  }
+
+  .global-registry-meta {
+    gap: 0.15rem;
+  }
+
   .machine-card[data-expanded="true"] .mc-status {
     width: 28px;
     min-width: 28px;

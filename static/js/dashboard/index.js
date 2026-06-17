@@ -45,6 +45,7 @@ const DEFAULT_COLLAPSED_HEIGHT = 108;
 const EXPAND_FACTOR = 2.5;
 const RESTORE_OPERATION_TASK_SOURCE = "status-out-of-service";
 const MAX_DASHBOARD_TITLE_LENGTH = 32;
+const DASHBOARD_TITLE_CACHE_KEY = "unatomo_dashboard_title_v1";
 
 const mount = document.getElementById("dashboard-mount");
 const appBasePrefix = getAppBasePrefix();
@@ -63,6 +64,15 @@ const isPublicSectionHash = () =>
   ["faqs", "tags", "contacto"].includes(getPublicSectionFromHash());
 const getDashboardInternalView = () =>
   getPublicSectionFromHash() === "registro" ? "registro" : "dashboard";
+
+const isMobileViewport = () =>
+  !!(window.matchMedia && window.matchMedia("(max-width: 768px)").matches);
+
+try {
+  if (isMobileViewport() && "scrollRestoration" in window.history) {
+    window.history.scrollRestoration = "manual";
+  }
+} catch {}
 
 if (mount) {
   const state = {
@@ -169,15 +179,34 @@ if (mount) {
     return date && !Number.isNaN(date.getTime()) ? date.toISOString() : "";
   };
 
+  const withTimeout = (promise, ms = 6000) =>
+    new Promise((resolve, reject) => {
+      const timer = setTimeout(() => reject(new Error("timeout")), ms);
+      promise
+        .then(resolve)
+        .catch(reject)
+        .finally(() => clearTimeout(timer));
+    });
+
   const getDefaultDashboardTitle = () => t("dashboard.navDashboard", "Dashboard");
 
   const getDashboardTitle = () =>
     normalizeDashboardTitle(state.dashboardLayout?.dashboardTitle) || getDefaultDashboardTitle();
 
+  const cacheDashboardTitle = (title) => {
+    try {
+      const normalized = normalizeDashboardTitle(title);
+      if (normalized) localStorage.setItem(DASHBOARD_TITLE_CACHE_KEY, normalized);
+      else localStorage.removeItem(DASHBOARD_TITLE_CACHE_KEY);
+    } catch {}
+  };
+
   const applyDashboardTitle = () => {
     const titleEl = document.getElementById("topbar-title");
     if (!titleEl || titleEl.dataset.editing === "true") return;
-    titleEl.textContent = getDashboardTitle();
+    const title = getDashboardTitle();
+    titleEl.textContent = title;
+    cacheDashboardTitle(normalizeDashboardTitle(state.dashboardLayout?.dashboardTitle));
   };
 
   const initDashboardTitleEditor = () => {
@@ -512,8 +541,13 @@ if (mount) {
     setTopbarSaveStatus(message);
   };
 
-  const isMobileDashboardViewport = () =>
-    !!(window.matchMedia && window.matchMedia("(max-width: 768px)").matches);
+  const isMobileDashboardViewport = isMobileViewport;
+
+  const resetInitialMobileScroll = () => {
+    if (!isMobileDashboardViewport()) return;
+    window.scrollTo(0, 0);
+    requestAnimationFrame(() => window.scrollTo(0, 0));
+  };
 
   const clearMobileDetailState = () => {
     state.mobileFocusedMachineId = "";
@@ -598,7 +632,10 @@ if (mount) {
       state.loadingGuardTimer = null;
     }
     state.loadingGuardTimer = setTimeout(() => {
+      if (!state.ownerReady) state.ownerReady = true;
+      if (!state.adminReady) state.adminReady = true;
       updateLoading();
+      renderCards({ preserveScroll: false });
     }, 8000);
   };
 
@@ -3283,6 +3320,7 @@ if (mount) {
     state.uid = uid;
     state.adminLabel = user.displayName || user.email || t("dashboard.admin", "Administrador");
     state.adminEmail = user.email || "";
+    resetInitialMobileScroll();
     refreshStorageFullState(uid);
     armLoadingGuard();
     try {
@@ -3311,7 +3349,7 @@ if (mount) {
     let ownerFetchResolved = false;
     let ownerBootstrap = [];
     try {
-      const remote = await fetchMachines(uid);
+      const remote = await withTimeout(fetchMachines(uid));
       ownerFetchResolved = true;
       ownerBootstrap = remote
         .map((m, idx) => normalizeMachine(m, idx))
@@ -3321,15 +3359,18 @@ if (mount) {
           tenantId: uid,
           role: "owner",
           ownerEmail: state.adminEmail || ""
-        }));
+      }));
       if (!remote.length) {
-        const legacy = await fetchLegacyMachines(uid);
+        const legacy = await withTimeout(fetchLegacyMachines(uid));
         if (legacy.length) {
-          await migrateLegacyMachines(uid, legacy);
+          await withTimeout(migrateLegacyMachines(uid, legacy));
         }
       }
     } catch {
-      // ignore migration failures
+      if (!state.ownerReady) {
+        state.ownerReady = true;
+        updateLoading();
+      }
     }
 
     const emailLower = normalizeEmail(user.email || "");
@@ -3341,16 +3382,19 @@ if (mount) {
       }
     }
     try {
-      const adminBootstrap = await fetchAdminMachines(uid, emailLower);
+      const adminBootstrap = await withTimeout(fetchAdminMachines(uid, emailLower));
       state.adminMachines = adminBootstrap;
       if (!state.adminReady) {
         state.adminReady = true;
         updateLoading();
       }
     } catch {
-      // ignore admin bootstrap failures
+      if (!state.adminReady) {
+        state.adminReady = true;
+        updateLoading();
+      }
     }
-    scheduleRebuild({ preserveScroll: true });
+    scheduleRebuild({ preserveScroll: false });
     subscribeOwnerMachines(uid);
     subscribeAdminLinks(uid);
     subscribePendingInvites(emailLower);
@@ -3364,6 +3408,7 @@ if (mount) {
       // ignore invite ensure failures
     }
     renderCards();
+    resetInitialMobileScroll();
     initGroupedDragAndDrop(list, {
       onReorder: handleGroupedReorder,
       onReorderItems: handleMixedItemReorder,
