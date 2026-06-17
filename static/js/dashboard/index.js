@@ -300,7 +300,7 @@ if (mount) {
       if (nextTitle === previousTitle) return;
       updateSaveState(t("dashboard.saving", "Guardando..."));
       try {
-        await upsertDashboardLayout(state.uid, state.dashboardLayout);
+        await upsertDashboardLayout(state.uid, { dashboardTitle: nextTitle });
         updateSaveState(t("dashboard.saved", "Guardado"));
       } catch {
         updateSaveState(t("dashboard.saveError", "Error al guardar"));
@@ -509,7 +509,7 @@ if (mount) {
     };
     updateRegistryBadge();
     try {
-      await upsertDashboardLayout(state.uid, state.dashboardLayout);
+      await upsertDashboardLayout(state.uid, { registrySeenAt: seenAt });
     } catch {
       notifyTopbar(t("dashboard.saveError", "Error al guardar"));
     }
@@ -3535,11 +3535,15 @@ if (mount) {
     }
     if (!state.dashboardLayout.registrySeenAt) {
       state.dashboardLayout.registrySeenAt = new Date().toISOString();
-      upsertDashboardLayout(uid, state.dashboardLayout).catch(() => {});
+      upsertDashboardLayout(uid, {
+        registrySeenAt: state.dashboardLayout.registrySeenAt
+      }).catch(() => {});
     }
     if (state.isSuperadmin && !state.dashboardLayout.suggestionsSeenAt) {
       state.dashboardLayout.suggestionsSeenAt = new Date().toISOString();
-      upsertDashboardLayout(uid, state.dashboardLayout).catch(() => {});
+      upsertDashboardLayout(uid, {
+        suggestionsSeenAt: state.dashboardLayout.suggestionsSeenAt
+      }).catch(() => {});
     }
     applyDashboardTitle();
     initDashboardTitleEditor();

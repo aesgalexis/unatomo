@@ -55,25 +55,40 @@ export const fetchDashboardLayout = async (uid) => {
 
 export const upsertDashboardLayout = async (uid, layout) => {
   if (!uid) return;
+  const hasGroups = Object.prototype.hasOwnProperty.call(layout || {}, "groups");
+  const hasPlacements = Object.prototype.hasOwnProperty.call(layout || {}, "placements");
+  const hasTabOrder = Object.prototype.hasOwnProperty.call(layout || {}, "tabOrder");
+  const hasTitle = Object.prototype.hasOwnProperty.call(layout || {}, "dashboardTitle");
+  const hasRegistrySeenAt = Object.prototype.hasOwnProperty.call(layout || {}, "registrySeenAt");
+  const hasSuggestionsSeenAt = Object.prototype.hasOwnProperty.call(layout || {}, "suggestionsSeenAt");
   const dashboardTitle = (layout?.dashboardTitle || "")
     .toString()
     .trim()
     .slice(0, MAX_DASHBOARD_TITLE_LENGTH);
+  const payload = {
+    updatedAt: serverTimestamp(),
+    updatedBy: uid
+  };
+  if (hasGroups) {
+    payload.groups = Array.isArray(layout?.groups) ? layout.groups : [];
+  }
+  if (hasPlacements) {
+    payload.placements =
+      layout?.placements && typeof layout.placements === "object" && !Array.isArray(layout.placements)
+        ? layout.placements
+        : {};
+  }
+  if (hasTabOrder) payload.tabOrder = normalizeTabOrder(layout?.tabOrder);
+  if (hasTitle) payload.dashboardTitle = dashboardTitle;
+  if (hasRegistrySeenAt) {
+    payload.registrySeenAt = normalizeIsoString(layout?.registrySeenAt);
+  }
+  if (hasSuggestionsSeenAt) {
+    payload.suggestionsSeenAt = normalizeIsoString(layout?.suggestionsSeenAt);
+  }
   await setDoc(
     dashboardLayoutDoc(uid),
-    {
-      groups: Array.isArray(layout?.groups) ? layout.groups : [],
-      placements:
-        layout?.placements && typeof layout.placements === "object" && !Array.isArray(layout.placements)
-          ? layout.placements
-          : {},
-      tabOrder: normalizeTabOrder(layout?.tabOrder),
-      dashboardTitle,
-      registrySeenAt: normalizeIsoString(layout?.registrySeenAt),
-      suggestionsSeenAt: normalizeIsoString(layout?.suggestionsSeenAt),
-      updatedAt: serverTimestamp(),
-      updatedBy: uid
-    },
+    payload,
     { merge: true }
   );
 };
