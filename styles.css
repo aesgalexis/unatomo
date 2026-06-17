@@ -971,6 +971,10 @@ html[data-superadmin="true"] .topbar-lang-toggle{
   display:block;
 }
 
+#notif-menu-btn.has-notifications{
+  border-color:var(--fg);
+}
+
 .notif-badge{
   position:absolute;
   top:-2px;
@@ -980,6 +984,10 @@ html[data-superadmin="true"] .topbar-lang-toggle{
   font-size:0.7rem;
   font-weight:700;
   line-height:1;
+}
+
+#notif-menu-btn.has-notifications .notif-badge{
+  color:var(--fg);
 }
 
 #notif-menu{

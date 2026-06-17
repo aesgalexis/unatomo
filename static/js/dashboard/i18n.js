@@ -126,6 +126,10 @@ const TEXT = {
       taskNoteAdded: "Nota en tarea",
       taskEdited: "Tarea editada",
       adminAccepted: "Administrador aceptado:",
+      ownershipTransferred: "Propiedad transferida",
+      ownershipTransferredTo: (email) => `Propiedad transferida a ${email}`,
+      ownershipTransferredFromTo: (fromEmail, toEmail) =>
+        `Propiedad transferida de ${fromEmail} a ${toEmail}`,
       interventionLog: "Intervenci\u00f3n",
       event: "Evento",
       download: "Descargar registro completo",
@@ -406,6 +410,10 @@ const TEXT = {
       taskNoteAdded: "Task note",
       taskEdited: "Task edited",
       adminAccepted: "Administrator accepted:",
+      ownershipTransferred: "Ownership transferred",
+      ownershipTransferredTo: (email) => `Ownership transferred to ${email}`,
+      ownershipTransferredFromTo: (fromEmail, toEmail) =>
+        `Ownership transferred from ${fromEmail} to ${toEmail}`,
       interventionLog: "Intervention",
       event: "Event",
       download: "Download full log",
