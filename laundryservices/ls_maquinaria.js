@@ -172,6 +172,14 @@ const STATE_LABELS = {
 const copies = Array.from(document.querySelectorAll("[data-legal-lang]"));
 let isMachineAdmin = false;
 let currentMachines = [];
+let machineryLoaded = false;
+let allowEmptyState = false;
+window.setTimeout(() => {
+  allowEmptyState = true;
+  if (!currentMachines.length) {
+    copies.forEach((copy) => renderMachinesForCopy(copy, currentMachines));
+  }
+}, 1800);
 
 if (copies.length) {
   const normalizeLang = (lang) => (LANGS.includes(lang) ? lang : "es");
@@ -381,7 +389,7 @@ if (copies.length) {
     if (!body) return;
     const filteredMachines = getFilteredMachines(copy, machines);
     if (!filteredMachines.length) {
-      renderTableState(copy, META[lang].empty);
+      renderTableState(copy, machineryLoaded && allowEmptyState ? META[lang].empty : META[lang].loading);
       return;
     }
     const totalPages = Math.max(1, Math.ceil(filteredMachines.length / PAGE_SIZE));
@@ -492,9 +500,11 @@ if (copies.length) {
   subscribeMachines(
     (machines) => {
       currentMachines = machines;
+      machineryLoaded = true;
       copies.forEach((copy) => renderMachinesForCopy(copy, machines));
     },
     () => {
+      machineryLoaded = true;
       copies.forEach((copy) => renderTableState(copy, META[normalizeLang(copy.getAttribute("data-legal-lang"))].error));
     }
   );
