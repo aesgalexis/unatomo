@@ -3,4 +3,3 @@ dist/
 .vite/
 .env*
 !.env.example
-static/js/config/runtime-config.js

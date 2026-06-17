@@ -1,0 +1,131 @@
+const mount = document.getElementById("dashboard-mount");
+const lang = document.documentElement.lang === "en" ? "en" : "es";
+
+const text = {
+  es: {
+    loading: "Cargando dashboard...",
+    retrying: "Reintentando cargar el dashboard...",
+    failed: "No se pudo cargar el dashboard.",
+    action: "Recargar dashboard",
+  },
+  en: {
+    loading: "Loading dashboard...",
+    retrying: "Retrying dashboard load...",
+    failed: "Could not load the dashboard.",
+    action: "Reload dashboard",
+  },
+}[lang];
+
+const DASHBOARD_MODULE = "/static/js/dashboard/index.js";
+const PUBLIC_SECTIONS = new Set(["faqs", "tags", "contacto"]);
+
+let loading = false;
+let attempts = 0;
+let stallTimer = null;
+
+const getSectionFromHash = () =>
+  (window.location.hash || "")
+    .replace(/^#/, "")
+    .replace(/^\/+/, "")
+    .trim()
+    .toLowerCase();
+
+const isPublicSection = () => PUBLIC_SECTIONS.has(getSectionFromHash());
+
+const hasDashboardChrome = () =>
+  !!mount?.querySelector(".add-bar") && !!mount?.querySelector("#machineList");
+
+const removeBootstrapState = () => {
+  mount?.querySelectorAll(".dashboard-bootstrap-state").forEach((node) => node.remove());
+};
+
+const renderState = (message, options = {}) => {
+  if (!mount || isPublicSection() || hasDashboardChrome()) return;
+  removeBootstrapState();
+
+  const wrap = document.createElement("div");
+  wrap.className = "dashboard-bootstrap-state";
+
+  const label = document.createElement("div");
+  label.className = "dashboard-bootstrap-text";
+  label.textContent = message;
+  wrap.appendChild(label);
+
+  if (options.action) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "dashboard-bootstrap-retry";
+    btn.textContent = text.action;
+    btn.addEventListener("click", () => {
+      loadDashboard({ force: true, message: text.retrying });
+    });
+    wrap.appendChild(btn);
+  }
+
+  mount.appendChild(wrap);
+};
+
+const clearStallTimer = () => {
+  if (!stallTimer) return;
+  window.clearTimeout(stallTimer);
+  stallTimer = null;
+};
+
+const armStallTimer = () => {
+  clearStallTimer();
+  stallTimer = window.setTimeout(() => {
+    if (!hasDashboardChrome()) renderState(text.failed, { action: true });
+  }, 9000);
+};
+
+const finishIfMounted = () => {
+  if (hasDashboardChrome()) {
+    clearStallTimer();
+    removeBootstrapState();
+    return true;
+  }
+  return false;
+};
+
+const loadDashboard = async (options = {}) => {
+  if (!mount || isPublicSection() || hasDashboardChrome() || loading) return;
+  loading = true;
+  attempts += 1;
+
+  renderState(options.message || text.loading);
+  armStallTimer();
+
+  const url = options.force || attempts > 1
+    ? `${DASHBOARD_MODULE}?retry=${Date.now()}`
+    : DASHBOARD_MODULE;
+
+  try {
+    await import(url);
+    window.requestAnimationFrame(() => {
+      if (!finishIfMounted()) renderState(text.failed, { action: true });
+    });
+  } catch (error) {
+    console.error("Dashboard bootstrap failed", error);
+    renderState(text.failed, { action: true });
+  } finally {
+    loading = false;
+    if (hasDashboardChrome()) clearStallTimer();
+  }
+};
+
+const ensureDashboard = () => {
+  if (!mount || isPublicSection() || hasDashboardChrome()) return;
+  window.setTimeout(() => {
+    if (!hasDashboardChrome()) {
+      loadDashboard({ force: attempts > 0, message: text.retrying });
+    }
+  }, 250);
+};
+
+window.addEventListener("pageshow", ensureDashboard);
+window.addEventListener("hashchange", ensureDashboard);
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) ensureDashboard();
+});
+
+loadDashboard();

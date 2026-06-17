@@ -29,14 +29,28 @@ for (const file of ENV_FILES) {
   Object.assign(env, await readEnvFile(path.join(ROOT, file)));
 }
 
+const readExistingConfig = async () => {
+  try {
+    const content = await readFile(CONFIG_PATH, "utf8");
+    const match = content.match(/window\.__UNATOMO_CONFIG__\s*=\s*(\{[\s\S]*?\})\s*;/);
+    if (!match) return {};
+    return JSON.parse(match[1]);
+  } catch {
+    return {};
+  }
+};
+
+const existing = await readExistingConfig();
+
 const config = {
-  FIREBASE_API_KEY: env.FIREBASE_API_KEY || "",
-  FIREBASE_AUTH_DOMAIN: env.FIREBASE_AUTH_DOMAIN || "",
-  FIREBASE_PROJECT_ID: env.FIREBASE_PROJECT_ID || "",
-  FIREBASE_STORAGE_BUCKET: env.FIREBASE_STORAGE_BUCKET || "",
-  FIREBASE_MESSAGING_SENDER_ID: env.FIREBASE_MESSAGING_SENDER_ID || "",
-  FIREBASE_APP_ID: env.FIREBASE_APP_ID || "",
-  FIREBASE_MEASUREMENT_ID: env.FIREBASE_MEASUREMENT_ID || ""
+  FIREBASE_API_KEY: env.FIREBASE_API_KEY || existing.FIREBASE_API_KEY || "",
+  FIREBASE_AUTH_DOMAIN: env.FIREBASE_AUTH_DOMAIN || existing.FIREBASE_AUTH_DOMAIN || "",
+  FIREBASE_PROJECT_ID: env.FIREBASE_PROJECT_ID || existing.FIREBASE_PROJECT_ID || "",
+  FIREBASE_STORAGE_BUCKET: env.FIREBASE_STORAGE_BUCKET || existing.FIREBASE_STORAGE_BUCKET || "",
+  FIREBASE_MESSAGING_SENDER_ID:
+    env.FIREBASE_MESSAGING_SENDER_ID || existing.FIREBASE_MESSAGING_SENDER_ID || "",
+  FIREBASE_APP_ID: env.FIREBASE_APP_ID || existing.FIREBASE_APP_ID || "",
+  FIREBASE_MEASUREMENT_ID: env.FIREBASE_MEASUREMENT_ID || existing.FIREBASE_MEASUREMENT_ID || ""
 };
 
 await mkdir(path.dirname(CONFIG_PATH), { recursive: true });
