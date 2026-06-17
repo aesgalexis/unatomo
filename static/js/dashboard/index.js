@@ -745,13 +745,21 @@ if (mount) {
       machineIdByTagId.set(machine.tagId, machine.id);
       if (!tagUnsubs.has(machine.tagId)) {
         const ref = doc(db, "machine_access", machine.tagId);
-        const unsub = onSnapshot(ref, (snap) => {
-          if (!snap.exists()) return;
-          const data = snap.data() || {};
-          const targetId = machineIdByTagId.get(machine.tagId);
-          if (!targetId) return;
-          applyOperationalPatch(targetId, data);
-        });
+        const unsub = onSnapshot(
+          ref,
+          (snap) => {
+            if (!snap.exists()) return;
+            const data = snap.data() || {};
+            const targetId = machineIdByTagId.get(machine.tagId);
+            if (!targetId) return;
+            applyOperationalPatch(targetId, data);
+          },
+          () => {
+            const currentUnsub = tagUnsubs.get(machine.tagId);
+            if (currentUnsub) currentUnsub();
+            tagUnsubs.delete(machine.tagId);
+          }
+        );
         tagUnsubs.set(machine.tagId, unsub);
       }
     });
@@ -1031,20 +1039,32 @@ if (mount) {
       nextIds.add(link.machineId);
       if (state.adminMachineUnsubs.has(link.machineId)) return;
       const ref = doc(db, "machines", link.machineId);
-      const unsub = onSnapshot(ref, { includeMetadataChanges: true }, (snap) => {
-        if (snap.metadata.hasPendingWrites) return;
-        if (isRecentLocalWrite(link.machineId)) return;
-        if (!snap.exists()) return;
-        const data = snap.data() || {};
-        if (data.ownerUid && data.ownerUid !== link.ownerUid) return;
-        const normalized = normalizeMachine({ id: snap.id, ...data }, state.draftMachines.length);
-        normalized.tenantId = link.ownerUid;
-        normalized.role = "admin";
-        normalized.ownerEmail = link.ownerEmail || "";
-        state.adminMachines = (state.adminMachines || []).filter((m) => m.id !== link.machineId);
-        state.adminMachines = [normalized, ...state.adminMachines];
-        scheduleRebuild({ preserveScroll: true });
-      });
+      const unsub = onSnapshot(
+        ref,
+        { includeMetadataChanges: true },
+        (snap) => {
+          if (snap.metadata.hasPendingWrites) return;
+          if (isRecentLocalWrite(link.machineId)) return;
+          if (!snap.exists()) return;
+          const data = snap.data() || {};
+          if (data.ownerUid && data.ownerUid !== link.ownerUid) return;
+          const normalized = normalizeMachine({ id: snap.id, ...data }, state.draftMachines.length);
+          normalized.tenantId = link.ownerUid;
+          normalized.role = "admin";
+          normalized.ownerEmail = link.ownerEmail || "";
+          state.adminMachines = (state.adminMachines || []).filter((m) => m.id !== link.machineId);
+          state.adminMachines = [normalized, ...state.adminMachines];
+          scheduleRebuild({ preserveScroll: true });
+        },
+        () => {
+          const currentUnsub = state.adminMachineUnsubs.get(link.machineId);
+          if (currentUnsub) currentUnsub();
+          state.adminMachineUnsubs.delete(link.machineId);
+          state.adminMachines = (state.adminMachines || [])
+            .filter((m) => m.id !== link.machineId);
+          scheduleRebuild({ preserveScroll: true });
+        }
+      );
       state.adminMachineUnsubs.set(link.machineId, unsub);
     });
 
@@ -1099,13 +1119,20 @@ if (mount) {
       where("adminEmailLower", "==", emailLower),
       where("status", "==", "pending")
     );
-    state.inviteUnsub = onSnapshot(q, (snap) => {
-      state.pendingInvites = snap.docs.map((docSnap) => ({
-        id: docSnap.id,
-        ...docSnap.data()
-      }));
-      renderInviteBanner();
-    });
+    state.inviteUnsub = onSnapshot(
+      q,
+      (snap) => {
+        state.pendingInvites = snap.docs.map((docSnap) => ({
+          id: docSnap.id,
+          ...docSnap.data()
+        }));
+        renderInviteBanner();
+      },
+      () => {
+        state.pendingInvites = [];
+        renderInviteBanner();
+      }
+    );
   };
 
   const subscribePendingTransferInvites = (uid) => {
@@ -1120,13 +1147,20 @@ if (mount) {
       where("toOwnerUid", "==", uid),
       where("status", "==", "pending")
     );
-    state.transferInviteUnsub = onSnapshot(q, (snap) => {
-      state.pendingTransferInvites = snap.docs.map((docSnap) => ({
-        id: docSnap.id,
-        ...docSnap.data()
-      }));
-      renderTopbarNotifications();
-    });
+    state.transferInviteUnsub = onSnapshot(
+      q,
+      (snap) => {
+        state.pendingTransferInvites = snap.docs.map((docSnap) => ({
+          id: docSnap.id,
+          ...docSnap.data()
+        }));
+        renderTopbarNotifications();
+      },
+      () => {
+        state.pendingTransferInvites = [];
+        renderTopbarNotifications();
+      }
+    );
   };
 
   const updateMachine = (id, patch) => {
