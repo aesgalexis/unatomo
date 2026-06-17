@@ -133,6 +133,7 @@ function initSetupLogin() {
       showStatus(text.connectingGoogle);
 
       const res = await loginWithGoogle();
+      if (res?.redirecting) return;
       if (handleLoginResult(res, showStatus)) return;
       if (!res.ok) return showStatus(text.loginFailed);
 
@@ -297,6 +298,7 @@ function initLoginPage() {
       setStatus(text.connectingGoogle);
 
       const res = await loginWithGoogle();
+      if (res?.redirecting) return;
       if (handleLoginResult(res, setStatus)) return;
       if (!res.ok) return setStatus(text.loginFailed);
 
