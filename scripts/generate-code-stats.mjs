@@ -5,6 +5,7 @@ const ROOT = process.cwd();
 const OUTPUT = path.join(ROOT, "static", "data", "code-stats.json");
 
 const IGNORE_DIRS = new Set([
+  ".backups",
   ".git",
   ".github",
   ".vscode",
@@ -15,7 +16,8 @@ const IGNORE_DIRS = new Set([
 
 const IGNORE_FILES = new Set([
   "package-lock.json",
-  path.join("static", "data", "code-stats.json")
+  path.join("static", "data", "code-stats.json"),
+  path.join("static", "data", "nfc-backup-status.json")
 ]);
 
 const CODE_EXTENSIONS = new Set([

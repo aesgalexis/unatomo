@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-06-17T18:53:26.918Z",
-  "totalFiles": 181,
-  "totalLines": 45907,
+  "generatedAt": "2026-06-17T20:53:35.952Z",
+  "totalFiles": 185,
+  "totalLines": 46834,
   "countedExtensions": [
     ".css",
     ".html",
@@ -12,6 +12,7 @@
     ".ts"
   ],
   "excludedDirectories": [
+    ".backups",
     ".git",
     ".github",
     ".vscode",

@@ -17,6 +17,28 @@ const text = {
   codeStatsLines: isEn
     ? (value) => `${value} lines of code running this application`
     : (value) => `${value} l\u00edneas de c\u00f3digo corriendo esta aplicaci\u00f3n`,
+  backupTitle: isEn ? "Backup" : "Respaldo",
+  backupLoading: isEn ? "Loading backup status..." : "Cargando estado de respaldo...",
+  backupError: isEn ? "Unable to load backup status." : "No se ha podido cargar el estado de respaldo.",
+  backupHint: isEn
+    ? "Local NFC backup status. Snapshot files stay outside the repository."
+    : "Estado local del respaldo NFC. Los snapshots quedan fuera del repositorio.",
+  backupPending: isEn ? "No backup recorded yet" : "Sin respaldo registrado",
+  backupOk: isEn ? "Ready" : "Correcto",
+  backupFailed: isEn ? "Needs attention" : "Revisar",
+  backupFirestore: isEn ? "Firestore data" : "Datos Firestore",
+  backupStorage: isEn ? "Storage inventory" : "Inventario Storage",
+  backupCompleted: isEn ? "Completed" : "Completado",
+  backupAttempted: isEn ? "Attempted" : "Intento",
+  backupFile: isEn ? "File" : "Archivo",
+  backupFolder: isEn ? "Folder" : "Carpeta",
+  backupCollections: isEn ? "Collections" : "Colecciones",
+  backupDocuments: isEn ? "Documents" : "Documentos",
+  backupFiles: isEn ? "Files" : "Archivos",
+  backupSize: isEn ? "Size" : "Tama\u00f1o",
+  backupProject: isEn ? "Project" : "Proyecto",
+  backupBucket: isEn ? "Bucket" : "Bucket",
+  backupCause: isEn ? "Cause" : "Causa",
   usersTitle: isEn ? "Users" : "Usuarios",
   usersLoading: isEn ? "Loading users..." : "Cargando usuarios...",
   usersEmpty: isEn ? "No users found." : "No se han encontrado usuarios.",
@@ -267,6 +289,99 @@ const formatMaybeDate = (value) => {
   }).format(date);
 };
 
+const formatBytes = (value) => {
+  const bytes = Number(value || 0);
+  if (!Number.isFinite(bytes) || bytes <= 0) return "0 B";
+  const units = ["B", "KB", "MB", "GB"];
+  let size = bytes;
+  let unitIndex = 0;
+  while (size >= 1024 && unitIndex < units.length - 1) {
+    size /= 1024;
+    unitIndex += 1;
+  }
+  return `${new Intl.NumberFormat(isEn ? "en" : "es", {
+    maximumFractionDigits: unitIndex === 0 ? 0 : 1,
+  }).format(size)} ${units[unitIndex]}`;
+};
+
+const getBackupStatusText = (status) => {
+  if (status === "ok") return text.backupOk;
+  if (status === "error") return text.backupFailed;
+  return text.backupPending;
+};
+
+const appendBackupMeta = (wrap, label, value) => {
+  if (value == null || value === "") return;
+  const row = document.createElement("div");
+  row.className = "controlpanel-backup-meta";
+  const key = document.createElement("span");
+  key.textContent = label;
+  const val = document.createElement("strong");
+  val.textContent = value;
+  row.appendChild(key);
+  row.appendChild(val);
+  wrap.appendChild(row);
+};
+
+const renderBackupItem = (item, label, type) => {
+  const status = item?.status || "pending";
+  const card = document.createElement("article");
+  card.className = "controlpanel-backup-item";
+  card.dataset.state = status;
+
+  const header = document.createElement("div");
+  header.className = "controlpanel-backup-header";
+
+  const title = document.createElement("h3");
+  title.textContent = label;
+
+  const badge = document.createElement("span");
+  badge.className = "controlpanel-backup-badge";
+  badge.textContent = getBackupStatusText(status);
+
+  header.appendChild(title);
+  header.appendChild(badge);
+  card.appendChild(header);
+
+  if (status === "ok") {
+    appendBackupMeta(card, text.backupCompleted, formatMaybeDate(item.completedAt));
+    appendBackupMeta(card, text.backupFile, item.file);
+    appendBackupMeta(card, text.backupProject, item.projectId);
+    if (type === "firestore") {
+      appendBackupMeta(card, text.backupCollections, item.collectionCount);
+      appendBackupMeta(card, text.backupDocuments, item.documentCount);
+    } else {
+      appendBackupMeta(card, text.backupBucket, item.bucket);
+      appendBackupMeta(card, text.backupFiles, item.fileCount);
+      appendBackupMeta(card, text.backupSize, formatBytes(item.totalBytes));
+      appendBackupMeta(card, text.backupFolder, item.downloadDir);
+    }
+  } else if (status === "error") {
+    appendBackupMeta(card, text.backupAttempted, formatMaybeDate(item.attemptedAt));
+    appendBackupMeta(card, text.backupCause, item.error);
+  }
+
+  return card;
+};
+
+const renderBackupStatus = (body, status) => {
+  body.innerHTML = "";
+  const note = document.createElement("p");
+  note.className = "controlpanel-note";
+  note.textContent = text.backupHint;
+  body.appendChild(note);
+
+  const list = document.createElement("div");
+  list.className = "controlpanel-backup-list";
+  list.appendChild(
+    renderBackupItem(status?.firestore || {}, text.backupFirestore, "firestore"),
+  );
+  list.appendChild(
+    renderBackupItem(status?.storage || {}, text.backupStorage, "storage"),
+  );
+  body.appendChild(list);
+};
+
 const renderTags = (body, items) => {
   body.innerHTML = "";
   const note = document.createElement("p");
@@ -423,10 +538,12 @@ if (mount) {
   const wrap = document.createElement("div");
   wrap.className = "controlpanel-wrap";
   const codeStatsCard = createCard(text.codeStatsTitle);
+  const backupCard = createCard(text.backupTitle);
   const usersCard = createCard(text.usersTitle);
   const codesCard = createCard(text.codesTitle);
   const tagsCard = createCard(text.tagsTitle);
   wrap.appendChild(codeStatsCard);
+  wrap.appendChild(backupCard);
   wrap.appendChild(usersCard);
   wrap.appendChild(codesCard);
   wrap.appendChild(tagsCard);
@@ -435,6 +552,9 @@ if (mount) {
   codeStatsCard
     .querySelector(".controlpanel-toggle")
     ?.addEventListener("click", () => toggleCard(codeStatsCard));
+  backupCard
+    .querySelector(".controlpanel-toggle")
+    ?.addEventListener("click", () => toggleCard(backupCard));
   usersCard
     .querySelector(".controlpanel-toggle")
     ?.addEventListener("click", () => toggleCard(usersCard));
@@ -446,6 +566,7 @@ if (mount) {
     ?.addEventListener("click", () => toggleCard(tagsCard));
 
   const codeStatsBody = codeStatsCard.querySelector(".controlpanel-body");
+  const backupBody = backupCard.querySelector(".controlpanel-body");
   const usersBody = usersCard.querySelector(".controlpanel-body");
   const codesBody = codesCard.querySelector(".controlpanel-body");
   const tagsBody = tagsCard.querySelector(".controlpanel-body");
@@ -531,8 +652,25 @@ if (mount) {
     }
   };
 
+  const loadBackupStatus = async () => {
+    if (!backupBody) return;
+    renderState(backupBody, text.backupHint, text.backupLoading);
+    try {
+      const response = await fetch(`/static/data/nfc-backup-status.json?ts=${Date.now()}`, {
+        cache: "no-store"
+      });
+      if (!response.ok) throw new Error("backup-status-unavailable");
+      const status = await response.json();
+      renderBackupStatus(backupBody, status);
+    } catch {
+      renderState(backupBody, text.backupHint, text.backupError, "error");
+    }
+  };
+
   toggleCard(codeStatsCard);
+  toggleCard(backupCard);
   if (codeStatsBody) renderState(codeStatsBody, text.codeStatsHint, text.codeStatsLoading);
+  if (backupBody) renderState(backupBody, text.backupHint, text.backupLoading);
   if (usersBody) renderState(usersBody, text.usersHint, text.usersLoading);
   if (codesBody) renderState(codesBody, text.codesHint, text.codesLoading);
   if (tagsBody) renderState(tagsBody, text.tagsHint, text.tagsLoading);
@@ -549,8 +687,9 @@ if (mount) {
       return;
     }
 
-    if (!codeStatsBody || !usersBody || !codesBody || !tagsBody) return;
+    if (!codeStatsBody || !backupBody || !usersBody || !codesBody || !tagsBody) return;
     await loadCodeStats();
+    await loadBackupStatus();
     renderState(usersBody, text.usersHint, text.usersLoading);
 
     let updateUsersStatus = () => {};

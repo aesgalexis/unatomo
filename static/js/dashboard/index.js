@@ -124,6 +124,9 @@ if (mount) {
     loading: true,
     ownerReady: false,
     adminReady: false,
+    ownerLoadFailed: false,
+    adminLoadFailed: false,
+    loadTimedOut: false,
     loadingGuardTimer: null,
     ownerUnsub: null,
     adminLinksUnsub: null,
@@ -166,6 +169,10 @@ if (mount) {
   let rebuildToken = 0;
   let rebuildTimer = null;
   let pendingRebuildOptions = null;
+  let activeDashboardUid = "";
+  let dashboardInitPromise = null;
+  let dashboardSessionVersion = 0;
+  let groupedDragAndDropReady = false;
 
   const clearDashboardTooltips = () => {
     document.querySelectorAll(".mc-tooltip").forEach((node) => node.remove());
@@ -432,7 +439,11 @@ if (mount) {
   sectionNav.appendChild(registryLink);
   sectionNav.appendChild(suggestionsLink);
 
-  const { wrap: loadingEl, setProgress: setLoadingProgress } = createDashboardLoading();
+  const {
+    wrap: loadingEl,
+    setProgress: setLoadingProgress,
+    resetProgress: resetLoadingProgress
+  } = createDashboardLoading();
 
   const addBtn = document.createElement("button");
   addBtn.type = "button";
@@ -663,6 +674,66 @@ if (mount) {
     setTopbarSaveStatus(message);
   };
 
+  const clearDashboardTimer = () => {
+    if (state.loadingGuardTimer) {
+      clearTimeout(state.loadingGuardTimer);
+      state.loadingGuardTimer = null;
+    }
+    if (rebuildTimer) {
+      clearTimeout(rebuildTimer);
+      rebuildTimer = null;
+    }
+  };
+
+  const cleanupDashboardSubscriptions = () => {
+    if (state.ownerUnsub) state.ownerUnsub();
+    if (state.adminLinksUnsub) state.adminLinksUnsub();
+    if (state.inviteUnsub) state.inviteUnsub();
+    if (state.transferInviteUnsub) state.transferInviteUnsub();
+    state.ownerUnsub = null;
+    state.adminLinksUnsub = null;
+    state.inviteUnsub = null;
+    state.transferInviteUnsub = null;
+    state.adminMachineUnsubs.forEach((unsub) => unsub?.());
+    state.adminMachineUnsubs.clear();
+    tagUnsubs.forEach((unsub) => unsub?.());
+    tagUnsubs.clear();
+    tagIdByMachineId.clear();
+    machineIdByTagId.clear();
+  };
+
+  const resetDashboardRuntime = (uid) => {
+    clearDashboardTimer();
+    cleanupDashboardSubscriptions();
+    state.uid = uid;
+    state.remoteMachines = [];
+    state.ownerMachines = [];
+    state.adminMachines = [];
+    state.draftMachines = [];
+    state.pendingInvites = [];
+    state.pendingTransferInvites = [];
+    state.suggestions = [];
+    state.suggestionsReady = false;
+    state.expandedById = [];
+    state.selectedTabById = {};
+    state.configSubtabById = {};
+    state.tagStatusById = {};
+    clearMobileDetailState();
+    state.ownerReady = false;
+    state.adminReady = false;
+    state.ownerLoadFailed = false;
+    state.adminLoadFailed = false;
+    state.loadTimedOut = false;
+    state.loading = true;
+    state.initialGroupPriorityOrder = {};
+    state.initialGroupPriorityReady = false;
+    cardRefs.clear();
+    list.innerHTML = "";
+    loadingEl.style.display = "";
+    resetLoadingProgress();
+    syncDashboardViewChrome();
+  };
+
   const isMobileDashboardViewport = isMobileViewport;
 
   const resetInitialMobileScroll = () => {
@@ -754,8 +825,15 @@ if (mount) {
       state.loadingGuardTimer = null;
     }
     state.loadingGuardTimer = setTimeout(() => {
-      if (!state.ownerReady) state.ownerReady = true;
-      if (!state.adminReady) state.adminReady = true;
+      state.loadTimedOut = true;
+      if (!state.ownerReady) {
+        state.ownerReady = true;
+        state.ownerLoadFailed = true;
+      }
+      if (!state.adminReady) {
+        state.adminReady = true;
+        state.adminLoadFailed = true;
+      }
       updateLoading();
       renderCards({ preserveScroll: false });
     }, 8000);
@@ -772,6 +850,17 @@ if (mount) {
     placeholder.className = "machine-placeholder";
     placeholder.textContent =
       t("dashboard.noMachines", "Todavía no hay máquinas. Pulsa 'Añadir' para crear la primera.");
+    list.appendChild(placeholder);
+  };
+
+  const renderLoadErrorPlaceholder = () => {
+    list.innerHTML = "";
+    const placeholder = document.createElement("div");
+    placeholder.className = "machine-placeholder";
+    placeholder.textContent = t(
+      "dashboard.machinesLoadError",
+      "No se pudieron cargar las máquinas. Recarga el dashboard."
+    );
     list.appendChild(placeholder);
   };
 
@@ -1160,6 +1249,8 @@ if (mount) {
       { includeMetadataChanges: true },
       (snap) => {
         if (snap.metadata.hasPendingWrites) return;
+        state.ownerLoadFailed = false;
+        state.loadTimedOut = false;
         if (!state.ownerReady) {
           state.ownerReady = true;
           updateLoading();
@@ -1182,6 +1273,7 @@ if (mount) {
         scheduleRebuild({ preserveScroll: true });
       },
       () => {
+        state.ownerLoadFailed = true;
         if (!state.ownerReady) {
           state.ownerReady = true;
           updateLoading();
@@ -1247,6 +1339,8 @@ if (mount) {
     state.adminLinksUnsub = onSnapshot(
       q,
       (snap) => {
+        state.adminLoadFailed = false;
+        state.loadTimedOut = false;
         if (!state.adminReady) {
           state.adminReady = true;
           updateLoading();
@@ -1258,6 +1352,7 @@ if (mount) {
         scheduleRebuild({ preserveScroll: true });
       },
       () => {
+        state.adminLoadFailed = true;
         if (!state.adminReady) {
           state.adminReady = true;
           updateLoading();
@@ -1785,6 +1880,13 @@ if (mount) {
       syncMobileDetailUI();
       if (state.loading) {
         list.innerHTML = "";
+        return;
+      }
+      if (state.ownerLoadFailed || state.adminLoadFailed || state.loadTimedOut) {
+        renderLoadErrorPlaceholder();
+        if (preserveScroll) {
+          restoreViewport(prevScrollY || 0, renderAnchor);
+        }
         return;
       }
       renderPlaceholder();
@@ -3509,7 +3611,22 @@ if (mount) {
     return machines.filter(Boolean);
   };
 
-  const initDashboard = async (uid, user) => {
+  const ensureGroupedDragAndDrop = () => {
+    if (groupedDragAndDropReady) return;
+    initGroupedDragAndDrop(list, {
+      onReorder: handleGroupedReorder,
+      onReorderItems: handleMixedItemReorder,
+      onDropOnCard: moveMachineToTargetGroup,
+      onDropMachineOnGroup: moveMachineToGroup,
+      onDropGroupOnGroup: moveGroupToTargetGroup
+    });
+    groupedDragAndDropReady = true;
+  };
+
+  const initDashboard = async (uid, user, sessionVersion) => {
+    const isActiveSession = () =>
+      activeDashboardUid === uid && dashboardSessionVersion === sessionVersion;
+    resetDashboardRuntime(uid);
     state.uid = uid;
     state.adminLabel = user.displayName || user.email || t("dashboard.admin", "Administrador");
     state.adminEmail = user.email || "";
@@ -3521,6 +3638,7 @@ if (mount) {
     } catch {
       // ignore directory write errors
     }
+    if (!isActiveSession()) return;
     try {
       state.dashboardLayout = normalizeDashboardLayout(await fetchDashboardLayout(uid));
     } catch {
@@ -3533,6 +3651,7 @@ if (mount) {
         suggestionsSeenAt: ""
       };
     }
+    if (!isActiveSession()) return;
     if (!state.dashboardLayout.registrySeenAt) {
       state.dashboardLayout.registrySeenAt = new Date().toISOString();
       upsertDashboardLayout(uid, {
@@ -3553,6 +3672,7 @@ if (mount) {
     let ownerBootstrap = [];
     try {
       const remote = await withTimeout(fetchMachines(uid));
+      state.ownerLoadFailed = false;
       ownerFetchResolved = true;
       ownerBootstrap = remote
         .map((m, idx) => normalizeMachine(m, idx))
@@ -3570,11 +3690,13 @@ if (mount) {
         }
       }
     } catch {
+      state.ownerLoadFailed = true;
       if (!state.ownerReady) {
         state.ownerReady = true;
         updateLoading();
       }
     }
+    if (!isActiveSession()) return;
 
     const emailLower = normalizeEmail(user.email || "");
     if (ownerFetchResolved) {
@@ -3586,17 +3708,20 @@ if (mount) {
     }
     try {
       const adminBootstrap = await withTimeout(fetchAdminMachines(uid, emailLower));
+      state.adminLoadFailed = false;
       state.adminMachines = adminBootstrap;
       if (!state.adminReady) {
         state.adminReady = true;
         updateLoading();
       }
     } catch {
+      state.adminLoadFailed = true;
       if (!state.adminReady) {
         state.adminReady = true;
         updateLoading();
       }
     }
+    if (!isActiveSession()) return;
     scheduleRebuild({ preserveScroll: false });
     subscribeOwnerMachines(uid);
     subscribeAdminLinks(uid);
@@ -3610,15 +3735,10 @@ if (mount) {
     } catch {
       // ignore invite ensure failures
     }
+    if (!isActiveSession()) return;
     renderCards();
     resetInitialMobileScroll();
-    initGroupedDragAndDrop(list, {
-      onReorder: handleGroupedReorder,
-      onReorderItems: handleMixedItemReorder,
-      onDropOnCard: moveMachineToTargetGroup,
-      onDropMachineOnGroup: moveMachineToGroup,
-      onDropGroupOnGroup: moveGroupToTargetGroup
-    });
+    ensureGroupedDragAndDrop();
   };
 
   window.addEventListener("hashchange", () => {
@@ -3644,6 +3764,11 @@ if (mount) {
 
   onAuthStateChanged(auth, async (user) => {
     if (!user) {
+      activeDashboardUid = "";
+      dashboardInitPromise = null;
+      dashboardSessionVersion += 1;
+      clearDashboardTimer();
+      cleanupDashboardSubscriptions();
       if (isPublicSectionHash()) {
         mount.hidden = true;
         return;
@@ -3663,6 +3788,31 @@ if (mount) {
       window.location.href = `${appBasePrefix || ""}/?setup=1`;
       return;
     }
-    initDashboard(user.uid, user);
+    if (activeDashboardUid === user.uid && dashboardInitPromise) return;
+    if (
+      activeDashboardUid === user.uid &&
+      !state.loading &&
+      !state.ownerLoadFailed &&
+      !state.adminLoadFailed
+    ) {
+      return;
+    }
+    activeDashboardUid = user.uid;
+    const sessionVersion = ++dashboardSessionVersion;
+    dashboardInitPromise = initDashboard(user.uid, user, sessionVersion)
+      .catch(() => {
+        if (dashboardSessionVersion !== sessionVersion) return;
+        state.ownerLoadFailed = true;
+        state.adminLoadFailed = true;
+        state.ownerReady = true;
+        state.adminReady = true;
+        updateLoading();
+        renderCards({ preserveScroll: false });
+      })
+      .finally(() => {
+        if (dashboardSessionVersion === sessionVersion) {
+          dashboardInitPromise = null;
+        }
+      });
   });
 }
