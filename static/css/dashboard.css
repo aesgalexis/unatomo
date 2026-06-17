@@ -294,7 +294,7 @@
   display: flex;
   justify-content: flex-end;
   position: absolute;
-  top: -1.75rem;
+  top: -2rem;
   right: 0;
   margin: 0;
 }
@@ -2458,10 +2458,14 @@
   }
 
   #dashboard-mount,
-  #machineList,
-  .global-registry-view {
+  #machineList {
     max-width: 100%;
     overflow-x: hidden;
+  }
+
+  .global-registry-view {
+    max-width: 100%;
+    overflow: visible;
   }
 
   .global-registry-row {
