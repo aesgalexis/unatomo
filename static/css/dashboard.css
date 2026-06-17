@@ -412,6 +412,40 @@
   font-weight: 600;
 }
 
+.dashboard-bootstrap-state {
+  min-height: 96px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.9rem;
+  background: color-mix(in srgb, var(--bg) 96%, transparent);
+  color: var(--fg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding: 1rem;
+  text-align: center;
+}
+
+.dashboard-bootstrap-text {
+  color: color-mix(in srgb, var(--fg) 82%, transparent);
+  font-size: 0.92rem;
+}
+
+.dashboard-bootstrap-retry {
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.65rem;
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  color: var(--fg);
+  font: inherit;
+  padding: 0.45rem 0.75rem;
+  cursor: pointer;
+}
+
+.dashboard-bootstrap-retry:hover {
+  border-color: var(--fg);
+}
+
 
 .admin-invite-banner {
   margin: 0 0 0.75rem;
@@ -2445,6 +2479,18 @@
     max-width: 200px;
     padding: 0 0.6rem;
     display: inline-flex;
+  }
+
+  .machine-card[data-expanded="false"] .mc-header {
+    min-height: var(--mc-collapsed-height);
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  .machine-card[data-expanded="false"] .mc-title {
+    line-height: 1.12;
+    max-height: 2.24em;
+    overflow: hidden;
   }
 
   #machineList[data-has-ungrouped="true"] > .machine-group:not(.machine-subgroup) > .machine-group-body > .machine-card-wrap,
