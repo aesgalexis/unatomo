@@ -1,20 +1,43 @@
 import { t } from "/static/js/dashboard/i18n.js";
-import { STATUS_LABELS } from "../components/machineCard/machineCardTypes.js";
+import {
+  formatHistoryLog,
+  getTaskLogKeys,
+  isTaskCreatedLog,
+  isTaskNoteLog,
+} from "../history/historyEventFormatter.js";
 
-const taskLogKey = (log = {}) => {
-  const taskId = String(log.taskId || "").trim();
-  if (taskId) return `id:${taskId}`;
-  const title = String(log.title || "").trim().toLowerCase();
-  return title ? `title:${title}` : "";
+const RESTORE_OPERATION_TASK_SOURCE = "status-out-of-service";
+
+const toTime = (value) => {
+  const date = value ? new Date(value) : null;
+  return date && !Number.isNaN(date.getTime()) ? date.getTime() : 0;
 };
 
-const taskLogKeys = (log = {}) => {
-  const keys = [];
-  const taskId = String(log.taskId || "").trim();
-  const title = String(log.title || "").trim().toLowerCase();
-  if (taskId) keys.push(`id:${taskId}`);
-  if (title) keys.push(`title:${title}`);
-  return keys;
+const normalizeText = (value) =>
+  String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+
+const isRestoreOperationLog = (log = {}) => {
+  const title = normalizeText(log.title);
+  return (
+    log.source === RESTORE_OPERATION_TASK_SOURCE ||
+    title.includes("operatividad") ||
+    title.includes("operation")
+  );
+};
+
+const isTaskChildLog = (log = {}) =>
+  isTaskNoteLog(log) ||
+  log.type === "task" ||
+  log.type === "task_edited";
+
+const addGroupedLog = (map, key, entry) => {
+  if (!key) return;
+  const logs = map.get(key) || [];
+  if (!logs.some((item) => item.index === entry.index)) logs.push(entry);
+  map.set(key, logs);
 };
 
 export const render = (panel, machine, hooks, options = {}) => {
@@ -22,14 +45,13 @@ export const render = (panel, machine, hooks, options = {}) => {
   const total = machine.logs ? machine.logs.length : 0;
 
   const locale = document.documentElement.lang === "en" ? "en-GB" : "es-ES";
-  const completedBy = (user) => (user ? t("history.completedBy", (value) => ` - por ${value}`)(user) : "");
 
   const form = document.createElement("div");
   form.className = "mc-log-form";
 
   const label = document.createElement("span");
   label.className = "mc-log-label";
-  label.textContent = t("history.intervention", "Intervención");
+  label.textContent = t("history.intervention", "Intervencion");
 
   const input = document.createElement("input");
   input.type = "text";
@@ -67,91 +89,85 @@ export const render = (panel, machine, hooks, options = {}) => {
     list.appendChild(empty);
   }
 
-  const rawLogs = [...(machine.logs || [])];
-  const notesByTaskKey = new Map();
-  rawLogs.forEach((log) => {
-    if (log.type !== "task_note_added") return;
-    taskLogKeys(log).forEach((key) => {
-      const notes = notesByTaskKey.get(key) || [];
-      if (!notes.includes(log)) notes.push(log);
-      notesByTaskKey.set(key, notes);
-    });
+  const rawLogs = Array.isArray(machine.logs)
+    ? machine.logs.map((log, index) => ({ log, index, time: toTime(log.ts) }))
+    : [];
+  const taskParentKeys = new Set();
+  const restoreCycleTaskKeys = new Map();
+
+  rawLogs.forEach((entry) => {
+    const { log } = entry;
+    if (!isTaskCreatedLog(log)) return;
+    getTaskLogKeys(log).forEach((key) => taskParentKeys.add(key));
+
+    const cycleId = String(log.statusCycleId || "").trim();
+    if (cycleId && isRestoreOperationLog(log)) {
+      const keys = restoreCycleTaskKeys.get(cycleId) || new Set();
+      getTaskLogKeys(log).forEach((key) => keys.add(key));
+      restoreCycleTaskKeys.set(cycleId, keys);
+    }
   });
 
-  const appendTaskNote = (log) => {
+  const childrenByTaskKey = new Map();
+  const childIndexes = new Set();
+  rawLogs.forEach((entry) => {
+    const { log } = entry;
+    if (isTaskChildLog(log)) {
+      const keys = getTaskLogKeys(log).filter((key) => taskParentKeys.has(key));
+      keys.forEach((key) => addGroupedLog(childrenByTaskKey, key, entry));
+      if (keys.length) childIndexes.add(entry.index);
+      return;
+    }
+
+    const cycleId = String(log.statusCycleId || "").trim();
+    const isCycleReturn =
+      log.type === "status" &&
+      log.value === "operativa" &&
+      restoreCycleTaskKeys.has(cycleId);
+    if (!isCycleReturn) return;
+
+    restoreCycleTaskKeys.get(cycleId).forEach((key) => {
+      addGroupedLog(childrenByTaskKey, key, entry);
+    });
+    childIndexes.add(entry.index);
+  });
+
+  const getTaskChildren = (log) => {
+    const children = [];
+    getTaskLogKeys(log).forEach((key) => {
+      (childrenByTaskKey.get(key) || []).forEach((entry) => {
+        if (!children.some((item) => item.index === entry.index)) children.push(entry);
+      });
+    });
+    return children.sort((a, b) => (a.time - b.time) || (a.index - b.index));
+  };
+
+  const appendLog = (log, indent = false) => {
     const item = document.createElement("div");
-    item.className = "mc-log-item mc-log-item-indent";
+    item.className = indent ? "mc-log-item mc-log-item-indent" : "mc-log-item";
     const time = new Date(log.ts).toLocaleString(locale);
-    const title = log.title || t("history.task", "Tarea");
-    const note = log.note ? ` - ${log.note}` : "";
-    const user = completedBy(log.user);
-    item.textContent = `${time} - ${t("history.taskNoteAdded", "Nota en tarea")}: ${title}${note}${user}`;
+    item.textContent = `${time} - ${formatHistoryLog(log, {
+      omitTaskTitle: indent && log.type === "task_note_added",
+    })}`;
     list.appendChild(item);
   };
 
   rawLogs
-    .slice()
-    .reverse()
-    .filter((log) => log.type !== "task_note_added")
+    .filter((entry) => !childIndexes.has(entry.index))
+    .map((entry) => {
+      const children = isTaskCreatedLog(entry.log) ? getTaskChildren(entry.log) : [];
+      const childTime = children.reduce((max, child) => Math.max(max, child.time), 0);
+      return {
+        ...entry,
+        children,
+        displayTime: Math.max(entry.time, childTime),
+      };
+    })
+    .sort((a, b) => (b.displayTime - a.displayTime) || (b.index - a.index))
     .slice(0, 16)
-    .forEach((log) => {
-      const item = document.createElement("div");
-      item.className = "mc-log-item";
-      const time = new Date(log.ts).toLocaleString(locale);
-      if (log.type === "task") {
-        const title = log.title || t("history.task", "Tarea");
-        const user = completedBy(log.user);
-        if (log.punctual) {
-          const duration = log.completionDuration ? ` (${log.completionDuration})` : "";
-          item.textContent = `${time} - ${t("history.oneOffCompleted", "Tarea puntual completada")}${duration}: ${title}${user}`;
-        } else {
-          const overdueText = log.overdueDuration ? t("history.lateSuffix", (text) => `, ${text} tarde`)(log.overdueDuration) : "";
-          const prefix = log.overdue
-            ? t("history.completedLate", (text) => `Tarea completada fuera de plazo${text}: `)(overdueText)
-            : t("history.completed", "Tarea completada: ");
-          item.textContent = `${time} - ${prefix}${title}${user}`;
-        }
-      } else if (log.type === "location") {
-        const value = log.value ? log.value : t("history.noLocation", "Sin ubicación");
-        item.textContent = `${time} - ${t("history.location", "Ubicación")} -> ${value}`;
-      } else if (log.type === "status") {
-        const labelText = STATUS_LABELS[log.value] || log.value;
-        const user = completedBy(log.user);
-        item.textContent = `${time} - ${t("history.status", "Estado")} -> ${labelText}${user}`;
-      } else if (log.type === "task_created") {
-        const title = log.title || t("history.task", "Tarea");
-        const desc = log.description ? ` - ${log.description}` : "";
-        const user = completedBy(log.user);
-        item.textContent = `${time} - ${t("history.taskCreated", "Tarea creada")}: ${title}${desc}${user}`;
-      } else if (log.type === "task_removed") {
-        const title = log.title || t("history.task", "Tarea");
-        const desc = log.description ? ` - ${log.description}` : "";
-        const user = completedBy(log.user);
-        item.textContent = `${time} - ${t("history.taskRemoved", "Tarea eliminada")}: ${title}${desc}${user}`;
-      } else if (log.type === "task_edited") {
-        const title = log.title || t("history.task", "Tarea");
-        const user = completedBy(log.user);
-        item.textContent = `${time} - ${t("history.taskEdited", "Tarea editada")}: ${title}${user}`;
-      } else if (log.type === "admin_accept") {
-        const admin = log.admin ? ` ${log.admin}` : "";
-        const user = completedBy(log.user);
-        item.textContent = `${time} - ${t("history.adminAccepted", "Administrador aceptado:")}${admin}${user}`;
-      } else if (log.type === "intervencion") {
-        const message = log.message || "";
-        const user = completedBy(log.user);
-        item.textContent = `${time} - ${t("history.interventionLog", "Intervencion")}: ${message}${user}`;
-      } else {
-        item.textContent = `${time} - ${log.type || t("history.event", "Evento")}`;
-      }
-      list.appendChild(item);
-      if (log.type === "task_created") {
-        const key = taskLogKey(log);
-        const notes = key ? notesByTaskKey.get(key) || [] : [];
-        notes
-          .slice()
-          .sort((a, b) => new Date(a.ts) - new Date(b.ts))
-          .forEach(appendTaskNote);
-      }
+    .forEach((entry) => {
+      appendLog(entry.log);
+      entry.children.forEach((child) => appendLog(child.log, true));
     });
   panel.appendChild(list);
 
@@ -188,7 +204,7 @@ export const render = (panel, machine, hooks, options = {}) => {
       document.body.appendChild(tipEl);
       const x = (event && event.clientX) || 0;
       const y = (event && event.clientY) || 0;
-      const left = x + 12;
+      const left = x - tipEl.offsetWidth - 12;
       const top = y - tipEl.offsetHeight - 10;
       tipEl.style.top = `${Math.max(8, top)}px`;
       tipEl.style.left = `${Math.max(8, left)}px`;

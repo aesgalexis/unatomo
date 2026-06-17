@@ -37,7 +37,7 @@ const attachTooltip = (target) => {
     const x = (event && event.clientX) || 0;
     const y = (event && event.clientY) || 0;
     tipEl.style.top = `${Math.max(8, y - tipEl.offsetHeight - 10)}px`;
-    tipEl.style.left = `${Math.max(8, x + 12)}px`;
+    tipEl.style.left = `${Math.max(8, x - tipEl.offsetWidth - 12)}px`;
   };
   const hideTip = () => {
     if (tipEl && tipEl.parentNode) tipEl.parentNode.removeChild(tipEl);
@@ -84,8 +84,10 @@ const downloadTextFile = (content, filename) => {
   URL.revokeObjectURL(url);
 };
 
+const isLogUnseen = (log = {}, seenAt = "") => toTime(log.ts) > toTime(seenAt);
+
 const appendRow = (list, entry, locale, options = {}) => {
-  const isUnseen = entry.time > toTime(options.seenAt);
+  const isUnseen = isLogUnseen(entry.log, options.seenAt);
   const row = document.createElement("article");
   row.className = "global-registry-row";
   row.classList.toggle("is-unseen", isUnseen);
@@ -126,9 +128,10 @@ const appendRow = (list, entry, locale, options = {}) => {
       .slice()
       .sort((a, b) => new Date(a.ts) - new Date(b.ts))
       .forEach((relatedLog) => {
+        const relatedUnseen = isLogUnseen(relatedLog, options.seenAt);
         const related = document.createElement("article");
         related.className = "global-registry-row global-registry-row-note";
-        related.classList.toggle("is-unseen", isUnseen);
+        related.classList.toggle("is-unseen", relatedUnseen);
 
         const relatedMeta = document.createElement("div");
         relatedMeta.className = "global-registry-meta";
@@ -155,9 +158,10 @@ const appendRow = (list, entry, locale, options = {}) => {
     .slice()
     .sort((a, b) => new Date(a.ts) - new Date(b.ts))
     .forEach((noteLog) => {
+      const noteUnseen = isLogUnseen(noteLog, options.seenAt);
       const note = document.createElement("article");
       note.className = "global-registry-row global-registry-row-note";
-      note.classList.toggle("is-unseen", isUnseen);
+      note.classList.toggle("is-unseen", noteUnseen);
 
       const noteMeta = document.createElement("div");
       noteMeta.className = "global-registry-meta";
