@@ -244,11 +244,6 @@ export const countUnseenGlobalRegistryEntries = (machines = [], seenAt = "") => 
   const seenTime = toTime(seenAt);
   return buildGlobalRegistryEntries(machines).reduce((total, entry) => {
     if (entry.time <= seenTime) return total;
-    const logs = [
-      entry.log,
-      ...(entry.relatedLogs || []),
-      ...(entry.notes || []),
-    ];
-    return total + logs.length;
+    return total + 1;
   }, 0);
 };
