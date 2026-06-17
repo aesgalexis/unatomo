@@ -15,9 +15,80 @@ const formatDate = (value, locale) => {
   return date.toLocaleString(locale);
 };
 
-const appendRow = (list, entry, locale) => {
+const toTime = (value) => {
+  const date = value ? new Date(value) : null;
+  return date && !Number.isNaN(date.getTime()) ? date.getTime() : 0;
+};
+
+const clearTooltips = () => {
+  document.querySelectorAll(".mc-tooltip").forEach((node) => node.remove());
+};
+
+const attachTooltip = (target) => {
+  let tipEl = null;
+  const showTip = (event) => {
+    const label = target.getAttribute("data-tooltip");
+    if (!label) return;
+    clearTooltips();
+    tipEl = document.createElement("div");
+    tipEl.className = "mc-tooltip";
+    tipEl.textContent = label;
+    document.body.appendChild(tipEl);
+    const x = (event && event.clientX) || 0;
+    const y = (event && event.clientY) || 0;
+    tipEl.style.top = `${Math.max(8, y - tipEl.offsetHeight - 10)}px`;
+    tipEl.style.left = `${Math.max(8, x + 12)}px`;
+  };
+  const hideTip = () => {
+    if (tipEl && tipEl.parentNode) tipEl.parentNode.removeChild(tipEl);
+    tipEl = null;
+  };
+  target.addEventListener("mouseenter", showTip);
+  target.addEventListener("mouseleave", hideTip);
+  target.addEventListener("blur", hideTip);
+  target.addEventListener("click", hideTip);
+};
+
+const formatDownloadLine = (entry, log, locale, indent = "") => {
+  const date = formatDate(log.ts, locale);
+  const machine = entry.machine?.title || t("machine.machine", "Equipo");
+  const location = (entry.machine?.location || "").toString().trim();
+  const place = location ? ` | ${location}` : "";
+  const text = formatHistoryLog(log, { omitTaskTitle: indent.length > 0 && log.type === "task_note_added" });
+  return `${indent}[${date}] ${machine}${place} - ${text}`;
+};
+
+const buildDownloadText = (entries, locale) => {
+  const lines = [];
+  entries.forEach((entry) => {
+    lines.push(formatDownloadLine(entry, entry.log, locale));
+    (entry.relatedLogs || []).forEach((log) => {
+      lines.push(formatDownloadLine(entry, log, locale, "  "));
+    });
+    (entry.notes || []).forEach((log) => {
+      lines.push(formatDownloadLine(entry, log, locale, "  "));
+    });
+  });
+  return lines.join("\n");
+};
+
+const downloadTextFile = (content, filename) => {
+  const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+};
+
+const appendRow = (list, entry, locale, options = {}) => {
+  const isUnseen = entry.time > toTime(options.seenAt);
   const row = document.createElement("article");
   row.className = "global-registry-row";
+  row.classList.toggle("is-unseen", isUnseen);
 
   const meta = document.createElement("div");
   meta.className = "global-registry-meta";
@@ -57,6 +128,7 @@ const appendRow = (list, entry, locale) => {
       .forEach((relatedLog) => {
         const related = document.createElement("article");
         related.className = "global-registry-row global-registry-row-note";
+        related.classList.toggle("is-unseen", isUnseen);
 
         const relatedMeta = document.createElement("div");
         relatedMeta.className = "global-registry-meta";
@@ -68,7 +140,9 @@ const appendRow = (list, entry, locale) => {
 
         const relatedBody = document.createElement("div");
         relatedBody.className = "global-registry-message";
-        relatedBody.textContent = formatHistoryLog(relatedLog);
+        relatedBody.textContent = formatHistoryLog(relatedLog, {
+          omitTaskTitle: relatedLog.type === "task_note_added",
+        });
 
         related.appendChild(relatedMeta);
         related.appendChild(relatedBody);
@@ -83,6 +157,7 @@ const appendRow = (list, entry, locale) => {
     .forEach((noteLog) => {
       const note = document.createElement("article");
       note.className = "global-registry-row global-registry-row-note";
+      note.classList.toggle("is-unseen", isUnseen);
 
       const noteMeta = document.createElement("div");
       noteMeta.className = "global-registry-meta";
@@ -94,7 +169,7 @@ const appendRow = (list, entry, locale) => {
 
       const noteBody = document.createElement("div");
       noteBody.className = "global-registry-message";
-      noteBody.textContent = formatHistoryLog(noteLog);
+      noteBody.textContent = formatHistoryLog(noteLog, { omitTaskTitle: true });
 
       note.appendChild(noteMeta);
       note.appendChild(noteBody);
@@ -109,6 +184,7 @@ export const renderGlobalRegistryView = (container, machines = [], options = {})
   );
   const onLoadMore = options.onLoadMore;
   const query = (options.query || "").toString().trim();
+  const seenAt = options.seenAt || "";
   const locale = getLocale();
   const allEntries = buildGlobalRegistryEntries(machines);
   const entries = filterGlobalRegistryEntries(allEntries, query);
@@ -116,6 +192,23 @@ export const renderGlobalRegistryView = (container, machines = [], options = {})
   container.innerHTML = "";
   container.className = "global-registry-view";
   container.removeAttribute("data-has-ungrouped");
+
+  const toolbar = document.createElement("div");
+  toolbar.className = "global-registry-toolbar";
+  const download = document.createElement("button");
+  download.type = "button";
+  download.className = "global-registry-download mc-log-download";
+  download.setAttribute("aria-label", t("history.download", "Descargar registro completo"));
+  download.setAttribute("data-tooltip", t("history.download", "Descargar registro completo"));
+  download.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 3a1 1 0 0 1 1 1v8.59l2.3-2.3a1 1 0 1 1 1.4 1.42l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 0 1 1.4-1.42l2.3 2.3V4a1 1 0 0 1 1-1Zm-7 14a1 1 0 0 1 1 1v2h12v-2a1 1 0 1 1 2 0v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1Z"/></svg>';
+  download.addEventListener("click", () => {
+    const text = buildDownloadText(entries, locale);
+    const stamp = new Date().toISOString().slice(0, 10);
+    downloadTextFile(text, `registro_global_${stamp}.txt`);
+  });
+  attachTooltip(download);
+  toolbar.appendChild(download);
+  container.appendChild(toolbar);
 
   const header = document.createElement("div");
   header.className = "global-registry-header";
@@ -140,7 +233,7 @@ export const renderGlobalRegistryView = (container, machines = [], options = {})
 
   const list = document.createElement("div");
   list.className = "global-registry-list";
-  entries.slice(0, visibleCount).forEach((entry) => appendRow(list, entry, locale));
+  entries.slice(0, visibleCount).forEach((entry) => appendRow(list, entry, locale, { seenAt }));
   container.appendChild(list);
 
   if (visibleCount < entries.length) {

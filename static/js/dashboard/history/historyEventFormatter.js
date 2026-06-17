@@ -35,7 +35,7 @@ export const isTaskNoteLog = (log = {}) => log.type === "task_note_added";
 
 export const isTaskCreatedLog = (log = {}) => log.type === "task_created";
 
-export const formatHistoryLog = (log = {}) => {
+export const formatHistoryLog = (log = {}, options = {}) => {
   if (log.type === "task") {
     const title = log.title || t("history.task", "Tarea");
     const user = completedBy(log.user);
@@ -81,6 +81,9 @@ export const formatHistoryLog = (log = {}) => {
     const title = log.title || t("history.task", "Tarea");
     const note = log.note ? ` - ${log.note}` : "";
     const user = completedBy(log.user);
+    if (options.omitTaskTitle) {
+      return `${t("history.taskNoteAdded", "Nota en tarea")}${note}${user}`;
+    }
     return `${t("history.taskNoteAdded", "Nota en tarea")}: ${title}${note}${user}`;
   }
 

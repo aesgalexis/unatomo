@@ -26,6 +26,7 @@ import { filterMachines } from "./components/machineSearch/machineFilter.js";
 import { createMachineSearchBar } from "./components/machineSearch/machineSearchBar.js";
 import { createDashboardLoading } from "./components/loading/dashboardLoading.js";
 import { GLOBAL_REGISTRY_PAGE_SIZE, renderGlobalRegistryView } from "./views/registry/globalRegistryView.js";
+import { countUnseenGlobalRegistryEntries } from "./views/registry/globalRegistryModel.js";
 import { setTopbarSaveStatus } from "/static/js/topbar/save-status.js";
 import { setTopbarNotifications } from "/static/js/notifications/topbar-notifications.js";
 import { calculateStorageUsage, STORAGE_LIMIT_BYTES } from "/static/js/configuracion/storageUsage.js";
@@ -76,7 +77,13 @@ if (mount) {
     selectedTabById: {},
     configSubtabById: {},
     tagStatusById: {},
-    dashboardLayout: { groups: [], placements: {}, tabOrder: [], dashboardTitle: "" },
+    dashboardLayout: {
+      groups: [],
+      placements: {},
+      tabOrder: [],
+      dashboardTitle: "",
+      registrySeenAt: ""
+    },
     activeView: getDashboardInternalView(),
     registryVisibleCount: GLOBAL_REGISTRY_PAGE_SIZE,
     searchQuery: "",
@@ -156,6 +163,11 @@ if (mount) {
       .replace(/\s+/g, " ")
       .trim()
       .slice(0, MAX_DASHBOARD_TITLE_LENGTH);
+
+  const normalizeIsoString = (value) => {
+    const date = value ? new Date(value) : null;
+    return date && !Number.isNaN(date.getTime()) ? date.toISOString() : "";
+  };
 
   const getDefaultDashboardTitle = () => t("dashboard.navDashboard", "Dashboard");
 
@@ -248,6 +260,14 @@ if (mount) {
   const createStatusCycleId = (machineId) =>
     `status_${machineId || "machine"}_${Date.now().toString(36)}`;
 
+  const getRestoreTaskCycleId = (task, machineData = {}) => {
+    if (!task) return "";
+    if (task.statusCycleId) return task.statusCycleId;
+    return task.source === RESTORE_OPERATION_TASK_SOURCE
+      ? machineData.activeStatusCycleId || ""
+      : "";
+  };
+
   const hasPendingRestoreOperationTask = (tasks = []) =>
     normalizeTasks(tasks).some(
       (task) =>
@@ -322,7 +342,13 @@ if (mount) {
   const registryLink = document.createElement("a");
   registryLink.className = "dashboard-section-link";
   registryLink.href = "#/registro";
-  registryLink.textContent = t("dashboard.navRegistry", "Registro");
+  const registryBadge = document.createElement("span");
+  registryBadge.className = "dashboard-section-badge";
+  registryBadge.hidden = true;
+  const registryLabel = document.createElement("span");
+  registryLabel.textContent = t("dashboard.navRegistry", "Registro");
+  registryLink.appendChild(registryBadge);
+  registryLink.appendChild(registryLabel);
 
   sectionNav.appendChild(dashboardLink);
   sectionNav.appendChild(registryLink);
@@ -367,6 +393,31 @@ if (mount) {
       if (!query) searchInput.blur();
     }
     searchInput.classList.toggle("is-active-search", !!query);
+  };
+
+  const updateRegistryBadge = () => {
+    const count = countUnseenGlobalRegistryEntries(
+      state.draftMachines || [],
+      state.dashboardLayout?.registrySeenAt || ""
+    );
+    registryBadge.hidden = count <= 0;
+    registryBadge.textContent = count > 99 ? "99+" : String(count);
+    registryLink.classList.toggle("has-unseen", count > 0);
+  };
+
+  const markRegistrySeen = async () => {
+    if (!state.uid) return;
+    const seenAt = new Date().toISOString();
+    state.dashboardLayout = {
+      ...normalizeDashboardLayout(state.dashboardLayout),
+      registrySeenAt: seenAt
+    };
+    updateRegistryBadge();
+    try {
+      await upsertDashboardLayout(state.uid, state.dashboardLayout);
+    } catch {
+      notifyTopbar(t("dashboard.saveError", "Error al guardar"));
+    }
   };
   const orderBtn = document.createElement("button");
   orderBtn.type = "button";
@@ -803,7 +854,8 @@ if (mount) {
       groups,
       placements,
       tabOrder: normalizeTabOrder(layout.tabOrder),
-      dashboardTitle: normalizeDashboardTitle(layout.dashboardTitle)
+      dashboardTitle: normalizeDashboardTitle(layout.dashboardTitle),
+      registrySeenAt: normalizeIsoString(layout.registrySeenAt)
     };
   };
 
@@ -1424,6 +1476,7 @@ if (mount) {
     clearDashboardTooltips();
     list.innerHTML = "";
     const machines = Array.isArray(state.draftMachines) ? state.draftMachines : [];
+    updateRegistryBadge();
     if (state.activeView === "registro") {
       clearMobileDetailState();
       syncMobileDetailUI();
@@ -1432,6 +1485,7 @@ if (mount) {
       cardRefs.clear();
       renderGlobalRegistryView(list, machines, {
         query: state.searchQuery,
+        seenAt: state.dashboardLayout?.registrySeenAt || "",
         visibleCount: state.registryVisibleCount,
         onLoadMore: () => {
           state.registryVisibleCount += GLOBAL_REGISTRY_PAGE_SIZE;
@@ -2523,7 +2577,7 @@ if (mount) {
               description: (removed && removed.description) || "",
               user,
               source: removed?.source || "",
-              statusCycleId: removed?.statusCycleId || current.activeStatusCycleId || ""
+              statusCycleId: getRestoreTaskCycleId(removed, current)
             }
           ];
           updateMachine(id, { tasks, logs });
@@ -2561,7 +2615,7 @@ if (mount) {
               note: note.text,
               user,
               source: task?.source || "",
-              statusCycleId: task?.statusCycleId || current.activeStatusCycleId || ""
+              statusCycleId: getRestoreTaskCycleId(task, current)
             }
           ];
           updateMachine(id, { tasks, logs });
@@ -2602,7 +2656,7 @@ if (mount) {
               description: task?.description || "",
               user,
               source: task?.source || "",
-              statusCycleId: task?.statusCycleId || current.activeStatusCycleId || ""
+              statusCycleId: getRestoreTaskCycleId(task, current)
             }
           ];
           updateMachine(id, { tasks, logs });
@@ -2825,8 +2879,9 @@ if (mount) {
           const user = state.adminLabel || t("dashboard.admin", "Administrador");
           const statusCycleId =
             before?.statusCycleId ||
-            current.activeStatusCycleId ||
-            (shouldRestoreOperation ? createStatusCycleId(id) : "");
+            (shouldRestoreOperation
+              ? current.activeStatusCycleId || createStatusCycleId(id)
+              : "");
           const logs = [
             ...(current.logs || []),
             {
@@ -3208,8 +3263,13 @@ if (mount) {
         groups: [],
         placements: {},
         tabOrder: normalizeTabOrder(),
-        dashboardTitle: ""
+        dashboardTitle: "",
+        registrySeenAt: ""
       };
+    }
+    if (!state.dashboardLayout.registrySeenAt) {
+      state.dashboardLayout.registrySeenAt = new Date().toISOString();
+      upsertDashboardLayout(uid, state.dashboardLayout).catch(() => {});
     }
     applyDashboardTitle();
     initDashboardTitleEditor();
@@ -3282,7 +3342,11 @@ if (mount) {
   window.addEventListener("hashchange", () => {
     const nextView = getDashboardInternalView();
     if (nextView === state.activeView) return;
+    const previousView = state.activeView;
     state.activeView = nextView;
+    if (previousView === "registro" && nextView !== "registro") {
+      markRegistrySeen();
+    }
     if (nextView === "registro") {
       state.registryVisibleCount = GLOBAL_REGISTRY_PAGE_SIZE;
     }

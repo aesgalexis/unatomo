@@ -20,6 +20,11 @@ const dashboardLayoutDoc = (uid) => doc(db, "dashboard_layout", uid);
 const VALID_TAB_IDS = ["quehaceres", "general", "historial", "configuracion"];
 const MAX_DASHBOARD_TITLE_LENGTH = 32;
 
+const normalizeIsoString = (value) => {
+  const date = value ? new Date(value) : null;
+  return date && !Number.isNaN(date.getTime()) ? date.toISOString() : "";
+};
+
 const normalizeTabOrder = (value) => {
   const seen = new Set();
   const ordered = Array.isArray(value)
@@ -64,6 +69,7 @@ export const upsertDashboardLayout = async (uid, layout) => {
           : {},
       tabOrder: normalizeTabOrder(layout?.tabOrder),
       dashboardTitle,
+      registrySeenAt: normalizeIsoString(layout?.registrySeenAt),
       updatedAt: serverTimestamp(),
       updatedBy: uid
     },

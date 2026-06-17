@@ -79,8 +79,12 @@ Global registry scope:
 - Uses only machines already visible to the current account, including owner and accepted-admin machines.
 - Does not fetch hidden machines from other accounts.
 - Shows 254 main log entries first, then each `Cargar más` click adds another 254 main entries.
+- The global registry header includes a download action that exports the full filtered registry, not only the currently visible 254-entry page.
 - The shared dashboard search input is active in `Registro` and filters the global registry by machine, location, formatted event text, task title/description, task note, user/admin fields, and common date formats.
+- The `Registro` nav link shows a gray theme-aware badge with the number of unseen global registry entries/blocks. Unseen state is based on `dashboard_layout/{uid}.registrySeenAt`; accounts without that field initialize it on first load so old history does not appear as newly unread.
+- While viewing `#/registro`, entries newer than `registrySeenAt` render with stronger text. They are marked seen when the user leaves `#/registro`, not immediately on entry.
 - Task note logs stay visually grouped under their related task creation when `taskId` or title fallback can match them.
+- When task notes are rendered under their parent task in the global registry, omit the repeated task title; the indentation already provides the context.
 - Out-of-service operational cycles are grouped as one registry block when possible: status changed to `fuera_de_servicio`, the automatic restore task, notes/edits/completion for that task, and the return to `operativa`. The block sorts by its latest activity so long repairs move back to the top when updated.
 - The add and order/filter controls remain visible in `Registro`, but are disabled until those features are explicitly implemented for the registry view.
 
