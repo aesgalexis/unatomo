@@ -21,6 +21,7 @@ const PUBLIC_SECTIONS = new Set(["faqs", "tags", "contacto"]);
 
 let loading = false;
 let attempts = 0;
+let loadingTimer = null;
 let stallTimer = null;
 
 const getSectionFromHash = () =>
@@ -71,6 +72,19 @@ const clearStallTimer = () => {
   stallTimer = null;
 };
 
+const clearLoadingTimer = () => {
+  if (!loadingTimer) return;
+  window.clearTimeout(loadingTimer);
+  loadingTimer = null;
+};
+
+const armLoadingTimer = (message) => {
+  clearLoadingTimer();
+  loadingTimer = window.setTimeout(() => {
+    if (!hasDashboardChrome()) renderState(message);
+  }, 900);
+};
+
 const armStallTimer = () => {
   clearStallTimer();
   stallTimer = window.setTimeout(() => {
@@ -80,6 +94,7 @@ const armStallTimer = () => {
 
 const finishIfMounted = () => {
   if (hasDashboardChrome()) {
+    clearLoadingTimer();
     clearStallTimer();
     removeBootstrapState();
     return true;
@@ -92,7 +107,7 @@ const loadDashboard = async (options = {}) => {
   loading = true;
   attempts += 1;
 
-  renderState(options.message || text.loading);
+  armLoadingTimer(options.message || text.loading);
   armStallTimer();
 
   const url = options.force || attempts > 1
@@ -106,6 +121,7 @@ const loadDashboard = async (options = {}) => {
     });
   } catch (error) {
     console.error("Dashboard bootstrap failed", error);
+    clearLoadingTimer();
     renderState(text.failed, { action: true });
   } finally {
     loading = false;

@@ -20,8 +20,16 @@ try {
 
 const titleEl = document.getElementById("topbar-title");
 if (titleEl) {
+  let cachedDashboardTitle = "";
+  const isDashboardPage = /^\/nfc\/(?:es|en)\/index\.html$/i.test(window.location.pathname);
+  if (isDashboardPage) {
+    try {
+      cachedDashboardTitle = (localStorage.getItem("unatomo_dashboard_title_v1") || "").trim();
+    } catch {}
+  }
   const t = (document.body.dataset.topbarTitle || "").trim();
-  if (t) titleEl.textContent = t;
+  if (cachedDashboardTitle) titleEl.textContent = cachedDashboardTitle;
+  else if (t) titleEl.textContent = t;
 }
 
 const currentLang = getCurrentLang();
