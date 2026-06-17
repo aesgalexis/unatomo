@@ -34,6 +34,19 @@ const isStatusOperativeLog = (log = {}) =>
 const isStatusCycleLog = (log = {}) =>
   isStatusDownLog(log) || isStatusOperativeLog(log) || isRestoreOperationLog(log);
 
+const isTaskChildLog = (log = {}) =>
+  isTaskNoteLog(log) ||
+  log.type === "task" ||
+  log.type === "task_edited" ||
+  log.type === "task_removed";
+
+const addGroupedLog = (map, key, entry) => {
+  if (!key) return;
+  const logs = map.get(key) || [];
+  if (!logs.some((item) => item.index === entry.index)) logs.push(entry);
+  map.set(key, logs);
+};
+
 const entryId = (machine, log, index) =>
   `${machine.id || "machine"}-${log.ts || index}-${index}`;
 
@@ -59,17 +72,7 @@ export const buildGlobalRegistryEntries = (machines = []) => {
     const orderedLogs = rawLogs
       .slice()
       .sort((a, b) => (a.time - b.time) || (a.index - b.index));
-    const notesByTaskKey = new Map();
     const consumed = new Set();
-
-    rawLogs.forEach(({ log }) => {
-      if (!isTaskNoteLog(log)) return;
-      getTaskLogKeys(log).forEach((key) => {
-        const notes = notesByTaskKey.get(key) || [];
-        if (!notes.includes(log)) notes.push(log);
-        notesByTaskKey.set(key, notes);
-      });
-    });
 
     const pushCycleEntry = (cycleLogs, fallbackIndex = 0) => {
       const uniqueLogs = cycleLogs
@@ -148,18 +151,44 @@ export const buildGlobalRegistryEntries = (machines = []) => {
       }
     });
 
+    const taskParentKeys = new Set();
+    rawLogs.forEach(({ log, index }) => {
+      if (consumed.has(index) || !isTaskCreatedLog(log)) return;
+      getTaskLogKeys(log).forEach((key) => taskParentKeys.add(key));
+    });
+
+    const taskChildrenByTaskKey = new Map();
+    const taskChildIndexes = new Set();
+    rawLogs.forEach((entry) => {
+      const { log, index } = entry;
+      if (consumed.has(index) || isTaskCreatedLog(log) || !isTaskChildLog(log)) return;
+      const keys = getTaskLogKeys(log).filter((key) => taskParentKeys.has(key));
+      keys.forEach((key) => addGroupedLog(taskChildrenByTaskKey, key, entry));
+      if (keys.length) taskChildIndexes.add(index);
+    });
+
+    const getTaskChildren = (log) => {
+      const children = [];
+      getTaskLogKeys(log).forEach((key) => {
+        (taskChildrenByTaskKey.get(key) || []).forEach((entry) => {
+          if (!children.some((item) => item.index === entry.index)) children.push(entry);
+        });
+      });
+      return children.sort((a, b) => (a.time - b.time) || (a.index - b.index));
+    };
+
     rawLogs
-      .filter(({ log, index }) => !consumed.has(index) && !isTaskNoteLog(log))
+      .filter(({ index }) => !consumed.has(index) && !taskChildIndexes.has(index))
       .forEach(({ log, index }) => {
-        const key = isTaskCreatedLog(log) ? getPrimaryTaskLogKey(log) : "";
-        const notes = key ? notesByTaskKey.get(key) || [] : [];
-        const noteTime = notes.reduce((max, note) => Math.max(max, toTime(note.ts)), 0);
+        const children = isTaskCreatedLog(log) ? getTaskChildren(log) : [];
+        const childTime = children.reduce((max, child) => Math.max(max, child.time), 0);
         entries.push({
           id: entryId(machine, log, index),
           machine,
           log,
-          time: Math.max(toTime(log.ts), noteTime),
-          notes,
+          time: Math.max(toTime(log.ts), childTime),
+          notes: [],
+          relatedLogs: children.map((child) => child.log),
         });
       });
   });
@@ -213,5 +242,12 @@ export const filterGlobalRegistryEntries = (entries = [], query = "") => {
 
 export const countUnseenGlobalRegistryEntries = (machines = [], seenAt = "") => {
   const seenTime = toTime(seenAt);
-  return buildGlobalRegistryEntries(machines).filter((entry) => entry.time > seenTime).length;
+  return buildGlobalRegistryEntries(machines).reduce((total, entry) => {
+    const logs = [
+      entry.log,
+      ...(entry.relatedLogs || []),
+      ...(entry.notes || []),
+    ];
+    return total + logs.filter((log) => toTime(log.ts) > seenTime).length;
+  }, 0);
 };
