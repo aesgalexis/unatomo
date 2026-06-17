@@ -245,6 +245,9 @@ if (mount) {
     statusTarget: "operativa"
   });
 
+  const createStatusCycleId = (machineId) =>
+    `status_${machineId || "machine"}_${Date.now().toString(36)}`;
+
   const hasPendingRestoreOperationTask = (tasks = []) =>
     normalizeTasks(tasks).some(
       (task) =>
@@ -1709,14 +1712,34 @@ if (mount) {
           const keepExpanded = node.dataset.expanded === "true";
           const user = state.adminLabel || t("dashboard.admin", "Administrador");
           const now = new Date().toISOString();
+          const statusCycleId =
+            current.statusCycleId ||
+            current.activeStatusCycleId ||
+            createStatusCycleId(machine.id);
           let nextTasks = normalizeTasks(current.tasks || []);
           const nextLogs = [
             ...(current.logs || []),
-            { ts: now, type: "status", value: nextStatus, user }
+            {
+              ts: now,
+              type: "status",
+              value: nextStatus,
+              user,
+              statusCycleId:
+                nextStatus === "fuera_de_servicio" || currentStatus === "fuera_de_servicio"
+                  ? statusCycleId
+                  : "",
+              source:
+                nextStatus === "fuera_de_servicio" || currentStatus === "fuera_de_servicio"
+                  ? RESTORE_OPERATION_TASK_SOURCE
+                  : ""
+            }
           ];
           if (currentStatus !== "fuera_de_servicio" && nextStatus === "fuera_de_servicio") {
             if (!hasPendingRestoreOperationTask(nextTasks)) {
-              const restoreTask = createRestoreOperationTask(user);
+              const restoreTask = {
+                ...createRestoreOperationTask(user),
+                statusCycleId
+              };
               nextTasks = [restoreTask, ...nextTasks];
               nextLogs.push({
                 ts: now,
@@ -1724,7 +1747,9 @@ if (mount) {
                 taskId: restoreTask.id,
                 title: restoreTask.title,
                 description: restoreTask.description || "",
-                user
+                user,
+                source: RESTORE_OPERATION_TASK_SOURCE,
+                statusCycleId
               });
             }
           } else if (currentStatus === "fuera_de_servicio" && nextStatus === "operativa") {
@@ -1736,12 +1761,15 @@ if (mount) {
               nextLogs.push({
                 ts: now,
                 type: "task",
+                taskId: restoreTask.id,
                 title: restoreTask.title || t("tasks.restoreOperation", "Volver a poner la máquina en operatividad"),
                 user,
                 overdue: false,
                 overdueDuration: "",
                 punctual: true,
-                completionDuration: getCompletionDuration(restoreTask)
+                completionDuration: getCompletionDuration(restoreTask),
+                source: RESTORE_OPERATION_TASK_SOURCE,
+                statusCycleId: restoreTask.statusCycleId || statusCycleId
               });
             }
           }
@@ -1749,7 +1777,8 @@ if (mount) {
             ...current,
             status: nextStatus,
             tasks: nextTasks,
-            logs: nextLogs
+            logs: nextLogs,
+            activeStatusCycleId: nextStatus === "fuera_de_servicio" ? statusCycleId : ""
           });
           renderCards({ preserveScroll: true });
           autoSave.saveNow(machine.id, "status");
@@ -2492,7 +2521,9 @@ if (mount) {
               taskId,
               title: (removed && removed.title) || "Tarea",
               description: (removed && removed.description) || "",
-              user
+              user,
+              source: removed?.source || "",
+              statusCycleId: removed?.statusCycleId || current.activeStatusCycleId || ""
             }
           ];
           updateMachine(id, { tasks, logs });
@@ -2528,7 +2559,9 @@ if (mount) {
               taskId,
               title: task?.title || "Tarea",
               note: note.text,
-              user
+              user,
+              source: task?.source || "",
+              statusCycleId: task?.statusCycleId || current.activeStatusCycleId || ""
             }
           ];
           updateMachine(id, { tasks, logs });
@@ -2567,7 +2600,9 @@ if (mount) {
               taskId,
               title: task?.title || "Tarea",
               description: task?.description || "",
-              user
+              user,
+              source: task?.source || "",
+              statusCycleId: task?.statusCycleId || current.activeStatusCycleId || ""
             }
           ];
           updateMachine(id, { tasks, logs });
@@ -2773,6 +2808,8 @@ if (mount) {
           const current = getDraftById(id);
           const baseTasks = normalizeTasks(current.tasks || []);
           const before = baseTasks.find((t) => t.id === taskId);
+          if (!before) return;
+          const now = new Date().toISOString();
           const wasOverdue = before ? getTaskTiming(before).pending : false;
           const overdueDuration = before ? getOverdueDuration(before) : "";
           const completionDuration = before ? getCompletionDuration(before) : "";
@@ -2781,32 +2818,42 @@ if (mount) {
             before?.statusTarget === "operativa";
           const tasks = baseTasks
             .map((t) =>
-              t.id === taskId ? { ...t, lastCompletedAt: new Date().toISOString() } : t
+              t.id === taskId ? { ...t, lastCompletedAt: now } : t
             )
             .filter((t) => !(t.id === taskId && t.frequency === "puntual"));
-          const task = baseTasks.find((t) => t.id === taskId);
+          const task = before;
           const user = state.adminLabel || t("dashboard.admin", "Administrador");
+          const statusCycleId =
+            before?.statusCycleId ||
+            current.activeStatusCycleId ||
+            (shouldRestoreOperation ? createStatusCycleId(id) : "");
           const logs = [
             ...(current.logs || []),
             {
-              ts: new Date().toISOString(),
+              ts: now,
               type: "task",
+              taskId,
               title: task.title || "Tarea",
               user,
               overdue: !!wasOverdue,
               overdueDuration,
               punctual: task.frequency === "puntual",
-              completionDuration
+              completionDuration,
+              source: shouldRestoreOperation ? RESTORE_OPERATION_TASK_SOURCE : task.source || "",
+              statusCycleId
             }
           ];
           const updates = { tasks, logs };
+          if (shouldRestoreOperation) updates.activeStatusCycleId = "";
           if (shouldRestoreOperation && normalizeStatus(current.status) !== "operativa") {
             updates.status = "operativa";
             logs.push({
-              ts: new Date().toISOString(),
+              ts: now,
               type: "status",
               value: "operativa",
-              user
+              user,
+              source: RESTORE_OPERATION_TASK_SOURCE,
+              statusCycleId
             });
           }
           updateMachine(id, updates);
