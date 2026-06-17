@@ -99,6 +99,25 @@ export const formatHistoryLog = (log = {}, options = {}) => {
     return `${t("history.adminAccepted", "Administrador aceptado:")}${admin}${user}`;
   }
 
+  if (log.type === "ownership_transfer") {
+    const from = log.fromOwnerEmail ? String(log.fromOwnerEmail).trim() : "";
+    const to = log.toOwnerEmail ? String(log.toOwnerEmail).trim() : "";
+    const user = completedBy(log.user);
+    if (from && to) {
+      return `${t(
+        "history.ownershipTransferredFromTo",
+        (fromEmail, toEmail) => `Propiedad transferida de ${fromEmail} a ${toEmail}`
+      )(from, to)}${user}`;
+    }
+    if (to) {
+      return `${t(
+        "history.ownershipTransferredTo",
+        (email) => `Propiedad transferida a ${email}`
+      )(to)}${user}`;
+    }
+    return `${t("history.ownershipTransferred", "Propiedad transferida")}${user}`;
+  }
+
   if (log.type === "intervencion") {
     const message = log.message || "";
     const user = completedBy(log.user);

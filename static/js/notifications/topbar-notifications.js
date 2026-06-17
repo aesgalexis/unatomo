@@ -84,6 +84,7 @@ export function initTopbarNotifications() {
 export function setTopbarNotifications(items = []) {
   if (!menuEl || !labelEl || !listEl) return;
   const hasItems = Array.isArray(items) && items.length > 0;
+  if (buttonEl) buttonEl.classList.toggle("has-notifications", hasItems);
   if (badgeEl) {
     badgeEl.hidden = !hasItems;
     if (hasItems) {
