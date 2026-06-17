@@ -5,6 +5,21 @@ service firebase.storage {
       return request.auth != null;
     }
 
+    function isLaundryServicesAdmin() {
+      return isSignedIn()
+        && request.auth.token.email in [
+          "aesg.alexis@gmail.com",
+          "alcalatriasm@gmail.com",
+          "alcalatriasmonica@gmail.com"
+        ];
+    }
+
+    function isLaundryMachineImage() {
+      return request.resource != null
+        && request.resource.size <= 12 * 1024 * 1024
+        && request.resource.contentType.matches('image/(jpeg|png|webp)');
+    }
+
     function acceptedAdminLink(machineId) {
       return /databases/(default)/documents/admin_machine_links/$(machineId + "_" + request.auth.uid);
     }
@@ -59,6 +74,12 @@ service firebase.storage {
       allow read: if canManageMachine(ownerUid, machineId);
       allow create, update: if canManageMachine(ownerUid, machineId) && isOtherDocument();
       allow delete: if canManageMachine(ownerUid, machineId);
+    }
+
+    match /maquinaria/{machineId}/{fileName} {
+      allow read: if true;
+      allow create, update: if isLaundryServicesAdmin() && isLaundryMachineImage();
+      allow delete: if false;
     }
 
     match /{allPaths=**} {
