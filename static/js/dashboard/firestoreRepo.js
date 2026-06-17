@@ -70,6 +70,7 @@ export const upsertDashboardLayout = async (uid, layout) => {
       tabOrder: normalizeTabOrder(layout?.tabOrder),
       dashboardTitle,
       registrySeenAt: normalizeIsoString(layout?.registrySeenAt),
+      suggestionsSeenAt: normalizeIsoString(layout?.suggestionsSeenAt),
       updatedAt: serverTimestamp(),
       updatedBy: uid
     },

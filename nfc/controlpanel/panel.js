@@ -24,6 +24,13 @@ const text = {
   usersHint: isEn
     ? "Accounts detected through Unatomo sign-in flows."
     : "Cuentas detectadas a trav\u00e9s de los flujos de acceso de Unatomo.",
+  userCollaborator: isEn ? "Collaborator" : "Colaborador",
+  userCollaboratorSaved: isEn
+    ? "Collaborator access updated."
+    : "Acceso de colaborador actualizado.",
+  userCollaboratorError: isEn
+    ? "Unable to update collaborator access."
+    : "No se ha podido actualizar el acceso de colaborador.",
   deleteUser: isEn ? "Delete account" : "Eliminar cuenta",
   usersDeleting: isEn ? "Deleting account..." : "Eliminando cuenta...",
   usersDeleted: isEn
@@ -93,6 +100,10 @@ const createCodeCallable = httpsCallable(functions, "createControlPanelRegistrat
 const deleteCodeCallable = httpsCallable(functions, "deleteControlPanelRegistrationCode");
 const listTagsCallable = httpsCallable(functions, "listControlPanelTags");
 const deleteUserCallable = httpsCallable(functions, "deleteControlPanelUser");
+const setUserCollaboratorCallable = httpsCallable(
+  functions,
+  "setControlPanelUserCollaborator"
+);
 
 const createCard = (title) => {
   const card = document.createElement("section");
@@ -208,6 +219,21 @@ const renderUsers = (body, items, handlers = {}) => {
     identity.appendChild(meta);
     row.appendChild(identity);
 
+    const collaboratorLabel = document.createElement("label");
+    collaboratorLabel.className = "controlpanel-check";
+    const collaborator = document.createElement("input");
+    collaborator.type = "checkbox";
+    collaborator.checked = item.suggestionsCollaborator === true;
+    collaborator.addEventListener("change", () => {
+      if (handlers.onToggleCollaborator) {
+        handlers.onToggleCollaborator(item, collaborator.checked, collaborator);
+      }
+    });
+    const collaboratorText = document.createElement("span");
+    collaboratorText.textContent = text.userCollaborator;
+    collaboratorLabel.appendChild(collaborator);
+    collaboratorLabel.appendChild(collaboratorText);
+
     const remove = document.createElement("button");
     remove.type = "button";
     remove.className = "controlpanel-link-danger";
@@ -216,6 +242,7 @@ const renderUsers = (body, items, handlers = {}) => {
       if (handlers.onDeleteUser) handlers.onDeleteUser(item);
     });
 
+    row.appendChild(collaboratorLabel);
     row.appendChild(remove);
     list.appendChild(row);
   });
@@ -536,6 +563,22 @@ if (mount) {
         renderUsers(usersBody, users, {
           setStatusRef: (setStatus) => {
             updateUsersStatus = setStatus;
+          },
+          onToggleCollaborator: async (item, enabled, input) => {
+            const uid = (item?.uid || "").toString().trim();
+            if (!uid) return;
+            input.disabled = true;
+            updateUsersStatus("");
+            try {
+              await setUserCollaboratorCallable({ uid, enabled });
+              item.suggestionsCollaborator = enabled;
+              updateUsersStatus(text.userCollaboratorSaved, "");
+            } catch {
+              input.checked = !enabled;
+              updateUsersStatus(text.userCollaboratorError, "error");
+            } finally {
+              input.disabled = false;
+            }
           },
           onDeleteUser: async (item) => {
             const uid = (item?.uid || "").toString().trim();
