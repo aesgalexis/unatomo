@@ -84,10 +84,10 @@ const downloadTextFile = (content, filename) => {
   URL.revokeObjectURL(url);
 };
 
-const isLogUnseen = (log = {}, seenAt = "") => toTime(log.ts) > toTime(seenAt);
+const isEntryUnseen = (entry = {}, seenAt = "") => toTime(entry.time) > toTime(seenAt);
 
 const appendRow = (list, entry, locale, options = {}) => {
-  const isUnseen = isLogUnseen(entry.log, options.seenAt);
+  const isUnseen = isEntryUnseen(entry, options.seenAt);
   const row = document.createElement("article");
   row.className = "global-registry-row";
   row.classList.toggle("is-unseen", isUnseen);
@@ -128,10 +128,9 @@ const appendRow = (list, entry, locale, options = {}) => {
       .slice()
       .sort((a, b) => new Date(a.ts) - new Date(b.ts))
       .forEach((relatedLog) => {
-        const relatedUnseen = isLogUnseen(relatedLog, options.seenAt);
         const related = document.createElement("article");
         related.className = "global-registry-row global-registry-row-note";
-        related.classList.toggle("is-unseen", relatedUnseen);
+        related.classList.toggle("is-unseen", isUnseen);
 
         const relatedMeta = document.createElement("div");
         relatedMeta.className = "global-registry-meta";
@@ -158,10 +157,9 @@ const appendRow = (list, entry, locale, options = {}) => {
     .slice()
     .sort((a, b) => new Date(a.ts) - new Date(b.ts))
     .forEach((noteLog) => {
-      const noteUnseen = isLogUnseen(noteLog, options.seenAt);
       const note = document.createElement("article");
       note.className = "global-registry-row global-registry-row-note";
-      note.classList.toggle("is-unseen", noteUnseen);
+      note.classList.toggle("is-unseen", isUnseen);
 
       const noteMeta = document.createElement("div");
       noteMeta.className = "global-registry-meta";

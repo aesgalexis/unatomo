@@ -243,11 +243,12 @@ export const filterGlobalRegistryEntries = (entries = [], query = "") => {
 export const countUnseenGlobalRegistryEntries = (machines = [], seenAt = "") => {
   const seenTime = toTime(seenAt);
   return buildGlobalRegistryEntries(machines).reduce((total, entry) => {
+    if (entry.time <= seenTime) return total;
     const logs = [
       entry.log,
       ...(entry.relatedLogs || []),
       ...(entry.notes || []),
     ];
-    return total + logs.filter((log) => toTime(log.ts) > seenTime).length;
+    return total + logs.length;
   }, 0);
 };
