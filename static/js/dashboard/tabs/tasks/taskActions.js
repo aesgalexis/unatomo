@@ -272,26 +272,6 @@ export const buildStatusToggleUpdate = (
         statusCycleId
       });
     }
-  } else if (currentStatus === "fuera_de_servicio" && nextStatus === "operativa") {
-    const restoreTask = tasks.find(
-      (task) => task.source === RESTORE_OPERATION_TASK_SOURCE && task.frequency === "puntual"
-    );
-    if (restoreTask) {
-      tasks = tasks.filter((task) => task.id !== restoreTask.id);
-      logs.push({
-        ts: now,
-        type: "task",
-        taskId: restoreTask.id,
-        title: restoreTask.title || options.restoreTitle || "Volver a poner la máquina en operatividad",
-        user,
-        overdue: false,
-        overdueDuration: "",
-        punctual: true,
-        completionDuration: getCompletionDuration(restoreTask),
-        source: RESTORE_OPERATION_TASK_SOURCE,
-        statusCycleId: restoreTask.statusCycleId || statusCycleId
-      });
-    }
   }
 
   return {

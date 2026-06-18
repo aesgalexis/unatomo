@@ -42,6 +42,23 @@ let totalMachinesCount = 0;
 let currentSizeIndex = 0;
 let useFrame = false;
 
+const requestPrint = () => {
+  try {
+    if (document.activeElement && typeof document.activeElement.blur === "function") {
+      document.activeElement.blur();
+    }
+  } catch {
+    // ignore focus cleanup failures
+  }
+  window.setTimeout(() => {
+    if (typeof window.print === "function") {
+      window.print();
+    } else if (typeof globalThis.print === "function") {
+      globalThis.print();
+    }
+  }, 0);
+};
+
 const getFocusedMachineId = () => {
   try {
     return new URLSearchParams(window.location.search).get("machineId") || "";
@@ -234,7 +251,11 @@ const renderQrGrid = (machines, options = {}) => {
       <path d="M6 14h12v7H6z"></path>
     </svg>
   `;
-  printBtn.addEventListener("click", () => window.print());
+  printBtn.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    requestPrint();
+  });
 
   actions.appendChild(sizeControl);
   actions.appendChild(frameControl);
