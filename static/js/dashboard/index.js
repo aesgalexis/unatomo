@@ -9,30 +9,62 @@ import { validateTag, assignTag } from "./tagRepo.js";
 import { createTagToken } from "/static/js/tokens/tagTokens.js";
 import { upsertMachineAccessFromMachine, fetchMachineAccess } from "./machineAccessRepo.js";
 import { buildMachineTagUrl, generateMachineTagQr, disconnectMachineTag } from "./tags/tagAssetsRepo.js";
-import {
-  deleteMachineDocumentFile,
-  uploadManualDocument,
-  uploadOtherDocument,
-  uploadPlateDocument
-} from "./documents/machineDocumentsRepo.js";
 import { createMachineCard } from "./machineCardTemplate.js";
 import { initGroupedDragAndDrop } from "./dragAndDrop.js";
 import { cloneMachines, normalizeMachine, createDraftMachine } from "./machineStore.js";
+import { installTaskHooks } from "./cardHooks/taskHooks.js";
+import { installDocumentHooks } from "./cardHooks/documentHooks.js";
 import { generateSaltBase64, hashPassword } from "/static/js/utils/crypto.js";
 import { initAutoSave } from "./autoSave.js";
-import { normalizeTasks } from "/static/js/dashboard/tabs/tasks/tasksModel.js";
-import { getTaskTiming, getOverdueDuration, getCompletionDuration } from "/static/js/dashboard/tabs/tasks/tasksTime.js";
+import { getTaskTiming } from "/static/js/dashboard/tabs/tasks/tasksTime.js";
+import { buildStatusToggleUpdate } from "/static/js/dashboard/tabs/tasks/taskActions.js";
 import { filterMachines } from "./components/machineSearch/machineFilter.js";
 import { createMachineSearchBar } from "./components/machineSearch/machineSearchBar.js";
 import { createDashboardLoading } from "./components/loading/dashboardLoading.js";
+import {
+  getDashboardLoadProgress,
+  hasDashboardLoadError,
+  markAdminLoadFailure,
+  markAdminLoadSuccess,
+  markDashboardLoadFailure,
+  markDashboardLoadTimeout,
+  markOwnerLoadFailure,
+  markOwnerLoadSuccess,
+  resetDashboardLoadState
+} from "./components/loading/dashboardLoadState.js";
+import {
+  renderDashboardEmptyPlaceholder,
+  renderDashboardLoadErrorPlaceholder,
+  renderDashboardNoResultsPlaceholder
+} from "./components/loading/dashboardPlaceholders.js";
 import {
   MAX_DASHBOARD_TITLE_LENGTH,
   normalizeDashboardLayout as normalizeDashboardLayoutBase,
   normalizeDashboardTitle,
   normalizeTabOrder
 } from "./layout/dashboardLayoutModel.mjs";
-import { GLOBAL_REGISTRY_PAGE_SIZE, renderGlobalRegistryView } from "./views/registry/globalRegistryView.js";
+import {
+  createDashboardGroupId,
+  createGroupFromMachineDrop,
+  getNextDashboardGroupTitle,
+  moveGroupToGroup,
+  moveMachineAfterTarget,
+  moveMachineToGroup as moveMachineToDashboardGroup,
+  reorderFlatMachines,
+  reorderMixedItems,
+  reorderUngroupedMachines,
+  updatePlacementOrder
+} from "./layout/dashboardLayoutActions.js";
 import { countUnseenGlobalRegistryEntries } from "./views/registry/globalRegistryModel.js";
+import {
+  GLOBAL_REGISTRY_PAGE_SIZE,
+  MAX_SUGGESTION_LENGTH,
+  SUGGESTIONS_PAGE_SIZE,
+  renderRegistryDashboardView,
+  renderSuggestionsDashboardView
+} from "./views/dashboardInternalViews.js";
+import { createMachineAccessSync } from "./data/machineAccessSync.js";
+import { createDashboardSubscriptions } from "./data/dashboardSubscriptions.js";
 import { isControlPanelUser } from "/nfc/controlpanel/access.js";
 import {
   createDashboardSuggestion,
@@ -40,28 +72,16 @@ import {
   markDashboardSuggestionsSeen
 } from "./views/suggestions/suggestionsRepo.js";
 import {
-  countUnseenSuggestions,
-  SUGGESTIONS_PAGE_SIZE,
-  MAX_SUGGESTION_LENGTH,
-  renderSuggestionsView
+  countUnseenSuggestions
 } from "./views/suggestions/suggestionsView.js";
 import { setTopbarSaveStatus } from "/static/js/topbar/save-status.js";
 import { setTopbarNotifications } from "/static/js/notifications/topbar-notifications.js";
 import { calculateStorageUsage, STORAGE_LIMIT_BYTES } from "/static/js/configuracion/storageUsage.js";
 import { getAppBasePrefix, getCurrentLang, setSavedLang } from "/static/js/site/locale.js";
 import { t } from "./i18n.js";
-import {
-  doc,
-  collection,
-  onSnapshot,
-  query,
-  where,
-  serverTimestamp
-} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
 const DEFAULT_COLLAPSED_HEIGHT = 108;
 const EXPAND_FACTOR = 2.5;
-const RESTORE_OPERATION_TASK_SOURCE = "status-out-of-service";
 const DASHBOARD_TITLE_CACHE_KEY = "unatomo_dashboard_title_v1";
 
 const mount = document.getElementById("dashboard-mount");
@@ -133,11 +153,6 @@ if (mount) {
     adminLoadFailed: false,
     loadTimedOut: false,
     loadingGuardTimer: null,
-    ownerUnsub: null,
-    adminLinksUnsub: null,
-    adminMachineUnsubs: new Map(),
-    inviteUnsub: null,
-    transferInviteUnsub: null,
     storageFull: false,
     nextScrollRestoreY: null,
     nextScrollAnchor: null,
@@ -168,9 +183,6 @@ if (mount) {
       // ignore
     }
   };
-  const tagUnsubs = new Map();
-  const tagIdByMachineId = new Map();
-  const machineIdByTagId = new Map();
   let rebuildToken = 0;
   let rebuildTimer = null;
   let pendingRebuildOptions = null;
@@ -178,6 +190,8 @@ if (mount) {
   let dashboardInitPromise = null;
   let dashboardSessionVersion = 0;
   let groupedDragAndDropReady = false;
+  let machineAccessSync = null;
+  let dashboardSubscriptions = null;
 
   const clearDashboardTooltips = () => {
     document.querySelectorAll(".mc-tooltip").forEach((node) => node.remove());
@@ -307,40 +321,6 @@ if (mount) {
       }
     });
   };
-
-  const createRestoreOperationTask = (createdBy) => ({
-    id:
-      (window.crypto?.randomUUID && window.crypto.randomUUID()) ||
-      `restore_${Date.now().toString(36)}`,
-    title: t("tasks.restoreOperation", "Volver a poner la máquina en operatividad"),
-    description: "",
-    frequency: "puntual",
-    createdAt: new Date().toISOString(),
-    lastCompletedAt: null,
-    createdBy: createdBy || null,
-    source: RESTORE_OPERATION_TASK_SOURCE,
-    automated: true,
-    statusTarget: "operativa"
-  });
-
-  const createStatusCycleId = (machineId) =>
-    `status_${machineId || "machine"}_${Date.now().toString(36)}`;
-
-  const getRestoreTaskCycleId = (task, machineData = {}) => {
-    if (!task) return "";
-    if (task.statusCycleId) return task.statusCycleId;
-    return task.source === RESTORE_OPERATION_TASK_SOURCE
-      ? machineData.activeStatusCycleId || ""
-      : "";
-  };
-
-  const hasPendingRestoreOperationTask = (tasks = []) =>
-    normalizeTasks(tasks).some(
-      (task) =>
-        task.source === RESTORE_OPERATION_TASK_SOURCE &&
-        task.frequency === "puntual" &&
-        getTaskTiming(task).pending
-    );
 
   const normalizeLocation = (value) =>
     (value || "")
@@ -679,20 +659,8 @@ if (mount) {
   };
 
   const cleanupDashboardSubscriptions = () => {
-    if (state.ownerUnsub) state.ownerUnsub();
-    if (state.adminLinksUnsub) state.adminLinksUnsub();
-    if (state.inviteUnsub) state.inviteUnsub();
-    if (state.transferInviteUnsub) state.transferInviteUnsub();
-    state.ownerUnsub = null;
-    state.adminLinksUnsub = null;
-    state.inviteUnsub = null;
-    state.transferInviteUnsub = null;
-    state.adminMachineUnsubs.forEach((unsub) => unsub?.());
-    state.adminMachineUnsubs.clear();
-    tagUnsubs.forEach((unsub) => unsub?.());
-    tagUnsubs.clear();
-    tagIdByMachineId.clear();
-    machineIdByTagId.clear();
+    dashboardSubscriptions?.cleanup();
+    machineAccessSync?.cleanup();
   };
 
   const resetDashboardRuntime = (uid) => {
@@ -712,12 +680,7 @@ if (mount) {
     state.configSubtabById = {};
     state.tagStatusById = {};
     clearMobileDetailState();
-    state.ownerReady = false;
-    state.adminReady = false;
-    state.ownerLoadFailed = false;
-    state.adminLoadFailed = false;
-    state.loadTimedOut = false;
-    state.loading = true;
+    resetDashboardLoadState(state);
     state.initialGroupPriorityOrder = {};
     state.initialGroupPriorityReady = false;
     cardRefs.clear();
@@ -795,11 +758,9 @@ if (mount) {
   }
 
   const updateLoading = () => {
-    const total = 2;
-    const ready = (state.ownerReady ? 1 : 0) + (state.adminReady ? 1 : 0);
-    const pct = Math.round((ready / total) * 100);
-    setLoadingProgress(pct);
-    if (ready >= total && state.loading) {
+    const progress = getDashboardLoadProgress(state);
+    setLoadingProgress(progress.percent);
+    if (progress.complete && state.loading) {
       state.loading = false;
       if (state.loadingGuardTimer) {
         clearTimeout(state.loadingGuardTimer);
@@ -818,15 +779,7 @@ if (mount) {
       state.loadingGuardTimer = null;
     }
     state.loadingGuardTimer = setTimeout(() => {
-      state.loadTimedOut = true;
-      if (!state.ownerReady) {
-        state.ownerReady = true;
-        state.ownerLoadFailed = true;
-      }
-      if (!state.adminReady) {
-        state.adminReady = true;
-        state.adminLoadFailed = true;
-      }
+      markDashboardLoadTimeout(state);
       updateLoading();
       renderCards({ preserveScroll: false });
     }, 8000);
@@ -838,23 +791,20 @@ if (mount) {
   syncDashboardViewChrome();
 
   const renderPlaceholder = () => {
-    list.innerHTML = "";
-    const placeholder = document.createElement("div");
-    placeholder.className = "machine-placeholder";
-    placeholder.textContent =
-      t("dashboard.noMachines", "Todavía no hay máquinas. Pulsa 'Añadir' para crear la primera.");
-    list.appendChild(placeholder);
+    renderDashboardEmptyPlaceholder(
+      list,
+      t("dashboard.noMachines", "Todavía no hay máquinas. Pulsa 'Añadir' para crear la primera.")
+    );
   };
 
   const renderLoadErrorPlaceholder = () => {
-    list.innerHTML = "";
-    const placeholder = document.createElement("div");
-    placeholder.className = "machine-placeholder";
-    placeholder.textContent = t(
-      "dashboard.machinesLoadError",
-      "No se pudieron cargar las máquinas. Recarga el dashboard."
+    renderDashboardLoadErrorPlaceholder(
+      list,
+      t(
+        "dashboard.machinesLoadError",
+        "No se pudieron cargar las máquinas. Recarga el dashboard."
+      )
     );
-    list.appendChild(placeholder);
   };
 
   const createGroupSection = (group, pendingTasksCount = 0, downMachinesCount = 0) => {
@@ -974,46 +924,6 @@ if (mount) {
     return merged;
   };
 
-  const syncMachineAccessListeners = (machines) => {
-    const nextTagIds = new Set();
-    tagIdByMachineId.clear();
-    machineIdByTagId.clear();
-
-    machines.forEach((machine) => {
-      if (!machine.tagId) return;
-      nextTagIds.add(machine.tagId);
-      tagIdByMachineId.set(machine.id, machine.tagId);
-      machineIdByTagId.set(machine.tagId, machine.id);
-      if (!tagUnsubs.has(machine.tagId)) {
-        const ref = doc(db, "machine_access", machine.tagId);
-        const unsub = onSnapshot(
-          ref,
-          (snap) => {
-            if (!snap.exists()) return;
-            const data = snap.data() || {};
-            const targetId = machineIdByTagId.get(machine.tagId);
-            if (!targetId) return;
-            applyOperationalPatch(targetId, data);
-          },
-          () => {
-            const currentUnsub = tagUnsubs.get(machine.tagId);
-            if (currentUnsub) currentUnsub();
-            tagUnsubs.delete(machine.tagId);
-          }
-        );
-        tagUnsubs.set(machine.tagId, unsub);
-      }
-    });
-
-    Array.from(tagUnsubs.keys()).forEach((tagId) => {
-      if (!nextTagIds.has(tagId)) {
-        const unsub = tagUnsubs.get(tagId);
-        if (unsub) unsub();
-        tagUnsubs.delete(tagId);
-      }
-    });
-  };
-
   const applyOperationalPatch = (machineId, operational) => {
     const current = getDraftById(machineId);
     if (!current) return;
@@ -1042,6 +952,13 @@ if (mount) {
         scheduleHeightSync(machineId, () => recalcHeight(card));
       }
     }
+  };
+
+  const syncMachineAccessListeners = (machines) => {
+    if (!machineAccessSync) {
+      machineAccessSync = createMachineAccessSync({ applyOperationalPatch });
+    }
+    machineAccessSync.sync(machines);
   };
 
   const getDraftIndex = (id) => state.draftMachines.findIndex((m) => m.id === id);
@@ -1073,25 +990,9 @@ if (mount) {
     }
   };
 
-  const createGroupId = () => {
-    if (window.crypto?.randomUUID) return window.crypto.randomUUID();
-    return `g_${Math.random().toString(36).slice(2, 10)}`;
-  };
-
   const getNextGroupTitle = () => {
     const base = t("dashboard.groupUntitled", "Grupo");
-    const existing = new Set(
-      (state.dashboardLayout?.groups || [])
-        .map((group) => (group.title || "").trim().toLowerCase())
-        .filter(Boolean)
-    );
-    let index = 1;
-    let title = `${base} ${index}`;
-    while (existing.has(title.toLowerCase())) {
-      index += 1;
-      title = `${base} ${index}`;
-    }
-    return title;
+    return getNextDashboardGroupTitle(state.dashboardLayout, base);
   };
 
   const getPendingTaskCount = (machine) => {
@@ -1188,181 +1089,19 @@ if (mount) {
     }, 160);
   };
 
-  const subscribeOwnerMachines = (uid) => {
-    if (state.ownerUnsub) state.ownerUnsub();
-    const q = query(collection(db, "machines"), where("ownerUid", "==", uid));
-    state.ownerUnsub = onSnapshot(
-      q,
-      { includeMetadataChanges: true },
-      (snap) => {
-        if (snap.metadata.hasPendingWrites) return;
-        state.ownerLoadFailed = false;
-        state.loadTimedOut = false;
-        if (!state.ownerReady) {
-          state.ownerReady = true;
-          updateLoading();
-        }
-        const changedIds = snap.docChanges().map((change) => change.doc.id);
-        if (changedIds.length && changedIds.every((id) => isRecentLocalWrite(id))) {
-          return;
-        }
-        const list = snap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
-        const normalized = list
-          .map((m, idx) => normalizeMachine(m, idx))
-          .filter(Boolean)
-          .map((m) => ({
-            ...m,
-            tenantId: uid,
-            role: "owner",
-            ownerEmail: state.adminEmail || ""
-          }));
-        state.ownerMachines = normalized;
-        scheduleRebuild({ preserveScroll: true });
-      },
-      () => {
-        state.ownerLoadFailed = true;
-        if (!state.ownerReady) {
-          state.ownerReady = true;
-          updateLoading();
-        }
-        renderCards({ preserveScroll: true });
-      }
-    );
-  };
-
-  const syncAdminMachineListeners = (links) => {
-    const nextIds = new Set();
-    (links || []).forEach((link) => {
-      if (!link || !link.machineId || !link.ownerUid) return;
-      if (link.status && link.status !== "accepted") return;
-      nextIds.add(link.machineId);
-      if (state.adminMachineUnsubs.has(link.machineId)) return;
-      const ref = doc(db, "machines", link.machineId);
-      const unsub = onSnapshot(
-        ref,
-        { includeMetadataChanges: true },
-        (snap) => {
-          if (snap.metadata.hasPendingWrites) return;
-          if (isRecentLocalWrite(link.machineId)) return;
-          if (!snap.exists()) return;
-          const data = snap.data() || {};
-          if (data.ownerUid && data.ownerUid !== link.ownerUid) return;
-          const normalized = normalizeMachine({ id: snap.id, ...data }, state.draftMachines.length);
-          normalized.tenantId = link.ownerUid;
-          normalized.role = "admin";
-          normalized.ownerEmail = link.ownerEmail || "";
-          state.adminMachines = (state.adminMachines || []).filter((m) => m.id !== link.machineId);
-          state.adminMachines = [normalized, ...state.adminMachines];
-          scheduleRebuild({ preserveScroll: true });
-        },
-        () => {
-          const currentUnsub = state.adminMachineUnsubs.get(link.machineId);
-          if (currentUnsub) currentUnsub();
-          state.adminMachineUnsubs.delete(link.machineId);
-          state.adminMachines = (state.adminMachines || [])
-            .filter((m) => m.id !== link.machineId);
-          scheduleRebuild({ preserveScroll: true });
-        }
-      );
-      state.adminMachineUnsubs.set(link.machineId, unsub);
-    });
-
-    Array.from(state.adminMachineUnsubs.keys()).forEach((id) => {
-      if (!nextIds.has(id)) {
-        const unsub = state.adminMachineUnsubs.get(id);
-        if (unsub) unsub();
-        state.adminMachineUnsubs.delete(id);
-        state.adminMachines = (state.adminMachines || []).filter((m) => m.id !== id);
-      }
-    });
-  };
-
-  const subscribeAdminLinks = (uid) => {
-    if (state.adminLinksUnsub) state.adminLinksUnsub();
-    const q = query(
-      collection(db, "admin_machine_links"),
-      where("adminUid", "==", uid)
-    );
-    state.adminLinksUnsub = onSnapshot(
-      q,
-      (snap) => {
-        state.adminLoadFailed = false;
-        state.loadTimedOut = false;
-        if (!state.adminReady) {
-          state.adminReady = true;
-          updateLoading();
-        }
-        const links = snap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
-        state.adminLinks = links;
-        const activeLinks = links.filter((link) => link.status !== "left" && link.status !== "rejected");
-        syncAdminMachineListeners(activeLinks);
-        scheduleRebuild({ preserveScroll: true });
-      },
-      () => {
-        state.adminLoadFailed = true;
-        if (!state.adminReady) {
-          state.adminReady = true;
-          updateLoading();
-        }
-        renderCards({ preserveScroll: true });
-      }
-    );
-  };
-
-  const subscribePendingInvites = (emailLower) => {
-    if (state.inviteUnsub) state.inviteUnsub();
-    if (!emailLower) {
-      state.pendingInvites = [];
-      renderInviteBanner();
-      return;
+  const getDashboardSubscriptions = () => {
+    if (!dashboardSubscriptions) {
+      dashboardSubscriptions = createDashboardSubscriptions({
+        state,
+        updateLoading,
+        scheduleRebuild,
+        renderCards,
+        renderInviteBanner,
+        renderTopbarNotifications,
+        isRecentLocalWrite
+      });
     }
-    const q = query(
-      collection(db, "admin_machine_invites"),
-      where("adminEmailLower", "==", emailLower),
-      where("status", "==", "pending")
-    );
-    state.inviteUnsub = onSnapshot(
-      q,
-      (snap) => {
-        state.pendingInvites = snap.docs.map((docSnap) => ({
-          id: docSnap.id,
-          ...docSnap.data()
-        }));
-        renderInviteBanner();
-      },
-      () => {
-        state.pendingInvites = [];
-        renderInviteBanner();
-      }
-    );
-  };
-
-  const subscribePendingTransferInvites = (uid) => {
-    if (state.transferInviteUnsub) state.transferInviteUnsub();
-    if (!uid) {
-      state.pendingTransferInvites = [];
-      renderTopbarNotifications();
-      return;
-    }
-    const q = query(
-      collection(db, "machine_transfer_invites"),
-      where("toOwnerUid", "==", uid),
-      where("status", "==", "pending")
-    );
-    state.transferInviteUnsub = onSnapshot(
-      q,
-      (snap) => {
-        state.pendingTransferInvites = snap.docs.map((docSnap) => ({
-          id: docSnap.id,
-          ...docSnap.data()
-        }));
-        renderTopbarNotifications();
-      },
-      () => {
-        state.pendingTransferInvites = [];
-        renderTopbarNotifications();
-      }
-    );
+    return dashboardSubscriptions;
   };
 
   const updateMachine = (id, patch) => {
@@ -1724,7 +1463,7 @@ if (mount) {
       filterInfo.textContent = "";
       filterInfo.style.display = "none";
       cardRefs.clear();
-      renderGlobalRegistryView(list, machines, {
+      renderRegistryDashboardView(list, machines, {
         query: state.searchQuery,
         seenAt: state.dashboardLayout?.registrySeenAt || "",
         visibleCount: state.registryVisibleCount,
@@ -1745,56 +1484,50 @@ if (mount) {
       filterInfo.textContent = "";
       filterInfo.style.display = "none";
       cardRefs.clear();
-      if (!state.suggestionsReady) {
-        const loading = document.createElement("div");
-        loading.className = "suggestions-empty";
-        loading.textContent = t("dashboard.suggestionsLoading", "Cargando sugerencias...");
-        list.appendChild(loading);
-      } else {
-        renderSuggestionsView(list, {
-          items: state.suggestions,
-          canSuggest: state.canSuggest || state.isSuperadmin,
-          isSuperadmin: state.isSuperadmin,
-          seenAt: state.dashboardLayout?.suggestionsSeenAt || "",
-          query: state.searchQuery,
-          visibleCount: state.suggestionsVisibleCount,
-          onLoadMore: () => {
-            state.suggestionsVisibleCount += SUGGESTIONS_PAGE_SIZE;
-            renderCards({ preserveScroll: true });
-          },
-          onSubmit: async (rawText, controls = {}) => {
-            const textValue = (rawText || "").toString().trim();
-            const status = controls.status;
-            if (!textValue) return;
-            if (controls.input) controls.input.disabled = true;
-            if (controls.submit) controls.submit.disabled = true;
-            if (status) {
-              status.hidden = false;
-              status.textContent = t("dashboard.suggestionsSending", "Enviando...");
-              status.removeAttribute("data-state");
-            }
-            try {
-              await createDashboardSuggestion(textValue.slice(0, MAX_SUGGESTION_LENGTH));
-              if (controls.input) controls.input.value = "";
-              if (status) {
-                status.textContent = t("dashboard.suggestionsSent", "Sugerencia enviada");
-              }
-              await loadSuggestions({ preserveScroll: true });
-            } catch {
-              if (status) {
-                status.textContent = t(
-                  "dashboard.suggestionsError",
-                  "No se pudo enviar la sugerencia"
-                );
-                status.dataset.state = "error";
-              }
-            } finally {
-              if (controls.input) controls.input.disabled = false;
-              if (controls.submit) controls.submit.disabled = false;
-            }
+      renderSuggestionsDashboardView(list, {
+        items: state.suggestions,
+        ready: state.suggestionsReady,
+        canSuggest: state.canSuggest || state.isSuperadmin,
+        isSuperadmin: state.isSuperadmin,
+        seenAt: state.dashboardLayout?.suggestionsSeenAt || "",
+        query: state.searchQuery,
+        visibleCount: state.suggestionsVisibleCount,
+        onLoadMore: () => {
+          state.suggestionsVisibleCount += SUGGESTIONS_PAGE_SIZE;
+          renderCards({ preserveScroll: true });
+        },
+        onSubmit: async (rawText, controls = {}) => {
+          const textValue = (rawText || "").toString().trim();
+          const status = controls.status;
+          if (!textValue) return;
+          if (controls.input) controls.input.disabled = true;
+          if (controls.submit) controls.submit.disabled = true;
+          if (status) {
+            status.hidden = false;
+            status.textContent = t("dashboard.suggestionsSending", "Enviando...");
+            status.removeAttribute("data-state");
           }
-        });
-      }
+          try {
+            await createDashboardSuggestion(textValue.slice(0, MAX_SUGGESTION_LENGTH));
+            if (controls.input) controls.input.value = "";
+            if (status) {
+              status.textContent = t("dashboard.suggestionsSent", "Sugerencia enviada");
+            }
+            await loadSuggestions({ preserveScroll: true });
+          } catch {
+            if (status) {
+              status.textContent = t(
+                "dashboard.suggestionsError",
+                "No se pudo enviar la sugerencia"
+              );
+              status.dataset.state = "error";
+            }
+          } finally {
+            if (controls.input) controls.input.disabled = false;
+            if (controls.submit) controls.submit.disabled = false;
+          }
+        }
+      });
       syncMachineAccessListeners(state.draftMachines);
       if (state.loading && state.ownerReady && state.adminReady) {
         updateLoading();
@@ -1829,7 +1562,7 @@ if (mount) {
         list.innerHTML = "";
         return;
       }
-      if (state.ownerLoadFailed || state.adminLoadFailed || state.loadTimedOut) {
+      if (hasDashboardLoadError(state)) {
         renderLoadErrorPlaceholder();
         if (preserveScroll) {
           restoreViewport(prevScrollY || 0, renderAnchor);
@@ -1845,11 +1578,10 @@ if (mount) {
     if (!visibleMachines.length) {
       clearMobileDetailState();
       syncMobileDetailUI();
-      list.innerHTML = "";
-      const placeholder = document.createElement("div");
-      placeholder.className = "machine-placeholder";
-      placeholder.textContent = t("dashboard.noResults", (value) => `No results for "${value}".`)(query);
-      list.appendChild(placeholder);
+      renderDashboardNoResultsPlaceholder(
+        list,
+        t("dashboard.noResults", (value) => `No results for "${value}".`)(query)
+      );
       if (preserveScroll) {
         restoreViewport(prevScrollY || 0, renderAnchor);
       }
@@ -2075,74 +1807,12 @@ if (mount) {
           const nextStatus = statusOrder[(idx + 1) % statusOrder.length];
           const keepExpanded = node.dataset.expanded === "true";
           const user = state.adminLabel || t("dashboard.admin", "Administrador");
-          const now = new Date().toISOString();
-          const statusCycleId =
-            current.statusCycleId ||
-            current.activeStatusCycleId ||
-            createStatusCycleId(machine.id);
-          let nextTasks = normalizeTasks(current.tasks || []);
-          const nextLogs = [
-            ...(current.logs || []),
-            {
-              ts: now,
-              type: "status",
-              value: nextStatus,
-              user,
-              statusCycleId:
-                nextStatus === "fuera_de_servicio" || currentStatus === "fuera_de_servicio"
-                  ? statusCycleId
-                  : "",
-              source:
-                nextStatus === "fuera_de_servicio" || currentStatus === "fuera_de_servicio"
-                  ? RESTORE_OPERATION_TASK_SOURCE
-                  : ""
-            }
-          ];
-          if (currentStatus !== "fuera_de_servicio" && nextStatus === "fuera_de_servicio") {
-            if (!hasPendingRestoreOperationTask(nextTasks)) {
-              const restoreTask = {
-                ...createRestoreOperationTask(user),
-                statusCycleId
-              };
-              nextTasks = [restoreTask, ...nextTasks];
-              nextLogs.push({
-                ts: now,
-                type: "task_created",
-                taskId: restoreTask.id,
-                title: restoreTask.title,
-                description: restoreTask.description || "",
-                user,
-                source: RESTORE_OPERATION_TASK_SOURCE,
-                statusCycleId
-              });
-            }
-          } else if (currentStatus === "fuera_de_servicio" && nextStatus === "operativa") {
-            const restoreTask = nextTasks.find(
-              (task) => task.source === RESTORE_OPERATION_TASK_SOURCE && task.frequency === "puntual"
-            );
-            if (restoreTask) {
-              nextTasks = nextTasks.filter((task) => task.id !== restoreTask.id);
-              nextLogs.push({
-                ts: now,
-                type: "task",
-                taskId: restoreTask.id,
-                title: restoreTask.title || t("tasks.restoreOperation", "Volver a poner la máquina en operatividad"),
-                user,
-                overdue: false,
-                overdueDuration: "",
-                punctual: true,
-                completionDuration: getCompletionDuration(restoreTask),
-                source: RESTORE_OPERATION_TASK_SOURCE,
-                statusCycleId: restoreTask.statusCycleId || statusCycleId
-              });
-            }
-          }
           replaceMachine(machine.id, {
             ...current,
-            status: nextStatus,
-            tasks: nextTasks,
-            logs: nextLogs,
-            activeStatusCycleId: nextStatus === "fuera_de_servicio" ? statusCycleId : ""
+            ...buildStatusToggleUpdate(machine.id, current, nextStatus, user, {
+              normalizeStatus,
+              restoreTitle: t("tasks.restoreOperation", "Volver a poner la máquina en operatividad")
+            })
           });
           renderCards({ preserveScroll: true });
           autoSave.saveNow(machine.id, "status");
@@ -2194,138 +1864,18 @@ if (mount) {
           autoSave.scheduleSave(id, `general:${field}`);
         };
 
-        hooks.onUploadMachineDocument = async (id, kind, file, statusEl, options = {}) => {
-          if (!["plate", "manual", "other"].includes(kind)) throw new Error("unsupported-document");
-          const current = getDraftById(id);
-          if (!current || !state.uid) throw new Error("missing-context");
-          const tenantId = current.tenantId || current.ownerUid || state.uid;
-          const previousSize = kind === "other" ? 0 : Number(current.documents?.[kind]?.size || 0);
-          await assertStorageAvailable(tenantId, Math.max(0, Number(file?.size || 0) - previousSize));
-          const machineForUpload = { ...current, tenantId };
-          if (current.isNew) {
-            await upsertMachine(tenantId, machineForUpload);
-            current.isNew = false;
-          }
-          const uploadDocument =
-            kind === "manual"
-              ? uploadManualDocument
-              : kind === "other"
-                ? uploadOtherDocument
-                : uploadPlateDocument;
-          const uploaded = await uploadDocument({
-            machine: machineForUpload,
-            file,
-            uploadedBy: state.uid
-          });
-          const currentDocuments = current.documents || {};
-          const documents =
-            kind === "other"
-              ? {
-                  ...currentDocuments,
-                  other: [
-                    ...(Array.isArray(currentDocuments.other) ? currentDocuments.other : []),
-                    uploaded
-                  ]
-                }
-              : {
-                  ...currentDocuments,
-                  [kind]: uploaded
-                };
-          updateMachine(id, { documents, isNew: false });
-          current.documents = documents;
-          current.isNew = false;
-          if (statusEl) {
-            statusEl.textContent = t("general.uploadSaved", "Archivo guardado");
-            statusEl.dataset.state = "ok";
-          }
-          if (!state.selectedTabById) state.selectedTabById = {};
-          state.selectedTabById[id] = "general";
-          state.expandedById = Array.from(expandedById);
-          await upsertMachine(tenantId, getDraftById(id));
-          await refreshStorageFullState(tenantId);
-          if (!options.silent) {
-            notifyTopbar(t("general.uploadSaved", "Archivo guardado"));
-          }
-          if (kind === "other" && !options.deferRender) {
-            window.setTimeout(() => renderCards({ preserveScroll: true }), 0);
-          }
-          return uploaded;
-        };
-
-        hooks.onRefreshMachineDocuments = () => {
-          renderCards({ preserveScroll: true });
-        };
-
-        hooks.onRenameMachineDocument = async (id, documentId = "", displayName = "") => {
-          const current = getDraftById(id);
-          if (!current || !state.uid) throw new Error("missing-context");
-          const tenantId = current.tenantId || current.ownerUid || state.uid;
-          const cleanName = (displayName || "").toString().trim().replace(/\s+/g, " ").slice(0, 40);
-          const documents = { ...(current.documents || {}) };
-          const otherDocs = Array.isArray(documents.other) ? documents.other : [];
-          const nextOtherDocs = otherDocs.map((entry) => {
-            if (entry?.id !== documentId && entry?.storagePath !== documentId) return entry;
-            const nextEntry = { ...entry };
-            if (cleanName) nextEntry.displayName = cleanName;
-            else delete nextEntry.displayName;
-            return nextEntry;
-          });
-          documents.other = nextOtherDocs;
-          updateMachine(id, { documents });
-          current.documents = documents;
-          if (!state.selectedTabById) state.selectedTabById = {};
-          state.selectedTabById[id] = "general";
-          state.expandedById = Array.from(expandedById);
-          await upsertMachine(tenantId, getDraftById(id));
-          notifyTopbar(t("general.renamed", "Nombre actualizado"));
-          return nextOtherDocs.find((entry) => entry?.id === documentId || entry?.storagePath === documentId) || null;
-        };
-
-        hooks.onDeleteMachineDocument = async (id, kind, statusEl, documentId = "") => {
-          if (!["plate", "manual", "other"].includes(kind)) throw new Error("unsupported-document");
-          const current = getDraftById(id);
-          if (!current || !state.uid) throw new Error("missing-context");
-          const doc = kind === "other"
-            ? (Array.isArray(current.documents?.other)
-                ? current.documents.other.find((entry) =>
-                    entry?.id === documentId || entry?.storagePath === documentId
-                  )
-                : null)
-            : current.documents?.[kind] || null;
-          if (!doc) return null;
-          const tenantId = current.tenantId || current.ownerUid || state.uid;
-          if (statusEl) {
-            statusEl.textContent = t("general.deleting", "Eliminando...");
-            statusEl.dataset.state = "neutral";
-          }
-          await deleteMachineDocumentFile(doc.storagePath).catch((error) => {
-            if (error?.code !== "storage/object-not-found") throw error;
-          });
-          const documents = { ...(current.documents || {}) };
-          if (kind === "other") {
-            documents.other = (Array.isArray(documents.other) ? documents.other : [])
-              .filter((entry) => entry?.id !== documentId && entry?.storagePath !== documentId);
-            if (!documents.other.length) delete documents.other;
-          } else {
-            delete documents[kind];
-          }
-          updateMachine(id, { documents });
-          current.documents = documents;
-          if (!state.selectedTabById) state.selectedTabById = {};
-          state.selectedTabById[id] = "general";
-          state.expandedById = Array.from(expandedById);
-          await upsertMachine(tenantId, getDraftById(id));
-          await refreshStorageFullState(tenantId);
-          notifyTopbar(t("general.deleted", "Archivo eliminado"));
-          if (statusEl) {
-            statusEl.textContent = t("general.deleted", "Archivo eliminado");
-            statusEl.dataset.state = "ok";
-          }
-          if (kind === "other") {
-            window.setTimeout(() => renderCards({ preserveScroll: true }), 0);
-          }
-          return doc;
-        };
+        installDocumentHooks(hooks, {
+          assertStorageAvailable,
+          expandedById,
+          getDraftById,
+          notifyTopbar,
+          refreshStorageFullState,
+          renderCards,
+          state,
+          t,
+          updateMachine,
+          upsertMachine
+        });
 
         hooks.onUpdateLocation = (id, nextValue) => {
           const current = getDraftById(id);
@@ -2847,135 +2397,17 @@ if (mount) {
           autoSave.saveNow(machineData.id, "intervencion");
         };
 
-        hooks.onAddTask = (id, task) => {
-          const current = getDraftById(id);
-          const tasks = Array.isArray(current.tasks) ? [...current.tasks] : [];
-          tasks.unshift(task);
-          const user = state.adminLabel || t("dashboard.admin", "Administrador");
-          const logs = [
-            ...(current.logs || []),
-            {
-              ts: new Date().toISOString(),
-              type: "task_created",
-              taskId: task.id,
-              title: task.title || "Tarea",
-              description: task.description || "",
-              user
-            }
-          ];
-          updateMachine(id, { tasks, logs });
-          if (!state.selectedTabById) state.selectedTabById = {};
-          state.selectedTabById[id] = "quehaceres";
-          state.expandedById = Array.from(expandedById);
-          renderCards({ preserveScroll: true });
-          notifyTopbar(t("dashboard.taskCreated", "Tarea creada"));
-          autoSave.saveNow(id, "add-task");
-        };
-
-        hooks.onRemoveTask = (id, taskId) => {
-          const current = getDraftById(id);
-          const removed = (current.tasks || []).find((t) => t.id === taskId);
-          const tasks = (current.tasks || []).filter((t) => t.id !== taskId);
-          const user = state.adminLabel || t("dashboard.admin", "Administrador");
-          const logs = [
-            ...(current.logs || []),
-            {
-              ts: new Date().toISOString(),
-              type: "task_removed",
-              taskId,
-              title: (removed && removed.title) || "Tarea",
-              description: (removed && removed.description) || "",
-              user,
-              source: removed?.source || "",
-              statusCycleId: getRestoreTaskCycleId(removed, current)
-            }
-          ];
-          updateMachine(id, { tasks, logs });
-          if (!state.selectedTabById) state.selectedTabById = {};
-          state.selectedTabById[id] = "quehaceres";
-          state.expandedById = Array.from(expandedById);
-          renderCards({ preserveScroll: true });
-          autoSave.saveNow(id, "remove-task");
-        };
-
-        hooks.onAddTaskNote = (id, taskId, text) => {
-          const current = getDraftById(id);
-          if (!current) return;
-          const user = state.adminLabel || t("dashboard.admin", "Administrador");
-          const note = {
-            id: (window.crypto.randomUUID && window.crypto.randomUUID()) || `n_${Date.now()}`,
-            text: (text || "").toString().trim().slice(0, 512),
-            createdAt: new Date().toISOString(),
-            createdBy: user
-          };
-          if (!note.text) return;
-          const tasks = normalizeTasks(current.tasks || []).map((task) =>
-            task.id === taskId
-              ? { ...task, notes: [...(task.notes || []), note] }
-              : task
-          );
-          const task = tasks.find((item) => item.id === taskId);
-          const logs = [
-            ...(current.logs || []),
-            {
-              ts: note.createdAt,
-              type: "task_note_added",
-              taskId,
-              title: task?.title || "Tarea",
-              note: note.text,
-              user,
-              source: task?.source || "",
-              statusCycleId: getRestoreTaskCycleId(task, current)
-            }
-          ];
-          updateMachine(id, { tasks, logs });
-          if (!state.selectedTabById) state.selectedTabById = {};
-          state.selectedTabById[id] = "quehaceres";
-          state.expandedById = Array.from(expandedById);
-          renderCards({ preserveScroll: true });
-          autoSave.saveNow(id, "task-note");
-        };
-
-        hooks.onEditTask = (id, taskId, patch) => {
-          const current = getDraftById(id);
-          if (!current) return;
-          const user = state.adminLabel || t("dashboard.admin", "Administrador");
-          const tasks = normalizeTasks(current.tasks || []).map((task) => {
-            if (task.id !== taskId) return task;
-            const frequency = patch.frequency || task.frequency || "puntual";
-            return {
-              ...task,
-              title: (patch.title || task.title || "Tarea").toString().trim().slice(0, 64),
-              description: (patch.description || "").toString().trim().slice(0, 1024),
-              frequency,
-              customDueAmount:
-                frequency === "custom"
-                  ? Math.max(1, Math.min(999, Number(patch.customDueAmount || 1) || 1))
-                  : null,
-              customDueUnit: frequency === "custom" ? patch.customDueUnit || "days" : null
-            };
-          });
-          const task = tasks.find((item) => item.id === taskId);
-          const logs = [
-            ...(current.logs || []),
-            {
-              ts: new Date().toISOString(),
-              type: "task_edited",
-              taskId,
-              title: task?.title || "Tarea",
-              description: task?.description || "",
-              user,
-              source: task?.source || "",
-              statusCycleId: getRestoreTaskCycleId(task, current)
-            }
-          ];
-          updateMachine(id, { tasks, logs });
-          if (!state.selectedTabById) state.selectedTabById = {};
-          state.selectedTabById[id] = "quehaceres";
-          state.expandedById = Array.from(expandedById);
-          renderCards({ preserveScroll: true });
-          autoSave.saveNow(id, "task-edit");
-        };
+        installTaskHooks(hooks, {
+          autoSave,
+          expandedById,
+          getDraftById,
+          notifyTopbar,
+          normalizeStatus,
+          renderCards,
+          state,
+          t,
+          updateMachine
+        });
 
         hooks.onUpdateNotifications = (id, next) => {
           updateMachine(id, { notifications: next });
@@ -3168,68 +2600,6 @@ if (mount) {
           autoSave.saveNow(machineData.id, "notification-test");
         };
 
-        hooks.onCompleteTask = (id, taskId) => {
-          const current = getDraftById(id);
-          const baseTasks = normalizeTasks(current.tasks || []);
-          const before = baseTasks.find((t) => t.id === taskId);
-          if (!before) return;
-          const now = new Date().toISOString();
-          const wasOverdue = before ? getTaskTiming(before).pending : false;
-          const overdueDuration = before ? getOverdueDuration(before) : "";
-          const completionDuration = before ? getCompletionDuration(before) : "";
-          const shouldRestoreOperation =
-            before?.source === RESTORE_OPERATION_TASK_SOURCE &&
-            before?.statusTarget === "operativa";
-          const tasks = baseTasks
-            .map((t) =>
-              t.id === taskId ? { ...t, lastCompletedAt: now } : t
-            )
-            .filter((t) => !(t.id === taskId && t.frequency === "puntual"));
-          const task = before;
-          const user = state.adminLabel || t("dashboard.admin", "Administrador");
-          const statusCycleId =
-            before?.statusCycleId ||
-            (shouldRestoreOperation
-              ? current.activeStatusCycleId || createStatusCycleId(id)
-              : "");
-          const logs = [
-            ...(current.logs || []),
-            {
-              ts: now,
-              type: "task",
-              taskId,
-              title: task.title || "Tarea",
-              user,
-              overdue: !!wasOverdue,
-              overdueDuration,
-              punctual: task.frequency === "puntual",
-              completionDuration,
-              source: shouldRestoreOperation ? RESTORE_OPERATION_TASK_SOURCE : task.source || "",
-              statusCycleId
-            }
-          ];
-          const updates = { tasks, logs };
-          if (shouldRestoreOperation) updates.activeStatusCycleId = "";
-          if (shouldRestoreOperation && normalizeStatus(current.status) !== "operativa") {
-            updates.status = "operativa";
-            logs.push({
-              ts: now,
-              type: "status",
-              value: "operativa",
-              user,
-              source: RESTORE_OPERATION_TASK_SOURCE,
-              statusCycleId
-            });
-          }
-          updateMachine(id, updates);
-          if (!state.selectedTabById) state.selectedTabById = {};
-          state.selectedTabById[id] = "quehaceres";
-          state.expandedById = Array.from(expandedById);
-          renderCards({ preserveScroll: true });
-          notifyTopbar(t("dashboard.taskCompleted", "Tarea completada"));
-          autoSave.saveNow(id, "task-complete");
-        };
-
         hooks.onContentResize = () => {
           if (card.dataset.expanded === "true") {
             scheduleHeightSync(machine.id, () => recalcHeight(card));
@@ -3296,106 +2666,45 @@ if (mount) {
   const handleReorder = (orderIds) => {
     if (!Array.isArray(orderIds) || !orderIds.length) return;
     clearInitialGroupPriorityOrder();
-    const orderMap = new Map(orderIds.map((id, index) => [id, index]));
-    const orderedSet = new Set(orderIds);
-    const maxCurrentOrder = state.draftMachines.reduce(
-      (max, machine) => Math.max(max, typeof machine.order === "number" ? machine.order : 0),
-      0
-    );
-    const updated = state.draftMachines.map((machine) => {
-      if (!orderMap.has(machine.id)) return machine;
-      autoSave.scheduleSave(machine.id, "order");
-      return { ...machine, order: orderMap.get(machine.id) };
-    });
-    updated
-      .filter((machine) => !orderedSet.has(machine.id))
-      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-      .forEach((machine, index) => {
-        if (typeof machine.order !== "number") machine.order = maxCurrentOrder + index + 1;
-      });
-    state.draftMachines = updated;
-    saveOrderCache(updated);
+    const result = reorderFlatMachines(state.draftMachines, orderIds);
+    result.touchedMachineIds.forEach((id) => autoSave.scheduleSave(id, "order"));
+    state.draftMachines = result.machines;
+    saveOrderCache(result.machines);
     renderCards();
   };
 
   const updateUngroupedOrder = (orderIds) => {
     if (!Array.isArray(orderIds) || !orderIds.length) return;
     clearInitialGroupPriorityOrder("");
-    const orderMap = new Map(orderIds.map((id, index) => [id, index]));
-    state.draftMachines = state.draftMachines.map((machine) => {
-      if (!orderMap.has(machine.id)) return machine;
-      autoSave.scheduleSave(machine.id, "order");
-      return { ...machine, order: orderMap.get(machine.id) };
-    });
+    const result = reorderUngroupedMachines(state.draftMachines, orderIds);
+    result.touchedMachineIds.forEach((id) => autoSave.scheduleSave(id, "order"));
+    state.draftMachines = result.machines;
     saveOrderCache(state.draftMachines);
   };
 
   const updateGroupedPlacementOrder = (groupId, orderIds) => {
     clearInitialGroupPriorityOrder(groupId || "");
-    const placements = { ...(state.dashboardLayout.placements || {}) };
-    orderIds.forEach((id, idx) => {
-      placements[id] = { groupId: groupId || "", order: idx };
-    });
-    state.dashboardLayout.placements = placements;
+    state.dashboardLayout = updatePlacementOrder(state.dashboardLayout, groupId, orderIds);
   };
 
   const handleMixedItemReorder = (parentGroupId, items = []) => {
     if (!Array.isArray(items) || !items.length) return;
     clearInitialGroupPriorityOrder(parentGroupId || "");
     state.dashboardLayout = normalizeDashboardLayout(state.dashboardLayout);
-    const groups = state.dashboardLayout.groups || [];
-    const placements = { ...(state.dashboardLayout.placements || {}) };
-    const parentGroup = groups.find((group) => group.id === parentGroupId);
-    const isSubgroupTarget = !!parentGroup?.parentGroupId;
-
-    const machineOrderMap = new Map();
-    const orderedItems = isSubgroupTarget
-      ? items.filter((item) => item.type === "machine")
-      : [
-          ...items.filter((item) => item.type === "group"),
-          ...items.filter((item) => item.type === "machine")
-        ];
-    orderedItems.forEach((item, index) => {
-      if (item.type === "machine") {
-        placements[item.id] = { groupId: parentGroupId || "", order: index };
-        if (!parentGroupId) machineOrderMap.set(item.id, index);
-      }
-      if (item.type === "group") {
-        if (isSubgroupTarget) return;
-        const group = groups.find((entry) => entry.id === item.id);
-        if (!group) return;
-        if (parentGroupId && group.id === parentGroupId) return;
-        group.parentGroupId = parentGroupId || "";
-        group.order = index;
-        groups.forEach((entry) => {
-          if (entry.parentGroupId === group.id && group.parentGroupId) entry.parentGroupId = "";
-        });
-      }
-    });
-    state.dashboardLayout.placements = placements;
-    if (machineOrderMap.size) {
-      state.draftMachines = state.draftMachines.map((machine) => {
-        if (!machineOrderMap.has(machine.id)) return machine;
-        autoSave.scheduleSave(machine.id, "order");
-        return { ...machine, order: machineOrderMap.get(machine.id) };
-      });
+    const result = reorderMixedItems(
+      state.dashboardLayout,
+      state.draftMachines,
+      parentGroupId,
+      items
+    );
+    state.dashboardLayout = result.layout;
+    state.draftMachines = result.machines;
+    if (result.touchedMachineIds.length) {
+      result.touchedMachineIds.forEach((id) => autoSave.scheduleSave(id, "order"));
       saveOrderCache(state.draftMachines);
     }
     saveDashboardLayout();
     renderCards({ preserveScroll: true });
-  };
-
-  const compactPlacementOrders = (groupId) => {
-    const placements = state.dashboardLayout?.placements || {};
-    state.draftMachines
-      .filter((machine) => (placements[machine.id]?.groupId || "") === (groupId || ""))
-      .sort((a, b) => (placements[a.id]?.order ?? a.order ?? 0) - (placements[b.id]?.order ?? b.order ?? 0))
-      .forEach((machine, index) => {
-        placements[machine.id] = {
-          groupId: groupId || "",
-          order: index
-        };
-      });
   };
 
   const handleGroupedReorder = (groupId, orderIds) => {
@@ -3421,25 +2730,13 @@ if (mount) {
     const title = window.prompt(t("dashboard.addGroupPrompt", "Nombre del grupo"), suggestedTitle);
     if (title === null) return;
     const cleanTitle = (title || "").trim() || suggestedTitle;
-    const previousDraggedGroupId = state.dashboardLayout.placements?.[draggedId]?.groupId || "";
-    const previousTargetGroupId = state.dashboardLayout.placements?.[targetId]?.groupId || "";
-    const groupId = createGroupId();
-    state.dashboardLayout.groups = [
-      ...(state.dashboardLayout.groups || []),
-      {
-        id: groupId,
-        title: cleanTitle,
-        order: state.dashboardLayout.groups.length,
-        collapsed: false
-      }
-    ];
-    state.dashboardLayout.placements = {
-      ...(state.dashboardLayout.placements || {}),
-      [targetId]: { groupId, order: 0 },
-      [draggedId]: { groupId, order: 1 }
-    };
-    compactPlacementOrders(previousDraggedGroupId);
-    compactPlacementOrders(previousTargetGroupId);
+    const result = createGroupFromMachineDrop(state.dashboardLayout, state.draftMachines, {
+      draggedId,
+      targetId,
+      groupId: createDashboardGroupId(),
+      title: cleanTitle
+    });
+    state.dashboardLayout = result.layout;
     saveDashboardLayout();
     renderCards({ preserveScroll: true });
   };
@@ -3447,25 +2744,17 @@ if (mount) {
   const moveMachineToTargetGroup = (draggedId, targetId) => {
     clearInitialGroupPriorityOrder();
     state.dashboardLayout = normalizeDashboardLayout(state.dashboardLayout);
-    const placements = state.dashboardLayout.placements || {};
-    const targetGroupId = placements[targetId]?.groupId || "";
-    if (!targetGroupId) {
+    const result = moveMachineAfterTarget(
+      state.dashboardLayout,
+      state.draftMachines,
+      draggedId,
+      targetId
+    );
+    if (result.shouldCreateGroup) {
       createGroupFromDrop(draggedId, targetId);
       return;
     }
-    const previousGroupId = placements[draggedId]?.groupId || "";
-    const orderedIds = state.draftMachines
-      .filter((machine) => (placements[machine.id]?.groupId || "") === targetGroupId && machine.id !== draggedId)
-      .sort((a, b) => (placements[a.id]?.order ?? a.order ?? 0) - (placements[b.id]?.order ?? b.order ?? 0))
-      .map((machine) => machine.id);
-    const targetIndex = orderedIds.indexOf(targetId);
-    orderedIds.splice(targetIndex >= 0 ? targetIndex + 1 : orderedIds.length, 0, draggedId);
-    orderedIds.forEach((id, index) => {
-      placements[id] = { groupId: targetGroupId, order: index };
-    });
-    state.dashboardLayout.placements = placements;
-    compactPlacementOrders(previousGroupId);
-    compactPlacementOrders(targetGroupId);
+    state.dashboardLayout = result.layout;
     saveDashboardLayout();
     renderCards({ preserveScroll: true });
   };
@@ -3474,17 +2763,13 @@ if (mount) {
     if (!draggedId || !targetGroupId) return;
     clearInitialGroupPriorityOrder(targetGroupId);
     state.dashboardLayout = normalizeDashboardLayout(state.dashboardLayout);
-    const groups = state.dashboardLayout.groups || [];
-    if (!groups.some((group) => group.id === targetGroupId)) return;
-    const placements = state.dashboardLayout.placements || {};
-    const previousGroupId = placements[draggedId]?.groupId || "";
-    const nextOrder = state.draftMachines
-      .filter((machine) => (placements[machine.id]?.groupId || "") === targetGroupId && machine.id !== draggedId)
-      .reduce((max, machine) => Math.max(max, placements[machine.id]?.order ?? machine.order ?? 0), -1) + 1;
-    placements[draggedId] = { groupId: targetGroupId, order: nextOrder };
-    state.dashboardLayout.placements = placements;
-    compactPlacementOrders(previousGroupId);
-    compactPlacementOrders(targetGroupId);
+    const result = moveMachineToDashboardGroup(
+      state.dashboardLayout,
+      state.draftMachines,
+      draggedId,
+      targetGroupId
+    );
+    state.dashboardLayout = result.layout;
     saveDashboardLayout();
     renderCards({ preserveScroll: true });
   };
@@ -3493,23 +2778,8 @@ if (mount) {
     if (!draggedGroupId || !targetGroupId || draggedGroupId === targetGroupId) return;
     clearInitialGroupPriorityOrder();
     state.dashboardLayout = normalizeDashboardLayout(state.dashboardLayout);
-    const groups = state.dashboardLayout.groups || [];
-    const draggedGroup = groups.find((group) => group.id === draggedGroupId);
-    const targetGroup = groups.find((group) => group.id === targetGroupId);
-    if (!draggedGroup || !targetGroup) return;
-    const parentGroupId = targetGroup.parentGroupId || targetGroup.id;
-    if (!parentGroupId || parentGroupId === draggedGroupId) return;
-    if (targetGroup.parentGroupId === draggedGroupId) return;
-
-    draggedGroup.parentGroupId = parentGroupId;
-    draggedGroup.order =
-      groups
-        .filter((group) => group.parentGroupId === parentGroupId && group.id !== draggedGroupId)
-        .reduce((max, group) => Math.max(max, typeof group.order === "number" ? group.order : 0), -1) + 1;
-
-    groups.forEach((group) => {
-      if (group.parentGroupId === draggedGroupId) group.parentGroupId = "";
-    });
+    const result = moveGroupToGroup(state.dashboardLayout, draggedGroupId, targetGroupId);
+    state.dashboardLayout = result.layout;
     saveDashboardLayout();
     renderCards({ preserveScroll: true });
   };
@@ -3619,7 +2889,7 @@ if (mount) {
     let ownerBootstrap = [];
     try {
       const remote = await withTimeout(fetchMachines(uid));
-      state.ownerLoadFailed = false;
+      markOwnerLoadSuccess(state);
       ownerFetchResolved = true;
       ownerBootstrap = remote
         .map((m, idx) => normalizeMachine(m, idx))
@@ -3637,43 +2907,33 @@ if (mount) {
         }
       }
     } catch {
-      state.ownerLoadFailed = true;
-      if (!state.ownerReady) {
-        state.ownerReady = true;
-        updateLoading();
-      }
+      markOwnerLoadFailure(state);
+      updateLoading();
     }
     if (!isActiveSession()) return;
 
     const emailLower = normalizeEmail(user.email || "");
     if (ownerFetchResolved) {
       state.ownerMachines = ownerBootstrap;
-      if (!state.ownerReady) {
-        state.ownerReady = true;
-        updateLoading();
-      }
+      markOwnerLoadSuccess(state);
+      updateLoading();
     }
     try {
       const adminBootstrap = await withTimeout(fetchAdminMachines(uid, emailLower));
-      state.adminLoadFailed = false;
+      markAdminLoadSuccess(state);
       state.adminMachines = adminBootstrap;
-      if (!state.adminReady) {
-        state.adminReady = true;
-        updateLoading();
-      }
+      updateLoading();
     } catch {
-      state.adminLoadFailed = true;
-      if (!state.adminReady) {
-        state.adminReady = true;
-        updateLoading();
-      }
+      markAdminLoadFailure(state);
+      updateLoading();
     }
     if (!isActiveSession()) return;
     scheduleRebuild({ preserveScroll: false });
-    subscribeOwnerMachines(uid);
-    subscribeAdminLinks(uid);
-    subscribePendingInvites(emailLower);
-    subscribePendingTransferInvites(uid);
+    const subscriptions = getDashboardSubscriptions();
+    subscriptions.subscribeOwnerMachines(uid);
+    subscriptions.subscribeAdminLinks(uid);
+    subscriptions.subscribePendingInvites(emailLower);
+    subscriptions.subscribePendingTransferInvites(uid);
     try {
       const acceptedInvites = await fetchInvitesForAdmin(emailLower, "accepted");
       await Promise.all(
@@ -3749,10 +3009,7 @@ if (mount) {
     dashboardInitPromise = initDashboard(user.uid, user, sessionVersion)
       .catch(() => {
         if (dashboardSessionVersion !== sessionVersion) return;
-        state.ownerLoadFailed = true;
-        state.adminLoadFailed = true;
-        state.ownerReady = true;
-        state.adminReady = true;
+        markDashboardLoadFailure(state);
         updateLoading();
         renderCards({ preserveScroll: false });
       })

@@ -3,6 +3,7 @@
 ## Entry Points
 
 - `static/js/dashboard/index.js`: dashboard bootstrap, auth handling, machine loading, draft state, hooks passed into machine cards, auto-save, and Firebase client operations.
+- `static/js/dashboard/data/`: live dashboard data subscriptions extracted from the bootstrap file. `dashboardSubscriptions.js` owns owner/admin/invite listeners, and `machineAccessSync.js` owns `machine_access` listeners for Tag ID operational patches.
 - `static/js/dashboard/machineCardTemplate.js`: card creation entry.
 - `static/js/dashboard/tabs/`: individual tab renderers.
 - `static/js/dashboard/tabs/configuracion/`: configuration tab modules.
@@ -28,6 +29,7 @@ Tag-related backend/client wrappers:
 Machine documentation UI lives in:
 
 - `static/js/dashboard/tabs/general/general.js`
+- `static/js/dashboard/cardHooks/documentHooks.js`
 - `static/js/dashboard/documents/machineDocumentsRepo.js`
 
 Current implemented scope:
@@ -37,6 +39,8 @@ Current implemented scope:
 - `Other documentation` / `Otra documentación`: accepts PDFs and JPG, PNG, or WebP images up to 25 MB each; supports multiple files and lists them below the upload tiles.
 - Plate images are compressed/resized in the browser before upload.
 - Uploads the image to Firebase Storage, not to the repository.
+- Document hooks coordinate dashboard state, autosave persistence, storage-full checks, and UI status messages.
+- `machineDocumentsRepo.js` owns file validation, compression, Storage paths, upload, download URL creation, and deletion.
 - Stores single-file metadata in `machines.documents.<kind>` and additional documentation in `machines.documents.other[]`.
 - Additional documentation can use `displayName` for a UI-only label, capped at 40 characters. Do not rename the underlying Storage object just to change the visible label.
 
@@ -66,15 +70,25 @@ or tab-order changes should use that module instead of duplicating layout rules.
 When saving from the dashboard, stale placements for machines no longer visible
 to the account are pruned.
 
+Layout mutations for drag/drop grouping and ordering live in
+`static/js/dashboard/layout/dashboardLayoutActions.js`. Keep that module pure:
+it should calculate groups, placements, and machine order changes, while
+`index.js` remains responsible for UI prompts, autosave, persistence, and render.
+
 Local consistency check:
 
 ```powershell
 npm.cmd run check:nfc:layout
+npm.cmd run check:nfc:architecture
 ```
 
 This reads the latest local Firestore backup and reports invalid
 `dashboard_layout` references such as missing machines, duplicate groups, or
 subgroup nesting deeper than one level.
+
+`check:nfc:architecture` is a source check. It verifies that the dashboard
+bootstrap does not regain responsibilities already extracted into data,
+layout, internal-view, card-hook, task-action, and loading modules.
 
 ## Dashboard-Level Views
 
@@ -87,6 +101,9 @@ The main dashboard page has internal hash views:
 Files:
 
 - `static/js/dashboard/index.js`: owns the view switch, section nav, disabled control state, and hash routing.
+- `static/js/dashboard/views/dashboardInternalViews.js`: coordinates rendering for dashboard-level internal views such as `Registro` and `Sugerencias`.
+- `static/js/dashboard/components/loading/dashboardLoadState.js`: centralizes owner/admin load-ready flags, load failures, init failure, and timeout behavior.
+- `static/js/dashboard/components/loading/dashboardPlaceholders.js`: renders empty, load-error, and no-results dashboard placeholders.
 - `static/js/dashboard/history/historyEventFormatter.js`: shared formatter and grouping helpers for machine history events. It preserves known legacy event text and falls back to `summary`, `message`, `messageKey`, or `type` for future events.
 - `static/js/dashboard/views/registry/globalRegistryModel.js`: flattens logs from all machines visible to the current account, sorts them newest-first, and groups task notes under their task-created event.
 - `static/js/dashboard/views/suggestions/`: renders and submits dashboard suggestions through callable functions.
@@ -126,10 +143,12 @@ When a machine changes from `operativa` to `fuera_de_servicio`, the dashboard cr
 Task implementation files:
 
 - `static/js/dashboard/tabs/tasks/tasksModel.js`: task normalization, limits, and ordering. Current limits are 64 characters for titles, 1024 for descriptions, and 512 for notes.
+- `static/js/dashboard/tabs/tasks/taskActions.js`: pure task/history mutations for create, remove, note, edit, complete, and the out-of-service/restore-operation cycle.
 - `static/js/dashboard/tabs/tasks/tasksUI.js`: task list rendering, create/edit/note forms, complete button, and three-dot add-note/edit/delete menu.
 - `static/js/dashboard/tabs/tasks/tasksTime.js`: frequency and due/overdue calculation, including custom frequency.
+- `static/js/dashboard/cardHooks/taskHooks.js`: machine-card task hooks for create, remove, note, edit, and complete actions.
 - `static/js/dashboard/tabs/historial.js`: history rendering. Task notes, task completion/edit events, and the status-linked return to `operativa` are grouped under the original task-created log when the log has a matching `taskId`; title fallback exists for older records.
-- `static/js/dashboard/index.js`: task hooks passed to machine cards and persistence/autosave behavior.
+- `static/js/dashboard/index.js`: still coordinates the machine-card render loop and passes shared state/dependencies into task hooks.
 
 When creating task-related logs, include `taskId` whenever possible. This keeps history notes attached below the corresponding task creation record instead of appearing as independent chronological entries. Status-linked restore task logs should also carry `source: "status-out-of-service"` and `statusCycleId` so the global registry can keep the full operational cycle together.
 

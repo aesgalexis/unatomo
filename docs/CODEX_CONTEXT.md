@@ -12,8 +12,12 @@ Project-owner-only UI is called `superadmin` in conversation and docs. In code i
 
 - `nfc/es/` and `nfc/en/`: localized dashboard/auth/static pages.
 - `static/js/dashboard/`: dashboard bootstrap, machine state, cards, tabs, repositories, Firebase client calls.
+- `static/js/dashboard/data/`: live Firebase dashboard subscriptions and `machine_access` sync.
+- `static/js/dashboard/cardHooks/`: machine-card hook installers split by feature area, currently tasks and documents.
 - `static/js/dashboard/history/`: shared history event formatting and grouping helpers.
+- `static/js/dashboard/layout/`: dashboard layout normalization and pure drag/drop layout actions.
 - `static/js/dashboard/views/`: dashboard-level views that are not machine-card tabs, such as the global registry.
+- `static/js/dashboard/components/loading/`: dashboard loading, error, timeout, and placeholder helpers.
 - `static/js/dashboard/tabs/configuracion/`: machine configuration UI.
 - `static/js/dashboard/tags/`: Tag ID URL, QR generation, and disconnect client wrappers.
 - `static/js/qr-print/index.js`: QR print page logic.
@@ -42,6 +46,8 @@ Project-owner-only UI is called `superadmin` in conversation and docs. In code i
 - The dashboard topbar title is editable per user and stored as `dashboard_layout/{uid}.dashboardTitle` with a 32-character cap; empty value falls back to `Dashboard`.
 - Dashboard initialization is intentionally guarded against duplicate auth emissions. Loading failures should not be presented as an empty account; show a load-error state until Firebase data arrives or the user reloads.
 - Dashboard layout normalization is centralized in `static/js/dashboard/layout/dashboardLayoutModel.mjs`; use `npm.cmd run check:nfc:layout` against a fresh backup before/after risky group or layout work.
+- Dashboard architecture is now intentionally split: `index.js` coordinates auth, top-level render, and shared state; extracted modules own live subscriptions, layout mutations, internal view rendering, task/document card hooks, task/history actions, and loading/error helpers.
+- Run `npm.cmd run check:nfc:architecture` after dashboard architecture changes to catch responsibilities drifting back into `index.js`.
 
 ## Working Style
 
@@ -64,3 +70,4 @@ Updated: 2026-06-16 15:58 Europe/Madrid
 - Last successful publish from this workspace pushed commit `5870cdf` to `main`.
 - Owner-requested local browser workflow: unpublished changes are usually tested in Microsoft Edge; published changes are checked in Chrome.
 - Before future task/history work, inspect `static/js/dashboard/tabs/tasks/`, `static/js/dashboard/tabs/historial.js`, and the hooks in `static/js/dashboard/index.js` around task add/edit/remove/complete.
+- After the 2026-06 architecture pass, task hooks live in `static/js/dashboard/cardHooks/taskHooks.js` and task/history mutations live in `static/js/dashboard/tabs/tasks/taskActions.js`; prefer those before editing `index.js`.

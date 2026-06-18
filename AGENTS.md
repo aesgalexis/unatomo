@@ -17,6 +17,7 @@ Use `npm.cmd` in PowerShell if `npm` is blocked by execution policy.
 ```powershell
 node scripts\syntax-scan.mjs static\js
 npm.cmd run build
+npm.cmd run check:nfc:architecture
 npm.cmd run site:publish
 npm.cmd run scan:secrets
 ```
