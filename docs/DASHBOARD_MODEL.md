@@ -60,6 +60,22 @@ Current scope:
 - `dashboardTitle` stores the user's editable dashboard topbar title, capped at 32 characters. Empty value falls back to `Dashboard`.
 - `tabOrder` stores the global order for machine-card tabs and applies to all machines. It is edited from the Settings/Configuración page preferences card.
 
+Layout normalization lives in `static/js/dashboard/layout/dashboardLayoutModel.mjs`
+and is shared by runtime rendering and Firestore save preparation. Future group
+or tab-order changes should use that module instead of duplicating layout rules.
+When saving from the dashboard, stale placements for machines no longer visible
+to the account are pruned.
+
+Local consistency check:
+
+```powershell
+npm.cmd run check:nfc:layout
+```
+
+This reads the latest local Firestore backup and reports invalid
+`dashboard_layout` references such as missing machines, duplicate groups, or
+subgroup nesting deeper than one level.
+
 ## Dashboard-Level Views
 
 The main dashboard page has internal hash views:
