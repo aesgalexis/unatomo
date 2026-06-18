@@ -24,6 +24,9 @@ const text = {
     ? "Unable to load QR codes."
     : "No se han podido cargar los QRs.",
   print: isEn ? "Print" : "Imprimir",
+  printBack: isEn
+    ? "Print back side with machine names?"
+    : "¿Imprimir el reverso con los nombres de las máquinas?",
   reload: isEn ? "Reload QR codes" : "Recargar QRs",
   remove: isEn ? "Remove from print sheet" : "Quitar de la hoja",
   size: isEn ? "QR size" : "Tamaño QR",
@@ -40,9 +43,36 @@ const GRID_GAP_BY_STEP = ["0.85rem", "1rem", "1.2rem", "1.45rem", "1.65rem"];
 let currentMachines = [];
 let totalMachinesCount = 0;
 let currentSizeIndex = 0;
-let useFrame = false;
+let useFrame = true;
 
-const requestPrint = () => {
+const clearPrintMode = () => {
+  document.body.classList.remove("qr-print-front-mode", "qr-print-back-mode");
+};
+
+const printWithMode = (mode) =>
+  new Promise((resolve) => {
+    clearPrintMode();
+    document.body.classList.add(`qr-print-${mode}-mode`);
+    let done = false;
+    const cleanup = () => {
+      if (done) return;
+      done = true;
+      window.removeEventListener("afterprint", cleanup);
+      clearPrintMode();
+      resolve();
+    };
+    window.addEventListener("afterprint", cleanup);
+    window.setTimeout(() => {
+      if (typeof window.print === "function") {
+        window.print();
+      } else if (typeof globalThis.print === "function") {
+        globalThis.print();
+      }
+      window.setTimeout(cleanup, 1000);
+    }, 0);
+  });
+
+const requestPrint = async () => {
   try {
     if (document.activeElement && typeof document.activeElement.blur === "function") {
       document.activeElement.blur();
@@ -50,13 +80,12 @@ const requestPrint = () => {
   } catch {
     // ignore focus cleanup failures
   }
+  await printWithMode("front");
   window.setTimeout(() => {
-    if (typeof window.print === "function") {
-      window.print();
-    } else if (typeof globalThis.print === "function") {
-      globalThis.print();
+    if (window.confirm(text.printBack)) {
+      printWithMode("back");
     }
-  }, 0);
+  }, 120);
 };
 
 const getFocusedMachineId = () => {
@@ -277,6 +306,8 @@ const renderQrGrid = (machines, options = {}) => {
 
   const grid = document.createElement("div");
   grid.className = "qr-print-grid";
+  const backGrid = document.createElement("div");
+  backGrid.className = "qr-print-grid qr-print-back-grid";
   machines.forEach((machine) => {
     const item = document.createElement("article");
     item.className = "qr-print-item";
@@ -319,8 +350,17 @@ const renderQrGrid = (machines, options = {}) => {
     qrWrap.appendChild(img);
     item.appendChild(qrWrap);
     grid.appendChild(item);
+
+    const backItem = document.createElement("article");
+    backItem.className = "qr-print-item qr-print-back-item";
+    const backName = document.createElement("p");
+    backName.className = "qr-print-back-machine";
+    backName.textContent = machine.title || machine.id;
+    backItem.appendChild(backName);
+    backGrid.appendChild(backItem);
   });
   wrap.appendChild(grid);
+  wrap.appendChild(backGrid);
   mount.appendChild(wrap);
 };
 

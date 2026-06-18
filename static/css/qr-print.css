@@ -126,6 +126,10 @@
   align-items: start;
 }
 
+.qr-print-back-grid {
+  display: none;
+}
+
 .qr-print-item {
   border: 1px solid var(--border-subtle);
   border-radius: 0.5rem;
@@ -225,6 +229,17 @@
   z-index: 1;
 }
 
+.qr-print-back-machine {
+  max-width: calc(var(--qr-size) * 1.08);
+  margin: 0;
+  color: var(--fg);
+  font-size: 0.95rem;
+  line-height: 1.25;
+  font-weight: 650;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
 @media print {
   @page {
     size: A4;
@@ -273,7 +288,8 @@
     background: #fff;
     border-radius: 0;
     padding: 4mm;
-    min-height: auto;
+    width: calc(var(--qr-size) * 1.08 + 8mm);
+    min-height: calc(var(--qr-size) * 1.08 + 18mm);
     box-sizing: border-box;
     overflow: visible;
   }
@@ -290,5 +306,27 @@
 
   .qr-print-remove {
     display: none !important;
+  }
+
+  .qr-print-back-grid {
+    display: none;
+  }
+
+  body.qr-print-back-mode .qr-print > .qr-print-grid:not(.qr-print-back-grid) {
+    display: none !important;
+  }
+
+  body.qr-print-back-mode .qr-print-back-grid {
+    display: grid;
+  }
+
+  body.qr-print-back-mode .qr-print-back-item {
+    align-items: center;
+    justify-content: center;
+  }
+
+  body.qr-print-back-mode .qr-print-back-machine {
+    color: #000;
+    font-size: 11pt;
   }
 }
