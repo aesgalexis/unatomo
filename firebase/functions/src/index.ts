@@ -1164,8 +1164,12 @@ export const createDashboardSuggestion = onCall(async (request) => {
     .trim()
     .slice(0, 1024);
   if (!text) throw new HttpsError("invalid-argument", "text-required");
+  const replyToSuggestionId = (request.data?.replyToSuggestionId || "")
+    .toString()
+    .trim();
 
   const now = admin.firestore.FieldValue.serverTimestamp();
+  const nowIso = new Date().toISOString();
   const authorEmail = normalizeEmail(auth.token?.email || userData.email || "");
   const authorName = (
     auth.token?.name ||
@@ -1174,17 +1178,86 @@ export const createDashboardSuggestion = onCall(async (request) => {
     ""
   ).toString().trim();
 
+  if (replyToSuggestionId) {
+    const ref = dashboardSuggestionsCol().doc(replyToSuggestionId);
+    const snap = await ref.get();
+    if (!snap.exists) {
+      throw new HttpsError("not-found", "suggestion-not-found");
+    }
+    const suggestion = snap.data() || {};
+    if (!isControlPanelAuth(auth) && suggestion.authorUid !== auth.uid) {
+      throw new HttpsError("permission-denied", "not-suggestion-author");
+    }
+    const reply = {
+      id: dashboardSuggestionsCol().doc().id,
+      text,
+      authorUid: auth.uid,
+      authorEmail,
+      authorName,
+      createdAt: nowIso,
+    };
+    await ref.set(
+      {
+        replies: admin.firestore.FieldValue.arrayUnion(reply),
+        updatedAt: now,
+        lastActivityAt: now,
+      },
+      {merge: true},
+    );
+    return {ok: true, id: ref.id, replyId: reply.id};
+  }
+
   const ref = dashboardSuggestionsCol().doc();
   await ref.set({
     text,
     authorUid: auth.uid,
     authorEmail,
     authorName,
+    replies: [],
+    resolved: false,
+    resolvedAt: "",
+    resolvedByUid: "",
     createdAt: now,
     updatedAt: now,
+    lastActivityAt: now,
   });
 
   return {ok: true, id: ref.id};
+});
+
+export const updateDashboardSuggestionResolved = onCall(async (request) => {
+  const auth = request.auth;
+  if (!auth) throw new HttpsError("unauthenticated", "auth-required");
+  assertControlPanelAccess(auth);
+
+  const suggestionId = (request.data?.suggestionId || "").toString().trim();
+  if (!suggestionId) {
+    throw new HttpsError("invalid-argument", "suggestionId-required");
+  }
+  const resolved = request.data?.resolved === true;
+  await dashboardSuggestionsCol().doc(suggestionId).set(
+    {
+      resolved,
+      resolvedAt: resolved ? admin.firestore.FieldValue.serverTimestamp() : "",
+      resolvedByUid: resolved ? auth.uid : "",
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    },
+    {merge: true},
+  );
+  return {ok: true, suggestionId, resolved};
+});
+
+export const deleteDashboardSuggestion = onCall(async (request) => {
+  const auth = request.auth;
+  if (!auth) throw new HttpsError("unauthenticated", "auth-required");
+  assertControlPanelAccess(auth);
+
+  const suggestionId = (request.data?.suggestionId || "").toString().trim();
+  if (!suggestionId) {
+    throw new HttpsError("invalid-argument", "suggestionId-required");
+  }
+  await dashboardSuggestionsCol().doc(suggestionId).delete();
+  return {ok: true, suggestionId};
 });
 
 export const listDashboardSuggestions = onCall(async (request) => {
@@ -1229,11 +1302,25 @@ export const listDashboardSuggestions = onCall(async (request) => {
       authorUid: data.authorUid || "",
       authorEmail: data.authorEmail || "",
       authorName: data.authorName || "",
+      resolved: data.resolved === true,
+      resolvedAt: data.resolvedAt?.toDate?.()?.toISOString?.() ||
+        data.resolvedAt || "",
+      resolvedByUid: data.resolvedByUid || "",
+      replies: Array.isArray(data.replies) ? data.replies.map((reply) => ({
+        id: (reply.id || "").toString(),
+        text: (reply.text || "").toString(),
+        authorUid: (reply.authorUid || "").toString(),
+        authorEmail: (reply.authorEmail || "").toString(),
+        authorName: (reply.authorName || "").toString(),
+        createdAt: (reply.createdAt || "").toString(),
+      })) : [],
       createdAt: data.createdAt?.toDate?.()?.toISOString?.() || "",
+      lastActivityAt: data.lastActivityAt?.toDate?.()?.toISOString?.() ||
+        data.createdAt?.toDate?.()?.toISOString?.() || "",
     };
   }).sort((a, b) => {
-    const left = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-    const right = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+    const left = a.lastActivityAt ? new Date(a.lastActivityAt).getTime() : 0;
+    const right = b.lastActivityAt ? new Date(b.lastActivityAt).getTime() : 0;
     return right - left;
   });
 
