@@ -39,8 +39,13 @@ export const renderSuggestionsDashboardView = (container, options = {}) => {
     isSuperadmin: !!options.isSuperadmin,
     seenAt: options.seenAt || "",
     query: options.query || "",
+    replyTarget: options.replyTarget || null,
     visibleCount: options.visibleCount,
     onLoadMore: options.onLoadMore,
-    onSubmit: options.onSubmit
+    onSubmit: options.onSubmit,
+    onReply: options.onReply,
+    onCancelReply: options.onCancelReply,
+    onResolve: options.onResolve,
+    onDelete: options.onDelete
   });
 };

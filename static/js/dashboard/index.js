@@ -68,8 +68,10 @@ import { createDashboardSubscriptions } from "./data/dashboardSubscriptions.js";
 import { isControlPanelUser } from "/nfc/controlpanel/access.js";
 import {
   createDashboardSuggestion,
+  deleteDashboardSuggestion,
   fetchDashboardSuggestions,
-  markDashboardSuggestionsSeen
+  markDashboardSuggestionsSeen,
+  updateDashboardSuggestionResolved
 } from "./views/suggestions/suggestionsRepo.js";
 import {
   countUnseenSuggestions
@@ -139,6 +141,7 @@ if (mount) {
     suggestionsVisibleCount: SUGGESTIONS_PAGE_SIZE,
     suggestions: [],
     suggestionsReady: false,
+    suggestionReplyTarget: null,
     canSuggest: false,
     isSuperadmin: false,
     searchQuery: "",
@@ -714,6 +717,7 @@ if (mount) {
     state.pendingTransferInvites = [];
     state.suggestions = [];
     state.suggestionsReady = false;
+    state.suggestionReplyTarget = null;
     state.expandedById = [];
     state.selectedTabById = {};
     state.configSubtabById = {};
@@ -1536,15 +1540,58 @@ if (mount) {
         isSuperadmin: state.isSuperadmin,
         seenAt: state.dashboardLayout?.suggestionsSeenAt || "",
         query: state.searchQuery,
+        replyTarget: state.suggestionReplyTarget,
         visibleCount: state.suggestionsVisibleCount,
         onLoadMore: () => {
           state.suggestionsVisibleCount += SUGGESTIONS_PAGE_SIZE;
           renderCards({ preserveScroll: true });
         },
+        onReply: (target) => {
+          state.suggestionReplyTarget = target || null;
+          renderCards({ preserveScroll: true });
+        },
+        onCancelReply: () => {
+          state.suggestionReplyTarget = null;
+          renderCards({ preserveScroll: true });
+        },
+        onResolve: async (suggestionId, resolved) => {
+          try {
+            await updateDashboardSuggestionResolved(suggestionId, resolved);
+            await loadSuggestions({ preserveScroll: true });
+          } catch {
+            notifyTopbar(t("dashboard.saveError", "Error al guardar"));
+          }
+        },
+        onDelete: async (suggestionId) => {
+          try {
+            await deleteDashboardSuggestion(suggestionId);
+            await loadSuggestions({ preserveScroll: true });
+          } catch {
+            notifyTopbar(t("dashboard.saveError", "Error al guardar"));
+          }
+        },
         onSubmit: async (rawText, controls = {}) => {
-          const textValue = (rawText || "").toString().trim();
+          const prefix = controls.input?.dataset?.replyPrefix || "";
+          let textValue = (rawText || "").toString();
+          if (prefix && textValue.startsWith(prefix)) {
+            textValue = textValue.slice(prefix.length);
+          }
+          textValue = textValue.trim();
+          const replyToSuggestionId = controls.replyToSuggestionId || "";
+          const expectedReplyId = state.suggestionReplyTarget?.suggestionId || "";
           const status = controls.status;
           if (!textValue) return;
+          if (expectedReplyId && !replyToSuggestionId) {
+            if (status) {
+              status.hidden = false;
+              status.textContent = t(
+                "dashboard.suggestionsError",
+                "No se pudo enviar la sugerencia"
+              );
+              status.dataset.state = "error";
+            }
+            return;
+          }
           if (controls.input) controls.input.disabled = true;
           if (controls.submit) controls.submit.disabled = true;
           if (status) {
@@ -1553,7 +1600,11 @@ if (mount) {
             status.removeAttribute("data-state");
           }
           try {
-            await createDashboardSuggestion(textValue.slice(0, MAX_SUGGESTION_LENGTH));
+            await createDashboardSuggestion(
+              textValue.slice(0, MAX_SUGGESTION_LENGTH),
+              { replyToSuggestionId }
+            );
+            state.suggestionReplyTarget = null;
             if (controls.input) controls.input.value = "";
             if (status) {
               status.textContent = t("dashboard.suggestionsSent", "Sugerencia enviada");

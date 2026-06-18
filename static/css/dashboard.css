@@ -436,6 +436,10 @@ body.page .topbar {
   border-color: var(--fg);
 }
 
+.suggestions-input.is-active-reply {
+  border-color: var(--fg);
+}
+
 .suggestions-submit {
   justify-self: center;
   margin-top: 0.25rem;
@@ -455,6 +459,28 @@ body.page .topbar {
 
 .suggestions-status[data-state="error"] {
   color: var(--danger, #d33);
+}
+
+.suggestions-reply-target {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: color-mix(in srgb, var(--fg) 68%, transparent);
+  font-size: 0.84rem;
+}
+
+.suggestions-reply-target[hidden] {
+  display: none;
+}
+
+.suggestions-reply-target button {
+  border: 0;
+  background: transparent;
+  color: color-mix(in srgb, var(--fg) 72%, transparent);
+  font: inherit;
+  font-size: 0.8rem;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 .suggestions-header {
@@ -491,6 +517,13 @@ body.page .topbar {
   padding: 0.48rem 0;
 }
 
+.suggestions-row-reply {
+  margin-left: 1.1rem;
+  padding-left: 0.75rem;
+  border-left: 2px solid var(--border-subtle);
+  grid-template-columns: minmax(145px, 0.34fr) minmax(0, 1fr);
+}
+
 .suggestions-meta {
   display: flex;
   flex-direction: column;
@@ -515,6 +548,39 @@ body.page .topbar {
   color: color-mix(in srgb, var(--fg) 86%, transparent);
   line-height: 1.4;
   white-space: pre-wrap;
+}
+
+.suggestions-message-wrap {
+  position: relative;
+  min-width: 0;
+  padding-right: 2.2rem;
+}
+
+.suggestions-message-wrap .suggestions-menu {
+  top: 0;
+  right: 0;
+  bottom: auto;
+}
+
+.suggestions-menu:hover .mc-doc-menu-link,
+.suggestions-menu:focus-within .mc-doc-menu-link,
+.suggestions-menu.is-open .mc-doc-menu-link {
+  max-width: 6.5rem;
+}
+
+.suggestions-menu .mc-doc-menu-link {
+  border: 0;
+  background: transparent;
+  color: color-mix(in srgb, var(--fg) 74%, transparent);
+}
+
+.suggestions-menu .mc-doc-menu-link:hover {
+  color: var(--fg);
+}
+
+.suggestions-row.is-resolved .suggestions-message {
+  text-decoration: line-through;
+  color: color-mix(in srgb, var(--fg) 54%, transparent);
 }
 
 .suggestions-row.is-unseen .suggestions-author,
@@ -2598,6 +2664,22 @@ body.page .topbar {
   background: color-mix(in srgb, var(--bg) 96%, transparent);
   color: var(--fg);
   font: inherit;
+}
+
+.machine-login-remember {
+  margin-top: 0.65rem;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: color-mix(in srgb, var(--fg) 78%, transparent);
+  font-size: 0.86rem;
+  line-height: 1.25;
+}
+
+.machine-login-remember input {
+  width: 1rem;
+  height: 1rem;
+  accent-color: #2c974b;
 }
 
 .machine-login-error {

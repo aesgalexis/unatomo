@@ -58,12 +58,70 @@ const getTagId = () => {
 };
 
 const sessionKey = (tagId) => `unatomo_machine_session_${tagId}`;
+const persistentSessionKey = (tagId) => `unatomo_machine_remembered_session_${tagId}`;
+const REMEMBER_SESSION_MS = 30 * 24 * 60 * 60 * 1000;
 
 const normalizeName = (value) =>
   (value || "")
     .trim()
     .replace(/\s+/g, " ")
     .toLowerCase();
+
+const createLocalMachineSession = (username, role, options = {}) => ({
+  username,
+  role: role || t("machine.userRoleFallback", "usuario"),
+  source: "machine",
+  remembered: !!options.remembered,
+  createdAt: new Date().toISOString(),
+  expiresAt: options.remembered
+    ? new Date(Date.now() + REMEMBER_SESSION_MS).toISOString()
+    : "",
+});
+
+const saveMachineSession = (tagId, session, { remember = false } = {}) => {
+  try {
+    if (session) sessionStorage.setItem(sessionKey(tagId), JSON.stringify(session));
+    else sessionStorage.removeItem(sessionKey(tagId));
+  } catch {
+    // ignore storage failures
+  }
+  try {
+    if (remember) {
+      localStorage.setItem(persistentSessionKey(tagId), JSON.stringify(session));
+    } else {
+      localStorage.removeItem(persistentSessionKey(tagId));
+    }
+  } catch {
+    // ignore storage failures
+  }
+};
+
+const readStoredMachineSession = (tagId) => {
+  const session = readStoredMachineSession(tagId);
+  if (session?.username) return session;
+
+  try {
+    session = JSON.parse(localStorage.getItem(persistentSessionKey(tagId)) || "null");
+  } catch {
+    session = null;
+  }
+  if (!session?.username) return null;
+  const expiresAt = session.expiresAt ? new Date(session.expiresAt).getTime() : 0;
+  if (!expiresAt || expiresAt <= Date.now()) {
+    try {
+      localStorage.removeItem(persistentSessionKey(tagId));
+    } catch {
+      // ignore storage failures
+    }
+    return null;
+  }
+  try {
+    sessionStorage.setItem(sessionKey(tagId), JSON.stringify(session));
+  } catch {
+    // ignore storage failures
+  }
+  return session;
+};
 
 const showLogin = (machine, tagId, onSuccess) => {
   const overlay = document.createElement("div");
@@ -85,6 +143,16 @@ const showLogin = (machine, tagId, onSuccess) => {
   passInput.type = "password";
   passInput.placeholder = t("machine.password", "Contrase\u00f1a");
   passInput.className = "machine-login-input";
+
+  const rememberLabel = document.createElement("label");
+  rememberLabel.className = "machine-login-remember";
+  const rememberInput = document.createElement("input");
+  rememberInput.type = "checkbox";
+  rememberInput.checked = true;
+  const rememberText = document.createElement("span");
+  rememberText.textContent = t("machine.rememberDevice", "Recordarme en este dispositivo");
+  rememberLabel.appendChild(rememberInput);
+  rememberLabel.appendChild(rememberText);
 
   const error = document.createElement("div");
   error.className = "machine-login-error";
@@ -120,12 +188,12 @@ const showLogin = (machine, tagId, onSuccess) => {
         error.textContent = t("machine.invalidCredentials", "Credenciales incorrectas.");
         return;
       }
-      sessionStorage.setItem(
-        sessionKey(tagId),
-        JSON.stringify({ username, role: user.role || t("machine.userRoleFallback", "usuario") })
-      );
+      const userSession = createLocalMachineSession(username, user.role, {
+        remembered: rememberInput.checked
+      });
+      saveMachineSession(tagId, userSession, { remember: rememberInput.checked });
       overlay.remove();
-      onSuccess({ username, role: user.role || t("machine.userRoleFallback", "usuario") });
+      onSuccess(userSession);
     } catch {
       error.textContent = t("machine.validationError", "Error al validar credenciales.");
     }
@@ -134,6 +202,7 @@ const showLogin = (machine, tagId, onSuccess) => {
   panel.appendChild(title);
   panel.appendChild(userInput);
   panel.appendChild(passInput);
+  panel.appendChild(rememberLabel);
   panel.appendChild(error);
   panel.appendChild(btn);
   overlay.appendChild(panel);
@@ -238,6 +307,7 @@ const init = async () => {
       (u) => normalizeName(u.username) === normalizeName(session.username)
     );
   if (!existingUser) {
+    saveMachineSession(tagId, null, { remember: false });
     showLogin(machineDoc, tagId, (userSession) => {
       state.session = userSession;
       state.draft = {
