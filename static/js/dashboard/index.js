@@ -197,7 +197,7 @@ if (mount) {
     document.querySelectorAll(".mc-tooltip").forEach((node) => node.remove());
   };
 
-  const attachDashboardTooltip = (target, { align = "center" } = {}) => {
+  const attachDashboardTooltip = (target, { align = "center", placement = "top" } = {}) => {
     let tipEl = null;
     const showTip = () => {
       const label = target.getAttribute("data-tooltip");
@@ -211,7 +211,10 @@ if (mount) {
       const left = align === "right"
         ? rect.right - tipEl.offsetWidth
         : rect.left + (rect.width - tipEl.offsetWidth) / 2;
-      tipEl.style.top = `${Math.max(8, rect.top - tipEl.offsetHeight - 10)}px`;
+      const top = placement === "bottom"
+        ? rect.bottom + 10
+        : rect.top - tipEl.offsetHeight - 10;
+      tipEl.style.top = `${Math.max(8, top)}px`;
       tipEl.style.left = `${Math.max(8, left)}px`;
     };
     const hideTip = () => {
@@ -442,7 +445,7 @@ if (mount) {
   suggestionsLink.setAttribute("data-tooltip", t("dashboard.navSuggestions", "Sugerencias"));
   suggestionsLink.appendChild(suggestionsBadge);
   suggestionsLink.appendChild(suggestionsLabel);
-  attachDashboardTooltip(suggestionsLink);
+  attachDashboardTooltip(suggestionsLink, { placement: "bottom" });
 
   sectionNav.appendChild(dashboardLink);
   sectionNav.appendChild(registryLink);
