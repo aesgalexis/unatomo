@@ -1,5 +1,6 @@
 import { fetchMachineAccess, updateMachineAccess } from "/static/js/dashboard/machineAccessRepo.js";
 import { createMachineCard } from "/static/js/dashboard/machineCardTemplate.js";
+import { auth, db } from "/static/js/firebase/firebaseApp.js";
 import { hashPassword } from "/static/js/utils/crypto.js";
 import { initAutoSave } from "/static/js/dashboard/autoSave.js";
 import { normalizeTasks } from "/static/js/dashboard/tabs/tasks/tasksModel.js";
@@ -13,6 +14,11 @@ import {
   canDownloadHistory,
   canSeeConfig
 } from "./permissions.js";
+import {
+  doc,
+  getDoc
+} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 
 const COLLAPSED_HEIGHT = 96;
 const EXPAND_FACTOR = 2.5;
@@ -134,6 +140,39 @@ const showLogin = (machine, tagId, onSuccess) => {
   document.body.appendChild(overlay);
 };
 
+const waitForAuthState = () =>
+  new Promise((resolve) => {
+    const unsub = onAuthStateChanged(auth, (user) => {
+      unsub();
+      resolve(user || null);
+    });
+  });
+
+const buildDashboardSession = (user, machineDoc) => ({
+  username: user.displayName || user.email || t("dashboard.admin", "Administrador"),
+  role: "admin",
+  source: "dashboard",
+  uid: user.uid,
+  machineId: machineDoc.machineId || "",
+});
+
+const hasDashboardMachineAccess = async (user, machineDoc) => {
+  if (!user || !machineDoc?.machineId || !machineDoc?.tenantId) return false;
+  if (machineDoc.tenantId === user.uid) return true;
+  try {
+    const linkId = `${machineDoc.machineId}_${user.uid}`;
+    const snap = await getDoc(doc(db, "admin_machine_links", linkId));
+    if (!snap.exists()) return false;
+    const data = snap.data() || {};
+    return data.adminUid === user.uid &&
+      data.ownerUid === machineDoc.tenantId &&
+      data.machineId === machineDoc.machineId &&
+      data.status === "accepted";
+  } catch {
+    return false;
+  }
+};
+
 const state = {
   tagId: null,
   session: null,
@@ -166,6 +205,24 @@ const init = async () => {
   const machineDoc = await fetchMachineAccess(tagId);
   if (!machineDoc) {
     renderMessage(t("machine.tagNotFound", "Tag no encontrado."));
+    return;
+  }
+
+  const authUser = await waitForAuthState();
+  if (await hasDashboardMachineAccess(authUser, machineDoc)) {
+    const dashboardSession = buildDashboardSession(authUser, machineDoc);
+    sessionStorage.setItem(sessionKey(tagId), JSON.stringify(dashboardSession));
+    state.session = dashboardSession;
+    state.draft = {
+      ...machineDoc,
+      status:
+        machineDoc.status === "desconectada"
+          ? "fuera_de_servicio"
+          : machineDoc.status || "operativa",
+      logs: machineDoc.logs || [],
+      tasks: normalizeTasks(machineDoc.tasks || [])
+    };
+    renderMachine();
     return;
   }
 

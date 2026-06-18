@@ -1,4 +1,5 @@
 export const canSeeTab = (role, tab) => {
+  if (role === "admin") return ["quehaceres", "general", "historial"].includes(tab);
   if (role === "usuario") return tab === "quehaceres";
   if (role === "tecnico" || role === "externo") {
     return ["quehaceres", "general", "historial"].includes(tab);
@@ -7,7 +8,7 @@ export const canSeeTab = (role, tab) => {
 };
 
 export const canEditStatus = (role) => {
-  return role === "usuario";
+  return role === "usuario" || role === "admin";
 };
 
 export const canEditTasks = () => {
@@ -15,7 +16,7 @@ export const canEditTasks = () => {
 };
 
 export const canDownloadHistory = (role) => {
-  return role === "tecnico";
+  return role === "tecnico" || role === "admin";
 };
 
 export const canSeeConfig = () => {
