@@ -314,7 +314,6 @@ export const subscribeMachines = (onData, onError) =>
           item.id &&
           item.categoria &&
           item.marca &&
-          (item.anio !== null && item.anio !== undefined) &&
           item.estado &&
           item.ubicacion
         );
