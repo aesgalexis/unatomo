@@ -24,3 +24,39 @@
 .section-list {
   margin: 0 0 12px 18px;
 }
+
+.section-whats-new-list {
+  display: grid;
+  gap: 0;
+}
+
+.section-whats-new-note {
+  color: color-mix(in srgb, var(--fg) 62%, transparent);
+  font-size: 0.86rem;
+  line-height: 1.4;
+}
+
+.section-whats-new-row {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.3fr) minmax(0, 1fr);
+  gap: 0.85rem;
+  padding: 0.48rem 0;
+}
+
+.section-whats-new-row time {
+  color: color-mix(in srgb, var(--fg) 66%, transparent);
+  font-size: 0.82rem;
+}
+
+.section-whats-new-row p {
+  margin: 0;
+  color: color-mix(in srgb, var(--fg) 86%, transparent);
+  line-height: 1.4;
+}
+
+@media (max-width: 768px) {
+  .section-whats-new-row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.2rem;
+  }
+}

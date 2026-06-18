@@ -25,6 +25,7 @@ Project-owner-only UI is called `superadmin` in conversation and docs. In code i
 - `static/css/qr-print.css`: QR print layout and print-specific CSS.
 - `static/js/site/locale.js`: language detection and localized path mapping.
 - `static/js/registro/session-menu.js`: authenticated user menu.
+- `static/js/sections/novedades.js` and `static/js/sections/whatsNewData.js`: public `Novedades` / `What's new` section.
 - `firebase/functions/src/index.ts`: callable backend functions.
 - `scripts/`: local build, static server, publish, syntax, and maintenance scripts.
 - `docs/PRODUCT_NOTES.md`: lightweight product-direction notes from owner conversations; context only, not hard rules.
@@ -48,6 +49,7 @@ Project-owner-only UI is called `superadmin` in conversation and docs. In code i
 - Dashboard layout normalization is centralized in `static/js/dashboard/layout/dashboardLayoutModel.mjs`; use `npm.cmd run check:nfc:layout` against a fresh backup before/after risky group or layout work.
 - Dashboard architecture is now intentionally split: `index.js` coordinates auth, top-level render, and shared state; extracted modules own live subscriptions, layout mutations, internal view rendering, task/document card hooks, task/history actions, and loading/error helpers.
 - Run `npm.cmd run check:nfc:architecture` after dashboard architecture changes to catch responsibilities drifting back into `index.js`.
+- Public `Novedades` entries are static and governed by `docs/WHATS_NEW_POLICY.md`. Check `docs/codex-flags.json` before adding entries.
 
 ## Working Style
 

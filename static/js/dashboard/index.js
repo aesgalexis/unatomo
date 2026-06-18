@@ -100,7 +100,7 @@ const getPublicSectionFromHash = () =>
     .trim()
     .toLowerCase();
 const isPublicSectionHash = () =>
-  ["faqs", "tags", "contacto"].includes(getPublicSectionFromHash());
+  ["faqs", "tags", "contacto", "novedades"].includes(getPublicSectionFromHash());
 const getDashboardInternalView = () =>
   ["registro", "sugerencias"].includes(getPublicSectionFromHash())
     ? getPublicSectionFromHash()

@@ -2,6 +2,7 @@
 import { render as renderFaqs } from "./faqs.js";
 import { render as renderTags } from "./tags.js";
 import { render as renderSoporte } from "./soporte.js";
+import { render as renderNovedades } from "./novedades.js";
 
 const dashboardMount = document.getElementById("dashboard-mount");
 const sectionMount = document.getElementById("section-mount");
@@ -9,9 +10,10 @@ const lang = getCurrentLang();
 
 const sectionMap = {
   dashboard: { title: "Dashboard", render: null },
-  faqs: { title: "FAQs", render: renderFaqs },
-  tags: { title: lang === "en" ? "Physical tags" : "Tags f\u00edsicos", render: renderTags },
-  contacto: { title: lang === "en" ? "Contact" : "Contacto", render: renderSoporte }
+  faqs: { title: "Unatomo", render: renderFaqs },
+  tags: { title: "Unatomo", render: renderTags },
+  contacto: { title: "Unatomo", render: renderSoporte },
+  novedades: { title: "Unatomo", render: renderNovedades }
 };
 const navText = {
   back: lang === "en" ? "Back" : "Volver",

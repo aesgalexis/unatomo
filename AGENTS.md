@@ -8,6 +8,7 @@ This repository is the active `unatomo` project. The usual working language with
 - Use `docs/DASHBOARD_MODEL.md` for dashboard, machine cards, Tag ID, QR print, menu, and i18n work.
 - Use `docs/FIREBASE_MODEL.md` before changing Firebase data flows, callable functions, ownership, admin links, Tag ID, or QR cleanup.
 - Use `docs/DEPLOY_NOTES.md` before publishing or diagnosing push/build problems.
+- Use `docs/WHATS_NEW_POLICY.md` before adding public `Novedades` / `What's new` entries; respect `docs/codex-flags.json`.
 - Older notes also exist in `docs/ARCHITECTURE.md` and `docs/DEV.md`; prefer the files above when they disagree with older NFC mock-route details.
 
 ## Common Commands

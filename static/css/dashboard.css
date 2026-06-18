@@ -58,6 +58,7 @@ body.page .topbar {
   height: 1.05rem;
   align-items: center;
   justify-content: center;
+  margin-left: -0.18rem;
   vertical-align: -0.16rem;
 }
 

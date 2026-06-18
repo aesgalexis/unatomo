@@ -39,6 +39,21 @@ const text = {
   backupProject: isEn ? "Project" : "Proyecto",
   backupBucket: isEn ? "Bucket" : "Bucket",
   backupCause: isEn ? "Cause" : "Causa",
+  whatsNewTitle: isEn ? "What's new" : "Novedades",
+  whatsNewLoading: isEn ? "Loading What's new status..." : "Cargando estado de Novedades...",
+  whatsNewHint: isEn
+    ? "Codex-facing toggle for deciding whether relevant product changes should be added to the public What's new section."
+    : "Control orientado a Codex para decidir si los cambios relevantes de producto deben añadirse a la seccion publica Novedades.",
+  whatsNewEnabled: isEn ? "Enabled" : "Activado",
+  whatsNewDisabled: isEn ? "Disabled" : "Desactivado",
+  whatsNewDisable: isEn ? "Disable locally" : "Desactivar localmente",
+  whatsNewEnable: isEn ? "Enable locally" : "Activar localmente",
+  whatsNewSource: isEn
+    ? "Authoritative source: docs/codex-flags.json"
+    : "Fuente autoritativa: docs/codex-flags.json",
+  whatsNewPending: isEn
+    ? "Pending: this panel control is not wired to the project flag yet."
+    : "Pendiente: este control del panel aun no esta conectado a la flag del proyecto.",
   usersTitle: isEn ? "Users" : "Usuarios",
   usersLoading: isEn ? "Loading users..." : "Cargando usuarios...",
   usersEmpty: isEn ? "No users found." : "No se han encontrado usuarios.",
@@ -382,6 +397,54 @@ const renderBackupStatus = (body, status) => {
   body.appendChild(list);
 };
 
+const WHATS_NEW_LOCAL_KEY = "unatomo_whats_new_codex_enabled_v1";
+
+const getLocalWhatsNewFlag = (fallback) => {
+  try {
+    const raw = localStorage.getItem(WHATS_NEW_LOCAL_KEY);
+    if (raw === "true") return true;
+    if (raw === "false") return false;
+  } catch {
+    // ignore storage failures
+  }
+  return fallback;
+};
+
+const renderWhatsNewControl = (body, flags = {}) => {
+  body.innerHTML = "";
+  const note = document.createElement("p");
+  note.className = "controlpanel-note";
+  note.textContent = text.whatsNewHint;
+  body.appendChild(note);
+
+  const enabled = getLocalWhatsNewFlag(flags.whatsNewUpdates !== false);
+  const status = document.createElement("p");
+  status.className = "controlpanel-state";
+  status.dataset.state = enabled ? "ok" : "error";
+  status.textContent = enabled ? text.whatsNewEnabled : text.whatsNewDisabled;
+  body.appendChild(status);
+
+  const source = document.createElement("p");
+  source.className = "controlpanel-note";
+  source.textContent = text.whatsNewSource;
+  body.appendChild(source);
+
+  const pending = document.createElement("p");
+  pending.className = "controlpanel-note controlpanel-note-superadmin";
+  pending.textContent = text.whatsNewPending;
+  body.appendChild(pending);
+
+  const actions = document.createElement("div");
+  actions.className = "controlpanel-actions";
+  const toggle = document.createElement("button");
+  toggle.type = "button";
+  toggle.className = "controlpanel-btn";
+  toggle.textContent = enabled ? text.whatsNewDisable : text.whatsNewEnable;
+  toggle.disabled = true;
+  actions.appendChild(toggle);
+  body.appendChild(actions);
+};
+
 const renderTags = (body, items) => {
   body.innerHTML = "";
   const note = document.createElement("p");
@@ -539,11 +602,13 @@ if (mount) {
   wrap.className = "controlpanel-wrap";
   const codeStatsCard = createCard(text.codeStatsTitle);
   const backupCard = createCard(text.backupTitle);
+  const whatsNewCard = createCard(text.whatsNewTitle);
   const usersCard = createCard(text.usersTitle);
   const codesCard = createCard(text.codesTitle);
   const tagsCard = createCard(text.tagsTitle);
   wrap.appendChild(codeStatsCard);
   wrap.appendChild(backupCard);
+  wrap.appendChild(whatsNewCard);
   wrap.appendChild(usersCard);
   wrap.appendChild(codesCard);
   wrap.appendChild(tagsCard);
@@ -555,6 +620,9 @@ if (mount) {
   backupCard
     .querySelector(".controlpanel-toggle")
     ?.addEventListener("click", () => toggleCard(backupCard));
+  whatsNewCard
+    .querySelector(".controlpanel-toggle")
+    ?.addEventListener("click", () => toggleCard(whatsNewCard));
   usersCard
     .querySelector(".controlpanel-toggle")
     ?.addEventListener("click", () => toggleCard(usersCard));
@@ -567,6 +635,7 @@ if (mount) {
 
   const codeStatsBody = codeStatsCard.querySelector(".controlpanel-body");
   const backupBody = backupCard.querySelector(".controlpanel-body");
+  const whatsNewBody = whatsNewCard.querySelector(".controlpanel-body");
   const usersBody = usersCard.querySelector(".controlpanel-body");
   const codesBody = codesCard.querySelector(".controlpanel-body");
   const tagsBody = tagsCard.querySelector(".controlpanel-body");
@@ -667,9 +736,24 @@ if (mount) {
     }
   };
 
+  const loadWhatsNewControl = async () => {
+    if (!whatsNewBody) return;
+    renderState(whatsNewBody, text.whatsNewHint, text.whatsNewLoading);
+    try {
+      const response = await fetch(`/docs/codex-flags.json?ts=${Date.now()}`, {
+        cache: "no-store"
+      });
+      const flags = response.ok ? await response.json() : {};
+      renderWhatsNewControl(whatsNewBody, flags);
+    } catch {
+      renderWhatsNewControl(whatsNewBody, {});
+    }
+  };
+
   toggleCard(codeStatsCard);
   if (codeStatsBody) renderState(codeStatsBody, text.codeStatsHint, text.codeStatsLoading);
   if (backupBody) renderState(backupBody, text.backupHint, text.backupLoading);
+  if (whatsNewBody) renderState(whatsNewBody, text.whatsNewHint, text.whatsNewLoading);
   if (usersBody) renderState(usersBody, text.usersHint, text.usersLoading);
   if (codesBody) renderState(codesBody, text.codesHint, text.codesLoading);
   if (tagsBody) renderState(tagsBody, text.tagsHint, text.tagsLoading);
@@ -686,9 +770,17 @@ if (mount) {
       return;
     }
 
-    if (!codeStatsBody || !backupBody || !usersBody || !codesBody || !tagsBody) return;
+    if (
+      !codeStatsBody ||
+      !backupBody ||
+      !whatsNewBody ||
+      !usersBody ||
+      !codesBody ||
+      !tagsBody
+    ) return;
     await loadCodeStats();
     await loadBackupStatus();
+    await loadWhatsNewControl();
     renderState(usersBody, text.usersHint, text.usersLoading);
 
     let updateUsersStatus = () => {};
