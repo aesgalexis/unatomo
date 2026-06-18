@@ -1,10 +1,21 @@
 import { fetchMachineAccess, updateMachineAccess } from "/static/js/dashboard/machineAccessRepo.js";
 import { createMachineCard } from "/static/js/dashboard/machineCardTemplate.js";
+import { installDocumentHooks } from "/static/js/dashboard/cardHooks/documentHooks.js";
+import { upsertMachine } from "/static/js/dashboard/firestoreRepo.js";
+import { generateMachineTagQr } from "/static/js/dashboard/tags/tagAssetsRepo.js";
 import { auth, db } from "/static/js/firebase/firebaseApp.js";
 import { hashPassword } from "/static/js/utils/crypto.js";
 import { initAutoSave } from "/static/js/dashboard/autoSave.js";
+import { calculateStorageUsage, STORAGE_LIMIT_BYTES } from "/static/js/configuracion/storageUsage.js";
 import { normalizeTasks } from "/static/js/dashboard/tabs/tasks/tasksModel.js";
-import { getTaskTiming, getOverdueDuration, getCompletionDuration } from "/static/js/dashboard/tabs/tasks/tasksTime.js";
+import {
+  buildAddTaskNoteUpdate,
+  buildAddTaskUpdate,
+  buildCompleteTaskUpdate,
+  buildEditTaskUpdate,
+  buildRemoveTaskUpdate,
+  buildStatusToggleUpdate
+} from "/static/js/dashboard/tabs/tasks/taskActions.js";
 import { setTopbarSaveStatus } from "/static/js/topbar/save-status.js";
 import { t } from "/static/js/dashboard/i18n.js";
 import {
@@ -97,7 +108,12 @@ const saveMachineSession = (tagId, session, { remember = false } = {}) => {
 };
 
 const readStoredMachineSession = (tagId) => {
-  const session = readStoredMachineSession(tagId);
+  let session = null;
+  try {
+    session = JSON.parse(sessionStorage.getItem(sessionKey(tagId)) || "null");
+  } catch {
+    session = null;
+  }
   if (session?.username) return session;
 
   try {
@@ -242,24 +258,87 @@ const hasDashboardMachineAccess = async (user, machineDoc) => {
   }
 };
 
+const normalizeStatus = (value) =>
+  value === "desconectada" ? "fuera_de_servicio" : value || "operativa";
+
+const normalizeMachineAccessDraft = (machineDoc) => ({
+  ...machineDoc,
+  id: machineDoc.machineId || machineDoc.id,
+  accessTagId: machineDoc.id,
+  tagId: machineDoc.tagId || machineDoc.id,
+  tenantId: machineDoc.tenantId || machineDoc.ownerUid || "",
+  ownerUid: machineDoc.ownerUid || machineDoc.tenantId || "",
+  status: normalizeStatus(machineDoc.status),
+  logs: machineDoc.logs || [],
+  tasks: normalizeTasks(machineDoc.tasks || []),
+  documents:
+    machineDoc.documents && typeof machineDoc.documents === "object"
+      ? machineDoc.documents
+      : {}
+});
+
+const buildMachineAccessPatch = (machine) => ({
+  tenantId: machine.tenantId || machine.ownerUid || "",
+  ownerUid: machine.ownerUid || machine.tenantId || "",
+  machineId: machine.id,
+  title: machine.title,
+  brand: machine.brand || "",
+  model: machine.model || "",
+  serial: machine.serial || "",
+  year: machine.year ?? null,
+  location: machine.location || "",
+  status: machine.status || "operativa",
+  tagId: machine.tagId || state.tagId,
+  tagUrl: machine.tagUrl || "",
+  tagQrUrl: machine.tagQrUrl || "",
+  tagQrPath: machine.tagQrPath || "",
+  tagQrSize: Number(machine.tagQrSize || 0),
+  documents:
+    machine.documents && typeof machine.documents === "object"
+      ? machine.documents
+      : {},
+  logs: machine.logs || [],
+  tasks: machine.tasks || [],
+  users: machine.users || [],
+  adminEmail: machine.adminEmail || "",
+  adminName: machine.adminName || "",
+  adminStatus: machine.adminStatus || "",
+  ownershipTransferEmail: machine.ownershipTransferEmail || "",
+  ownershipTransferStatus: machine.ownershipTransferStatus || "",
+  activeStatusCycleId: machine.activeStatusCycleId || "",
+  notifications: machine.notifications || null
+});
+
 const state = {
   tagId: null,
+  uid: null,
   session: null,
   draft: null
+};
+
+const getActorLabel = () =>
+  state.session?.username || t("dashboard.admin", "Administrador");
+
+const getDraftById = (id) => (state.draft?.id === id ? state.draft : null);
+
+const updateDraft = (id, patch) => {
+  if (!state.draft || state.draft.id !== id) return;
+  state.draft = { ...state.draft, ...patch };
+};
+
+const persistDraft = async () => {
+  if (!state.draft || !state.tagId) return;
+  const updatedBy = state.session?.uid || state.session?.username || "machine";
+  await updateMachineAccess(state.tagId, buildMachineAccessPatch(state.draft), updatedBy);
+  if (state.session?.source === "dashboard" && state.draft.tenantId) {
+    await upsertMachine(state.draft.tenantId, state.draft);
+  }
 };
 
 const autoSave = initAutoSave({
   notify: updateSaveState,
   saveFn: async () => {
-    await updateMachineAccess(
-      state.tagId,
-      {
-        status: state.draft.status,
-        logs: state.draft.logs || [],
-        tasks: state.draft.tasks || []
-      },
-      `machineUser:${state.session.username || "unknown"}`
-    );
+    await persistDraft();
   }
 });
 
@@ -281,26 +360,14 @@ const init = async () => {
   if (await hasDashboardMachineAccess(authUser, machineDoc)) {
     const dashboardSession = buildDashboardSession(authUser, machineDoc);
     sessionStorage.setItem(sessionKey(tagId), JSON.stringify(dashboardSession));
+    state.uid = authUser.uid;
     state.session = dashboardSession;
-    state.draft = {
-      ...machineDoc,
-      status:
-        machineDoc.status === "desconectada"
-          ? "fuera_de_servicio"
-          : machineDoc.status || "operativa",
-      logs: machineDoc.logs || [],
-      tasks: normalizeTasks(machineDoc.tasks || [])
-    };
+    state.draft = normalizeMachineAccessDraft(machineDoc);
     renderMachine();
     return;
   }
 
-  let session = null;
-  try {
-    session = JSON.parse(sessionStorage.getItem(sessionKey(tagId)) || "null");
-  } catch {
-    session = null;
-  }
+  const session = readStoredMachineSession(tagId);
 
   const existingUser =
     session && (machineDoc.users || []).find(
@@ -310,30 +377,14 @@ const init = async () => {
     saveMachineSession(tagId, null, { remember: false });
     showLogin(machineDoc, tagId, (userSession) => {
       state.session = userSession;
-      state.draft = {
-        ...machineDoc,
-        status:
-          machineDoc.status === "desconectada"
-            ? "fuera_de_servicio"
-            : machineDoc.status || "operativa",
-        logs: machineDoc.logs || [],
-        tasks: normalizeTasks(machineDoc.tasks || [])
-      };
+      state.draft = normalizeMachineAccessDraft(machineDoc);
       renderMachine();
     });
     return;
   }
 
   state.session = session;
-  state.draft = {
-    ...machineDoc,
-    status:
-      machineDoc.status === "desconectada"
-        ? "fuera_de_servicio"
-        : machineDoc.status || "operativa",
-    logs: machineDoc.logs || [],
-    tasks: normalizeTasks(machineDoc.tasks || [])
-  };
+  state.draft = normalizeMachineAccessDraft(machineDoc);
   renderMachine();
 };
 
@@ -343,7 +394,8 @@ const renderMachine = () => {
   list.innerHTML = "";
 
   const role = session.role || t("machine.userRoleFallback", "usuario");
-  const visibleTabs = ["quehaceres", "general", "historial"].filter((tab) =>
+  const isDashboardAdmin = role === "admin" && session.source === "dashboard";
+  const visibleTabs = ["quehaceres", "general", "historial", "configuracion"].filter((tab) =>
     canSeeTab(role, tab)
   );
 
@@ -355,11 +407,11 @@ const renderMachine = () => {
     canEditTasks: canEditTasks(role),
     canCompleteTasks: true,
     canDownloadHistory: canDownloadHistory(role),
-    canEditGeneral: false,
-    canEditLocation: false,
-    canEditConfig: false,
+    canEditGeneral: isDashboardAdmin,
+    canEditLocation: isDashboardAdmin,
+    canEditConfig: isDashboardAdmin,
     visibleTabs,
-    disableTitleEdit: true,
+    disableTitleEdit: !isDashboardAdmin,
     createdBy: state.session.username || null
   });
 
@@ -389,18 +441,16 @@ const renderMachine = () => {
   hooks.onStatusToggle = () => {
     if (!canEditStatus(role)) return;
     const statusOrder = ["operativa", "fuera_de_servicio"];
-    const currentStatus =
-      machineDoc.status === "desconectada" ? "fuera_de_servicio" : machineDoc.status || "operativa";
+    const currentStatus = normalizeStatus(machineDoc.status);
     const idx = statusOrder.indexOf(currentStatus);
     const nextStatus = statusOrder[(idx + 1) % statusOrder.length];
-    const user = state.session.username || t("machine.userRoleFallback", "usuario");
+    const user = getActorLabel();
     state.draft = {
       ...machineDoc,
-      status: nextStatus,
-      logs: [
-        ...(machineDoc.logs || []),
-        { ts: new Date().toISOString(), type: "status", value: nextStatus, user }
-      ]
+      ...buildStatusToggleUpdate(machineDoc.id, machineDoc, nextStatus, user, {
+        normalizeStatus,
+        restoreTitle: t("tasks.restoreOperation", "Volver a poner la máquina en operatividad")
+      })
     };
     renderMachine();
     notifyTopbar(t("machine.statusUpdated", "Estado actualizado"));
@@ -409,10 +459,7 @@ const renderMachine = () => {
 
   hooks.onAddTask = (id, task) => {
     if (!canEditTasks(role)) return;
-    state.draft = {
-      ...machineDoc,
-      tasks: [task, ...(machineDoc.tasks || [])]
-    };
+    state.draft = { ...machineDoc, ...buildAddTaskUpdate(machineDoc, task, getActorLabel()) };
     renderMachine();
     notifyTopbar(t("machine.taskCreated", "Tarea creada"));
     autoSave.saveNow(state.tagId, "add-task");
@@ -422,49 +469,48 @@ const renderMachine = () => {
     if (!canEditTasks(role)) return;
     state.draft = {
       ...machineDoc,
-      tasks: (machineDoc.tasks || []).filter((t) => t.id !== taskId)
+      ...buildRemoveTaskUpdate(machineDoc, taskId, getActorLabel())
     };
     renderMachine();
     autoSave.saveNow(state.tagId, "remove-task");
   };
 
-  hooks.onCompleteTask = (id, taskId) => {
-    const baseTasks = normalizeTasks(machineDoc.tasks || []);
-    const before = baseTasks.find((t) => t.id === taskId);
-    const wasOverdue = before ? getTaskTiming(before).pending : false;
-    const overdueDuration = before ? getOverdueDuration(before) : "";
-    const completionDuration = before ? getCompletionDuration(before) : "";
-    const tasks = baseTasks
-      .map((t) =>
-        t.id === taskId ? { ...t, lastCompletedAt: new Date().toISOString() } : t
-      )
-      .filter((t) => !(t.id === taskId && t.frequency === "puntual"));
-    const task = baseTasks.find((t) => t.id === taskId);
-    const user = state.session.username || t("machine.userRoleFallback", "usuario");
+  hooks.onAddTaskNote = (id, taskId, text) => {
+    if (!canEditTasks(role)) return;
+    const updates = buildAddTaskNoteUpdate(machineDoc, taskId, text, getActorLabel());
+    if (!updates) return;
+    state.draft = { ...machineDoc, ...updates };
+    renderMachine();
+    autoSave.saveNow(state.tagId, "task-note");
+  };
+
+  hooks.onEditTask = (id, taskId, patch) => {
+    if (!canEditTasks(role)) return;
     state.draft = {
       ...machineDoc,
-      tasks,
-      logs: [
-        ...(machineDoc.logs || []),
-        {
-          ts: new Date().toISOString(),
-          type: "task",
-          title: task.title || t("tasks.task", "Tarea"),
-          user,
-          overdue: !!wasOverdue,
-          overdueDuration,
-          punctual: task.frequency === "puntual",
-          completionDuration
-        }
-      ]
+      ...buildEditTaskUpdate(machineDoc, taskId, patch, getActorLabel())
     };
+    renderMachine();
+    autoSave.saveNow(state.tagId, "task-edit");
+  };
+
+  hooks.onCompleteTask = (id, taskId) => {
+    const updates = buildCompleteTaskUpdate(
+      machineDoc.id,
+      machineDoc,
+      taskId,
+      getActorLabel(),
+      { normalizeStatus }
+    );
+    if (!updates) return;
+    state.draft = { ...machineDoc, ...updates };
     renderMachine();
     notifyTopbar(t("machine.taskCompleted", "Tarea completada"));
     autoSave.saveNow(state.tagId, "task-complete");
   };
 
   hooks.onAddIntervention = (machineData, message) => {
-    const user = state.session.username || t("machine.userRoleFallback", "usuario");
+    const user = getActorLabel();
     state.draft = {
       ...machineDoc,
       logs: [
@@ -477,6 +523,136 @@ const renderMachine = () => {
     autoSave.saveNow(state.tagId, "intervencion");
   };
 
+  hooks.onTitleUpdate = (_node, nextTitle) => {
+    if (!isDashboardAdmin) return false;
+    const title = (nextTitle || "").trim();
+    if (!title) return false;
+    updateDraft(machineDoc.id, { title });
+    autoSave.scheduleSave(state.tagId, "title");
+    return true;
+  };
+
+  hooks.onUpdateGeneral = (id, field, value, input, errorEl) => {
+    if (!isDashboardAdmin) return;
+    if (field === "year") {
+      const currentYear = new Date().getFullYear();
+      const parsed = value ? Number(value) : null;
+      if (
+        parsed !== null &&
+        (Number.isNaN(parsed) || parsed > currentYear || parsed < currentYear - 50)
+      ) {
+        if (errorEl) {
+          errorEl.textContent = t(
+            "dashboard.invalidYear",
+            (min, max) => `Año inválido (entre ${min} y ${max}).`
+          )(currentYear - 50, currentYear);
+          errorEl.dataset.state = "error";
+        }
+        if (input) input.setAttribute("aria-invalid", "true");
+        return;
+      }
+      if (errorEl) {
+        errorEl.textContent = "";
+        errorEl.dataset.state = "";
+      }
+      if (input) input.removeAttribute("aria-invalid");
+      updateDraft(id, { year: parsed });
+    } else {
+      updateDraft(id, { [field]: value });
+    }
+    autoSave.scheduleSave(state.tagId, `general:${field}`);
+  };
+
+  hooks.onUpdateLocation = (id, nextValue) => {
+    if (!isDashboardAdmin) return;
+    const normalized = (nextValue || "")
+      .toString()
+      .trim()
+      .replace(/\s+/g, " ")
+      .slice(0, 40);
+    if (normalized === (machineDoc.location || "")) return;
+    state.draft = {
+      ...machineDoc,
+      location: normalized,
+      logs: [
+        ...(machineDoc.logs || []),
+        { ts: new Date().toISOString(), type: "location", value: normalized || "" }
+      ]
+    };
+    renderMachine();
+    autoSave.saveNow(state.tagId, "location");
+  };
+
+  hooks.onCopyTagUrl = (_id, btn, input) => {
+    if (!input.value) return;
+    navigator.clipboard
+      .writeText(input.value)
+      .catch(() => {
+        input.select();
+        document.execCommand("copy");
+      })
+      .finally(() => {
+        const prev = btn.textContent;
+        btn.textContent = t("config.copied", "Copiado");
+        setTimeout(() => (btn.textContent = prev), 1000);
+      });
+  };
+
+  hooks.onGenerateTagQr = async (_id, statusEl) => {
+    if (!isDashboardAdmin || !machineDoc.tagId) return null;
+    if (statusEl) {
+      statusEl.textContent = t("config.generatingQr", "Generando QR...");
+      statusEl.dataset.state = "neutral";
+    }
+    const result = await generateMachineTagQr(machineDoc.id, document.documentElement.lang || "es");
+    state.draft = {
+      ...machineDoc,
+      tagUrl: result.tagUrl || machineDoc.tagUrl || "",
+      tagQrUrl: result.qrUrl || machineDoc.tagQrUrl || "",
+      tagQrPath: result.qrPath || machineDoc.tagQrPath || "",
+      tagQrSize: Number(result.qrSize || machineDoc.tagQrSize || 0)
+    };
+    await persistDraft();
+    renderMachine();
+    return result;
+  };
+
+  if (isDashboardAdmin) {
+    const assertStorageAvailable = async (
+      uid = state.uid || machineDoc.tenantId,
+      additionalBytes = 0
+    ) => {
+      if (!uid) throw new Error("no-auth");
+      const usage = await calculateStorageUsage(uid);
+      const full =
+        usage.totalBytes + Math.max(0, Number(additionalBytes) || 0) >=
+        STORAGE_LIMIT_BYTES;
+      if (full) {
+        notifyTopbar(t("dashboard.storageFullAction", "Almacenamiento lleno"));
+        throw new Error("storage-full");
+      }
+      return usage;
+    };
+    installDocumentHooks(hooks, {
+      assertStorageAvailable,
+      expandedById: new Set([machineDoc.id]),
+      getDraftById,
+      notifyTopbar,
+      refreshStorageFullState: async () => false,
+      renderCards: () => renderMachine(),
+      state,
+      t,
+      updateMachine: updateDraft,
+      upsertMachine: async (tenantId, machine) => {
+        await upsertMachine(tenantId, machine);
+        await updateMachineAccess(
+          state.tagId,
+          buildMachineAccessPatch(machine),
+          state.session?.uid || "dashboard"
+        );
+      }
+    });
+  }
 };
 
 init();

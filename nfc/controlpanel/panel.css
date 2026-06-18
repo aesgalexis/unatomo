@@ -44,6 +44,10 @@
   color: color-mix(in srgb, var(--fg) 70%, transparent);
 }
 
+.controlpanel-note-superadmin {
+  color: #7c3aed;
+}
+
 .controlpanel-state {
   margin: 0;
   font-size: 14px;
@@ -52,6 +56,10 @@
 
 .controlpanel-state[data-state="error"] {
   color: var(--danger, #d33);
+}
+
+.controlpanel-state[data-state="ok"] {
+  color: #16a34a;
 }
 
 .controlpanel-metric {
