@@ -25,6 +25,12 @@ import { getTaskTiming, getOverdueDuration, getCompletionDuration } from "/stati
 import { filterMachines } from "./components/machineSearch/machineFilter.js";
 import { createMachineSearchBar } from "./components/machineSearch/machineSearchBar.js";
 import { createDashboardLoading } from "./components/loading/dashboardLoading.js";
+import {
+  MAX_DASHBOARD_TITLE_LENGTH,
+  normalizeDashboardLayout as normalizeDashboardLayoutBase,
+  normalizeDashboardTitle,
+  normalizeTabOrder
+} from "./layout/dashboardLayoutModel.mjs";
 import { GLOBAL_REGISTRY_PAGE_SIZE, renderGlobalRegistryView } from "./views/registry/globalRegistryView.js";
 import { countUnseenGlobalRegistryEntries } from "./views/registry/globalRegistryModel.js";
 import { isControlPanelUser } from "/nfc/controlpanel/access.js";
@@ -56,7 +62,6 @@ import {
 const DEFAULT_COLLAPSED_HEIGHT = 108;
 const EXPAND_FACTOR = 2.5;
 const RESTORE_OPERATION_TASK_SOURCE = "status-out-of-service";
-const MAX_DASHBOARD_TITLE_LENGTH = 32;
 const DASHBOARD_TITLE_CACHE_KEY = "unatomo_dashboard_title_v1";
 
 const mount = document.getElementById("dashboard-mount");
@@ -193,18 +198,6 @@ if (mount) {
 
   const normalizeStatus = (value) =>
     value === "desconectada" ? "fuera_de_servicio" : value || "operativa";
-
-  const normalizeDashboardTitle = (value) =>
-    (value || "")
-      .toString()
-      .replace(/\s+/g, " ")
-      .trim()
-      .slice(0, MAX_DASHBOARD_TITLE_LENGTH);
-
-  const normalizeIsoString = (value) => {
-    const date = value ? new Date(value) : null;
-    return date && !Number.isNaN(date.getTime()) ? date.toISOString() : "";
-  };
 
   const withTimeout = (promise, ms = 6000) =>
     new Promise((resolve, reject) => {
@@ -1053,72 +1046,26 @@ if (mount) {
 
   const getDraftIndex = (id) => state.draftMachines.findIndex((m) => m.id === id);
   const getDraftById = (id) => state.draftMachines.find((m) => m.id === id);
-  const DEFAULT_TAB_ORDER = ["quehaceres", "historial", "general", "configuracion"];
-  const normalizeTabOrder = (value) => {
-    const seen = new Set();
-    const ordered = Array.isArray(value)
-      ? value.filter((id) => {
-          if (!DEFAULT_TAB_ORDER.includes(id) || seen.has(id)) return false;
-          seen.add(id);
-          return true;
-        })
-      : [];
-    DEFAULT_TAB_ORDER.forEach((id) => {
-      if (!seen.has(id)) ordered.push(id);
-    });
-    return ordered;
-  };
+  const getKnownMachineIds = () =>
+    Array.from(
+      new Set([
+        ...(state.draftMachines || []),
+        ...(state.ownerMachines || []),
+        ...(state.adminMachines || [])
+      ].map((machine) => machine?.id).filter(Boolean))
+    );
 
-  const normalizeDashboardLayout = (layout = {}) => {
-    const groups = Array.isArray(layout.groups)
-      ? layout.groups
-          .filter((group) => group && group.id)
-          .map((group, index) => ({
-            id: String(group.id),
-            title: (group.title || t("dashboard.groupUntitled", "Grupo")).toString().trim() || t("dashboard.groupUntitled", "Grupo"),
-            order: typeof group.order === "number" ? group.order : index,
-            parentGroupId: group.parentGroupId ? String(group.parentGroupId) : "",
-            collapsed: !!group.collapsed
-          }))
-          .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-      : [];
-    const knownGroupIds = new Set(groups.map((group) => group.id));
-    groups.forEach((group) => {
-      if (!knownGroupIds.has(group.parentGroupId) || group.parentGroupId === group.id) {
-        group.parentGroupId = "";
-      }
+  const normalizeDashboardLayout = (layout = {}, options = {}) =>
+    normalizeDashboardLayoutBase(layout, {
+      groupUntitled: t("dashboard.groupUntitled", "Grupo"),
+      validMachineIds: options.pruneMissingMachines ? getKnownMachineIds() : null
     });
-    const groupById = new Map(groups.map((group) => [group.id, group]));
-    groups.forEach((group) => {
-      const parent = groupById.get(group.parentGroupId);
-      if (parent?.parentGroupId) group.parentGroupId = "";
-    });
-    const placements = {};
-    const rawPlacements =
-      layout.placements && typeof layout.placements === "object" && !Array.isArray(layout.placements)
-        ? layout.placements
-        : {};
-    Object.entries(rawPlacements).forEach(([machineId, placement]) => {
-      if (!machineId || !placement || typeof placement !== "object") return;
-      const groupId = knownGroupIds.has(placement.groupId) ? placement.groupId : "";
-      placements[machineId] = {
-        groupId,
-        order: typeof placement.order === "number" ? placement.order : 0
-      };
-    });
-    return {
-      groups,
-      placements,
-      tabOrder: normalizeTabOrder(layout.tabOrder),
-      dashboardTitle: normalizeDashboardTitle(layout.dashboardTitle),
-      registrySeenAt: normalizeIsoString(layout.registrySeenAt),
-      suggestionsSeenAt: normalizeIsoString(layout.suggestionsSeenAt)
-    };
-  };
 
   const saveDashboardLayout = async () => {
     if (!state.uid) return;
-    state.dashboardLayout = normalizeDashboardLayout(state.dashboardLayout);
+    state.dashboardLayout = normalizeDashboardLayout(state.dashboardLayout, {
+      pruneMissingMachines: true
+    });
     try {
       await upsertDashboardLayout(state.uid, state.dashboardLayout);
     } catch {

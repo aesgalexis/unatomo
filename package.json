@@ -16,7 +16,8 @@
     "scan:secrets": "node scripts/scan-secrets.mjs",
     "doctor": "node scripts/doctor.mjs",
     "backup:nfc:firestore": "node scripts/backup-firestore-nfc.mjs",
-    "backup:nfc:storage": "node scripts/backup-storage-inventory-nfc.mjs"
+    "backup:nfc:storage": "node scripts/backup-storage-inventory-nfc.mjs",
+    "check:nfc:layout": "node scripts/validate-dashboard-layout-backup.mjs"
   },
   "repository": {
     "type": "git",

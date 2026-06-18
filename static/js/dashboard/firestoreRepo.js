@@ -12,33 +12,16 @@ import {
   setDoc,
   deleteDoc
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+import {
+  normalizeDashboardTitle,
+  normalizeIsoString,
+  normalizeTabOrder
+} from "./layout/dashboardLayoutModel.mjs";
 
 const machinesCollection = collection(db, "machines");
 const usernamesDoc = (ownerUid, normalized) =>
   doc(db, "usernames", `${ownerUid}_${normalized}`);
 const dashboardLayoutDoc = (uid) => doc(db, "dashboard_layout", uid);
-const VALID_TAB_IDS = ["quehaceres", "general", "historial", "configuracion"];
-const MAX_DASHBOARD_TITLE_LENGTH = 32;
-
-const normalizeIsoString = (value) => {
-  const date = value ? new Date(value) : null;
-  return date && !Number.isNaN(date.getTime()) ? date.toISOString() : "";
-};
-
-const normalizeTabOrder = (value) => {
-  const seen = new Set();
-  const ordered = Array.isArray(value)
-    ? value.filter((id) => {
-        if (!VALID_TAB_IDS.includes(id) || seen.has(id)) return false;
-        seen.add(id);
-        return true;
-      })
-    : [];
-  VALID_TAB_IDS.forEach((id) => {
-    if (!seen.has(id)) ordered.push(id);
-  });
-  return ordered;
-};
 
 export const fetchMachines = async (uid) => {
   const q = query(machinesCollection, where("ownerUid", "==", uid));
@@ -61,10 +44,7 @@ export const upsertDashboardLayout = async (uid, layout) => {
   const hasTitle = Object.prototype.hasOwnProperty.call(layout || {}, "dashboardTitle");
   const hasRegistrySeenAt = Object.prototype.hasOwnProperty.call(layout || {}, "registrySeenAt");
   const hasSuggestionsSeenAt = Object.prototype.hasOwnProperty.call(layout || {}, "suggestionsSeenAt");
-  const dashboardTitle = (layout?.dashboardTitle || "")
-    .toString()
-    .trim()
-    .slice(0, MAX_DASHBOARD_TITLE_LENGTH);
+  const dashboardTitle = normalizeDashboardTitle(layout?.dashboardTitle);
   const payload = {
     updatedAt: serverTimestamp(),
     updatedBy: uid

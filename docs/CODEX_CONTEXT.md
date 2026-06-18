@@ -41,6 +41,7 @@ Project-owner-only UI is called `superadmin` in conversation and docs. In code i
 - Global registry event text comes from `static/js/dashboard/history/historyEventFormatter.js`; new history event types should provide `summary`, `message`, or `messageKey` so the global registry can show them without view-specific code.
 - The dashboard topbar title is editable per user and stored as `dashboard_layout/{uid}.dashboardTitle` with a 32-character cap; empty value falls back to `Dashboard`.
 - Dashboard initialization is intentionally guarded against duplicate auth emissions. Loading failures should not be presented as an empty account; show a load-error state until Firebase data arrives or the user reloads.
+- Dashboard layout normalization is centralized in `static/js/dashboard/layout/dashboardLayoutModel.mjs`; use `npm.cmd run check:nfc:layout` against a fresh backup before/after risky group or layout work.
 
 ## Working Style
 
