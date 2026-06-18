@@ -668,7 +668,6 @@ if (mount) {
   };
 
   toggleCard(codeStatsCard);
-  toggleCard(backupCard);
   if (codeStatsBody) renderState(codeStatsBody, text.codeStatsHint, text.codeStatsLoading);
   if (backupBody) renderState(backupBody, text.backupHint, text.backupLoading);
   if (usersBody) renderState(usersBody, text.usersHint, text.usersLoading);

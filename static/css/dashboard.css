@@ -1,5 +1,20 @@
 @import "/static/css/effects/inactive_sections/inactive.css";
 
+html,
+body.page {
+  scrollbar-gutter: auto;
+}
+
+body.page {
+  width: 100vw;
+  overflow-x: hidden;
+}
+
+body.page .topbar {
+  right: auto;
+  width: 100vw;
+}
+
 .topbar-title-editable {
   display: block;
   max-width: min(50vw, 32ch);
@@ -35,6 +50,21 @@
   color: color-mix(in srgb, var(--fg) 58%, transparent);
   text-decoration: none;
   font-weight: 500;
+}
+
+.dashboard-section-icon {
+  display: inline-flex;
+  width: 1.05rem;
+  height: 1.05rem;
+  align-items: center;
+  justify-content: center;
+  vertical-align: -0.16rem;
+}
+
+.dashboard-section-icon svg {
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
 }
 
 .dashboard-section-badge {

@@ -197,6 +197,34 @@ if (mount) {
     document.querySelectorAll(".mc-tooltip").forEach((node) => node.remove());
   };
 
+  const attachDashboardTooltip = (target, { align = "center" } = {}) => {
+    let tipEl = null;
+    const showTip = () => {
+      const label = target.getAttribute("data-tooltip");
+      if (!label) return;
+      clearDashboardTooltips();
+      tipEl = document.createElement("div");
+      tipEl.className = "mc-tooltip";
+      tipEl.textContent = label;
+      document.body.appendChild(tipEl);
+      const rect = target.getBoundingClientRect();
+      const left = align === "right"
+        ? rect.right - tipEl.offsetWidth
+        : rect.left + (rect.width - tipEl.offsetWidth) / 2;
+      tipEl.style.top = `${Math.max(8, rect.top - tipEl.offsetHeight - 10)}px`;
+      tipEl.style.left = `${Math.max(8, left)}px`;
+    };
+    const hideTip = () => {
+      if (tipEl && tipEl.parentNode) tipEl.parentNode.removeChild(tipEl);
+      tipEl = null;
+    };
+    target.addEventListener("mouseenter", showTip);
+    target.addEventListener("mouseleave", hideTip);
+    target.addEventListener("focus", showTip);
+    target.addEventListener("blur", hideTip);
+    target.addEventListener("click", hideTip);
+  };
+
   ["pointerdown", "dragstart", "scroll", "resize"].forEach((eventName) => {
     window.addEventListener(eventName, clearDashboardTooltips, true);
   });
@@ -404,9 +432,17 @@ if (mount) {
   suggestionsBadge.className = "dashboard-section-badge";
   suggestionsBadge.hidden = true;
   const suggestionsLabel = document.createElement("span");
-  suggestionsLabel.textContent = t("dashboard.navSuggestions", "Sugerencias");
+  suggestionsLabel.className = "dashboard-section-icon";
+  suggestionsLabel.innerHTML = `
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M13 2 4 14h7l-1 8 10-13h-7l0-7Z"></path>
+    </svg>
+  `;
+  suggestionsLink.setAttribute("aria-label", t("dashboard.navSuggestions", "Sugerencias"));
+  suggestionsLink.setAttribute("data-tooltip", t("dashboard.navSuggestions", "Sugerencias"));
   suggestionsLink.appendChild(suggestionsBadge);
   suggestionsLink.appendChild(suggestionsLabel);
+  attachDashboardTooltip(suggestionsLink);
 
   sectionNav.appendChild(dashboardLink);
   sectionNav.appendChild(registryLink);
@@ -694,8 +730,14 @@ if (mount) {
 
   const resetInitialMobileScroll = () => {
     if (!isMobileDashboardViewport()) return;
-    window.scrollTo(0, 0);
-    requestAnimationFrame(() => window.scrollTo(0, 0));
+    const scrollTop = () => window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    scrollTop();
+    requestAnimationFrame(() => {
+      scrollTop();
+      requestAnimationFrame(scrollTop);
+    });
+    window.setTimeout(scrollTop, 80);
+    window.setTimeout(scrollTop, 240);
   };
 
   const clearMobileDetailState = () => {
