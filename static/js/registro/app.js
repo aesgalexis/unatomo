@@ -1,6 +1,5 @@
 import {
   auth,
-  consumeGoogleRedirectLoginResult,
   loginWithGoogle,
   loginWithEmail,
   validateRegistrationCode,
@@ -84,23 +83,6 @@ const handleLoginResult = (res, setStatus) => {
   return false;
 };
 
-const handleGoogleRedirectResult = async (setStatus, onSuccess) => {
-  try {
-    const res = await consumeGoogleRedirectLoginResult();
-    if (!res?.redirectResult) return;
-    if (handleLoginResult(res, setStatus)) return;
-    if (!res.ok) {
-      setStatus(text.loginFailed);
-      return;
-    }
-    setStatus(text.loginSuccess);
-    setTimeout(onSuccess, 650);
-  } catch (error) {
-    console.warn("Google redirect login failed", error);
-    setStatus(text.googleLoginError);
-  }
-};
-
 function initSetupLogin() {
   const btnOpen = document.getElementById("go-login");
   const box = document.getElementById("login-box");
@@ -144,10 +126,6 @@ function initSetupLogin() {
     } catch {}
   });
 
-  handleGoogleRedirectResult(showStatus, () => {
-    window.location.href = paths.home;
-  });
-
   btnGoogle.addEventListener("click", async () => {
     clearStatus();
     try {
@@ -155,7 +133,6 @@ function initSetupLogin() {
       showStatus(text.connectingGoogle);
 
       const res = await loginWithGoogle();
-      if (res?.redirecting) return;
       if (handleLoginResult(res, showStatus)) return;
       if (!res.ok) return showStatus(text.loginFailed);
 
@@ -313,8 +290,6 @@ function initLoginPage() {
     }
   });
 
-  handleGoogleRedirectResult(setStatus, goHome);
-
   btnGoogle.addEventListener("click", async () => {
     clearStatus();
     try {
@@ -322,7 +297,6 @@ function initLoginPage() {
       setStatus(text.connectingGoogle);
 
       const res = await loginWithGoogle();
-      if (res?.redirecting) return;
       if (handleLoginResult(res, setStatus)) return;
       if (!res.ok) return setStatus(text.loginFailed);
 
