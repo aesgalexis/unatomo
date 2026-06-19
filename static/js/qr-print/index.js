@@ -31,6 +31,7 @@ const text = {
   remove: isEn ? "Remove from print sheet" : "Quitar de la hoja",
   size: isEn ? "QR size" : "Tamaño QR",
   frame: isEn ? "Frame" : "Marco",
+  backNames: isEn ? "Back names" : "Nombres reverso",
   count: isEn
     ? (visible, total) => `Showing ${visible} of ${total} QR ${total === 1 ? "code" : "codes"}`
     : (visible, total) => `Mostrando ${visible} de ${total} ${total === 1 ? "QR" : "QRs"}`,
@@ -44,15 +45,17 @@ let currentMachines = [];
 let totalMachinesCount = 0;
 let currentSizeIndex = 0;
 let useFrame = true;
+let printBackNames = false;
 
 const clearPrintMode = () => {
-  document.body.classList.remove("qr-print-front-mode", "qr-print-back-mode");
+  document.body.classList.remove("qr-print-printing", "qr-print-include-back");
 };
 
-const printWithMode = (mode) =>
+const printDocument = () =>
   new Promise((resolve) => {
     clearPrintMode();
-    document.body.classList.add(`qr-print-${mode}-mode`);
+    document.body.classList.add("qr-print-printing");
+    if (printBackNames) document.body.classList.add("qr-print-include-back");
     let done = false;
     const cleanup = () => {
       if (done) return;
@@ -80,12 +83,7 @@ const requestPrint = async () => {
   } catch {
     // ignore focus cleanup failures
   }
-  await printWithMode("front");
-  window.setTimeout(() => {
-    if (window.confirm(text.printBack)) {
-      printWithMode("back");
-    }
-  }, 120);
+  await printDocument();
 };
 
 const getFocusedMachineId = () => {
@@ -190,6 +188,14 @@ const setQrSize = (wrap, sizeIndex) => {
   wrap.style.setProperty("--qr-grid-gap", GRID_GAP_BY_STEP[safeIndex]);
 };
 
+const PRINT_ROWS_BY_STEP = [5, 4, 3, 3, 2];
+
+const getPrintSheetCapacity = () => {
+  const columns = PRINT_COLUMNS_BY_STEP[currentSizeIndex] || PRINT_COLUMNS_BY_STEP[0];
+  const rows = PRINT_ROWS_BY_STEP[currentSizeIndex] || PRINT_ROWS_BY_STEP[0];
+  return Math.max(1, columns * rows);
+};
+
 const renderQrGrid = (machines, options = {}) => {
   if (!mount) return;
   if (!options.preserveList) {
@@ -249,6 +255,20 @@ const renderQrGrid = (machines, options = {}) => {
   frameControl.appendChild(frameInput);
   frameControl.appendChild(frameLabel);
 
+  const backControl = document.createElement("label");
+  backControl.className = "qr-print-back-toggle";
+  const backInput = document.createElement("input");
+  backInput.type = "checkbox";
+  backInput.checked = printBackNames;
+  const backLabel = document.createElement("span");
+  backLabel.textContent = text.backNames;
+  backInput.addEventListener("change", () => {
+    printBackNames = backInput.checked;
+    renderQrGrid(currentMachines, { preserveList: true });
+  });
+  backControl.appendChild(backInput);
+  backControl.appendChild(backLabel);
+
   const reloadBtn = document.createElement("button");
   reloadBtn.type = "button";
   reloadBtn.className = "qr-print-icon-button qr-print-icon-button--reload";
@@ -288,6 +308,7 @@ const renderQrGrid = (machines, options = {}) => {
 
   actions.appendChild(sizeControl);
   actions.appendChild(frameControl);
+  actions.appendChild(backControl);
   actions.appendChild(reloadBtn);
   actions.appendChild(printBtn);
 
@@ -304,11 +325,21 @@ const renderQrGrid = (machines, options = {}) => {
     return;
   }
 
-  const grid = document.createElement("div");
-  grid.className = "qr-print-grid";
-  const backGrid = document.createElement("div");
+  let grid = document.createElement("div");
+  grid.className = "qr-print-grid qr-print-front-grid";
+  let backGrid = document.createElement("div");
   backGrid.className = "qr-print-grid qr-print-back-grid";
-  machines.forEach((machine) => {
+  const sheetCapacity = getPrintSheetCapacity();
+  const appendSheetPair = () => {
+    wrap.appendChild(grid);
+    wrap.appendChild(backGrid);
+    grid = document.createElement("div");
+    grid.className = "qr-print-grid qr-print-front-grid";
+    backGrid = document.createElement("div");
+    backGrid.className = "qr-print-grid qr-print-back-grid";
+  };
+  machines.forEach((machine, index) => {
+    if (index > 0 && index % sheetCapacity === 0) appendSheetPair();
     const item = document.createElement("article");
     item.className = "qr-print-item";
 

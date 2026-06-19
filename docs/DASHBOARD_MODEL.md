@@ -179,6 +179,7 @@ Behavior:
 - Reload restores the full QR list.
 - Size selector uses fixed size steps.
 - Optional frame uses `static/img/LOGO unatomo v1.6 baseQR.jpg`.
+- Optional back-name printing adds machine-name reverse pages to the same print job for printer duplex mode.
 
 ## Localization
 
