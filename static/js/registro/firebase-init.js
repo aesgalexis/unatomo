@@ -3,6 +3,7 @@ import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.
 import {
   getAuth,
   GoogleAuthProvider,
+  getRedirectResult,
   signInWithPopup,
   signInWithRedirect,
   createUserWithEmailAndPassword,
@@ -39,6 +40,19 @@ const shouldUseGoogleRedirect = () => {
   const mobileUA = /android|iphone|ipad|ipod|mobile/.test(ua);
   const coarsePointer = window.matchMedia?.("(pointer: coarse)")?.matches;
   return mobileUA || !!coarsePointer;
+};
+
+let googleRedirectResultPromise = null;
+
+const buildLoginResult = async (user) => {
+  if (!user) return { ok: false };
+  const registration = await getUserRegistrationState(user);
+  return {
+    ok: registration.allowed,
+    uid: user.uid,
+    needsRegistration: !registration.allowed,
+    registrationReason: registration.reason || ""
+  };
 };
 
 export async function validateRegistrationCode(code) {
@@ -140,14 +154,20 @@ export async function loginWithGoogle() {
     return { ok: false, redirecting: true };
   }
   const result = await signInWithPopup(auth, provider);
-  if (!result.user) return { ok: false };
-  const registration = await getUserRegistrationState(result.user);
-  return {
-    ok: registration.allowed,
-    uid: result.user.uid,
-    needsRegistration: !registration.allowed,
-    registrationReason: registration.reason || ""
-  };
+  return buildLoginResult(result.user);
+}
+
+export async function consumeGoogleRedirectLoginResult() {
+  if (!googleRedirectResultPromise) {
+    googleRedirectResultPromise = getRedirectResult(auth).then(async (result) => {
+      if (!result?.user) return { ok: false, redirectResult: false };
+      return {
+        ...(await buildLoginResult(result.user)),
+        redirectResult: true
+      };
+    });
+  }
+  return googleRedirectResultPromise;
 }
 
 export async function loginWithEmail(email, password) {

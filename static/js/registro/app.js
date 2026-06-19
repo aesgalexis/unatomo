@@ -1,5 +1,6 @@
 import {
   auth,
+  consumeGoogleRedirectLoginResult,
   loginWithGoogle,
   loginWithEmail,
   validateRegistrationCode,
@@ -83,6 +84,23 @@ const handleLoginResult = (res, setStatus) => {
   return false;
 };
 
+const handleGoogleRedirectResult = async (setStatus, onSuccess) => {
+  try {
+    const res = await consumeGoogleRedirectLoginResult();
+    if (!res?.redirectResult) return;
+    if (handleLoginResult(res, setStatus)) return;
+    if (!res.ok) {
+      setStatus(text.loginFailed);
+      return;
+    }
+    setStatus(text.loginSuccess);
+    setTimeout(onSuccess, 650);
+  } catch (error) {
+    console.warn("Google redirect login failed", error);
+    setStatus(text.googleLoginError);
+  }
+};
+
 function initSetupLogin() {
   const btnOpen = document.getElementById("go-login");
   const box = document.getElementById("login-box");
@@ -124,6 +142,10 @@ function initSetupLogin() {
       const registration = await getUserRegistrationState(user);
       if (registration.allowed) window.location.href = paths.home;
     } catch {}
+  });
+
+  handleGoogleRedirectResult(showStatus, () => {
+    window.location.href = paths.home;
   });
 
   btnGoogle.addEventListener("click", async () => {
@@ -290,6 +312,8 @@ function initLoginPage() {
       goActivationFlow();
     }
   });
+
+  handleGoogleRedirectResult(setStatus, goHome);
 
   btnGoogle.addEventListener("click", async () => {
     clearStatus();
