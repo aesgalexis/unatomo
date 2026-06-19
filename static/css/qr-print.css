@@ -95,7 +95,8 @@
   accent-color: var(--fg);
 }
 
-.qr-print-frame-toggle {
+.qr-print-frame-toggle,
+.qr-print-back-toggle {
   display: flex;
   align-items: center;
   gap: 0.45rem;
@@ -104,7 +105,8 @@
   white-space: nowrap;
 }
 
-.qr-print-frame-toggle input {
+.qr-print-frame-toggle input,
+.qr-print-back-toggle input {
   width: 1rem;
   height: 1rem;
   accent-color: #2c974b;
@@ -261,6 +263,7 @@
   .qr-print-toolbar,
   .qr-print-actions,
   .qr-print-frame-toggle,
+  .qr-print-back-toggle,
   .qr-print-state {
     display: none !important;
   }
@@ -312,20 +315,31 @@
     display: none;
   }
 
-  body.qr-print-back-mode .qr-print > .qr-print-grid:not(.qr-print-back-grid) {
-    display: none !important;
+  body.qr-print-include-back .qr-print-front-grid {
+    break-after: page;
+    page-break-after: always;
   }
 
-  body.qr-print-back-mode .qr-print-back-grid {
+  body.qr-print-include-back .qr-print-back-grid {
     display: grid;
+    direction: rtl;
   }
 
-  body.qr-print-back-mode .qr-print-back-item {
+  body.qr-print-include-back .qr-print-back-grid:not(:last-child) {
+    break-after: page;
+    page-break-after: always;
+  }
+
+  body.qr-print-include-back .qr-print-back-item {
+    direction: ltr;
+  }
+
+  body.qr-print-include-back .qr-print-back-item {
     align-items: center;
     justify-content: center;
   }
 
-  body.qr-print-back-mode .qr-print-back-machine {
+  body.qr-print-include-back .qr-print-back-machine {
     color: #000;
     font-size: 11pt;
   }

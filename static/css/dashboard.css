@@ -2477,7 +2477,7 @@ body.page .topbar {
   justify-content: flex-start;
   width: 100%;
   height: 0;
-  margin-bottom: 0;
+  margin-bottom: 0.22rem;
   position: relative;
   z-index: 1;
 }
