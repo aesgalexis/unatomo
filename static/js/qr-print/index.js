@@ -9,10 +9,13 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 import { auth, db, getUserRegistrationState } from "/static/js/firebase/firebaseApp.js";
 import { getCurrentLang, localizeEsPath } from "/static/js/site/locale.js";
+import { normalizeDashboardTitle } from "/static/js/dashboard/layout/dashboardLayoutModel.mjs";
+import { isControlPanelUser } from "/nfc/controlpanel/access.js";
 
 const mount = document.getElementById("qr-print-mount");
 const lang = getCurrentLang();
 const isEn = lang === "en";
+const DASHBOARD_TITLE_CACHE_KEY = "unatomo_dashboard_title_v1";
 
 const text = {
   title: isEn ? "QR print" : "Impresión QR",
@@ -28,24 +31,184 @@ const text = {
     ? "Print back side with machine names?"
     : "¿Imprimir el reverso con los nombres de las máquinas?",
   reload: isEn ? "Reload QR codes" : "Recargar QRs",
+  search: isEn ? "Search QR by machine title" : "Buscar QR por titulo de maquina",
+  searchPlaceholder: isEn ? "Search by title..." : "Buscar por titulo...",
   remove: isEn ? "Remove from print sheet" : "Quitar de la hoja",
   size: isEn ? "QR size" : "Tamaño QR",
   frame: isEn ? "Frame" : "Marco",
   backNames: isEn ? "Back names" : "Nombres reverso",
-  count: isEn
-    ? (visible, total) => `Showing ${visible} of ${total} QR ${total === 1 ? "code" : "codes"}`
-    : (visible, total) => `Mostrando ${visible} de ${total} ${total === 1 ? "QR" : "QRs"}`,
+  sectionNavAria: isEn ? "Sections" : "Secciones",
+  navDashboard: "Dashboard",
+  navRegistry: isEn ? "Registry" : "Registro",
+  navQrPrint: isEn ? "QR print" : "Impresi\u00f3n QR",
+  navSuggestions: isEn ? "Suggestions" : "Sugerencias",
+  count: (visible, total) => `${visible}/${total}`,
   login: localizeEsPath("/es/auth/login.html", lang),
   home: localizeEsPath("/es/index.html", lang),
+  dashboard: localizeEsPath("/es/index.html", lang),
+  qrPrint: localizeEsPath("/es/impresion-qr.html", lang),
 };
 const QR_SIZE_STEPS = [100, 132, 168, 210, 260];
 const PRINT_COLUMNS_BY_STEP = [4, 3, 2, 2, 1];
 const GRID_GAP_BY_STEP = ["0.85rem", "1rem", "1.2rem", "1.45rem", "1.65rem"];
+const RELOAD_ICON = `
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path d="M20 12a8 8 0 1 1-2.34-5.66"></path>
+    <path d="M20 4v5h-5"></path>
+  </svg>
+`;
+const PRINT_ICON = `
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path d="M6 9V3h12v6"></path>
+    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+    <path d="M6 14h12v7H6z"></path>
+  </svg>
+`;
 let currentMachines = [];
+let allMachines = [];
 let totalMachinesCount = 0;
 let currentSizeIndex = 0;
 let useFrame = true;
 let printBackNames = false;
+let loadingProgressTimer = null;
+let showSuggestionsNav = false;
+let searchQuery = "";
+let hiddenMachineIds = new Set();
+
+const createIconButton = (className, label, icon) => {
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = `qr-print-icon-button ${className}`;
+  btn.setAttribute("aria-label", label);
+  btn.title = label;
+  btn.innerHTML = icon;
+  return btn;
+};
+
+const getCachedDashboardTitle = () => {
+  try {
+    return normalizeDashboardTitle(localStorage.getItem(DASHBOARD_TITLE_CACHE_KEY) || "");
+  } catch {
+    return "";
+  }
+};
+
+const cacheDashboardTitle = (title) => {
+  try {
+    const normalized = normalizeDashboardTitle(title);
+    if (normalized) localStorage.setItem(DASHBOARD_TITLE_CACHE_KEY, normalized);
+  } catch {}
+};
+
+const applyDashboardTopbarTitle = async (uid) => {
+  const setTitle = (value, attempts = 0) => {
+    const titleEl = document.getElementById("topbar-title");
+    if (titleEl) {
+      titleEl.textContent = value;
+      return;
+    }
+    if (attempts < 20) {
+      window.setTimeout(() => setTitle(value, attempts + 1), 50);
+    }
+  };
+  let title = getCachedDashboardTitle() || "Dashboard";
+  try {
+    const snap = await getDoc(doc(db, "dashboard_layout", uid));
+    const remoteTitle = normalizeDashboardTitle(snap.exists() ? snap.data()?.dashboardTitle : "");
+    if (remoteTitle) {
+      title = remoteTitle;
+      cacheDashboardTitle(remoteTitle);
+    }
+  } catch {}
+  setTitle(title);
+};
+
+const clearLoadingProgress = () => {
+  if (!loadingProgressTimer) return;
+  window.clearInterval(loadingProgressTimer);
+  loadingProgressTimer = null;
+};
+
+const createSectionNav = () => {
+  const sectionNav = document.createElement("nav");
+  sectionNav.className = "dashboard-section-nav qr-print-section-nav";
+  sectionNav.setAttribute("aria-label", text.sectionNavAria);
+
+  const dashboardLink = document.createElement("a");
+  dashboardLink.className = "dashboard-section-link";
+  dashboardLink.href = `${text.dashboard}#/dashboard`;
+  dashboardLink.textContent = text.navDashboard;
+
+  const registryLink = document.createElement("a");
+  registryLink.className = "dashboard-section-link";
+  registryLink.href = `${text.dashboard}#/registro`;
+  const registryLabel = document.createElement("span");
+  registryLabel.textContent = text.navRegistry;
+  registryLink.appendChild(registryLabel);
+
+  const qrPrintLink = document.createElement("a");
+  qrPrintLink.className = "dashboard-section-link";
+  qrPrintLink.href = text.qrPrint;
+  qrPrintLink.setAttribute("aria-label", text.navQrPrint);
+  qrPrintLink.setAttribute("data-tooltip", text.navQrPrint);
+  const qrPrintLabel = document.createElement("span");
+  qrPrintLabel.className = "dashboard-section-icon";
+  qrPrintLabel.innerHTML = `
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M7 3h10v5H7V3Zm-2 7h14a3 3 0 0 1 3 3v4a2 2 0 0 1-2 2h-2v2H6v-2H4a2 2 0 0 1-2-2v-4a3 3 0 0 1 3-3Zm3 7v2h8v-2H8Zm11-4a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z"></path>
+    </svg>
+  `;
+  qrPrintLink.appendChild(qrPrintLabel);
+
+  const suggestionsLink = document.createElement("a");
+  suggestionsLink.className = "dashboard-section-link";
+  suggestionsLink.href = `${text.dashboard}#/sugerencias`;
+  suggestionsLink.hidden = !showSuggestionsNav;
+  suggestionsLink.setAttribute("aria-label", text.navSuggestions);
+  suggestionsLink.setAttribute("data-tooltip", text.navSuggestions);
+  const suggestionsLabel = document.createElement("span");
+  suggestionsLabel.className = "dashboard-section-icon";
+  suggestionsLabel.innerHTML = `
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M13 2 4 14h7l-1 8 10-13h-7l0-7Z"></path>
+    </svg>
+  `;
+  suggestionsLink.appendChild(suggestionsLabel);
+
+  sectionNav.appendChild(dashboardLink);
+  sectionNav.appendChild(registryLink);
+  sectionNav.appendChild(qrPrintLink);
+  sectionNav.appendChild(suggestionsLink);
+  return sectionNav;
+};
+
+const canShowSuggestionsNav = async (user, registration) => {
+  if (registration?.profile?.suggestionsCollaborator === true) return true;
+  try {
+    return await isControlPanelUser(user);
+  } catch {
+    return false;
+  }
+};
+
+const normalizeSearch = (value) =>
+  (value || "")
+    .toString()
+    .trim()
+    .toLocaleLowerCase(isEn ? "en" : "es");
+
+const getVisibleMachines = () => {
+  const queryText = normalizeSearch(searchQuery);
+  return allMachines.filter((machine) => {
+    if (hiddenMachineIds.has(machine.id)) return false;
+    if (!queryText) return true;
+    return normalizeSearch(machine.title || machine.id).includes(queryText);
+  });
+};
+
+const renderVisibleMachines = (options = {}) => {
+  renderQrGrid(getVisibleMachines(), { preserveList: true, ...options });
+};
 
 const clearPrintMode = () => {
   document.body.classList.remove("qr-print-printing", "qr-print-include-back");
@@ -96,6 +259,7 @@ const getFocusedMachineId = () => {
 
 const setState = (message, state = "") => {
   if (!mount) return;
+  clearLoadingProgress();
   mount.innerHTML = "";
   const wrap = document.createElement("section");
   wrap.className = "qr-print";
@@ -198,8 +362,11 @@ const getPrintSheetCapacity = () => {
 
 const renderQrGrid = (machines, options = {}) => {
   if (!mount) return;
+  clearLoadingProgress();
+  currentMachines = machines;
   if (!options.preserveList) {
-    currentMachines = machines;
+    allMachines = machines;
+    hiddenMachineIds = new Set();
     totalMachinesCount = Number.isFinite(options.totalCount)
       ? options.totalCount
       : machines.length;
@@ -210,19 +377,23 @@ const renderQrGrid = (machines, options = {}) => {
   wrap.className = "qr-print";
   wrap.classList.toggle("qr-print--framed", useFrame);
   setQrSize(wrap, currentSizeIndex);
+  wrap.appendChild(createSectionNav());
 
   const toolbar = document.createElement("div");
   toolbar.className = "qr-print-toolbar";
 
-  const copy = document.createElement("div");
-  copy.className = "qr-print-summary";
+  const header = document.createElement("div");
+  header.className = "qr-print-header";
+  const heading = document.createElement("h3");
+  heading.textContent = text.title;
   const count = document.createElement("p");
   count.className = "qr-print-count";
   count.textContent = text.count(machines.length, totalMachinesCount);
-  copy.appendChild(count);
+  header.appendChild(heading);
+  header.appendChild(count);
 
-  const actions = document.createElement("div");
-  actions.className = "qr-print-actions";
+  const printOptions = document.createElement("div");
+  printOptions.className = "qr-print-options";
 
   const sizeControl = document.createElement("label");
   sizeControl.className = "qr-print-size";
@@ -269,52 +440,53 @@ const renderQrGrid = (machines, options = {}) => {
   backControl.appendChild(backInput);
   backControl.appendChild(backLabel);
 
-  const reloadBtn = document.createElement("button");
-  reloadBtn.type = "button";
-  reloadBtn.className = "qr-print-icon-button qr-print-icon-button--reload";
-  reloadBtn.setAttribute("aria-label", text.reload);
-  reloadBtn.title = text.reload;
-  reloadBtn.innerHTML = `
-    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-      <path d="M20 12a8 8 0 1 1-2.34-5.66"></path>
-      <path d="M20 4v5h-5"></path>
-    </svg>
-  `;
+  const reloadBtn = createIconButton("qr-print-icon-button--reload", text.reload, RELOAD_ICON);
   reloadBtn.addEventListener("click", () => {
     if (!auth.currentUser?.uid) return;
-    setState(text.loading);
+    searchQuery = "";
+    setLoadingState();
     fetchQrMachines(auth.currentUser.uid)
       .then((nextMachines) => renderQrGrid(nextMachines))
       .catch(() => setState(text.error, "error"));
   });
 
-  const printBtn = document.createElement("button");
-  printBtn.type = "button";
-  printBtn.className = "qr-print-icon-button qr-print-icon-button--print";
-  printBtn.setAttribute("aria-label", text.print);
-  printBtn.title = text.print;
-  printBtn.innerHTML = `
-    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-      <path d="M6 9V3h12v6"></path>
-      <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
-      <path d="M6 14h12v7H6z"></path>
-    </svg>
-  `;
+  const printBtn = createIconButton("qr-print-icon-button--print", text.print, PRINT_ICON);
   printBtn.addEventListener("click", (event) => {
     event.preventDefault();
     event.stopPropagation();
     requestPrint();
   });
 
-  actions.appendChild(sizeControl);
-  actions.appendChild(frameControl);
-  actions.appendChild(backControl);
-  actions.appendChild(reloadBtn);
-  actions.appendChild(printBtn);
+  printBtn.disabled = machines.length === 0;
 
-  toolbar.appendChild(copy);
-  toolbar.appendChild(actions);
+  const searchInput = document.createElement("input");
+  searchInput.type = "search";
+  searchInput.className = "qr-print-search";
+  searchInput.placeholder = text.searchPlaceholder;
+  searchInput.value = searchQuery;
+  searchInput.setAttribute("aria-label", text.search);
+  searchInput.classList.toggle("is-active-search", !!searchQuery.trim());
+  searchInput.addEventListener("input", () => {
+    searchQuery = searchInput.value || "";
+    renderVisibleMachines({ restoreSearch: true });
+  });
+  searchInput.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") return;
+    event.preventDefault();
+    searchQuery = "";
+    renderVisibleMachines({ restoreSearch: true });
+  });
+
+  printOptions.appendChild(sizeControl);
+  printOptions.appendChild(frameControl);
+  printOptions.appendChild(backControl);
+
+  toolbar.appendChild(printBtn);
+  toolbar.appendChild(searchInput);
+  toolbar.appendChild(reloadBtn);
+  toolbar.appendChild(printOptions);
   wrap.appendChild(toolbar);
+  wrap.appendChild(header);
 
   if (!machines.length) {
     const empty = document.createElement("p");
@@ -322,6 +494,11 @@ const renderQrGrid = (machines, options = {}) => {
     empty.textContent = text.empty;
     wrap.appendChild(empty);
     mount.appendChild(wrap);
+    if (options.restoreSearch) {
+      const nextSearch = wrap.querySelector(".qr-print-search");
+      nextSearch?.focus();
+      nextSearch?.setSelectionRange?.(nextSearch.value.length, nextSearch.value.length);
+    }
     return;
   }
 
@@ -350,8 +527,8 @@ const renderQrGrid = (machines, options = {}) => {
     removeBtn.title = text.remove;
     removeBtn.textContent = "×";
     removeBtn.addEventListener("click", () => {
-      currentMachines = currentMachines.filter((entry) => entry.id !== machine.id);
-      renderQrGrid(currentMachines, { preserveList: true });
+      hiddenMachineIds.add(machine.id);
+      renderVisibleMachines();
     });
 
     const name = document.createElement("p");
@@ -393,21 +570,77 @@ const renderQrGrid = (machines, options = {}) => {
   wrap.appendChild(grid);
   wrap.appendChild(backGrid);
   mount.appendChild(wrap);
+  if (options.restoreSearch) {
+    const nextSearch = wrap.querySelector(".qr-print-search");
+    nextSearch?.focus();
+    nextSearch?.setSelectionRange?.(nextSearch.value.length, nextSearch.value.length);
+  }
+};
+
+const setLoadingState = () => {
+  if (!mount) return;
+  clearLoadingProgress();
+  mount.innerHTML = "";
+
+  const wrap = document.createElement("section");
+  wrap.className = "qr-print";
+  wrap.appendChild(createSectionNav());
+
+  const toolbar = document.createElement("div");
+  toolbar.className = "qr-print-toolbar";
+
+  const printBtn = createIconButton("qr-print-icon-button--print", text.print, PRINT_ICON);
+  printBtn.disabled = true;
+  const searchInput = document.createElement("input");
+  searchInput.type = "search";
+  searchInput.className = "qr-print-search";
+  searchInput.placeholder = text.searchPlaceholder;
+  searchInput.setAttribute("aria-label", text.search);
+  searchInput.disabled = true;
+  const reloadBtn = createIconButton("qr-print-icon-button--reload", text.reload, RELOAD_ICON);
+  reloadBtn.disabled = true;
+
+  const loading = document.createElement("div");
+  loading.className = "dashboard-loading qr-print-loading";
+  const loadingText = document.createElement("div");
+  loadingText.className = "dashboard-loading-text";
+  loadingText.textContent = `${text.loading} `;
+  const percent = document.createElement("span");
+  percent.className = "dashboard-loading-percent";
+  percent.textContent = "0%";
+  loadingText.appendChild(percent);
+  loading.appendChild(loadingText);
+
+  toolbar.appendChild(printBtn);
+  toolbar.appendChild(searchInput);
+  toolbar.appendChild(reloadBtn);
+  toolbar.appendChild(loading);
+  wrap.appendChild(toolbar);
+  mount.appendChild(wrap);
+
+  let progress = 0;
+  loadingProgressTimer = window.setInterval(() => {
+    progress = Math.min(88, progress + Math.max(1, Math.ceil((88 - progress) / 12)));
+    percent.textContent = `${progress}%`;
+    if (progress >= 88) clearLoadingProgress();
+  }, 80);
 };
 
 if (mount) {
-  setState(text.loading);
+  setLoadingState();
   onAuthStateChanged(auth, async (user) => {
     if (!user) {
       window.location.href = text.login;
       return;
     }
+    applyDashboardTopbarTitle(user.uid);
     try {
       const registration = await getUserRegistrationState(user);
       if (!registration.allowed) {
         window.location.href = text.home;
         return;
       }
+      showSuggestionsNav = await canShowSuggestionsNav(user, registration);
       const machines = await fetchQrMachines(user.uid);
       const focusedMachineId = getFocusedMachineId();
       const visibleMachines = focusedMachineId

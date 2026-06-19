@@ -89,6 +89,10 @@ const DASHBOARD_TITLE_CACHE_KEY = "unatomo_dashboard_title_v1";
 const mount = document.getElementById("dashboard-mount");
 const appBasePrefix = getAppBasePrefix();
 const lang = getCurrentLang();
+const qrPrintHref =
+  lang === "en"
+    ? `${appBasePrefix || ""}/en/qr-print.html`
+    : `${appBasePrefix || ""}/es/impresion-qr.html`;
 const redirectToEntry = () => {
   setSavedLang(lang);
   window.location.href = `${appBasePrefix || ""}/`;
@@ -430,6 +434,21 @@ if (mount) {
   registryLink.appendChild(registryBadge);
   registryLink.appendChild(registryLabel);
 
+  const qrPrintLink = document.createElement("a");
+  qrPrintLink.className = "dashboard-section-link";
+  qrPrintLink.href = qrPrintHref;
+  qrPrintLink.setAttribute("aria-label", t("dashboard.navQrPrint", "Impresi\u00f3n QR"));
+  qrPrintLink.setAttribute("data-tooltip", t("dashboard.navQrPrint", "Impresi\u00f3n QR"));
+  const qrPrintLabel = document.createElement("span");
+  qrPrintLabel.className = "dashboard-section-icon";
+  qrPrintLabel.innerHTML = `
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M7 3h10v5H7V3Zm-2 7h14a3 3 0 0 1 3 3v4a2 2 0 0 1-2 2h-2v2H6v-2H4a2 2 0 0 1-2-2v-4a3 3 0 0 1 3-3Zm3 7v2h8v-2H8Zm11-4a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z"></path>
+    </svg>
+  `;
+  qrPrintLink.appendChild(qrPrintLabel);
+  attachDashboardTooltip(qrPrintLink, { placement: "bottom" });
+
   const suggestionsLink = document.createElement("a");
   suggestionsLink.className = "dashboard-section-link";
   suggestionsLink.href = "#/sugerencias";
@@ -452,6 +471,7 @@ if (mount) {
 
   sectionNav.appendChild(dashboardLink);
   sectionNav.appendChild(registryLink);
+  sectionNav.appendChild(qrPrintLink);
   sectionNav.appendChild(suggestionsLink);
 
   const {
