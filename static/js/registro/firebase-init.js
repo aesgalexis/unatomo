@@ -3,9 +3,7 @@ import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.
 import {
   getAuth,
   GoogleAuthProvider,
-  getRedirectResult,
   signInWithPopup,
-  signInWithRedirect,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   updateProfile,
@@ -34,15 +32,6 @@ export const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 export const auth = getAuth(app);
 export const storage = getStorage(app);
-
-const shouldUseGoogleRedirect = () => {
-  const ua = (navigator.userAgent || "").toLowerCase();
-  const mobileUA = /android|iphone|ipad|ipod|mobile/.test(ua);
-  const coarsePointer = window.matchMedia?.("(pointer: coarse)")?.matches;
-  return mobileUA || !!coarsePointer;
-};
-
-let googleRedirectResultPromise = null;
 
 const buildLoginResult = async (user) => {
   if (!user) return { ok: false };
@@ -149,25 +138,8 @@ export async function registerWithEmail(regCode, email, password, displayName) {
 
 export async function loginWithGoogle() {
   const provider = new GoogleAuthProvider();
-  if (shouldUseGoogleRedirect()) {
-    await signInWithRedirect(auth, provider);
-    return { ok: false, redirecting: true };
-  }
   const result = await signInWithPopup(auth, provider);
   return buildLoginResult(result.user);
-}
-
-export async function consumeGoogleRedirectLoginResult() {
-  if (!googleRedirectResultPromise) {
-    googleRedirectResultPromise = getRedirectResult(auth).then(async (result) => {
-      if (!result?.user) return { ok: false, redirectResult: false };
-      return {
-        ...(await buildLoginResult(result.user)),
-        redirectResult: true
-      };
-    });
-  }
-  return googleRedirectResultPromise;
 }
 
 export async function loginWithEmail(email, password) {
