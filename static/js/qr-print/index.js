@@ -11,6 +11,11 @@ import { auth, db, getUserRegistrationState } from "/static/js/firebase/firebase
 import { getCurrentLang, localizeEsPath } from "/static/js/site/locale.js";
 import { normalizeDashboardTitle } from "/static/js/dashboard/layout/dashboardLayoutModel.mjs";
 import { isControlPanelUser } from "/nfc/controlpanel/access.js";
+import { createDashboardSectionNav } from "/static/js/dashboard/components/sectionNav.js";
+import { countUnseenGlobalRegistryEntries } from "/static/js/dashboard/views/registry/globalRegistryModel.js";
+import { fetchDashboardSuggestions } from "/static/js/dashboard/views/suggestions/suggestionsRepo.js";
+import { countUnseenSuggestions } from "/static/js/dashboard/views/suggestions/suggestionsView.js";
+import { fetchDashboardTodos } from "/static/js/dashboard/views/todo/todoRepo.js";
 
 const mount = document.getElementById("qr-print-mount");
 const lang = getCurrentLang();
@@ -42,6 +47,7 @@ const text = {
   navRegistry: isEn ? "Registry" : "Registro",
   navQrPrint: isEn ? "QR print" : "Impresi\u00f3n QR",
   navSuggestions: isEn ? "Suggestions" : "Sugerencias",
+  navTodo: "To do",
   count: (visible, total) => `${visible}/${total}`,
   login: localizeEsPath("/es/auth/login.html", lang),
   home: localizeEsPath("/es/index.html", lang),
@@ -72,6 +78,10 @@ let useFrame = true;
 let printBackNames = false;
 let loadingProgressTimer = null;
 let showSuggestionsNav = false;
+let showTodoNav = false;
+let registryBadgeCount = 0;
+let suggestionsBadgeCount = 0;
+let todoBadgeCount = 0;
 let searchQuery = "";
 let hiddenMachineIds = new Set();
 
@@ -130,63 +140,35 @@ const clearLoadingProgress = () => {
 };
 
 const createSectionNav = () => {
-  const sectionNav = document.createElement("nav");
-  sectionNav.className = "dashboard-section-nav qr-print-section-nav";
-  sectionNav.setAttribute("aria-label", text.sectionNavAria);
-
-  const dashboardLink = document.createElement("a");
-  dashboardLink.className = "dashboard-section-link";
-  dashboardLink.href = `${text.dashboard}#/dashboard`;
-  dashboardLink.textContent = text.navDashboard;
-
-  const registryLink = document.createElement("a");
-  registryLink.className = "dashboard-section-link";
-  registryLink.href = `${text.dashboard}#/registro`;
-  registryLink.setAttribute("aria-label", text.navRegistry);
-  registryLink.setAttribute("data-tooltip", text.navRegistry);
-  const registryLabel = document.createElement("span");
-  registryLabel.className = "dashboard-section-icon";
-  registryLabel.innerHTML = `
-    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-      <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M5 4h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Zm3 4h8M8 12h8M8 16h5"></path>
-    </svg>
-  `;
-  registryLink.appendChild(registryLabel);
-
-  const qrPrintLink = document.createElement("a");
-  qrPrintLink.className = "dashboard-section-link";
-  qrPrintLink.href = text.qrPrint;
-  qrPrintLink.setAttribute("aria-label", text.navQrPrint);
-  qrPrintLink.setAttribute("data-tooltip", text.navQrPrint);
-  const qrPrintLabel = document.createElement("span");
-  qrPrintLabel.className = "dashboard-section-icon";
-  qrPrintLabel.innerHTML = `
-    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-      <path d="M7 3h10v5H7V3Zm-2 7h14a3 3 0 0 1 3 3v4a2 2 0 0 1-2 2h-2v2H6v-2H4a2 2 0 0 1-2-2v-4a3 3 0 0 1 3-3Zm3 7v2h8v-2H8Zm11-4a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z"></path>
-    </svg>
-  `;
-  qrPrintLink.appendChild(qrPrintLabel);
-
-  const suggestionsLink = document.createElement("a");
-  suggestionsLink.className = "dashboard-section-link";
-  suggestionsLink.href = `${text.dashboard}#/sugerencias`;
-  suggestionsLink.hidden = !showSuggestionsNav;
-  suggestionsLink.setAttribute("aria-label", text.navSuggestions);
-  suggestionsLink.setAttribute("data-tooltip", text.navSuggestions);
-  const suggestionsLabel = document.createElement("span");
-  suggestionsLabel.className = "dashboard-section-icon";
-  suggestionsLabel.innerHTML = `
-    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-      <path d="M13 2 4 14h7l-1 8 10-13h-7l0-7Z"></path>
-    </svg>
-  `;
-  suggestionsLink.appendChild(suggestionsLabel);
-
-  sectionNav.appendChild(dashboardLink);
-  sectionNav.appendChild(registryLink);
-  sectionNav.appendChild(qrPrintLink);
-  sectionNav.appendChild(suggestionsLink);
-  return sectionNav;
+  const refs = createDashboardSectionNav({
+    ariaLabel: text.sectionNavAria,
+    dashboardHref: `${text.dashboard}#/dashboard`,
+    registryHref: `${text.dashboard}#/registro`,
+    qrPrintHref: text.qrPrint,
+    suggestionsHref: `${text.dashboard}#/sugerencias`,
+    todoHref: `${text.dashboard}#/todo`,
+    labels: {
+      dashboard: text.navDashboard,
+      registry: text.navRegistry,
+      qrPrint: text.navQrPrint,
+      suggestions: text.navSuggestions,
+      todo: text.navTodo
+    },
+    active: "qrPrint",
+    showSuggestions: showSuggestionsNav,
+    showTodo: showTodoNav,
+    extraClass: "qr-print-section-nav"
+  });
+  refs.registryBadge.hidden = registryBadgeCount <= 0;
+  refs.registryBadge.textContent = registryBadgeCount > 99 ? "99+" : String(registryBadgeCount);
+  refs.suggestionsBadge.hidden = suggestionsBadgeCount <= 0;
+  refs.suggestionsBadge.textContent = suggestionsBadgeCount > 99 ? "99+" : String(suggestionsBadgeCount);
+  refs.todoBadge.hidden = todoBadgeCount <= 0;
+  refs.todoBadge.textContent = todoBadgeCount > 99 ? "99+" : String(todoBadgeCount);
+  refs.registryLink.classList.toggle("has-unseen", registryBadgeCount > 0);
+  refs.suggestionsLink.classList.toggle("has-unseen", suggestionsBadgeCount > 0);
+  refs.todoLink.classList.toggle("has-unseen", todoBadgeCount > 0);
+  return refs.sectionNav;
 };
 
 const canShowSuggestionsNav = async (user, registration) => {
@@ -195,6 +177,46 @@ const canShowSuggestionsNav = async (user, registration) => {
     return await isControlPanelUser(user);
   } catch {
     return false;
+  }
+};
+
+const canShowTodoNav = async (user, registration) => {
+  if (registration?.profile?.todoAdmin === true) return true;
+  try {
+    return await isControlPanelUser(user);
+  } catch {
+    return false;
+  }
+};
+
+const loadSectionNavCounts = async (uid, sourceMachines = []) => {
+  registryBadgeCount = 0;
+  suggestionsBadgeCount = 0;
+  todoBadgeCount = 0;
+  let layout = {};
+  try {
+    const snap = await getDoc(doc(db, "dashboard_layout", uid));
+    layout = snap.exists() ? snap.data() || {} : {};
+  } catch {}
+  registryBadgeCount = countUnseenGlobalRegistryEntries(
+    sourceMachines,
+    layout.registrySeenAt || ""
+  );
+  if (showSuggestionsNav) {
+    try {
+      const result = await fetchDashboardSuggestions(500);
+      suggestionsBadgeCount = result.isSuperadmin
+        ? countUnseenSuggestions(result.items || [], result.suggestionsSeenAt || "")
+        : 0;
+    } catch {}
+  }
+  if (showTodoNav) {
+    try {
+      const result = await fetchDashboardTodos(500);
+      todoBadgeCount = (result.items || [])
+        .filter((item) => item && item.completed !== true)
+        .length;
+    } catch {}
   }
 };
 
@@ -329,6 +351,11 @@ const fetchAdminMachines = async (uid) => {
 };
 
 const fetchQrMachines = async (uid) => {
+  const sourceMachines = await fetchAccessibleMachines(uid);
+  return buildQrMachines(sourceMachines);
+};
+
+const fetchAccessibleMachines = async (uid) => {
   const [ownerResult, adminResult] = await Promise.allSettled([
     fetchOwnerMachines(uid),
     fetchAdminMachines(uid),
@@ -338,8 +365,12 @@ const fetchQrMachines = async (uid) => {
   }
   const ownerMachines = ownerResult.status === "fulfilled" ? ownerResult.value : [];
   const adminMachines = adminResult.status === "fulfilled" ? adminResult.value : [];
+  return [...ownerMachines, ...adminMachines];
+};
+
+const buildQrMachines = async (machines = []) => {
   const map = new Map();
-  const normalizedMachines = [...ownerMachines, ...adminMachines].map(normalizeMachine);
+  const normalizedMachines = machines.map(normalizeMachine);
   const qrUrls = await Promise.all(normalizedMachines.map(resolveQrUrl));
   normalizedMachines.forEach((normalized, index) => {
     normalized.tagQrUrl = qrUrls[index] || "";
@@ -647,8 +678,13 @@ if (mount) {
         window.location.href = text.home;
         return;
       }
-      showSuggestionsNav = await canShowSuggestionsNav(user, registration);
-      const machines = await fetchQrMachines(user.uid);
+      [showSuggestionsNav, showTodoNav] = await Promise.all([
+        canShowSuggestionsNav(user, registration),
+        canShowTodoNav(user, registration)
+      ]);
+      const sourceMachines = await fetchAccessibleMachines(user.uid);
+      await loadSectionNavCounts(user.uid, sourceMachines);
+      const machines = await buildQrMachines(sourceMachines);
       const focusedMachineId = getFocusedMachineId();
       const visibleMachines = focusedMachineId
         ? machines.filter((machine) => machine.id === focusedMachineId)

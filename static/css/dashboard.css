@@ -1,4 +1,5 @@
 @import "/static/css/effects/inactive_sections/inactive.css";
+@import "/static/css/components/dashboard-section-nav.css";
 
 html,
 body.page {
@@ -35,84 +36,6 @@ body.page .topbar {
 .topbar-title-editable:focus {
   outline: 1px solid color-mix(in srgb, var(--fg) 42%, transparent);
   outline-offset: 3px;
-}
-
-.dashboard-section-nav {
-  display: flex;
-  justify-content: flex-end;
-  gap: 1.15rem;
-  margin: 0.15rem 0 0.25rem;
-  font-size: 0.9rem;
-}
-
-.dashboard-section-link {
-  position: relative;
-  color: color-mix(in srgb, var(--fg) 58%, transparent);
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.dashboard-section-icon {
-  display: inline-flex;
-  width: 1.05rem;
-  height: 1.05rem;
-  align-items: center;
-  justify-content: center;
-  margin-left: -0.18rem;
-  vertical-align: -0.16rem;
-}
-
-.dashboard-section-icon svg {
-  width: 100%;
-  height: 100%;
-  fill: currentColor;
-}
-
-.dashboard-section-icon-todo {
-  width: 1.32rem;
-  height: 1.32rem;
-}
-
-.dashboard-section-badge {
-  position: absolute;
-  top: -1.38rem;
-  left: 50%;
-  min-width: 1.15rem;
-  height: 1.15rem;
-  padding: 0 0.32rem;
-  padding-top: 0.08rem;
-  box-sizing: border-box;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--fg) 16%, var(--bg));
-  color: var(--fg);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.68rem;
-  line-height: 1;
-  transform: translateX(calc(-50% - 0.09rem));
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--fg) 16%, transparent);
-}
-
-.dashboard-section-badge[hidden] {
-  display: none;
-}
-
-.dashboard-section-link:hover {
-  color: var(--fg);
-}
-
-.dashboard-section-link.is-active {
-  color: var(--fg);
-}
-
-.dashboard-section-link-superadmin {
-  color: #7c3aed;
-}
-
-.dashboard-section-link-superadmin:hover,
-.dashboard-section-link-superadmin.is-active {
-  color: #7c3aed;
 }
 
 .add-bar {

@@ -20,6 +20,7 @@ import { getTaskTiming } from "/static/js/dashboard/tabs/tasks/tasksTime.js";
 import { buildStatusToggleUpdate } from "/static/js/dashboard/tabs/tasks/taskActions.js";
 import { filterMachines } from "./components/machineSearch/machineFilter.js";
 import { createMachineSearchBar } from "./components/machineSearch/machineSearchBar.js";
+import { createDashboardSectionNav } from "./components/sectionNav.js";
 import { createDashboardLoading } from "./components/loading/dashboardLoading.js";
 import {
   getDashboardLoadProgress,
@@ -430,87 +431,28 @@ if (mount) {
   const addBar = document.createElement("div");
   addBar.className = "add-bar";
 
-  const sectionNav = document.createElement("nav");
-  sectionNav.className = "dashboard-section-nav";
-  sectionNav.setAttribute("aria-label", t("dashboard.sectionNavAria", "Secciones"));
-
-  const dashboardLink = document.createElement("a");
-  dashboardLink.className = "dashboard-section-link is-active";
-  dashboardLink.href = "#/dashboard";
-  dashboardLink.setAttribute("aria-current", "page");
-  dashboardLink.textContent = t("dashboard.navDashboard", "Dashboard");
-
-  const registryLink = document.createElement("a");
-  registryLink.className = "dashboard-section-link";
-  registryLink.href = "#/registro";
-  const registryBadge = document.createElement("span");
-  registryBadge.className = "dashboard-section-badge";
-  registryBadge.hidden = true;
-  const registryLabel = document.createElement("span");
-  registryLabel.textContent = t("dashboard.navRegistry", "Registro");
-  registryLink.appendChild(registryBadge);
-  registryLink.appendChild(registryLabel);
-
-  const qrPrintLink = document.createElement("a");
-  qrPrintLink.className = "dashboard-section-link";
-  qrPrintLink.href = qrPrintHref;
-  qrPrintLink.setAttribute("aria-label", t("dashboard.navQrPrint", "Impresi\u00f3n QR"));
-  qrPrintLink.setAttribute("data-tooltip", t("dashboard.navQrPrint", "Impresi\u00f3n QR"));
-  const qrPrintLabel = document.createElement("span");
-  qrPrintLabel.className = "dashboard-section-icon";
-  qrPrintLabel.innerHTML = `
-    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-      <path d="M7 3h10v5H7V3Zm-2 7h14a3 3 0 0 1 3 3v4a2 2 0 0 1-2 2h-2v2H6v-2H4a2 2 0 0 1-2-2v-4a3 3 0 0 1 3-3Zm3 7v2h8v-2H8Zm11-4a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z"></path>
-    </svg>
-  `;
-  qrPrintLink.appendChild(qrPrintLabel);
-  attachDashboardTooltip(qrPrintLink, { placement: "bottom" });
-
-  const suggestionsLink = document.createElement("a");
-  suggestionsLink.className = "dashboard-section-link";
-  suggestionsLink.href = "#/sugerencias";
-  suggestionsLink.hidden = true;
-  const suggestionsBadge = document.createElement("span");
-  suggestionsBadge.className = "dashboard-section-badge";
-  suggestionsBadge.hidden = true;
-  const suggestionsLabel = document.createElement("span");
-  suggestionsLabel.className = "dashboard-section-icon";
-  suggestionsLabel.innerHTML = `
-    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-      <path d="M13 2 4 14h7l-1 8 10-13h-7l0-7Z"></path>
-    </svg>
-  `;
-  suggestionsLink.setAttribute("aria-label", t("dashboard.navSuggestions", "Sugerencias"));
-  suggestionsLink.setAttribute("data-tooltip", t("dashboard.navSuggestions", "Sugerencias"));
-  suggestionsLink.appendChild(suggestionsBadge);
-  suggestionsLink.appendChild(suggestionsLabel);
-  attachDashboardTooltip(suggestionsLink, { placement: "bottom" });
-
-  const todoLink = document.createElement("a");
-  todoLink.className = "dashboard-section-link dashboard-section-link-superadmin";
-  todoLink.href = "#/todo";
-  todoLink.hidden = true;
-  todoLink.setAttribute("aria-label", t("dashboard.navTodo", "To do"));
-  todoLink.setAttribute("data-tooltip", t("dashboard.navTodo", "To do"));
-  const todoBadge = document.createElement("span");
-  todoBadge.className = "dashboard-section-badge";
-  todoBadge.hidden = true;
-  const todoLabel = document.createElement("span");
-  todoLabel.className = "dashboard-section-icon dashboard-section-icon-todo";
-  todoLabel.innerHTML = `
-    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-      <path d="M6 4h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm2.2 8.2 2.1 2.1 5-5-1.4-1.4-3.6 3.6-0.7-0.7-1.4 1.4Zm0 4h7.6v-2H8.2v2Z"></path>
-    </svg>
-  `;
-  todoLink.appendChild(todoBadge);
-  todoLink.appendChild(todoLabel);
-  attachDashboardTooltip(todoLink, { placement: "bottom" });
-
-  sectionNav.appendChild(dashboardLink);
-  sectionNav.appendChild(registryLink);
-  sectionNav.appendChild(qrPrintLink);
-  sectionNav.appendChild(suggestionsLink);
-  sectionNav.appendChild(todoLink);
+  const {
+    sectionNav,
+    dashboardLink,
+    registryLink,
+    registryBadge,
+    suggestionsLink,
+    suggestionsBadge,
+    todoLink,
+    todoBadge
+  } = createDashboardSectionNav({
+    ariaLabel: t("dashboard.sectionNavAria", "Secciones"),
+    qrPrintHref,
+    labels: {
+      dashboard: t("dashboard.navDashboard", "Dashboard"),
+      registry: t("dashboard.navRegistry", "Registro"),
+      qrPrint: t("dashboard.navQrPrint", "Impresión QR"),
+      suggestions: t("dashboard.navSuggestions", "Sugerencias"),
+      todo: t("dashboard.navTodo", "To do")
+    },
+    active: "dashboard",
+    attachTooltip: attachDashboardTooltip
+  });
 
   const {
     wrap: loadingEl,
