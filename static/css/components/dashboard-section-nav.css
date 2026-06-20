@@ -1,0 +1,95 @@
+.dashboard-section-nav {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1.15rem;
+  margin: 0.15rem 0 0.25rem;
+  font-size: 0.9rem;
+}
+
+.dashboard-section-link {
+  position: relative;
+  color: color-mix(in srgb, var(--fg) 58%, transparent);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.dashboard-section-link:hover,
+.dashboard-section-link.is-active {
+  color: var(--fg);
+}
+
+.dashboard-section-link-superadmin,
+.dashboard-section-link-superadmin:hover,
+.dashboard-section-link-superadmin.is-active {
+  color: #7c3aed;
+}
+
+.dashboard-section-link[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 50%;
+  z-index: 1200;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  color: var(--fg);
+  font-size: 0.75rem;
+  line-height: 1.2;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.dashboard-section-link[data-tooltip]:hover::after,
+.dashboard-section-link[data-tooltip]:focus-visible::after {
+  opacity: 1;
+}
+
+.dashboard-section-icon {
+  display: inline-flex;
+  width: 1.05rem;
+  height: 1.05rem;
+  align-items: center;
+  justify-content: center;
+  margin-left: -0.18rem;
+  vertical-align: -0.16rem;
+}
+
+.dashboard-section-icon svg {
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+}
+
+.dashboard-section-icon-todo {
+  width: 1.32rem;
+  height: 1.32rem;
+}
+
+.dashboard-section-badge {
+  position: absolute;
+  top: -1.38rem;
+  left: 50%;
+  min-width: 1.15rem;
+  height: 1.15rem;
+  padding: 0 0.32rem;
+  padding-top: 0.08rem;
+  box-sizing: border-box;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--fg) 16%, var(--bg));
+  color: var(--fg);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.68rem;
+  line-height: 1;
+  transform: translateX(calc(-50% - 0.09rem));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--fg) 16%, transparent);
+}
+
+.dashboard-section-badge[hidden] {
+  display: none;
+}
