@@ -1,0 +1,46 @@
+import { functions } from "/static/js/firebase/firebaseApp.js";
+import { httpsCallable } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-functions.js";
+
+const listTodosCallable = httpsCallable(functions, "listDashboardTodos");
+const createTodoCallable = httpsCallable(functions, "createDashboardTodo");
+const updateTodoCallable = httpsCallable(functions, "updateDashboardTodo");
+const deleteTodoCallable = httpsCallable(functions, "deleteDashboardTodo");
+
+const normalizeTodo = (item = {}) => ({
+  id: (item.id || "").toString(),
+  text: (item.text || "").toString(),
+  completed: item.completed === true,
+  createdAt: (item.createdAt || "").toString(),
+  updatedAt: (item.updatedAt || "").toString(),
+  completedAt: (item.completedAt || "").toString()
+});
+
+export const fetchDashboardTodos = async (limit = 254) => {
+  const response = await listTodosCallable({ limit });
+  const data = response?.data || {};
+  return {
+    canTodo: data.canTodo === true,
+    isSuperadmin: data.isSuperadmin === true,
+    items: Array.isArray(data.items)
+      ? data.items.map(normalizeTodo).filter((item) => item.id)
+      : []
+  };
+};
+
+export const createDashboardTodo = async (text) => {
+  const response = await createTodoCallable({ text });
+  return response?.data || {};
+};
+
+export const updateDashboardTodo = async (todoId, completed) => {
+  const response = await updateTodoCallable({
+    todoId,
+    completed: completed === true
+  });
+  return response?.data || {};
+};
+
+export const deleteDashboardTodo = async (todoId) => {
+  const response = await deleteTodoCallable({ todoId });
+  return response?.data || {};
+};

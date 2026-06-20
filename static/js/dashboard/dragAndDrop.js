@@ -167,6 +167,10 @@ export const initGroupedDragAndDrop = (listEl, callbacks = {}) => {
   };
 
   listEl.addEventListener("dragstart", (event) => {
+    if (event.target.closest("button, input, select, textarea, a, option")) {
+      event.preventDefault();
+      return;
+    }
     const header = event.target.closest(".machine-group-header");
     const group = header?.closest(".machine-group");
     if (group) {
@@ -182,10 +186,6 @@ export const initGroupedDragAndDrop = (listEl, callbacks = {}) => {
       return;
     }
 
-    if (event.target.closest("button, input, select, textarea, a, option")) {
-      event.preventDefault();
-      return;
-    }
     const card = event.target.closest(".machine-card");
     if (!card || card.draggable === false) return;
 
@@ -223,6 +223,7 @@ export const initGroupedDragAndDrop = (listEl, callbacks = {}) => {
     const targetCard = draggedType === "machine" ? event.target.closest(".machine-card") : null;
     if (
       draggedType === "group" &&
+      !isDraggingSubgroup(dragging) &&
       targetGroup &&
       targetGroup.dataset.groupId !== draggedId &&
       isCenterGroupDrop(event, targetGroup)
@@ -244,7 +245,9 @@ export const initGroupedDragAndDrop = (listEl, callbacks = {}) => {
       clearCenterTarget();
     }
     if (draggedType === "group") {
-      const body = getGroupDropBody(listEl, event.target, dragging, event);
+      const body = isDraggingSubgroup(dragging)
+        ? listEl
+        : getGroupDropBody(listEl, event.target, dragging, event);
       const parentGroup = body.closest?.(".machine-group");
       if (parentGroup?.dataset.parentGroupId) return;
       const afterElement = getDragAfterElement(body, event.clientY);
@@ -264,13 +267,18 @@ export const initGroupedDragAndDrop = (listEl, callbacks = {}) => {
     if (draggedType === "group") {
       const targetGroup = centerTargetGroup || getTargetGroup(event.target);
       const targetGroupId = targetGroup?.dataset.groupId || "";
-      if (centerTargetGroup && targetGroupId && targetGroupId !== draggedId) {
+      const draggingGroup = listEl.querySelector(".machine-group.is-dragging");
+      if (
+        centerTargetGroup &&
+        !isDraggingSubgroup(draggingGroup) &&
+        targetGroupId &&
+        targetGroupId !== draggedId
+      ) {
         if (placeholder && placeholder.parentNode) placeholder.parentNode.removeChild(placeholder);
         clearCenterTarget();
         callbacks.onDropGroupOnGroup?.(draggedId, targetGroupId);
       } else if (placeholder?.parentNode) {
         const body = placeholder.parentNode;
-        const draggingGroup = listEl.querySelector(".machine-group.is-dragging");
         if (draggingGroup) body.insertBefore(draggingGroup, placeholder);
         placeholder.remove();
         const parentGroup = body === listEl ? null : body.closest?.(".machine-group");

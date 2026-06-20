@@ -142,8 +142,15 @@ const createSectionNav = () => {
   const registryLink = document.createElement("a");
   registryLink.className = "dashboard-section-link";
   registryLink.href = `${text.dashboard}#/registro`;
+  registryLink.setAttribute("aria-label", text.navRegistry);
+  registryLink.setAttribute("data-tooltip", text.navRegistry);
   const registryLabel = document.createElement("span");
-  registryLabel.textContent = text.navRegistry;
+  registryLabel.className = "dashboard-section-icon";
+  registryLabel.innerHTML = `
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M5 4h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Zm3 4h8M8 12h8M8 16h5"></path>
+    </svg>
+  `;
   registryLink.appendChild(registryLabel);
 
   const qrPrintLink = document.createElement("a");

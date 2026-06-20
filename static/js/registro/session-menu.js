@@ -23,26 +23,9 @@ if (!btn || !menu || !label || !action) {
     login: localizeEsPath("/es/auth/login.html", lang),
     register: localizeEsPath("/es/auth/registro.html", lang),
     settings: localizeEsPath("/es/configuracion.html", lang),
-    qrPrint: localizeEsPath("/es/impresion-qr.html", lang),
     home: localizeEsPath("/es/index.html", lang),
     panel: getControlPanelPath(),
   };
-
-  let qrPrintLink = document.getElementById("session-menu-qr-print");
-  if (!qrPrintLink) {
-    qrPrintLink = document.createElement("a");
-    qrPrintLink.id = "session-menu-qr-print";
-    qrPrintLink.href = paths.qrPrint;
-    qrPrintLink.setAttribute("role", "menuitem");
-    qrPrintLink.className = "session-menu-link";
-    qrPrintLink.hidden = true;
-    qrPrintLink.textContent = lang === "en" ? "QR print" : "Impresión QR";
-    if (profileLink && profileLink.parentNode) {
-      profileLink.parentNode.insertBefore(qrPrintLink, profileLink);
-    } else if (action && action.parentNode) {
-      action.parentNode.insertBefore(qrPrintLink, action);
-    }
-  }
 
   let panelLink = document.getElementById("session-menu-panel");
   if (!panelLink) {
@@ -64,7 +47,6 @@ if (!btn || !menu || !label || !action) {
     const parent = profileLink?.parentNode || action?.parentNode || null;
     if (!parent || !profileLink) return;
     if (panelLink) parent.insertBefore(panelLink, profileLink);
-    if (qrPrintLink) parent.insertBefore(qrPrintLink, profileLink);
   };
   syncSessionMenuOrder();
 
@@ -112,11 +94,6 @@ if (!btn || !menu || !label || !action) {
       panelLink.textContent = "";
     }
 
-    if (qrPrintLink) {
-      qrPrintLink.hidden = true;
-      qrPrintLink.textContent = "";
-    }
-
     action.textContent = text.session.login;
     action.setAttribute("href", paths.login);
     action.onclick = () => {
@@ -150,12 +127,6 @@ if (!btn || !menu || !label || !action) {
       profileLink.hidden = false;
       profileLink.textContent = text.session.settings;
       profileLink.setAttribute("href", paths.settings);
-    }
-
-    if (qrPrintLink) {
-      qrPrintLink.hidden = false;
-      qrPrintLink.textContent = lang === "en" ? "QR print" : "Impresión QR";
-      qrPrintLink.setAttribute("href", paths.qrPrint);
     }
 
     if (panelLink) {
@@ -204,14 +175,6 @@ if (!btn || !menu || !label || !action) {
   if (panelLink) {
     panelLink.addEventListener("click", (event) => {
       if (!currentUser || panelLink.hidden) return;
-      event.stopPropagation();
-      closeMenu();
-    });
-  }
-
-  if (qrPrintLink) {
-    qrPrintLink.addEventListener("click", (event) => {
-      if (!currentUser || qrPrintLink.hidden) return;
       event.stopPropagation();
       closeMenu();
     });

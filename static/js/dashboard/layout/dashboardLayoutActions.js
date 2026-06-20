@@ -150,7 +150,7 @@ export const reorderMixedItems = (layout = {}, machines = [], parentGroupId = ""
 export const createGroupFromMachineDrop = (
   layout = {},
   machines = [],
-  { draggedId = "", targetId = "", groupId = "", title = "" } = {}
+  { draggedId = "", targetId = "", groupId = "", title = "", parentGroupId = "" } = {}
 ) => {
   if (!draggedId || !targetId || draggedId === targetId || !groupId) {
     return { layout, compactedGroupIds: [] };
@@ -158,12 +158,20 @@ export const createGroupFromMachineDrop = (
   let nextLayout = cloneLayout(layout);
   const previousDraggedGroupId = nextLayout.placements?.[draggedId]?.groupId || "";
   const previousTargetGroupId = nextLayout.placements?.[targetId]?.groupId || "";
+  const parentGroup = parentGroupId
+    ? (nextLayout.groups || []).find((group) => group.id === parentGroupId)
+    : null;
+  const validParentGroupId = parentGroup && !parentGroup.parentGroupId ? parentGroup.id : "";
   nextLayout.groups = [
     ...(nextLayout.groups || []),
     {
       id: groupId,
       title,
-      order: nextLayout.groups.length,
+      parentGroupId: validParentGroupId,
+      order:
+        (nextLayout.groups || [])
+          .filter((group) => (group.parentGroupId || "") === validParentGroupId)
+          .reduce((max, group) => Math.max(max, typeof group.order === "number" ? group.order : 0), -1) + 1,
       collapsed: false
     }
   ];
@@ -256,5 +264,92 @@ export const moveGroupToGroup = (layout = {}, draggedGroupId = "", targetGroupId
   groups.forEach((group) => {
     if (group.parentGroupId === draggedGroupId) group.parentGroupId = "";
   });
+  return { layout: nextLayout };
+};
+
+export const moveGroupToRoot = (layout = {}, draggedGroupId = "", order = null) => {
+  if (!draggedGroupId) return { layout };
+  const nextLayout = cloneLayout(layout);
+  const groups = nextLayout.groups || [];
+  const group = groups.find((entry) => entry.id === draggedGroupId);
+  if (!group) return { layout };
+  group.parentGroupId = "";
+  group.order = typeof order === "number"
+    ? order
+    : groups
+        .filter((entry) => !entry.parentGroupId && entry.id !== draggedGroupId)
+        .reduce((max, entry) => Math.max(max, typeof entry.order === "number" ? entry.order : 0), -1) + 1;
+  groups
+    .filter((entry) => !entry.parentGroupId)
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+    .forEach((entry, index) => {
+      entry.order = index;
+    });
+  return { layout: nextLayout };
+};
+
+export const renameGroup = (layout = {}, groupId = "", title = "") => {
+  if (!groupId) return { layout };
+  const nextLayout = cloneLayout(layout);
+  const group = (nextLayout.groups || []).find((entry) => entry.id === groupId);
+  if (!group) return { layout };
+  const cleanTitle = (title || "").toString().trim();
+  if (!cleanTitle) return { layout };
+  group.title = cleanTitle.slice(0, 40);
+  return { layout: nextLayout };
+};
+
+export const createChildGroup = (layout = {}, parentGroupId = "", group = {}) => {
+  if (!parentGroupId || !group?.id) return { layout };
+  const nextLayout = cloneLayout(layout);
+  const groups = nextLayout.groups || [];
+  const parent = groups.find((entry) => entry.id === parentGroupId);
+  if (!parent || parent.parentGroupId) return { layout };
+  groups.push({
+    id: group.id,
+    title: (group.title || "Grupo").toString().trim() || "Grupo",
+    parentGroupId,
+    order:
+      groups
+        .filter((entry) => entry.parentGroupId === parentGroupId)
+        .reduce((max, entry) => Math.max(max, typeof entry.order === "number" ? entry.order : 0), -1) + 1,
+    collapsed: false
+  });
+  nextLayout.groups = groups;
+  return { layout: nextLayout };
+};
+
+export const deleteGroup = (layout = {}, groupId = "") => {
+  if (!groupId) return { layout };
+  const nextLayout = cloneLayout(layout);
+  const groups = nextLayout.groups || [];
+  const target = groups.find((entry) => entry.id === groupId);
+  if (!target) return { layout };
+  const parentGroupId = target.parentGroupId || "";
+  const placements = nextLayout.placements || {};
+  let nextMachineOrder = Object.values(placements)
+    .filter((placement) => (placement?.groupId || "") === parentGroupId)
+    .reduce((max, placement) => Math.max(max, typeof placement.order === "number" ? placement.order : 0), -1) + 1;
+  Object.entries(placements).forEach(([machineId, placement]) => {
+    if ((placement?.groupId || "") !== groupId) return;
+    placements[machineId] = {
+      ...placement,
+      groupId: parentGroupId,
+      order: nextMachineOrder
+    };
+    nextMachineOrder += 1;
+  });
+  let nextGroupOrder = groups
+    .filter((entry) => entry.parentGroupId === parentGroupId && entry.id !== groupId)
+    .reduce((max, entry) => Math.max(max, typeof entry.order === "number" ? entry.order : 0), -1) + 1;
+  groups.forEach((entry) => {
+    if (entry.parentGroupId === groupId) {
+      entry.parentGroupId = parentGroupId;
+      entry.order = nextGroupOrder;
+      nextGroupOrder += 1;
+    }
+  });
+  nextLayout.groups = groups.filter((entry) => entry.id !== groupId);
+  nextLayout.placements = placements;
   return { layout: nextLayout };
 };
