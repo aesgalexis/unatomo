@@ -45,11 +45,14 @@ import {
 } from "./layout/dashboardLayoutModel.mjs";
 import {
   createDashboardGroupId,
+  createChildGroup,
   createGroupFromMachineDrop,
+  deleteGroup,
   getNextDashboardGroupTitle,
   moveGroupToGroup,
   moveMachineAfterTarget,
   moveMachineToGroup as moveMachineToDashboardGroup,
+  renameGroup,
   reorderFlatMachines,
   reorderMixedItems,
   reorderUngroupedMachines,
@@ -60,8 +63,11 @@ import {
   GLOBAL_REGISTRY_PAGE_SIZE,
   MAX_SUGGESTION_LENGTH,
   SUGGESTIONS_PAGE_SIZE,
+  MAX_TODO_LENGTH,
+  TODO_PAGE_SIZE,
   renderRegistryDashboardView,
-  renderSuggestionsDashboardView
+  renderSuggestionsDashboardView,
+  renderTodoDashboardView
 } from "./views/dashboardInternalViews.js";
 import { createMachineAccessSync } from "./data/machineAccessSync.js";
 import { createDashboardSubscriptions } from "./data/dashboardSubscriptions.js";
@@ -76,6 +82,12 @@ import {
 import {
   countUnseenSuggestions
 } from "./views/suggestions/suggestionsView.js";
+import {
+  createDashboardTodo,
+  deleteDashboardTodo,
+  fetchDashboardTodos,
+  updateDashboardTodo
+} from "./views/todo/todoRepo.js";
 import { setTopbarSaveStatus } from "/static/js/topbar/save-status.js";
 import { setTopbarNotifications } from "/static/js/notifications/topbar-notifications.js";
 import { calculateStorageUsage, STORAGE_LIMIT_BYTES } from "/static/js/configuracion/storageUsage.js";
@@ -106,7 +118,7 @@ const getPublicSectionFromHash = () =>
 const isPublicSectionHash = () =>
   ["faqs", "tags", "contacto", "novedades"].includes(getPublicSectionFromHash());
 const getDashboardInternalView = () =>
-  ["registro", "sugerencias"].includes(getPublicSectionFromHash())
+  ["registro", "sugerencias", "todo"].includes(getPublicSectionFromHash())
     ? getPublicSectionFromHash()
     : "dashboard";
 
@@ -143,10 +155,14 @@ if (mount) {
     activeView: getDashboardInternalView(),
     registryVisibleCount: GLOBAL_REGISTRY_PAGE_SIZE,
     suggestionsVisibleCount: SUGGESTIONS_PAGE_SIZE,
+    todoVisibleCount: TODO_PAGE_SIZE,
     suggestions: [],
     suggestionsReady: false,
     suggestionReplyTarget: null,
+    todos: [],
+    todosReady: false,
     canSuggest: false,
+    canTodo: false,
     isSuperadmin: false,
     searchQuery: "",
     pendingInvites: [],
@@ -168,6 +184,7 @@ if (mount) {
   };
 
   const cardRefs = new Map();
+  const locallyVisibleEmptyGroupIds = new Set();
   const ORDER_CACHE_KEY = "unatomo_order_v1";
   const loadOrderCache = () => {
     try {
@@ -469,16 +486,62 @@ if (mount) {
   suggestionsLink.appendChild(suggestionsLabel);
   attachDashboardTooltip(suggestionsLink, { placement: "bottom" });
 
+  const todoLink = document.createElement("a");
+  todoLink.className = "dashboard-section-link dashboard-section-link-superadmin";
+  todoLink.href = "#/todo";
+  todoLink.hidden = true;
+  todoLink.setAttribute("aria-label", t("dashboard.navTodo", "To do"));
+  todoLink.setAttribute("data-tooltip", t("dashboard.navTodo", "To do"));
+  const todoBadge = document.createElement("span");
+  todoBadge.className = "dashboard-section-badge";
+  todoBadge.hidden = true;
+  const todoLabel = document.createElement("span");
+  todoLabel.className = "dashboard-section-icon dashboard-section-icon-todo";
+  todoLabel.innerHTML = `
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M6 4h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm2.2 8.2 2.1 2.1 5-5-1.4-1.4-3.6 3.6-0.7-0.7-1.4 1.4Zm0 4h7.6v-2H8.2v2Z"></path>
+    </svg>
+  `;
+  todoLink.appendChild(todoBadge);
+  todoLink.appendChild(todoLabel);
+  attachDashboardTooltip(todoLink, { placement: "bottom" });
+
   sectionNav.appendChild(dashboardLink);
   sectionNav.appendChild(registryLink);
   sectionNav.appendChild(qrPrintLink);
   sectionNav.appendChild(suggestionsLink);
+  sectionNav.appendChild(todoLink);
 
   const {
     wrap: loadingEl,
     setProgress: setLoadingProgress,
     resetProgress: resetLoadingProgress
   } = createDashboardLoading();
+  const loadingTextEl = loadingEl.querySelector(".dashboard-loading-text");
+  const inlineStatusEl = document.createElement("div");
+  inlineStatusEl.className = "dashboard-inline-status";
+  inlineStatusEl.hidden = true;
+  loadingEl.appendChild(inlineStatusEl);
+  let inlineStatusTimer = null;
+  const setDashboardInlineStatus = (message = "", stateName = "") => {
+    if (inlineStatusTimer) {
+      clearTimeout(inlineStatusTimer);
+      inlineStatusTimer = null;
+    }
+    if (loadingTextEl) loadingTextEl.hidden = true;
+    inlineStatusEl.hidden = false;
+    inlineStatusEl.textContent = message;
+    loadingEl.dataset.state = stateName || "";
+    loadingEl.style.display = "";
+    inlineStatusTimer = setTimeout(() => {
+      inlineStatusTimer = null;
+      loadingEl.removeAttribute("data-state");
+      inlineStatusEl.hidden = true;
+      inlineStatusEl.textContent = "";
+      if (loadingTextEl) loadingTextEl.hidden = false;
+      if (!state.loading) loadingEl.style.display = "none";
+    }, 2200);
+  };
 
   const addBtn = document.createElement("button");
   addBtn.type = "button";
@@ -495,6 +558,8 @@ if (mount) {
         state.registryVisibleCount = GLOBAL_REGISTRY_PAGE_SIZE;
       } else if (state.activeView === "sugerencias") {
         state.suggestionsVisibleCount = SUGGESTIONS_PAGE_SIZE;
+      } else if (state.activeView === "todo") {
+        state.todoVisibleCount = TODO_PAGE_SIZE;
       }
       renderCards({ preserveScroll: true });
     }
@@ -544,6 +609,17 @@ if (mount) {
     suggestionsBadge.hidden = count <= 0;
     suggestionsBadge.textContent = count > 99 ? "99+" : String(count);
     suggestionsLink.classList.toggle("has-unseen", count > 0);
+  };
+
+  const updateTodoNav = () => {
+    const visible = state.canTodo || state.isSuperadmin;
+    todoLink.hidden = !visible;
+    const count = visible
+      ? (state.todos || []).filter((item) => item && item.completed !== true).length
+      : 0;
+    todoBadge.hidden = count <= 0;
+    todoBadge.textContent = count > 99 ? "99+" : String(count);
+    todoLink.classList.toggle("has-unseen", count > 0);
   };
 
   const markRegistrySeen = async () => {
@@ -603,6 +679,24 @@ if (mount) {
     } catch {
       state.suggestionsReady = true;
       updateSuggestionsBadge();
+    }
+  };
+
+  const loadTodos = async ({ preserveScroll = true } = {}) => {
+    if (!state.canTodo && !state.isSuperadmin) return;
+    try {
+      const result = await fetchDashboardTodos(500);
+      state.canTodo = result.canTodo;
+      state.isSuperadmin = result.isSuperadmin || state.isSuperadmin;
+      state.todos = result.items;
+      state.todosReady = true;
+      updateTodoNav();
+      if (state.activeView === "todo") {
+        renderCards({ preserveScroll });
+      }
+    } catch {
+      state.todosReady = true;
+      updateTodoNav();
     }
   };
   const orderBtn = document.createElement("button");
@@ -670,29 +764,41 @@ if (mount) {
     applyDashboardTitle();
     const isRegistry = state.activeView === "registro";
     const isSuggestions = state.activeView === "sugerencias";
-    dashboardLink.classList.toggle("is-active", !isRegistry && !isSuggestions);
+    const isTodo = state.activeView === "todo";
+    dashboardLink.classList.toggle("is-active", !isRegistry && !isSuggestions && !isTodo);
     registryLink.classList.toggle("is-active", isRegistry);
     suggestionsLink.classList.toggle("is-active", isSuggestions);
+    todoLink.classList.toggle("is-active", isTodo);
     if (isRegistry) {
       dashboardLink.removeAttribute("aria-current");
       registryLink.setAttribute("aria-current", "page");
       suggestionsLink.removeAttribute("aria-current");
+      todoLink.removeAttribute("aria-current");
     } else if (isSuggestions) {
       dashboardLink.removeAttribute("aria-current");
       registryLink.removeAttribute("aria-current");
       suggestionsLink.setAttribute("aria-current", "page");
+      todoLink.removeAttribute("aria-current");
+    } else if (isTodo) {
+      dashboardLink.removeAttribute("aria-current");
+      registryLink.removeAttribute("aria-current");
+      suggestionsLink.removeAttribute("aria-current");
+      todoLink.setAttribute("aria-current", "page");
     } else {
       dashboardLink.setAttribute("aria-current", "page");
       registryLink.removeAttribute("aria-current");
       suggestionsLink.removeAttribute("aria-current");
+      todoLink.removeAttribute("aria-current");
     }
-    addBar.classList.toggle("is-registry-view", isRegistry || isSuggestions);
+    addBar.classList.toggle("is-registry-view", isRegistry || isSuggestions || isTodo);
     searchInput.placeholder = isRegistry
       ? t("dashboard.registrySearchPlaceholder", "Buscar en registro...")
       : isSuggestions
         ? t("dashboard.suggestionsSearchPlaceholder", "Buscar sugerencias...")
-        : t("dashboard.searchPlaceholder", "Buscar por nombre o ubicación...");
-    const primaryControlsDisabled = state.loading || isRegistry || isSuggestions;
+        : isTodo
+          ? t("dashboard.todoSearchPlaceholder", "Buscar pendientes...")
+          : t("dashboard.searchPlaceholder", "Buscar por nombre o ubicación...");
+    const primaryControlsDisabled = state.loading || isRegistry || isSuggestions || isTodo;
     const searchDisabled = state.loading;
     addBtn.disabled = primaryControlsDisabled;
     searchInput.disabled = searchDisabled;
@@ -738,6 +844,8 @@ if (mount) {
     state.suggestions = [];
     state.suggestionsReady = false;
     state.suggestionReplyTarget = null;
+    state.todos = [];
+    state.todosReady = false;
     state.expandedById = [];
     state.selectedTabById = {};
     state.configSubtabById = {};
@@ -746,6 +854,7 @@ if (mount) {
     resetDashboardLoadState(state);
     state.initialGroupPriorityOrder = {};
     state.initialGroupPriorityReady = false;
+    locallyVisibleEmptyGroupIds.clear();
     cardRefs.clear();
     list.innerHTML = "";
     loadingEl.style.display = "";
@@ -876,6 +985,54 @@ if (mount) {
     );
   };
 
+  function handleRenameGroup(group) {
+    if (!group?.id) return;
+    const currentTitle = group.title || t("dashboard.groupUntitled", "Grupo");
+    const nextTitle = window.prompt(
+      t("dashboard.groupRenamePrompt", "Nombre del grupo"),
+      currentTitle
+    );
+    if (nextTitle === null) return;
+    const cleanTitle = nextTitle.trim();
+    if (!cleanTitle || cleanTitle === currentTitle) return;
+    state.dashboardLayout = normalizeDashboardLayout(state.dashboardLayout);
+    state.dashboardLayout = renameGroup(state.dashboardLayout, group.id, cleanTitle).layout;
+    saveDashboardLayout();
+    renderCards({ preserveScroll: true });
+  }
+
+  function handleDeleteGroup(group) {
+    if (!group?.id) return;
+    const title = group.title || t("dashboard.groupUntitled", "Grupo");
+    const confirmed = window.confirm(
+      t("dashboard.groupDeleteConfirm", (value) => `¿Eliminar el grupo "${value}"? Las máquinas no se eliminarán.`)(title)
+    );
+    if (!confirmed) return;
+    clearInitialGroupPriorityOrder();
+    state.dashboardLayout = normalizeDashboardLayout(state.dashboardLayout);
+    state.dashboardLayout = deleteGroup(state.dashboardLayout, group.id).layout;
+    locallyVisibleEmptyGroupIds.delete(group.id);
+    saveDashboardLayout();
+    renderCards({ preserveScroll: true });
+  }
+
+  function handleAddChildGroup(group) {
+    if (!group?.id || group.parentGroupId) return;
+    const suggestedTitle = getNextGroupTitle();
+    const title = window.prompt(t("dashboard.addGroupPrompt", "Nombre del grupo"), suggestedTitle);
+    if (title === null) return;
+    const cleanTitle = (title || "").trim() || suggestedTitle;
+    const newGroupId = createDashboardGroupId();
+    state.dashboardLayout = normalizeDashboardLayout(state.dashboardLayout);
+    state.dashboardLayout = createChildGroup(state.dashboardLayout, group.id, {
+      id: newGroupId,
+      title: cleanTitle
+    }).layout;
+    locallyVisibleEmptyGroupIds.add(newGroupId);
+    saveDashboardLayout();
+    renderCards({ preserveScroll: true });
+  }
+
   const createGroupSection = (group, pendingTasksCount = 0, downMachinesCount = 0) => {
     const section = document.createElement("section");
     section.className = "machine-group";
@@ -885,15 +1042,16 @@ if (mount) {
     section.dataset.collapsed = group.collapsed ? "true" : "false";
     section.draggable = true;
 
-    const header = document.createElement("button");
-    header.type = "button";
+    const header = document.createElement("div");
+    header.setAttribute("role", "button");
+    header.tabIndex = 0;
     header.className = "machine-group-header";
     header.draggable = true;
     const caret = document.createElement("span");
     caret.className = "machine-group-caret";
     caret.textContent = group.collapsed ? "+" : "−";
     const title = document.createElement("span");
-    title.className = "machine-group-title";
+    title.className = "machine-group-title machine-group-menu-hover-zone";
     title.textContent = group.title || t("dashboard.groupUntitled", "Grupo");
     const pendingCount = document.createElement("span");
     pendingCount.className = "machine-group-count machine-group-pending-count";
@@ -905,11 +1063,63 @@ if (mount) {
     downCount.textContent = String(downMachinesCount);
     downCount.title = t("dashboard.groupDownCountTooltip", "Máquinas fuera de servicio en este grupo");
     downCount.hidden = downMachinesCount <= 0;
+    const menu = document.createElement("div");
+    menu.className = "machine-group-menu machine-group-menu-hover-zone";
+    const menuToggle = document.createElement("button");
+    menuToggle.type = "button";
+    menuToggle.className = "machine-group-menu-toggle";
+    menuToggle.setAttribute("aria-label", t("dashboard.groupMenu", "Opciones de grupo"));
+    menuToggle.setAttribute("aria-haspopup", "menu");
+    menuToggle.setAttribute("aria-expanded", "false");
+    menuToggle.textContent = "•••";
+    const menuPanel = document.createElement("div");
+    menuPanel.className = "machine-group-menu-panel";
+    menuPanel.setAttribute("role", "menu");
+    menuPanel.hidden = true;
+    const closeMenu = () => {
+      menuPanel.hidden = true;
+      menuToggle.setAttribute("aria-expanded", "false");
+    };
+    const addMenuAction = (label, onClick) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "machine-group-menu-action";
+      btn.setAttribute("role", "menuitem");
+      btn.textContent = label;
+      btn.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        closeMenu();
+        onClick();
+      });
+      menuPanel.appendChild(btn);
+    };
+    if (!group.parentGroupId) {
+      addMenuAction(t("dashboard.groupAddChild", "Añadir grupo"), () => handleAddChildGroup(group));
+    }
+    addMenuAction(t("dashboard.groupRename", "Renombrar"), () => handleRenameGroup(group));
+    addMenuAction(t("dashboard.groupDelete", "Eliminar"), () => handleDeleteGroup(group));
+    menuToggle.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const nextOpen = menuPanel.hidden;
+      menuPanel.hidden = !nextOpen;
+      menuToggle.setAttribute("aria-expanded", nextOpen ? "true" : "false");
+    });
+    menu.addEventListener("click", (event) => event.stopPropagation());
+    menu.addEventListener("mouseleave", closeMenu);
+    const spacer = document.createElement("span");
+    spacer.className = "machine-group-header-spacer";
+    menu.appendChild(menuToggle);
+    menu.appendChild(menuPanel);
     header.appendChild(caret);
     header.appendChild(title);
+    header.appendChild(menu);
+    header.appendChild(spacer);
     header.appendChild(downCount);
     header.appendChild(pendingCount);
     header.addEventListener("click", (event) => {
+      if (event.target.closest(".machine-group-menu")) return;
       event.preventDefault();
       try {
         header.blur({ preventScroll: true });
@@ -927,6 +1137,12 @@ if (mount) {
       }
       saveDashboardLayout();
       renderCards();
+    });
+    header.addEventListener("keydown", (event) => {
+      if (event.target.closest(".machine-group-menu")) return;
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      header.click();
     });
 
     const body = document.createElement("div");
@@ -1522,7 +1738,12 @@ if (mount) {
     const machines = Array.isArray(state.draftMachines) ? state.draftMachines : [];
     updateRegistryBadge();
     updateSuggestionsBadge();
+    updateTodoNav();
     if (state.activeView === "sugerencias" && !state.canSuggest && !state.isSuperadmin) {
+      window.location.hash = "#/dashboard";
+      return;
+    }
+    if (state.activeView === "todo" && !state.canTodo && !state.isSuperadmin) {
       window.location.hash = "#/dashboard";
       return;
     }
@@ -1638,6 +1859,73 @@ if (mount) {
               );
               status.dataset.state = "error";
             }
+          } finally {
+            if (controls.input) controls.input.disabled = false;
+            if (controls.submit) controls.submit.disabled = false;
+          }
+        }
+      });
+      syncMachineAccessListeners(state.draftMachines);
+      if (state.loading && state.ownerReady && state.adminReady) {
+        updateLoading();
+      }
+      return;
+    }
+    if (state.activeView === "todo") {
+      clearMobileDetailState();
+      syncMobileDetailUI();
+      filterInfo.textContent = "";
+      filterInfo.style.display = "none";
+      cardRefs.clear();
+      renderTodoDashboardView(list, {
+        items: state.todos,
+        ready: state.todosReady,
+        canTodo: state.canTodo || state.isSuperadmin,
+        query: state.searchQuery,
+        visibleCount: state.todoVisibleCount,
+        onLoadMore: () => {
+          state.todoVisibleCount += TODO_PAGE_SIZE;
+          renderCards({ preserveScroll: true });
+        },
+        onToggle: async (todoId, completed) => {
+          try {
+            await updateDashboardTodo(todoId, completed);
+            await loadTodos({ preserveScroll: true });
+          } catch {
+            notifyTopbar(t("dashboard.saveError", "Error al guardar"));
+          }
+        },
+        onDelete: async (todoId, button) => {
+          if (button) {
+            button.disabled = true;
+            button.textContent = t("dashboard.todoDeleting", "Eliminando...");
+          }
+          try {
+            await deleteDashboardTodo(todoId);
+            state.todos = (state.todos || []).filter((item) => item.id !== todoId);
+            renderCards({ preserveScroll: true });
+            await loadTodos({ preserveScroll: true });
+          } catch {
+            if (button) {
+              button.disabled = false;
+              button.textContent = t("dashboard.todoDelete", "Eliminar");
+            }
+            notifyTopbar(t("dashboard.saveError", "Error al guardar"));
+          }
+        },
+        onSubmit: async (rawText, controls = {}) => {
+          const textValue = (rawText || "").toString().trim();
+          if (!textValue) return;
+          if (controls.input) controls.input.disabled = true;
+          if (controls.submit) controls.submit.disabled = true;
+          setDashboardInlineStatus(t("dashboard.todoSaving", "Guardando..."));
+          try {
+            await createDashboardTodo(textValue.slice(0, MAX_TODO_LENGTH));
+            if (controls.input) controls.input.value = "";
+            setDashboardInlineStatus(t("dashboard.todoSaved", "Pendiente añadido"), "ok");
+            await loadTodos({ preserveScroll: true });
+          } catch {
+            setDashboardInlineStatus(t("dashboard.todoError", "No se pudo guardar"), "error");
           } finally {
             if (controls.input) controls.input.disabled = false;
             if (controls.submit) controls.submit.disabled = false;
@@ -2757,6 +3045,15 @@ if (mount) {
           });
         }
       });
+    if (useGroupedLayout && locallyVisibleEmptyGroupIds.size) {
+      Array.from(locallyVisibleEmptyGroupIds).forEach((groupId) => {
+        if (!groupById.has(groupId)) {
+          locallyVisibleEmptyGroupIds.delete(groupId);
+          return;
+        }
+        renderGroup(groupId);
+      });
+    }
     if (isMobileDashboardViewport()) {
       const expandedId = Array.from(expandedById)[0] || "";
       if (expandedId) {
@@ -2846,11 +3143,15 @@ if (mount) {
     const title = window.prompt(t("dashboard.addGroupPrompt", "Nombre del grupo"), suggestedTitle);
     if (title === null) return;
     const cleanTitle = (title || "").trim() || suggestedTitle;
+    const targetGroupId = state.dashboardLayout.placements?.[targetId]?.groupId || "";
+    const targetGroup = (state.dashboardLayout.groups || []).find((group) => group.id === targetGroupId);
+    const parentGroupId = targetGroup && !targetGroup.parentGroupId ? targetGroup.id : "";
     const result = createGroupFromMachineDrop(state.dashboardLayout, state.draftMachines, {
       draggedId,
       targetId,
       groupId: createDashboardGroupId(),
-      title: cleanTitle
+      title: cleanTitle,
+      parentGroupId
     });
     state.dashboardLayout = result.layout;
     saveDashboardLayout();
@@ -2860,6 +3161,12 @@ if (mount) {
   const moveMachineToTargetGroup = (draggedId, targetId) => {
     clearInitialGroupPriorityOrder();
     state.dashboardLayout = normalizeDashboardLayout(state.dashboardLayout);
+    const targetGroupId = state.dashboardLayout.placements?.[targetId]?.groupId || "";
+    const targetGroup = (state.dashboardLayout.groups || []).find((group) => group.id === targetGroupId);
+    if (!targetGroupId || (targetGroup && !targetGroup.parentGroupId)) {
+      createGroupFromDrop(draggedId, targetId);
+      return;
+    }
     const result = moveMachineAfterTarget(
       state.dashboardLayout,
       state.draftMachines,
@@ -3000,6 +3307,7 @@ if (mount) {
     applyDashboardTitle();
     initDashboardTitleEditor();
     loadSuggestions({ preserveScroll: false });
+    loadTodos({ preserveScroll: false });
 
     let ownerFetchResolved = false;
     let ownerBootstrap = [];
@@ -3082,6 +3390,10 @@ if (mount) {
       state.suggestionsVisibleCount = SUGGESTIONS_PAGE_SIZE;
       loadSuggestions({ preserveScroll: false });
     }
+    if (nextView === "todo") {
+      state.todoVisibleCount = TODO_PAGE_SIZE;
+      loadTodos({ preserveScroll: false });
+    }
     renderCards({ preserveScroll: false });
   });
 
@@ -3106,6 +3418,7 @@ if (mount) {
         return;
       }
       state.canSuggest = registration.profile?.suggestionsCollaborator === true;
+      state.canTodo = registration.profile?.todoAdmin === true;
       state.isSuperadmin = await isControlPanelUser(user);
     } catch {
       window.location.href = `${appBasePrefix || ""}/?setup=1`;

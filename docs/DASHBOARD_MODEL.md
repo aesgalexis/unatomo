@@ -59,7 +59,7 @@ Current scope:
 - Move a machine into an existing group by dropping it onto a card in that group.
 - Create one-level subgroups by dragging a group header onto another group.
 - Reorder machines with drag and drop in the flat list, ungrouped list, and group bodies.
-- The dashboard intentionally has no group creation button or per-card group selector.
+- Group headers expose a hover menu for renaming, deleting the group without deleting machines, and adding one empty child group under parent groups.
 - Group records may include `parentGroupId`; nesting deeper than one sublevel is intentionally flattened.
 - `dashboardTitle` stores the user's editable dashboard topbar title, capped at 32 characters. Empty value falls back to `Dashboard`.
 - `tabOrder` stores the global order for machine-card tabs and applies to all machines. It is edited from the Settings/Configuración page preferences card.
@@ -97,6 +97,7 @@ The main dashboard page has internal hash views:
 - `#/dashboard`: the normal machine-card and group view.
 - `#/registro`: the global registry view.
 - `#/sugerencias`: the collaborator suggestions view.
+- `#/todo`: the private To Do view for `superadmin` and users enabled with `users/{uid}.todoAdmin`.
 
 Files:
 
@@ -107,6 +108,7 @@ Files:
 - `static/js/dashboard/history/historyEventFormatter.js`: shared formatter and grouping helpers for machine history events. It preserves known legacy event text and falls back to `summary`, `message`, `messageKey`, or `type` for future events.
 - `static/js/dashboard/views/registry/globalRegistryModel.js`: flattens logs from all machines visible to the current account, sorts them newest-first, and groups task notes under their task-created event.
 - `static/js/dashboard/views/suggestions/`: renders and submits dashboard suggestions through callable functions.
+- `static/js/dashboard/views/todo/`: renders and manages private To Do lists through separate callable functions.
 - `static/js/dashboard/views/registry/globalRegistryView.js`: renders the global registry and `Cargar más` / `Load more` pagination.
 
 Global registry scope:
@@ -129,6 +131,12 @@ Suggestions scope:
 - The collaborator flag is controlled from the superadmin control panel user list.
 - Normal collaborators can submit and see their own suggestions. The superadmin can see all suggestions and gets an unseen badge over the `Sugerencias` nav link.
 - Suggestions use callable functions instead of direct Firestore reads so global access stays behind the existing hashed superadmin check.
+
+To Do scope:
+
+- The `To do` link uses the superadmin violet accent when visible.
+- The view is separate from suggestions and uses its own callable functions and `dashboard_todos` collection.
+- `superadmin` and users marked with `users/{uid}.todoAdmin === true` see only their own To Do list.
 
 History event contract:
 

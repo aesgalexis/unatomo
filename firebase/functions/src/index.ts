@@ -59,6 +59,7 @@ const registrationCodesCol = () => db.collection("registration_codes");
 const tagsCol = () => db.collection("tags");
 const machineAccessCol = () => db.collection("machine_access");
 const dashboardSuggestionsCol = () => db.collection("dashboard_suggestions");
+const dashboardTodosCol = () => db.collection("dashboard_todos");
 const storageBucket = admin.storage().bucket();
 const ACCOUNT_STORAGE_LIMIT_BYTES = 1024 * 1024 * 1024;
 const QR_FALLBACK_BYTES = 4 * 1024;
@@ -1074,6 +1075,7 @@ export const listControlPanelUsers = onCall(async (request) => {
     email: string;
     displayName: string;
     suggestionsCollaborator: boolean;
+    todoAdmin: boolean;
   }>();
 
   const upsertItem = (
@@ -1082,6 +1084,7 @@ export const listControlPanelUsers = onCall(async (request) => {
       email?: unknown;
       displayName?: unknown;
       suggestionsCollaborator?: unknown;
+      todoAdmin?: unknown;
     },
   ) => {
     const uid = (raw.uid || "").toString().trim();
@@ -1098,6 +1101,10 @@ export const listControlPanelUsers = onCall(async (request) => {
         typeof raw.suggestionsCollaborator === "boolean" ?
           raw.suggestionsCollaborator :
           !!current?.suggestionsCollaborator,
+      todoAdmin:
+        typeof raw.todoAdmin === "boolean" ?
+          raw.todoAdmin :
+          !!current?.todoAdmin,
     });
   };
 
@@ -1143,6 +1150,156 @@ export const setControlPanelUserCollaborator = onCall(async (request) => {
   );
 
   return {ok: true, uid, suggestionsCollaborator: enabled};
+});
+
+export const setControlPanelUserTodoAdmin = onCall(async (request) => {
+  const auth = request.auth;
+  if (!auth) throw new HttpsError("unauthenticated", "auth-required");
+  assertControlPanelAccess(auth);
+
+  const uid = (request.data?.uid || "").toString().trim();
+  if (!uid) throw new HttpsError("invalid-argument", "uid-required");
+
+  const enabled = request.data?.enabled === true;
+  await db.collection("users").doc(uid).set(
+    {
+      todoAdmin: enabled,
+      todoAdminUpdatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      todoAdminUpdatedBy: auth.uid || "",
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    },
+    {merge: true},
+  );
+
+  return {ok: true, uid, todoAdmin: enabled};
+});
+
+const canUseDashboardTodo = async (auth: {
+  uid?: string;
+  token?: {email?: string | null};
+} | null | undefined) => {
+  if (isControlPanelAuth(auth)) return {allowed: true, isSuperadmin: true};
+  const userSnap = await db.collection("users").doc(auth?.uid || "").get();
+  const userData = userSnap.data() || {};
+  return {allowed: userData.todoAdmin === true, isSuperadmin: false};
+};
+
+export const listDashboardTodos = onCall(async (request) => {
+  const auth = request.auth;
+  if (!auth) throw new HttpsError("unauthenticated", "auth-required");
+  const access = await canUseDashboardTodo(auth);
+  if (!access.allowed) {
+    return {
+      ok: true,
+      canTodo: false,
+      isSuperadmin: access.isSuperadmin,
+      items: [],
+    };
+  }
+  const rawLimit = Number(request.data?.limit || 254);
+  const limit = Math.max(1, Math.min(500, Math.floor(rawLimit)));
+  const snap = await dashboardTodosCol()
+    .where("ownerUid", "==", auth.uid)
+    .limit(limit)
+    .get();
+  const items = snap.docs.map((docSnap) => {
+    const data = docSnap.data() || {};
+    return {
+      id: docSnap.id,
+      text: data.text || "",
+      ownerUid: data.ownerUid || "",
+      completed: data.completed === true,
+      createdAt: data.createdAt?.toDate?.()?.toISOString?.() || "",
+      updatedAt: data.updatedAt?.toDate?.()?.toISOString?.() || "",
+      completedAt: data.completedAt?.toDate?.()?.toISOString?.() ||
+        data.completedAt || "",
+    };
+  }).sort((a, b) => {
+    if (a.completed !== b.completed) return a.completed ? 1 : -1;
+    const left = a.updatedAt || a.createdAt;
+    const right = b.updatedAt || b.createdAt;
+    return new Date(right).getTime() - new Date(left).getTime();
+  });
+  return {
+    ok: true,
+    canTodo: true,
+    isSuperadmin: access.isSuperadmin,
+    items,
+  };
+});
+
+export const createDashboardTodo = onCall(async (request) => {
+  const auth = request.auth;
+  if (!auth) throw new HttpsError("unauthenticated", "auth-required");
+  const access = await canUseDashboardTodo(auth);
+  if (!access.allowed) {
+    throw new HttpsError("permission-denied", "todo-disabled");
+  }
+  const text = (request.data?.text || "")
+    .toString()
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 1024);
+  if (!text) throw new HttpsError("invalid-argument", "text-required");
+  const now = admin.firestore.FieldValue.serverTimestamp();
+  const ref = dashboardTodosCol().doc();
+  await ref.set({
+    text,
+    ownerUid: auth.uid,
+    completed: false,
+    completedAt: "",
+    createdAt: now,
+    updatedAt: now,
+  });
+  return {ok: true, id: ref.id};
+});
+
+export const updateDashboardTodo = onCall(async (request) => {
+  const auth = request.auth;
+  if (!auth) throw new HttpsError("unauthenticated", "auth-required");
+  const access = await canUseDashboardTodo(auth);
+  if (!access.allowed) {
+    throw new HttpsError("permission-denied", "todo-disabled");
+  }
+  const todoId = (request.data?.todoId || "").toString().trim();
+  if (!todoId) throw new HttpsError("invalid-argument", "todoId-required");
+  const ref = dashboardTodosCol().doc(todoId);
+  const snap = await ref.get();
+  if (!snap.exists) throw new HttpsError("not-found", "todo-not-found");
+  if ((snap.data()?.ownerUid || "") !== auth.uid) {
+    throw new HttpsError("permission-denied", "not-todo-owner");
+  }
+  const completed = request.data?.completed === true;
+  await ref.set(
+    {
+      completed,
+      completedAt: completed ?
+        admin.firestore.FieldValue.serverTimestamp() :
+        "",
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    },
+    {merge: true},
+  );
+  return {ok: true, todoId, completed};
+});
+
+export const deleteDashboardTodo = onCall(async (request) => {
+  const auth = request.auth;
+  if (!auth) throw new HttpsError("unauthenticated", "auth-required");
+  const access = await canUseDashboardTodo(auth);
+  if (!access.allowed) {
+    throw new HttpsError("permission-denied", "todo-disabled");
+  }
+  const todoId = (request.data?.todoId || "").toString().trim();
+  if (!todoId) throw new HttpsError("invalid-argument", "todoId-required");
+  const ref = dashboardTodosCol().doc(todoId);
+  const snap = await ref.get();
+  if (!snap.exists) return {ok: true, todoId};
+  if ((snap.data()?.ownerUid || "") !== auth.uid) {
+    throw new HttpsError("permission-denied", "not-todo-owner");
+  }
+  await ref.delete();
+  return {ok: true, todoId};
 });
 
 export const createDashboardSuggestion = onCall(async (request) => {

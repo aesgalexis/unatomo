@@ -25,6 +25,7 @@ npm.cmd run scan:secrets
 
 ## Project Rules
 
+- Keep progress updates sparse. Prefer silent work unless there is a relevant finding, a file edit is about to happen, the task becomes long-running, or the work is blocked.
 - Do not leave temporary Firebase/admin scripts in the repo after one-off operations.
 - Do not change Firebase ownership/admin/tag cleanup flows without reading `docs/FIREBASE_MODEL.md`.
 - Preserve Spanish and English routes, labels, and menu entries when touching user-facing pages.

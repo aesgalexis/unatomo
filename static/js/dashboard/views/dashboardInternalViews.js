@@ -8,11 +8,18 @@ import {
   SUGGESTIONS_PAGE_SIZE,
   renderSuggestionsView
 } from "./suggestions/suggestionsView.js";
+import {
+  MAX_TODO_LENGTH,
+  TODO_PAGE_SIZE,
+  renderTodoView
+} from "./todo/todoView.js";
 
 export {
   GLOBAL_REGISTRY_PAGE_SIZE,
   MAX_SUGGESTION_LENGTH,
-  SUGGESTIONS_PAGE_SIZE
+  SUGGESTIONS_PAGE_SIZE,
+  MAX_TODO_LENGTH,
+  TODO_PAGE_SIZE
 };
 
 export const renderRegistryDashboardView = (container, machines = [], options = {}) => {
@@ -21,6 +28,20 @@ export const renderRegistryDashboardView = (container, machines = [], options = 
     seenAt: options.seenAt || "",
     visibleCount: options.visibleCount,
     onLoadMore: options.onLoadMore
+  });
+};
+
+export const renderTodoDashboardView = (container, options = {}) => {
+  renderTodoView(container, {
+    items: options.items || [],
+    ready: !!options.ready,
+    canTodo: !!options.canTodo,
+    query: options.query || "",
+    visibleCount: options.visibleCount,
+    onLoadMore: options.onLoadMore,
+    onSubmit: options.onSubmit,
+    onToggle: options.onToggle,
+    onDelete: options.onDelete
   });
 };
 

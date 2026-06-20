@@ -34,7 +34,9 @@ Read this before changing data flows, callable functions, machine ownership, adm
 - `machine_transfer_invites`: pending/accepted/rejected machine ownership transfer requests.
 - `dashboard_layout/{uid}`: per-user dashboard grouping/layout preferences. Groups may include `parentGroupId` for one-level subgroups; `dashboardTitle` stores the user's editable dashboard topbar title; `registrySeenAt` stores the last time the user left the global registry view after seeing current activity.
 - `dashboard_suggestions`: collaborator suggestions submitted from `#/sugerencias`. Normal collaborators see their own suggestions; `superadmin` sees all through callable functions.
+- `dashboard_todos`: private dashboard To Do items. Each enabled user sees only their own items through callable functions.
 - `users/{uid}.suggestionsCollaborator`: superadmin-controlled boolean that makes the `Sugerencias` view/link visible for that user and allows submitting suggestions.
+- `users/{uid}.todoAdmin`: superadmin-controlled boolean that makes the `To do` view/link visible for that user and allows managing their own To Do list.
 - Account directory/registry collections may exist for account lookup and admin display names; inspect the repo before changing them.
 
 Machine documents are stored as metadata on `machines.documents`. The actual files live in Firebase Storage under:
@@ -70,6 +72,8 @@ Backend callables live in `firebase/functions/src/index.ts`. Common frontend wra
 - `createDashboardSuggestion`: creates a suggestion for `superadmin` or an enabled collaborator.
 - `listDashboardSuggestions`: lists own suggestions for collaborators and all suggestions for `superadmin`.
 - `markDashboardSuggestionsSeen`: stores the superadmin suggestions seen timestamp.
+- `setControlPanelUserTodoAdmin`: superadmin-only toggle for To Do access.
+- `listDashboardTodos`, `createDashboardTodo`, `updateDashboardTodo`, `deleteDashboardTodo`: manage each enabled user's own To Do list.
 
 ## Tag ID And QR Rules
 
