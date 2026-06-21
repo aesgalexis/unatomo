@@ -169,6 +169,58 @@ body.page .topbar {
   outline: none;
 }
 
+.dashboard-view-menu {
+  position: relative;
+  display: inline-flex;
+}
+
+.dashboard-view-menu-panel {
+  position: absolute;
+  top: calc(100% + 0.25rem);
+  left: 0;
+  z-index: 35;
+  min-width: 10.25rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--bg) 96%, transparent);
+  box-shadow: 0 12px 28px color-mix(in srgb, #000 16%, transparent);
+  padding: 0.25rem;
+}
+
+.dashboard-view-menu-panel[hidden] {
+  display: none;
+}
+
+.dashboard-view-menu-item {
+  width: 100%;
+  border: 0;
+  border-radius: 0.35rem;
+  background: transparent;
+  color: var(--fg);
+  display: grid;
+  grid-template-columns: 1.2rem minmax(0, 1fr);
+  gap: 0.4rem;
+  align-items: center;
+  padding: 0.42rem 0.55rem;
+  font: inherit;
+  font-size: 0.88rem;
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.dashboard-view-menu-item:hover,
+.dashboard-view-menu-item:focus-visible {
+  background: color-mix(in srgb, var(--fg) 9%, transparent);
+  outline: none;
+}
+
+.dashboard-view-menu-check {
+  color: #2c974b;
+  font-weight: 700;
+  text-align: center;
+}
+
 
 
 
@@ -643,12 +695,19 @@ body.page .topbar {
   background: transparent;
   color: var(--danger, #d33);
   font: inherit;
-  font-size: 0.82rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1;
   cursor: pointer;
+  width: 1.6rem;
+  height: 1.6rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .todo-delete:hover {
-  text-decoration: underline;
+  color: #b42318;
 }
 
 .dashboard-mobile-back {
@@ -1445,7 +1504,7 @@ body.page .topbar {
 .machine-group-menu-panel {
   position: absolute;
   top: 100%;
-  right: 0;
+  left: 0;
   z-index: 25;
   min-width: 9rem;
   border: 1px solid var(--border-subtle);

@@ -124,7 +124,9 @@ export const renderTodoView = (container, options = {}) => {
     const remove = document.createElement("button");
     remove.type = "button";
     remove.className = "todo-delete";
-    remove.textContent = t("dashboard.todoDelete", "Eliminar");
+    remove.setAttribute("aria-label", t("dashboard.todoDelete", "Eliminar"));
+    remove.title = t("dashboard.todoDelete", "Eliminar");
+    remove.textContent = "x";
     remove.addEventListener("click", (event) => {
       event.preventDefault();
       event.stopPropagation();

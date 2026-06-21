@@ -63,6 +63,7 @@ Current scope:
 - Group records may include `parentGroupId`; nesting deeper than one sublevel is intentionally flattened.
 - `dashboardTitle` stores the user's editable dashboard topbar title, capped at 32 characters. Empty value falls back to `Dashboard`.
 - `tabOrder` stores the global order for machine-card tabs and applies to all machines. It is edited from the Settings/Configuración page preferences card.
+- `machineViewMode` stores whether the dashboard renders saved groups (`grouped`, default) or a flat machine list (`flat`). Flat view never changes group membership or creates groups.
 
 Layout normalization lives in `static/js/dashboard/layout/dashboardLayoutModel.mjs`
 and is shared by runtime rendering and Firestore save preparation. Future group

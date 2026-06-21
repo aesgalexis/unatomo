@@ -21,6 +21,7 @@ import { buildStatusToggleUpdate } from "/static/js/dashboard/tabs/tasks/taskAct
 import { filterMachines } from "./components/machineSearch/machineFilter.js";
 import { createMachineSearchBar } from "./components/machineSearch/machineSearchBar.js";
 import { createDashboardSectionNav } from "./components/sectionNav.js";
+import { createDashboardViewMenu } from "./components/viewMenu/viewMenu.js";
 import { createDashboardLoading } from "./components/loading/dashboardLoading.js";
 import {
   getDashboardLoadProgress,
@@ -151,7 +152,8 @@ if (mount) {
       tabOrder: [],
       dashboardTitle: "",
       registrySeenAt: "",
-      suggestionsSeenAt: ""
+      suggestionsSeenAt: "",
+      machineViewMode: "grouped"
     },
     activeView: getDashboardInternalView(),
     registryVisibleCount: GLOBAL_REGISTRY_PAGE_SIZE,
@@ -641,41 +643,24 @@ if (mount) {
       updateTodoNav();
     }
   };
-  const orderBtn = document.createElement("button");
-  orderBtn.type = "button";
-  orderBtn.className = "btn-order";
-  orderBtn.setAttribute("aria-label", t("dashboard.orderAria", "Ordenar"));
-  orderBtn.innerHTML =
-    '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">' +
-    '<path fill="currentColor" d="M7 6h10a1 1 0 1 0 0-2H7a1 1 0 0 0 0 2zm0 7h6a1 1 0 1 0 0-2H7a1 1 0 0 0 0 2zm0 7h2a1 1 0 1 0 0-2H7a1 1 0 0 0 0 2zM4 5l2 2 2-2H4zm0 7l2 2 2-2H4zm0 7l2 2 2-2H4z"/>' +
-    '</svg>';
-  orderBtn.addEventListener("click", () => {
-    const pendingCount = (machine) => {
-      const tasks = Array.isArray(machine.tasks) ? machine.tasks : [];
-      return tasks.filter((task) => getTaskTiming(task).pending).length;
-    };
-    const sorted = state.draftMachines
-      .slice()
-      .sort((a, b) => {
-        const aDown = a.status === "fuera_de_servicio" ? 0 : 1;
-        const bDown = b.status === "fuera_de_servicio" ? 0 : 1;
-        if (aDown !== bDown) return aDown - bDown;
-        const aPending = pendingCount(a);
-        const bPending = pendingCount(b);
-        if (aPending !== bPending) return bPending - aPending;
-        return (a.order ?? 0) - (b.order ?? 0);
+  const viewMenu = createDashboardViewMenu({
+    currentMode: state.dashboardLayout.machineViewMode || "grouped",
+    onChange: (mode) => {
+      state.dashboardLayout = normalizeDashboardLayout({
+        ...state.dashboardLayout,
+        machineViewMode: mode
       });
-    const updated = sorted.map((m, index) => ({ ...m, order: index }));
-    state.draftMachines = updated;
-    saveOrderCache(updated);
-    renderCards({ preserveScroll: true });
-    updated.forEach((m) => autoSave.scheduleSave(m.id, "order"));
+      viewMenu.setMode(state.dashboardLayout.machineViewMode);
+      upsertDashboardLayout(state.uid, { machineViewMode: state.dashboardLayout.machineViewMode })
+        .catch(() => notifyTopbar(t("dashboard.saveError", "Error al guardar")));
+      renderCards({ preserveScroll: true });
+    }
   });
 
 
   addBar.appendChild(addBtn);
   addBar.appendChild(searchInput);
-  addBar.appendChild(orderBtn);
+  addBar.appendChild(viewMenu.wrap);
 
   const filterInfo = document.createElement("div");
   filterInfo.className = "filter-info";
@@ -744,10 +729,10 @@ if (mount) {
     const searchDisabled = state.loading;
     addBtn.disabled = primaryControlsDisabled;
     searchInput.disabled = searchDisabled;
-    orderBtn.disabled = primaryControlsDisabled;
+    viewMenu.button.disabled = primaryControlsDisabled;
     addBtn.setAttribute("aria-disabled", primaryControlsDisabled ? "true" : "false");
     searchInput.setAttribute("aria-disabled", searchDisabled ? "true" : "false");
-    orderBtn.setAttribute("aria-disabled", primaryControlsDisabled ? "true" : "false");
+    viewMenu.button.setAttribute("aria-disabled", primaryControlsDisabled ? "true" : "false");
   };
 
   const updateSaveState = (message = "") => {
@@ -907,7 +892,7 @@ if (mount) {
 
   addBtn.disabled = true;
   searchInput.disabled = true;
-  orderBtn.disabled = true;
+  viewMenu.button.disabled = true;
   syncDashboardViewChrome();
 
   const renderPlaceholder = () => {
@@ -1947,9 +1932,13 @@ if (mount) {
     cardRefs.clear();
     state.locations = computeLocations(state.draftMachines);
     state.dashboardLayout = normalizeDashboardLayout(state.dashboardLayout);
+    viewMenu.setMode(state.dashboardLayout.machineViewMode);
     const layoutGroups = state.dashboardLayout.groups || [];
     const layoutPlacements = state.dashboardLayout.placements || {};
-    const useGroupedLayout = layoutGroups.length > 0 && !query;
+    const useGroupedLayout =
+      state.dashboardLayout.machineViewMode !== "flat" &&
+      layoutGroups.length > 0 &&
+      !query;
     const validGroupIds = new Set(layoutGroups.map((group) => group.id));
     const hasUngroupedMachines = useGroupedLayout && visibleMachines.some((machine) => {
       const groupId = layoutPlacements[machine.id]?.groupId || "";
@@ -3044,6 +3033,10 @@ if (mount) {
 
   const handleMixedItemReorder = (parentGroupId, items = []) => {
     if (!Array.isArray(items) || !items.length) return;
+    if (state.dashboardLayout?.machineViewMode === "flat") {
+      handleReorder(items.filter((item) => item.type === "machine").map((item) => item.id));
+      return;
+    }
     clearInitialGroupPriorityOrder(parentGroupId || "");
     state.dashboardLayout = normalizeDashboardLayout(state.dashboardLayout);
     const result = reorderMixedItems(
@@ -3063,6 +3056,10 @@ if (mount) {
   };
 
   const handleGroupedReorder = (groupId, orderIds) => {
+    if (state.dashboardLayout?.machineViewMode === "flat") {
+      handleReorder(orderIds);
+      return;
+    }
     if (!state.dashboardLayout?.groups?.length) {
       handleReorder(orderIds);
       return;
@@ -3079,6 +3076,7 @@ if (mount) {
 
   const createGroupFromDrop = (draggedId, targetId) => {
     if (!draggedId || !targetId || draggedId === targetId) return;
+    if (state.dashboardLayout?.machineViewMode === "flat") return;
     clearInitialGroupPriorityOrder();
     state.dashboardLayout = normalizeDashboardLayout(state.dashboardLayout);
     const suggestedTitle = getNextGroupTitle();
@@ -3101,6 +3099,17 @@ if (mount) {
   };
 
   const moveMachineToTargetGroup = (draggedId, targetId) => {
+    if (state.dashboardLayout?.machineViewMode === "flat") {
+      const orderedIds = state.draftMachines
+        .slice()
+        .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+        .map((machine) => machine.id)
+        .filter((id) => id && id !== draggedId);
+      const targetIndex = orderedIds.indexOf(targetId);
+      orderedIds.splice(targetIndex >= 0 ? targetIndex + 1 : orderedIds.length, 0, draggedId);
+      handleReorder(orderedIds);
+      return;
+    }
     clearInitialGroupPriorityOrder();
     state.dashboardLayout = normalizeDashboardLayout(state.dashboardLayout);
     const targetGroupId = state.dashboardLayout.placements?.[targetId]?.groupId || "";
@@ -3125,6 +3134,7 @@ if (mount) {
   };
 
   const moveMachineToGroup = (draggedId, targetGroupId) => {
+    if (state.dashboardLayout?.machineViewMode === "flat") return;
     if (!draggedId || !targetGroupId) return;
     clearInitialGroupPriorityOrder(targetGroupId);
     state.dashboardLayout = normalizeDashboardLayout(state.dashboardLayout);
@@ -3140,6 +3150,7 @@ if (mount) {
   };
 
   const moveGroupToTargetGroup = (draggedGroupId, targetGroupId) => {
+    if (state.dashboardLayout?.machineViewMode === "flat") return;
     if (!draggedGroupId || !targetGroupId || draggedGroupId === targetGroupId) return;
     clearInitialGroupPriorityOrder();
     state.dashboardLayout = normalizeDashboardLayout(state.dashboardLayout);
@@ -3200,7 +3211,8 @@ if (mount) {
       onReorderItems: handleMixedItemReorder,
       onDropOnCard: moveMachineToTargetGroup,
       onDropMachineOnGroup: moveMachineToGroup,
-      onDropGroupOnGroup: moveGroupToTargetGroup
+      onDropGroupOnGroup: moveGroupToTargetGroup,
+      allowGrouping: () => state.dashboardLayout?.machineViewMode !== "flat"
     });
     groupedDragAndDropReady = true;
   };
@@ -3230,7 +3242,8 @@ if (mount) {
         tabOrder: normalizeTabOrder(),
         dashboardTitle: "",
         registrySeenAt: "",
-        suggestionsSeenAt: ""
+        suggestionsSeenAt: "",
+        machineViewMode: "grouped"
       };
     }
     if (!isActiveSession()) return;
