@@ -53,6 +53,14 @@ export const createDashboardViewMenu = ({
     option.disabled = disabled;
     option.setAttribute("aria-disabled", disabled ? "true" : "false");
     option.dataset.mode = item.id;
+    if (disabled) {
+      const tooltip = t(
+        "dashboard.sortDisabledTooltip",
+        "Para poder ordenar\nla vista de grupos\ndebe estar deshabilitada."
+      );
+      option.dataset.tooltip = tooltip;
+      option.setAttribute("aria-label", `${t(`dashboard.${item.labelKey}`, item.fallback)}. ${tooltip}`);
+    }
 
     const check = document.createElement("span");
     check.className = "dashboard-view-menu-check";

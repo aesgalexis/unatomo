@@ -165,6 +165,10 @@ body.page .topbar {
   border-color: var(--fg);
 }
 
+.btn-order[aria-expanded="true"] {
+  border-color: var(--fg);
+}
+
 .btn-order:focus {
   outline: none;
 }
@@ -193,6 +197,7 @@ body.page .topbar {
 }
 
 .dashboard-view-menu-item {
+  position: relative;
   width: 100%;
   border: 0;
   border-radius: 0.35rem;
@@ -223,6 +228,35 @@ body.page .topbar {
 
 .dashboard-view-menu-item:disabled:hover {
   background: transparent;
+}
+
+.dashboard-view-menu-item[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: 50%;
+  left: calc(100% + 0.5rem);
+  z-index: 40;
+  width: max-content;
+  max-width: 11.5rem;
+  padding: 0.42rem 0.55rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.45rem;
+  background: color-mix(in srgb, var(--bg) 96%, transparent);
+  color: var(--fg);
+  box-shadow: 0 10px 24px color-mix(in srgb, #000 14%, transparent);
+  font-size: 0.78rem;
+  font-weight: 400;
+  line-height: 1.25;
+  opacity: 0;
+  pointer-events: none;
+  text-align: left;
+  transform: translateY(-50%);
+  white-space: pre-line;
+}
+
+.dashboard-view-menu-item[data-tooltip]:hover::after,
+.dashboard-view-menu-item[data-tooltip]:focus-visible::after {
+  opacity: 1;
 }
 
 .dashboard-view-menu-check {
