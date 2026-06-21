@@ -36,11 +36,40 @@ service cloud.firestore {
     match /users/{uid} {
       allow read: if isSignedIn() && request.auth.uid == uid;
 
-      allow create, update: if isSignedIn()
-                            && request.auth.uid == uid
-                            && request.resource.data.regCode is string
-                            && exists(/databases/$(database)/documents/registration_codes/$(request.resource.data.regCode))
-                            && get(/databases/$(database)/documents/registration_codes/$(request.resource.data.regCode)).data.active == true;
+      function hasActiveRegistrationCode() {
+        return request.resource.data.regCode is string
+          && exists(/databases/$(database)/documents/registration_codes/$(request.resource.data.regCode))
+          && get(/databases/$(database)/documents/registration_codes/$(request.resource.data.regCode)).data.active == true;
+      }
+
+      allow create: if isSignedIn()
+                    && request.auth.uid == uid
+                    && hasActiveRegistrationCode();
+
+      allow update: if isSignedIn()
+                    && request.auth.uid == uid
+                    && (
+                      (
+                        request.resource.data.diff(resource.data).affectedKeys()
+                          .hasOnly(["company", "updatedAt"])
+                        && request.resource.data.company is string
+                        && request.resource.data.company.size() <= 60
+                      )
+                      ||
+                      (
+                        hasActiveRegistrationCode()
+                        && request.resource.data.diff(resource.data).affectedKeys()
+                          .hasOnly([
+                            "uid",
+                            "email",
+                            "displayName",
+                            "photoURL",
+                            "regCode",
+                            "updatedAt",
+                            "createdAt"
+                          ])
+                      )
+                    );
 
       allow delete: if false;
     }

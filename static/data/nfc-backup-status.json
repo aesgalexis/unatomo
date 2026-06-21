@@ -2,23 +2,14 @@
   "kind": "unatomo-nfc-backup-status",
   "firestore": {
     "status": "ok",
-    "completedAt": "2026-06-19T17:46:07.451Z",
-    "file": ".backups/2026-06-19T17-46-07-452Z-nfc-firestore.json",
+    "completedAt": "2026-06-21T18:03:54.732Z",
+    "file": ".backups/2026-06-21T18-03-54-733Z-nfc-firestore.json",
     "projectId": "unatomo-c20a4",
-    "collectionCount": 11,
-    "documentCount": 275,
+    "collectionCount": 2,
+    "documentCount": 14,
     "collections": {
-      "machines": 58,
-      "dashboard_layout": 4,
-      "machine_access": 40,
-      "tags": 41,
-      "admin_machine_links": 50,
-      "admin_machine_invites": 59,
-      "machine_transfer_invites": 1,
       "users": 7,
-      "account_directory": 7,
-      "dashboard_suggestions": 1,
-      "registration_codes": 7
+      "account_directory": 7
     }
   },
   "storage": {
@@ -43,5 +34,5 @@
       }
     }
   },
-  "updatedAt": "2026-06-19T17:46:07.467Z"
+  "updatedAt": "2026-06-21T18:03:54.736Z"
 }

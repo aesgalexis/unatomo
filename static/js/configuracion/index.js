@@ -481,10 +481,11 @@ if (mount) {
             { merge: true }
           );
           profile = { ...profile, company: next };
-          await upsertAccountDirectory({ ...user, company: next });
         } catch {
           companyInput.value = previous;
+          return;
         }
+        upsertAccountDirectory({ ...user, company: next }).catch(() => {});
       });
     }
 

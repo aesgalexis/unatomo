@@ -87,7 +87,14 @@ const createCustomControls = (task = {}) => {
   return { wrap, amount, unit };
 };
 
-const createTaskMenu = ({ machine, task, hooks, openNoteForm, openEditForm }) => {
+const createTaskMenu = ({
+  machine,
+  task,
+  hooks,
+  openNoteForm,
+  openImagePicker,
+  openEditForm
+}) => {
   const menu = document.createElement("span");
   menu.className = "mc-doc-menu task-menu";
 
@@ -131,6 +138,17 @@ const createTaskMenu = ({ machine, task, hooks, openNoteForm, openEditForm }) =>
     openNoteForm();
   });
 
+  const images = document.createElement("button");
+  images.type = "button";
+  images.className = "mc-doc-menu-link task-menu-link";
+  images.textContent = t("tasks.addImages", "Añadir imágenes");
+  images.addEventListener("click", (event) => {
+    event.stopPropagation();
+    menu.classList.remove("is-open");
+    dots.setAttribute("aria-expanded", "false");
+    openImagePicker();
+  });
+
   const edit = document.createElement("button");
   edit.type = "button";
   edit.className = "mc-doc-menu-link task-menu-link";
@@ -155,6 +173,7 @@ const createTaskMenu = ({ machine, task, hooks, openNoteForm, openEditForm }) =>
 
   menu.appendChild(dots);
   menu.appendChild(note);
+  menu.appendChild(images);
   menu.appendChild(edit);
   menu.appendChild(remove);
   return menu;
@@ -398,7 +417,30 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
       const actions = document.createElement("div");
       actions.className = "task-actions-left";
       if (canEditTasks) {
-        actions.appendChild(createTaskMenu({ machine, task, hooks, openNoteForm, openEditForm }));
+        const openImagePicker = () => {
+          const input = document.createElement("input");
+          input.type = "file";
+          input.accept = "image/jpeg,image/png,image/webp";
+          input.multiple = true;
+          input.hidden = true;
+          input.addEventListener("change", () => {
+            const files = Array.from(input.files || []).slice(0, 10);
+            input.remove();
+            if (files.length && hooks.onAddTaskImages) {
+              hooks.onAddTaskImages(machine.id, task.id, files);
+            }
+          });
+          document.body.appendChild(input);
+          input.click();
+        };
+        actions.appendChild(createTaskMenu({
+          machine,
+          task,
+          hooks,
+          openNoteForm,
+          openImagePicker,
+          openEditForm
+        }));
       }
 
       const side = document.createElement("div");
