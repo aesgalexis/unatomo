@@ -179,6 +179,7 @@ if (mount) {
     mobileFocusedMachineId: "",
     mobileDetailJustEntered: false,
     loading: true,
+    stylesReady: !window.__unatomoStylesReady,
     ownerReady: false,
     adminReady: false,
     ownerLoadFailed: false,
@@ -232,6 +233,12 @@ if (mount) {
   };
 
   const attachDashboardTooltip = (target, { align = "center", placement = "top" } = {}) => {
+    if (
+      window.matchMedia &&
+      !window.matchMedia("(hover: hover) and (pointer: fine)").matches
+    ) {
+      return;
+    }
     let tipEl = null;
     const showTip = () => {
       const label = target.getAttribute("data-tooltip");
@@ -952,6 +959,13 @@ if (mount) {
       }, 2000);
     }
   };
+
+  if (window.__unatomoStylesReady) {
+    window.__unatomoStylesReady.then(() => {
+      state.stylesReady = true;
+      updateLoading();
+    }).catch(() => {});
+  }
 
   const armLoadingGuard = () => {
     if (state.loadingGuardTimer) {

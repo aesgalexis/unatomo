@@ -6,6 +6,7 @@ export const openStatusIncidentModal = ({
 } = {}) =>
   new Promise((resolve) => {
     const previousActive = document.activeElement;
+    const previousScrollY = window.scrollY || 0;
     const overlay = document.createElement("div");
     overlay.className = "status-incident-overlay";
     overlay.setAttribute("role", "presentation");
@@ -189,12 +190,18 @@ export const openStatusIncidentModal = ({
     dialog.appendChild(form);
     overlay.appendChild(dialog);
     document.body.appendChild(overlay);
+    document.body.style.setProperty(
+      "--status-incident-scroll-top",
+      `${-previousScrollY}px`
+    );
     document.body.classList.add("status-incident-open");
 
     const cleanup = (value) => {
       document.removeEventListener("keydown", onKeyDown, true);
       document.body.classList.remove("status-incident-open");
+      document.body.style.removeProperty("--status-incident-scroll-top");
       overlay.remove();
+      window.scrollTo(0, previousScrollY);
       if (previousActive && typeof previousActive.focus === "function") {
         try {
           previousActive.focus({ preventScroll: true });
