@@ -32,7 +32,7 @@ Read this before changing data flows, callable functions, machine ownership, adm
 - `admin_machine_links`: accepted admin access links.
 - `admin_invites`: pending/accepted admin invitations.
 - `machine_transfer_invites`: pending/accepted/rejected machine ownership transfer requests.
-- `dashboard_layout/{uid}`: per-user dashboard grouping/layout preferences. Groups may include `parentGroupId` for one-level subgroups; `dashboardTitle` stores the user's editable dashboard topbar title; `registrySeenAt` stores the last time the user left the global registry view after seeing current activity.
+- `dashboard_layout/{uid}`: per-user dashboard grouping/layout preferences. Groups may include `parentGroupId` for one-level subgroups; `dashboardTitle` stores the user's editable dashboard topbar title; `registrySeenAt` stores the last time the user left the global registry view after seeing current activity; `machineViewMode` and `machineSortMode` store dashboard display preferences.
 - `dashboard_suggestions`: collaborator suggestions submitted from `#/sugerencias`. Normal collaborators see their own suggestions; `superadmin` sees all through callable functions.
 - `dashboard_todos`: private dashboard To Do items. Each enabled user sees only their own items through callable functions.
 - `users/{uid}.suggestionsCollaborator`: superadmin-controlled boolean that makes the `Sugerencias` view/link visible for that user and allows submitting suggestions.

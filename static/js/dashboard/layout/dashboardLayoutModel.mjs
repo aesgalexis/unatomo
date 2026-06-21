@@ -37,6 +37,9 @@ export const normalizeTabOrder = (value) => {
 export const normalizeMachineViewMode = (value) =>
   value === "flat" ? "flat" : "grouped";
 
+export const normalizeMachineSortMode = (value) =>
+  ["manual", "incidents", "name"].includes(value) ? value : "manual";
+
 export const normalizeDashboardLayout = (layout = {}, options = {}) => {
   const groupUntitled = (options.groupUntitled || "Grupo").toString();
   const validMachineIds =
@@ -95,6 +98,7 @@ export const normalizeDashboardLayout = (layout = {}, options = {}) => {
     dashboardTitle: normalizeDashboardTitle(layout?.dashboardTitle),
     registrySeenAt: normalizeIsoString(layout?.registrySeenAt),
     suggestionsSeenAt: normalizeIsoString(layout?.suggestionsSeenAt),
-    machineViewMode: normalizeMachineViewMode(layout?.machineViewMode)
+    machineViewMode: normalizeMachineViewMode(layout?.machineViewMode),
+    machineSortMode: normalizeMachineSortMode(layout?.machineSortMode)
   };
 };

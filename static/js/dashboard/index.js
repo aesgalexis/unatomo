@@ -153,7 +153,8 @@ if (mount) {
       dashboardTitle: "",
       registrySeenAt: "",
       suggestionsSeenAt: "",
-      machineViewMode: "grouped"
+      machineViewMode: "grouped",
+      machineSortMode: "manual"
     },
     activeView: getDashboardInternalView(),
     registryVisibleCount: GLOBAL_REGISTRY_PAGE_SIZE,
@@ -270,6 +271,33 @@ if (mount) {
 
   const normalizeStatus = (value) =>
     value === "desconectada" ? "fuera_de_servicio" : value || "operativa";
+
+  const getMachinePendingTaskCount = (machine) =>
+    (Array.isArray(machine?.tasks) ? machine.tasks : [])
+      .filter((task) => getTaskTiming(task).pending)
+      .length;
+
+  const compareMachineTitle = (a, b) =>
+    (a?.title || "").localeCompare(b?.title || "", "es", { sensitivity: "base" }) ||
+    ((a?.order ?? 0) - (b?.order ?? 0));
+
+  const sortFlatMachines = (machines = [], sortMode = "manual") => {
+    const list = machines.slice();
+    if (sortMode === "incidents") {
+      return list.sort((a, b) => {
+        const aOut = normalizeStatus(a?.status) === "fuera_de_servicio" ? 0 : 1;
+        const bOut = normalizeStatus(b?.status) === "fuera_de_servicio" ? 0 : 1;
+        if (aOut !== bOut) return aOut - bOut;
+        const pendingDiff = getMachinePendingTaskCount(b) - getMachinePendingTaskCount(a);
+        if (pendingDiff) return pendingDiff;
+        return compareMachineTitle(a, b);
+      });
+    }
+    if (sortMode === "name") {
+      return list.sort(compareMachineTitle);
+    }
+    return list.sort((a, b) => (a?.order ?? 0) - (b?.order ?? 0));
+  };
 
   const withTimeout = (promise, ms = 6000) =>
     new Promise((resolve, reject) => {
@@ -645,13 +673,31 @@ if (mount) {
   };
   const viewMenu = createDashboardViewMenu({
     currentMode: state.dashboardLayout.machineViewMode || "grouped",
+    currentSort: state.dashboardLayout.machineSortMode || "manual",
     onChange: (mode) => {
       state.dashboardLayout = normalizeDashboardLayout({
         ...state.dashboardLayout,
-        machineViewMode: mode
+        machineViewMode: mode,
+        machineSortMode: mode === "grouped"
+          ? "manual"
+          : state.dashboardLayout.machineSortMode
       });
       viewMenu.setMode(state.dashboardLayout.machineViewMode);
-      upsertDashboardLayout(state.uid, { machineViewMode: state.dashboardLayout.machineViewMode })
+      viewMenu.setSortMode(state.dashboardLayout.machineSortMode);
+      upsertDashboardLayout(state.uid, {
+        machineViewMode: state.dashboardLayout.machineViewMode,
+        machineSortMode: state.dashboardLayout.machineSortMode
+      })
+        .catch(() => notifyTopbar(t("dashboard.saveError", "Error al guardar")));
+      renderCards({ preserveScroll: true });
+    },
+    onSortChange: (mode) => {
+      state.dashboardLayout = normalizeDashboardLayout({
+        ...state.dashboardLayout,
+        machineSortMode: mode
+      });
+      viewMenu.setSortMode(state.dashboardLayout.machineSortMode);
+      upsertDashboardLayout(state.uid, { machineSortMode: state.dashboardLayout.machineSortMode })
         .catch(() => notifyTopbar(t("dashboard.saveError", "Error al guardar")));
       renderCards({ preserveScroll: true });
     }
@@ -1867,7 +1913,7 @@ if (mount) {
     }
     list.className = "";
     const query = (state.searchQuery || "").trim();
-    const visibleMachines = filterMachines(machines, query);
+    let visibleMachines = filterMachines(machines, query);
     state.knownUsers = Array.from(
       new Set(
         machines
@@ -1933,6 +1979,13 @@ if (mount) {
     state.locations = computeLocations(state.draftMachines);
     state.dashboardLayout = normalizeDashboardLayout(state.dashboardLayout);
     viewMenu.setMode(state.dashboardLayout.machineViewMode);
+    viewMenu.setSortMode(state.dashboardLayout.machineSortMode);
+    if (state.dashboardLayout.machineViewMode === "flat") {
+      visibleMachines = sortFlatMachines(
+        visibleMachines,
+        state.dashboardLayout.machineSortMode
+      );
+    }
     const layoutGroups = state.dashboardLayout.groups || [];
     const layoutPlacements = state.dashboardLayout.placements || {};
     const useGroupedLayout =
@@ -1963,10 +2016,8 @@ if (mount) {
       const next = machine.order ?? 0;
       if (typeof current !== "number") groupAnchorOrder.set(topGroupId, next);
     });
-    const sortedVisibleMachines = visibleMachines
-      .slice()
-      .sort((a, b) => {
-        if (!useGroupedLayout) return (a.order ?? 0) - (b.order ?? 0);
+    const sortedVisibleMachines = useGroupedLayout
+      ? visibleMachines.slice().sort((a, b) => {
         const aPlacement = layoutPlacements[a.id] || {};
         const bPlacement = layoutPlacements[b.id] || {};
         const aGroupId = validGroupIds.has(aPlacement.groupId) ? aPlacement.groupId : "";
@@ -2005,7 +2056,8 @@ if (mount) {
           if (aLocalOrder !== bLocalOrder) return aLocalOrder - bLocalOrder;
         }
         return (a.order ?? 0) - (b.order ?? 0);
-      });
+      })
+      : visibleMachines;
     const groupTargets = new Map();
     const renderedGroups = new Set();
     const groupCounts = new Map(layoutGroups.map((group) => [group.id, 0]));
@@ -3009,6 +3061,13 @@ if (mount) {
 
   const handleReorder = (orderIds) => {
     if (!Array.isArray(orderIds) || !orderIds.length) return;
+    if (
+      state.dashboardLayout?.machineViewMode === "flat" &&
+      state.dashboardLayout?.machineSortMode !== "manual"
+    ) {
+      renderCards({ preserveScroll: true });
+      return;
+    }
     clearInitialGroupPriorityOrder();
     const result = reorderFlatMachines(state.draftMachines, orderIds);
     result.touchedMachineIds.forEach((id) => autoSave.scheduleSave(id, "order"));
@@ -3243,7 +3302,8 @@ if (mount) {
         dashboardTitle: "",
         registrySeenAt: "",
         suggestionsSeenAt: "",
-        machineViewMode: "grouped"
+        machineViewMode: "grouped",
+        machineSortMode: "manual"
       };
     }
     if (!isActiveSession()) return;
