@@ -954,6 +954,15 @@ body.status-incident-open {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 140ms ease, color 140ms ease;
+}
+
+.todo-row:hover .todo-delete,
+.todo-row:focus-within .todo-delete {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .todo-delete:hover {
@@ -1705,7 +1714,7 @@ body.status-incident-open {
   line-height: 1;
   padding: 0 0.32rem 0.1rem;
   text-align: center;
-  text-indent: 0.06rem;
+  text-indent: 0;
 }
 
 .machine-group-count[hidden] {
@@ -1796,6 +1805,7 @@ body.status-incident-open {
 .machine-group-down-count {
   background: #dc2626;
   color: #fff;
+  text-indent: -0.04rem;
 }
 
 .machine-group-body {
