@@ -520,8 +520,8 @@ const renderQrGrid = (machines, options = {}) => {
   printOptions.appendChild(backControl);
 
   toolbar.appendChild(printBtn);
-  toolbar.appendChild(searchInput);
   toolbar.appendChild(reloadBtn);
+  toolbar.appendChild(searchInput);
   toolbar.appendChild(printOptions);
   wrap.appendChild(toolbar);
   wrap.appendChild(header);
@@ -650,8 +650,8 @@ const setLoadingState = () => {
   loading.appendChild(loadingText);
 
   toolbar.appendChild(printBtn);
-  toolbar.appendChild(searchInput);
   toolbar.appendChild(reloadBtn);
+  toolbar.appendChild(searchInput);
   toolbar.appendChild(loading);
   wrap.appendChild(toolbar);
   mount.appendChild(wrap);

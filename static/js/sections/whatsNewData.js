@@ -1,5 +1,10 @@
 export const whatsNewEntries = [
   {
+    date: "2026-06-21",
+    es: "El dashboard puede alternar entre vista con grupos y lista plana, con orden por incidencias o nombre.",
+    en: "The dashboard can switch between grouped and flat views, with sorting by incidents or name.",
+  },
+  {
     date: "2026-06-18",
     es: "Estrenamos Novedades para resumir los cambios relevantes de Unatomo.",
     en: "What's new is now available to summarize relevant Unatomo changes.",
