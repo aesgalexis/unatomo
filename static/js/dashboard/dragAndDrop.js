@@ -221,8 +221,10 @@ export const initGroupedDragAndDrop = (listEl, callbacks = {}) => {
     if (!dragging || !placeholder) return;
     const targetGroup = getTargetGroup(event.target);
     const targetCard = draggedType === "machine" ? event.target.closest(".machine-card") : null;
+    const allowGrouping = callbacks.allowGrouping?.() !== false;
     if (
       draggedType === "group" &&
+      allowGrouping &&
       !isDraggingSubgroup(dragging) &&
       targetGroup &&
       targetGroup.dataset.groupId !== draggedId &&
@@ -235,7 +237,12 @@ export const initGroupedDragAndDrop = (listEl, callbacks = {}) => {
       }
       return;
     }
-    if (targetCard && targetCard.dataset.machineId !== draggedId && isCenterCardDrop(event, targetCard)) {
+    if (
+      allowGrouping &&
+      targetCard &&
+      targetCard.dataset.machineId !== draggedId &&
+      isCenterCardDrop(event, targetCard)
+    ) {
       if (centerTargetCard !== targetCard) {
         clearCenterTarget();
         centerTargetCard = targetCard;
@@ -270,6 +277,7 @@ export const initGroupedDragAndDrop = (listEl, callbacks = {}) => {
       const draggingGroup = listEl.querySelector(".machine-group.is-dragging");
       if (
         centerTargetGroup &&
+        callbacks.allowGrouping?.() !== false &&
         !isDraggingSubgroup(draggingGroup) &&
         targetGroupId &&
         targetGroupId !== draggedId
@@ -291,7 +299,11 @@ export const initGroupedDragAndDrop = (listEl, callbacks = {}) => {
     const dragging = listEl.querySelector(".machine-card.is-dragging");
     const dragItem = getDragItem(dragging);
     const targetGroup = getTargetGroup(event.target);
-    if (targetGroup && event.target.closest(".machine-group-header")) {
+    if (
+      callbacks.allowGrouping?.() !== false &&
+      targetGroup &&
+      event.target.closest(".machine-group-header")
+    ) {
       if (placeholder && placeholder.parentNode) placeholder.parentNode.removeChild(placeholder);
       clearCenterTarget();
       callbacks.onDropMachineOnGroup?.(draggedId, targetGroup.dataset.groupId || "");
@@ -300,7 +312,12 @@ export const initGroupedDragAndDrop = (listEl, callbacks = {}) => {
     const targetCard = centerTargetCard || event.target.closest(".machine-card");
     const targetId = targetCard?.dataset.machineId || "";
 
-    if (targetId && targetId !== draggedId && (targetCard === centerTargetCard || isCenterCardDrop(event, targetCard))) {
+    if (
+      callbacks.allowGrouping?.() !== false &&
+      targetId &&
+      targetId !== draggedId &&
+      (targetCard === centerTargetCard || isCenterCardDrop(event, targetCard))
+    ) {
       if (placeholder && placeholder.parentNode) placeholder.parentNode.removeChild(placeholder);
       clearCenterTarget();
       callbacks.onDropOnCard?.(draggedId, targetId);
