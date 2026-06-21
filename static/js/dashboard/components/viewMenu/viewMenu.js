@@ -1,8 +1,8 @@
 import { t } from "../../i18n.js";
 
 const VIEW_MODES = [
-  { id: "grouped", labelKey: "viewMenuShowGroups", fallback: "Ver grupos" },
-  { id: "flat", labelKey: "viewMenuHideGroups", fallback: "No ver grupos" }
+  { id: "grouped", labelKey: "viewMenuShowGroups", fallback: "Mostrar grupos" },
+  { id: "flat", labelKey: "viewMenuHideGroups", fallback: "No mostrar grupos" }
 ];
 
 const SORT_MODES = [

@@ -1,4 +1,5 @@
 import {
+  buildAddTaskAttachmentsUpdate,
   buildAddTaskNoteUpdate,
   buildAddTaskUpdate,
   buildCompleteTaskUpdate,
@@ -55,6 +56,56 @@ export const installTaskHooks = (hooks, deps = {}) => {
     showTaskTab(id);
     renderCards({ preserveScroll: true });
     autoSave.saveNow(id, "task-note");
+  };
+
+  hooks.onAddTaskImages = async (id, taskId, files = []) => {
+    const current = getDraftById(id);
+    const task = current?.tasks?.find((item) => item.id === taskId);
+    const selected = Array.from(files || []).slice(0, 10);
+    if (!current || !task || !selected.length || !hooks.onUploadMachineDocument) return;
+    const user = getUserLabel();
+    const uploadedAttachments = [];
+    let failedUploads = 0;
+    notifyTopbar(t("dashboard.incidentUploadingImages", "Subiendo imágenes..."));
+    for (const file of selected) {
+      try {
+        const uploaded = await hooks.onUploadMachineDocument(
+          id,
+          "other",
+          file,
+          null,
+          {
+            silent: true,
+            deferRender: true,
+            rethrow: true,
+            preserveTab: true,
+            documentMetadata: {
+              context: "task-attachment",
+              linkedTaskId: task.id,
+              linkedStatusCycleId: task.statusCycleId || ""
+            }
+          }
+        );
+        if (uploaded) uploadedAttachments.push(uploaded);
+      } catch {
+        failedUploads += 1;
+      }
+    }
+    const latest = getDraftById(id);
+    const updates = latest
+      ? buildAddTaskAttachmentsUpdate(latest, taskId, uploadedAttachments, user)
+      : null;
+    if (updates) {
+      updateMachine(id, updates);
+      showTaskTab(id);
+      renderCards({ preserveScroll: true });
+      autoSave.saveNow(id, "task-images");
+    }
+    if (failedUploads) {
+      notifyTopbar(t("dashboard.incidentImageUploadError", "Alguna imagen no se pudo subir"));
+    } else if (uploadedAttachments.length) {
+      notifyTopbar(t("dashboard.incidentImagesUploaded", "Imágenes guardadas"));
+    }
   };
 
   hooks.onEditTask = (id, taskId, patch) => {
