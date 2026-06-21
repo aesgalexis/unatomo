@@ -2,11 +2,16 @@ import { t } from "/static/js/dashboard/i18n.js";
 import {
   formatHistoryLog,
   getTaskLogKeys,
+  isTaskAttachmentLog,
   isTaskCreatedLog,
   isTaskNoteLog,
 } from "../history/historyEventFormatter.js";
 
 const RESTORE_OPERATION_TASK_SOURCE = "status-out-of-service";
+const HISTORY_VISIBLE_LIMIT = 16;
+const MINUTE = 60 * 1000;
+const HOUR = 60 * MINUTE;
+const DAY = 24 * HOUR;
 
 const toTime = (value) => {
   const date = value ? new Date(value) : null;
@@ -30,14 +35,81 @@ const isRestoreOperationLog = (log = {}) => {
 
 const isTaskChildLog = (log = {}) =>
   isTaskNoteLog(log) ||
+  isTaskAttachmentLog(log) ||
   log.type === "task" ||
   log.type === "task_edited";
+
+const isStatusDownLog = (log = {}) =>
+  log.type === "status" && log.value === "fuera_de_servicio";
+
+const isStatusOperativeLog = (log = {}) =>
+  log.type === "status" && log.value === "operativa";
+
+const isStatusCycleLog = (log = {}) =>
+  isStatusDownLog(log) || isStatusOperativeLog(log) || isRestoreOperationLog(log);
+
+const orderCycleChildren = (entries = []) => {
+  const ordered = entries
+    .slice()
+    .sort((a, b) => (a.time - b.time) || (a.index - b.index));
+  const attachments = ordered.filter((entry) => isTaskAttachmentLog(entry.log));
+  if (!attachments.length) return ordered;
+  const remaining = ordered.filter((entry) => !isTaskAttachmentLog(entry.log));
+  const firstNoteIndex = remaining.findIndex((entry) => isTaskNoteLog(entry.log));
+  if (firstNoteIndex < 0) return ordered;
+  remaining.splice(firstNoteIndex, 0, ...attachments);
+  return remaining;
+};
 
 const addGroupedLog = (map, key, entry) => {
   if (!key) return;
   const logs = map.get(key) || [];
   if (!logs.some((item) => item.index === entry.index)) logs.push(entry);
   map.set(key, logs);
+};
+
+const getScopedTaskLogKeys = (log = {}) => {
+  const taskId = String(log.taskId || "").trim();
+  const cycleId = String(log.statusCycleId || "").trim();
+  const title = String(log.title || "").trim().toLowerCase();
+  const restoreLog = isRestoreOperationLog(log);
+
+  if (!restoreLog) return getTaskLogKeys(log);
+
+  if (cycleId) {
+    return [
+      taskId ? `id:${taskId}` : "",
+      `cycle:${cycleId}`,
+      !taskId && title ? `cycle-title:${cycleId}:${title}` : "",
+    ].filter(Boolean);
+  }
+
+  if (taskId) return [`id:${taskId}`];
+  return getTaskLogKeys(log);
+};
+
+const unitLabel = (key, count) => t(`tasks.${count === 1 ? key : `${key}s`}`, key);
+
+const formatDuration = (diffMs) => {
+  const diff = Math.max(0, diffMs);
+  if (diff < HOUR) {
+    const minutes = Math.max(1, Math.ceil(diff / MINUTE));
+    return `${minutes} ${unitLabel("minute", minutes)}`;
+  }
+  if (diff < DAY) {
+    const hours = Math.max(1, Math.ceil(diff / HOUR));
+    return `${hours} ${unitLabel("hour", hours)}`;
+  }
+  const days = Math.max(1, Math.ceil(diff / DAY));
+  if (days >= 30) {
+    const months = Math.ceil(days / 30);
+    return `${months} ${unitLabel("month", months)}`;
+  }
+  if (days >= 7) {
+    const weeks = Math.ceil(days / 7);
+    return `${weeks} ${unitLabel("week", weeks)}`;
+  }
+  return `${days} ${unitLabel("day", days)}`;
 };
 
 export const render = (panel, machine, hooks, options = {}) => {
@@ -92,28 +164,52 @@ export const render = (panel, machine, hooks, options = {}) => {
   const rawLogs = Array.isArray(machine.logs)
     ? machine.logs.map((log, index) => ({ log, index, time: toTime(log.ts) }))
     : [];
+  const statusCycleStartTimes = new Map();
   const taskParentKeys = new Set();
   const restoreCycleTaskKeys = new Map();
+  const explicitCycles = new Map();
 
   rawLogs.forEach((entry) => {
     const { log } = entry;
-    if (!isTaskCreatedLog(log)) return;
-    getTaskLogKeys(log).forEach((key) => taskParentKeys.add(key));
-
     const cycleId = String(log.statusCycleId || "").trim();
+    if (cycleId && isStatusCycleLog(log)) {
+      const logs = explicitCycles.get(cycleId) || [];
+      logs.push(entry);
+      explicitCycles.set(cycleId, logs);
+    }
+    if (cycleId && isStatusDownLog(log)) {
+      statusCycleStartTimes.set(cycleId, entry.time);
+    }
+    if (!isTaskCreatedLog(log)) return;
+    getScopedTaskLogKeys(log).forEach((key) => taskParentKeys.add(key));
+
     if (cycleId && isRestoreOperationLog(log)) {
       const keys = restoreCycleTaskKeys.get(cycleId) || new Set();
-      getTaskLogKeys(log).forEach((key) => keys.add(key));
+      getScopedTaskLogKeys(log).forEach((key) => keys.add(key));
       restoreCycleTaskKeys.set(cycleId, keys);
     }
   });
 
+  const cycleChildrenByParentIndex = new Map();
+  const cycleChildIndexes = new Set();
+  explicitCycles.forEach((entries) => {
+    const parent = entries.find((entry) => isStatusDownLog(entry.log));
+    if (!parent) return;
+    const children = orderCycleChildren(
+      entries.filter((entry) => entry.index !== parent.index)
+    );
+    if (!children.length) return;
+    cycleChildrenByParentIndex.set(parent.index, children);
+    children.forEach((entry) => cycleChildIndexes.add(entry.index));
+  });
+
   const childrenByTaskKey = new Map();
-  const childIndexes = new Set();
+  const childIndexes = new Set(cycleChildIndexes);
   rawLogs.forEach((entry) => {
+    if (cycleChildIndexes.has(entry.index)) return;
     const { log } = entry;
     if (isTaskChildLog(log)) {
-      const keys = getTaskLogKeys(log).filter((key) => taskParentKeys.has(key));
+      const keys = getScopedTaskLogKeys(log).filter((key) => taskParentKeys.has(key));
       keys.forEach((key) => addGroupedLog(childrenByTaskKey, key, entry));
       if (keys.length) childIndexes.add(entry.index);
       return;
@@ -121,9 +217,7 @@ export const render = (panel, machine, hooks, options = {}) => {
 
     const cycleId = String(log.statusCycleId || "").trim();
     const isCycleReturn =
-      log.type === "status" &&
-      log.value === "operativa" &&
-      restoreCycleTaskKeys.has(cycleId);
+      isStatusOperativeLog(log) && restoreCycleTaskKeys.has(cycleId);
     if (!isCycleReturn) return;
 
     restoreCycleTaskKeys.get(cycleId).forEach((key) => {
@@ -134,7 +228,7 @@ export const render = (panel, machine, hooks, options = {}) => {
 
   const getTaskChildren = (log) => {
     const children = [];
-    getTaskLogKeys(log).forEach((key) => {
+    getScopedTaskLogKeys(log).forEach((key) => {
       (childrenByTaskKey.get(key) || []).forEach((entry) => {
         if (!children.some((item) => item.index === entry.index)) children.push(entry);
       });
@@ -142,20 +236,58 @@ export const render = (panel, machine, hooks, options = {}) => {
     return children.sort((a, b) => (a.time - b.time) || (a.index - b.index));
   };
 
-  const appendLog = (log, indent = false) => {
+  const getDisplayLog = (log, parentLog = null) => {
+    if (log.type !== "task" || !log.punctual) return log;
+    const cycleId = String(log.statusCycleId || "").trim();
+    const completedTime = toTime(log.ts);
+    const cycleStartTime = cycleId ? statusCycleStartTimes.get(cycleId) : 0;
+    const parentTime = parentLog ? toTime(parentLog.ts) : 0;
+    const baseTime = cycleStartTime || parentTime;
+    if (!baseTime || !completedTime || completedTime < baseTime) return log;
+    return {
+      ...log,
+      completionDuration: formatDuration(completedTime - baseTime),
+    };
+  };
+
+  const appendLog = (log, indent = false, parentLog = null) => {
     const item = document.createElement("div");
     item.className = indent ? "mc-log-item mc-log-item-indent" : "mc-log-item";
-    const time = new Date(log.ts).toLocaleString(locale);
-    item.textContent = `${time} - ${formatHistoryLog(log, {
+    const displayLog = getDisplayLog(log, parentLog);
+    const time = new Date(displayLog.ts).toLocaleString(locale);
+    if (isTaskAttachmentLog(displayLog) && displayLog.attachmentUrl) {
+      const image = String(displayLog.contentType || "").startsWith("image/");
+      const labelText = t(
+        image ? "history.imageAdded" : "history.fileAdded",
+        image ? "Imagen añadida" : "Archivo añadido"
+      );
+      item.append(`${time} - ${labelText}: `);
+      const link = document.createElement("a");
+      link.className = "mc-log-attachment-link";
+      link.href = displayLog.attachmentUrl;
+      link.target = "_blank";
+      link.rel = "noopener";
+      link.textContent = displayLog.attachmentName || t("tasks.image", "Imagen");
+      link.addEventListener("click", (event) => event.stopPropagation());
+      item.appendChild(link);
+      if (displayLog.user) {
+        item.append(t("history.completedBy", (value) => ` - por ${value}`)(displayLog.user));
+      }
+      list.appendChild(item);
+      return;
+    }
+    item.textContent = `${time} - ${formatHistoryLog(displayLog, {
       omitTaskTitle: indent && log.type === "task_note_added",
     })}`;
     list.appendChild(item);
   };
 
-  rawLogs
+  const visibleEntries = rawLogs
     .filter((entry) => !childIndexes.has(entry.index))
     .map((entry) => {
-      const children = isTaskCreatedLog(entry.log) ? getTaskChildren(entry.log) : [];
+      const children =
+        cycleChildrenByParentIndex.get(entry.index) ||
+        (isTaskCreatedLog(entry.log) ? getTaskChildren(entry.log) : []);
       const childTime = children.reduce((max, child) => Math.max(max, child.time), 0);
       return {
         ...entry,
@@ -163,12 +295,19 @@ export const render = (panel, machine, hooks, options = {}) => {
         displayTime: Math.max(entry.time, childTime),
       };
     })
-    .sort((a, b) => (b.displayTime - a.displayTime) || (b.index - a.index))
-    .slice(0, 16)
-    .forEach((entry) => {
-      appendLog(entry.log);
-      entry.children.forEach((child) => appendLog(child.log, true));
-    });
+    .sort((a, b) => (b.displayTime - a.displayTime) || (b.index - a.index));
+
+  let visibleCount = 0;
+  for (const entry of visibleEntries) {
+    if (visibleCount >= HISTORY_VISIBLE_LIMIT) break;
+    appendLog(entry.log);
+    visibleCount += 1;
+    for (const child of entry.children) {
+      if (visibleCount >= HISTORY_VISIBLE_LIMIT) break;
+      appendLog(child.log, true, entry.log);
+      visibleCount += 1;
+    }
+  }
   panel.appendChild(list);
 
   const sep = document.createElement("hr");
@@ -180,7 +319,6 @@ export const render = (panel, machine, hooks, options = {}) => {
 
   const counter = document.createElement("div");
   counter.className = "mc-log-header";
-  const visibleCount = Math.min(16, total);
   counter.textContent = `${visibleCount}/${total}`;
   footer.appendChild(counter);
 

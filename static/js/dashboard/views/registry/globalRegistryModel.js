@@ -2,6 +2,7 @@ import {
   formatHistoryLog,
   getPrimaryTaskLogKey,
   getTaskLogKeys,
+  isTaskAttachmentLog,
   isTaskCreatedLog,
   isTaskNoteLog,
 } from "../../history/historyEventFormatter.js";
@@ -36,6 +37,7 @@ const isStatusCycleLog = (log = {}) =>
 
 const isTaskChildLog = (log = {}) =>
   isTaskNoteLog(log) ||
+  isTaskAttachmentLog(log) ||
   log.type === "task" ||
   log.type === "task_edited" ||
   log.type === "task_removed";
@@ -205,6 +207,7 @@ const buildRegistrySearchText = (entry, log = entry.log) => {
     log.title,
     log.description,
     log.note,
+    log.attachmentName,
     log.message,
     log.summary,
     log.user,

@@ -195,6 +195,58 @@ const renderNotes = (item, task, hooks) => {
   item.appendChild(details);
 };
 
+const createAttachmentLink = (attachment) => {
+  const link = document.createElement("a");
+  link.className = "task-attachment-link";
+  link.href = attachment.url;
+  link.target = "_blank";
+  link.rel = "noopener";
+  link.textContent = attachment.name || t("tasks.image", "Imagen");
+  link.addEventListener("click", (event) => event.stopPropagation());
+  return link;
+};
+
+const renderAttachments = (item, task, hooks) => {
+  const attachments = Array.isArray(task.attachments) ? task.attachments : [];
+  if (!attachments.length) return;
+  const onlyImages = attachments.every((attachment) =>
+    String(attachment.contentType || "").startsWith("image/")
+  );
+
+  if (attachments.length === 1) {
+    const row = document.createElement("div");
+    row.className = "task-attachments task-attachment-single";
+    const label = document.createElement("span");
+    label.textContent = `${t(onlyImages ? "tasks.image" : "tasks.file", onlyImages ? "Imagen" : "Archivo")}:`;
+    row.appendChild(label);
+    row.appendChild(createAttachmentLink(attachments[0]));
+    item.appendChild(row);
+    return;
+  }
+
+  const details = document.createElement("details");
+  details.className = "task-attachments";
+  details.addEventListener("toggle", () => {
+    if (hooks.onContentResize) requestAnimationFrame(() => hooks.onContentResize());
+  });
+  const summary = document.createElement("summary");
+  summary.textContent = t(
+    onlyImages ? "tasks.imagesCount" : "tasks.filesCount",
+    (count) => `${onlyImages ? "Imágenes" : "Archivos"} (${count})`
+  )(attachments.length);
+  details.appendChild(summary);
+  const list = document.createElement("div");
+  list.className = "task-attachments-list";
+  attachments.forEach((attachment) => {
+    const row = document.createElement("div");
+    row.className = "task-attachment";
+    row.appendChild(createAttachmentLink(attachment));
+    list.appendChild(row);
+  });
+  details.appendChild(list);
+  item.appendChild(details);
+};
+
 export const renderTasksPanel = (panel, machine, hooks, options = {}, context = {}) => {
   panel.innerHTML = "";
   const canEditTasks = options.canEditTasks !== false;
@@ -369,6 +421,7 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
 
       item.appendChild(body);
       item.appendChild(forms);
+      renderAttachments(item, task, hooks);
       renderNotes(item, task, hooks);
       list.appendChild(item);
     });

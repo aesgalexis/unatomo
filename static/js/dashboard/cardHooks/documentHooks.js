@@ -73,11 +73,15 @@ export const installDocumentHooks = (hooks, deps = {}) => {
         : kind === "other"
           ? uploadOtherDocument
           : uploadPlateDocument;
-    const uploaded = await uploadDocument({
+    const uploadedDocument = await uploadDocument({
       machine: machineForUpload,
       file,
       uploadedBy: state.uid
     });
+    const uploaded = {
+      ...uploadedDocument,
+      ...(options.documentMetadata || {})
+    };
     const currentDocuments = current.documents || {};
     const documents =
       kind === "other"
@@ -99,7 +103,9 @@ export const installDocumentHooks = (hooks, deps = {}) => {
       statusEl.textContent = t("general.uploadSaved", "Archivo guardado");
       statusEl.dataset.state = "ok";
     }
-    withGeneralTabSelected(state, id, expandedById);
+    if (!options.preserveTab) {
+      withGeneralTabSelected(state, id, expandedById);
+    }
     await upsertMachine(tenantId, getDraftById(id));
     await refreshStorageFullState(tenantId);
     if (!options.silent) {

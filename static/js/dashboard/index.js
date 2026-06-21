@@ -17,10 +17,15 @@ import { installDocumentHooks } from "./cardHooks/documentHooks.js";
 import { generateSaltBase64, hashPassword } from "/static/js/utils/crypto.js";
 import { initAutoSave } from "./autoSave.js";
 import { getTaskTiming } from "/static/js/dashboard/tabs/tasks/tasksTime.js";
-import { buildStatusToggleUpdate } from "/static/js/dashboard/tabs/tasks/taskActions.js";
+import {
+  RESTORE_OPERATION_TASK_SOURCE,
+  buildAddTaskAttachmentsUpdate,
+  buildStatusToggleUpdate
+} from "/static/js/dashboard/tabs/tasks/taskActions.js";
 import { filterMachines } from "./components/machineSearch/machineFilter.js";
 import { createMachineSearchBar } from "./components/machineSearch/machineSearchBar.js";
 import { createDashboardSectionNav } from "./components/sectionNav.js";
+import { openStatusIncidentModal } from "./components/statusIncidentModal/statusIncidentModal.js";
 import { createDashboardViewMenu } from "./components/viewMenu/viewMenu.js";
 import { createDashboardLoading } from "./components/loading/dashboardLoading.js";
 import {
@@ -189,6 +194,7 @@ if (mount) {
 
   const cardRefs = new Map();
   const locallyVisibleEmptyGroupIds = new Set();
+  const pendingStatusIncidentMachineIds = new Set();
   const ORDER_CACHE_KEY = "unatomo_order_v1";
   const loadOrderCache = () => {
     try {
@@ -2209,23 +2215,111 @@ if (mount) {
           }
         };
 
-        hooks.onStatusToggle = (node) => {
+        hooks.onStatusToggle = async (node) => {
+          if (pendingStatusIncidentMachineIds.has(machine.id)) return;
           const statusOrder = ["operativa", "fuera_de_servicio"];
           const current = getDraftById(machine.id);
+          if (!current) return;
           const currentStatus = normalizeStatus(current.status);
           const idx = statusOrder.indexOf(currentStatus);
           const nextStatus = statusOrder[(idx + 1) % statusOrder.length];
           const keepExpanded = node.dataset.expanded === "true";
           const user = state.adminLabel || t("dashboard.admin", "Administrador");
+          const defaultRestoreTitle = t(
+            "tasks.restoreOperation",
+            "Volver a poner la máquina en operatividad"
+          );
+          let incidentDetails = null;
+          if (currentStatus !== "fuera_de_servicio" && nextStatus === "fuera_de_servicio") {
+            pendingStatusIncidentMachineIds.add(machine.id);
+            try {
+              incidentDetails = await openStatusIncidentModal({
+                machineTitle: current.title || machine.title || "",
+                defaultTitle: defaultRestoreTitle
+              });
+              if (!incidentDetails) return;
+            } finally {
+              pendingStatusIncidentMachineIds.delete(machine.id);
+            }
+          }
+          const statusUpdate = buildStatusToggleUpdate(
+            machine.id,
+            current,
+            nextStatus,
+            user,
+            {
+              normalizeStatus,
+              restoreTitle: (incidentDetails?.title || "").trim() || defaultRestoreTitle,
+              restoreDescription: (incidentDetails?.description || "").trim(),
+              restoreNote: (incidentDetails?.note || "").trim()
+            }
+          );
           replaceMachine(machine.id, {
             ...current,
-            ...buildStatusToggleUpdate(machine.id, current, nextStatus, user, {
-              normalizeStatus,
-              restoreTitle: t("tasks.restoreOperation", "Volver a poner la máquina en operatividad")
-            })
+            ...statusUpdate
           });
+
+          const selectedImages = Array.isArray(incidentDetails?.images)
+            ? incidentDetails.images
+            : [];
+          const restoreTask = statusUpdate.tasks?.find(
+            (task) =>
+              task.source === RESTORE_OPERATION_TASK_SOURCE &&
+              task.statusCycleId === statusUpdate.activeStatusCycleId
+          );
+          const uploadedAttachments = [];
+          let failedUploads = 0;
+          if (selectedImages.length && restoreTask && hooks.onUploadMachineDocument) {
+            notifyTopbar(t("dashboard.incidentUploadingImages", "Subiendo imágenes..."));
+            for (const file of selectedImages) {
+              try {
+                const uploaded = await hooks.onUploadMachineDocument(
+                  machine.id,
+                  "other",
+                  file,
+                  null,
+                  {
+                    silent: true,
+                    deferRender: true,
+                    rethrow: true,
+                    preserveTab: true,
+                    documentMetadata: {
+                      context: "task-attachment",
+                      linkedTaskId: restoreTask.id,
+                      linkedStatusCycleId: restoreTask.statusCycleId || ""
+                    }
+                  }
+                );
+                if (uploaded) uploadedAttachments.push(uploaded);
+              } catch {
+                failedUploads += 1;
+              }
+            }
+          }
+          if (uploadedAttachments.length && restoreTask) {
+            const latest = getDraftById(machine.id);
+            if (latest) {
+              const attachmentUpdate = buildAddTaskAttachmentsUpdate(
+                latest,
+                restoreTask.id,
+                uploadedAttachments,
+                user
+              );
+              if (attachmentUpdate) updateMachine(machine.id, attachmentUpdate);
+            }
+          }
           renderCards({ preserveScroll: true });
           autoSave.saveNow(machine.id, "status");
+          if (failedUploads) {
+            notifyTopbar(
+              t(
+                "dashboard.incidentImageUploadError",
+                "Alguna imagen no se pudo subir"
+              )
+            );
+          } else if (uploadedAttachments.length) {
+            notifyTopbar(t("dashboard.incidentImagesUploaded", "Imágenes guardadas"));
+          }
           if (keepExpanded) {
             expandedById.add(machine.id);
             state.expandedById = Array.from(expandedById);

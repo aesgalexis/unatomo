@@ -1,6 +1,8 @@
 import { t } from "/static/js/dashboard/i18n.js";
 
-const DAY = 24 * 60 * 60 * 1000;
+const MINUTE = 60 * 1000;
+const HOUR = 60 * MINUTE;
+const DAY = 24 * HOUR;
 const durationDays = {
   diaria: 1,
   semanal: 7,
@@ -96,6 +98,14 @@ export const getOverdueDuration = (task, nowMs = Date.now()) => {
 export const getCompletionDuration = (task, nowMs = Date.now()) => {
   const baseMs = toMs(task.createdAt);
   const diff = Math.max(0, nowMs - baseMs);
+  if (diff < HOUR) {
+    const minutes = Math.max(1, Math.ceil(diff / MINUTE));
+    return formatCount(minutes, "minute");
+  }
+  if (diff < DAY) {
+    const hours = Math.max(1, Math.ceil(diff / HOUR));
+    return formatCount(hours, "hour");
+  }
   const dayCount = Math.max(1, Math.ceil(diff / DAY));
   if (dayCount >= 30) {
     const months = Math.ceil(dayCount / 30);

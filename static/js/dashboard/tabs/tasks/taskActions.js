@@ -17,11 +17,12 @@ export const createStatusCycleId = (machineId) =>
 export const createRestoreOperationTask = (createdBy, options = {}) => ({
   id: createId("restore"),
   title: options.title || "Volver a poner la máquina en operatividad",
-  description: "",
+  description: (options.description || "").toString().trim().slice(0, 1024),
   frequency: "puntual",
   createdAt: options.now || new Date().toISOString(),
   lastCompletedAt: null,
   createdBy: createdBy || null,
+  notes: Array.isArray(options.notes) ? options.notes : [],
   source: RESTORE_OPERATION_TASK_SOURCE,
   automated: true,
   statusTarget: "operativa"
@@ -37,6 +38,14 @@ export const getRestoreTaskCycleId = (task, machineData = {}) => {
 
 export const hasPendingRestoreOperationTask = (tasks = []) =>
   normalizeTasks(tasks).some(
+    (task) =>
+      task.source === RESTORE_OPERATION_TASK_SOURCE &&
+      task.frequency === "puntual" &&
+      getTaskTiming(task).pending
+  );
+
+const getPendingRestoreOperationTask = (tasks = []) =>
+  normalizeTasks(tasks).find(
     (task) =>
       task.source === RESTORE_OPERATION_TASK_SOURCE &&
       task.frequency === "puntual" &&
@@ -118,6 +127,50 @@ export const buildAddTaskNoteUpdate = (
       }
     ]
   };
+};
+
+export const buildAddTaskAttachmentsUpdate = (
+  machine,
+  taskId,
+  attachments,
+  user,
+  now = new Date().toISOString()
+) => {
+  const added = (Array.isArray(attachments) ? attachments : [])
+    .filter((attachment) => attachment?.url)
+    .map((attachment) => ({
+      ...attachment,
+      documentId: attachment.documentId || attachment.id || ""
+    }));
+  if (!added.length) return null;
+
+  const tasks = normalizeTasks(machine.tasks || []).map((task) =>
+    task.id === taskId
+      ? { ...task, attachments: [...(task.attachments || []), ...added] }
+      : task
+  );
+  const task = tasks.find((item) => item.id === taskId);
+  if (!task) return null;
+
+  const logs = [
+    ...(machine.logs || []),
+    ...added.map((attachment) => ({
+      ts: attachment.uploadedAt || now,
+      type: "task_attachment_added",
+      taskId,
+      title: task.title || "Tarea",
+      attachmentId: attachment.id || attachment.documentId || "",
+      documentId: attachment.documentId || attachment.id || "",
+      attachmentName: attachment.name || "Imagen",
+      attachmentUrl: attachment.url,
+      contentType: attachment.contentType || "",
+      storagePath: attachment.storagePath || "",
+      user,
+      source: task.source || "",
+      statusCycleId: getRestoreTaskCycleId(task, machine)
+    }))
+  ];
+  return { tasks, logs };
 };
 
 export const buildEditTaskUpdate = (
@@ -252,21 +305,45 @@ export const buildStatusToggleUpdate = (
   ];
 
   if (currentStatus !== "fuera_de_servicio" && nextStatus === "fuera_de_servicio") {
-    if (!hasPendingRestoreOperationTask(tasks)) {
-      const restoreTask = {
-        ...createRestoreOperationTask(user, {
-          now,
-          title: options.restoreTitle
-        }),
-        statusCycleId
-      };
-      tasks = [restoreTask, ...tasks];
+    const pendingRestoreTask = getPendingRestoreOperationTask(tasks);
+    if (pendingRestoreTask) {
+      tasks = tasks.filter((task) => task.id !== pendingRestoreTask.id);
+    }
+    const restoreTask = {
+      ...createRestoreOperationTask(user, {
+        now,
+        title: options.restoreTitle,
+        description: options.restoreDescription,
+        notes: options.restoreNote
+          ? [{
+              id: createId("n"),
+              text: options.restoreNote.toString().trim().slice(0, 512),
+              createdAt: now,
+              createdBy: user
+            }]
+          : []
+      }),
+      statusCycleId
+    };
+    tasks = [restoreTask, ...tasks];
+    logs.push({
+      ts: now,
+      type: "task_created",
+      taskId: restoreTask.id,
+      title: restoreTask.title,
+      description: restoreTask.description || "",
+      user,
+      source: RESTORE_OPERATION_TASK_SOURCE,
+      statusCycleId
+    });
+    const initialNote = restoreTask.notes?.[0];
+    if (initialNote?.text) {
       logs.push({
         ts: now,
-        type: "task_created",
+        type: "task_note_added",
         taskId: restoreTask.id,
         title: restoreTask.title,
-        description: restoreTask.description || "",
+        note: initialNote.text,
         user,
         source: RESTORE_OPERATION_TASK_SOURCE,
         statusCycleId
