@@ -671,12 +671,31 @@ if (mount) {
       updateTodoNav();
     }
   };
+  const materializeCurrentFlatOrder = () => {
+    const currentSort = state.dashboardLayout?.machineSortMode || "manual";
+    if (state.dashboardLayout?.machineViewMode !== "flat" || currentSort === "manual") return;
+    const orderedIds = sortFlatMachines(state.draftMachines, currentSort)
+      .map((machine) => machine.id)
+      .filter(Boolean);
+    if (!orderedIds.length) return;
+    const result = reorderFlatMachines(state.draftMachines, orderedIds);
+    result.touchedMachineIds.forEach((id) => autoSave.scheduleSave(id, "order"));
+    state.draftMachines = result.machines;
+    saveOrderCache(result.machines);
+  };
   const viewMenu = createDashboardViewMenu({
     currentMode: state.dashboardLayout.machineViewMode || "grouped",
     currentSort: state.dashboardLayout.machineSortMode || "manual",
     onChange: (mode) => {
+      const nextGroups = mode === "grouped"
+        ? (state.dashboardLayout.groups || []).map((group) => ({
+            ...group,
+            collapsed: true
+          }))
+        : state.dashboardLayout.groups;
       state.dashboardLayout = normalizeDashboardLayout({
         ...state.dashboardLayout,
+        groups: nextGroups,
         machineViewMode: mode,
         machineSortMode: mode === "grouped"
           ? "manual"
@@ -685,13 +704,17 @@ if (mount) {
       viewMenu.setMode(state.dashboardLayout.machineViewMode);
       viewMenu.setSortMode(state.dashboardLayout.machineSortMode);
       upsertDashboardLayout(state.uid, {
+        groups: state.dashboardLayout.groups,
         machineViewMode: state.dashboardLayout.machineViewMode,
         machineSortMode: state.dashboardLayout.machineSortMode
       })
         .catch(() => notifyTopbar(t("dashboard.saveError", "Error al guardar")));
-      renderCards({ preserveScroll: true });
+      renderCards({ preserveScroll: true, preserveAnchor: false });
     },
     onSortChange: (mode) => {
+      if (mode === "manual") {
+        materializeCurrentFlatOrder();
+      }
       state.dashboardLayout = normalizeDashboardLayout({
         ...state.dashboardLayout,
         machineSortMode: mode
@@ -699,14 +722,14 @@ if (mount) {
       viewMenu.setSortMode(state.dashboardLayout.machineSortMode);
       upsertDashboardLayout(state.uid, { machineSortMode: state.dashboardLayout.machineSortMode })
         .catch(() => notifyTopbar(t("dashboard.saveError", "Error al guardar")));
-      renderCards({ preserveScroll: true });
+      renderCards({ preserveScroll: true, preserveAnchor: false });
     }
   });
 
 
   addBar.appendChild(addBtn);
-  addBar.appendChild(searchInput);
   addBar.appendChild(viewMenu.wrap);
+  addBar.appendChild(searchInput);
 
   const filterInfo = document.createElement("div");
   filterInfo.className = "filter-info";
@@ -1689,14 +1712,14 @@ if (mount) {
     });
   };
 
-  const renderCards = ({ preserveScroll = false } = {}) => {
+  const renderCards = ({ preserveScroll = false, preserveAnchor = true } = {}) => {
     state.activeView = getDashboardInternalView();
     syncDashboardViewChrome();
-    const capturedAnchor = preserveScroll ? captureViewportAnchor() : null;
+    const capturedAnchor = preserveScroll && preserveAnchor ? captureViewportAnchor() : null;
     const prevScrollY = preserveScroll
       ? (typeof state.nextScrollRestoreY === "number" ? state.nextScrollRestoreY : window.scrollY)
       : null;
-    const renderAnchor = state.nextScrollAnchor || capturedAnchor;
+    const renderAnchor = preserveAnchor ? state.nextScrollAnchor || capturedAnchor : null;
     state.nextScrollRestoreY = null;
     const activeEl = document.activeElement;
     if (activeEl && list.contains(activeEl) && typeof activeEl.blur === "function") {
