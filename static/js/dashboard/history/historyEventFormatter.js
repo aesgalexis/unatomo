@@ -33,6 +33,9 @@ export const getPrimaryTaskLogKey = (log = {}) => getTaskLogKeys(log)[0] || "";
 
 export const isTaskNoteLog = (log = {}) => log.type === "task_note_added";
 
+export const isTaskAttachmentLog = (log = {}) =>
+  log.type === "task_attachment_added";
+
 export const isTaskCreatedLog = (log = {}) => log.type === "task_created";
 
 export const formatHistoryLog = (log = {}, options = {}) => {
@@ -85,6 +88,17 @@ export const formatHistoryLog = (log = {}, options = {}) => {
       return `${t("history.taskNoteAdded", "Nota en tarea")}${note}${user}`;
     }
     return `${t("history.taskNoteAdded", "Nota en tarea")}: ${title}${note}${user}`;
+  }
+
+  if (log.type === "task_attachment_added") {
+    const name = log.attachmentName || t("tasks.image", "Imagen");
+    const image = String(log.contentType || "").startsWith("image/");
+    const label = t(
+      image ? "history.imageAdded" : "history.fileAdded",
+      image ? "Imagen añadida" : "Archivo añadido"
+    );
+    const user = completedBy(log.user);
+    return `${label}: ${name}${user}`;
   }
 
   if (log.type === "task_edited") {

@@ -10,6 +10,22 @@ const toIso = (value) => {
   return date.toISOString();
 };
 
+const normalizeAttachment = (raw) => {
+  if (!raw || typeof raw !== "object") return null;
+  const url = String(raw.url || "").trim();
+  if (!url) return null;
+  return {
+    id: raw.id || raw.documentId || raw.storagePath || `attachment_${Date.now()}`,
+    documentId: raw.documentId || raw.id || "",
+    name: String(raw.displayName || raw.name || "Imagen").trim().slice(0, 120),
+    url,
+    storagePath: String(raw.storagePath || "").trim(),
+    contentType: String(raw.contentType || "").trim(),
+    uploadedAt: toIso(raw.uploadedAt),
+    uploadedBy: raw.uploadedBy || null
+  };
+};
+
 export const normalizeTask = (raw) => {
   if (!raw || typeof raw !== "object") return null;
   const description =
@@ -44,6 +60,9 @@ export const normalizeTask = (raw) => {
         })
         .filter(Boolean)
     : [];
+  const attachments = Array.isArray(raw.attachments)
+    ? raw.attachments.map(normalizeAttachment).filter(Boolean)
+    : [];
 
   return {
     id: raw.id || `t_${Math.random().toString(36).slice(2, 8)}`,
@@ -53,6 +72,7 @@ export const normalizeTask = (raw) => {
     customDueAmount: raw.frequency === "custom" ? customAmount : null,
     customDueUnit: raw.frequency === "custom" ? customUnit : null,
     notes,
+    attachments,
     createdAt: toIso(raw.createdAt),
     lastCompletedAt: raw.lastCompletedAt ?? null,
     createdBy: raw.createdBy || null,
@@ -110,6 +130,7 @@ export const createTask = ({
           ? customDueUnit
           : null,
       notes: [],
+      attachments: [],
       createdAt: new Date().toISOString(),
       lastCompletedAt: null,
       createdBy: createdBy || null

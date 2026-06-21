@@ -535,7 +535,17 @@ export const createMachineCard = (machine, options = {}) => {
   statusBtn.addEventListener("click", (event) => {
     event.stopPropagation();
     if (options.canEditStatus === false) return;
-    if (hooks.onStatusToggle) hooks.onStatusToggle(card);
+    if (hooks.onStatusToggle) {
+      const result = hooks.onStatusToggle(card);
+      if (result && typeof result.finally === "function") {
+        statusBtn.disabled = true;
+        result.finally(() => {
+          if (statusBtn.isConnected && options.canEditStatus !== false) {
+            statusBtn.disabled = false;
+          }
+        });
+      }
+    }
     if (document.activeElement === statusBtn) {
       statusBtn.blur();
     }

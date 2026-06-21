@@ -49,6 +49,12 @@ machine-docs/{ownerUid}/{machineId}/other/{fileName}
 
 Implemented document types are `plate`, intended for machine plate photos; `manual`, intended for one PDF manual up to 25 MB; and `other`, an array of additional PDFs or images up to 25 MB each. Do not store uploaded files in the repository.
 
+Incident images selected while changing a machine to `fuera_de_servicio` are
+stored as ordinary `machines.documents.other[]` entries. Linked entries may
+include `context: "task-attachment"`, `linkedTaskId`, and
+`linkedStatusCycleId`; the corresponding task keeps attachment references and
+the history log stores a `task_attachment_added` event.
+
 Ownership transfers are accepted through Cloud Functions, not by direct client writes. The function validates that the recipient exists in `account_directory`, rewrites the machine owner fields, copies any Storage object referenced by `machines.documents.*.storagePath` from `machine-docs/{oldOwnerUid}/{machineId}/...` to `machine-docs/{newOwnerUid}/{machineId}/...`, updates document URLs/paths, updates Tag/QR ownership metadata, and leaves the previous owner as an accepted administrator.
 
 ## Account Storage Limit

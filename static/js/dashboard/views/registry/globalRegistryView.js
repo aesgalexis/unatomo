@@ -1,5 +1,8 @@
 import { t } from "/static/js/dashboard/i18n.js";
-import { formatHistoryLog } from "../../history/historyEventFormatter.js";
+import {
+  formatHistoryLog,
+  isTaskAttachmentLog
+} from "../../history/historyEventFormatter.js";
 import {
   buildGlobalRegistryEntries,
   filterGlobalRegistryEntries,
@@ -87,6 +90,29 @@ const downloadTextFile = (content, filename) => {
 const isEntryUnseen = (entry = {}, seenAt = "") => toTime(entry.time) > toTime(seenAt);
 const isLogUnseen = (log = {}, seenAt = "") => toTime(log.ts) > toTime(seenAt);
 
+const appendHistoryMessage = (container, log, options = {}) => {
+  if (isTaskAttachmentLog(log) && log.attachmentUrl) {
+    const image = String(log.contentType || "").startsWith("image/");
+    const label = t(
+      image ? "history.imageAdded" : "history.fileAdded",
+      image ? "Imagen añadida" : "Archivo añadido"
+    );
+    container.append(`${label}: `);
+    const link = document.createElement("a");
+    link.className = "global-registry-attachment-link";
+    link.href = log.attachmentUrl;
+    link.target = "_blank";
+    link.rel = "noopener";
+    link.textContent = log.attachmentName || t("tasks.image", "Imagen");
+    container.appendChild(link);
+    if (log.user) {
+      container.append(t("history.completedBy", (value) => ` - por ${value}`)(log.user));
+    }
+    return;
+  }
+  container.textContent = formatHistoryLog(log, options);
+};
+
 const appendRow = (list, entry, locale, options = {}) => {
   const isUnseen = isEntryUnseen(entry, options.seenAt);
   const row = document.createElement("article");
@@ -118,7 +144,7 @@ const appendRow = (list, entry, locale, options = {}) => {
 
   const body = document.createElement("div");
   body.className = "global-registry-message";
-  body.textContent = formatHistoryLog(entry.log);
+  appendHistoryMessage(body, entry.log);
 
   row.appendChild(meta);
   row.appendChild(body);
@@ -144,7 +170,7 @@ const appendRow = (list, entry, locale, options = {}) => {
 
         const relatedBody = document.createElement("div");
         relatedBody.className = "global-registry-message";
-        relatedBody.textContent = formatHistoryLog(relatedLog, {
+        appendHistoryMessage(relatedBody, relatedLog, {
           omitTaskTitle: relatedLog.type === "task_note_added",
         });
 
@@ -174,7 +200,7 @@ const appendRow = (list, entry, locale, options = {}) => {
 
       const noteBody = document.createElement("div");
       noteBody.className = "global-registry-message";
-      noteBody.textContent = formatHistoryLog(noteLog, { omitTaskTitle: true });
+      appendHistoryMessage(noteBody, noteLog, { omitTaskTitle: true });
 
       note.appendChild(noteMeta);
       note.appendChild(noteBody);

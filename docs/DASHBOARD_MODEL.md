@@ -148,7 +148,13 @@ History event contract:
 
 ## Status-Linked Tasks
 
-When a machine changes from `operativa` to `fuera_de_servicio`, the dashboard creates one pending one-off task with `source: "status-out-of-service"` to return the machine to operation. This behavior is account-independent and must apply to every dashboard user who can change the machine status, not only to the `superadmin`. Status-linked restore tasks are always rendered before ordinary tasks. Completing that task automatically changes the machine back to `operativa` and writes the status event to history. Changing the machine back to `operativa` manually only changes the machine status; it must not complete or remove the pending status-linked restore task, because notes or follow-up work may still need to be added. Do not duplicate this task while one pending status-linked restore task already exists.
+When a machine changes from `operativa` to `fuera_de_servicio`, the dashboard creates one pending one-off task with `source: "status-out-of-service"` to return the machine to operation. The status change opens a modal where the user can confirm the default restore task or add a custom title, description, and initial note before the task is created. This behavior is account-independent and must apply to every dashboard user who can change the machine status, not only to the `superadmin`. Status-linked restore tasks are always rendered before ordinary tasks. Completing that task automatically changes the machine back to `operativa` and writes the status event to history. Changing the machine back to `operativa` manually only changes the machine status; it must not complete or remove the pending status-linked restore task, because notes or follow-up work may still need to be added. Do not duplicate this task while one pending status-linked restore task already exists.
+
+The out-of-service modal can also attach incident images. They reuse the
+existing `documents.other[]` upload/storage flow and carry task/cycle linkage
+metadata. The task stores lightweight attachment references, and history uses
+`task_attachment_added` so individual and global registry views can render the
+file as a link inside the operational cycle.
 
 Task implementation files:
 
