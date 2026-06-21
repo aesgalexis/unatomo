@@ -344,6 +344,11 @@ body.page .topbar {
 
 body.status-incident-open {
   overflow: hidden;
+  position: fixed;
+  top: var(--status-incident-scroll-top, 0);
+  right: 0;
+  left: 0;
+  width: 100%;
 }
 
 .status-incident-overlay {
@@ -355,6 +360,8 @@ body.status-incident-open {
   justify-content: center;
   padding: 1.25rem;
   background: color-mix(in srgb, #000 52%, transparent);
+  overscroll-behavior: contain;
+  touch-action: none;
 }
 
 .status-incident-dialog {
@@ -367,6 +374,8 @@ body.status-incident-open {
   color: var(--fg);
   box-shadow: 0 20px 58px color-mix(in srgb, #000 32%, transparent);
   padding: 1.15rem;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
 }
 
 .status-incident-title {

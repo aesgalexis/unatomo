@@ -98,3 +98,9 @@
 .dashboard-section-badge[hidden] {
   display: none;
 }
+
+@media (max-width: 768px), (hover: none), (pointer: coarse) {
+  .dashboard-section-link[data-tooltip]::after {
+    display: none;
+  }
+}

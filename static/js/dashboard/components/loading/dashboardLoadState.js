@@ -8,8 +8,11 @@ export const resetDashboardLoadState = (state) => {
 };
 
 export const getDashboardLoadProgress = (state) => {
-  const total = 2;
-  const ready = (state.ownerReady ? 1 : 0) + (state.adminReady ? 1 : 0);
+  const total = 3;
+  const ready =
+    (state.stylesReady ? 1 : 0) +
+    (state.ownerReady ? 1 : 0) +
+    (state.adminReady ? 1 : 0);
   return {
     ready,
     total,

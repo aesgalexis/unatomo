@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" class="styles-loading">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -8,9 +8,60 @@
   <meta name="robots" content="index, follow" />
   <script src="/static/js/theme/theme-init.js"></script>
   <script src="/static/js/config/runtime-config.js"></script>
+  <style>
+    html.styles-loading body { overflow: hidden; }
+    html.styles-loading body > * { visibility: hidden !important; }
+    html.styles-loading body::before {
+      content: "";
+      visibility: visible;
+      position: fixed;
+      inset: 0;
+      z-index: 2147483646;
+      background: #fff;
+    }
+    html[data-theme="dark"].styles-loading body::before { background: #111; }
+    html.styles-loading body::after {
+      content: "Cargando...";
+      visibility: visible;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      z-index: 2147483647;
+      color: #222;
+      font: 500 14px/1.2 system-ui, sans-serif;
+      transform: translate(-50%, -50%);
+    }
+    html[data-theme="dark"].styles-loading body::after { color: #f5f5f5; }
+    html.styles-loading.styles-error body::after {
+      content: "No se pudieron cargar los estilos";
+    }
+  </style>
   <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="/static/css/dashboard.css">
   <link rel="stylesheet" href="/static/css/sections.css">
+  <script>
+    window.__unatomoStylesReady = (() => {
+      const links = Array.from(document.querySelectorAll('link[rel="stylesheet"]'));
+      const waitForLink = (link) => {
+        try {
+          if (link.sheet) return Promise.resolve();
+        } catch {}
+        return new Promise((resolve, reject) => {
+          link.addEventListener("load", resolve, { once: true });
+          link.addEventListener("error", reject, { once: true });
+        });
+      };
+      const timeout = window.setTimeout(() => {
+        document.documentElement.classList.add("styles-error");
+      }, 12000);
+      return Promise.all(links.map(waitForLink))
+        .then(() => document.fonts?.ready || Promise.resolve())
+        .then(() => {
+          window.clearTimeout(timeout);
+          document.documentElement.classList.remove("styles-loading", "styles-error");
+        });
+    })();
+  </script>
   <link rel="icon" href="/static/img/favicon/favicon.svg" type="image/svg+xml">
 </head>
 
