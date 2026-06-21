@@ -1,6 +1,6 @@
 import { t } from "/static/js/dashboard/i18n.js";
 
-export const TODO_PAGE_SIZE = 254;
+export const TODO_PAGE_SIZE = 64;
 export const MAX_TODO_LENGTH = 1024;
 
 const getLocale = () => (document.documentElement.lang === "en" ? "en-GB" : "es-ES");
@@ -22,6 +22,28 @@ const filterTodos = (items = [], query = "") => {
     ].join(" ").toLowerCase().includes(term)
   );
 };
+
+const downloadTextFile = (content, filename) => {
+  const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+};
+
+const buildTodoDownloadText = (items, locale) =>
+  items.map((item) => {
+    const date = formatDate(item.updatedAt || item.createdAt, locale);
+    const status = item.completed
+      ? t("tasks.completed", "Completada")
+      : t("tasks.pending", "Pendiente");
+    const text = String(item.text || "").replace(/\n/g, "\n  ");
+    return `[${date}] [${status}] ${text}`;
+  }).join("\n");
 
 export const renderTodoView = (container, options = {}) => {
   const locale = getLocale();
@@ -69,11 +91,7 @@ export const renderTodoView = (container, options = {}) => {
   header.className = "todo-header";
   const title = document.createElement("h3");
   title.textContent = t("dashboard.todoTitle", "To do");
-  const count = document.createElement("span");
-  count.className = "todo-count";
-  count.textContent = `${Math.min(visibleCount, entries.length)}/${entries.length}`;
   header.appendChild(title);
-  header.appendChild(count);
   container.appendChild(header);
 
   if (!options.ready) {
@@ -144,10 +162,39 @@ export const renderTodoView = (container, options = {}) => {
     const loadMore = document.createElement("button");
     loadMore.type = "button";
     loadMore.className = "global-registry-load-more";
-    loadMore.textContent = t("dashboard.registryLoadMore", "Cargar más");
+    loadMore.textContent = t("dashboard.todoLoadMore", "Mostrar más");
     loadMore.addEventListener("click", () => {
       if (options.onLoadMore) options.onLoadMore();
     });
     container.appendChild(loadMore);
   }
+
+  const sep = document.createElement("hr");
+  sep.className = "mc-sep todo-footer-sep";
+  container.appendChild(sep);
+
+  const footer = document.createElement("div");
+  footer.className = "mc-log-footer todo-footer";
+  const count = document.createElement("div");
+  count.className = "mc-log-header";
+  count.textContent = `${Math.min(visibleCount, entries.length)}/${entries.length}`;
+
+  const download = document.createElement("button");
+  download.type = "button";
+  download.className = "mc-log-download todo-download";
+  const downloadLabel = t(
+    "dashboard.todoDownload",
+    "Descargar registro completo de tareas"
+  );
+  download.setAttribute("aria-label", downloadLabel);
+  download.title = downloadLabel;
+  download.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 3a1 1 0 0 1 1 1v8.59l2.3-2.3a1 1 0 1 1 1.4 1.42l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 0 1 1.4-1.42l2.3 2.3V4a1 1 0 0 1 1-1Zm-7 14a1 1 0 0 1 1 1v2h12v-2a1 1 0 1 1 2 0v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1Z"/></svg>';
+  download.addEventListener("click", () => {
+    const stamp = new Date().toISOString().slice(0, 10);
+    downloadTextFile(buildTodoDownloadText(entries, locale), `todo_${stamp}.txt`);
+  });
+
+  footer.appendChild(count);
+  footer.appendChild(download);
+  container.appendChild(footer);
 };
