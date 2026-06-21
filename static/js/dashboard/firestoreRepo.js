@@ -15,6 +15,7 @@ import {
 import {
   normalizeDashboardTitle,
   normalizeIsoString,
+  normalizeMachineSortMode,
   normalizeMachineViewMode,
   normalizeTabOrder
 } from "./layout/dashboardLayoutModel.mjs";
@@ -46,6 +47,7 @@ export const upsertDashboardLayout = async (uid, layout) => {
   const hasRegistrySeenAt = Object.prototype.hasOwnProperty.call(layout || {}, "registrySeenAt");
   const hasSuggestionsSeenAt = Object.prototype.hasOwnProperty.call(layout || {}, "suggestionsSeenAt");
   const hasMachineViewMode = Object.prototype.hasOwnProperty.call(layout || {}, "machineViewMode");
+  const hasMachineSortMode = Object.prototype.hasOwnProperty.call(layout || {}, "machineSortMode");
   const dashboardTitle = normalizeDashboardTitle(layout?.dashboardTitle);
   const payload = {
     updatedAt: serverTimestamp(),
@@ -70,6 +72,9 @@ export const upsertDashboardLayout = async (uid, layout) => {
   }
   if (hasMachineViewMode) {
     payload.machineViewMode = normalizeMachineViewMode(layout?.machineViewMode);
+  }
+  if (hasMachineSortMode) {
+    payload.machineSortMode = normalizeMachineSortMode(layout?.machineSortMode);
   }
   await setDoc(
     dashboardLayoutDoc(uid),

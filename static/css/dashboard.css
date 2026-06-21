@@ -215,16 +215,33 @@ body.page .topbar {
   outline: none;
 }
 
+.dashboard-view-menu-item:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+
+.dashboard-view-menu-item:disabled:hover {
+  background: transparent;
+}
+
 .dashboard-view-menu-check {
   color: #2c974b;
   font-weight: 700;
   text-align: center;
 }
 
+.dashboard-view-menu-separator {
+  height: 1px;
+  margin: 0.25rem 0;
+  background: var(--border-subtle);
+}
 
-
-
-
+.dashboard-view-menu-label {
+  padding: 0.3rem 0.55rem 0.15rem;
+  color: color-mix(in srgb, var(--fg) 58%, transparent);
+  font-size: 0.76rem;
+  font-weight: 600;
+}
 
 :root {
   --mc-collapsed-height: 52px;
