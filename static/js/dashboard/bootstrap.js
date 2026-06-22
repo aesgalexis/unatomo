@@ -117,7 +117,7 @@ const loadDashboard = async (options = {}) => {
     : DASHBOARD_MODULE;
 
   try {
-    await import(url);
+    await import(/* @vite-ignore */ url);
     window.requestAnimationFrame(() => {
       if (!finishIfMounted()) renderState(text.failed, { action: true });
     });

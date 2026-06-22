@@ -150,6 +150,7 @@ body.page .topbar {
   width: 2.55rem;
   height: 2.55rem;
   margin-top: 0;
+  margin-left: -0.1rem;
   border: 1px solid var(--border-subtle);
   background-color: color-mix(in srgb, var(--bg) 96%, transparent);
   color: transparent;

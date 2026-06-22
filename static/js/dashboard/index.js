@@ -251,7 +251,9 @@ if (mount) {
       const rect = target.getBoundingClientRect();
       const left = align === "right"
         ? rect.right - tipEl.offsetWidth
-        : rect.left + (rect.width - tipEl.offsetWidth) / 2;
+        : align === "left"
+          ? rect.left
+          : rect.left + (rect.width - tipEl.offsetWidth) / 2;
       const top = placement === "bottom"
         ? rect.bottom + 10
         : rect.top - tipEl.offsetHeight - 10;
@@ -366,7 +368,11 @@ if (mount) {
     titleEl.setAttribute("spellcheck", "false");
     titleEl.setAttribute("role", "textbox");
     titleEl.setAttribute("aria-label", t("dashboard.titleEditAria", "Editar título del dashboard"));
-    titleEl.setAttribute("title", t("dashboard.titleEditHint", "Editar título del dashboard"));
+    titleEl.setAttribute(
+      "data-tooltip",
+      t("dashboard.titleEditHint", "Editar título del dashboard")
+    );
+    attachDashboardTooltip(titleEl, { align: "left", placement: "bottom" });
 
     let beforeEdit = "";
     const clampTitle = () => {
