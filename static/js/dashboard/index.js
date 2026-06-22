@@ -92,6 +92,7 @@ import {
 import {
   createDashboardTodo,
   deleteDashboardTodo,
+  fetchDashboardTodoCollaborators,
   fetchDashboardTodos,
   updateDashboardTodo
 } from "./views/todo/todoRepo.js";
@@ -170,6 +171,8 @@ if (mount) {
     suggestionReplyTarget: null,
     todos: [],
     todosReady: false,
+    todoCollaborators: [],
+    todoCollaboratorsReady: false,
     canSuggest: false,
     canTodo: false,
     isSuperadmin: false,
@@ -694,6 +697,21 @@ if (mount) {
       updateTodoNav();
     }
   };
+  const loadTodoCollaborators = async () => {
+    if (!state.canTodo && !state.isSuperadmin) return;
+    try {
+      const collaborators = await fetchDashboardTodoCollaborators();
+      state.todoCollaborators.splice(
+        0,
+        state.todoCollaborators.length,
+        ...collaborators
+      );
+    } catch {
+      state.todoCollaborators.splice(0, state.todoCollaborators.length);
+    } finally {
+      state.todoCollaboratorsReady = true;
+    }
+  };
   const materializeCurrentFlatOrder = () => {
     const currentSort = state.dashboardLayout?.machineSortMode || "manual";
     if (state.dashboardLayout?.machineViewMode !== "flat" || currentSort === "manual") return;
@@ -865,6 +883,8 @@ if (mount) {
     state.suggestionReplyTarget = null;
     state.todos = [];
     state.todosReady = false;
+    state.todoCollaborators = [];
+    state.todoCollaboratorsReady = false;
     state.expandedById = [];
     state.selectedTabById = {};
     state.configSubtabById = {};
@@ -1907,6 +1927,7 @@ if (mount) {
         items: state.todos,
         ready: state.todosReady,
         canTodo: state.canTodo || state.isSuperadmin,
+        collaborators: state.todoCollaborators,
         query: state.searchQuery,
         visibleCount: state.todoVisibleCount,
         onLoadMore: () => {
@@ -1950,6 +1971,7 @@ if (mount) {
           try {
             await createDashboardTodo(textValue.slice(0, MAX_TODO_LENGTH));
             if (controls.input) controls.input.value = "";
+            if (controls.resetRecipients) controls.resetRecipients();
             setDashboardInlineStatus(t("dashboard.todoSaved", "Pendiente añadido"), "ok");
             await loadTodos({ preserveScroll: true });
           } catch (error) {
@@ -3483,6 +3505,7 @@ if (mount) {
     initDashboardTitleEditor();
     loadSuggestions({ preserveScroll: false });
     loadTodos({ preserveScroll: false });
+    loadTodoCollaborators();
 
     let ownerFetchResolved = false;
     let ownerBootstrap = [];
@@ -3568,6 +3591,9 @@ if (mount) {
     if (nextView === "todo") {
       state.todoVisibleCount = TODO_PAGE_SIZE;
       loadTodos({ preserveScroll: false });
+      if (!state.todoCollaboratorsReady) {
+        loadTodoCollaborators();
+      }
     }
     renderCards({ preserveScroll: false });
   });

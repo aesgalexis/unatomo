@@ -1240,6 +1240,42 @@ const normalizeDashboardTodoPerson = (
   };
 };
 
+export const listDashboardTodoCollaborators = onCall(async (request) => {
+  const auth = request.auth;
+  if (!auth) throw new HttpsError("unauthenticated", "auth-required");
+  const access = await canUseDashboardTodo(auth);
+  if (!access.allowed) {
+    throw new HttpsError("permission-denied", "todo-disabled");
+  }
+
+  const enabledSnap = await db.collection("users")
+    .where("suggestionsCollaborator", "==", true)
+    .get();
+  const enabledUids = new Set(enabledSnap.docs.map((docSnap) => docSnap.id));
+  const people: DashboardTodoPerson[] = [];
+  let pageToken: string | undefined;
+  do {
+    const page = await admin.auth().listUsers(1000, pageToken);
+    page.users.forEach((user) => {
+      if (user.uid === auth.uid) return;
+      const isSuperadmin = isControlPanelAuth({
+        token: {email: user.email || ""},
+      });
+      if (!enabledUids.has(user.uid) && !isSuperadmin) return;
+      const person = toDashboardTodoPerson(user);
+      if (person.mention) people.push(person);
+    });
+    pageToken = page.pageToken;
+  } while (pageToken);
+
+  people.sort((a, b) => {
+    const left = (a.displayName || a.email || a.mention).toLowerCase();
+    const right = (b.displayName || b.email || b.mention).toLowerCase();
+    return left.localeCompare(right, "es");
+  });
+  return {ok: true, items: people};
+});
+
 export const listDashboardTodos = onCall(async (request) => {
   const auth = request.auth;
   if (!auth) throw new HttpsError("unauthenticated", "auth-required");
