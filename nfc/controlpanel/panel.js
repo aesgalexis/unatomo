@@ -62,19 +62,12 @@ const text = {
     ? "Accounts detected through Unatomo sign-in flows."
     : "Cuentas detectadas a trav\u00e9s de los flujos de acceso de Unatomo.",
   userCollaborator: isEn ? "Collaborator" : "Colaborador",
-  userTodoAdmin: isEn ? "Admin" : "Admin",
   userCollaboratorSaved: isEn
     ? "Collaborator access updated."
     : "Acceso de colaborador actualizado.",
   userCollaboratorError: isEn
     ? "Unable to update collaborator access."
     : "No se ha podido actualizar el acceso de colaborador.",
-  userTodoAdminSaved: isEn
-    ? "Admin access updated."
-    : "Acceso de admin actualizado.",
-  userTodoAdminError: isEn
-    ? "Unable to update admin access."
-    : "No se ha podido actualizar el acceso de admin.",
   deleteUser: isEn ? "Delete account" : "Eliminar cuenta",
   usersDeleting: isEn ? "Deleting account..." : "Eliminando cuenta...",
   usersDeleted: isEn
@@ -147,10 +140,6 @@ const deleteUserCallable = httpsCallable(functions, "deleteControlPanelUser");
 const setUserCollaboratorCallable = httpsCallable(
   functions,
   "setControlPanelUserCollaborator"
-);
-const setUserTodoAdminCallable = httpsCallable(
-  functions,
-  "setControlPanelUserTodoAdmin"
 );
 
 const createCard = (title) => {
@@ -282,31 +271,16 @@ const renderUsers = (body, items, handlers = {}) => {
     collaboratorLabel.appendChild(collaborator);
     collaboratorLabel.appendChild(collaboratorText);
 
-    const todoAdminLabel = document.createElement("label");
-    todoAdminLabel.className = "controlpanel-check";
-    const todoAdmin = document.createElement("input");
-    todoAdmin.type = "checkbox";
-    todoAdmin.checked = item.todoAdmin === true;
-    todoAdmin.addEventListener("change", () => {
-      if (handlers.onToggleTodoAdmin) {
-        handlers.onToggleTodoAdmin(item, todoAdmin.checked, todoAdmin);
-      }
-    });
-    const todoAdminText = document.createElement("span");
-    todoAdminText.textContent = text.userTodoAdmin;
-    todoAdminLabel.appendChild(todoAdmin);
-    todoAdminLabel.appendChild(todoAdminText);
-
     const remove = document.createElement("button");
     remove.type = "button";
     remove.className = "controlpanel-link-danger";
-    remove.textContent = text.deleteUser;
+    remove.setAttribute("aria-label", text.deleteUser);
+    remove.textContent = "x";
     remove.addEventListener("click", () => {
       if (handlers.onDeleteUser) handlers.onDeleteUser(item);
     });
 
     row.appendChild(collaboratorLabel);
-    row.appendChild(todoAdminLabel);
     row.appendChild(remove);
     list.appendChild(row);
   });
@@ -833,22 +807,6 @@ if (mount) {
             } catch {
               input.checked = !enabled;
               updateUsersStatus(text.userCollaboratorError, "error");
-            } finally {
-              input.disabled = false;
-            }
-          },
-          onToggleTodoAdmin: async (item, enabled, input) => {
-            const uid = (item?.uid || "").toString().trim();
-            if (!uid) return;
-            input.disabled = true;
-            updateUsersStatus("");
-            try {
-              await setUserTodoAdminCallable({ uid, enabled });
-              item.todoAdmin = enabled;
-              updateUsersStatus(text.userTodoAdminSaved, "");
-            } catch {
-              input.checked = !enabled;
-              updateUsersStatus(text.userTodoAdminError, "error");
             } finally {
               input.disabled = false;
             }

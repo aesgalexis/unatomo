@@ -1075,7 +1075,6 @@ export const listControlPanelUsers = onCall(async (request) => {
     email: string;
     displayName: string;
     suggestionsCollaborator: boolean;
-    todoAdmin: boolean;
   }>();
 
   const upsertItem = (
@@ -1084,7 +1083,6 @@ export const listControlPanelUsers = onCall(async (request) => {
       email?: unknown;
       displayName?: unknown;
       suggestionsCollaborator?: unknown;
-      todoAdmin?: unknown;
     },
   ) => {
     const uid = (raw.uid || "").toString().trim();
@@ -1101,10 +1099,6 @@ export const listControlPanelUsers = onCall(async (request) => {
         typeof raw.suggestionsCollaborator === "boolean" ?
           raw.suggestionsCollaborator :
           !!current?.suggestionsCollaborator,
-      todoAdmin:
-        typeof raw.todoAdmin === "boolean" ?
-          raw.todoAdmin :
-          !!current?.todoAdmin,
     });
   };
 
@@ -1152,28 +1146,6 @@ export const setControlPanelUserCollaborator = onCall(async (request) => {
   return {ok: true, uid, suggestionsCollaborator: enabled};
 });
 
-export const setControlPanelUserTodoAdmin = onCall(async (request) => {
-  const auth = request.auth;
-  if (!auth) throw new HttpsError("unauthenticated", "auth-required");
-  assertControlPanelAccess(auth);
-
-  const uid = (request.data?.uid || "").toString().trim();
-  if (!uid) throw new HttpsError("invalid-argument", "uid-required");
-
-  const enabled = request.data?.enabled === true;
-  await db.collection("users").doc(uid).set(
-    {
-      todoAdmin: enabled,
-      todoAdminUpdatedAt: admin.firestore.FieldValue.serverTimestamp(),
-      todoAdminUpdatedBy: auth.uid || "",
-      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-    },
-    {merge: true},
-  );
-
-  return {ok: true, uid, todoAdmin: enabled};
-});
-
 const canUseDashboardTodo = async (auth: {
   uid?: string;
   token?: {email?: string | null};
@@ -1181,7 +1153,10 @@ const canUseDashboardTodo = async (auth: {
   if (isControlPanelAuth(auth)) return {allowed: true, isSuperadmin: true};
   const userSnap = await db.collection("users").doc(auth?.uid || "").get();
   const userData = userSnap.data() || {};
-  return {allowed: userData.todoAdmin === true, isSuperadmin: false};
+  return {
+    allowed: userData.suggestionsCollaborator === true,
+    isSuperadmin: false,
+  };
 };
 
 type DashboardTodoPerson = {
@@ -1206,7 +1181,7 @@ const canUserRecordUseDashboardTodo = async (
 ) => {
   if (isControlPanelAuth({token: {email: user.email || ""}})) return true;
   const snap = await db.collection("users").doc(user.uid).get();
-  return snap.data()?.todoAdmin === true;
+  return snap.data()?.suggestionsCollaborator === true;
 };
 
 const resolveDashboardTodoMentions = async (
@@ -1356,12 +1331,18 @@ export const createDashboardTodo = onCall(async (request) => {
     .map((match) => match.slice(1).toLowerCase())
     .filter((mention, index, values) => values.indexOf(mention) === index);
   const recipients = await resolveDashboardTodoMentions(mentions, auth.uid);
+  const storedText = text
+    .replace(/@[a-z0-9][a-z0-9._-]{0,63}/gi, " ")
+    .replace(/\s+([,.;:!?])/g, "$1")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!storedText) throw new HttpsError("invalid-argument", "text-required");
   const creatorRecord = await admin.auth().getUser(auth.uid);
   const owner = toDashboardTodoPerson(creatorRecord);
   const now = admin.firestore.FieldValue.serverTimestamp();
   const ref = dashboardTodosCol().doc();
   await ref.set({
-    text,
+    text: storedText,
     ownerUid: auth.uid,
     owner,
     participantUids: [auth.uid, ...recipients.map((person) => person.uid)],

@@ -42,6 +42,9 @@ Project-owner-only UI is called `superadmin` in conversation and docs. In code i
 - Changing a machine to `fuera_de_servicio` creates a one-off restore task for all permitted dashboard users. That status-linked task is always rendered before ordinary tasks and completing it restores the machine to `operativa`.
 - The dashboard has internal views at `#/dashboard` and `#/registro`. `Registro` shows a global registry made from the histories of all machines visible to the current account.
 - The dashboard also has `#/sugerencias`. It is visible only to `superadmin` or users marked as `suggestionsCollaborator` from the control panel.
+- The same collaborator flag enables `#/todo`; To Do has no separate admin
+  role. Shared To Do items use one document, participant completion, and
+  owner-only deletion.
 - The `superadmin` control panel has a `Respaldo` / `Backup` card. It reads `static/data/nfc-backup-status.json`, which is updated by the local NFC backup scripts.
 - Global registry event text comes from `static/js/dashboard/history/historyEventFormatter.js`; new history event types should provide `summary`, `message`, or `messageKey` so the global registry can show them without view-specific code.
 - The dashboard topbar title is editable per user and stored as `dashboard_layout/{uid}.dashboardTitle` with a 32-character cap; empty value falls back to `Dashboard`.

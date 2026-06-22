@@ -16,16 +16,20 @@ const TODO_ICON = `
   </svg>
 `;
 
-const createIconLink = ({ href, label, icon, extraClass = "" }) => {
+const createIconLink = ({
+  href,
+  label,
+  icon,
+  extraClass = "",
+  iconClass = ""
+}) => {
   const link = document.createElement("a");
   link.className = `dashboard-section-link${extraClass ? ` ${extraClass}` : ""}`;
   link.href = href;
   link.setAttribute("aria-label", label);
   link.setAttribute("data-tooltip", label);
   const iconEl = document.createElement("span");
-  iconEl.className = extraClass.includes("superadmin")
-    ? "dashboard-section-icon dashboard-section-icon-todo"
-    : "dashboard-section-icon";
+  iconEl.className = `dashboard-section-icon${iconClass ? ` ${iconClass}` : ""}`;
   iconEl.innerHTML = icon;
   link.appendChild(iconEl);
   return { link, iconEl };
@@ -42,6 +46,7 @@ export const createDashboardSectionNav = ({
   active = "dashboard",
   showSuggestions = false,
   showTodo = false,
+  todoSuperadmin = false,
   extraClass = "",
   attachTooltip = null
 } = {}) => {
@@ -84,9 +89,10 @@ export const createDashboardSectionNav = ({
 
   const todo = createIconLink({
     href: todoHref,
-    label: labels.todo || "To do",
+    label: labels.todo || "To-do",
     icon: TODO_ICON,
-    extraClass: "dashboard-section-link-superadmin"
+    extraClass: todoSuperadmin ? "dashboard-section-link-superadmin" : "",
+    iconClass: "dashboard-section-icon-todo"
   });
   todo.link.hidden = !showTodo;
   const todoBadge = document.createElement("span");

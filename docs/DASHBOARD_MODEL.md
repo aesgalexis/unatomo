@@ -99,7 +99,8 @@ The main dashboard page has internal hash views:
 - `#/dashboard`: the normal machine-card and group view.
 - `#/registro`: the global registry view.
 - `#/sugerencias`: the collaborator suggestions view.
-- `#/todo`: the private To Do view for `superadmin` and users enabled with `users/{uid}.todoAdmin`.
+- `#/todo`: the To Do view for `superadmin` and users enabled as
+  collaborators with `users/{uid}.suggestionsCollaborator`.
 
 Files:
 
@@ -136,9 +137,11 @@ Suggestions scope:
 
 To Do scope:
 
-- The `To do` link uses the superadmin violet accent when visible.
+- The `To do` link uses the violet accent only for `superadmin`; collaborators
+  see the ordinary navigation color.
 - The view is separate from suggestions and uses its own callable functions and `dashboard_todos` collection.
-- `superadmin` and users marked with `users/{uid}.todoAdmin === true` see only their own To Do list.
+- `superadmin` and collaborators can use To Do. Private items remain visible
+  only to their owner; shared items are visible to their participants.
 
 History event contract:
 

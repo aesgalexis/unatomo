@@ -74,6 +74,11 @@
   height: 1.32rem;
 }
 
+.dashboard-section-icon-todo svg {
+  transform: translateY(1px) scale(1.06);
+  transform-origin: center;
+}
+
 .dashboard-section-badge {
   position: absolute;
   top: -1.38rem;
