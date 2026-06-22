@@ -31,6 +31,7 @@ const text = {
   backupOverall: isEn ? "Current backup scope" : "Alcance actual del respaldo",
   backupFirestore: isEn ? "Firestore data" : "Datos Firestore",
   backupStorage: isEn ? "Storage inventory" : "Inventario Storage",
+  backupAuth: isEn ? "Firebase Authentication" : "Firebase Authentication",
   backupCompleted: isEn ? "Completed" : "Completado",
   backupAge: isEn ? "Age" : "Antigüedad",
   backupCoverage: isEn ? "Included" : "Incluido",
@@ -42,12 +43,12 @@ const text = {
   backupCollections: isEn ? "Collections" : "Colecciones",
   backupDocuments: isEn ? "Documents" : "Documentos",
   backupFiles: isEn ? "Files" : "Archivos",
+  backupUsers: isEn ? "Users" : "Usuarios",
   backupSize: isEn ? "Size" : "Tama\u00f1o",
   backupProject: isEn ? "Project" : "Proyecto",
   backupBucket: isEn ? "Bucket" : "Bucket",
   backupCause: isEn ? "Cause" : "Causa",
   backupScopeNames: {
-    "firebase-auth": isEn ? "Firebase Authentication" : "Firebase Authentication",
     "legacy-tenant-machines": isEn ? "legacy tenant machines" : "máquinas legacy",
     "restore-tools": isEn ? "restore tools" : "herramientas de restauración",
     "scheduled-execution": isEn ? "scheduled execution" : "ejecución programada",
@@ -391,11 +392,14 @@ const renderBackupItem = (item, label, type) => {
     if (type === "firestore") {
       appendBackupMeta(card, text.backupCollections, item.collectionCount);
       appendBackupMeta(card, text.backupDocuments, item.documentCount);
-    } else {
+    } else if (type === "storage") {
       appendBackupMeta(card, text.backupBucket, item.bucket);
       appendBackupMeta(card, text.backupFiles, item.fileCount);
       appendBackupMeta(card, text.backupSize, formatBytes(item.totalBytes));
       appendBackupMeta(card, text.backupFolder, item.downloadDir);
+    } else if (type === "auth") {
+      appendBackupMeta(card, text.backupUsers, item.userCount);
+      appendBackupMeta(card, text.backupSize, formatBytes(item.size));
     }
   } else if (status === "error") {
     appendBackupMeta(card, text.backupAttempted, formatMaybeDate(item.attemptedAt));
@@ -433,10 +437,11 @@ const renderOverallBackup = (item = {}) => {
     ? item.storagePrefixes.length
     : 0;
   if (collectionCount || prefixCount) {
+    const authCoverage = item.firebaseAuth ? " · Authentication" : "";
     appendBackupMeta(
       card,
       text.backupCoverage,
-      `${collectionCount} Firestore · ${prefixCount} Storage`,
+      `${collectionCount} Firestore · ${prefixCount} Storage${authCoverage}`,
     );
   }
   const pending = (item.pendingScopes || [])
@@ -462,6 +467,9 @@ const renderBackupStatus = (body, status) => {
   );
   list.appendChild(
     renderBackupItem(status?.storage || {}, text.backupStorage, "storage"),
+  );
+  list.appendChild(
+    renderBackupItem(status?.auth || {}, text.backupAuth, "auth"),
   );
   body.appendChild(list);
 };
