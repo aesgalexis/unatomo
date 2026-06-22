@@ -87,6 +87,12 @@ Backend callables live in `firebase/functions/src/index.ts`. Common frontend wra
   participants may update completion state; deletion remains owner-only.
 - `listDashboardTodoCollaborators`: returns enabled collaborators for the To Do
   mention autocomplete; it is available only to To Do users.
+- `getControlPanelSystemStatus`: superadmin-only, read-only production overview.
+  It reports service availability and product totals, then checks machine
+  owners, Tag assignments, `machine_access`, administrator links, pending
+  invitations, and pending transfers for broken Firestore relationships. It
+  returns only counts and bounded samples. Physical Storage object existence is
+  intentionally not checked yet.
 
 ## Tag ID And QR Rules
 
