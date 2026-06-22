@@ -97,6 +97,9 @@ export const renderTodoView = (container, options = {}) => {
     Number(options.visibleCount || TODO_PAGE_SIZE)
   );
   const canTodo = options.canTodo === true;
+  const collaborators = Array.isArray(options.collaborators)
+    ? options.collaborators
+    : [];
 
   container.innerHTML = "";
   container.className = "todo-view";
@@ -104,28 +107,184 @@ export const renderTodoView = (container, options = {}) => {
 
   const form = document.createElement("form");
   form.className = "todo-form";
+  const composer = document.createElement("div");
+  composer.className = "todo-composer";
+  const chips = document.createElement("div");
+  chips.className = "todo-recipient-chips";
+  chips.hidden = true;
   const input = document.createElement("textarea");
   input.className = "todo-input";
   input.maxLength = MAX_TODO_LENGTH;
   input.rows = 2;
   input.placeholder = t("dashboard.todoPlaceholder", "Añadir pendiente...");
   input.disabled = !canTodo;
+  const suggestions = document.createElement("div");
+  suggestions.className = "todo-mention-suggestions";
+  suggestions.setAttribute("role", "listbox");
+  suggestions.hidden = true;
+  let selectedRecipients = [];
+  let visibleSuggestions = [];
+  let activeSuggestionIndex = 0;
+
+  const closeSuggestions = () => {
+    suggestions.hidden = true;
+    suggestions.innerHTML = "";
+    visibleSuggestions = [];
+    activeSuggestionIndex = 0;
+  };
+
+  const renderChips = () => {
+    chips.innerHTML = "";
+    chips.hidden = selectedRecipients.length === 0;
+    selectedRecipients.forEach((person) => {
+      const chip = document.createElement("span");
+      chip.className = "todo-recipient-chip";
+      const label = document.createElement("span");
+      label.textContent = `@${person.mention}`;
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.className = "todo-recipient-remove";
+      remove.setAttribute(
+        "aria-label",
+        t("dashboard.todoRemoveRecipient", "Quitar colaborador")
+      );
+      remove.textContent = "x";
+      remove.addEventListener("click", () => {
+        selectedRecipients = selectedRecipients.filter(
+          (item) => item.uid !== person.uid
+        );
+        renderChips();
+        input.focus();
+      });
+      chip.appendChild(label);
+      chip.appendChild(remove);
+      chips.appendChild(chip);
+    });
+  };
+
+  const getMentionToken = () => {
+    const caret = input.selectionStart ?? input.value.length;
+    const before = input.value.slice(0, caret);
+    const start = before.lastIndexOf("@");
+    if (start < 0) return null;
+    const previous = start > 0 ? before[start - 1] : "";
+    if (previous && /[a-z0-9._-]/i.test(previous)) return null;
+    const query = before.slice(start + 1);
+    if (!query || !/^[a-z0-9._-]+$/i.test(query)) return null;
+    return { start, caret, query: query.toLowerCase() };
+  };
+
+  const selectRecipient = (person, token = getMentionToken()) => {
+    if (!person || !token) return;
+    if (!selectedRecipients.some((item) => item.uid === person.uid)) {
+      selectedRecipients.push(person);
+      renderChips();
+    }
+    input.value =
+      input.value.slice(0, token.start) + input.value.slice(token.caret);
+    input.setSelectionRange(token.start, token.start);
+    closeSuggestions();
+    input.focus();
+  };
+
+  const renderSuggestions = () => {
+    const token = getMentionToken();
+    if (!token) {
+      closeSuggestions();
+      return;
+    }
+    const selectedUids = new Set(selectedRecipients.map((person) => person.uid));
+    visibleSuggestions = collaborators
+      .filter((person) => !selectedUids.has(person.uid))
+      .filter((person) => [
+        person.mention,
+        person.displayName,
+        person.email
+      ].some((value) => (value || "").toLowerCase().includes(token.query)))
+      .slice(0, 6);
+    suggestions.innerHTML = "";
+    suggestions.hidden = visibleSuggestions.length === 0;
+    activeSuggestionIndex = 0;
+    visibleSuggestions.forEach((person, index) => {
+      const option = document.createElement("button");
+      option.type = "button";
+      option.className = "todo-mention-option";
+      option.classList.toggle("is-active", index === activeSuggestionIndex);
+      option.setAttribute("role", "option");
+      const mention = document.createElement("strong");
+      mention.textContent = `@${person.mention}`;
+      const name = document.createElement("span");
+      name.textContent = person.displayName || person.email || "";
+      option.appendChild(mention);
+      option.appendChild(name);
+      option.addEventListener("mousedown", (event) => event.preventDefault());
+      option.addEventListener("click", () => selectRecipient(person, token));
+      suggestions.appendChild(option);
+    });
+  };
+
+  const refreshActiveSuggestion = () => {
+    suggestions.querySelectorAll(".todo-mention-option").forEach(
+      (option, index) => {
+        option.classList.toggle("is-active", index === activeSuggestionIndex);
+      }
+    );
+  };
+  input.addEventListener("input", renderSuggestions);
   input.addEventListener("keydown", (event) => {
+    if (!suggestions.hidden && visibleSuggestions.length) {
+      if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+        event.preventDefault();
+        const direction = event.key === "ArrowDown" ? 1 : -1;
+        activeSuggestionIndex = (
+          activeSuggestionIndex + direction + visibleSuggestions.length
+        ) % visibleSuggestions.length;
+        refreshActiveSuggestion();
+        return;
+      }
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeSuggestions();
+        return;
+      }
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        selectRecipient(visibleSuggestions[activeSuggestionIndex]);
+        return;
+      }
+    }
     if (event.key !== "Enter" || event.shiftKey) return;
     event.preventDefault();
     form.requestSubmit();
+  });
+  input.addEventListener("blur", () => {
+    window.setTimeout(closeSuggestions, 120);
   });
   const submit = document.createElement("button");
   submit.type = "submit";
   submit.className = "btn-save todo-submit";
   submit.textContent = t("dashboard.todoAdd", "Añadir");
   submit.disabled = !canTodo;
-  form.appendChild(input);
+  composer.appendChild(chips);
+  composer.appendChild(input);
+  composer.appendChild(suggestions);
+  form.appendChild(composer);
   form.appendChild(submit);
   form.addEventListener("submit", (event) => {
     event.preventDefault();
     if (options.onSubmit) {
-      options.onSubmit(input.value || "", { input, submit });
+      const mentions = selectedRecipients
+        .map((person) => `@${person.mention}`)
+        .join(" ");
+      const value = [mentions, input.value.trim()].filter(Boolean).join(" ");
+      options.onSubmit(value, {
+        input,
+        submit,
+        resetRecipients: () => {
+          selectedRecipients = [];
+          renderChips();
+        }
+      });
     }
   });
   container.appendChild(form);

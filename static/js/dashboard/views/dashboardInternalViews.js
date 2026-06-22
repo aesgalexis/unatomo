@@ -36,6 +36,7 @@ export const renderTodoDashboardView = (container, options = {}) => {
     items: options.items || [],
     ready: !!options.ready,
     canTodo: !!options.canTodo,
+    collaborators: options.collaborators || [],
     query: options.query || "",
     visibleCount: options.visibleCount,
     onLoadMore: options.onLoadMore,

@@ -85,6 +85,8 @@ Backend callables live in `firebase/functions/src/index.ts`. Common frontend wra
 - `listDashboardTodos`, `createDashboardTodo`, `updateDashboardTodo`,
   `deleteDashboardTodo`: manage private and shared To Do items. Shared
   participants may update completion state; deletion remains owner-only.
+- `listDashboardTodoCollaborators`: returns enabled collaborators for the To Do
+  mention autocomplete; it is available only to To Do users.
 
 ## Tag ID And QR Rules
 

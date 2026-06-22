@@ -2,6 +2,10 @@ import { functions } from "/static/js/firebase/firebaseApp.js";
 import { httpsCallable } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-functions.js";
 
 const listTodosCallable = httpsCallable(functions, "listDashboardTodos");
+const listCollaboratorsCallable = httpsCallable(
+  functions,
+  "listDashboardTodoCollaborators"
+);
 const createTodoCallable = httpsCallable(functions, "createDashboardTodo");
 const updateTodoCallable = httpsCallable(functions, "updateDashboardTodo");
 const deleteTodoCallable = httpsCallable(functions, "deleteDashboardTodo");
@@ -38,6 +42,14 @@ export const fetchDashboardTodos = async (limit = 254) => {
       ? data.items.map(normalizeTodo).filter((item) => item.id)
       : []
   };
+};
+
+export const fetchDashboardTodoCollaborators = async () => {
+  const response = await listCollaboratorsCallable();
+  const data = response?.data || {};
+  return Array.isArray(data.items)
+    ? data.items.map(normalizeTodoPerson).filter((person) => person.uid)
+    : [];
 };
 
 export const createDashboardTodo = async (text) => {
