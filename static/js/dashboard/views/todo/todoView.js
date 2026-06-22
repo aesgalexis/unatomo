@@ -17,6 +17,11 @@ const filterTodos = (items = [], query = "") => {
   return items.filter((item) =>
     [
       item.text,
+      ...(item.sharedWith || []).flatMap((person) => [
+        person.displayName,
+        person.email,
+        person.mention
+      ]),
       formatDate(item.createdAt, getLocale()),
       item.completed ? "completed completada hecha done" : "pending pendiente"
     ].join(" ").toLowerCase().includes(term)
@@ -35,7 +40,7 @@ const downloadTextFile = (content, filename) => {
   URL.revokeObjectURL(url);
 };
 
-const attachDownloadTooltip = (target) => {
+const attachTodoTooltip = (target, extraClass = "") => {
   if (
     window.matchMedia &&
     !window.matchMedia("(hover: hover) and (pointer: fine)").matches
@@ -52,7 +57,7 @@ const attachDownloadTooltip = (target) => {
     if (!label) return;
     document.querySelectorAll(".mc-tooltip").forEach((node) => node.remove());
     tipEl = document.createElement("div");
-    tipEl.className = "mc-tooltip todo-download-tooltip";
+    tipEl.className = `mc-tooltip${extraClass ? ` ${extraClass}` : ""}`;
     tipEl.textContent = label;
     document.body.appendChild(tipEl);
     const rect = target.getBoundingClientRect();
@@ -74,7 +79,13 @@ const buildTodoDownloadText = (items, locale) =>
       ? t("tasks.completed", "Completada")
       : t("tasks.pending", "Pendiente");
     const text = String(item.text || "").replace(/\n/g, "\n  ");
-    return `[${date}] [${status}] ${text}`;
+    const people = (item.sharedWith || [])
+      .map((person) => person.displayName || person.email || person.mention)
+      .filter(Boolean);
+    const shared = people.length
+      ? ` [${t("dashboard.todoSharedWith", (names) => `Compartida con ${names}`)(people.join(", "))}]`
+      : "";
+    return `[${date}] [${status}]${shared} ${text}`;
   }).join("\n");
 
 export const renderTodoView = (container, options = {}) => {
@@ -171,21 +182,49 @@ export const renderTodoView = (container, options = {}) => {
     body.appendChild(text);
     if (meta.textContent) body.appendChild(meta);
 
-    const remove = document.createElement("button");
-    remove.type = "button";
-    remove.className = "todo-delete";
-    remove.setAttribute("aria-label", t("dashboard.todoDelete", "Eliminar"));
-    remove.title = t("dashboard.todoDelete", "Eliminar");
-    remove.textContent = "x";
-    remove.addEventListener("click", (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      if (options.onDelete) options.onDelete(item.id, remove);
-    });
+    const actions = document.createElement("div");
+    actions.className = "todo-actions";
+    if (item.isShared && item.sharedWith?.length) {
+      const people = item.sharedWith
+        .map((person) => person.displayName || person.email || person.mention)
+        .filter(Boolean);
+      const tooltip = t(
+        "dashboard.todoSharedWith",
+        (names) => `Compartida con ${names}`
+      )(people.join(", "));
+      const shared = document.createElement("button");
+      shared.type = "button";
+      shared.className = "todo-shared";
+      shared.setAttribute("aria-label", tooltip);
+      shared.setAttribute("data-tooltip", tooltip);
+      shared.innerHTML =
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+        'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" ' +
+        'aria-hidden="true"><circle cx="18" cy="5" r="3"/>' +
+        '<circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>' +
+        '<path d="m8.59 13.51 6.83 3.98M15.41 6.51 8.59 10.49"/></svg>';
+      attachTodoTooltip(shared, "todo-shared-tooltip");
+      actions.appendChild(shared);
+    }
+
+    if (item.canDelete) {
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.className = "todo-delete";
+      remove.setAttribute("aria-label", t("dashboard.todoDelete", "Eliminar"));
+      remove.title = t("dashboard.todoDelete", "Eliminar");
+      remove.textContent = "x";
+      remove.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (options.onDelete) options.onDelete(item.id, remove);
+      });
+      actions.appendChild(remove);
+    }
 
     row.appendChild(check);
     row.appendChild(body);
-    row.appendChild(remove);
+    row.appendChild(actions);
     list.appendChild(row);
   });
   container.appendChild(list);
@@ -220,7 +259,7 @@ export const renderTodoView = (container, options = {}) => {
   );
   download.setAttribute("aria-label", downloadLabel);
   download.setAttribute("data-tooltip", downloadLabel);
-  attachDownloadTooltip(download);
+  attachTodoTooltip(download, "todo-download-tooltip");
   download.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 3a1 1 0 0 1 1 1v8.59l2.3-2.3a1 1 0 1 1 1.4 1.42l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 0 1 1.4-1.42l2.3 2.3V4a1 1 0 0 1 1-1Zm-7 14a1 1 0 0 1 1 1v2h12v-2a1 1 0 1 1 2 0v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1Z"/></svg>';
   download.addEventListener("click", () => {
     const stamp = new Date().toISOString().slice(0, 10);

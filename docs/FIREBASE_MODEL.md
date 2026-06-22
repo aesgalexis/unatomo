@@ -34,7 +34,11 @@ Read this before changing data flows, callable functions, machine ownership, adm
 - `machine_transfer_invites`: pending/accepted/rejected machine ownership transfer requests.
 - `dashboard_layout/{uid}`: per-user dashboard grouping/layout preferences. Groups may include `parentGroupId` for one-level subgroups; `dashboardTitle` stores the user's editable dashboard topbar title; `registrySeenAt` stores the last time the user left the global registry view after seeing current activity; `machineViewMode` and `machineSortMode` store dashboard display preferences.
 - `dashboard_suggestions`: collaborator suggestions submitted from `#/sugerencias`. Normal collaborators see their own suggestions; `superadmin` sees all through callable functions.
-- `dashboard_todos`: private dashboard To Do items. Each enabled user sees only their own items through callable functions.
+- `dashboard_todos`: dashboard To Do items managed through callable functions.
+  Private items belong only to `ownerUid`. Shared items keep one canonical
+  document with `participantUids`, `owner`, and `sharedWith`: every participant
+  may complete or reopen it, while only `ownerUid` may delete it. Mentions
+  currently resolve from the local part of an enabled user's email address.
 - `users/{uid}.suggestionsCollaborator`: superadmin-controlled boolean that makes the `Sugerencias` view/link visible for that user and allows submitting suggestions.
 - `users/{uid}.todoAdmin`: superadmin-controlled boolean that makes the `To do` view/link visible for that user and allows managing their own To Do list.
 - Account directory/registry collections may exist for account lookup and admin display names; inspect the repo before changing them.
@@ -79,7 +83,9 @@ Backend callables live in `firebase/functions/src/index.ts`. Common frontend wra
 - `listDashboardSuggestions`: lists own suggestions for collaborators and all suggestions for `superadmin`.
 - `markDashboardSuggestionsSeen`: stores the superadmin suggestions seen timestamp.
 - `setControlPanelUserTodoAdmin`: superadmin-only toggle for To Do access.
-- `listDashboardTodos`, `createDashboardTodo`, `updateDashboardTodo`, `deleteDashboardTodo`: manage each enabled user's own To Do list.
+- `listDashboardTodos`, `createDashboardTodo`, `updateDashboardTodo`,
+  `deleteDashboardTodo`: manage private and shared To Do items. Shared
+  participants may update completion state; deletion remains owner-only.
 
 ## Tag ID And QR Rules
 

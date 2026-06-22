@@ -968,6 +968,38 @@ body.status-incident-open {
   color: color-mix(in srgb, var(--fg) 54%, transparent);
 }
 
+.todo-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.2rem;
+}
+
+.todo-shared {
+  width: 1.6rem;
+  height: 1.6rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: color-mix(in srgb, var(--fg) 54%, transparent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+}
+
+.todo-shared svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.todo-shared-tooltip {
+  width: max-content;
+  max-width: 15rem;
+  white-space: normal;
+  text-align: center;
+}
+
 .todo-delete {
   border: 0;
   background: transparent;
