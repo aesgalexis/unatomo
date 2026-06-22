@@ -39,8 +39,8 @@ Read this before changing data flows, callable functions, machine ownership, adm
   document with `participantUids`, `owner`, and `sharedWith`: every participant
   may complete or reopen it, while only `ownerUid` may delete it. Mentions
   currently resolve from the local part of an enabled user's email address.
-- `users/{uid}.suggestionsCollaborator`: superadmin-controlled boolean that makes the `Sugerencias` view/link visible for that user and allows submitting suggestions.
-- `users/{uid}.todoAdmin`: superadmin-controlled boolean that makes the `To do` view/link visible for that user and allows managing their own To Do list.
+- `users/{uid}.suggestionsCollaborator`: superadmin-controlled boolean that
+  enables both the `Sugerencias` and `To do` views for that user.
 - Account directory/registry collections may exist for account lookup and admin display names; inspect the repo before changing them.
 
 Machine documents are stored as metadata on `machines.documents`. The actual files live in Firebase Storage under:
@@ -82,7 +82,6 @@ Backend callables live in `firebase/functions/src/index.ts`. Common frontend wra
 - `createDashboardSuggestion`: creates a suggestion for `superadmin` or an enabled collaborator.
 - `listDashboardSuggestions`: lists own suggestions for collaborators and all suggestions for `superadmin`.
 - `markDashboardSuggestionsSeen`: stores the superadmin suggestions seen timestamp.
-- `setControlPanelUserTodoAdmin`: superadmin-only toggle for To Do access.
 - `listDashboardTodos`, `createDashboardTodo`, `updateDashboardTodo`,
   `deleteDashboardTodo`: manage private and shared To Do items. Shared
   participants may update completion state; deletion remains owner-only.

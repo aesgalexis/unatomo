@@ -497,7 +497,7 @@ if (mount) {
       registry: t("dashboard.navRegistry", "Registro"),
       qrPrint: t("dashboard.navQrPrint", "Impresión QR"),
       suggestions: t("dashboard.navSuggestions", "Sugerencias"),
-      todo: t("dashboard.navTodo", "To do")
+      todo: t("dashboard.navTodo", "To-do")
     },
     active: "dashboard",
     attachTooltip: attachDashboardTooltip
@@ -605,6 +605,10 @@ if (mount) {
   const updateTodoNav = () => {
     const visible = state.canTodo || state.isSuperadmin;
     todoLink.hidden = !visible;
+    todoLink.classList.toggle(
+      "dashboard-section-link-superadmin",
+      state.isSuperadmin
+    );
     const count = visible
       ? (state.todos || []).filter((item) => item && item.completed !== true).length
       : 0;
@@ -1918,21 +1922,23 @@ if (mount) {
           }
         },
         onDelete: async (todoId, button) => {
-          if (button) {
-            button.disabled = true;
-            button.textContent = t("dashboard.todoDeleting", "Eliminando...");
-          }
+          if (button) button.disabled = true;
+          setDashboardInlineStatus(t("dashboard.todoDeleting", "Eliminando..."));
           try {
             await deleteDashboardTodo(todoId);
             state.todos = (state.todos || []).filter((item) => item.id !== todoId);
+            setDashboardInlineStatus(
+              t("dashboard.todoDeleted", "Pendiente eliminado"),
+              "ok"
+            );
             renderCards({ preserveScroll: true });
             await loadTodos({ preserveScroll: true });
           } catch {
-            if (button) {
-              button.disabled = false;
-              button.textContent = t("dashboard.todoDelete", "Eliminar");
-            }
-            notifyTopbar(t("dashboard.saveError", "Error al guardar"));
+            if (button) button.disabled = false;
+            setDashboardInlineStatus(
+              t("dashboard.todoDeleteError", "No se pudo eliminar"),
+              "error"
+            );
           }
         },
         onSubmit: async (rawText, controls = {}) => {
@@ -1961,7 +1967,7 @@ if (mount) {
                 : reason.includes("todo-recipient-disabled")
                   ? t(
                       "dashboard.todoRecipientDisabled",
-                      "Ese usuario no tiene acceso a To Do"
+                      "Ese usuario no es colaborador"
                     )
                   : t("dashboard.todoError", "No se pudo guardar");
             setDashboardInlineStatus(message, "error");
@@ -3587,7 +3593,7 @@ if (mount) {
         return;
       }
       state.canSuggest = registration.profile?.suggestionsCollaborator === true;
-      state.canTodo = registration.profile?.todoAdmin === true;
+      state.canTodo = registration.profile?.suggestionsCollaborator === true;
       state.isSuperadmin = await isControlPanelUser(user);
     } catch {
       window.location.href = `${appBasePrefix || ""}/?setup=1`;

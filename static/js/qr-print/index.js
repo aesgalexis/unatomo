@@ -47,7 +47,7 @@ const text = {
   navRegistry: isEn ? "Registry" : "Registro",
   navQrPrint: isEn ? "QR print" : "Impresi\u00f3n QR",
   navSuggestions: isEn ? "Suggestions" : "Sugerencias",
-  navTodo: "To do",
+  navTodo: "To-do",
   count: (visible, total) => `${visible}/${total}`,
   login: localizeEsPath("/es/auth/login.html", lang),
   home: localizeEsPath("/es/index.html", lang),
@@ -79,6 +79,7 @@ let printBackNames = false;
 let loadingProgressTimer = null;
 let showSuggestionsNav = false;
 let showTodoNav = false;
+let todoNavSuperadmin = false;
 let registryBadgeCount = 0;
 let suggestionsBadgeCount = 0;
 let todoBadgeCount = 0;
@@ -157,6 +158,7 @@ const createSectionNav = () => {
     active: "qrPrint",
     showSuggestions: showSuggestionsNav,
     showTodo: showTodoNav,
+    todoSuperadmin: todoNavSuperadmin,
     extraClass: "qr-print-section-nav"
   });
   refs.registryBadge.hidden = registryBadgeCount <= 0;
@@ -181,7 +183,7 @@ const canShowSuggestionsNav = async (user, registration) => {
 };
 
 const canShowTodoNav = async (user, registration) => {
-  if (registration?.profile?.todoAdmin === true) return true;
+  if (registration?.profile?.suggestionsCollaborator === true) return true;
   try {
     return await isControlPanelUser(user);
   } catch {
@@ -677,6 +679,11 @@ if (mount) {
       if (!registration.allowed) {
         window.location.href = text.home;
         return;
+      }
+      try {
+        todoNavSuperadmin = await isControlPanelUser(user);
+      } catch {
+        todoNavSuperadmin = false;
       }
       [showSuggestionsNav, showTodoNav] = await Promise.all([
         canShowSuggestionsNav(user, registration),
