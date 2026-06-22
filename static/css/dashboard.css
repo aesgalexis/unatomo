@@ -1266,7 +1266,7 @@ body.status-incident-open {
   overflow: hidden;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 10c0 6-9 12-9 12S3 16 3 10a9 9 0 1 1 18 0z'/%3E%3Ccircle cx='12' cy='10' r='3'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: center;
+  background-position: 7px center;
   background-size: 16px 16px;
   transition: width 180ms ease, padding 180ms ease, color 120ms ease;
 }
@@ -1283,7 +1283,7 @@ body.status-incident-open {
   padding: 0.2rem 0.4rem 0.2rem 1.7rem;
   color: var(--fg);
   text-indent: 0;
-  background-position: 0.5rem center;
+  background-position: 7px center;
 }
 
 .mc-location-accept,
@@ -3264,6 +3264,76 @@ body.status-incident-open {
     gap: 0.15rem;
   }
 
+  .mc-header {
+    min-width: 0;
+    flex-wrap: nowrap;
+    gap: 0.5rem;
+  }
+
+  .mc-title {
+    flex: 0 1 auto;
+    min-width: 2.5rem;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mc-title-input {
+    min-width: 0;
+    max-width: min(35vw, 10rem);
+  }
+
+  .mc-location {
+    flex: 0 0 auto;
+    min-width: 32px;
+    max-width: min(44vw, 12rem);
+    overflow: hidden;
+  }
+
+  .mc-location-label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mc-location:hover .mc-location-select,
+  .mc-location:focus-within .mc-location-select {
+    width: auto;
+    min-width: 32px;
+    max-width: min(44vw, 12rem);
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .mc-icon-wrap {
+    flex: 0 1000 auto;
+    min-width: 0;
+    max-width: max-content;
+    box-sizing: border-box;
+    overflow: hidden;
+    justify-content: flex-start;
+    padding-right: 0.65rem;
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 0.65rem), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 0.65rem), transparent);
+  }
+
+  .mc-icon-wrap > * {
+    flex: 0 0 auto;
+  }
+
+  .mc-hover-plus {
+    display: none;
+  }
+
+  .mc-right {
+    flex: 0 0 auto;
+    min-width: max-content;
+    margin-left: auto;
+    gap: 0.35rem;
+  }
+
   .machine-card[data-expanded="true"] .mc-status {
     width: 28px;
     min-width: 28px;
@@ -3301,8 +3371,7 @@ body.status-incident-open {
 
   .machine-card[data-expanded="false"] .mc-title {
     line-height: 1.12;
-    max-height: 2.24em;
-    overflow: hidden;
+    max-height: 1.12em;
   }
 
   #machineList[data-has-ungrouped="true"] > .machine-group:not(.machine-subgroup) > .machine-group-body > .machine-card-wrap,
