@@ -45,7 +45,7 @@ Project-owner-only UI is called `superadmin` in conversation and docs. In code i
 - The same collaborator flag enables `#/todo`; To Do has no separate admin
   role. Shared To Do items use one document, participant completion, and
   owner-only deletion.
-- The `superadmin` control panel has a `Respaldo` / `Backup` card. It reads `static/data/nfc-backup-status.json`, which is updated by the local NFC backup scripts.
+- The `superadmin` control panel has a `Respaldo` / `Backup` card. It reads `static/data/nfc-backup-status.json`, which is updated by the local NFC backup scripts. Prefer `npm.cmd run backup:nfc:all`; the panel shows its aggregate status, age, included scope, and explicitly pending recovery scopes above the Firestore and Storage details.
 - Global registry event text comes from `static/js/dashboard/history/historyEventFormatter.js`; new history event types should provide `summary`, `message`, or `messageKey` so the global registry can show them without view-specific code.
 - The dashboard topbar title is editable per user and stored as `dashboard_layout/{uid}.dashboardTitle` with a 32-character cap; empty value falls back to `Dashboard`.
 - Dashboard initialization is intentionally guarded against duplicate auth emissions. Loading failures should not be presented as an empty account; show a load-error state until Firebase data arrives or the user reloads.

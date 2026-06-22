@@ -10,20 +10,7 @@ import {
   toProjectRelativePath,
   writeBackupStatusPatch,
 } from "./firebase-admin-local.mjs";
-
-const DEFAULT_COLLECTIONS = [
-  "machines",
-  "dashboard_layout",
-  "machine_access",
-  "tags",
-  "admin_machine_links",
-  "admin_machine_invites",
-  "machine_transfer_invites",
-  "users",
-  "account_directory",
-  "dashboard_suggestions",
-  "registration_codes",
-];
+import { NFC_FIRESTORE_COLLECTIONS } from "./nfc-backup-config.mjs";
 
 const fetchJson = async (url, accessToken) => {
   const response = await fetch(url, {
@@ -66,7 +53,7 @@ const backupFirestore = async () => {
     throw new Error("Firebase project id not found in env or .firebaserc");
   }
   const accessToken = await getFirebaseCliAccessToken();
-  const collections = parseCsvArg("collections", DEFAULT_COLLECTIONS);
+  const collections = parseCsvArg("collections", NFC_FIRESTORE_COLLECTIONS);
   const startedAt = new Date().toISOString();
   const output = {
     kind: "unatomo-nfc-firestore-backup",
