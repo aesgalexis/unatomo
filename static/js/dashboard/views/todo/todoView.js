@@ -11,6 +11,47 @@ const formatDate = (value, locale) => {
   return date.toLocaleString(locale);
 };
 
+const getTextareaCaretPosition = (textarea) => {
+  const style = window.getComputedStyle(textarea);
+  const mirror = document.createElement("div");
+  mirror.style.position = "fixed";
+  mirror.style.left = "-9999px";
+  mirror.style.top = "0";
+  mirror.style.visibility = "hidden";
+  mirror.style.boxSizing = "border-box";
+  mirror.style.width = `${textarea.clientWidth}px`;
+  mirror.style.whiteSpace = "pre-wrap";
+  mirror.style.overflowWrap = "break-word";
+  [
+    "fontFamily",
+    "fontSize",
+    "fontStyle",
+    "fontWeight",
+    "letterSpacing",
+    "lineHeight",
+    "paddingTop",
+    "paddingRight",
+    "paddingBottom",
+    "paddingLeft",
+    "textAlign",
+    "textTransform"
+  ].forEach((property) => {
+    mirror.style[property] = style[property];
+  });
+  const caret = textarea.selectionStart ?? textarea.value.length;
+  mirror.textContent = textarea.value.slice(0, caret);
+  const marker = document.createElement("span");
+  marker.textContent = "\u200b";
+  mirror.appendChild(marker);
+  document.body.appendChild(mirror);
+  const position = {
+    left: marker.offsetLeft - textarea.scrollLeft,
+    top: marker.offsetTop - textarea.scrollTop
+  };
+  mirror.remove();
+  return position;
+};
+
 const filterTodos = (items = [], query = "") => {
   const term = (query || "").toString().trim().toLowerCase();
   if (!term) return items;
@@ -194,14 +235,12 @@ export const renderTodoView = (container, options = {}) => {
       return;
     }
     const selectedUids = new Set(selectedRecipients.map((person) => person.uid));
-    visibleSuggestions = collaborators
+    const matches = collaborators
       .filter((person) => !selectedUids.has(person.uid))
-      .filter((person) => [
-        person.mention,
-        person.displayName,
-        person.email
-      ].some((value) => (value || "").toLowerCase().includes(token.query)))
-      .slice(0, 6);
+      .filter((person) => (person.mention || "")
+        .toLowerCase()
+        .startsWith(token.query));
+    visibleSuggestions = matches.length === 1 ? matches : [];
     suggestions.innerHTML = "";
     suggestions.hidden = visibleSuggestions.length === 0;
     activeSuggestionIndex = 0;
@@ -212,15 +251,29 @@ export const renderTodoView = (container, options = {}) => {
       option.classList.toggle("is-active", index === activeSuggestionIndex);
       option.setAttribute("role", "option");
       const mention = document.createElement("strong");
-      mention.textContent = `@${person.mention}`;
+      mention.textContent = person.mention.slice(token.query.length);
       const name = document.createElement("span");
       name.textContent = person.displayName || person.email || "";
+      option.setAttribute(
+        "aria-label",
+        `@${person.mention} ${name.textContent}`.trim()
+      );
       option.appendChild(mention);
       option.appendChild(name);
       option.addEventListener("mousedown", (event) => event.preventDefault());
       option.addEventListener("click", () => selectRecipient(person, token));
       suggestions.appendChild(option);
     });
+    if (!suggestions.hidden) {
+      const caret = getTextareaCaretPosition(input);
+      const preferredLeft = input.offsetLeft + caret.left + 2;
+      const maxLeft = Math.max(
+        8,
+        composer.clientWidth - suggestions.offsetWidth - 8
+      );
+      suggestions.style.left = `${Math.max(8, Math.min(preferredLeft, maxLeft))}px`;
+      suggestions.style.top = `${input.offsetTop + caret.top}px`;
+    }
   };
 
   const refreshActiveSuggestion = () => {
@@ -247,7 +300,10 @@ export const renderTodoView = (container, options = {}) => {
         closeSuggestions();
         return;
       }
-      if (event.key === "Enter" && !event.shiftKey) {
+      if (
+        (event.key === "Enter" && !event.shiftKey) ||
+        event.key === "Tab"
+      ) {
         event.preventDefault();
         selectRecipient(visibleSuggestions[activeSuggestionIndex]);
         return;
