@@ -1946,8 +1946,25 @@ if (mount) {
             if (controls.input) controls.input.value = "";
             setDashboardInlineStatus(t("dashboard.todoSaved", "Pendiente añadido"), "ok");
             await loadTodos({ preserveScroll: true });
-          } catch {
-            setDashboardInlineStatus(t("dashboard.todoError", "No se pudo guardar"), "error");
+          } catch (error) {
+            const reason = `${error?.code || ""} ${error?.message || ""}`;
+            const message = reason.includes("todo-mention-not-found")
+              ? t(
+                  "dashboard.todoMentionNotFound",
+                  "No existe un usuario To Do con esa mención"
+                )
+              : reason.includes("todo-mention-ambiguous")
+                ? t(
+                    "dashboard.todoMentionAmbiguous",
+                    "Esa mención corresponde a más de una cuenta"
+                  )
+                : reason.includes("todo-recipient-disabled")
+                  ? t(
+                      "dashboard.todoRecipientDisabled",
+                      "Ese usuario no tiene acceso a To Do"
+                    )
+                  : t("dashboard.todoError", "No se pudo guardar");
+            setDashboardInlineStatus(message, "error");
           } finally {
             if (controls.input) controls.input.disabled = false;
             if (controls.submit) controls.submit.disabled = false;

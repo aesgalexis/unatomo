@@ -1184,6 +1184,87 @@ const canUseDashboardTodo = async (auth: {
   return {allowed: userData.todoAdmin === true, isSuperadmin: false};
 };
 
+type DashboardTodoPerson = {
+  uid: string;
+  email: string;
+  displayName: string;
+  mention: string;
+};
+
+const getTodoMention = (email: string) =>
+  normalizeEmail(email).split("@")[0] || "";
+
+const toDashboardTodoPerson = (user: admin.auth.UserRecord) => ({
+  uid: user.uid,
+  email: normalizeEmail(user.email || ""),
+  displayName: (user.displayName || user.email || "").toString().trim(),
+  mention: getTodoMention(user.email || ""),
+});
+
+const canUserRecordUseDashboardTodo = async (
+  user: admin.auth.UserRecord,
+) => {
+  if (isControlPanelAuth({token: {email: user.email || ""}})) return true;
+  const snap = await db.collection("users").doc(user.uid).get();
+  return snap.data()?.todoAdmin === true;
+};
+
+const resolveDashboardTodoMentions = async (
+  mentions: string[],
+  creatorUid: string,
+) => {
+  if (!mentions.length) return [] as DashboardTodoPerson[];
+  const wanted = new Set(mentions);
+  const matches = new Map<string, admin.auth.UserRecord[]>();
+  let pageToken: string | undefined;
+  do {
+    const page = await admin.auth().listUsers(1000, pageToken);
+    page.users.forEach((user) => {
+      const mention = getTodoMention(user.email || "");
+      if (!wanted.has(mention)) return;
+      const current = matches.get(mention) || [];
+      current.push(user);
+      matches.set(mention, current);
+    });
+    pageToken = page.pageToken;
+  } while (pageToken);
+
+  const people: DashboardTodoPerson[] = [];
+  for (const mention of mentions) {
+    const candidates = matches.get(mention) || [];
+    if (candidates.length !== 1) {
+      throw new HttpsError(
+        candidates.length ? "failed-precondition" : "not-found",
+        candidates.length ?
+          "todo-mention-ambiguous" :
+          "todo-mention-not-found",
+      );
+    }
+    const user = candidates[0];
+    if (user.uid === creatorUid) continue;
+    if (!await canUserRecordUseDashboardTodo(user)) {
+      throw new HttpsError("permission-denied", "todo-recipient-disabled");
+    }
+    people.push(toDashboardTodoPerson(user));
+  }
+  return people;
+};
+
+const normalizeDashboardTodoPerson = (
+  value: unknown,
+): DashboardTodoPerson | null => {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const raw = value as Record<string, unknown>;
+  const uid = (raw.uid || "").toString().trim();
+  if (!uid) return null;
+  return {
+    uid,
+    email: normalizeEmail((raw.email || "").toString()),
+    displayName: (raw.displayName || "").toString().trim(),
+    mention: (raw.mention || "").toString().trim().toLowerCase(),
+  };
+};
+
 export const listDashboardTodos = onCall(async (request) => {
   const auth = request.auth;
   if (!auth) throw new HttpsError("unauthenticated", "auth-required");
@@ -1198,16 +1279,43 @@ export const listDashboardTodos = onCall(async (request) => {
   }
   const rawLimit = Number(request.data?.limit || 254);
   const limit = Math.max(1, Math.min(500, Math.floor(rawLimit)));
-  const snap = await dashboardTodosCol()
-    .where("ownerUid", "==", auth.uid)
-    .limit(limit)
-    .get();
-  const items = snap.docs.map((docSnap) => {
+  const [ownedSnap, sharedSnap] = await Promise.all([
+    dashboardTodosCol()
+      .where("ownerUid", "==", auth.uid)
+      .limit(limit)
+      .get(),
+    dashboardTodosCol()
+      .where("participantUids", "array-contains", auth.uid)
+      .limit(limit)
+      .get(),
+  ]);
+  const todoDocs = new Map<
+    string,
+    FirebaseFirestore.QueryDocumentSnapshot
+  >();
+  [...ownedSnap.docs, ...sharedSnap.docs].forEach((docSnap) => {
+    todoDocs.set(docSnap.id, docSnap);
+  });
+  const items = Array.from(todoDocs.values()).map((docSnap) => {
     const data = docSnap.data() || {};
+    const owner = normalizeDashboardTodoPerson(data.owner);
+    const recipients = Array.isArray(data.sharedWith) ?
+      data.sharedWith
+        .map(normalizeDashboardTodoPerson)
+        .filter((person): person is DashboardTodoPerson => !!person) :
+      [];
+    const sharedWith = data.ownerUid === auth.uid ?
+      recipients :
+      [owner, ...recipients]
+        .filter((person): person is DashboardTodoPerson => !!person)
+        .filter((person) => person.uid !== auth.uid);
     return {
       id: docSnap.id,
       text: data.text || "",
       ownerUid: data.ownerUid || "",
+      canDelete: data.ownerUid === auth.uid,
+      isShared: recipients.length > 0,
+      sharedWith,
       completed: data.completed === true,
       createdAt: data.createdAt?.toDate?.()?.toISOString?.() || "",
       updatedAt: data.updatedAt?.toDate?.()?.toISOString?.() || "",
@@ -1219,7 +1327,7 @@ export const listDashboardTodos = onCall(async (request) => {
     const left = a.updatedAt || a.createdAt;
     const right = b.updatedAt || b.createdAt;
     return new Date(right).getTime() - new Date(left).getTime();
-  });
+  }).slice(0, limit);
   return {
     ok: true,
     canTodo: true,
@@ -1235,17 +1343,29 @@ export const createDashboardTodo = onCall(async (request) => {
   if (!access.allowed) {
     throw new HttpsError("permission-denied", "todo-disabled");
   }
-  const text = (request.data?.text || "")
+  const text: string = (request.data?.text || "")
     .toString()
     .replace(/\s+/g, " ")
     .trim()
     .slice(0, 1024);
   if (!text) throw new HttpsError("invalid-argument", "text-required");
+  const mentionMatches = text.match(
+    /@[a-z0-9][a-z0-9._-]{0,63}/gi,
+  ) || [];
+  const mentions = mentionMatches
+    .map((match) => match.slice(1).toLowerCase())
+    .filter((mention, index, values) => values.indexOf(mention) === index);
+  const recipients = await resolveDashboardTodoMentions(mentions, auth.uid);
+  const creatorRecord = await admin.auth().getUser(auth.uid);
+  const owner = toDashboardTodoPerson(creatorRecord);
   const now = admin.firestore.FieldValue.serverTimestamp();
   const ref = dashboardTodosCol().doc();
   await ref.set({
     text,
     ownerUid: auth.uid,
+    owner,
+    participantUids: [auth.uid, ...recipients.map((person) => person.uid)],
+    sharedWith: recipients,
     completed: false,
     completedAt: "",
     createdAt: now,
@@ -1264,22 +1384,30 @@ export const updateDashboardTodo = onCall(async (request) => {
   const todoId = (request.data?.todoId || "").toString().trim();
   if (!todoId) throw new HttpsError("invalid-argument", "todoId-required");
   const ref = dashboardTodosCol().doc(todoId);
-  const snap = await ref.get();
-  if (!snap.exists) throw new HttpsError("not-found", "todo-not-found");
-  if ((snap.data()?.ownerUid || "") !== auth.uid) {
-    throw new HttpsError("permission-denied", "not-todo-owner");
-  }
   const completed = request.data?.completed === true;
-  await ref.set(
-    {
-      completed,
-      completedAt: completed ?
-        admin.firestore.FieldValue.serverTimestamp() :
-        "",
-      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-    },
-    {merge: true},
-  );
+  await db.runTransaction(async (tx) => {
+    const snap = await tx.get(ref);
+    if (!snap.exists) throw new HttpsError("not-found", "todo-not-found");
+    const todo = snap.data() || {};
+    const participantUids = Array.isArray(todo.participantUids) ?
+      todo.participantUids :
+      [];
+    if (todo.ownerUid !== auth.uid && !participantUids.includes(auth.uid)) {
+      throw new HttpsError("permission-denied", "not-todo-participant");
+    }
+    tx.set(
+      ref,
+      {
+        completed,
+        completedByUid: completed ? auth.uid : "",
+        completedAt: completed ?
+          admin.firestore.FieldValue.serverTimestamp() :
+          "",
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      },
+      {merge: true},
+    );
+  });
   return {ok: true, todoId, completed};
 });
 
@@ -1293,12 +1421,14 @@ export const deleteDashboardTodo = onCall(async (request) => {
   const todoId = (request.data?.todoId || "").toString().trim();
   if (!todoId) throw new HttpsError("invalid-argument", "todoId-required");
   const ref = dashboardTodosCol().doc(todoId);
-  const snap = await ref.get();
-  if (!snap.exists) return {ok: true, todoId};
-  if ((snap.data()?.ownerUid || "") !== auth.uid) {
-    throw new HttpsError("permission-denied", "not-todo-owner");
-  }
-  await ref.delete();
+  await db.runTransaction(async (tx) => {
+    const snap = await tx.get(ref);
+    if (!snap.exists) return;
+    if ((snap.data()?.ownerUid || "") !== auth.uid) {
+      throw new HttpsError("permission-denied", "not-todo-owner");
+    }
+    tx.delete(ref);
+  });
   return {ok: true, todoId};
 });
 

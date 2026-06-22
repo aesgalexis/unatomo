@@ -6,9 +6,22 @@ const createTodoCallable = httpsCallable(functions, "createDashboardTodo");
 const updateTodoCallable = httpsCallable(functions, "updateDashboardTodo");
 const deleteTodoCallable = httpsCallable(functions, "deleteDashboardTodo");
 
+const normalizeTodoPerson = (person = {}) => ({
+  uid: (person.uid || "").toString(),
+  email: (person.email || "").toString(),
+  displayName: (person.displayName || "").toString(),
+  mention: (person.mention || "").toString()
+});
+
 const normalizeTodo = (item = {}) => ({
   id: (item.id || "").toString(),
   text: (item.text || "").toString(),
+  ownerUid: (item.ownerUid || "").toString(),
+  canDelete: item.canDelete === true,
+  isShared: item.isShared === true,
+  sharedWith: Array.isArray(item.sharedWith)
+    ? item.sharedWith.map(normalizeTodoPerson).filter((person) => person.uid)
+    : [],
   completed: item.completed === true,
   createdAt: (item.createdAt || "").toString(),
   updatedAt: (item.updatedAt || "").toString(),
