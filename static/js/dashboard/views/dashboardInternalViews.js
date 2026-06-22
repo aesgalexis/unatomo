@@ -38,8 +38,11 @@ export const renderTodoDashboardView = (container, options = {}) => {
     canTodo: !!options.canTodo,
     collaborators: options.collaborators || [],
     query: options.query || "",
-    visibleCount: options.visibleCount,
-    onLoadMore: options.onLoadMore,
+    page: options.page,
+    showCompleted: !!options.showCompleted,
+    onPageChange: options.onPageChange,
+    onShowCompletedChange: options.onShowCompletedChange,
+    onBack: options.onBack,
     onSubmit: options.onSubmit,
     onToggle: options.onToggle,
     onDelete: options.onDelete

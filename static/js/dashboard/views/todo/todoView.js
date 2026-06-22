@@ -1,6 +1,6 @@
 import { t } from "/static/js/dashboard/i18n.js";
 
-export const TODO_PAGE_SIZE = 64;
+export const TODO_PAGE_SIZE = 50;
 export const MAX_TODO_LENGTH = 1024;
 
 const getLocale = () => (document.documentElement.lang === "en" ? "en-GB" : "es-ES");
@@ -132,11 +132,18 @@ const buildTodoDownloadText = (items, locale) =>
 export const renderTodoView = (container, options = {}) => {
   const locale = getLocale();
   const items = Array.isArray(options.items) ? options.items : [];
-  const entries = filterTodos(items, options.query || "");
-  const visibleCount = Math.max(
-    TODO_PAGE_SIZE,
-    Number(options.visibleCount || TODO_PAGE_SIZE)
+  const searchedEntries = filterTodos(items, options.query || "");
+  const showCompleted = options.showCompleted === true;
+  const entries = showCompleted
+    ? searchedEntries
+    : searchedEntries.filter((item) => item.completed !== true);
+  const pageCount = Math.max(1, Math.ceil(entries.length / TODO_PAGE_SIZE));
+  const currentPage = Math.min(
+    pageCount,
+    Math.max(1, Number(options.page || 1))
   );
+  const pageStart = (currentPage - 1) * TODO_PAGE_SIZE;
+  const pageEntries = entries.slice(pageStart, pageStart + TODO_PAGE_SIZE);
   const canTodo = options.canTodo === true;
   const collaborators = Array.isArray(options.collaborators)
     ? options.collaborators
@@ -355,8 +362,55 @@ export const renderTodoView = (container, options = {}) => {
   const header = document.createElement("div");
   header.className = "todo-header";
   const title = document.createElement("h3");
-  title.textContent = t("dashboard.todoTitle", "To do");
+  title.textContent = t("dashboard.todoTitle", "To-do");
+  const headerActions = document.createElement("div");
+  headerActions.className = "todo-header-actions";
+  const count = document.createElement("span");
+  count.className = "todo-count";
+  count.textContent = `${entries.length}/${searchedEntries.length}`;
+  const completedToggle = document.createElement("button");
+  completedToggle.type = "button";
+  completedToggle.className = "todo-completed-toggle";
+  const completedTooltip = showCompleted
+    ? t("dashboard.todoHideCompleted", "Ocultar completados")
+    : t("dashboard.todoShowCompleted", "Mostrar completados");
+  completedToggle.setAttribute("aria-label", completedTooltip);
+  completedToggle.setAttribute("data-tooltip", completedTooltip);
+  completedToggle.setAttribute("aria-pressed", showCompleted ? "true" : "false");
+  completedToggle.innerHTML = showCompleted
+    ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>'
+    : '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="m3 3 18 18M10.6 10.6a2 2 0 0 0 2.8 2.8M9.9 4.2A10.8 10.8 0 0 1 12 4c5 0 9 4 10 8a15.6 15.6 0 0 1-2 4.1M6.6 6.6A12.8 12.8 0 0 0 2 12c1 4 5 8 10 8a10.8 10.8 0 0 0 5.4-1.4"/></svg>';
+  attachTodoTooltip(completedToggle);
+  completedToggle.addEventListener("click", () => {
+    if (options.onShowCompletedChange) {
+      options.onShowCompletedChange(!showCompleted);
+    }
+  });
+
+  const download = document.createElement("button");
+  download.type = "button";
+  download.className = "mc-log-download todo-download";
+  const downloadLabel = t(
+    "dashboard.todoDownload",
+    "Descargar registro completo de tareas"
+  );
+  download.setAttribute("aria-label", downloadLabel);
+  download.setAttribute("data-tooltip", downloadLabel);
+  attachTodoTooltip(download, "todo-download-tooltip");
+  download.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 3a1 1 0 0 1 1 1v8.59l2.3-2.3a1 1 0 1 1 1.4 1.42l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 0 1 1.4-1.42l2.3 2.3V4a1 1 0 0 1 1-1Zm-7 14a1 1 0 0 1 1 1v2h12v-2a1 1 0 1 1 2 0v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1Z"/></svg>';
+  download.addEventListener("click", () => {
+    const stamp = new Date().toISOString().slice(0, 10);
+    downloadTextFile(
+      buildTodoDownloadText(searchedEntries, locale),
+      `todo_${stamp}.txt`
+    );
+  });
+
   header.appendChild(title);
+  headerActions.appendChild(count);
+  headerActions.appendChild(completedToggle);
+  headerActions.appendChild(download);
+  header.appendChild(headerActions);
   container.appendChild(header);
 
   if (!options.ready) {
@@ -379,7 +433,7 @@ export const renderTodoView = (container, options = {}) => {
 
   const list = document.createElement("div");
   list.className = "todo-list";
-  entries.slice(0, visibleCount).forEach((item) => {
+  pageEntries.forEach((item) => {
     const row = document.createElement("article");
     row.className = "todo-row";
     row.classList.toggle("is-completed", item.completed === true);
@@ -430,18 +484,58 @@ export const renderTodoView = (container, options = {}) => {
     }
 
     if (item.canDelete) {
+      const menu = document.createElement("div");
+      menu.className = "todo-item-menu";
+      const menuToggle = document.createElement("button");
+      menuToggle.type = "button";
+      menuToggle.className = "todo-item-menu-toggle";
+      menuToggle.setAttribute(
+        "aria-label",
+        t("general.moreOptions", "Más opciones")
+      );
+      menuToggle.setAttribute("aria-haspopup", "menu");
+      menuToggle.setAttribute("aria-expanded", "false");
+      menuToggle.textContent = "•••";
+      const menuPanel = document.createElement("div");
+      menuPanel.className = "todo-item-menu-panel";
+      menuPanel.setAttribute("role", "menu");
+      menuPanel.hidden = true;
+      const closeMenu = () => {
+        menuPanel.hidden = true;
+        menuToggle.setAttribute("aria-expanded", "false");
+      };
       const remove = document.createElement("button");
       remove.type = "button";
-      remove.className = "todo-delete";
-      remove.setAttribute("aria-label", t("dashboard.todoDelete", "Eliminar"));
-      remove.title = t("dashboard.todoDelete", "Eliminar");
-      remove.textContent = "x";
+      remove.className = "todo-item-menu-action todo-item-delete";
+      remove.setAttribute("role", "menuitem");
+      remove.textContent = t("dashboard.todoDelete", "Eliminar");
       remove.addEventListener("click", (event) => {
         event.preventDefault();
         event.stopPropagation();
+        closeMenu();
         if (options.onDelete) options.onDelete(item.id, remove);
       });
-      actions.appendChild(remove);
+      menuToggle.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        const nextOpen = menuPanel.hidden;
+        menuPanel.hidden = !nextOpen;
+        menuToggle.setAttribute("aria-expanded", nextOpen ? "true" : "false");
+      });
+      menuToggle.addEventListener("keydown", (event) => {
+        if (event.key !== "Escape") return;
+        closeMenu();
+        menuToggle.blur();
+      });
+      menu.addEventListener("focusout", () => {
+        window.setTimeout(() => {
+          if (!menu.contains(document.activeElement)) closeMenu();
+        }, 0);
+      });
+      menuPanel.appendChild(remove);
+      menu.appendChild(menuToggle);
+      menu.appendChild(menuPanel);
+      actions.appendChild(menu);
     }
 
     row.appendChild(check);
@@ -451,44 +545,65 @@ export const renderTodoView = (container, options = {}) => {
   });
   container.appendChild(list);
 
-  if (visibleCount < entries.length) {
-    const loadMore = document.createElement("button");
-    loadMore.type = "button";
-    loadMore.className = "global-registry-load-more";
-    loadMore.textContent = t("dashboard.todoLoadMore", "Mostrar más");
-    loadMore.addEventListener("click", () => {
-      if (options.onLoadMore) options.onLoadMore();
-    });
-    container.appendChild(loadMore);
-  }
-
-  const sep = document.createElement("hr");
-  sep.className = "mc-sep todo-footer-sep";
-  container.appendChild(sep);
-
-  const footer = document.createElement("div");
-  footer.className = "mc-log-footer todo-footer";
-  const count = document.createElement("div");
-  count.className = "mc-log-header";
-  count.textContent = `${Math.min(visibleCount, entries.length)}/${entries.length}`;
-
-  const download = document.createElement("button");
-  download.type = "button";
-  download.className = "mc-log-download todo-download";
-  const downloadLabel = t(
-    "dashboard.todoDownload",
-    "Descargar registro completo de tareas"
+  const pagination = document.createElement("div");
+  pagination.className = "todo-pagination";
+  const pageControls = document.createElement("div");
+  pageControls.className = "todo-page-controls";
+  const previous = document.createElement("button");
+  previous.type = "button";
+  previous.className = "todo-page-button";
+  previous.disabled = currentPage <= 1;
+  previous.setAttribute(
+    "aria-label",
+    t("dashboard.todoPreviousPage", "Página anterior")
   );
-  download.setAttribute("aria-label", downloadLabel);
-  download.setAttribute("data-tooltip", downloadLabel);
-  attachTodoTooltip(download, "todo-download-tooltip");
-  download.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 3a1 1 0 0 1 1 1v8.59l2.3-2.3a1 1 0 1 1 1.4 1.42l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 0 1 1.4-1.42l2.3 2.3V4a1 1 0 0 1 1-1Zm-7 14a1 1 0 0 1 1 1v2h12v-2a1 1 0 1 1 2 0v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1Z"/></svg>';
-  download.addEventListener("click", () => {
-    const stamp = new Date().toISOString().slice(0, 10);
-    downloadTextFile(buildTodoDownloadText(entries, locale), `todo_${stamp}.txt`);
+  previous.innerHTML =
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" ' +
+    'stroke="currentColor" stroke-width="2" stroke-linecap="round" ' +
+    'stroke-linejoin="round" d="m15 18-6-6 6-6"/></svg>';
+  previous.addEventListener("click", () => {
+    if (options.onPageChange) options.onPageChange(currentPage - 1);
   });
-
-  footer.appendChild(count);
-  footer.appendChild(download);
-  container.appendChild(footer);
+  const pageLabel = document.createElement("span");
+  pageLabel.className = "todo-page-label";
+  pageLabel.textContent = `${currentPage}/${pageCount}`;
+  const next = document.createElement("button");
+  next.type = "button";
+  next.className = "todo-page-button";
+  next.disabled = currentPage >= pageCount;
+  next.setAttribute(
+    "aria-label",
+    t("dashboard.todoNextPage", "Página siguiente")
+  );
+  next.innerHTML =
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" ' +
+    'stroke="currentColor" stroke-width="2" stroke-linecap="round" ' +
+    'stroke-linejoin="round" d="m9 18 6-6-6-6"/></svg>';
+  next.addEventListener("click", () => {
+    if (options.onPageChange) options.onPageChange(currentPage + 1);
+  });
+  pageControls.appendChild(previous);
+  pageControls.appendChild(pageLabel);
+  pageControls.appendChild(next);
+  const pageNav = document.createElement("div");
+  pageNav.className = "scroll-top-container todo-page-nav";
+  const back = document.createElement("button");
+  back.type = "button";
+  back.className = "scroll-top-button";
+  back.textContent = t("dashboard.todoBack", "Volver");
+  back.addEventListener("click", () => {
+    if (options.onBack) options.onBack();
+  });
+  const top = document.createElement("button");
+  top.type = "button";
+  top.className = "scroll-top-button";
+  top.textContent = t("dashboard.todoTop", "Arriba");
+  top.addEventListener("click", () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+  pageNav.appendChild(back);
+  pageNav.appendChild(top);
+  pagination.appendChild(pageControls);
+  pagination.appendChild(pageNav);
+  container.appendChild(pagination);
 };

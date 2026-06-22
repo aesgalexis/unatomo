@@ -71,7 +71,6 @@ import {
   MAX_SUGGESTION_LENGTH,
   SUGGESTIONS_PAGE_SIZE,
   MAX_TODO_LENGTH,
-  TODO_PAGE_SIZE,
   renderRegistryDashboardView,
   renderSuggestionsDashboardView,
   renderTodoDashboardView
@@ -165,7 +164,8 @@ if (mount) {
     activeView: getDashboardInternalView(),
     registryVisibleCount: GLOBAL_REGISTRY_PAGE_SIZE,
     suggestionsVisibleCount: SUGGESTIONS_PAGE_SIZE,
-    todoVisibleCount: TODO_PAGE_SIZE,
+    todoPage: 1,
+    todoShowCompleted: false,
     suggestions: [],
     suggestionsReady: false,
     suggestionReplyTarget: null,
@@ -553,7 +553,7 @@ if (mount) {
       } else if (state.activeView === "sugerencias") {
         state.suggestionsVisibleCount = SUGGESTIONS_PAGE_SIZE;
       } else if (state.activeView === "todo") {
-        state.todoVisibleCount = TODO_PAGE_SIZE;
+        state.todoPage = 1;
       }
       renderCards({ preserveScroll: true });
     }
@@ -883,6 +883,8 @@ if (mount) {
     state.suggestionReplyTarget = null;
     state.todos = [];
     state.todosReady = false;
+    state.todoPage = 1;
+    state.todoShowCompleted = false;
     state.todoCollaborators = [];
     state.todoCollaboratorsReady = false;
     state.expandedById = [];
@@ -1929,10 +1931,19 @@ if (mount) {
         canTodo: state.canTodo || state.isSuperadmin,
         collaborators: state.todoCollaborators,
         query: state.searchQuery,
-        visibleCount: state.todoVisibleCount,
-        onLoadMore: () => {
-          state.todoVisibleCount += TODO_PAGE_SIZE;
+        page: state.todoPage,
+        showCompleted: state.todoShowCompleted,
+        onPageChange: (page) => {
+          state.todoPage = page;
           renderCards({ preserveScroll: true });
+        },
+        onShowCompletedChange: (showCompleted) => {
+          state.todoShowCompleted = showCompleted;
+          state.todoPage = 1;
+          renderCards({ preserveScroll: true });
+        },
+        onBack: () => {
+          window.location.hash = "#/dashboard";
         },
         onToggle: async (todoId, completed) => {
           try {
@@ -3589,7 +3600,7 @@ if (mount) {
       loadSuggestions({ preserveScroll: false });
     }
     if (nextView === "todo") {
-      state.todoVisibleCount = TODO_PAGE_SIZE;
+      state.todoPage = 1;
       loadTodos({ preserveScroll: false });
       if (!state.todoCollaboratorsReady) {
         loadTodoCollaborators();

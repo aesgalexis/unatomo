@@ -142,6 +142,11 @@ To Do scope:
 - The view is separate from suggestions and uses its own callable functions and `dashboard_todos` collection.
 - `superadmin` and collaborators can use To Do. Private items remain visible
   only to their owner; shared items are visible to their participants.
+- Pending items are shown by default, with an eye control to include completed
+  items. The list uses 50-item pages and keeps its pagination above the shared
+  `Volver` / `Arriba` page navigation controls.
+- To Do item deletion is available only to the owner through the row's
+  three-dot menu. Shared participants can still change completion state.
 
 History event contract:
 
