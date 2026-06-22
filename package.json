@@ -17,6 +17,7 @@
     "doctor": "node scripts/doctor.mjs",
     "backup:nfc:firestore": "node scripts/backup-firestore-nfc.mjs",
     "backup:nfc:storage": "node scripts/backup-storage-inventory-nfc.mjs",
+    "backup:nfc:all": "node scripts/backup-nfc-all.mjs",
     "check:nfc:layout": "node scripts/validate-dashboard-layout-backup.mjs",
     "check:nfc:architecture": "node scripts/check-nfc-architecture.mjs"
   },

@@ -188,50 +188,86 @@ export const renderSuggestionsView = (container, options = {}) => {
 
   const createSuggestionMenu = (item) => {
     const menu = document.createElement("div");
-    menu.className = "mc-doc-menu suggestions-menu";
+    menu.className = "todo-item-menu suggestions-menu";
     const toggle = document.createElement("button");
     toggle.type = "button";
-    toggle.className = "mc-doc-menu-dots";
+    toggle.className = "todo-item-menu-toggle";
     toggle.setAttribute("aria-label", t("dashboard.suggestionsMenu", "Opciones"));
-    toggle.textContent = "...";
-    const replyBtn = document.createElement("button");
-    replyBtn.type = "button";
-    replyBtn.className = "mc-doc-menu-link";
-    replyBtn.textContent = t("dashboard.suggestionsReply", "Responder");
-    replyBtn.addEventListener("click", () => {
-      if (options.onReply) {
-        options.onReply({
-          suggestionId: item.id,
-          createdAt: item.createdAt,
-        });
+    toggle.setAttribute("aria-haspopup", "menu");
+    toggle.setAttribute("aria-expanded", "false");
+    toggle.textContent = "\u2022\u2022\u2022";
+    const panel = document.createElement("div");
+    panel.className = "todo-item-menu-panel";
+    panel.setAttribute("role", "menu");
+    panel.hidden = true;
+    const closeMenu = () => {
+      panel.hidden = true;
+      toggle.setAttribute("aria-expanded", "false");
+    };
+    const createAction = (label, handler, extraClass = "") => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = `todo-item-menu-action ${extraClass}`.trim();
+      button.setAttribute("role", "menuitem");
+      button.textContent = label;
+      button.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        closeMenu();
+        handler();
+      });
+      return button;
+    };
+    const replyAction = createAction(
+      t("dashboard.suggestionsReply", "Responder"),
+      () => {
+        if (options.onReply) {
+          options.onReply({
+            suggestionId: item.id,
+            createdAt: item.createdAt,
+          });
+        }
       }
-    });
-    const completedBtn = document.createElement("button");
-    completedBtn.type = "button";
-    completedBtn.className = "mc-doc-menu-link";
-    completedBtn.textContent = item.resolved
-      ? t("dashboard.suggestionsReopen", "Reabrir")
-      : t("dashboard.suggestionsComplete", "Completada");
-    completedBtn.addEventListener("click", () => {
-      if (options.onResolve) options.onResolve(item.id, !item.resolved);
-    });
-    const deleteBtn = document.createElement("button");
-    deleteBtn.type = "button";
-    deleteBtn.className = "mc-doc-menu-link mc-doc-menu-delete";
-    deleteBtn.textContent = t("dashboard.suggestionsDelete", "Eliminar");
-    deleteBtn.addEventListener("click", () => {
-      if (options.onDelete) options.onDelete(item.id);
-    });
+    );
+    const completedAction = createAction(
+      item.resolved
+        ? t("dashboard.suggestionsReopen", "Reabrir")
+        : t("dashboard.suggestionsComplete", "Completada"),
+      () => {
+        if (options.onResolve) options.onResolve(item.id, !item.resolved);
+      }
+    );
+    const deleteAction = createAction(
+      t("dashboard.suggestionsDelete", "Eliminar"),
+      () => {
+        if (options.onDelete) options.onDelete(item.id);
+      },
+      "todo-item-delete"
+    );
     toggle.addEventListener("click", (event) => {
+      event.preventDefault();
       event.stopPropagation();
-      menu.classList.toggle("is-open");
+      const nextOpen = panel.hidden;
+      panel.hidden = !nextOpen;
+      toggle.setAttribute("aria-expanded", nextOpen ? "true" : "false");
+    });
+    toggle.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape") return;
+      closeMenu();
+      toggle.blur();
+    });
+    menu.addEventListener("focusout", () => {
+      window.setTimeout(() => {
+        if (!menu.contains(document.activeElement)) closeMenu();
+      }, 0);
     });
     menu.appendChild(toggle);
-    menu.appendChild(replyBtn);
+    panel.appendChild(replyAction);
     if (isSuperadmin) {
-      menu.appendChild(completedBtn);
-      menu.appendChild(deleteBtn);
+      panel.appendChild(completedAction);
+      panel.appendChild(deleteAction);
     }
+    menu.appendChild(panel);
     return menu;
   };
 

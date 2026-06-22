@@ -25,10 +25,17 @@ const text = {
     : "Estado local del respaldo NFC. Los snapshots quedan fuera del repositorio.",
   backupPending: isEn ? "No backup recorded yet" : "Sin respaldo registrado",
   backupOk: isEn ? "Ready" : "Correcto",
+  backupPartial: isEn ? "Partial" : "Parcial",
+  backupRunning: isEn ? "Running" : "En curso",
   backupFailed: isEn ? "Needs attention" : "Revisar",
+  backupOverall: isEn ? "Current backup scope" : "Alcance actual del respaldo",
   backupFirestore: isEn ? "Firestore data" : "Datos Firestore",
   backupStorage: isEn ? "Storage inventory" : "Inventario Storage",
   backupCompleted: isEn ? "Completed" : "Completado",
+  backupAge: isEn ? "Age" : "Antigüedad",
+  backupCoverage: isEn ? "Included" : "Incluido",
+  backupPendingCoverage: isEn ? "Pending" : "Pendiente",
+  backupManifest: isEn ? "Manifest" : "Manifiesto",
   backupAttempted: isEn ? "Attempted" : "Intento",
   backupFile: isEn ? "File" : "Archivo",
   backupFolder: isEn ? "Folder" : "Carpeta",
@@ -39,6 +46,12 @@ const text = {
   backupProject: isEn ? "Project" : "Proyecto",
   backupBucket: isEn ? "Bucket" : "Bucket",
   backupCause: isEn ? "Cause" : "Causa",
+  backupScopeNames: {
+    "firebase-auth": isEn ? "Firebase Authentication" : "Firebase Authentication",
+    "legacy-tenant-machines": isEn ? "legacy tenant machines" : "máquinas legacy",
+    "restore-tools": isEn ? "restore tools" : "herramientas de restauración",
+    "scheduled-execution": isEn ? "scheduled execution" : "ejecución programada",
+  },
   whatsNewTitle: isEn ? "What's new" : "Novedades",
   whatsNewLoading: isEn ? "Loading What's new status..." : "Cargando estado de Novedades...",
   whatsNewHint: isEn
@@ -320,8 +333,20 @@ const formatBytes = (value) => {
   }).format(size)} ${units[unitIndex]}`;
 };
 
+const formatBackupAge = (value) => {
+  const time = Date.parse(value || "");
+  if (!Number.isFinite(time)) return text.noData;
+  const minutes = Math.max(0, Math.floor((Date.now() - time) / 60000));
+  if (minutes < 60) return `${minutes} min`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} h`;
+  return `${Math.floor(hours / 24)} d`;
+};
+
 const getBackupStatusText = (status) => {
   if (status === "ok") return text.backupOk;
+  if (status === "partial") return text.backupPartial;
+  if (status === "running") return text.backupRunning;
   if (status === "error") return text.backupFailed;
   return text.backupPending;
 };
@@ -380,6 +405,48 @@ const renderBackupItem = (item, label, type) => {
   return card;
 };
 
+const renderOverallBackup = (item = {}) => {
+  const status = item.status || "pending";
+  const card = document.createElement("article");
+  card.className = "controlpanel-backup-item controlpanel-backup-overall";
+  card.dataset.state = status;
+  const header = document.createElement("div");
+  header.className = "controlpanel-backup-header";
+  const title = document.createElement("h3");
+  title.textContent = text.backupOverall;
+  const badge = document.createElement("span");
+  badge.className = "controlpanel-backup-badge";
+  badge.textContent = getBackupStatusText(status);
+  header.appendChild(title);
+  header.appendChild(badge);
+  card.appendChild(header);
+
+  const completedAt = item.completedAt || item.attemptedAt || item.startedAt;
+  appendBackupMeta(card, text.backupCompleted, formatMaybeDate(completedAt));
+  appendBackupMeta(card, text.backupAge, formatBackupAge(completedAt));
+  appendBackupMeta(card, text.backupProject, item.projectId);
+  appendBackupMeta(card, text.backupManifest, item.manifestFile);
+  const collectionCount = Array.isArray(item.firestoreCollections)
+    ? item.firestoreCollections.length
+    : 0;
+  const prefixCount = Array.isArray(item.storagePrefixes)
+    ? item.storagePrefixes.length
+    : 0;
+  if (collectionCount || prefixCount) {
+    appendBackupMeta(
+      card,
+      text.backupCoverage,
+      `${collectionCount} Firestore · ${prefixCount} Storage`,
+    );
+  }
+  const pending = (item.pendingScopes || [])
+    .map((key) => text.backupScopeNames[key] || key)
+    .join(", ");
+  appendBackupMeta(card, text.backupPendingCoverage, pending);
+  if (item.error) appendBackupMeta(card, text.backupCause, item.error);
+  return card;
+};
+
 const renderBackupStatus = (body, status) => {
   body.innerHTML = "";
   const note = document.createElement("p");
@@ -389,6 +456,7 @@ const renderBackupStatus = (body, status) => {
 
   const list = document.createElement("div");
   list.className = "controlpanel-backup-list";
+  list.appendChild(renderOverallBackup(status?.overall || {}));
   list.appendChild(
     renderBackupItem(status?.firestore || {}, text.backupFirestore, "firestore"),
   );

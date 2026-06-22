@@ -825,25 +825,14 @@ body.status-incident-open {
 }
 
 .suggestions-message-wrap .suggestions-menu {
+  position: absolute;
   top: 0;
   right: 0;
-  bottom: auto;
 }
 
-.suggestions-menu:hover .mc-doc-menu-link,
-.suggestions-menu:focus-within .mc-doc-menu-link,
-.suggestions-menu.is-open .mc-doc-menu-link {
-  max-width: 6.5rem;
-}
-
-.suggestions-menu .mc-doc-menu-link {
-  border: 0;
-  background: transparent;
-  color: color-mix(in srgb, var(--fg) 74%, transparent);
-}
-
-.suggestions-menu .mc-doc-menu-link:hover {
-  color: var(--fg);
+.suggestions-row:hover .todo-item-menu-toggle,
+.suggestions-row:focus-within .todo-item-menu-toggle {
+  opacity: 1;
 }
 
 .suggestions-row.is-resolved .suggestions-message {
@@ -1222,12 +1211,16 @@ body.status-incident-open {
   border: 0;
   border-radius: 0.35rem;
   background: transparent;
-  color: var(--danger, #d33);
+  color: var(--fg);
   display: block;
   font: inherit;
   font-size: 0.88rem;
   text-align: left;
   cursor: pointer;
+}
+
+.todo-item-menu-action.todo-item-delete {
+  color: var(--danger, #d33);
 }
 
 .todo-item-menu-action:hover,

@@ -24,6 +24,7 @@ export const readBackupStatus = () => {
   const current = readJsonIfExists(statusPath);
   return {
     kind: "unatomo-nfc-backup-status",
+    overall: { status: "pending" },
     firestore: { status: "pending" },
     storage: { status: "pending" },
     ...(current || {}),

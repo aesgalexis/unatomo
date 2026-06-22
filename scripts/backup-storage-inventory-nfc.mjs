@@ -11,8 +11,7 @@ import {
   toProjectRelativePath,
   writeBackupStatusPatch,
 } from "./firebase-admin-local.mjs";
-
-const DEFAULT_PREFIXES = ["machine-docs/", "tag-qrs/"];
+import { NFC_STORAGE_PREFIXES } from "./nfc-backup-config.mjs";
 
 const toSafeMetadata = (metadata = {}) => ({
   name: metadata.name || "",
@@ -99,7 +98,7 @@ const backupStorageInventory = async () => {
   }
   const accessToken = await getFirebaseCliAccessToken();
   const bucketName = getFirebaseStorageBucket(projectId);
-  const prefixes = parseCsvArg("prefixes", DEFAULT_PREFIXES);
+  const prefixes = parseCsvArg("prefixes", NFC_STORAGE_PREFIXES);
   const backupSlug = getTimestampSlug();
   const startedAt = new Date().toISOString();
   const output = {

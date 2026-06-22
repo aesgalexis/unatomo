@@ -68,6 +68,15 @@ These scripts are read-only and use the local Firebase CLI login
 JSON files or backup snapshots.
 
 ```powershell
+npm.cmd run backup:nfc:all
+```
+
+This is the preferred command. It runs the Firestore and Storage backups in
+sequence, checks that both results belong to the current run, and writes a
+SHA-256 manifest plus an aggregate `ok`, `partial`, or `error` status. The
+component commands remain available for focused snapshots:
+
+```powershell
 npm.cmd run backup:nfc:firestore
 npm.cmd run backup:nfc:storage
 ```
@@ -80,8 +89,10 @@ The Firestore backup exports the main NFC collections to JSON:
 - `tags`
 - admin invite/link/transfer collections
 - `users`
+- `usernames`
 - `account_directory`
 - `dashboard_suggestions`
+- `dashboard_todos`
 - `registration_codes`
 
 The Storage backup writes an inventory JSON and downloads the matching files.
@@ -89,6 +100,11 @@ It covers:
 
 - `machine-docs/`
 - `tag-qrs/`
+
+The aggregate status deliberately lists Firebase Authentication, legacy
+`tenants/{uid}/machines`, restore tooling, and scheduled execution as pending.
+Do not describe the current command as a complete disaster-recovery system
+until those scopes and a tested restore procedure are implemented.
 
 Use optional comma-separated filters when needed:
 
