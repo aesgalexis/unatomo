@@ -55,13 +55,15 @@ const run = async () => {
 
   const firestoreResult = await runScript("backup-firestore-nfc.mjs");
   const storageResult = await runScript("backup-storage-inventory-nfc.mjs");
+  const authResult = await runScript("backup-auth-nfc.mjs");
   const componentStatus = readBackupStatus();
   const firestoreOk = isCurrentSuccess(componentStatus.firestore, firestoreResult);
   const storageOk = isCurrentSuccess(componentStatus.storage, storageResult);
-  const successfulComponents = Number(firestoreOk) + Number(storageOk);
-  const status = successfulComponents === 2
+  const authOk = isCurrentSuccess(componentStatus.auth, authResult);
+  const successfulComponents = Number(firestoreOk) + Number(storageOk) + Number(authOk);
+  const status = successfulComponents === 3
     ? "ok"
-    : successfulComponents === 1
+    : successfulComponents > 0
       ? "partial"
       : "error";
   const completedAt = new Date().toISOString();
@@ -74,6 +76,7 @@ const run = async () => {
     coverage: {
       firestoreCollections: NFC_FIRESTORE_COLLECTIONS,
       storagePrefixes: NFC_STORAGE_PREFIXES,
+      firebaseAuth: true,
       pendingScopes: NFC_BACKUP_PENDING_SCOPES,
     },
     components: {
@@ -91,6 +94,13 @@ const run = async () => {
         fileCount: componentStatus.storage?.fileCount || 0,
         downloadedCount: componentStatus.storage?.downloadedCount || 0,
         totalBytes: componentStatus.storage?.totalBytes || 0,
+      },
+      auth: {
+        status: authOk ? "ok" : "error",
+        file: componentStatus.auth?.file || "",
+        sha256: hashBackupFile(componentStatus.auth?.file),
+        userCount: componentStatus.auth?.userCount || 0,
+        size: componentStatus.auth?.size || 0,
       },
     },
   };
@@ -110,6 +120,7 @@ const run = async () => {
       manifestFile: toProjectRelativePath(manifestPath),
       firestoreCollections: NFC_FIRESTORE_COLLECTIONS,
       storagePrefixes: NFC_STORAGE_PREFIXES,
+      firebaseAuth: true,
       pendingScopes: NFC_BACKUP_PENDING_SCOPES,
     },
   });

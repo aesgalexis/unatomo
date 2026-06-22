@@ -71,14 +71,16 @@ JSON files or backup snapshots.
 npm.cmd run backup:nfc:all
 ```
 
-This is the preferred command. It runs the Firestore and Storage backups in
-sequence, checks that both results belong to the current run, and writes a
-SHA-256 manifest plus an aggregate `ok`, `partial`, or `error` status. The
-component commands remain available for focused snapshots:
+This is the preferred command. It runs the Firestore, Storage, and Firebase
+Authentication backups in sequence, checks that every result belongs to the
+current run, and writes a SHA-256 manifest plus an aggregate `ok`, `partial`,
+or `error` status. The component commands remain available for focused
+snapshots:
 
 ```powershell
 npm.cmd run backup:nfc:firestore
 npm.cmd run backup:nfc:storage
+npm.cmd run backup:nfc:auth
 ```
 
 The Firestore backup exports the main NFC collections to JSON:
@@ -101,10 +103,14 @@ It covers:
 - `machine-docs/`
 - `tag-qrs/`
 
-The aggregate status deliberately lists Firebase Authentication, legacy
-`tenants/{uid}/machines`, restore tooling, and scheduled execution as pending.
-Do not describe the current command as a complete disaster-recovery system
-until those scopes and a tested restore procedure are implemented.
+The Authentication component uses the Firebase CLI export format so account
+UIDs and provider links can be retained for future recovery. Treat this file as
+sensitive data and keep external backup media encrypted.
+
+The aggregate status deliberately lists legacy `tenants/{uid}/machines`,
+restore tooling, and scheduled execution as pending. Do not describe the
+current command as a complete disaster-recovery system until those scopes and
+a tested restore procedure are implemented.
 
 Use optional comma-separated filters when needed:
 

@@ -17,7 +17,6 @@ export const NFC_FIRESTORE_COLLECTIONS = [
 export const NFC_STORAGE_PREFIXES = ["machine-docs/", "tag-qrs/"];
 
 export const NFC_BACKUP_PENDING_SCOPES = [
-  "firebase-auth",
   "legacy-tenant-machines",
   "restore-tools",
   "scheduled-execution",

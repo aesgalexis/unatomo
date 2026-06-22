@@ -27,6 +27,7 @@ export const readBackupStatus = () => {
     overall: { status: "pending" },
     firestore: { status: "pending" },
     storage: { status: "pending" },
+    auth: { status: "pending" },
     ...(current || {}),
   };
 };
