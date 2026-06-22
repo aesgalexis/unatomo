@@ -8,6 +8,65 @@ const mount = document.getElementById("controlpanel-mount");
 const isEn = getCurrentLang() === "en";
 
 const text = {
+  systemTitle: isEn ? "System status" : "Estado del sistema",
+  systemLoading: isEn ? "Checking system..." : "Comprobando sistema...",
+  systemError: isEn
+    ? "Unable to retrieve system status."
+    : "No se ha podido obtener el estado del sistema.",
+  systemHint: isEn
+    ? "Live read-only overview of the production system."
+    : "Resumen en vivo y de solo lectura del sistema de producción.",
+  systemChecked: isEn ? "Checked" : "Comprobado",
+  systemFunctions: "Functions",
+  systemFirestore: "Firestore",
+  systemAuthentication: "Authentication",
+  systemIntegrity: isEn ? "Data integrity" : "Integridad de datos",
+  systemHealthy: isEn ? "Healthy" : "Correcto",
+  systemWarning: isEn ? "Warnings" : "Avisos",
+  systemUsers: isEn ? "Users" : "Usuarios",
+  systemMachines: isEn ? "Machines" : "Máquinas",
+  systemOperational: isEn ? "Operational" : "Operativas",
+  systemOutOfService: isEn ? "Out of service" : "Fuera de servicio",
+  systemTags: "Tags",
+  systemPendingTasks: isEn ? "Pending tasks" : "Tareas pendientes",
+  systemPendingTodos: isEn ? "Pending to-dos" : "Pendientes To-do",
+  systemOpenSuggestions: isEn ? "Open suggestions" : "Sugerencias abiertas",
+  systemPendingInvites: isEn ? "Pending invites" : "Invitaciones pendientes",
+  systemPendingTransfers: isEn ? "Pending transfers" : "Transferencias pendientes",
+  integrityTitle: isEn ? "Data integrity" : "Integridad de datos",
+  integrityLoading: isEn ? "Checking relationships..." : "Comprobando relaciones...",
+  integrityError: isEn
+    ? "Unable to run integrity checks."
+    : "No se han podido ejecutar las comprobaciones de integridad.",
+  integrityHint: isEn
+    ? "Read-only checks across machines, owners, Tags, access and invitations."
+    : "Comprobaciones de solo lectura entre máquinas, propietarios, Tags, accesos e invitaciones.",
+  integrityOk: isEn ? "No inconsistencies detected" : "No se detectaron inconsistencias",
+  integrityIssues: isEn ? "Inconsistencies detected" : "Inconsistencias detectadas",
+  integritySamples: isEn ? "Examples" : "Ejemplos",
+  integrityStoragePending: isEn
+    ? "Physical Storage objects are not checked in this phase."
+    : "Los objetos físicos de Storage no se comprueban en esta fase.",
+  integrityScopeLimited: isEn
+    ? "At least one collection reached the current inspection limit."
+    : "Al menos una colección alcanzó el límite actual de inspección.",
+  integrityIssueLabels: {
+    "machine-missing-owner": isEn ? "Machines without owner" : "Máquinas sin propietario",
+    "machine-owner-not-in-auth": isEn ? "Machine owners missing from Auth" : "Propietarios ausentes en Auth",
+    "machine-tag-missing": isEn ? "Machines referencing a missing Tag" : "Máquinas con Tag inexistente",
+    "machine-access-missing": isEn ? "Tagged machines without access record" : "Máquinas con Tag sin acceso",
+    "duplicate-machine-tag": isEn ? "Tags assigned to multiple machines" : "Tags asignados a varias máquinas",
+    "assigned-tag-missing-machine": isEn ? "Assigned Tags without machine" : "Tags asignados sin máquina",
+    "tag-machine-missing": isEn ? "Tags referencing a missing machine" : "Tags con máquina inexistente",
+    "tag-machine-mismatch": isEn ? "Tag and machine assignment mismatch" : "Asignación Tag-máquina inconsistente",
+    "tag-owner-mismatch": isEn ? "Tag and machine owner mismatch" : "Propietario de Tag inconsistente",
+    "tag-access-missing": isEn ? "Assigned Tags without access record" : "Tags asignados sin acceso",
+    "access-tag-missing": isEn ? "Access records without Tag" : "Accesos sin Tag",
+    "access-machine-missing": isEn ? "Access records without machine" : "Accesos sin máquina",
+    "admin-link-machine-missing": isEn ? "Admin links without machine" : "Enlaces de administrador sin máquina",
+    "invite-machine-missing": isEn ? "Pending invites without machine" : "Invitaciones pendientes sin máquina",
+    "transfer-machine-missing": isEn ? "Pending transfers without machine" : "Transferencias pendientes sin máquina",
+  },
   codeStatsTitle: isEn ? "Application code" : "C\u00f3digo de aplicaci\u00f3n",
   codeStatsLoading: isEn ? "Loading code stats..." : "Cargando estad\u00edsticas de c\u00f3digo...",
   codeStatsError: isEn ? "Unable to load code stats." : "No se han podido cargar las estad\u00edsticas de c\u00f3digo.",
@@ -146,6 +205,10 @@ const text = {
 };
 
 const listUsersCallable = httpsCallable(functions, "listControlPanelUsers");
+const getSystemStatusCallable = httpsCallable(
+  functions,
+  "getControlPanelSystemStatus"
+);
 const listCodesCallable = httpsCallable(functions, "listControlPanelRegistrationCodes");
 const createCodeCallable = httpsCallable(functions, "createControlPanelRegistrationCode");
 const deleteCodeCallable = httpsCallable(functions, "deleteControlPanelRegistrationCode");
@@ -218,6 +281,152 @@ const renderCodeStats = (body, stats) => {
   metric.appendChild(value);
   metric.appendChild(label);
   body.appendChild(metric);
+};
+
+const appendSystemStatusRow = (wrap, label, status) => {
+  const row = document.createElement("div");
+  row.className = "controlpanel-system-status";
+  row.dataset.state = status === "ok" ? "ok" : "warning";
+  const name = document.createElement("span");
+  name.textContent = label;
+  const value = document.createElement("strong");
+  value.textContent = status === "ok" ? text.systemHealthy : text.systemWarning;
+  row.appendChild(name);
+  row.appendChild(value);
+  wrap.appendChild(row);
+};
+
+const appendSystemMetric = (wrap, value, label) => {
+  const metric = document.createElement("div");
+  metric.className = "controlpanel-system-metric";
+  const amount = document.createElement("strong");
+  amount.textContent = new Intl.NumberFormat(isEn ? "en" : "es").format(
+    Number(value || 0)
+  );
+  const name = document.createElement("span");
+  name.textContent = label;
+  metric.appendChild(amount);
+  metric.appendChild(name);
+  wrap.appendChild(metric);
+};
+
+const renderSystemStatus = (body, data = {}) => {
+  body.innerHTML = "";
+  const note = document.createElement("p");
+  note.className = "controlpanel-note";
+  note.textContent = text.systemHint;
+  body.appendChild(note);
+
+  const statuses = document.createElement("div");
+  statuses.className = "controlpanel-system-statuses";
+  appendSystemStatusRow(statuses, text.systemFunctions, data.services?.functions);
+  appendSystemStatusRow(statuses, text.systemFirestore, data.services?.firestore);
+  appendSystemStatusRow(
+    statuses,
+    text.systemAuthentication,
+    data.services?.authentication
+  );
+  appendSystemStatusRow(
+    statuses,
+    text.systemIntegrity,
+    data.integrity?.status
+  );
+  body.appendChild(statuses);
+
+  const summary = data.summary || {};
+  const metrics = document.createElement("div");
+  metrics.className = "controlpanel-system-metrics";
+  appendSystemMetric(metrics, summary.users, text.systemUsers);
+  appendSystemMetric(metrics, summary.machines, text.systemMachines);
+  appendSystemMetric(metrics, summary.operationalMachines, text.systemOperational);
+  appendSystemMetric(
+    metrics,
+    summary.outOfServiceMachines,
+    text.systemOutOfService
+  );
+  appendSystemMetric(metrics, summary.tags, text.systemTags);
+  appendSystemMetric(metrics, summary.pendingTasks, text.systemPendingTasks);
+  appendSystemMetric(metrics, summary.pendingTodos, text.systemPendingTodos);
+  appendSystemMetric(
+    metrics,
+    summary.openSuggestions,
+    text.systemOpenSuggestions
+  );
+  appendSystemMetric(
+    metrics,
+    summary.pendingInvites,
+    text.systemPendingInvites
+  );
+  appendSystemMetric(
+    metrics,
+    summary.pendingTransfers,
+    text.systemPendingTransfers
+  );
+  body.appendChild(metrics);
+
+  const checked = document.createElement("p");
+  checked.className = "controlpanel-note controlpanel-system-checked";
+  checked.textContent =
+    text.systemChecked + ": " + formatMaybeDate(data.generatedAt);
+  body.appendChild(checked);
+};
+
+const renderIntegrityStatus = (body, integrity = {}) => {
+  body.innerHTML = "";
+  const note = document.createElement("p");
+  note.className = "controlpanel-note";
+  note.textContent = text.integrityHint;
+  body.appendChild(note);
+
+  const summary = document.createElement("div");
+  summary.className = "controlpanel-integrity-summary";
+  summary.dataset.state = integrity.status === "ok" ? "ok" : "warning";
+  const count = Number(integrity.issueCount || 0);
+  summary.textContent = count
+    ? text.integrityIssues + ": " + count
+    : text.integrityOk;
+  body.appendChild(summary);
+
+  const issues = Array.isArray(integrity.issues) ? integrity.issues : [];
+  if (issues.length) {
+    const list = document.createElement("div");
+    list.className = "controlpanel-integrity-list";
+    issues.forEach((issue) => {
+      const row = document.createElement("article");
+      row.className = "controlpanel-integrity-item";
+      const header = document.createElement("div");
+      header.className = "controlpanel-integrity-header";
+      const title = document.createElement("strong");
+      title.textContent =
+        text.integrityIssueLabels[issue.code] || String(issue.code || "");
+      const badge = document.createElement("span");
+      badge.textContent = String(issue.count || 0);
+      header.appendChild(title);
+      header.appendChild(badge);
+      row.appendChild(header);
+      const samples = Array.isArray(issue.samples) ? issue.samples : [];
+      if (samples.length) {
+        const examples = document.createElement("p");
+        examples.textContent =
+          text.integritySamples + ": " + samples.join(", ");
+        row.appendChild(examples);
+      }
+      list.appendChild(row);
+    });
+    body.appendChild(list);
+  }
+
+  const storage = document.createElement("p");
+  storage.className = "controlpanel-note controlpanel-integrity-scope";
+  storage.textContent = text.integrityStoragePending;
+  body.appendChild(storage);
+  if (integrity.scopeLimited) {
+    const limited = document.createElement("p");
+    limited.className =
+      "controlpanel-note controlpanel-integrity-scope is-warning";
+    limited.textContent = text.integrityScopeLimited;
+    body.appendChild(limited);
+  }
 };
 
 const renderUsers = (body, items, handlers = {}) => {
@@ -677,12 +886,16 @@ const renderCodes = (body, items, handlers = {}) => {
 if (mount) {
   const wrap = document.createElement("div");
   wrap.className = "controlpanel-wrap";
+  const systemStatusCard = createCard(text.systemTitle);
+  const integrityCard = createCard(text.integrityTitle);
   const codeStatsCard = createCard(text.codeStatsTitle);
   const backupCard = createCard(text.backupTitle);
   const whatsNewCard = createCard(text.whatsNewTitle);
   const usersCard = createCard(text.usersTitle);
   const codesCard = createCard(text.codesTitle);
   const tagsCard = createCard(text.tagsTitle);
+  wrap.appendChild(systemStatusCard);
+  wrap.appendChild(integrityCard);
   wrap.appendChild(codeStatsCard);
   wrap.appendChild(backupCard);
   wrap.appendChild(whatsNewCard);
@@ -691,6 +904,12 @@ if (mount) {
   wrap.appendChild(tagsCard);
   mount.appendChild(wrap);
 
+  systemStatusCard
+    .querySelector(".controlpanel-toggle")
+    ?.addEventListener("click", () => toggleCard(systemStatusCard));
+  integrityCard
+    .querySelector(".controlpanel-toggle")
+    ?.addEventListener("click", () => toggleCard(integrityCard));
   codeStatsCard
     .querySelector(".controlpanel-toggle")
     ?.addEventListener("click", () => toggleCard(codeStatsCard));
@@ -710,6 +929,8 @@ if (mount) {
     .querySelector(".controlpanel-toggle")
     ?.addEventListener("click", () => toggleCard(tagsCard));
 
+  const systemStatusBody = systemStatusCard.querySelector(".controlpanel-body");
+  const integrityBody = integrityCard.querySelector(".controlpanel-body");
   const codeStatsBody = codeStatsCard.querySelector(".controlpanel-body");
   const backupBody = backupCard.querySelector(".controlpanel-body");
   const whatsNewBody = whatsNewCard.querySelector(".controlpanel-body");
@@ -719,6 +940,39 @@ if (mount) {
   let updateCodesStatus = () => {};
   let addCodeButton = null;
   let addCodeInput = null;
+
+  const loadSystemStatus = async () => {
+    if (!systemStatusBody || !integrityBody) return;
+    renderState(
+      systemStatusBody,
+      text.systemHint,
+      text.systemLoading
+    );
+    renderState(
+      integrityBody,
+      text.integrityHint,
+      text.integrityLoading
+    );
+    try {
+      const response = await getSystemStatusCallable();
+      const data = response?.data || {};
+      renderSystemStatus(systemStatusBody, data);
+      renderIntegrityStatus(integrityBody, data.integrity || {});
+    } catch {
+      renderState(
+        systemStatusBody,
+        text.systemHint,
+        text.systemError,
+        "error"
+      );
+      renderState(
+        integrityBody,
+        text.integrityHint,
+        text.integrityError,
+        "error"
+      );
+    }
+  };
 
   const loadCodes = async () => {
     if (!codesBody) return;
@@ -827,7 +1081,13 @@ if (mount) {
     }
   };
 
-  toggleCard(codeStatsCard);
+  toggleCard(systemStatusCard);
+  if (systemStatusBody) {
+    renderState(systemStatusBody, text.systemHint, text.systemLoading);
+  }
+  if (integrityBody) {
+    renderState(integrityBody, text.integrityHint, text.integrityLoading);
+  }
   if (codeStatsBody) renderState(codeStatsBody, text.codeStatsHint, text.codeStatsLoading);
   if (backupBody) renderState(backupBody, text.backupHint, text.backupLoading);
   if (whatsNewBody) renderState(whatsNewBody, text.whatsNewHint, text.whatsNewLoading);
@@ -849,12 +1109,15 @@ if (mount) {
 
     if (
       !codeStatsBody ||
+      !systemStatusBody ||
+      !integrityBody ||
       !backupBody ||
       !whatsNewBody ||
       !usersBody ||
       !codesBody ||
       !tagsBody
     ) return;
+    await loadSystemStatus();
     await loadCodeStats();
     await loadBackupStatus();
     await loadWhatsNewControl();

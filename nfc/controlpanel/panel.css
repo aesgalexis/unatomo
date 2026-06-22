@@ -79,6 +79,130 @@
   font-size: 14px;
 }
 
+.controlpanel-system-statuses {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px 18px;
+  padding: 2px 0 14px;
+  border-bottom: 1px solid color-mix(in srgb, var(--fg) 9%, transparent);
+}
+
+.controlpanel-system-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+  color: color-mix(in srgb, var(--fg) 76%, transparent);
+  font-size: 13px;
+}
+
+.controlpanel-system-status strong {
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.controlpanel-system-status[data-state="ok"] strong {
+  color: #0f7a3e;
+}
+
+.controlpanel-system-status[data-state="warning"] strong {
+  color: #9a5b00;
+}
+
+.controlpanel-system-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 18px 12px;
+  padding-top: 16px;
+}
+
+.controlpanel-system-metric {
+  min-width: 0;
+  padding-left: 10px;
+  border-left: 2px solid color-mix(in srgb, var(--fg) 14%, transparent);
+  display: grid;
+  gap: 3px;
+}
+
+.controlpanel-system-metric strong {
+  color: var(--fg);
+  font-size: 21px;
+  line-height: 1;
+}
+
+.controlpanel-system-metric span {
+  color: color-mix(in srgb, var(--fg) 68%, transparent);
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+.controlpanel-system-checked {
+  margin: 16px 0 0;
+  text-align: right;
+}
+
+.controlpanel-integrity-summary {
+  padding: 2px 0 12px;
+  border-bottom: 1px solid color-mix(in srgb, var(--fg) 9%, transparent);
+  color: color-mix(in srgb, var(--fg) 82%, transparent);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.controlpanel-integrity-summary[data-state="ok"] {
+  color: #0f7a3e;
+}
+
+.controlpanel-integrity-summary[data-state="warning"] {
+  color: #9a5b00;
+}
+
+.controlpanel-integrity-list {
+  display: grid;
+}
+
+.controlpanel-integrity-item {
+  padding: 11px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--fg) 8%, transparent);
+}
+
+.controlpanel-integrity-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--fg);
+  font-size: 13px;
+}
+
+.controlpanel-integrity-header strong {
+  font-weight: 600;
+}
+
+.controlpanel-integrity-header span {
+  min-width: 1.5rem;
+  text-align: right;
+  color: #9a5b00;
+  font-weight: 700;
+}
+
+.controlpanel-integrity-item p {
+  margin: 5px 0 0;
+  color: color-mix(in srgb, var(--fg) 66%, transparent);
+  font-size: 12px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.controlpanel-integrity-scope {
+  margin: 12px 0 0;
+}
+
+.controlpanel-integrity-scope.is-warning {
+  color: #9a5b00;
+}
+
 .controlpanel-backup-list {
   display: grid;
   gap: 12px;
