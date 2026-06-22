@@ -156,7 +156,7 @@ export const renderTodoView = (container, options = {}) => {
   const input = document.createElement("textarea");
   input.className = "todo-input";
   input.maxLength = MAX_TODO_LENGTH;
-  input.rows = 2;
+  input.rows = 3;
   input.placeholder = t("dashboard.todoPlaceholder", "Añadir pendiente...");
   input.disabled = !canTodo;
   const suggestions = document.createElement("div");
@@ -177,6 +177,12 @@ export const renderTodoView = (container, options = {}) => {
   const renderChips = () => {
     chips.innerHTML = "";
     chips.hidden = selectedRecipients.length === 0;
+    input.placeholder = selectedRecipients.length
+      ? t(
+          "dashboard.todoSharedPlaceholder",
+          "Añadir pendiente compartido..."
+        )
+      : t("dashboard.todoPlaceholder", "Añadir pendiente...");
     selectedRecipients.forEach((person) => {
       const chip = document.createElement("span");
       chip.className = "todo-recipient-chip";
@@ -240,6 +246,10 @@ export const renderTodoView = (container, options = {}) => {
       .filter((person) => (person.mention || "")
         .toLowerCase()
         .startsWith(token.query));
+    if (matches.length === 1 && matches[0].mention === token.query) {
+      selectRecipient(matches[0], token);
+      return;
+    }
     visibleSuggestions = matches.length === 1 ? matches : [];
     suggestions.innerHTML = "";
     suggestions.hidden = visibleSuggestions.length === 0;
@@ -252,21 +262,18 @@ export const renderTodoView = (container, options = {}) => {
       option.setAttribute("role", "option");
       const mention = document.createElement("strong");
       mention.textContent = person.mention.slice(token.query.length);
-      const name = document.createElement("span");
-      name.textContent = person.displayName || person.email || "";
       option.setAttribute(
         "aria-label",
-        `@${person.mention} ${name.textContent}`.trim()
+        `@${person.mention} ${person.displayName || person.email || ""}`.trim()
       );
       option.appendChild(mention);
-      option.appendChild(name);
       option.addEventListener("mousedown", (event) => event.preventDefault());
       option.addEventListener("click", () => selectRecipient(person, token));
       suggestions.appendChild(option);
     });
     if (!suggestions.hidden) {
       const caret = getTextareaCaretPosition(input);
-      const preferredLeft = input.offsetLeft + caret.left + 2;
+      const preferredLeft = input.offsetLeft + caret.left;
       const maxLeft = Math.max(
         8,
         composer.clientWidth - suggestions.offsetWidth - 8
