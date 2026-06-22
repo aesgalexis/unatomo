@@ -179,6 +179,10 @@ body.page .topbar {
   flex: 0 0 auto;
 }
 
+.add-bar > .dashboard-view-menu + .add-search {
+  margin-left: -0.1rem;
+}
+
 .dashboard-view-menu-panel {
   position: absolute;
   top: calc(100% + 0.25rem);
@@ -384,10 +388,34 @@ body.status-incident-open {
   font-weight: 650;
 }
 
+.status-incident-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.status-incident-heading {
+  min-width: 0;
+}
+
 .status-incident-machine {
-  margin: 0.25rem 0 1rem;
+  margin: 0.25rem 0 0;
   color: color-mix(in srgb, var(--fg) 64%, transparent);
   font-size: 0.9rem;
+}
+
+.status-incident-warning-icon {
+  display: inline-flex;
+  width: 3.25rem;
+  height: 3.25rem;
+  color: color-mix(in srgb, var(--fg) 46%, transparent);
+}
+
+.status-incident-warning-icon svg {
+  width: 100%;
+  height: 100%;
 }
 
 .status-incident-form {
@@ -1410,7 +1438,7 @@ body.status-incident-open {
 
 .mc-tooltip {
   position: fixed;
-  z-index: 1200;
+  z-index: 2100;
   padding: 0.25rem 0.5rem;
   border-radius: 0.5rem;
   background: color-mix(in srgb, var(--bg) 92%, transparent);
@@ -1419,6 +1447,13 @@ body.status-incident-open {
   font-size: 0.75rem;
   white-space: nowrap;
   pointer-events: none;
+}
+
+.todo-download-tooltip {
+  width: max-content;
+  max-width: 12.5rem;
+  white-space: normal;
+  text-align: center;
 }
 
 .mc-status:disabled {

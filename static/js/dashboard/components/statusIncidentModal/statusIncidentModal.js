@@ -28,6 +28,23 @@ export const openStatusIncidentModal = ({
     machine.className = "status-incident-machine";
     machine.textContent = machineTitle || t("machine.machine", "Equipo");
 
+    const header = document.createElement("div");
+    header.className = "status-incident-header";
+    const heading = document.createElement("div");
+    heading.className = "status-incident-heading";
+    const warningIcon = document.createElement("span");
+    warningIcon.className = "status-incident-warning-icon";
+    warningIcon.setAttribute("aria-hidden", "true");
+    warningIcon.innerHTML =
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+      'stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' +
+      '<path d="M21.73 18 13.73 4a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>' +
+      '<path d="M12 9v4"/><path d="M12 17h.01"/></svg>';
+    heading.appendChild(title);
+    heading.appendChild(machine);
+    header.appendChild(heading);
+    header.appendChild(warningIcon);
+
     const form = document.createElement("form");
     form.className = "status-incident-form";
 
@@ -185,8 +202,7 @@ export const openStatusIncidentModal = ({
     form.appendChild(imageInput);
     form.appendChild(actions);
 
-    dialog.appendChild(title);
-    dialog.appendChild(machine);
+    dialog.appendChild(header);
     dialog.appendChild(form);
     overlay.appendChild(dialog);
     document.body.appendChild(overlay);

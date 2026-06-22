@@ -35,6 +35,38 @@ const downloadTextFile = (content, filename) => {
   URL.revokeObjectURL(url);
 };
 
+const attachDownloadTooltip = (target) => {
+  if (
+    window.matchMedia &&
+    !window.matchMedia("(hover: hover) and (pointer: fine)").matches
+  ) return;
+
+  let tipEl = null;
+  const hideTip = () => {
+    tipEl?.remove();
+    tipEl = null;
+  };
+  const showTip = () => {
+    hideTip();
+    const label = target.getAttribute("data-tooltip");
+    if (!label) return;
+    document.querySelectorAll(".mc-tooltip").forEach((node) => node.remove());
+    tipEl = document.createElement("div");
+    tipEl.className = "mc-tooltip todo-download-tooltip";
+    tipEl.textContent = label;
+    document.body.appendChild(tipEl);
+    const rect = target.getBoundingClientRect();
+    tipEl.style.top = `${Math.max(8, rect.top - tipEl.offsetHeight - 10)}px`;
+    tipEl.style.left = `${Math.max(8, rect.right - tipEl.offsetWidth)}px`;
+  };
+
+  target.addEventListener("mouseenter", showTip);
+  target.addEventListener("mouseleave", hideTip);
+  target.addEventListener("focus", showTip);
+  target.addEventListener("blur", hideTip);
+  target.addEventListener("click", hideTip);
+};
+
 const buildTodoDownloadText = (items, locale) =>
   items.map((item) => {
     const date = formatDate(item.updatedAt || item.createdAt, locale);
@@ -187,7 +219,8 @@ export const renderTodoView = (container, options = {}) => {
     "Descargar registro completo de tareas"
   );
   download.setAttribute("aria-label", downloadLabel);
-  download.title = downloadLabel;
+  download.setAttribute("data-tooltip", downloadLabel);
+  attachDownloadTooltip(download);
   download.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 3a1 1 0 0 1 1 1v8.59l2.3-2.3a1 1 0 1 1 1.4 1.42l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 0 1 1.4-1.42l2.3 2.3V4a1 1 0 0 1 1-1Zm-7 14a1 1 0 0 1 1 1v2h12v-2a1 1 0 1 1 2 0v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1Z"/></svg>';
   download.addEventListener("click", () => {
     const stamp = new Date().toISOString().slice(0, 10);
