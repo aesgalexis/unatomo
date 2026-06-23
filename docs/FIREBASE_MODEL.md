@@ -119,6 +119,23 @@ frontend wrappers live under `static/js/dashboard/`.
   changes to those two fields so stale dashboard code cannot flatten a saved
   hierarchy.
 
+## Integrity Cleanup Log
+
+### 2026-06-23
+
+- Pre-cleanup backup manifest:
+  `.backups/2026-06-23T18-18-22-860Z-nfc-backup-manifest.json`.
+- Removed two obsolete machine documents, six obsolete Tag records, five
+  orphaned `machine_access` records, three stale administrator links, one stale
+  administrator invitation, the legacy test-machine document, and one orphaned
+  Tag QR object.
+- Post-cleanup backup manifest:
+  `.backups/2026-06-23T18-26-54-456Z-nfc-backup-manifest.json`.
+- Post-cleanup verification reports one intentionally preserved inconsistency:
+  Tag `G-0JKO-0MDR` still points to the machine whose current Tag is
+  `G-8ENK-U32Q` (`Sec. Domus (26kg)`). Resolve this separately only after
+  confirming which physical Tag is authoritative.
+
 ## Tag ID And QR Rules
 
 - Creating or connecting a Tag ID should result in a QR automatically.
