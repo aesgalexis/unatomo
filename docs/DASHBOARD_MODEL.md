@@ -57,10 +57,20 @@ Current scope:
 - Create groups by dragging one machine card onto the center of another card.
 - Render group headers as collapsible sections.
 - Move a machine into an existing group by dropping it onto a card in that group.
-- Create one-level subgroups by dragging a group header onto another group.
+- Nest groups by dragging a group header onto another group, up to depth 2
+  (`root -> child -> grandchild`).
 - Reorder machines with drag and drop in the flat list, ungrouped list, and group bodies.
-- Group headers expose a hover menu for renaming, deleting the group without deleting machines, and adding one empty child group under parent groups.
-- Group records may include `parentGroupId`; nesting deeper than one sublevel is intentionally flattened.
+- Group headers expose a hover menu for renaming, deleting the group without
+  deleting machines, adding a child below levels 0 and 1, and adding a superior
+  group when the existing subtree still fits within the depth limit.
+- Every group uses the same record shape. `parentGroupId` expresses the
+  hierarchy; depth is calculated and is not stored. The normalizer preserves
+  levels 0-2, rejects cycles, and flattens only groups that would exceed depth
+  2. Do not add a separate grandparent field.
+- Group and placement persistence goes through the authenticated
+  `saveDashboardGroupLayout` callable. Direct client changes to `groups` or
+  `placements` are intentionally denied by Firestore rules; this protects the
+  hierarchy from tabs running an older dashboard bundle.
 - `dashboardTitle` stores the user's editable dashboard topbar title, capped at 32 characters. Empty value falls back to `Dashboard`.
 - `tabOrder` stores the global order for machine-card tabs and applies to all machines. It is edited from the Settings/Configuración page preferences card.
 - `machineViewMode` stores whether the dashboard renders saved groups (`grouped`, default) or a flat machine list (`flat`). Flat view never changes group membership or creates groups.
@@ -85,8 +95,13 @@ npm.cmd run check:nfc:architecture
 ```
 
 This reads the latest local Firestore backup and reports invalid
-`dashboard_layout` references such as missing machines, duplicate groups, or
-subgroup nesting deeper than one level.
+`dashboard_layout` references such as missing machines, duplicate groups,
+missing parents, cycles, or nesting deeper than level 2. Run the focused
+hierarchy checks as well:
+
+```powershell
+npm.cmd run check:nfc:group-hierarchy
+```
 
 `check:nfc:architecture` is a source check. It verifies that the dashboard
 bootstrap does not regain responsibilities already extracted into data,

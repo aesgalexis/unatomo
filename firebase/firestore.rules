@@ -110,7 +110,14 @@ service cloud.firestore {
     }
 
     match /dashboard_layout/{uid} {
-      allow read, create, update: if isSignedIn() && request.auth.uid == uid;
+      allow read: if isSignedIn() && request.auth.uid == uid;
+      allow create: if isSignedIn()
+        && request.auth.uid == uid
+        && !request.resource.data.keys().hasAny(["groups", "placements"]);
+      allow update: if isSignedIn()
+        && request.auth.uid == uid
+        && !request.resource.data.diff(resource.data).affectedKeys()
+          .hasAny(["groups", "placements"]);
       allow delete: if false;
     }
 

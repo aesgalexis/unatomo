@@ -31,14 +31,13 @@ const getDropBody = (listEl, target) =>
 
 const getTargetGroup = (target) => target.closest?.(".machine-group") || null;
 
-const isDraggingSubgroup = (dragging) =>
-  !!dragging?.classList?.contains("machine-subgroup");
-
 const getGroupDropBody = (listEl, target, dragging, event) => {
   const body = target.closest?.(".machine-group-body") || null;
   if (!body) return listEl;
+  if (dragging?.contains?.(body)) return listEl;
   const ownerGroup = body.closest?.(".machine-group");
-  if (isDraggingSubgroup(dragging) && ownerGroup && ownerGroup.contains(dragging)) {
+  const draggingDepth = Number(dragging?.dataset?.groupDepth || 0);
+  if (draggingDepth > 0 && ownerGroup && ownerGroup.contains(dragging)) {
     const box = body.getBoundingClientRect();
     if (event.clientX < box.left + 24) return listEl;
   }
@@ -225,9 +224,12 @@ export const initGroupedDragAndDrop = (listEl, callbacks = {}) => {
     if (
       draggedType === "group" &&
       allowGrouping &&
-      !isDraggingSubgroup(dragging) &&
       targetGroup &&
       targetGroup.dataset.groupId !== draggedId &&
+      callbacks.canDropGroupOnGroup?.(
+        draggedId,
+        targetGroup.dataset.groupId || ""
+      ) !== false &&
       isCenterGroupDrop(event, targetGroup)
     ) {
       if (centerTargetGroup !== targetGroup) {
@@ -252,11 +254,7 @@ export const initGroupedDragAndDrop = (listEl, callbacks = {}) => {
       clearCenterTarget();
     }
     if (draggedType === "group") {
-      const body = isDraggingSubgroup(dragging)
-        ? listEl
-        : getGroupDropBody(listEl, event.target, dragging, event);
-      const parentGroup = body.closest?.(".machine-group");
-      if (parentGroup?.dataset.parentGroupId) return;
+      const body = getGroupDropBody(listEl, event.target, dragging, event);
       const afterElement = getDragAfterElement(body, event.clientY);
       if (afterElement == null) body.appendChild(placeholder);
       else body.insertBefore(placeholder, afterElement);
@@ -278,9 +276,9 @@ export const initGroupedDragAndDrop = (listEl, callbacks = {}) => {
       if (
         centerTargetGroup &&
         callbacks.allowGrouping?.() !== false &&
-        !isDraggingSubgroup(draggingGroup) &&
         targetGroupId &&
-        targetGroupId !== draggedId
+        targetGroupId !== draggedId &&
+        callbacks.canDropGroupOnGroup?.(draggedId, targetGroupId) !== false
       ) {
         if (placeholder && placeholder.parentNode) placeholder.parentNode.removeChild(placeholder);
         clearCenterTarget();

@@ -1,4 +1,5 @@
 export const MAX_DASHBOARD_TITLE_LENGTH = 32;
+export const MAX_DASHBOARD_GROUP_DEPTH = 2;
 
 export const DEFAULT_TAB_ORDER = [
   "quehaceres",
@@ -40,6 +41,25 @@ export const normalizeMachineViewMode = (value) =>
 export const normalizeMachineSortMode = (value) =>
   ["manual", "incidents", "name"].includes(value) ? value : "manual";
 
+export const getDashboardGroupDepth = (groups = [], groupId = "") => {
+  const groupById = new Map(groups.map((group) => [group.id, group]));
+  const seen = new Set();
+  let currentId = groupId;
+  let depth = 0;
+  while (currentId) {
+    if (seen.has(currentId)) return MAX_DASHBOARD_GROUP_DEPTH + 1;
+    seen.add(currentId);
+    const parentGroupId = groupById.get(currentId)?.parentGroupId || "";
+    if (!parentGroupId) return depth;
+    depth += 1;
+    currentId = parentGroupId;
+  }
+  return depth;
+};
+
+export const canDashboardGroupHaveChildren = (groups = [], groupId = "") =>
+  getDashboardGroupDepth(groups, groupId) < MAX_DASHBOARD_GROUP_DEPTH;
+
 export const normalizeDashboardLayout = (layout = {}, options = {}) => {
   const groupUntitled = (options.groupUntitled || "Grupo").toString();
   const validMachineIds =
@@ -68,10 +88,22 @@ export const normalizeDashboardLayout = (layout = {}, options = {}) => {
     }
   });
 
-  const groupById = new Map(groups.map((group) => [group.id, group]));
   groups.forEach((group) => {
-    const parent = groupById.get(group.parentGroupId);
-    if (parent?.parentGroupId) group.parentGroupId = "";
+    const seen = new Set([group.id]);
+    let currentId = group.id;
+    let depth = 0;
+    while (currentId) {
+      const parentGroupId = groups.find((entry) => entry.id === currentId)
+        ?.parentGroupId || "";
+      if (!parentGroupId) break;
+      if (seen.has(parentGroupId) || depth >= MAX_DASHBOARD_GROUP_DEPTH) {
+        group.parentGroupId = "";
+        break;
+      }
+      seen.add(parentGroupId);
+      depth += 1;
+      currentId = parentGroupId;
+    }
   });
 
   const placements = {};
