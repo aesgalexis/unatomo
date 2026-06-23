@@ -31,6 +31,7 @@ const saveDashboardGroupLayoutCallable = httpsCallable(
   functions,
   "saveDashboardGroupLayout"
 );
+const deleteMachineCallable = httpsCallable(functions, "deleteMachine");
 
 export const fetchMachines = async (uid) => {
   const q = query(machinesCollection, where("ownerUid", "==", uid));
@@ -216,11 +217,8 @@ export const upsertMachine = async (uid, machine) => {
 };
 
 export const deleteMachine = async (uid, machineId) => {
-  const refs = [doc(db, "machines", machineId)];
-  if (uid) {
-    refs.push(doc(db, "tenants", uid, "machines", machineId));
-  }
-  await Promise.allSettled(refs.map((ref) => deleteDoc(ref)));
+  void uid;
+  await deleteMachineCallable({ machineId });
 };
 
 export const addUserWithRegistry = async (uid, machineId, user, options = {}) => {

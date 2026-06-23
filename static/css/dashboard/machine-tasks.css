@@ -1,0 +1,329 @@
+.task-list {
+  display: grid;
+  gap: 0.22rem;
+}
+
+.task-empty {
+  color: color-mix(in srgb, var(--fg) 70%, transparent);
+  align-items: center;
+  justify-content: center;
+  min-height: 150px;
+  gap: 0.65rem;
+  text-align: center;
+  border-bottom: 0;
+}
+
+.task-empty-icon {
+  width: 68px;
+  height: 68px;
+  display: inline-flex;
+  color: color-mix(in srgb, var(--fg) 34%, transparent);
+}
+
+.task-empty-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.task-empty-text {
+  max-width: 260px;
+}
+
+.task-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.35rem;
+  font-size: 0.9rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.task-item:not(:first-child) {
+  padding-top: 1.05rem;
+}
+
+.task-item.task-empty {
+  display: flex;
+  flex-direction: column;
+}
+
+.task-body,
+.task-inline-forms,
+.task-notes {
+  min-width: 0;
+}
+
+.task-line {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.task-line-main {
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.task-title {
+  color: var(--fg);
+  font-weight: 600;
+}
+
+.task-desc {
+  color: color-mix(in srgb, var(--fg) 85%, transparent);
+  flex: 1;
+  min-width: 0;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.task-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-left: auto;
+  justify-content: flex-end;
+}
+
+.task-remaining {
+  color: color-mix(in srgb, var(--fg) 70%, transparent);
+  font-size: 0.85rem;
+}
+
+.task-pending {
+  color: var(--danger, #d33);
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.task-complete-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--bg) 96%, transparent);
+  color: var(--fg);
+  padding: 0 0.6rem;
+  font: inherit;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.task-complete-text {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+  transform: translateY(-0.04em);
+}
+
+.task-remove-link {
+  color: var(--danger, #d33);
+  font-size: 0.8rem;
+  text-decoration: none;
+  align-self: flex-start;
+}
+
+.task-remove-link:hover {
+  text-decoration: underline;
+}
+
+.task-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.55rem;
+  margin-left: auto;
+}
+
+.task-menu {
+  position: static;
+  transform: translateY(-0.1rem);
+}
+
+.task-actions-left {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  width: 100%;
+  height: 0;
+  margin-bottom: 0.22rem;
+  position: relative;
+  z-index: 1;
+}
+
+.task-actions-left .task-menu {
+  flex-direction: row;
+  transform: translateY(-1.2rem);
+}
+
+.task-actions-left .mc-doc-menu-link {
+  max-width: 0;
+}
+
+.task-actions-left .mc-doc-menu:hover .mc-doc-menu-link,
+.task-actions-left .mc-doc-menu:focus-within .mc-doc-menu-link,
+.task-actions-left .mc-doc-menu.is-open .mc-doc-menu-link {
+  max-width: 8.4rem;
+}
+
+.task-menu .mc-doc-menu-link {
+  border: 0;
+  background: transparent;
+}
+
+.task-inline-forms,
+.task-notes,
+.task-attachments {
+  grid-column: 1 / -1;
+}
+
+.task-note-form,
+.task-edit-form,
+.task-custom-controls {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.task-note-input {
+  flex: 1 1 260px;
+  min-height: 64px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.6rem;
+  background: color-mix(in srgb, var(--bg) 96%, transparent);
+  color: var(--fg);
+  font: inherit;
+  padding: 0.45rem 0.55rem;
+  resize: vertical;
+}
+
+.task-notes,
+.task-attachments {
+  margin-left: 1rem;
+  color: color-mix(in srgb, var(--fg) 78%, transparent);
+}
+
+.task-notes summary,
+.task-attachments summary {
+  cursor: pointer;
+  font-size: 0.82rem;
+  color: color-mix(in srgb, var(--fg) 68%, transparent);
+}
+
+.task-notes-list,
+.task-attachments-list {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 0.35rem;
+  padding-bottom: 0.35rem;
+}
+
+.task-note,
+.task-attachment {
+  border-left: 2px solid var(--border-subtle);
+  padding-left: 0.65rem;
+  line-height: 1.45;
+}
+
+.task-attachment-single {
+  display: flex;
+  gap: 0.35rem;
+  align-items: baseline;
+  font-size: 0.82rem;
+}
+
+.task-attachment-link {
+  color: var(--link, #2563eb);
+  overflow-wrap: anywhere;
+}
+
+.task-custom-controls[hidden] {
+  display: none;
+}
+
+.task-custom-amount {
+  width: 76px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.6rem;
+  background: color-mix(in srgb, var(--bg) 96%, transparent);
+  color: var(--fg);
+  font: inherit;
+  height: 32px;
+  padding: 0.25rem 0.45rem;
+}
+
+.mc-log-item-indent {
+  margin-left: 1rem;
+  padding-left: 0.65rem;
+  border-left: 2px solid var(--border-subtle);
+}
+
+.mc-log-attachment-link,
+.global-registry-attachment-link {
+  color: var(--link, #2563eb);
+  overflow-wrap: anywhere;
+}
+
+.task-form {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.75rem;
+}
+
+.task-title-input {
+  flex: 1 1 200px;
+  min-width: 180px;
+  padding: 0.35rem 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--bg) 96%, transparent);
+  color: var(--fg);
+  font: inherit;
+  height: 32px;
+}
+
+.task-desc-input {
+  flex: 1 1 240px;
+  min-width: 200px;
+  padding: 0.35rem 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--bg) 96%, transparent);
+  color: var(--fg);
+  font: inherit;
+  height: 32px;
+}
+
+.task-frequency-select,
+.task-custom-unit {
+  min-width: 150px;
+  padding: 0 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--bg) 96%, transparent);
+  color: var(--fg);
+  font: inherit;
+  height: 32px;
+  line-height: 30px;
+}
+
+.task-custom-unit {
+  min-width: 110px;
+}
+
+.task-create-btn {
+  border-radius: 0.6rem;
+  border: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--bg) 96%, transparent);
+  color: var(--fg);
+  padding: 0.35rem 0.7rem;
+  font: inherit;
+  cursor: pointer;
+}
+

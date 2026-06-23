@@ -27,7 +27,9 @@ Project-owner-only UI is called `superadmin` in conversation and docs. In code i
 - `static/js/dashboard/tabs/configuracion/`: machine configuration UI.
 - `static/js/dashboard/tags/`: Tag ID URL, QR generation, and disconnect client wrappers.
 - `static/js/qr-print/index.js`: QR print page logic.
-- `static/css/dashboard.css`: dashboard and machine-card styles.
+- `static/css/dashboard.css`: stable dashboard stylesheet manifest.
+- `static/css/dashboard/`: dashboard and machine-card styles split by feature;
+  read `docs/DASHBOARD_CSS.md` before changing file boundaries or import order.
 - `static/css/qr-print.css`: QR print layout and print-specific CSS.
 - `static/js/site/locale.js`: language detection and localized path mapping.
 - `static/js/registro/session-menu.js`: authenticated user menu.
