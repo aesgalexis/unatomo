@@ -26,7 +26,10 @@ Project-owner-only UI is called `superadmin` in conversation and docs. In code i
 - `static/js/site/locale.js`: language detection and localized path mapping.
 - `static/js/registro/session-menu.js`: authenticated user menu.
 - `static/js/sections/novedades.js` and `static/js/sections/whatsNewData.js`: public `Novedades` / `What's new` section.
-- `firebase/functions/src/index.ts`: callable backend functions.
+- `firebase/functions/src/index.ts`: export-only public callable entry point.
+- `firebase/functions/src/core/` and `firebase/functions/src/dashboard/`:
+  shared backend infrastructure and extracted callable domains. Read
+  `docs/FUNCTIONS_ARCHITECTURE.md` before structural Functions work.
 - `scripts/`: local build, static server, publish, syntax, and maintenance scripts.
 - `docs/PRODUCT_NOTES.md`: lightweight product-direction notes from owner conversations; context only, not hard rules.
 
@@ -71,6 +74,10 @@ Project-owner-only UI is called `superadmin` in conversation and docs. In code i
   intentionally reject direct browser writes to dashboard `groups` and
   `placements`.
 - Dashboard architecture is now intentionally split: `index.js` coordinates auth, top-level render, and shared state; extracted modules own live subscriptions, layout mutations, internal view rendering, task/document card hooks, task/history actions, and loading/error helpers.
+- Firebase Functions are split by domain while preserving the callable exports
+  from `firebase/functions/src/index.ts`. Firebase Admin
+  initialization and shared collection refs live in `core/firebase.ts`; do not
+  initialize Admin independently inside domain modules.
 - Run `npm.cmd run check:nfc:architecture` after dashboard architecture changes to catch responsibilities drifting back into `index.js`.
 - Public `Novedades` entries are static and governed by `docs/WHATS_NEW_POLICY.md`. Check `docs/codex-flags.json` before adding entries.
 

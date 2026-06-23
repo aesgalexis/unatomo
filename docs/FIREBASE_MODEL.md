@@ -80,7 +80,10 @@ When the account is full, the dashboard must block plate uploads, manual uploads
 
 ## Callable Functions
 
-Backend callables live in `firebase/functions/src/index.ts`. Common frontend wrappers live under `static/js/dashboard/`.
+Backend callables are exported publicly from
+`firebase/functions/src/index.ts`. Implementations may live in domain modules
+under `firebase/functions/src/`; see `docs/FUNCTIONS_ARCHITECTURE.md`. Common
+frontend wrappers live under `static/js/dashboard/`.
 
 - `assignMachineTag`: assigns an existing Tag ID to a machine and updates access data.
 - `generateMachineTagQr`: generates/stores a QR PNG and writes `tagQrUrl`, `tagQrPath`, `tagQrSize`, `qrUrl`, `qrPath`, and `qrSize` metadata.
