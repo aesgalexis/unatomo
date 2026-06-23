@@ -16,6 +16,12 @@ Project-owner-only UI is called `superadmin` in conversation and docs. In code i
 - `static/js/dashboard/cardHooks/`: machine-card hook installers split by feature area, currently tasks and documents.
 - `static/js/dashboard/history/`: shared history event formatting and grouping helpers.
 - `static/js/dashboard/layout/`: dashboard layout normalization and pure drag/drop layout actions.
+- `static/js/dashboard/runtime/`: dashboard state, session, data, autosave,
+  viewport, title, and mobile runtime controllers.
+- `static/js/dashboard/controllers/`: top-level navigation, loading, ordering,
+  internal-view, topbar, and machine-access controllers.
+- `static/js/dashboard/rendering/`: group/card rendering and machine-card hook
+  installers split by core, Tag ID, users, and management responsibilities.
 - `static/js/dashboard/views/`: dashboard-level views that are not machine-card tabs, such as the global registry.
 - `static/js/dashboard/components/loading/`: dashboard loading, error, timeout, and placeholder helpers.
 - `static/js/dashboard/tabs/configuracion/`: machine configuration UI.
@@ -73,7 +79,10 @@ Project-owner-only UI is called `superadmin` in conversation and docs. In code i
 - Persist group hierarchy through `saveDashboardGroupLayout`; Firestore rules
   intentionally reject direct browser writes to dashboard `groups` and
   `placements`.
-- Dashboard architecture is now intentionally split: `index.js` coordinates auth, top-level render, and shared state; extracted modules own live subscriptions, layout mutations, internal view rendering, task/document card hooks, task/history actions, and loading/error helpers.
+- Dashboard architecture is intentionally split: `index.js` owns bootstrap and
+  dependency composition; runtime, controllers, and rendering modules own
+  session/data state, navigation, layout mutations, internal views, machine
+  cards, hooks, and loading/error behavior.
 - Firebase Functions are split by domain while preserving the callable exports
   from `firebase/functions/src/index.ts`. Firebase Admin
   initialization and shared collection refs live in `core/firebase.ts`; do not
@@ -101,5 +110,7 @@ Updated: 2026-06-16 15:58 Europe/Madrid
 
 - Last successful publish from this workspace pushed commit `5870cdf` to `main`.
 - Owner-requested local browser workflow: unpublished changes are usually tested in Microsoft Edge; published changes are checked in Chrome.
-- Before future task/history work, inspect `static/js/dashboard/tabs/tasks/`, `static/js/dashboard/tabs/historial.js`, and the hooks in `static/js/dashboard/index.js` around task add/edit/remove/complete.
+- Before future task/history work, inspect `static/js/dashboard/tabs/tasks/`,
+  `static/js/dashboard/tabs/historial.js`, and the installers under
+  `static/js/dashboard/rendering/hooks/` and `cardHooks/`.
 - After the 2026-06 architecture pass, task hooks live in `static/js/dashboard/cardHooks/taskHooks.js` and task/history mutations live in `static/js/dashboard/tabs/tasks/taskActions.js`; prefer those before editing `index.js`.
