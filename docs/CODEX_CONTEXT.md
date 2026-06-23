@@ -45,6 +45,11 @@ Project-owner-only UI is called `superadmin` in conversation and docs. In code i
 - The same collaborator flag enables `#/todo`; To Do has no separate admin
   role. Shared To Do items use one document, participant completion, and
   owner-only deletion.
+- Accounts may claim one immutable public `accountHandle` from Settings.
+  Firebase Auth `uid` remains canonical for every durable relationship. To-do
+  mentions prefer account handles and retain the email-local alias only as a
+  compatibility fallback. Do not confuse `account_handles` with the existing
+  machine-user `usernames` collection.
 - The `superadmin` control panel has a `Respaldo` / `Backup` card. It reads `static/data/nfc-backup-status.json`, which is updated by the local NFC backup scripts. Prefer `npm.cmd run backup:nfc:all`; the panel shows its aggregate status, age, included scope, and explicitly pending recovery scopes above the Firestore, Storage, and Firebase Authentication details.
 - The control panel starts with read-only `Estado del sistema` and `Integridad
   de datos` cards backed by the superadmin-only

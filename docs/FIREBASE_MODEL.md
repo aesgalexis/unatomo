@@ -41,7 +41,11 @@ Read this before changing data flows, callable functions, machine ownership, adm
   currently resolve from the local part of an enabled user's email address.
 - `users/{uid}.suggestionsCollaborator`: superadmin-controlled boolean that
   enables both the `Sugerencias` and `To do` views for that user.
-- Account directory/registry collections may exist for account lookup and admin display names; inspect the repo before changing them.
+- `account_directory`: account lookup and display metadata keyed by normalized
+  email.
+- `account_handles`: immutable public account-handle index keyed by normalized
+  handle. It maps one handle to one Firebase Auth `uid` and is separate from
+  `usernames`, which stores machine-local credentials.
 
 Machine documents are stored as metadata on `machines.documents`. The actual files live in Firebase Storage under:
 
@@ -86,7 +90,13 @@ Backend callables live in `firebase/functions/src/index.ts`. Common frontend wra
   `deleteDashboardTodo`: manage private and shared To Do items. Shared
   participants may update completion state; deletion remains owner-only.
 - `listDashboardTodoCollaborators`: returns enabled collaborators for the To Do
-  mention autocomplete; it is available only to To Do users.
+  mention autocomplete; it is available only to To Do users. Account handles
+  are preferred, with the legacy email-local mention retained for accounts
+  that have not claimed a handle.
+- `checkAccountHandleAvailability`, `claimAccountHandle`: validate and reserve
+  an immutable public account handle transactionally in
+  `account_handles/{handle}` and `users/{uid}`. Direct browser writes to the
+  handle index are forbidden.
 - `getControlPanelSystemStatus`: superadmin-only, read-only production overview.
   It reports service availability and product totals, then checks machine
   owners, Tag assignments, `machine_access`, administrator links, pending
@@ -106,6 +116,17 @@ Backend callables live in `firebase/functions/src/index.ts`. Common frontend wra
 - The machine config QR action should take the user to QR print focused on that machine.
 - If a Tag ID is disconnected, the QR must be removed as part of the disconnect flow.
 - Avoid introducing alternate QR creation paths that bypass the canonical callable unless there is a clear reason.
+
+## Account Identity
+
+- Firebase Authentication `uid` is canonical for ownership, permissions,
+  participants, Storage paths, and durable relationships.
+- `accountHandle` is a public lookup and display alias. Resolve it to a `uid`
+  before an operation and persist the `uid`, never the handle, as the durable
+  relationship key.
+- Email remains valid for sign-in, recovery, and legacy invitation flows.
+- Never reuse `usernames` for account handles; that collection belongs to
+  machine-local operational users.
 
 ## Production Safety
 

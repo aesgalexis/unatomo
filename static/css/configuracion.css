@@ -79,6 +79,39 @@
   text-align: right;
 }
 
+.profile-handle-control {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.profile-handle-prefix {
+  color: color-mix(in srgb, var(--fg) 68%, transparent);
+  font-size: 14px;
+}
+
+.profile-handle-input {
+  flex: 0 1 320px;
+  min-width: 0;
+}
+
+.profile-handle-status {
+  min-height: 1.1rem;
+  color: color-mix(in srgb, var(--fg) 62%, transparent);
+  font-size: 12px;
+  text-align: right;
+}
+
+.profile-handle-status[data-state="ok"] {
+  color: #2c974b;
+}
+
+.profile-handle-status[data-state="error"] {
+  color: var(--danger, #d33);
+}
+
 .profile-theme-options {
   display: flex;
   gap: 16px;
@@ -200,6 +233,14 @@
   .profile-input {
     text-align: left;
     max-width: 100%;
+  }
+
+  .profile-handle-control {
+    justify-content: flex-start;
+  }
+
+  .profile-handle-status {
+    text-align: left;
   }
 
   .profile-value {

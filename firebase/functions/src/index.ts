@@ -60,11 +60,40 @@ const tagsCol = () => db.collection("tags");
 const machineAccessCol = () => db.collection("machine_access");
 const dashboardSuggestionsCol = () => db.collection("dashboard_suggestions");
 const dashboardTodosCol = () => db.collection("dashboard_todos");
+const accountHandlesCol = () => db.collection("account_handles");
 const storageBucket = admin.storage().bucket();
 const ACCOUNT_STORAGE_LIMIT_BYTES = 1024 * 1024 * 1024;
 const QR_FALLBACK_BYTES = 4 * 1024;
 
 const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+const ACCOUNT_HANDLE_PATTERN =
+  /^[a-z0-9](?:[a-z0-9._-]{1,28}[a-z0-9])$/;
+const RESERVED_ACCOUNT_HANDLES = new Set([
+  "admin",
+  "administrador",
+  "administrator",
+  "api",
+  "nfc",
+  "root",
+  "sistema",
+  "soporte",
+  "support",
+  "system",
+  "todo",
+  "unatomo",
+  "www",
+]);
+
+const normalizeAccountHandle = (value: unknown) =>
+  (value || "").toString().trim().replace(/^@+/, "").toLowerCase();
+
+const getAccountHandleValidationError = (handle: string) => {
+  if (!ACCOUNT_HANDLE_PATTERN.test(handle) || /[._-]{2}/.test(handle)) {
+    return "handle-invalid";
+  }
+  if (RESERVED_ACCOUNT_HANDLES.has(handle)) return "handle-reserved";
+  return "";
+};
 
 const toSafeStorageSize = (value: unknown) => {
   const parsed = Number(value || 0);
@@ -1153,6 +1182,101 @@ type ControlPanelIntegrityIssue = {
   samples: string[];
 };
 
+export const checkAccountHandleAvailability = onCall(async (request) => {
+  const auth = request.auth;
+  if (!auth) throw new HttpsError("unauthenticated", "auth-required");
+
+  const handle = normalizeAccountHandle(request.data?.handle);
+  const validationError = getAccountHandleValidationError(handle);
+  if (validationError) {
+    return {
+      ok: true,
+      handle,
+      valid: false,
+      available: false,
+      reason: validationError,
+    };
+  }
+
+  const [handleSnap, userSnap] = await Promise.all([
+    accountHandlesCol().doc(handle).get(),
+    db.collection("users").doc(auth.uid).get(),
+  ]);
+  const currentHandle = normalizeAccountHandle(userSnap.data()?.accountHandle);
+  const claimedBy = (handleSnap.data()?.uid || "").toString().trim();
+  return {
+    ok: true,
+    handle,
+    valid: true,
+    available: !handleSnap.exists || claimedBy === auth.uid,
+    owned: currentHandle === handle && claimedBy === auth.uid,
+    reason: handleSnap.exists && claimedBy !== auth.uid ? "handle-taken" : "",
+  };
+});
+
+export const claimAccountHandle = onCall(async (request) => {
+  const auth = request.auth;
+  if (!auth) throw new HttpsError("unauthenticated", "auth-required");
+
+  const handle = normalizeAccountHandle(request.data?.handle);
+  const validationError = getAccountHandleValidationError(handle);
+  if (validationError) {
+    throw new HttpsError("invalid-argument", validationError);
+  }
+
+  const userRef = db.collection("users").doc(auth.uid);
+  const handleRef = accountHandlesCol().doc(handle);
+  const emailLower = normalizeEmail(auth.token?.email || "");
+  const directoryRef = emailLower ?
+    accountDirectoryCol().doc(emailLower) :
+    null;
+  await db.runTransaction(async (tx) => {
+    const [userSnap, handleSnap] = await Promise.all([
+      tx.get(userRef),
+      tx.get(handleRef),
+    ]);
+    if (!userSnap.exists) {
+      throw new HttpsError("failed-precondition", "profile-required");
+    }
+    const currentHandle = normalizeAccountHandle(
+      userSnap.data()?.accountHandle,
+    );
+    const claimedBy = (handleSnap.data()?.uid || "").toString().trim();
+    if (currentHandle && currentHandle !== handle) {
+      throw new HttpsError("failed-precondition", "handle-already-set");
+    }
+    if (handleSnap.exists && claimedBy !== auth.uid) {
+      throw new HttpsError("already-exists", "handle-taken");
+    }
+
+    const now = admin.firestore.FieldValue.serverTimestamp();
+    if (!handleSnap.exists) {
+      tx.create(handleRef, {
+        uid: auth.uid,
+        handle,
+        createdAt: now,
+      });
+    }
+    tx.set(userRef, {
+      accountHandle: handle,
+      accountHandleNormalized: handle,
+      accountHandleCreatedAt: userSnap.data()?.accountHandleCreatedAt || now,
+      updatedAt: now,
+    }, {merge: true});
+    if (directoryRef) {
+      tx.set(directoryRef, {
+        uid: auth.uid,
+        email: auth.token?.email || emailLower,
+        emailLower,
+        accountHandle: handle,
+        updatedAt: now,
+      }, {merge: true});
+    }
+  });
+
+  return {ok: true, handle};
+});
+
 export const getControlPanelSystemStatus = onCall(async (request) => {
   const auth = request.auth;
   if (!auth) throw new HttpsError("unauthenticated", "auth-required");
@@ -1179,6 +1303,8 @@ export const getControlPanelSystemStatus = onCall(async (request) => {
     transfersSnap,
     todosSnap,
     suggestionsSnap,
+    usersSnap,
+    accountHandlesSnap,
     authUsers,
   ] = await Promise.all([
     machinesCol().limit(queryLimit).get(),
@@ -1189,6 +1315,8 @@ export const getControlPanelSystemStatus = onCall(async (request) => {
     transferInvitesCol().limit(queryLimit).get(),
     dashboardTodosCol().limit(queryLimit).get(),
     dashboardSuggestionsCol().limit(queryLimit).get(),
+    db.collection("users").limit(queryLimit).get(),
+    accountHandlesCol().limit(queryLimit).get(),
     listAuthUsers(),
   ]);
 
@@ -1337,6 +1465,51 @@ export const getControlPanelSystemStatus = onCall(async (request) => {
   addIssue("invite-machine-missing", pendingInviteMachineMissing);
   addIssue("transfer-machine-missing", pendingTransferMachineMissing);
 
+  const handleByUid = new Map<string, string[]>();
+  const userProfileByUid = new Map(
+    usersSnap.docs.map((docSnap) => [docSnap.id, docSnap.data() || {}]),
+  );
+  const handleMissingUser: string[] = [];
+  const invalidHandle: string[] = [];
+  const handleProfileMismatch: string[] = [];
+  accountHandlesSnap.forEach((docSnap) => {
+    const data = docSnap.data() || {};
+    const handle = normalizeAccountHandle(data.handle || docSnap.id);
+    const uid = (data.uid || "").toString().trim();
+    if (docSnap.id !== handle || getAccountHandleValidationError(handle)) {
+      invalidHandle.push(docSnap.id);
+    }
+    if (!uid || !authUids.has(uid)) handleMissingUser.push(docSnap.id);
+    if (uid) {
+      const handles = handleByUid.get(uid) || [];
+      handles.push(handle);
+      handleByUid.set(uid, handles);
+      const profileHandle = normalizeAccountHandle(
+        userProfileByUid.get(uid)?.accountHandle,
+      );
+      if (profileHandle !== handle) {
+        handleProfileMismatch.push(`${uid}: @${handle}`);
+      }
+    }
+  });
+  usersSnap.forEach((docSnap) => {
+    const profileHandle = normalizeAccountHandle(docSnap.data()?.accountHandle);
+    if (!profileHandle) return;
+    const indexed = handleByUid.get(docSnap.id) || [];
+    if (!indexed.includes(profileHandle)) {
+      handleProfileMismatch.push(`${docSnap.id}: @${profileHandle}`);
+    }
+  });
+  const duplicateAccountHandles = Array.from(handleByUid.entries())
+    .filter(([, handles]) => handles.length > 1)
+    .map(([uid, handles]) =>
+      `${uid}: ${handles.map((item) => `@${item}`).join(", ")}`,
+    );
+  addIssue("account-handle-invalid", invalidHandle);
+  addIssue("account-handle-user-missing", handleMissingUser);
+  addIssue("account-handle-profile-mismatch", handleProfileMismatch);
+  addIssue("account-handle-duplicate-user", duplicateAccountHandles);
+
   const issueCount = issues.reduce((total, issue) => total + issue.count, 0);
   const pendingTodos = todosSnap.docs.filter(
     (docSnap) => docSnap.data()?.completed !== true,
@@ -1359,6 +1532,8 @@ export const getControlPanelSystemStatus = onCall(async (request) => {
     transfersSnap,
     todosSnap,
     suggestionsSnap,
+    usersSnap,
+    accountHandlesSnap,
   ];
 
   return {
@@ -1371,6 +1546,7 @@ export const getControlPanelSystemStatus = onCall(async (request) => {
     },
     summary: {
       users: authUsers.length,
+      accountHandles: accountHandlesSnap.size,
       machines: machinesSnap.size,
       operationalMachines,
       outOfServiceMachines,
@@ -1434,6 +1610,8 @@ export const listControlPanelUsers = onCall(async (request) => {
     uid: string;
     email: string;
     displayName: string;
+    company: string;
+    accountHandle: string;
     suggestionsCollaborator: boolean;
   }>();
 
@@ -1442,12 +1620,16 @@ export const listControlPanelUsers = onCall(async (request) => {
       uid?: unknown;
       email?: unknown;
       displayName?: unknown;
+      company?: unknown;
+      accountHandle?: unknown;
       suggestionsCollaborator?: unknown;
     },
   ) => {
     const uid = (raw.uid || "").toString().trim();
     const email = (raw.email || "").toString().trim();
     const displayName = (raw.displayName || "").toString().trim();
+    const company = (raw.company || "").toString().trim();
+    const accountHandle = normalizeAccountHandle(raw.accountHandle);
     const key = uid || normalizeEmail(email);
     if (!key) return;
     const current = map.get(key);
@@ -1455,6 +1637,8 @@ export const listControlPanelUsers = onCall(async (request) => {
       uid: uid || (current?.uid || ""),
       email: email || (current?.email || ""),
       displayName: displayName || (current?.displayName || ""),
+      company: company || (current?.company || ""),
+      accountHandle: accountHandle || (current?.accountHandle || ""),
       suggestionsCollaborator:
         typeof raw.suggestionsCollaborator === "boolean" ?
           raw.suggestionsCollaborator :
@@ -1529,12 +1713,21 @@ type DashboardTodoPerson = {
 const getTodoMention = (email: string) =>
   normalizeEmail(email).split("@")[0] || "";
 
-const toDashboardTodoPerson = (user: admin.auth.UserRecord) => ({
+const toDashboardTodoPerson = (
+  user: admin.auth.UserRecord,
+  accountHandle = "",
+) => ({
   uid: user.uid,
   email: normalizeEmail(user.email || ""),
   displayName: (user.displayName || user.email || "").toString().trim(),
-  mention: getTodoMention(user.email || ""),
+  mention: normalizeAccountHandle(accountHandle) ||
+    getTodoMention(user.email || ""),
 });
+
+const getAccountHandleForUid = async (uid: string) => {
+  const snap = await db.collection("users").doc(uid).get();
+  return normalizeAccountHandle(snap.data()?.accountHandle);
+};
 
 const canUserRecordUseDashboardTodo = async (
   user: admin.auth.UserRecord,
@@ -1549,20 +1742,39 @@ const resolveDashboardTodoMentions = async (
   creatorUid: string,
 ) => {
   if (!mentions.length) return [] as DashboardTodoPerson[];
+  if (mentions.length > 10) {
+    throw new HttpsError("invalid-argument", "too-many-todo-mentions");
+  }
   const wanted = new Set(mentions);
   const matches = new Map<string, admin.auth.UserRecord[]>();
+  const resolvedHandles = await Promise.all(
+    mentions.map(async (mention) => {
+      const snap = await accountHandlesCol().doc(mention).get();
+      const uid = (snap.data()?.uid || "").toString().trim();
+      if (!snap.exists || !uid) return null;
+      const user = await admin.auth().getUser(uid).catch(() => null);
+      return user ? {mention, user} : null;
+    }),
+  );
+  resolvedHandles.forEach((match) => {
+    if (!match) return;
+    matches.set(match.mention, [match.user]);
+    wanted.delete(match.mention);
+  });
   let pageToken: string | undefined;
-  do {
-    const page = await admin.auth().listUsers(1000, pageToken);
-    page.users.forEach((user) => {
-      const mention = getTodoMention(user.email || "");
-      if (!wanted.has(mention)) return;
-      const current = matches.get(mention) || [];
-      current.push(user);
-      matches.set(mention, current);
-    });
-    pageToken = page.pageToken;
-  } while (pageToken);
+  if (wanted.size) {
+    do {
+      const page = await admin.auth().listUsers(1000, pageToken);
+      page.users.forEach((user) => {
+        const mention = getTodoMention(user.email || "");
+        if (!wanted.has(mention)) return;
+        const current = matches.get(mention) || [];
+        current.push(user);
+        matches.set(mention, current);
+      });
+      pageToken = page.pageToken;
+    } while (pageToken);
+  }
 
   const people: DashboardTodoPerson[] = [];
   for (const mention of mentions) {
@@ -1580,7 +1792,7 @@ const resolveDashboardTodoMentions = async (
     if (!await canUserRecordUseDashboardTodo(user)) {
       throw new HttpsError("permission-denied", "todo-recipient-disabled");
     }
-    people.push(toDashboardTodoPerson(user));
+    people.push(toDashboardTodoPerson(user, mention));
   }
   return people;
 };
@@ -1612,7 +1824,10 @@ export const listDashboardTodoCollaborators = onCall(async (request) => {
     .where("suggestionsCollaborator", "==", true)
     .get();
   const enabledUids = new Set(enabledSnap.docs.map((docSnap) => docSnap.id));
-  const people: DashboardTodoPerson[] = [];
+  const enabledProfiles = new Map(
+    enabledSnap.docs.map((docSnap) => [docSnap.id, docSnap.data() || {}]),
+  );
+  const eligibleUsers: admin.auth.UserRecord[] = [];
   let pageToken: string | undefined;
   do {
     const page = await admin.auth().listUsers(1000, pageToken);
@@ -1622,11 +1837,18 @@ export const listDashboardTodoCollaborators = onCall(async (request) => {
         token: {email: user.email || ""},
       });
       if (!enabledUids.has(user.uid) && !isSuperadmin) return;
-      const person = toDashboardTodoPerson(user);
-      if (person.mention) people.push(person);
+      eligibleUsers.push(user);
     });
     pageToken = page.pageToken;
   } while (pageToken);
+
+  const people = await Promise.all(eligibleUsers.map(async (user) => {
+    const profile = enabledProfiles.get(user.uid);
+    const accountHandle = normalizeAccountHandle(
+      profile?.accountHandle || await getAccountHandleForUid(user.uid),
+    );
+    return toDashboardTodoPerson(user, accountHandle);
+  }));
 
   people.sort((a, b) => {
     const left = (a.displayName || a.email || a.mention).toLowerCase();
@@ -1733,8 +1955,11 @@ export const createDashboardTodo = onCall(async (request) => {
     .replace(/\s+/g, " ")
     .trim();
   if (!storedText) throw new HttpsError("invalid-argument", "text-required");
-  const creatorRecord = await admin.auth().getUser(auth.uid);
-  const owner = toDashboardTodoPerson(creatorRecord);
+  const [creatorRecord, creatorHandle] = await Promise.all([
+    admin.auth().getUser(auth.uid),
+    getAccountHandleForUid(auth.uid),
+  ]);
+  const owner = toDashboardTodoPerson(creatorRecord, creatorHandle);
   const now = admin.firestore.FieldValue.serverTimestamp();
   const ref = dashboardTodosCol().doc();
   await ref.set({
@@ -2033,6 +2258,7 @@ export const deleteControlPanelUser = onCall(async (request) => {
 
   const [
     accountDirectorySnap,
+    accountHandlesSnap,
     ownerMachinesSnap,
     usernamesSnap,
     tagsSnap,
@@ -2044,6 +2270,7 @@ export const deleteControlPanelUser = onCall(async (request) => {
     legacyMachinesSnap,
   ] = await Promise.all([
     accountDirectoryCol().where("uid", "==", uid).get(),
+    accountHandlesCol().where("uid", "==", uid).get(),
     machinesCol().where("ownerUid", "==", uid).get(),
     db.collection("usernames").where("ownerUid", "==", uid).get(),
     tagsCol().where("tenantId", "==", uid).get(),
@@ -2068,6 +2295,10 @@ export const deleteControlPanelUser = onCall(async (request) => {
   collectUniqueDocRefs(
     refsToDelete,
     accountDirectorySnap.docs.map((docSnap) => docSnap.ref),
+  );
+  collectUniqueDocRefs(
+    refsToDelete,
+    accountHandlesSnap.docs.map((docSnap) => docSnap.ref),
   );
   collectUniqueDocRefs(
     refsToDelete,

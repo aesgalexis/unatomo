@@ -91,6 +91,7 @@ The Firestore backup exports the main NFC collections to JSON:
 - `tags`
 - admin invite/link/transfer collections
 - `users`
+- `account_handles`
 - `usernames`
 - `account_directory`
 - `dashboard_suggestions`

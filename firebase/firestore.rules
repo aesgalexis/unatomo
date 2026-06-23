@@ -101,12 +101,24 @@ service cloud.firestore {
       allow get: if isSignedIn();
       allow list: if false;
 
-      allow create, update: if isSignedIn()
+      allow create: if isSignedIn()
         && request.resource.data.uid == request.auth.uid
         && request.resource.data.emailLower is string
-        && request.resource.data.emailLower == emailLower;
+        && request.resource.data.emailLower == emailLower
+        && !request.resource.data.keys().hasAny(["accountHandle"]);
+
+      allow update: if isSignedIn()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.emailLower is string
+        && request.resource.data.emailLower == emailLower
+        && !request.resource.data.diff(resource.data).affectedKeys()
+          .hasAny(["accountHandle"]);
 
       allow delete: if false;
+    }
+
+    match /account_handles/{handle} {
+      allow read, write: if false;
     }
 
     match /dashboard_layout/{uid} {
