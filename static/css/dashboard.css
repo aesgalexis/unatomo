@@ -1993,7 +1993,7 @@ body.status-incident-open {
   border: 0;
   border-radius: 0;
   background: transparent;
-  color: var(--fg);
+  color: color-mix(in srgb, var(--fg) 76%, transparent);
   display: flex;
   align-items: center;
   gap: 0.65rem;
@@ -2002,6 +2002,12 @@ body.status-incident-open {
   font: inherit;
   cursor: pointer;
   position: relative;
+  transition: color 120ms ease;
+}
+
+.machine-group-header:hover,
+.machine-group[data-collapsed="false"] > .machine-group-header {
+  color: var(--fg);
 }
 
 .machine-group-header:focus-visible {
@@ -2176,6 +2182,13 @@ body.status-incident-open {
 
 #machineList[data-has-ungrouped="true"] .machine-group > .machine-group-body > .machine-card-wrap {
   transform: translateX(var(--group-card-offset-with-ungrouped, 1.2rem));
+}
+
+#machineList[data-has-ungrouped="true"]
+  .machine-group[data-group-depth="0"]
+  > .machine-group-body
+  > .machine-card-wrap {
+  transform: translateX(0);
 }
 
 .mc-manual {
