@@ -24,6 +24,7 @@ const text = {
   systemHealthy: isEn ? "Healthy" : "Correcto",
   systemWarning: isEn ? "Warnings" : "Avisos",
   systemUsers: isEn ? "Users" : "Usuarios",
+  systemAccountHandles: isEn ? "Usernames" : "Nombres de usuario",
   systemMachines: isEn ? "Machines" : "Máquinas",
   systemOperational: isEn ? "Operational" : "Operativas",
   systemOutOfService: isEn ? "Out of service" : "Fuera de servicio",
@@ -204,6 +205,21 @@ const text = {
   login: localizeEsPath("/es/auth/login.html")
 };
 
+Object.assign(text.integrityIssueLabels, {
+  "account-handle-invalid": isEn
+    ? "Invalid account usernames"
+    : "Nombres de usuario no validos",
+  "account-handle-user-missing": isEn
+    ? "Usernames without Auth account"
+    : "Nombres de usuario sin cuenta Auth",
+  "account-handle-profile-mismatch": isEn
+    ? "Username and profile mismatch"
+    : "Nombre de usuario y perfil inconsistentes",
+  "account-handle-duplicate-user": isEn
+    ? "Accounts with multiple usernames"
+    : "Cuentas con varios nombres de usuario"
+});
+
 const listUsersCallable = httpsCallable(functions, "listControlPanelUsers");
 const getSystemStatusCallable = httpsCallable(
   functions,
@@ -337,6 +353,11 @@ const renderSystemStatus = (body, data = {}) => {
   const metrics = document.createElement("div");
   metrics.className = "controlpanel-system-metrics";
   appendSystemMetric(metrics, summary.users, text.systemUsers);
+  appendSystemMetric(
+    metrics,
+    summary.accountHandles,
+    text.systemAccountHandles
+  );
   appendSystemMetric(metrics, summary.machines, text.systemMachines);
   appendSystemMetric(metrics, summary.operationalMachines, text.systemOperational);
   appendSystemMetric(
@@ -473,7 +494,11 @@ const renderUsers = (body, items, handlers = {}) => {
 
     const meta = document.createElement("div");
     meta.className = "controlpanel-user-meta";
-    meta.textContent = item.email || text.noEmail;
+    meta.textContent = [
+      item.accountHandle ? `@${item.accountHandle}` : "",
+      item.email || text.noEmail,
+      item.company || ""
+    ].filter(Boolean).join(" · ");
 
     identity.appendChild(name);
     identity.appendChild(meta);

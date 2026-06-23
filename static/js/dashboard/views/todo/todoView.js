@@ -462,7 +462,9 @@ export const renderTodoView = (container, options = {}) => {
     actions.className = "todo-actions";
     if (item.isShared && item.sharedWith?.length) {
       const people = item.sharedWith
-        .map((person) => person.displayName || person.email || person.mention)
+        .map((person) => person.mention
+          ? `@${person.mention}`
+          : person.displayName || person.email)
         .filter(Boolean);
       const tooltip = t(
         "dashboard.todoSharedWith",
