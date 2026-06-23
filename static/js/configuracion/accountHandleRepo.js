@@ -6,6 +6,7 @@ const checkAvailabilityCallable = httpsCallable(
   "checkAccountHandleAvailability"
 );
 const claimHandleCallable = httpsCallable(functions, "claimAccountHandle");
+const changeHandleCallable = httpsCallable(functions, "changeAccountHandle");
 
 export const normalizeAccountHandle = (value) =>
   (value || "").toString().trim().replace(/^@+/, "").toLowerCase();
@@ -19,6 +20,13 @@ export const checkAccountHandleAvailability = async (handle) => {
 
 export const claimAccountHandle = async (handle) => {
   const response = await claimHandleCallable({
+    handle: normalizeAccountHandle(handle)
+  });
+  return response?.data || {};
+};
+
+export const changeAccountHandle = async (handle) => {
+  const response = await changeHandleCallable({
     handle: normalizeAccountHandle(handle)
   });
   return response?.data || {};

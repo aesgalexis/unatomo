@@ -45,7 +45,9 @@ Project-owner-only UI is called `superadmin` in conversation and docs. In code i
 - The same collaborator flag enables `#/todo`; To Do has no separate admin
   role. Shared To Do items use one document, participant completion, and
   owner-only deletion.
-- Accounts may claim one immutable public `accountHandle` from Settings.
+- Accounts may claim and change a public `accountHandle` from Settings. Previous
+  names remain reserved aliases for the same UID for 90 days and changes are
+  retained internally in `account_handle_history`.
   Firebase Auth `uid` remains canonical for every durable relationship. To-do
   mentions prefer account handles and retain the email-local alias only as a
   compatibility fallback. Do not confuse `account_handles` with the existing

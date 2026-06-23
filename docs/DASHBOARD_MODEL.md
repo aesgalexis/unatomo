@@ -162,10 +162,11 @@ To Do scope:
   `Volver` / `Arriba` page navigation controls.
 - To Do item deletion is available only to the owner through the row's
   three-dot menu. Shared participants can still change completion state.
-- Mention autocomplete prefers each collaborator's immutable public
+- Mention autocomplete prefers each collaborator's current public
   `accountHandle`. Accounts without one continue to use the local part of their
   email during the transition. Shared To Do documents persist participant
-  UIDs; the visible mention is metadata, never the permission key.
+  UIDs; the visible mention is metadata, never the permission key. Previous
+  handles continue resolving to the same UID during their 90-day reservation.
 
 History event contract:
 
