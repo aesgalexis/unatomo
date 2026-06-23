@@ -14,6 +14,7 @@ import { setTopbarNotifications } from "/static/js/notifications/topbar-notifica
 import { calculateStorageUsage, formatBytes, STORAGE_LIMIT_BYTES } from "./storageUsage.js";
 import {
   checkAccountHandleAvailability,
+  changeAccountHandle,
   claimAccountHandle,
   normalizeAccountHandle
 } from "./accountHandleRepo.js";
@@ -41,6 +42,9 @@ const textMap = {
   name: isEn ? "Name" : "Nombre",
   accountHandle: isEn ? "Username" : "Nombre de usuario",
   accountHandleClaim: isEn ? "Confirm" : "Confirmar",
+  accountHandleChange: isEn ? "Change" : "Cambiar",
+  accountHandleSave: isEn ? "Save" : "Guardar",
+  accountHandleCancel: isEn ? "Cancel" : "Cancelar",
   accountHandleAvailable: isEn ? "Available" : "Disponible",
   accountHandleTaken: isEn ? "Not available" : "No disponible",
   accountHandleInvalid: isEn
@@ -54,8 +58,14 @@ const textMap = {
     ? "Unable to confirm the username."
     : "No se ha podido confirmar el nombre de usuario.",
   accountHandleConfirm: isEn
-    ? (handle) => `Confirm @${handle}? It cannot be changed during this phase.`
-    : (handle) => `\u00bfConfirmar @${handle}? No podr\u00e1 cambiarse durante esta fase.`,
+    ? (handle) => `Confirm @${handle}?`
+    : (handle) => `\u00bfConfirmar @${handle}?`,
+  accountHandleChangeConfirm: isEn
+    ? (handle) => `Change to @${handle}? Your previous username will remain reserved for you for 90 days.`
+    : (handle) => `\u00bfCambiar a @${handle}? Tu nombre anterior quedar\u00e1 reservado para ti durante 90 d\u00edas.`,
+  accountHandleCooldown: isEn
+    ? "Wait one minute before changing it again."
+    : "Espera un minuto antes de volver a cambiarlo.",
   company: isEn ? "Company" : "Empresa",
   email: isEn ? "Email" : "Correo electr\u00f3nico",
   createdAt: isEn ? "Created at" : "Fecha de creaci\u00f3n",
@@ -196,6 +206,8 @@ if (mount) {
           <span class="profile-handle-prefix">@</span>
           <input class="profile-input profile-handle-input" id="profile-handle" type="text" maxlength="30" autocomplete="off" spellcheck="false" />
           <button class="profile-mini-btn profile-handle-claim" id="profile-handle-claim" type="button">${textMap.accountHandleClaim}</button>
+          <button class="profile-mini-btn" id="profile-handle-edit" type="button" hidden>${textMap.accountHandleChange}</button>
+          <button class="profile-mini-btn" id="profile-handle-cancel" type="button" hidden>${textMap.accountHandleCancel}</button>
         </div>
         <span class="profile-handle-status" id="profile-handle-status" aria-live="polite"></span>
       </div>
@@ -300,6 +312,8 @@ if (mount) {
   const nameInput = accountBody?.querySelector("#profile-name");
   const handleInput = accountBody?.querySelector("#profile-handle");
   const handleClaim = accountBody?.querySelector("#profile-handle-claim");
+  const handleEdit = accountBody?.querySelector("#profile-handle-edit");
+  const handleCancel = accountBody?.querySelector("#profile-handle-cancel");
   const handleStatus = accountBody?.querySelector("#profile-handle-status");
   const companyInput = accountBody?.querySelector("#profile-company");
   const emailEl = accountBody?.querySelector("#profile-email");
@@ -487,33 +501,46 @@ if (mount) {
       if (state) handleStatus.dataset.state = state;
       else handleStatus.removeAttribute("data-state");
     };
-    const lockHandle = (handle) => {
-      if (handleInput) {
-        handleInput.value = handle;
-        handleInput.disabled = true;
-      }
-      if (handleClaim) handleClaim.hidden = true;
-      setHandleStatus(textMap.accountHandleSaved, "ok");
-    };
-    const currentHandle = normalizeAccountHandle(profile.accountHandle);
-    if (currentHandle) {
-      lockHandle(currentHandle);
-    } else if (handleInput && handleClaim) {
+    let savedHandle = normalizeAccountHandle(profile.accountHandle);
+    if (handleInput && handleClaim && handleEdit && handleCancel) {
       const suggestedHandle = normalizeAccountHandle(
         (user.email || "").split("@")[0]
       );
-      handleInput.value = suggestedHandle;
-      handleClaim.disabled = true;
       let checkTimer = 0;
       let checkedHandle = "";
       let isAvailable = false;
+      const lockHandle = (handle) => {
+        savedHandle = handle;
+        handleInput.value = handle;
+        handleInput.disabled = true;
+        handleClaim.hidden = true;
+        handleCancel.hidden = true;
+        handleEdit.hidden = false;
+        setHandleStatus("");
+      };
+      const startEditing = () => {
+        handleInput.disabled = false;
+        handleInput.value = savedHandle || suggestedHandle;
+        handleClaim.textContent = savedHandle
+          ? textMap.accountHandleSave
+          : textMap.accountHandleClaim;
+        handleClaim.hidden = false;
+        handleClaim.disabled = true;
+        handleCancel.hidden = !savedHandle;
+        handleEdit.hidden = true;
+        checkedHandle = "";
+        isAvailable = false;
+        setHandleStatus("");
+        handleInput.focus();
+        handleInput.select();
+      };
       const renderAvailability = async () => {
         const handle = normalizeAccountHandle(handleInput.value);
         handleInput.value = handle;
         checkedHandle = "";
         isAvailable = false;
         handleClaim.disabled = true;
-        if (!handle) {
+        if (!handle || handle === savedHandle) {
           setHandleStatus("");
           return;
         }
@@ -545,21 +572,28 @@ if (mount) {
         window.clearTimeout(checkTimer);
         checkTimer = window.setTimeout(renderAvailability, 280);
       });
+      handleEdit.addEventListener("click", startEditing);
+      handleCancel.addEventListener("click", () => lockHandle(savedHandle));
       handleClaim.addEventListener("click", async () => {
         const handle = normalizeAccountHandle(handleInput.value);
         if (!isAvailable || checkedHandle !== handle) {
           await renderAvailability();
           return;
         }
-        if (!window.confirm(textMap.accountHandleConfirm(handle))) return;
+        const confirmation = savedHandle
+          ? textMap.accountHandleChangeConfirm(handle)
+          : textMap.accountHandleConfirm(handle);
+        if (!window.confirm(confirmation)) return;
         handleInput.disabled = true;
         handleClaim.disabled = true;
         setHandleStatus(textMap.accountHandleSaving);
         try {
-          const result = await claimAccountHandle(handle);
-          const savedHandle = normalizeAccountHandle(result.handle || handle);
-          profile = {...profile, accountHandle: savedHandle};
-          lockHandle(savedHandle);
+          const result = savedHandle
+            ? await changeAccountHandle(handle)
+            : await claimAccountHandle(handle);
+          const confirmedHandle = normalizeAccountHandle(result.handle || handle);
+          profile = {...profile, accountHandle: confirmedHandle};
+          lockHandle(confirmedHandle);
         } catch (error) {
           handleInput.disabled = false;
           const message = (error?.message || "").toString();
@@ -567,6 +601,8 @@ if (mount) {
             setHandleStatus(textMap.accountHandleTaken, "error");
           } else if (message.includes("handle-reserved")) {
             setHandleStatus(textMap.accountHandleReserved, "error");
+          } else if (message.includes("handle-change-cooldown")) {
+            setHandleStatus(textMap.accountHandleCooldown, "error");
           } else {
             setHandleStatus(textMap.accountHandleError, "error");
           }
@@ -574,7 +610,9 @@ if (mount) {
           checkedHandle = "";
         }
       });
-      renderAvailability();
+      if (savedHandle) lockHandle(savedHandle);
+      else startEditing();
+      if (!savedHandle) renderAvailability();
     }
 
     loadCounts(user.uid);

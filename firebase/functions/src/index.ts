@@ -61,6 +61,7 @@ const machineAccessCol = () => db.collection("machine_access");
 const dashboardSuggestionsCol = () => db.collection("dashboard_suggestions");
 const dashboardTodosCol = () => db.collection("dashboard_todos");
 const accountHandlesCol = () => db.collection("account_handles");
+const accountHandleHistoryCol = () => db.collection("account_handle_history");
 const storageBucket = admin.storage().bucket();
 const ACCOUNT_STORAGE_LIMIT_BYTES = 1024 * 1024 * 1024;
 const QR_FALLBACK_BYTES = 4 * 1024;
@@ -68,6 +69,8 @@ const QR_FALLBACK_BYTES = 4 * 1024;
 const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 const ACCOUNT_HANDLE_PATTERN =
   /^[a-z0-9](?:[a-z0-9._-]{1,28}[a-z0-9])$/;
+const ACCOUNT_HANDLE_RESERVATION_MS = 90 * 24 * 60 * 60 * 1000;
+const ACCOUNT_HANDLE_CHANGE_COOLDOWN_MS = 60 * 1000;
 const RESERVED_ACCOUNT_HANDLES = new Set([
   "admin",
   "administrador",
@@ -94,6 +97,20 @@ const getAccountHandleValidationError = (handle: string) => {
   if (RESERVED_ACCOUNT_HANDLES.has(handle)) return "handle-reserved";
   return "";
 };
+
+const firestoreValueToMillis = (value: unknown) => {
+  if (value && typeof (value as {toMillis?: unknown}).toMillis === "function") {
+    return (value as {toMillis: () => number}).toMillis();
+  }
+  const parsed = new Date((value || "").toString()).getTime();
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
+const isExpiredAccountHandle = (
+  data: FirebaseFirestore.DocumentData,
+  now = Date.now(),
+) => data.status === "reserved" &&
+  firestoreValueToMillis(data.reservedUntil) <= now;
 
 const toSafeStorageSize = (value: unknown) => {
   const parsed = Number(value || 0);
@@ -1203,14 +1220,17 @@ export const checkAccountHandleAvailability = onCall(async (request) => {
     db.collection("users").doc(auth.uid).get(),
   ]);
   const currentHandle = normalizeAccountHandle(userSnap.data()?.accountHandle);
-  const claimedBy = (handleSnap.data()?.uid || "").toString().trim();
+  const handleData = handleSnap.data() || {};
+  const claimedBy = (handleData.uid || "").toString().trim();
+  const expired = handleSnap.exists && isExpiredAccountHandle(handleData);
   return {
     ok: true,
     handle,
     valid: true,
-    available: !handleSnap.exists || claimedBy === auth.uid,
+    available: !handleSnap.exists || claimedBy === auth.uid || expired,
     owned: currentHandle === handle && claimedBy === auth.uid,
-    reason: handleSnap.exists && claimedBy !== auth.uid ? "handle-taken" : "",
+    reason: handleSnap.exists && claimedBy !== auth.uid && !expired ?
+      "handle-taken" : "",
   };
 });
 
@@ -1241,22 +1261,26 @@ export const claimAccountHandle = onCall(async (request) => {
     const currentHandle = normalizeAccountHandle(
       userSnap.data()?.accountHandle,
     );
-    const claimedBy = (handleSnap.data()?.uid || "").toString().trim();
+    const handleData = handleSnap.data() || {};
+    const claimedBy = (handleData.uid || "").toString().trim();
+    const expired = handleSnap.exists && isExpiredAccountHandle(handleData);
     if (currentHandle && currentHandle !== handle) {
       throw new HttpsError("failed-precondition", "handle-already-set");
     }
-    if (handleSnap.exists && claimedBy !== auth.uid) {
+    if (handleSnap.exists && claimedBy !== auth.uid && !expired) {
       throw new HttpsError("already-exists", "handle-taken");
     }
 
     const now = admin.firestore.FieldValue.serverTimestamp();
-    if (!handleSnap.exists) {
-      tx.create(handleRef, {
-        uid: auth.uid,
-        handle,
-        createdAt: now,
-      });
-    }
+    tx.set(handleRef, {
+      uid: auth.uid,
+      handle,
+      status: "active",
+      redirectTo: "",
+      reservedUntil: "",
+      createdAt: claimedBy === auth.uid ? handleData.createdAt || now : now,
+      updatedAt: now,
+    });
     tx.set(userRef, {
       accountHandle: handle,
       accountHandleNormalized: handle,
@@ -1275,6 +1299,102 @@ export const claimAccountHandle = onCall(async (request) => {
   });
 
   return {ok: true, handle};
+});
+
+export const changeAccountHandle = onCall(async (request) => {
+  const auth = request.auth;
+  if (!auth) throw new HttpsError("unauthenticated", "auth-required");
+
+  const nextHandle = normalizeAccountHandle(request.data?.handle);
+  const validationError = getAccountHandleValidationError(nextHandle);
+  if (validationError) {
+    throw new HttpsError("invalid-argument", validationError);
+  }
+
+  const userRef = db.collection("users").doc(auth.uid);
+  const nextHandleRef = accountHandlesCol().doc(nextHandle);
+  const historyRef = accountHandleHistoryCol().doc();
+  const emailLower = normalizeEmail(auth.token?.email || "");
+  const directoryRef = emailLower ?
+    accountDirectoryCol().doc(emailLower) :
+    null;
+  await db.runTransaction(async (tx) => {
+    const userSnap = await tx.get(userRef);
+    if (!userSnap.exists) {
+      throw new HttpsError("failed-precondition", "profile-required");
+    }
+    const userData = userSnap.data() || {};
+    const previousHandle = normalizeAccountHandle(userData.accountHandle);
+    if (!previousHandle) {
+      throw new HttpsError("failed-precondition", "handle-required");
+    }
+    if (previousHandle === nextHandle) return;
+
+    const changedAt = firestoreValueToMillis(userData.accountHandleChangedAt);
+    if (changedAt &&
+        Date.now() - changedAt < ACCOUNT_HANDLE_CHANGE_COOLDOWN_MS) {
+      throw new HttpsError("resource-exhausted", "handle-change-cooldown");
+    }
+
+    const previousHandleRef = accountHandlesCol().doc(previousHandle);
+    const [previousSnap, nextSnap] = await Promise.all([
+      tx.get(previousHandleRef),
+      tx.get(nextHandleRef),
+    ]);
+    const nextData = nextSnap.data() || {};
+    const nextOwnerUid = (nextData.uid || "").toString().trim();
+    const nextExpired = nextSnap.exists && isExpiredAccountHandle(nextData);
+    if (nextSnap.exists && nextOwnerUid !== auth.uid && !nextExpired) {
+      throw new HttpsError("already-exists", "handle-taken");
+    }
+
+    const now = admin.firestore.Timestamp.now();
+    const reservedUntil = admin.firestore.Timestamp.fromMillis(
+      now.toMillis() + ACCOUNT_HANDLE_RESERVATION_MS,
+    );
+    tx.set(previousHandleRef, {
+      uid: auth.uid,
+      handle: previousHandle,
+      status: "reserved",
+      redirectTo: nextHandle,
+      reservedUntil,
+      createdAt: previousSnap.data()?.createdAt || now,
+      updatedAt: now,
+    });
+    tx.set(nextHandleRef, {
+      uid: auth.uid,
+      handle: nextHandle,
+      status: "active",
+      redirectTo: "",
+      reservedUntil: "",
+      createdAt: nextOwnerUid === auth.uid ? nextData.createdAt || now : now,
+      updatedAt: now,
+    });
+    tx.set(userRef, {
+      accountHandle: nextHandle,
+      accountHandleNormalized: nextHandle,
+      accountHandleChangedAt: now,
+      updatedAt: now,
+    }, {merge: true});
+    if (directoryRef) {
+      tx.set(directoryRef, {
+        uid: auth.uid,
+        email: auth.token?.email || emailLower,
+        emailLower,
+        accountHandle: nextHandle,
+        updatedAt: now,
+      }, {merge: true});
+    }
+    tx.create(historyRef, {
+      uid: auth.uid,
+      previousHandle,
+      newHandle: nextHandle,
+      changedAt: now,
+      reservedUntil,
+    });
+  });
+
+  return {ok: true, handle: nextHandle};
 });
 
 export const getControlPanelSystemStatus = onCall(async (request) => {
@@ -1472,14 +1592,35 @@ export const getControlPanelSystemStatus = onCall(async (request) => {
   const handleMissingUser: string[] = [];
   const invalidHandle: string[] = [];
   const handleProfileMismatch: string[] = [];
+  const reservedHandleMissingExpiry: string[] = [];
+  const reservedHandleBrokenRedirect: string[] = [];
+  const handleDocs = new Map(
+    accountHandlesSnap.docs.map((docSnap) => [
+      docSnap.id,
+      docSnap.data() || {},
+    ]),
+  );
   accountHandlesSnap.forEach((docSnap) => {
     const data = docSnap.data() || {};
     const handle = normalizeAccountHandle(data.handle || docSnap.id);
     const uid = (data.uid || "").toString().trim();
+    const status = data.status === "reserved" ? "reserved" : "active";
     if (docSnap.id !== handle || getAccountHandleValidationError(handle)) {
       invalidHandle.push(docSnap.id);
     }
     if (!uid || !authUids.has(uid)) handleMissingUser.push(docSnap.id);
+    if (status === "reserved") {
+      const redirectTo = normalizeAccountHandle(data.redirectTo);
+      const redirectData = handleDocs.get(redirectTo) || {};
+      if (!firestoreValueToMillis(data.reservedUntil)) {
+        reservedHandleMissingExpiry.push(docSnap.id);
+      }
+      if (!redirectTo ||
+          (redirectData.uid || "").toString().trim() !== uid) {
+        reservedHandleBrokenRedirect.push(docSnap.id);
+      }
+      return;
+    }
     if (uid) {
       const handles = handleByUid.get(uid) || [];
       handles.push(handle);
@@ -1509,6 +1650,11 @@ export const getControlPanelSystemStatus = onCall(async (request) => {
   addIssue("account-handle-user-missing", handleMissingUser);
   addIssue("account-handle-profile-mismatch", handleProfileMismatch);
   addIssue("account-handle-duplicate-user", duplicateAccountHandles);
+  addIssue(
+    "account-handle-reservation-missing-expiry",
+    reservedHandleMissingExpiry,
+  );
+  addIssue("account-handle-broken-redirect", reservedHandleBrokenRedirect);
 
   const issueCount = issues.reduce((total, issue) => total + issue.count, 0);
   const pendingTodos = todosSnap.docs.filter(
@@ -1729,6 +1875,22 @@ const getAccountHandleForUid = async (uid: string) => {
   return normalizeAccountHandle(snap.data()?.accountHandle);
 };
 
+const getAccountHandlesForUids = async (uids: string[]) => {
+  const uniqueUids = Array.from(new Set(uids.filter(Boolean)));
+  const handles = new Map<string, string>();
+  for (let index = 0; index < uniqueUids.length; index += 100) {
+    const chunk = uniqueUids.slice(index, index + 100);
+    const snaps = await db.getAll(
+      ...chunk.map((uid) => db.collection("users").doc(uid)),
+    );
+    snaps.forEach((snap) => {
+      const handle = normalizeAccountHandle(snap.data()?.accountHandle);
+      if (handle) handles.set(snap.id, handle);
+    });
+  }
+  return handles;
+};
+
 const canUserRecordUseDashboardTodo = async (
   user: admin.auth.UserRecord,
 ) => {
@@ -1750,8 +1912,11 @@ const resolveDashboardTodoMentions = async (
   const resolvedHandles = await Promise.all(
     mentions.map(async (mention) => {
       const snap = await accountHandlesCol().doc(mention).get();
-      const uid = (snap.data()?.uid || "").toString().trim();
-      if (!snap.exists || !uid) return null;
+      const handleData = snap.data() || {};
+      const uid = (handleData.uid || "").toString().trim();
+      if (!snap.exists || !uid || isExpiredAccountHandle(handleData)) {
+        return null;
+      }
       const user = await admin.auth().getUser(uid).catch(() => null);
       return user ? {mention, user} : null;
     }),
@@ -1792,7 +1957,8 @@ const resolveDashboardTodoMentions = async (
     if (!await canUserRecordUseDashboardTodo(user)) {
       throw new HttpsError("permission-denied", "todo-recipient-disabled");
     }
-    people.push(toDashboardTodoPerson(user, mention));
+    const currentHandle = await getAccountHandleForUid(user.uid);
+    people.push(toDashboardTodoPerson(user, currentHandle || mention));
   }
   return people;
 };
@@ -1889,6 +2055,15 @@ export const listDashboardTodos = onCall(async (request) => {
   [...ownedSnap.docs, ...sharedSnap.docs].forEach((docSnap) => {
     todoDocs.set(docSnap.id, docSnap);
   });
+  const participantUids = Array.from(todoDocs.values()).flatMap((docSnap) => {
+    const data = docSnap.data() || {};
+    const recipients = Array.isArray(data.sharedWith) ? data.sharedWith : [];
+    return [
+      (data.ownerUid || "").toString(),
+      ...recipients.map((person) => (person?.uid || "").toString()),
+    ];
+  });
+  const currentHandles = await getAccountHandlesForUids(participantUids);
   const items = Array.from(todoDocs.values()).map((docSnap) => {
     const data = docSnap.data() || {};
     const owner = normalizeDashboardTodoPerson(data.owner);
@@ -1897,6 +2072,14 @@ export const listDashboardTodos = onCall(async (request) => {
         .map(normalizeDashboardTodoPerson)
         .filter((person): person is DashboardTodoPerson => !!person) :
       [];
+    if (owner && currentHandles.has(owner.uid)) {
+      owner.mention = currentHandles.get(owner.uid) || owner.mention;
+    }
+    recipients.forEach((person) => {
+      if (currentHandles.has(person.uid)) {
+        person.mention = currentHandles.get(person.uid) || person.mention;
+      }
+    });
     const sharedWith = data.ownerUid === auth.uid ?
       recipients :
       [owner, ...recipients]
@@ -2259,6 +2442,7 @@ export const deleteControlPanelUser = onCall(async (request) => {
   const [
     accountDirectorySnap,
     accountHandlesSnap,
+    accountHandleHistorySnap,
     ownerMachinesSnap,
     usernamesSnap,
     tagsSnap,
@@ -2271,6 +2455,7 @@ export const deleteControlPanelUser = onCall(async (request) => {
   ] = await Promise.all([
     accountDirectoryCol().where("uid", "==", uid).get(),
     accountHandlesCol().where("uid", "==", uid).get(),
+    accountHandleHistoryCol().where("uid", "==", uid).get(),
     machinesCol().where("ownerUid", "==", uid).get(),
     db.collection("usernames").where("ownerUid", "==", uid).get(),
     tagsCol().where("tenantId", "==", uid).get(),
@@ -2299,6 +2484,10 @@ export const deleteControlPanelUser = onCall(async (request) => {
   collectUniqueDocRefs(
     refsToDelete,
     accountHandlesSnap.docs.map((docSnap) => docSnap.ref),
+  );
+  collectUniqueDocRefs(
+    refsToDelete,
+    accountHandleHistorySnap.docs.map((docSnap) => docSnap.ref),
   );
   collectUniqueDocRefs(
     refsToDelete,

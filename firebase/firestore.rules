@@ -121,6 +121,10 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    match /account_handle_history/{entryId} {
+      allow read, write: if false;
+    }
+
     match /dashboard_layout/{uid} {
       allow read: if isSignedIn() && request.auth.uid == uid;
       allow create: if isSignedIn()

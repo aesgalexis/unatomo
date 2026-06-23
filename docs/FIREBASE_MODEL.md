@@ -43,9 +43,12 @@ Read this before changing data flows, callable functions, machine ownership, adm
   enables both the `Sugerencias` and `To do` views for that user.
 - `account_directory`: account lookup and display metadata keyed by normalized
   email.
-- `account_handles`: immutable public account-handle index keyed by normalized
-  handle. It maps one handle to one Firebase Auth `uid` and is separate from
-  `usernames`, which stores machine-local credentials.
+- `account_handles`: public account-handle index keyed by normalized handle.
+  Active names and 90-day reserved aliases map to one Firebase Auth `uid`.
+- `account_handle_history`: permanent internal audit of account-handle changes.
+  It is not exposed in account settings.
+  Both collections are separate from `usernames`, which stores machine-local
+  credentials.
 
 Machine documents are stored as metadata on `machines.documents`. The actual files live in Firebase Storage under:
 
@@ -93,10 +96,10 @@ Backend callables live in `firebase/functions/src/index.ts`. Common frontend wra
   mention autocomplete; it is available only to To Do users. Account handles
   are preferred, with the legacy email-local mention retained for accounts
   that have not claimed a handle.
-- `checkAccountHandleAvailability`, `claimAccountHandle`: validate and reserve
-  an immutable public account handle transactionally in
-  `account_handles/{handle}` and `users/{uid}`. Direct browser writes to the
-  handle index are forbidden.
+- `checkAccountHandleAvailability`, `claimAccountHandle`,
+  `changeAccountHandle`: validate, claim, and change public account handles.
+  Changes are transactional, reserve the previous alias for its owner for 90
+  days, and write `account_handle_history`. Direct browser writes are forbidden.
 - `getControlPanelSystemStatus`: superadmin-only, read-only production overview.
   It reports service availability and product totals, then checks machine
   owners, Tag assignments, `machine_access`, administrator links, pending

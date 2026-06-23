@@ -217,7 +217,13 @@ Object.assign(text.integrityIssueLabels, {
     : "Nombre de usuario y perfil inconsistentes",
   "account-handle-duplicate-user": isEn
     ? "Accounts with multiple usernames"
-    : "Cuentas con varios nombres de usuario"
+    : "Cuentas con varios nombres de usuario",
+  "account-handle-reservation-missing-expiry": isEn
+    ? "Reserved usernames without expiry"
+    : "Nombres reservados sin caducidad",
+  "account-handle-broken-redirect": isEn
+    ? "Broken username redirects"
+    : "Redirecciones de nombres de usuario rotas"
 });
 
 const listUsersCallable = httpsCallable(functions, "listControlPanelUsers");

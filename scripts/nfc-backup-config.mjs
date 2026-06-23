@@ -8,6 +8,7 @@ export const NFC_FIRESTORE_COLLECTIONS = [
   "machine_transfer_invites",
   "users",
   "account_handles",
+  "account_handle_history",
   "usernames",
   "account_directory",
   "dashboard_suggestions",
