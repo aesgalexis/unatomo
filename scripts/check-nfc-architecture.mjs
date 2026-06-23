@@ -1,4 +1,5 @@
 import { existsSync, readFileSync } from "node:fs";
+import { build } from "esbuild";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -26,7 +27,19 @@ const requiredFiles = [
   "firebase/functions/src/dashboard/todos.ts",
   "firebase/functions/src/machines/adminInvites.ts",
   "firebase/functions/src/machines/tags.ts",
-  "firebase/functions/src/machines/transfers.ts"
+  "firebase/functions/src/machines/transfers.ts",
+  "static/js/dashboard/controllers/dashboardInternalViewController.js",
+  "static/js/dashboard/controllers/dashboardLoadController.js",
+  "static/js/dashboard/controllers/dashboardNavigationController.js",
+  "static/js/dashboard/controllers/dashboardOrderingController.js",
+  "static/js/dashboard/controllers/dashboardTopbarController.js",
+  "static/js/dashboard/controllers/machineAccessController.js",
+  "static/js/dashboard/rendering/dashboardRenderer.js",
+  "static/js/dashboard/rendering/groupSectionRenderer.js",
+  "static/js/dashboard/rendering/machineCardRenderer.js",
+  "static/js/dashboard/runtime/dashboardDataController.js",
+  "static/js/dashboard/runtime/dashboardSession.js",
+  "static/js/dashboard/runtime/dashboardState.js"
 ];
 
 const checks = [];
@@ -34,6 +47,36 @@ const checks = [];
 const addCheck = (ok, message) => {
   checks.push({ ok, message });
 };
+
+let dashboardModuleGraphOk = true;
+try {
+  await build({
+    entryPoints: [path.join(ROOT, "static/js/dashboard/index.js")],
+    bundle: true,
+    format: "esm",
+    platform: "browser",
+    write: false,
+    logLevel: "silent",
+    plugins: [{
+      name: "dashboard-root-imports",
+      setup(buildApi) {
+        buildApi.onResolve({ filter: /^\// }, (args) => ({
+          path: path.join(ROOT, args.path.slice(1))
+        }));
+        buildApi.onResolve({ filter: /^https:\/\// }, (args) => ({
+          path: args.path,
+          external: true
+        }));
+      }
+    }]
+  });
+} catch {
+  dashboardModuleGraphOk = false;
+}
+addCheck(
+  dashboardModuleGraphOk,
+  "dashboard ES module graph resolves with valid named exports"
+);
 
 requiredFiles.forEach((relativePath) => {
   addCheck(existsSync(path.join(ROOT, relativePath)), `required file exists: ${relativePath}`);
@@ -45,6 +88,24 @@ const documentHooks = read("static/js/dashboard/cardHooks/documentHooks.js");
 const dashboardSubscriptions = read("static/js/dashboard/data/dashboardSubscriptions.js");
 const taskActions = read("static/js/dashboard/tabs/tasks/taskActions.js");
 const functionsIndex = read("firebase/functions/src/index.ts");
+
+addCheck(
+  indexJs.split(/\r?\n/).length <= 900,
+  "dashboard index.js remains below 900 lines"
+);
+[
+  "createMachineCard(",
+  "installDocumentHooks(",
+  "installTaskHooks(",
+  "renderRegistryDashboardView(",
+  "renderSuggestionsDashboardView(",
+  "renderTodoDashboardView("
+].forEach((needle) => {
+  addCheck(
+    !indexJs.includes(needle),
+    `dashboard index.js does not own extracted rendering primitive: ${needle}`
+  );
+});
 
 addCheck(
   !functionsIndex.includes("onCall("),

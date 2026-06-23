@@ -2,7 +2,13 @@
 
 ## Entry Points
 
-- `static/js/dashboard/index.js`: dashboard bootstrap, auth handling, machine loading, draft state, hooks passed into machine cards, auto-save, and Firebase client operations.
+- `static/js/dashboard/index.js`: dashboard bootstrap and dependency composition.
+- `static/js/dashboard/runtime/`: session, state, data coordination, autosave,
+  title, viewport, mobile behavior, sorting, and local ordering cache.
+- `static/js/dashboard/controllers/`: navigation, loading, topbar, ordering,
+  internal views, and machine-access invitation coordination.
+- `static/js/dashboard/rendering/`: dashboard/group/card rendering and
+  feature-scoped machine-card hook installers.
 - `static/js/dashboard/data/`: live dashboard data subscriptions extracted from the bootstrap file. `dashboardSubscriptions.js` owns owner/admin/invite listeners, and `machineAccessSync.js` owns `machine_access` listeners for Tag ID operational patches.
 - `static/js/dashboard/machineCardTemplate.js`: card creation entry.
 - `static/js/dashboard/tabs/`: individual tab renderers.
@@ -192,7 +198,11 @@ Task implementation files:
 - `static/js/dashboard/tabs/tasks/tasksTime.js`: frequency and due/overdue calculation, including custom frequency.
 - `static/js/dashboard/cardHooks/taskHooks.js`: machine-card task hooks for create, remove, note, edit, and complete actions.
 - `static/js/dashboard/tabs/historial.js`: history rendering. Task notes, task completion/edit events, and the status-linked return to `operativa` are grouped under the original task-created log when the log has a matching `taskId`; title fallback exists for older records.
-- `static/js/dashboard/index.js`: still coordinates the machine-card render loop and passes shared state/dependencies into task hooks.
+- `static/js/dashboard/rendering/dashboardRenderer.js`: coordinates the
+  machine-card render loop.
+- `static/js/dashboard/rendering/hooks/machineCardCoreHooks.js` installs the
+  core/status/document hooks; `static/js/dashboard/cardHooks/taskHooks.js`
+  remains the task-specific mutation adapter.
 
 When creating task-related logs, include `taskId` whenever possible. This keeps history notes attached below the corresponding task creation record instead of appearing as independent chronological entries. Status-linked restore task logs should also carry `source: "status-out-of-service"` and `statusCycleId` so the global registry can keep the full operational cycle together.
 
