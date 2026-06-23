@@ -925,9 +925,9 @@ if (mount) {
   const usersCard = createCard(text.usersTitle);
   const codesCard = createCard(text.codesTitle);
   const tagsCard = createCard(text.tagsTitle);
+  wrap.appendChild(codeStatsCard);
   wrap.appendChild(systemStatusCard);
   wrap.appendChild(integrityCard);
-  wrap.appendChild(codeStatsCard);
   wrap.appendChild(backupCard);
   wrap.appendChild(whatsNewCard);
   wrap.appendChild(usersCard);
@@ -1112,7 +1112,7 @@ if (mount) {
     }
   };
 
-  toggleCard(systemStatusCard);
+  toggleCard(codeStatsCard);
   if (systemStatusBody) {
     renderState(systemStatusBody, text.systemHint, text.systemLoading);
   }

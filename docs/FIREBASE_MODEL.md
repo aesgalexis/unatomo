@@ -88,6 +88,10 @@ frontend wrappers live under `static/js/dashboard/`.
 - `assignMachineTag`: assigns an existing Tag ID to a machine and updates access data.
 - `generateMachineTagQr`: generates/stores a QR PNG and writes `tagQrUrl`, `tagQrPath`, `tagQrSize`, `qrUrl`, `qrPath`, and `qrSize` metadata.
 - `disconnectMachineTag`: disconnects Tag ID data and deletes the associated QR file/path. Preserve this cleanup behavior.
+- `deleteMachine`: owner-only machine deletion. It removes the canonical and
+  legacy machine documents plus associated Tags, access records, administrator
+  links, invitations, transfer invitations, document files, and Tag QR files.
+  Do not restore direct client-side machine deletion.
 - `setControlPanelUserCollaborator`: superadmin-only toggle for suggestion collaborators.
 - `createDashboardSuggestion`: creates a suggestion for `superadmin` or an enabled collaborator.
 - `listDashboardSuggestions`: lists own suggestions for collaborators and all suggestions for `superadmin`.

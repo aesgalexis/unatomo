@@ -26,6 +26,7 @@ const requiredFiles = [
   "firebase/functions/src/dashboard/suggestions.ts",
   "firebase/functions/src/dashboard/todos.ts",
   "firebase/functions/src/machines/adminInvites.ts",
+  "firebase/functions/src/machines/deleteMachine.ts",
   "firebase/functions/src/machines/tags.ts",
   "firebase/functions/src/machines/transfers.ts",
   "static/js/dashboard/controllers/dashboardInternalViewController.js",
@@ -39,7 +40,19 @@ const requiredFiles = [
   "static/js/dashboard/rendering/machineCardRenderer.js",
   "static/js/dashboard/runtime/dashboardDataController.js",
   "static/js/dashboard/runtime/dashboardSession.js",
-  "static/js/dashboard/runtime/dashboardState.js"
+  "static/js/dashboard/runtime/dashboardState.js",
+  "static/css/dashboard/shell.css",
+  "static/css/dashboard/incident-modal.css",
+  "static/css/dashboard/registry.css",
+  "static/css/dashboard/suggestions.css",
+  "static/css/dashboard/todo.css",
+  "static/css/dashboard/loading.css",
+  "static/css/dashboard/machine-base.css",
+  "static/css/dashboard/machine-documents.css",
+  "static/css/dashboard/machine-config.css",
+  "static/css/dashboard/machine-tasks.css",
+  "static/css/dashboard/machine-login.css",
+  "static/css/dashboard/responsive.css"
 ];
 
 const checks = [];
@@ -78,6 +91,28 @@ addCheck(
   "dashboard ES module graph resolves with valid named exports"
 );
 
+let dashboardCssGraphOk = true;
+try {
+  await build({
+    entryPoints: [path.join(ROOT, "static/css/dashboard.css")],
+    bundle: true,
+    minify: true,
+    write: false,
+    logLevel: "silent",
+    plugins: [{
+      name: "dashboard-css-root-imports",
+      setup(buildApi) {
+        buildApi.onResolve({ filter: /^\// }, (args) => ({
+          path: path.join(ROOT, args.path.slice(1))
+        }));
+      }
+    }]
+  });
+} catch {
+  dashboardCssGraphOk = false;
+}
+addCheck(dashboardCssGraphOk, "dashboard CSS import graph resolves");
+
 requiredFiles.forEach((relativePath) => {
   addCheck(existsSync(path.join(ROOT, relativePath)), `required file exists: ${relativePath}`);
 });
@@ -88,6 +123,36 @@ const documentHooks = read("static/js/dashboard/cardHooks/documentHooks.js");
 const dashboardSubscriptions = read("static/js/dashboard/data/dashboardSubscriptions.js");
 const taskActions = read("static/js/dashboard/tabs/tasks/taskActions.js");
 const functionsIndex = read("firebase/functions/src/index.ts");
+const dashboardCssManifest = read("static/css/dashboard.css");
+const dashboardCssImports = [
+  "/static/css/effects/inactive_sections/inactive.css",
+  "/static/css/components/dashboard-section-nav.css",
+  "/static/css/dashboard/shell.css",
+  "/static/css/dashboard/incident-modal.css",
+  "/static/css/dashboard/registry.css",
+  "/static/css/dashboard/suggestions.css",
+  "/static/css/dashboard/todo.css",
+  "/static/css/dashboard/loading.css",
+  "/static/css/dashboard/machine-base.css",
+  "/static/css/dashboard/machine-documents.css",
+  "/static/css/dashboard/machine-config.css",
+  "/static/css/dashboard/machine-tasks.css",
+  "/static/css/dashboard/machine-login.css",
+  "/static/css/dashboard/responsive.css"
+];
+const actualDashboardCssImports = Array.from(
+  dashboardCssManifest.matchAll(/@import\s+["']([^"']+)["'];/g),
+  (match) => match[1]
+);
+addCheck(
+  JSON.stringify(actualDashboardCssImports) === JSON.stringify(dashboardCssImports),
+  "dashboard CSS manifest preserves canonical import order"
+);
+addCheck(
+  dashboardCssManifest.split(/\r?\n/).filter((line) => line.trim()).length ===
+    dashboardCssImports.length,
+  "dashboard.css remains an import-only manifest"
+);
 
 addCheck(
   indexJs.split(/\r?\n/).length <= 900,
@@ -123,8 +188,8 @@ const callableExports = Array.from(
   .map((name) => name.trim())
   .filter(Boolean);
 addCheck(
-  callableExports.length === 34 && new Set(callableExports).size === 34,
-  "Functions index.ts preserves 34 unique callable exports"
+  callableExports.length === 35 && new Set(callableExports).size === 35,
+  "Functions index.ts preserves 35 unique callable exports"
 );
 
 [

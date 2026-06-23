@@ -14,6 +14,10 @@
 - `static/js/dashboard/tabs/`: individual tab renderers.
 - `static/js/dashboard/tabs/configuracion/`: configuration tab modules.
 - `static/js/dashboard/i18n.js`: dashboard copy for Spanish and English.
+- `static/css/dashboard.css`: stable import-only stylesheet entry point.
+- `static/css/dashboard/`: dashboard styles split by shell, internal view,
+  machine-card feature, and responsive responsibility. See
+  `docs/DASHBOARD_CSS.md` before moving rules or imports.
 
 ## Machine Config
 

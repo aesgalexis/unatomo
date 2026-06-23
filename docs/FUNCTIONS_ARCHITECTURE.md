@@ -115,3 +115,13 @@ must not be used as source files.
 - Reduced `index.ts` to the stable export-only boundary for all 34 callables.
 - Added architecture checks that require the domain modules, reject callable
   implementations in `index.ts`, cap its size, and verify 34 unique exports.
+
+### 2026-06-23 - Safe machine deletion
+
+- Added the authenticated `deleteMachine` callable. Only the machine owner can
+  invoke it.
+- Machine deletion now clears the canonical and legacy machine documents,
+  associated Tags, access records, administrator links, invitations, transfer
+  invitations, document files, and Tag QR files.
+- The dashboard no longer performs a partial client-side machine deletion.
+- The public callable boundary now contains 35 exports.

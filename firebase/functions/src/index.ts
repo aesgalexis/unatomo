@@ -50,6 +50,7 @@ export {
   generateMachineTagQr,
   listControlPanelTags,
 } from "./machines/tags";
+export {deleteMachine} from "./machines/deleteMachine";
 
 // Firebase Admin initialization and global runtime options are centralized in
 // core/firebase.ts. Keep this file as the stable public export boundary while

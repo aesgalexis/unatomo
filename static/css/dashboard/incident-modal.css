@@ -1,0 +1,210 @@
+.status-incident-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1400;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  background: color-mix(in srgb, #000 52%, transparent);
+  overscroll-behavior: contain;
+  touch-action: none;
+}
+
+.status-incident-dialog {
+  width: min(560px, 100%);
+  max-height: min(86vh, 720px);
+  overflow: auto;
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.9rem;
+  background: var(--panel-bg);
+  color: var(--fg);
+  box-shadow: 0 20px 58px color-mix(in srgb, #000 32%, transparent);
+  padding: 1.15rem;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+}
+
+.status-incident-title {
+  margin: 0;
+  font-size: 1.08rem;
+  font-weight: 650;
+}
+
+.status-incident-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.status-incident-heading {
+  min-width: 0;
+}
+
+.status-incident-machine {
+  margin: 0.25rem 0 0;
+  color: color-mix(in srgb, var(--fg) 64%, transparent);
+  font-size: 0.9rem;
+}
+
+.status-incident-warning-icon {
+  display: inline-flex;
+  width: 3.25rem;
+  height: 3.25rem;
+  color: color-mix(in srgb, var(--fg) 46%, transparent);
+}
+
+.status-incident-warning-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.status-incident-form {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.status-incident-field {
+  display: grid;
+  gap: 0.35rem;
+  color: color-mix(in srgb, var(--fg) 72%, transparent);
+  font-size: 0.85rem;
+}
+
+.status-incident-input,
+.status-incident-textarea {
+  width: 100%;
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.65rem;
+  background: color-mix(in srgb, var(--bg) 96%, transparent);
+  color: var(--fg);
+  font: inherit;
+  font-size: 0.94rem;
+  line-height: 1.35;
+  padding: 0.55rem 0.65rem;
+}
+
+.status-incident-textarea {
+  resize: vertical;
+}
+
+.status-incident-input:focus,
+.status-incident-textarea:focus {
+  border-color: var(--fg);
+  outline: none;
+}
+
+.status-incident-add-note {
+  justify-self: start;
+  border: 0;
+  background: transparent;
+  color: color-mix(in srgb, var(--fg) 74%, transparent);
+  font: inherit;
+  font-size: 0.86rem;
+  padding: 0;
+  cursor: pointer;
+}
+
+.status-incident-add-note:hover,
+.status-incident-add-note:focus-visible {
+  color: var(--fg);
+  text-decoration: underline;
+  outline: none;
+}
+
+.status-incident-note-wrap[hidden] {
+  display: none;
+}
+
+.status-incident-image-box {
+  min-height: 5.4rem;
+  border: 1px dashed color-mix(in srgb, var(--fg) 28%, transparent);
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--bg) 94%, transparent);
+  color: color-mix(in srgb, var(--fg) 58%, transparent);
+  display: grid;
+  place-items: center;
+  gap: 0.18rem;
+  padding: 0.75rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 160ms ease, background-color 160ms ease;
+}
+
+.status-incident-image-box:hover,
+.status-incident-image-box:focus-visible,
+.status-incident-image-box.is-dragover {
+  border-color: color-mix(in srgb, var(--fg) 58%, transparent);
+  background: color-mix(in srgb, var(--fg) 5%, var(--bg));
+  outline: none;
+}
+
+.status-incident-image-box.has-files {
+  border-style: solid;
+}
+
+.status-incident-image-icon {
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--fg) 30%, transparent);
+  background: color-mix(in srgb, var(--bg) 98%, transparent);
+  color: color-mix(in srgb, var(--fg) 72%, transparent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.status-incident-image-icon::before {
+  content: attr(data-symbol);
+  transform: translateY(-0.12em);
+}
+
+.status-incident-image-title {
+  color: color-mix(in srgb, var(--fg) 72%, transparent);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.status-incident-image-action {
+  font-size: 0.9rem;
+}
+
+.status-incident-image-input {
+  display: none;
+}
+
+.status-incident-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.55rem;
+  margin-top: 0.15rem;
+}
+
+.status-incident-cancel,
+.status-incident-confirm {
+  min-height: 2.35rem;
+  border-radius: 0.65rem;
+  padding: 0.45rem 0.85rem;
+  font: inherit;
+  cursor: pointer;
+}
+
+.status-incident-cancel {
+  border: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--bg) 96%, transparent);
+  color: var(--fg);
+}
+
+.status-incident-confirm {
+  border: 1px solid #2c974b;
+  background: linear-gradient(135deg, #2da44e, #2c974b);
+  color: #fff;
+  font-weight: 650;
+}
+
