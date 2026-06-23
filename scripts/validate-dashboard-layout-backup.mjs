@@ -2,6 +2,7 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
+  MAX_DASHBOARD_GROUP_DEPTH,
   normalizeDashboardLayout
 } from "../static/js/dashboard/layout/dashboardLayoutModel.mjs";
 
@@ -96,13 +97,35 @@ const validateLayout = (doc, layout, machineIds) => {
     issues.push("duplicate group ids");
   }
 
-  const groupById = new Map(normalized.groups.map((group) => [group.id, group]));
-  normalized.groups.forEach((group) => {
-    const parent = groupById.get(group.parentGroupId);
-    if (parent?.parentGroupId) {
-      issues.push(`group ${group.id} has nesting deeper than one level`);
+  const rawGroupById = new Map(
+    rawGroups.filter((group) => group?.id).map((group) => [String(group.id), group])
+  );
+  rawGroupById.forEach((group, groupId) => {
+    const seen = new Set([groupId]);
+    let current = group;
+    let depth = 0;
+    while (current?.parentGroupId) {
+      const parentGroupId = String(current.parentGroupId);
+      if (seen.has(parentGroupId)) {
+        issues.push(`group ${groupId} has a parent cycle`);
+        break;
+      }
+      const parent = rawGroupById.get(parentGroupId);
+      if (!parent) {
+        issues.push(`group ${groupId} references missing parent ${parentGroupId}`);
+        break;
+      }
+      seen.add(parentGroupId);
+      depth += 1;
+      if (depth > MAX_DASHBOARD_GROUP_DEPTH) {
+        issues.push(`group ${groupId} exceeds maximum depth`);
+        break;
+      }
+      current = parent;
     }
   });
+
+  const groupById = new Map(normalized.groups.map((group) => [group.id, group]));
 
   Object.entries(normalized.placements || {}).forEach(([machineId, placement]) => {
     if (!machineIds.has(machineId)) {

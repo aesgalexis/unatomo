@@ -56,6 +56,13 @@ Project-owner-only UI is called `superadmin` in conversation and docs. In code i
 - The dashboard topbar title is editable per user and stored as `dashboard_layout/{uid}.dashboardTitle` with a 32-character cap; empty value falls back to `Dashboard`.
 - Dashboard initialization is intentionally guarded against duplicate auth emissions. Loading failures should not be presented as an empty account; show a load-error state until Firebase data arrives or the user reloads.
 - Dashboard layout normalization is centralized in `static/js/dashboard/layout/dashboardLayoutModel.mjs`; use `npm.cmd run check:nfc:layout` against a fresh backup before/after risky group or layout work.
+- Dashboard groups support depth 0-2 through the existing `parentGroupId`
+  relation. `Añadir grupo superior` wraps an existing subtree so a new root
+  container can be created without moving its machines. Use
+  `npm.cmd run check:nfc:group-hierarchy` after hierarchy changes.
+- Persist group hierarchy through `saveDashboardGroupLayout`; Firestore rules
+  intentionally reject direct browser writes to dashboard `groups` and
+  `placements`.
 - Dashboard architecture is now intentionally split: `index.js` coordinates auth, top-level render, and shared state; extracted modules own live subscriptions, layout mutations, internal view rendering, task/document card hooks, task/history actions, and loading/error helpers.
 - Run `npm.cmd run check:nfc:architecture` after dashboard architecture changes to catch responsibilities drifting back into `index.js`.
 - Public `Novedades` entries are static and governed by `docs/WHATS_NEW_POLICY.md`. Check `docs/codex-flags.json` before adding entries.

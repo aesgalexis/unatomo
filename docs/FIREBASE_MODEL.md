@@ -93,6 +93,11 @@ Backend callables live in `firebase/functions/src/index.ts`. Common frontend wra
   invitations, and pending transfers for broken Firestore relationships. It
   returns only counts and bounded samples. Physical Storage object existence is
   intentionally not checked yet.
+- `saveDashboardGroupLayout`: authenticated layout writer for `groups` and
+  `placements`. It validates unique IDs, existing parents, cycles, placements,
+  and maximum group depth 2 before writing. Firestore rules block direct client
+  changes to those two fields so stale dashboard code cannot flatten a saved
+  hierarchy.
 
 ## Tag ID And QR Rules
 

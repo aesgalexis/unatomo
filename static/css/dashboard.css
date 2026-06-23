@@ -2009,8 +2009,8 @@ body.status-incident-open {
   outline-offset: 2px;
 }
 
-.machine-subgroup > .machine-group-header {
-  padding-left: 1rem;
+.machine-group > .machine-group-header {
+  padding-left: var(--group-header-offset, 0);
 }
 
 .machine-group-caret {
@@ -2103,6 +2103,8 @@ body.status-incident-open {
   left: 0;
   z-index: 25;
   min-width: 9rem;
+  width: max-content;
+  max-width: min(16rem, calc(100vw - 2rem));
   border: 1px solid var(--border-subtle);
   border-radius: 0.5rem;
   background: color-mix(in srgb, var(--bg) 96%, transparent);
@@ -2126,6 +2128,7 @@ body.status-incident-open {
   font-size: 0.88rem;
   text-align: left;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .machine-group-menu-action:hover,
@@ -2152,7 +2155,7 @@ body.status-incident-open {
   width: 100%;
 }
 
-.machine-group-body > .machine-subgroup:first-child {
+.machine-group-body > .machine-group:first-child {
   margin-top: 0.6rem;
 }
 
@@ -2167,16 +2170,12 @@ body.status-incident-open {
   width: 100%;
 }
 
-#machineList[data-has-ungrouped="true"] > .machine-group:not(.machine-subgroup) > .machine-group-body > .machine-card-wrap {
-  transform: translateX(1.2rem);
+#machineList .machine-group > .machine-group-body > .machine-card-wrap {
+  transform: translateX(var(--group-card-offset, 0));
 }
 
-#machineList .machine-subgroup > .machine-group-body > .machine-card-wrap {
-  transform: translateX(1.2rem);
-}
-
-#machineList[data-has-ungrouped="true"] .machine-subgroup > .machine-group-body > .machine-card-wrap {
-  transform: translateX(2.4rem);
+#machineList[data-has-ungrouped="true"] .machine-group > .machine-group-body > .machine-card-wrap {
+  transform: translateX(var(--group-card-offset-with-ungrouped, 1.2rem));
 }
 
 .mc-manual {
@@ -3711,9 +3710,8 @@ body.status-incident-open {
     max-height: 1.12em;
   }
 
-  #machineList[data-has-ungrouped="true"] > .machine-group:not(.machine-subgroup) > .machine-group-body > .machine-card-wrap,
-  #machineList .machine-subgroup > .machine-group-body > .machine-card-wrap,
-  #machineList[data-has-ungrouped="true"] .machine-subgroup > .machine-group-body > .machine-card-wrap {
+  #machineList .machine-group > .machine-group-body > .machine-card-wrap,
+  #machineList[data-has-ungrouped="true"] .machine-group > .machine-group-body > .machine-card-wrap {
     transform: none;
   }
 

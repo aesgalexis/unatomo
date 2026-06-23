@@ -1,4 +1,7 @@
-import { db } from "/static/js/firebase/firebaseApp.js";
+import { db, functions } from "/static/js/firebase/firebaseApp.js";
+import {
+  httpsCallable
+} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-functions.js";
 import {
   collection,
   doc,
@@ -24,6 +27,10 @@ const machinesCollection = collection(db, "machines");
 const usernamesDoc = (ownerUid, normalized) =>
   doc(db, "usernames", `${ownerUid}_${normalized}`);
 const dashboardLayoutDoc = (uid) => doc(db, "dashboard_layout", uid);
+const saveDashboardGroupLayoutCallable = httpsCallable(
+  functions,
+  "saveDashboardGroupLayout"
+);
 
 export const fetchMachines = async (uid) => {
   const q = query(machinesCollection, where("ownerUid", "==", uid));
@@ -54,13 +61,10 @@ export const upsertDashboardLayout = async (uid, layout) => {
     updatedBy: uid
   };
   if (hasGroups) {
-    payload.groups = Array.isArray(layout?.groups) ? layout.groups : [];
+    if (!hasPlacements) throw new Error("placements-required-with-groups");
   }
   if (hasPlacements) {
-    payload.placements =
-      layout?.placements && typeof layout.placements === "object" && !Array.isArray(layout.placements)
-        ? layout.placements
-        : {};
+    if (!hasGroups) throw new Error("groups-required-with-placements");
   }
   if (hasTabOrder) payload.tabOrder = normalizeTabOrder(layout?.tabOrder);
   if (hasTitle) payload.dashboardTitle = dashboardTitle;
@@ -75,6 +79,17 @@ export const upsertDashboardLayout = async (uid, layout) => {
   }
   if (hasMachineSortMode) {
     payload.machineSortMode = normalizeMachineSortMode(layout?.machineSortMode);
+  }
+  if (hasGroups && hasPlacements) {
+    await saveDashboardGroupLayoutCallable({
+      groups: Array.isArray(layout?.groups) ? layout.groups : [],
+      placements:
+        layout?.placements &&
+        typeof layout.placements === "object" &&
+        !Array.isArray(layout.placements) ?
+          layout.placements :
+          {}
+    });
   }
   await setDoc(
     dashboardLayoutDoc(uid),

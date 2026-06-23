@@ -1,3 +1,9 @@
+import {
+  MAX_DASHBOARD_GROUP_DEPTH,
+  canDashboardGroupHaveChildren,
+  getDashboardGroupDepth
+} from "./dashboardLayoutModel.mjs";
+
 export const createDashboardGroupId = () => {
   if (window.crypto?.randomUUID) return window.crypto.randomUUID();
   return `g_${Math.random().toString(36).slice(2, 10)}`;
@@ -32,6 +38,55 @@ const cloneLayout = (layout = {}) => ({
         )
       : {}
 });
+
+const isGroupDescendantOf = (groups = [], groupId = "", ancestorId = "") => {
+  const groupById = new Map(groups.map((group) => [group.id, group]));
+  const seen = new Set();
+  let currentId = groupId;
+  while (currentId && !seen.has(currentId)) {
+    if (currentId === ancestorId) return true;
+    seen.add(currentId);
+    currentId = groupById.get(currentId)?.parentGroupId || "";
+  }
+  return false;
+};
+
+const getGroupSubtreeHeight = (groups = [], groupId = "", seen = new Set()) => {
+  if (!groupId || seen.has(groupId)) return 0;
+  const nextSeen = new Set(seen);
+  nextSeen.add(groupId);
+  const childHeights = groups
+    .filter((group) => group.parentGroupId === groupId)
+    .map((group) => 1 + getGroupSubtreeHeight(groups, group.id, nextSeen));
+  return childHeights.length ? Math.max(...childHeights) : 0;
+};
+
+const canMoveGroupToParent = (groups = [], groupId = "", parentGroupId = "") => {
+  if (!groupId) return false;
+  if (!parentGroupId) return true;
+  if (groupId === parentGroupId) return false;
+  if (isGroupDescendantOf(groups, parentGroupId, groupId)) return false;
+  const parentDepth = getDashboardGroupDepth(groups, parentGroupId);
+  const subtreeHeight = getGroupSubtreeHeight(groups, groupId);
+  return parentDepth + 1 + subtreeHeight <= MAX_DASHBOARD_GROUP_DEPTH;
+};
+
+export const canMoveGroupIntoGroup = (
+  layout = {},
+  draggedGroupId = "",
+  targetGroupId = ""
+) => canMoveGroupToParent(
+  layout.groups || [],
+  draggedGroupId,
+  targetGroupId
+);
+
+export const canWrapGroupWithParent = (layout = {}, groupId = "") => {
+  const groups = layout.groups || [];
+  const depth = getDashboardGroupDepth(groups, groupId);
+  const subtreeHeight = getGroupSubtreeHeight(groups, groupId);
+  return depth + 1 + subtreeHeight <= MAX_DASHBOARD_GROUP_DEPTH;
+};
 
 export const reorderFlatMachines = (machines = [], orderIds = []) => {
   if (!Array.isArray(orderIds) || !orderIds.length) {
@@ -106,16 +161,11 @@ export const reorderMixedItems = (layout = {}, machines = [], parentGroupId = ""
   const nextLayout = cloneLayout(layout);
   const groups = nextLayout.groups || [];
   const placements = nextLayout.placements || {};
-  const parentGroup = groups.find((group) => group.id === parentGroupId);
-  const isSubgroupTarget = !!parentGroup?.parentGroupId;
 
   const machineOrderMap = new Map();
-  const orderedItems = isSubgroupTarget
-    ? items.filter((item) => item.type === "machine")
-    : [
-        ...items.filter((item) => item.type === "group"),
-        ...items.filter((item) => item.type === "machine")
-      ];
+  const orderedItems = items.filter(
+    (item) => item.type === "group" || item.type === "machine"
+  );
 
   orderedItems.forEach((item, index) => {
     if (item.type === "machine") {
@@ -123,15 +173,12 @@ export const reorderMixedItems = (layout = {}, machines = [], parentGroupId = ""
       if (!parentGroupId) machineOrderMap.set(item.id, index);
       return;
     }
-    if (item.type !== "group" || isSubgroupTarget) return;
+    if (item.type !== "group") return;
     const group = groups.find((entry) => entry.id === item.id);
     if (!group) return;
-    if (parentGroupId && group.id === parentGroupId) return;
+    if (!canMoveGroupToParent(groups, group.id, parentGroupId)) return;
     group.parentGroupId = parentGroupId || "";
     group.order = index;
-    groups.forEach((entry) => {
-      if (entry.parentGroupId === group.id && group.parentGroupId) entry.parentGroupId = "";
-    });
   });
 
   const touchedMachineIds = [];
@@ -161,7 +208,16 @@ export const createGroupFromMachineDrop = (
   const parentGroup = parentGroupId
     ? (nextLayout.groups || []).find((group) => group.id === parentGroupId)
     : null;
-  const validParentGroupId = parentGroup && !parentGroup.parentGroupId ? parentGroup.id : "";
+  if (
+    parentGroupId &&
+    (!parentGroup || !canDashboardGroupHaveChildren(
+      nextLayout.groups || [],
+      parentGroup.id
+    ))
+  ) {
+    return { layout, compactedGroupIds: [] };
+  }
+  const validParentGroupId = parentGroup?.id || "";
   nextLayout.groups = [
     ...(nextLayout.groups || []),
     {
@@ -250,9 +306,11 @@ export const moveGroupToGroup = (layout = {}, draggedGroupId = "", targetGroupId
   const draggedGroup = groups.find((group) => group.id === draggedGroupId);
   const targetGroup = groups.find((group) => group.id === targetGroupId);
   if (!draggedGroup || !targetGroup) return { layout };
-  const parentGroupId = targetGroup.parentGroupId || targetGroup.id;
+  const parentGroupId = targetGroup.id;
   if (!parentGroupId || parentGroupId === draggedGroupId) return { layout };
-  if (targetGroup.parentGroupId === draggedGroupId) return { layout };
+  if (!canMoveGroupToParent(groups, draggedGroupId, parentGroupId)) {
+    return { layout };
+  }
 
   draggedGroup.parentGroupId = parentGroupId;
   draggedGroup.order =
@@ -261,9 +319,6 @@ export const moveGroupToGroup = (layout = {}, draggedGroupId = "", targetGroupId
       .reduce((max, group) => Math.max(max, typeof group.order === "number" ? group.order : 0), -1) +
     1;
 
-  groups.forEach((group) => {
-    if (group.parentGroupId === draggedGroupId) group.parentGroupId = "";
-  });
   return { layout: nextLayout };
 };
 
@@ -299,12 +354,37 @@ export const renameGroup = (layout = {}, groupId = "", title = "") => {
   return { layout: nextLayout };
 };
 
+export const createParentGroup = (layout = {}, groupId = "", group = {}) => {
+  if (!groupId || !group?.id || groupId === group.id) return { layout };
+  const nextLayout = cloneLayout(layout);
+  const groups = nextLayout.groups || [];
+  const target = groups.find((entry) => entry.id === groupId);
+  if (!target || !canWrapGroupWithParent(nextLayout, groupId)) {
+    return { layout };
+  }
+  const previousParentGroupId = target.parentGroupId || "";
+  const previousOrder = target.order ?? 0;
+  groups.push({
+    id: group.id,
+    title: (group.title || "Grupo").toString().trim() || "Grupo",
+    parentGroupId: previousParentGroupId,
+    order: previousOrder,
+    collapsed: false
+  });
+  target.parentGroupId = group.id;
+  target.order = 0;
+  nextLayout.groups = groups;
+  return { layout: nextLayout };
+};
+
 export const createChildGroup = (layout = {}, parentGroupId = "", group = {}) => {
   if (!parentGroupId || !group?.id) return { layout };
   const nextLayout = cloneLayout(layout);
   const groups = nextLayout.groups || [];
   const parent = groups.find((entry) => entry.id === parentGroupId);
-  if (!parent || parent.parentGroupId) return { layout };
+  if (!parent || !canDashboardGroupHaveChildren(groups, parentGroupId)) {
+    return { layout };
+  }
   groups.push({
     id: group.id,
     title: (group.title || "Grupo").toString().trim() || "Grupo",
