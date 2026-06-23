@@ -57,6 +57,24 @@ Firebase artifacts live under `firebase/`:
 
 Be careful with production callable functions and data scripts. Temporary scripts for Firebase data maintenance should not remain in the repository after use unless explicitly requested.
 
+Use the project wrappers instead of calling `firebase deploy` directly. They
+remove inherited `DEBUG` and `FIREBASE_DEBUG` variables before starting the CLI,
+preventing verbose internal HTTP traces from flooding terminals and Codex tool
+output.
+
+```powershell
+npm.cmd run deploy:nfc:firestore
+npm.cmd run deploy:nfc:storage
+npm.cmd run deploy:nfc:functions
+npm.cmd run deploy:nfc:backend
+```
+
+For a targeted function deployment:
+
+```powershell
+npm.cmd run firebase:clean -- deploy --only "functions:functionName"
+```
+
 ## NFC Backups
 
 Before architecture work, risky dashboard persistence changes, ownership

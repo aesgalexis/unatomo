@@ -21,11 +21,16 @@ npm.cmd run build
 npm.cmd run check:nfc:architecture
 npm.cmd run site:publish
 npm.cmd run scan:secrets
+npm.cmd run deploy:nfc:backend
 ```
 
 ## Project Rules
 
 - Keep progress updates sparse. Prefer silent work unless there is a relevant finding, a file edit is about to happen, the task becomes long-running, or the work is blocked.
+- Use the repository `deploy:nfc:*` scripts for Firebase deployments. They remove inherited `DEBUG` and `FIREBASE_DEBUG` values that otherwise produce very large Firebase CLI traces. For a targeted deploy, use `npm.cmd run firebase:clean -- deploy --only "functions:name"`.
+- Keep command output bounded: search the smallest relevant paths, request narrow line ranges, and avoid dumping full large files when a targeted `rg` plus a short range is enough.
+- Do not inspect generated `dist/` or `firebase/functions/lib/` unless diagnosing the build output itself. Work from source files.
+- Do not repeatedly read the same context document in one task. Start from the routed MD above, then open only the feature files it identifies.
 - Do not leave temporary Firebase/admin scripts in the repo after one-off operations.
 - Do not change Firebase ownership/admin/tag cleanup flows without reading `docs/FIREBASE_MODEL.md`.
 - Preserve Spanish and English routes, labels, and menu entries when touching user-facing pages.
