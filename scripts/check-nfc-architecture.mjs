@@ -17,7 +17,16 @@ const requiredFiles = [
   "static/js/dashboard/cardHooks/documentHooks.js",
   "static/js/dashboard/tabs/tasks/taskActions.js",
   "static/js/dashboard/components/loading/dashboardLoadState.js",
-  "static/js/dashboard/components/loading/dashboardPlaceholders.js"
+  "static/js/dashboard/components/loading/dashboardPlaceholders.js",
+  "firebase/functions/src/core/firebase.ts",
+  "firebase/functions/src/accounts/handles.ts",
+  "firebase/functions/src/controlPanel/systemAndUsers.ts",
+  "firebase/functions/src/dashboard/layout.ts",
+  "firebase/functions/src/dashboard/suggestions.ts",
+  "firebase/functions/src/dashboard/todos.ts",
+  "firebase/functions/src/machines/adminInvites.ts",
+  "firebase/functions/src/machines/tags.ts",
+  "firebase/functions/src/machines/transfers.ts"
 ];
 
 const checks = [];
@@ -35,6 +44,27 @@ const taskHooks = read("static/js/dashboard/cardHooks/taskHooks.js");
 const documentHooks = read("static/js/dashboard/cardHooks/documentHooks.js");
 const dashboardSubscriptions = read("static/js/dashboard/data/dashboardSubscriptions.js");
 const taskActions = read("static/js/dashboard/tabs/tasks/taskActions.js");
+const functionsIndex = read("firebase/functions/src/index.ts");
+
+addCheck(
+  !functionsIndex.includes("onCall("),
+  "Functions index.ts remains an export-only boundary"
+);
+addCheck(
+  functionsIndex.split(/\r?\n/).length <= 150,
+  "Functions index.ts remains below 150 lines"
+);
+const callableExports = Array.from(
+  functionsIndex.matchAll(/export\s*\{([^}]+)\}\s*from/g),
+  (match) => match[1]
+)
+  .flatMap((group) => group.split(","))
+  .map((name) => name.trim())
+  .filter(Boolean);
+addCheck(
+  callableExports.length === 34 && new Set(callableExports).size === 34,
+  "Functions index.ts preserves 34 unique callable exports"
+);
 
 [
   "onSnapshot",
