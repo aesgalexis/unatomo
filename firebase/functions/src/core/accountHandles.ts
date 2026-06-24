@@ -1,4 +1,3 @@
-export const ACCOUNT_HANDLE_RESERVATION_MS = 90 * 24 * 60 * 60 * 1000;
 export const ACCOUNT_HANDLE_CHANGE_COOLDOWN_MS = 60 * 1000;
 
 const ACCOUNT_HANDLE_PATTERN =
@@ -37,9 +36,3 @@ export const firestoreValueToMillis = (value: unknown) => {
   const parsed = new Date((value || "").toString()).getTime();
   return Number.isFinite(parsed) ? parsed : 0;
 };
-
-export const isExpiredAccountHandle = (
-  data: FirebaseFirestore.DocumentData,
-  now = Date.now(),
-) => data.status === "reserved" &&
-  firestoreValueToMillis(data.reservedUntil) <= now;

@@ -62,6 +62,53 @@
   color: #16a34a;
 }
 
+.controlpanel-preference-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.controlpanel-preference-label,
+.controlpanel-preference-status {
+  font-size: 13px;
+}
+
+.controlpanel-preference-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.controlpanel-preference-status {
+  color: color-mix(in srgb, var(--fg) 68%, transparent);
+}
+
+.controlpanel-preference-switch {
+  width: 42px;
+  height: 24px;
+  padding: 2px;
+  border: 1px solid #7c3aed;
+  border-radius: 999px;
+  background: transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.controlpanel-preference-switch[data-enabled="true"] {
+  justify-content: flex-end;
+  background: color-mix(in srgb, #7c3aed 22%, transparent);
+}
+
+.controlpanel-preference-switch-knob {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #7c3aed;
+}
+
 .controlpanel-metric {
   display: grid;
   gap: 4px;

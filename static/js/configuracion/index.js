@@ -61,8 +61,8 @@ const textMap = {
     ? (handle) => `Confirm @${handle}?`
     : (handle) => `\u00bfConfirmar @${handle}?`,
   accountHandleChangeConfirm: isEn
-    ? (handle) => `Change to @${handle}? Your previous username will remain reserved for you for 90 days.`
-    : (handle) => `\u00bfCambiar a @${handle}? Tu nombre anterior quedar\u00e1 reservado para ti durante 90 d\u00edas.`,
+    ? (handle) => `Change to @${handle}? Your previous username will remain permanently reserved for you.`
+    : (handle) => `\u00bfCambiar a @${handle}? Tu nombre anterior quedar\u00e1 reservado para ti permanentemente.`,
   accountHandleCooldown: isEn
     ? "Wait one minute before changing it again."
     : "Espera un minuto antes de volver a cambiarlo.",

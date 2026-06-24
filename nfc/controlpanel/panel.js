@@ -2,6 +2,10 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/fi
 import { httpsCallable } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-functions.js";
 import { auth, functions } from "/static/js/firebase/firebaseApp.js";
 import { getCurrentLang, localizeEsPath } from "/static/js/site/locale.js";
+import {
+  isSuperadminLanguageToggleVisible,
+  setSuperadminLanguageToggleVisible,
+} from "/static/js/site/superadmin-preferences.js";
 import { isControlPanelUser } from "/nfc/controlpanel/access.js";
 
 const mount = document.getElementById("controlpanel-mount");
@@ -128,6 +132,15 @@ const text = {
   whatsNewPending: isEn
     ? "Pending: this panel control is not wired to the project flag yet."
     : "Pendiente: este control del panel aun no esta conectado a la flag del proyecto.",
+  preferencesTitle: isEn ? "Superadmin preferences" : "Preferencias de superadmin",
+  preferencesHint: isEn
+    ? "Personal interface options stored only in this browser."
+    : "Opciones personales de interfaz guardadas solo en este navegador.",
+  languageToggleLabel: isEn
+    ? "Show ES/EN selector in the topbar"
+    : "Mostrar selector ES/EN en el topbar",
+  languageToggleVisible: isEn ? "Visible" : "Visible",
+  languageToggleHidden: isEn ? "Hidden" : "Oculto",
   usersTitle: isEn ? "Users" : "Usuarios",
   usersLoading: isEn ? "Loading users..." : "Cargando usuarios...",
   usersEmpty: isEn ? "No users found." : "No se han encontrado usuarios.",
@@ -218,9 +231,6 @@ Object.assign(text.integrityIssueLabels, {
   "account-handle-duplicate-user": isEn
     ? "Accounts with multiple usernames"
     : "Cuentas con varios nombres de usuario",
-  "account-handle-reservation-missing-expiry": isEn
-    ? "Reserved usernames without expiry"
-    : "Nombres reservados sin caducidad",
   "account-handle-broken-redirect": isEn
     ? "Broken username redirects"
     : "Redirecciones de nombres de usuario rotas"
@@ -762,6 +772,52 @@ const renderWhatsNewControl = (body, flags = {}) => {
   body.appendChild(actions);
 };
 
+const renderSuperadminPreferences = (body) => {
+  body.innerHTML = "";
+
+  const note = document.createElement("p");
+  note.className = "controlpanel-note";
+  note.textContent = text.preferencesHint;
+  body.appendChild(note);
+
+  const row = document.createElement("div");
+  row.className = "controlpanel-preference-row";
+
+  const label = document.createElement("span");
+  label.className = "controlpanel-preference-label";
+  label.textContent = text.languageToggleLabel;
+
+  const control = document.createElement("div");
+  control.className = "controlpanel-preference-control";
+  const status = document.createElement("span");
+  status.className = "controlpanel-preference-status";
+  const toggle = document.createElement("button");
+  toggle.type = "button";
+  toggle.className = "controlpanel-preference-switch";
+  toggle.setAttribute("role", "switch");
+  toggle.setAttribute("aria-label", text.languageToggleLabel);
+  toggle.innerHTML = '<span class="controlpanel-preference-switch-knob"></span>';
+
+  const sync = (visible) => {
+    toggle.dataset.enabled = visible ? "true" : "false";
+    toggle.setAttribute("aria-checked", visible ? "true" : "false");
+    status.textContent = visible ? text.languageToggleVisible : text.languageToggleHidden;
+  };
+
+  sync(isSuperadminLanguageToggleVisible());
+  toggle.addEventListener("click", () => {
+    const visible = toggle.getAttribute("aria-checked") !== "true";
+    setSuperadminLanguageToggleVisible(visible);
+    sync(visible);
+  });
+
+  control.appendChild(status);
+  control.appendChild(toggle);
+  row.appendChild(label);
+  row.appendChild(control);
+  body.appendChild(row);
+};
+
 const renderTags = (body, items) => {
   body.innerHTML = "";
   const note = document.createElement("p");
@@ -921,6 +977,7 @@ if (mount) {
   const integrityCard = createCard(text.integrityTitle);
   const codeStatsCard = createCard(text.codeStatsTitle);
   const backupCard = createCard(text.backupTitle);
+  const preferencesCard = createCard(text.preferencesTitle);
   const whatsNewCard = createCard(text.whatsNewTitle);
   const usersCard = createCard(text.usersTitle);
   const codesCard = createCard(text.codesTitle);
@@ -929,6 +986,7 @@ if (mount) {
   wrap.appendChild(systemStatusCard);
   wrap.appendChild(integrityCard);
   wrap.appendChild(backupCard);
+  wrap.appendChild(preferencesCard);
   wrap.appendChild(whatsNewCard);
   wrap.appendChild(usersCard);
   wrap.appendChild(codesCard);
@@ -947,6 +1005,9 @@ if (mount) {
   backupCard
     .querySelector(".controlpanel-toggle")
     ?.addEventListener("click", () => toggleCard(backupCard));
+  preferencesCard
+    .querySelector(".controlpanel-toggle")
+    ?.addEventListener("click", () => toggleCard(preferencesCard));
   whatsNewCard
     .querySelector(".controlpanel-toggle")
     ?.addEventListener("click", () => toggleCard(whatsNewCard));
@@ -964,6 +1025,7 @@ if (mount) {
   const integrityBody = integrityCard.querySelector(".controlpanel-body");
   const codeStatsBody = codeStatsCard.querySelector(".controlpanel-body");
   const backupBody = backupCard.querySelector(".controlpanel-body");
+  const preferencesBody = preferencesCard.querySelector(".controlpanel-body");
   const whatsNewBody = whatsNewCard.querySelector(".controlpanel-body");
   const usersBody = usersCard.querySelector(".controlpanel-body");
   const codesBody = codesCard.querySelector(".controlpanel-body");
@@ -1121,6 +1183,7 @@ if (mount) {
   }
   if (codeStatsBody) renderState(codeStatsBody, text.codeStatsHint, text.codeStatsLoading);
   if (backupBody) renderState(backupBody, text.backupHint, text.backupLoading);
+  if (preferencesBody) renderSuperadminPreferences(preferencesBody);
   if (whatsNewBody) renderState(whatsNewBody, text.whatsNewHint, text.whatsNewLoading);
   if (usersBody) renderState(usersBody, text.usersHint, text.usersLoading);
   if (codesBody) renderState(codesBody, text.codesHint, text.codesLoading);
@@ -1143,6 +1206,7 @@ if (mount) {
       !systemStatusBody ||
       !integrityBody ||
       !backupBody ||
+      !preferencesBody ||
       !whatsNewBody ||
       !usersBody ||
       !codesBody ||

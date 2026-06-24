@@ -1,7 +1,6 @@
 import {HttpsError, onCall} from "firebase-functions/v2/https";
 import * as admin from "firebase-admin";
 import {
-  firestoreValueToMillis,
   getAccountHandleValidationError,
   normalizeAccountHandle,
 } from "../core/accountHandles";
@@ -221,7 +220,6 @@ export const getControlPanelSystemStatus = onCall(async (request) => {
   const handleMissingUser: string[] = [];
   const invalidHandle: string[] = [];
   const handleProfileMismatch: string[] = [];
-  const reservedHandleMissingExpiry: string[] = [];
   const reservedHandleBrokenRedirect: string[] = [];
   const handleDocs = new Map(
     accountHandlesSnap.docs.map((docSnap) => [
@@ -241,9 +239,6 @@ export const getControlPanelSystemStatus = onCall(async (request) => {
     if (status === "reserved") {
       const redirectTo = normalizeAccountHandle(data.redirectTo);
       const redirectData = handleDocs.get(redirectTo) || {};
-      if (!firestoreValueToMillis(data.reservedUntil)) {
-        reservedHandleMissingExpiry.push(docSnap.id);
-      }
       if (!redirectTo ||
           (redirectData.uid || "").toString().trim() !== uid) {
         reservedHandleBrokenRedirect.push(docSnap.id);
@@ -279,10 +274,6 @@ export const getControlPanelSystemStatus = onCall(async (request) => {
   addIssue("account-handle-user-missing", handleMissingUser);
   addIssue("account-handle-profile-mismatch", handleProfileMismatch);
   addIssue("account-handle-duplicate-user", duplicateAccountHandles);
-  addIssue(
-    "account-handle-reservation-missing-expiry",
-    reservedHandleMissingExpiry,
-  );
   addIssue("account-handle-broken-redirect", reservedHandleBrokenRedirect);
 
   const issueCount = issues.reduce((total, issue) => total + issue.count, 0);
@@ -464,4 +455,3 @@ export const setControlPanelUserCollaborator = onCall(async (request) => {
 
   return {ok: true, uid, suggestionsCollaborator: enabled};
 });
-
