@@ -174,6 +174,9 @@ export const createMachineCard = (machine, options = {}) => {
         wrap.innerHTML = "";
         wrap.appendChild(select);
         select.value = value || "";
+        if (hooks.onContentResize) {
+          requestAnimationFrame(() => hooks.onContentResize());
+        }
       };
 
       const okBtn = document.createElement("button");
@@ -207,6 +210,9 @@ export const createMachineCard = (machine, options = {}) => {
       wrap.appendChild(input);
       wrap.appendChild(actions);
       input.focus();
+      if (hooks.onContentResize) {
+        requestAnimationFrame(() => hooks.onContentResize());
+      }
     };
 
     wrap.appendChild(select);
