@@ -161,10 +161,11 @@
 }
 
 .mc-location.is-editing {
+  order: 1;
   flex: 1 0 100%;
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  align-items: stretch;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
   width: 100%;
   max-width: 100%;
   overflow: visible;
@@ -178,7 +179,7 @@
 
 .mc-location.is-editing .mc-location-actions {
   justify-content: flex-end;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .mc-location-select {
