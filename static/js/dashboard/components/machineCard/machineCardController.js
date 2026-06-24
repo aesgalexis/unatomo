@@ -156,6 +156,8 @@ export const createMachineCard = (machine, options = {}) => {
 
     const showAddInput = () => {
       wrap.innerHTML = "";
+      wrap.classList.add("is-editing");
+      header?.classList.add("mc-header--location-editing");
       const input = document.createElement("input");
       input.className = "mc-location-input";
       input.type = "text";
@@ -165,6 +167,14 @@ export const createMachineCard = (machine, options = {}) => {
 
       const actions = document.createElement("div");
       actions.className = "mc-location-actions";
+
+      const closeAddInput = (value) => {
+        wrap.classList.remove("is-editing");
+        header?.classList.remove("mc-header--location-editing");
+        wrap.innerHTML = "";
+        wrap.appendChild(select);
+        select.value = value || "";
+      };
 
       const okBtn = document.createElement("button");
       okBtn.type = "button";
@@ -180,9 +190,7 @@ export const createMachineCard = (machine, options = {}) => {
         );
         if (match) finalValue = match;
         if (hooks.onUpdateLocation) hooks.onUpdateLocation(machine.id, finalValue);
-        wrap.innerHTML = "";
-        wrap.appendChild(select);
-        select.value = finalValue || "";
+        closeAddInput(finalValue);
       });
 
       const cancelBtn = document.createElement("button");
@@ -191,9 +199,7 @@ export const createMachineCard = (machine, options = {}) => {
       cancelBtn.textContent = t("card.cancel", "Cancelar");
       cancelBtn.addEventListener("click", (event) => {
         event.stopPropagation();
-        wrap.innerHTML = "";
-        wrap.appendChild(select);
-        select.value = current || "";
+        closeAddInput(current);
       });
 
       actions.appendChild(okBtn);
