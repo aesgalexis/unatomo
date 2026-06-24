@@ -176,7 +176,7 @@ To Do scope:
   `accountHandle`. Accounts without one continue to use the local part of their
   email during the transition. Shared To Do documents persist participant
   UIDs; the visible mention is metadata, never the permission key. Previous
-  handles continue resolving to the same UID during their 90-day reservation.
+  handles continue resolving to the same UID permanently.
 
 History event contract:
 

@@ -44,7 +44,7 @@ Read this before changing data flows, callable functions, machine ownership, adm
 - `account_directory`: account lookup and display metadata keyed by normalized
   email.
 - `account_handles`: public account-handle index keyed by normalized handle.
-  Active names and 90-day reserved aliases map to one Firebase Auth `uid`.
+  Active names and permanently reserved aliases map to one Firebase Auth `uid`.
 - `account_handle_history`: permanent internal audit of account-handle changes.
   It is not exposed in account settings.
   Both collections are separate from `usernames`, which stores machine-local
@@ -105,8 +105,8 @@ frontend wrappers live under `static/js/dashboard/`.
   that have not claimed a handle.
 - `checkAccountHandleAvailability`, `claimAccountHandle`,
   `changeAccountHandle`: validate, claim, and change public account handles.
-  Changes are transactional, reserve the previous alias for its owner for 90
-  days, and write `account_handle_history`. Direct browser writes are forbidden.
+  Changes are transactional, reserve every previous alias permanently for its
+  owner, and write `account_handle_history`. Direct browser writes are forbidden.
 - `getControlPanelSystemStatus`: superadmin-only, read-only production overview.
   It reports service availability and product totals, then checks machine
   owners, Tag assignments, `machine_access`, administrator links, pending

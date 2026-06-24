@@ -57,7 +57,7 @@ Project-owner-only UI is called `superadmin` in conversation and docs. In code i
   role. Shared To Do items use one document, participant completion, and
   owner-only deletion.
 - Accounts may claim and change a public `accountHandle` from Settings. Previous
-  names remain reserved aliases for the same UID for 90 days and changes are
+  names remain permanently reserved aliases for the same UID and changes are
   retained internally in `account_handle_history`.
   Firebase Auth `uid` remains canonical for every durable relationship. To-do
   mentions prefer account handles and retain the email-local alias only as a

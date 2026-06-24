@@ -2,10 +2,8 @@ import {HttpsError, onCall} from "firebase-functions/v2/https";
 import * as admin from "firebase-admin";
 import {
   ACCOUNT_HANDLE_CHANGE_COOLDOWN_MS,
-  ACCOUNT_HANDLE_RESERVATION_MS,
   firestoreValueToMillis,
   getAccountHandleValidationError,
-  isExpiredAccountHandle,
   normalizeAccountHandle,
 } from "../core/accountHandles";
 import {normalizeEmail} from "../core/auth";
@@ -39,14 +37,13 @@ export const checkAccountHandleAvailability = onCall(async (request) => {
   const currentHandle = normalizeAccountHandle(userSnap.data()?.accountHandle);
   const handleData = handleSnap.data() || {};
   const claimedBy = (handleData.uid || "").toString().trim();
-  const expired = handleSnap.exists && isExpiredAccountHandle(handleData);
   return {
     ok: true,
     handle,
     valid: true,
-    available: !handleSnap.exists || claimedBy === auth.uid || expired,
+    available: !handleSnap.exists || claimedBy === auth.uid,
     owned: currentHandle === handle && claimedBy === auth.uid,
-    reason: handleSnap.exists && claimedBy !== auth.uid && !expired ?
+    reason: handleSnap.exists && claimedBy !== auth.uid ?
       "handle-taken" : "",
   };
 });
@@ -80,11 +77,10 @@ export const claimAccountHandle = onCall(async (request) => {
     );
     const handleData = handleSnap.data() || {};
     const claimedBy = (handleData.uid || "").toString().trim();
-    const expired = handleSnap.exists && isExpiredAccountHandle(handleData);
     if (currentHandle && currentHandle !== handle) {
       throw new HttpsError("failed-precondition", "handle-already-set");
     }
-    if (handleSnap.exists && claimedBy !== auth.uid && !expired) {
+    if (handleSnap.exists && claimedBy !== auth.uid) {
       throw new HttpsError("already-exists", "handle-taken");
     }
 
@@ -160,21 +156,17 @@ export const changeAccountHandle = onCall(async (request) => {
     ]);
     const nextData = nextSnap.data() || {};
     const nextOwnerUid = (nextData.uid || "").toString().trim();
-    const nextExpired = nextSnap.exists && isExpiredAccountHandle(nextData);
-    if (nextSnap.exists && nextOwnerUid !== auth.uid && !nextExpired) {
+    if (nextSnap.exists && nextOwnerUid !== auth.uid) {
       throw new HttpsError("already-exists", "handle-taken");
     }
 
     const now = admin.firestore.Timestamp.now();
-    const reservedUntil = admin.firestore.Timestamp.fromMillis(
-      now.toMillis() + ACCOUNT_HANDLE_RESERVATION_MS,
-    );
     tx.set(previousHandleRef, {
       uid: auth.uid,
       handle: previousHandle,
       status: "reserved",
       redirectTo: nextHandle,
-      reservedUntil,
+      reservedPermanently: true,
       createdAt: previousSnap.data()?.createdAt || now,
       updatedAt: now,
     });
@@ -207,10 +199,9 @@ export const changeAccountHandle = onCall(async (request) => {
       previousHandle,
       newHandle: nextHandle,
       changedAt: now,
-      reservedUntil,
+      reservationPolicy: "permanent",
     });
   });
 
   return {ok: true, handle: nextHandle};
 });
-

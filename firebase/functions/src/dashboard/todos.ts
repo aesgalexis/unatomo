@@ -1,9 +1,6 @@
 import {HttpsError, onCall} from "firebase-functions/v2/https";
 import * as admin from "firebase-admin";
-import {
-  isExpiredAccountHandle,
-  normalizeAccountHandle,
-} from "../core/accountHandles";
+import {normalizeAccountHandle} from "../core/accountHandles";
 import {isControlPanelAuth, normalizeEmail} from "../core/auth";
 import {
   accountHandlesCol,
@@ -89,7 +86,7 @@ const resolveDashboardTodoMentions = async (
       const snap = await accountHandlesCol().doc(mention).get();
       const handleData = snap.data() || {};
       const uid = (handleData.uid || "").toString().trim();
-      if (!snap.exists || !uid || isExpiredAccountHandle(handleData)) {
+      if (!snap.exists || !uid) {
         return null;
       }
       const user = await admin.auth().getUser(uid).catch(() => null);

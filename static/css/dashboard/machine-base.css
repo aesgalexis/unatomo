@@ -625,6 +625,10 @@
   text-align: center;
 }
 
+.machine-group[data-group-depth="0"] > .machine-group-header > .machine-group-caret {
+  display: none;
+}
+
 .machine-group-title {
   flex: 0 1 auto;
   min-width: 0;
