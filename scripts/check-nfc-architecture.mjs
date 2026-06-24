@@ -120,6 +120,10 @@ requiredFiles.forEach((relativePath) => {
 const indexJs = read("static/js/dashboard/index.js");
 const taskHooks = read("static/js/dashboard/cardHooks/taskHooks.js");
 const documentHooks = read("static/js/dashboard/cardHooks/documentHooks.js");
+const machineCardController = read(
+  "static/js/dashboard/components/machineCard/machineCardController.js"
+);
+const taggedMachinePage = read("static/js/machine/index.js");
 const dashboardSubscriptions = read("static/js/dashboard/data/dashboardSubscriptions.js");
 const taskActions = read("static/js/dashboard/tabs/tasks/taskActions.js");
 const functionsIndex = read("firebase/functions/src/index.ts");
@@ -152,6 +156,15 @@ addCheck(
   dashboardCssManifest.split(/\r?\n/).filter((line) => line.trim()).length ===
     dashboardCssImports.length,
   "dashboard.css remains an import-only manifest"
+);
+
+addCheck(
+  machineCardController.includes("hooks.onContentResize()"),
+  "location editor notifies machine-card height changes"
+);
+addCheck(
+  taggedMachinePage.includes("hooks.onContentResize = () =>"),
+  "tagged machine page handles dynamic card height changes"
 );
 
 addCheck(

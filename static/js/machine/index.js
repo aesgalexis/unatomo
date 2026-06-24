@@ -438,6 +438,10 @@ const renderMachine = () => {
     recalcHeight();
   };
 
+  hooks.onContentResize = () => {
+    recalcHeight();
+  };
+
   hooks.onStatusToggle = () => {
     if (!canEditStatus(role)) return;
     const statusOrder = ["operativa", "fuera_de_servicio"];
