@@ -78,31 +78,6 @@
     overflow: hidden;
   }
 
-  .mc-header.mc-header--location-editing {
-    flex-wrap: wrap;
-  }
-
-  .mc-location.is-editing {
-    flex: 1 0 100%;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    align-items: stretch;
-    width: 100%;
-    max-width: 100%;
-    overflow: visible;
-  }
-
-  .mc-location.is-editing .mc-location-input {
-    box-sizing: border-box;
-    width: 100%;
-    max-width: none;
-  }
-
-  .mc-location.is-editing .mc-location-actions {
-    justify-content: flex-end;
-    flex-wrap: wrap;
-  }
-
   .mc-location-label {
     min-width: 0;
     overflow: hidden;
