@@ -27,6 +27,13 @@ npm.cmd run deploy:nfc:backend
 ## Project Rules
 
 - Keep progress updates sparse. Prefer silent work unless there is a relevant finding, a file edit is about to happen, the task becomes long-running, or the work is blocked.
+- Publishing and deployments are owner-run by default. Codex and delegated agents
+  must not execute `npm.cmd run site:publish`, any `deploy:nfc:*` command, or a
+  targeted Firebase deploy unless the owner explicitly asks for execution in
+  that turn. Local validation commands such as build, lint, syntax scans, and
+  architecture checks remain agent-run. At handoff, provide the exact required
+  publish/deploy commands in copy-paste order, or state clearly that no publish
+  or deploy is required.
 - Use the repository `deploy:nfc:*` scripts for Firebase deployments. They remove inherited `DEBUG` and `FIREBASE_DEBUG` values that otherwise produce very large Firebase CLI traces. For a targeted deploy, use `npm.cmd run firebase:clean -- deploy --only "functions:name"`.
 - Keep command output bounded: search the smallest relevant paths, request narrow line ranges, and avoid dumping full large files when a targeted `rg` plus a short range is enough.
 - Do not inspect generated `dist/` or `firebase/functions/lib/` unless diagnosing the build output itself. Work from source files.

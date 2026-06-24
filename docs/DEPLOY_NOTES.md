@@ -1,5 +1,32 @@
 # Deploy Notes
 
+## Owner-Run Publish And Deploy Policy
+
+Publishing and production deployments are executed by the project owner by
+default. Codex or another agent should implement the change and run appropriate
+local validation, but should not run any of these commands unless the owner
+explicitly requests execution in the current turn:
+
+```powershell
+npm.cmd run site:publish
+npm.cmd run deploy:nfc:firestore
+npm.cmd run deploy:nfc:storage
+npm.cmd run deploy:nfc:functions
+npm.cmd run deploy:nfc:backend
+npm.cmd run firebase:clean -- deploy --only "functions:functionName"
+```
+
+Every implementation handoff must end with one of the following:
+
+- The exact commands the owner must copy and run, listed in execution order.
+- An explicit statement that no publish or Firebase deployment is required.
+
+Local checks remain the agent's responsibility. This includes builds, lint,
+syntax scans, architecture checks, secret scans when relevant, and read-only
+backups required to work safely. A normal frontend-plus-callable handoff should
+usually list the targeted Function deployment first and `site:publish` second,
+so the browser never calls a backend function that is not deployed yet.
+
 ## Local Validation
 
 PowerShell may block `npm` through `npm.ps1`. Prefer `npm.cmd` when needed.
