@@ -1,6 +1,7 @@
 import { functions } from "/static/js/firebase/firebaseApp.js";
 import { httpsCallable } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-functions.js";
 import { getCurrentLang } from "/static/js/site/locale.js";
+export { buildMachineTagUrl } from "./tagUrl.js";
 
 const generateMachineTagQrCallable = httpsCallable(
   functions,
@@ -10,14 +11,6 @@ const disconnectMachineTagCallable = httpsCallable(
   functions,
   "disconnectMachineTag"
 );
-const CANONICAL_SITE_ORIGIN = "https://unatomo.com";
-
-export const buildMachineTagUrl = (tagId, lang = getCurrentLang()) => {
-  if (!tagId) return "";
-  const safeLang = lang === "en" ? "en" : "es";
-  return `${CANONICAL_SITE_ORIGIN}/nfc/${safeLang}/m.html?tag=${encodeURIComponent(tagId)}`;
-};
-
 export const generateMachineTagQr = async (machineId, lang = getCurrentLang()) => {
   try {
     const response = await generateMachineTagQrCallable({ machineId, lang });

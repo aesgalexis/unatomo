@@ -105,6 +105,10 @@
 }
 
 @media (max-width: 768px), (hover: none), (pointer: coarse) {
+  .dashboard-section-nav {
+    padding-top: 1.38rem;
+  }
+
   .dashboard-section-link[data-tooltip]::after {
     display: none;
   }

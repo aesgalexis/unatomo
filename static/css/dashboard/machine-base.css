@@ -32,6 +32,14 @@
   cursor: pointer;
 }
 
+.machine-card[data-expanded="true"] {
+  overflow: visible;
+}
+
+.machine-card:has(.task-menu-toggle[aria-expanded="true"]) {
+  z-index: 35;
+}
+
 .machine-card.is-dragging {
   opacity: 0.6;
   box-shadow: 0 8px 18px rgba(0,0,0,0.15);
