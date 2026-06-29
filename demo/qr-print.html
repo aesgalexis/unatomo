@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="es" class="styles-loading">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Impresion QR demo | unatomo</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <script src="/static/js/theme/theme-init.js"></script>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/static/css/qr-print.css">
+  <script>
+    window.__unatomoStylesReady = (() => {
+      const links = Array.from(document.querySelectorAll('link[rel="stylesheet"]'));
+      const waitForLink = (link) => {
+        try {
+          if (link.sheet) return Promise.resolve();
+        } catch {}
+        return new Promise((resolve) => {
+          link.addEventListener("load", resolve, { once: true });
+          link.addEventListener("error", resolve, { once: true });
+        });
+      };
+      return Promise.all(links.map(waitForLink))
+        .then(() => document.fonts?.ready || Promise.resolve())
+        .then(() => document.documentElement.classList.remove("styles-loading"));
+    })();
+  </script>
+  <link rel="icon" href="/static/img/favicon/favicon.svg" type="image/svg+xml">
+</head>
+
+<body class="page demo-page" data-topbar-title="Impresion QR demo">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="topbar-logo-group">
+        <a href="/demo/" class="topbar-logo-link" aria-label="unatomo demo">
+          <img src="/static/img/logo-unatomo-v1.6.svg" alt="unatomo" class="topbar-logo" loading="eager" />
+        </a>
+        <div class="topbar-title-wrap" aria-hidden="true">
+          <h2 class="topbar-title" id="topbar-title">Impresion QR demo</h2>
+          <div class="topbar-status" id="topbar-status" aria-live="polite"></div>
+        </div>
+      </div>
+      <div class="topbar-actions" aria-label="Demo">
+        <span class="mc-badge">Modo demo</span>
+        <button id="theme-toggle" type="button" aria-label="Cambiar tema"></button>
+      </div>
+    </div>
+  </header>
+
+  <main class="shell page-shell">
+    <section class="page-section">
+      <div id="qr-print-mount"></div>
+    </section>
+    <div id="legal-footer" class="legal-footer"></div>
+    <div class="footer-link">
+      <a href="/nfc/es/privacidad.html">Politica de privacidad y cookies</a>
+    </div>
+  </main>
+
+  <script type="module" src="/demo/js/demoQrPrint.js"></script>
+  <script src="/static/js/footer.js"></script>
+</body>
+</html>

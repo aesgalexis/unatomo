@@ -96,86 +96,106 @@ const createTaskMenu = ({
   openEditForm
 }) => {
   const menu = document.createElement("span");
-  menu.className = "mc-doc-menu task-menu";
+  menu.className = "task-menu";
 
   const dots = document.createElement("button");
   dots.type = "button";
-  dots.className = "mc-doc-menu-dots";
+  dots.className = "task-menu-toggle";
   dots.setAttribute("aria-label", t("general.moreOptions", "Más opciones"));
+  dots.setAttribute("aria-haspopup", "menu");
   dots.setAttribute("aria-expanded", "false");
-  dots.textContent = "...";
-  menu.addEventListener("mouseleave", () => {
-    menu.classList.remove("is-hover-suppressed");
-  });
+  dots.textContent = "•••";
+
+  const panel = document.createElement("div");
+  panel.className = "task-menu-panel";
+  panel.setAttribute("role", "menu");
+  panel.hidden = true;
+
+  let documentClickHandler = null;
+
+  const closeMenu = () => {
+    panel.hidden = true;
+    dots.setAttribute("aria-expanded", "false");
+    if (documentClickHandler) {
+      document.removeEventListener("click", documentClickHandler, true);
+      documentClickHandler = null;
+    }
+  };
+
+  const openMenu = () => {
+    panel.hidden = false;
+    dots.setAttribute("aria-expanded", "true");
+    if (documentClickHandler) return;
+    documentClickHandler = (event) => {
+      if (menu.contains(event.target)) return;
+      closeMenu();
+    };
+    document.addEventListener("click", documentClickHandler, true);
+  };
+
   dots.addEventListener("click", (event) => {
     event.preventDefault();
     event.stopPropagation();
-    const isOpen = menu.classList.contains("is-open");
-    if (!isOpen) {
-      menu.classList.remove("is-hover-suppressed");
-      menu.classList.add("is-open");
-      dots.setAttribute("aria-expanded", "true");
-    } else {
-      menu.classList.remove("is-open");
-      menu.classList.add("is-hover-suppressed");
-      dots.setAttribute("aria-expanded", "false");
-      try {
-        dots.blur({ preventScroll: true });
-      } catch {
-        dots.blur();
-      }
-    }
+    const nextOpen = panel.hidden;
+    if (nextOpen) openMenu();
+    else closeMenu();
   });
 
   const note = document.createElement("button");
   note.type = "button";
-  note.className = "mc-doc-menu-link task-menu-link";
+  note.className = "task-menu-action";
+  note.setAttribute("role", "menuitem");
   note.textContent = t("tasks.addNote", "Añadir nota");
   note.addEventListener("click", (event) => {
+    event.preventDefault();
     event.stopPropagation();
-    menu.classList.remove("is-open");
-    dots.setAttribute("aria-expanded", "false");
+    closeMenu();
     openNoteForm();
   });
 
   const images = document.createElement("button");
   images.type = "button";
-  images.className = "mc-doc-menu-link task-menu-link";
+  images.className = "task-menu-action";
+  images.setAttribute("role", "menuitem");
   images.textContent = t("tasks.addImages", "Añadir imágenes");
   images.addEventListener("click", (event) => {
+    event.preventDefault();
     event.stopPropagation();
-    menu.classList.remove("is-open");
-    dots.setAttribute("aria-expanded", "false");
+    closeMenu();
     openImagePicker();
   });
 
   const edit = document.createElement("button");
   edit.type = "button";
-  edit.className = "mc-doc-menu-link task-menu-link";
+  edit.className = "task-menu-action";
+  edit.setAttribute("role", "menuitem");
   edit.textContent = t("general.edit", "Editar");
   edit.addEventListener("click", (event) => {
+    event.preventDefault();
     event.stopPropagation();
-    menu.classList.remove("is-open");
-    dots.setAttribute("aria-expanded", "false");
+    closeMenu();
     openEditForm();
   });
 
   const remove = document.createElement("button");
   remove.type = "button";
-  remove.className = "mc-doc-menu-link mc-doc-menu-delete task-menu-link";
+  remove.className = "task-menu-action task-menu-delete";
+  remove.setAttribute("role", "menuitem");
   remove.textContent = t("tasks.remove", "Eliminar");
   remove.addEventListener("click", (event) => {
+    event.preventDefault();
     event.stopPropagation();
-    menu.classList.remove("is-open");
-    dots.setAttribute("aria-expanded", "false");
+    closeMenu();
     if (hooks.onRemoveTask) hooks.onRemoveTask(machine.id, task.id);
   });
 
+  menu.addEventListener("click", (event) => event.stopPropagation());
   menu.appendChild(dots);
-  menu.appendChild(note);
-  menu.appendChild(images);
-  menu.appendChild(edit);
-  menu.appendChild(remove);
+  panel.appendChild(note);
+  panel.appendChild(images);
+  panel.appendChild(edit);
+  panel.appendChild(remove);
+  menu.appendChild(panel);
   return menu;
 };
 
@@ -518,7 +538,7 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
 
     const createBtn = document.createElement("button");
     createBtn.type = "button";
-    createBtn.className = "task-create-btn";
+    createBtn.className = "task-create-btn task-create-submit";
     createBtn.textContent = t("tasks.create", "Crear");
     createBtn.addEventListener("click", (event) => {
       event.stopPropagation();

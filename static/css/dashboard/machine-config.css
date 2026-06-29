@@ -229,13 +229,15 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 36px;
+  box-sizing: border-box;
+  height: 32px;
   border-radius: 0.6rem;
   border: 1px solid var(--border-subtle);
   background: color-mix(in srgb, var(--bg) 96%, transparent);
   color: var(--fg);
-  padding: 0.35rem 0.7rem;
+  padding: 0.2rem 0.7rem;
   font: inherit;
+  line-height: 1;
   text-decoration: none;
 }
 
@@ -559,4 +561,3 @@
   display: inline-flex;
   gap: 0.35rem;
 }
-

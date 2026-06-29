@@ -140,7 +140,10 @@
 }
 
 .task-menu {
-  position: static;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0;
   transform: translateY(-0.1rem);
 }
 
@@ -156,23 +159,111 @@
 }
 
 .task-actions-left .task-menu {
-  flex-direction: row;
-  transform: translateY(-1.2rem);
+  transform: translateY(-0.95rem);
 }
 
-.task-actions-left .mc-doc-menu-link {
-  max-width: 0;
+.task-menu-toggle {
+  width: 1.4rem;
+  height: 1.4rem;
+  border: 1px solid transparent;
+  border-radius: 0.35rem;
+  background: transparent;
+  color: color-mix(in srgb, var(--fg) 64%, transparent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+  font-size: 0.9rem;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity 120ms ease, border-color 120ms ease, background 120ms ease;
 }
 
-.task-actions-left .mc-doc-menu:hover .mc-doc-menu-link,
-.task-actions-left .mc-doc-menu:focus-within .mc-doc-menu-link,
-.task-actions-left .mc-doc-menu.is-open .mc-doc-menu-link {
-  max-width: 8.4rem;
+.mc-expand .task-menu-toggle {
+  border: 1px solid transparent;
+  background: transparent;
+  color: color-mix(in srgb, var(--fg) 64%, transparent);
 }
 
-.task-menu .mc-doc-menu-link {
+.task-item:hover .task-menu-toggle,
+.task-item:focus-within .task-menu-toggle,
+.task-menu-toggle[aria-expanded="true"] {
+  opacity: 1;
+}
+
+.task-menu-toggle:hover,
+.task-menu-toggle[aria-expanded="true"] {
+  border-color: var(--border-subtle);
+  background: color-mix(in srgb, var(--bg) 92%, var(--fg) 8%);
+  color: var(--fg);
+}
+
+.mc-expand .task-menu-toggle:hover,
+.mc-expand .task-menu-toggle[aria-expanded="true"] {
+  border-color: var(--border-subtle);
+  background: color-mix(in srgb, var(--bg) 92%, var(--fg) 8%);
+  color: var(--fg);
+}
+
+.task-menu-panel {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 25;
+  min-width: 9rem;
+  width: max-content;
+  max-width: min(16rem, calc(100vw - 2rem));
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--bg) 96%, transparent);
+  box-shadow: 0 12px 28px color-mix(in srgb, #000 16%, transparent);
+  padding: 0.25rem;
+}
+
+.task-menu-panel[hidden] {
+  display: none;
+}
+
+.task-menu-action {
+  width: 100%;
+  border: 0;
+  border-radius: 0.35rem;
+  background: transparent;
+  color: var(--fg);
+  display: block;
+  padding: 0.42rem 0.55rem;
+  font: inherit;
+  font-size: 0.88rem;
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.mc-expand .task-menu-action {
   border: 0;
   background: transparent;
+  color: var(--fg);
+}
+
+.task-menu-action:hover,
+.task-menu-action:focus-visible {
+  background: color-mix(in srgb, var(--fg) 9%, transparent);
+  outline: none;
+}
+
+.mc-expand .task-menu-action:hover,
+.mc-expand .task-menu-action:focus-visible {
+  background: color-mix(in srgb, var(--fg) 9%, transparent);
+  outline: none;
+}
+
+.task-menu-delete {
+  color: var(--danger, #d33);
+}
+
+.mc-expand .task-menu-delete {
+  color: var(--danger, #d33);
 }
 
 .task-inline-forms,
@@ -327,3 +418,18 @@
   cursor: pointer;
 }
 
+.task-create-submit {
+  background: linear-gradient(135deg, #2da44e, #2c974b);
+  border-color: #2c974b;
+  color: #fff;
+}
+
+.mc-expand .task-create-submit {
+  background: linear-gradient(135deg, #2da44e, #2c974b);
+  border-color: #2c974b;
+  color: #fff;
+}
+
+.task-create-submit:hover {
+  opacity: 0.95;
+}

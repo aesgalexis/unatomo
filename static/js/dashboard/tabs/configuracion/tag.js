@@ -1,5 +1,5 @@
 import { t } from "../../i18n.js";
-import { buildMachineTagUrl } from "../../tags/tagAssetsRepo.js";
+import { buildMachineTagUrl } from "../../tags/tagUrl.js";
 import { getCurrentLang, localizeEsPath } from "/static/js/site/locale.js";
 
 const buildQrPrintHref = (machineId) => {
