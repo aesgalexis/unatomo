@@ -25,15 +25,13 @@
 
   const links = lang === "en"
     ? [
-        { href: `${basePrefix}/en/index.html#/faqs`, label: "FAQs" },
-        { href: `${basePrefix}/en/index.html#/tags`, label: "Physical tags" },
         { href: `${basePrefix}/en/index.html#/novedades`, label: "What’s new" },
+        { href: `${basePrefix}/en/index.html#/tags`, label: "Physical tags" },
         { href: `${basePrefix}/en/index.html#/contacto`, label: "Contact" }
       ]
     : [
-        { href: `${basePrefix}/es/index.html#/faqs`, label: "FAQs" },
-        { href: `${basePrefix}/es/index.html#/tags`, label: "Tags f\u00edsicos" },
         { href: `${basePrefix}/es/index.html#/novedades`, label: "Novedades" },
+        { href: `${basePrefix}/es/index.html#/tags`, label: "Tags f\u00edsicos" },
         { href: `${basePrefix}/es/index.html#/contacto`, label: "Contacto" }
       ];
 

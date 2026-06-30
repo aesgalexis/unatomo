@@ -152,11 +152,11 @@ export const installMachineCardManagementHooks = (dependencies) => {
 
         hooks.onUpdateAdmin = async (id, email) => {
           const current = getDraftById(id);
-          if (!current) return;
+          if (!current) return false;
           const ownerEmail = (current.ownerEmail || state.adminEmail || "").trim();
           if (!isOwnerMachine(current)) {
             notifyTopbar("Solo el propietario puede asignar administrador");
-            return;
+            return false;
           }
           const nextEmail = normalizeEmail(email);
           const ownerNormalized = normalizeEmail(ownerEmail);
@@ -173,7 +173,7 @@ export const installMachineCardManagementHooks = (dependencies) => {
                 "No puedes asignar administrador con una transferencia pendiente"
               )
             );
-            return;
+            return false;
           }
 
           if (!nextEmail) {
@@ -183,7 +183,7 @@ export const installMachineCardManagementHooks = (dependencies) => {
             state.expandedById = Array.from(expandedById);
             renderCards({ preserveScroll: true });
             autoSave.scheduleSave(id, "admin");
-            return;
+            return true;
           }
           if (ownerNormalized && nextEmail === ownerNormalized) {
             updateMachine(id, {
@@ -193,7 +193,7 @@ export const installMachineCardManagementHooks = (dependencies) => {
             state.selectedTabById = { ...(state.selectedTabById || {}), [id]: "configuracion" };
             state.expandedById = Array.from(expandedById);
             renderCards({ preserveScroll: true });
-            return;
+            return false;
           }
           const restoreY = window.scrollY;
           const anchorCard = list.querySelector(`.machine-card[data-machine-id="${id}"]`);
@@ -211,12 +211,13 @@ export const installMachineCardManagementHooks = (dependencies) => {
             state.nextScrollRestoreY = null;
             state.nextScrollAnchor = null;
             notifyTopbar(t("dashboard.adminAssignNoPermission", "No tienes permisos para asignar administrador"));
-            return;
+            return false;
           }
           if (!state.selectedTabById) state.selectedTabById = {};
           state.selectedTabById[id] = "configuracion";
           state.expandedById = Array.from(expandedById);
           notifyTopbar(t("dashboard.adminPending", "Pendiente aceptación"));
+          return true;
         };
 
         hooks.onRemoveAdmin = async (id) => {

@@ -1,5 +1,4 @@
 ﻿import { getCurrentLang } from "/static/js/site/locale.js";
-import { render as renderFaqs } from "./faqs.js";
 import { render as renderTags } from "./tags.js";
 import { render as renderSoporte } from "./soporte.js";
 import { render as renderNovedades } from "./novedades.js";
@@ -10,7 +9,6 @@ const lang = getCurrentLang();
 
 const sectionMap = {
   dashboard: { title: "Dashboard", render: null },
-  faqs: { title: "Unatomo", render: renderFaqs },
   tags: { title: "Unatomo", render: renderTags },
   contacto: { title: "Unatomo", render: renderSoporte },
   novedades: { title: "Unatomo", render: renderNovedades }

@@ -17,7 +17,7 @@ const text = {
 }[lang];
 
 const DASHBOARD_MODULE = "/static/js/dashboard/index.js";
-const PUBLIC_SECTIONS = new Set(["faqs", "tags", "contacto", "novedades"]);
+const PUBLIC_SECTIONS = new Set(["novedades", "tags", "contacto"]);
 const LOADING_NOTICE_DELAY_MS = 1800;
 const STALL_NOTICE_DELAY_MS = 12000;
 
