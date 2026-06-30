@@ -515,7 +515,7 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
     const titleInput = document.createElement("input");
     titleInput.className = "task-title-input";
     titleInput.type = "text";
-    titleInput.placeholder = t("tasks.task", "Tarea");
+    titleInput.placeholder = t("tasks.taskIncidentPlaceholder", "Tarea / incidencia");
     titleInput.maxLength = MAX_TASK_TITLE;
     titleInput.addEventListener("click", (event) => event.stopPropagation());
 
