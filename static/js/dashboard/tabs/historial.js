@@ -121,14 +121,11 @@ export const render = (panel, machine, hooks, options = {}) => {
   const form = document.createElement("div");
   form.className = "mc-log-form";
 
-  const label = document.createElement("span");
-  label.className = "mc-log-label";
-  label.textContent = t("history.intervention", "Intervencion");
-
   const input = document.createElement("input");
   input.type = "text";
   input.maxLength = 255;
   input.className = "mc-log-input";
+  input.setAttribute("aria-label", t("history.intervention", "Intervencion"));
   input.addEventListener("click", (event) => event.stopPropagation());
 
   const btn = document.createElement("button");
@@ -143,7 +140,6 @@ export const render = (panel, machine, hooks, options = {}) => {
     input.value = "";
   });
 
-  form.appendChild(label);
   form.appendChild(input);
   form.appendChild(btn);
   panel.appendChild(form);

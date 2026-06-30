@@ -36,6 +36,10 @@
   overflow: visible;
 }
 
+.machine-card[data-expanded="true"].is-expanding {
+  overflow: hidden;
+}
+
 .machine-card:has(.task-menu-toggle[aria-expanded="true"]) {
   z-index: 35;
 }
@@ -409,7 +413,19 @@
 
 .mc-expand {
   padding: 0 1.25rem 1.25rem;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 150ms ease, transform 150ms ease;
+}
+
+.machine-card[data-expanded="true"] .mc-expand {
   opacity: 1;
+  transform: translateY(0);
+  transition-delay: 70ms;
+}
+
+.machine-card[data-expanded="false"] .mc-expand {
+  pointer-events: none;
 }
 
 .mc-tabs {

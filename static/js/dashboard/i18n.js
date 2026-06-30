@@ -77,6 +77,7 @@ const TEXT = {
     },
     tasks: {
       task: "Tarea",
+      taskIncidentPlaceholder: "Tarea / incidencia",
       oneOff: "Tarea puntual",
       custom: "Personalizada",
       pending: "Pendiente",
@@ -446,6 +447,7 @@ const TEXT = {
     },
     tasks: {
       task: "Task",
+      taskIncidentPlaceholder: "Task / incident",
       oneOff: "One-off task",
       custom: "Custom",
       pending: "Pending",
