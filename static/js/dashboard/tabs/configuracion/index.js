@@ -51,12 +51,28 @@ export const render = (panel, machine, hooks, options = {}) => {
     const acceptBtn = document.createElement("button");
     acceptBtn.type = "button";
     acceptBtn.className = "mc-location-accept";
-    acceptBtn.textContent = t("card.accept", "Aceptar");
-    acceptBtn.addEventListener("click", (event) => {
+    const acceptLabel = t("card.accept", "Aceptar");
+    acceptBtn.textContent = acceptLabel;
+    acceptBtn.addEventListener("click", async (event) => {
       event.stopPropagation();
       const email = input.value.trim();
       if (!email) return;
-      if (hooks.onUpdateAdmin) hooks.onUpdateAdmin(machine.id, email);
+      if (!hooks.onUpdateAdmin) return;
+      input.disabled = true;
+      acceptBtn.disabled = true;
+      cancelBtn.disabled = true;
+      acceptBtn.textContent = t("config.assigning", "Asignando...");
+      let assigned = false;
+      try {
+        assigned = await hooks.onUpdateAdmin(machine.id, email) === true;
+      } finally {
+        if (!assigned && acceptBtn.isConnected) {
+          input.disabled = false;
+          acceptBtn.disabled = false;
+          cancelBtn.disabled = false;
+          acceptBtn.textContent = acceptLabel;
+        }
+      }
     });
 
     const cancelBtn = document.createElement("button");

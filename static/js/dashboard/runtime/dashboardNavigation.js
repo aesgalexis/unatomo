@@ -6,7 +6,7 @@ export const getPublicSectionFromHash = () =>
     .toLowerCase();
 
 export const isPublicSectionHash = () =>
-  ["faqs", "tags", "contacto", "novedades"].includes(getPublicSectionFromHash());
+  ["novedades", "tags", "contacto"].includes(getPublicSectionFromHash());
 
 export const getDashboardInternalView = () => {
   const section = getPublicSectionFromHash();
