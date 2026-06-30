@@ -162,6 +162,24 @@
   transform: translateY(-0.95rem);
 }
 
+@media (max-width: 768px) {
+  .task-item {
+    padding-top: 0.55rem;
+  }
+
+  .task-item:not(:first-child) {
+    padding-top: 1.45rem;
+  }
+
+  .task-actions-left {
+    margin-bottom: 0.45rem;
+  }
+
+  .task-actions-left .task-menu {
+    transform: translateY(-1.28rem);
+  }
+}
+
 .task-menu-toggle {
   width: 1.4rem;
   height: 1.4rem;

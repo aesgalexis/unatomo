@@ -1,14 +1,67 @@
 import {HttpsError, onCall} from "firebase-functions/v2/https";
 import * as admin from "firebase-admin";
+import {
+  getAccountHandleValidationError,
+  normalizeAccountHandle,
+} from "../core/accountHandles";
 import {normalizeEmail} from "../core/auth";
-import {invitesCol, linksCol, machinesCol} from "../core/firebase";
+import {
+  accountDirectoryCol,
+  accountHandlesCol,
+  invitesCol,
+  linksCol,
+  machinesCol,
+} from "../core/firebase";
+
+const resolveInviteeIdentity = async (value: string) => {
+  const raw = (value || "").toString().trim();
+  if (!raw.startsWith("@")) {
+    return {
+      adminEmail: raw,
+      adminEmailLower: normalizeEmail(raw),
+      adminUid: "",
+      adminHandle: "",
+    };
+  }
+
+  const handle = normalizeAccountHandle(raw);
+  const validationError = getAccountHandleValidationError(handle);
+  if (validationError) {
+    throw new HttpsError("invalid-argument", validationError);
+  }
+
+  const handleSnap = await accountHandlesCol().doc(handle).get();
+  const adminUid = (handleSnap.data()?.uid || "").toString().trim();
+  if (!handleSnap.exists || !adminUid) {
+    throw new HttpsError("not-found", "account-handle-not-found");
+  }
+
+  const directorySnap = await accountDirectoryCol()
+    .where("uid", "==", adminUid)
+    .limit(1)
+    .get();
+  const directoryData = directorySnap.docs[0]?.data() || {};
+  const adminEmailLower = normalizeEmail(directoryData.emailLower || "");
+  const adminEmail = (directoryData.email || adminEmailLower).toString().trim();
+  if (!adminEmailLower) {
+    throw new HttpsError("not-found", "account-email-not-found");
+  }
+
+  return {
+    adminEmail,
+    adminEmailLower,
+    adminUid,
+    adminHandle: handle,
+  };
+};
 
 export const createAdminInvite = onCall(async (request) => {
   const auth = request.auth;
   if (!auth) throw new HttpsError("unauthenticated", "auth-required");
   const machineId = (request.data?.machineId || "").toString().trim();
   const adminEmailRaw = (request.data?.adminEmail || "").toString();
-  const adminEmailLower = normalizeEmail(adminEmailRaw);
+  const invitee = await resolveInviteeIdentity(adminEmailRaw);
+  const adminEmailLower = invitee.adminEmailLower;
   if (!machineId || !adminEmailLower) {
     throw new HttpsError("invalid-argument", "machineId/adminEmail required");
   }
@@ -43,8 +96,10 @@ export const createAdminInvite = onCall(async (request) => {
       ownerEmail,
       machineId,
       machineTitle: (machine.title || "").toString(),
-      adminEmail: adminEmailRaw,
+      adminEmail: invitee.adminEmail,
       adminEmailLower,
+      adminUid: invitee.adminUid,
+      adminHandle: invitee.adminHandle,
       status: "pending",
       createdAt: now,
       updatedAt: now,
@@ -54,7 +109,7 @@ export const createAdminInvite = onCall(async (request) => {
 
   await machineRef.set(
     {
-      adminEmail: adminEmailRaw,
+      adminEmail: invitee.adminEmail,
       adminStatus: "Pendiente aceptación",
     },
     {merge: true},
@@ -310,4 +365,3 @@ export const ensureAdminLink = onCall(async (request) => {
   );
   return {ok: true, created: true};
 });
-
