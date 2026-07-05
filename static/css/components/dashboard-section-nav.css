@@ -70,12 +70,12 @@
 }
 
 .dashboard-section-icon-todo {
-  width: 1.32rem;
-  height: 1.32rem;
+  width: 1.26rem;
+  height: 1.26rem;
 }
 
 .dashboard-section-icon-todo svg {
-  transform: translateY(1px) scale(1.06);
+  transform: translateY(1px) scale(1.055);
   transform-origin: center;
 }
 

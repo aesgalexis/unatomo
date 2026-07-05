@@ -219,10 +219,29 @@ body.page .topbar {
 .qr-print-size {
   display: flex;
   align-items: center;
-  gap: 0.65rem;
+  gap: 0.55rem;
   color: var(--muted);
   font-size: 0.9rem;
   white-space: nowrap;
+}
+
+.qr-print-size-icon {
+  display: inline-flex;
+  width: 1.05rem;
+  height: 1.05rem;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.qr-print-size-icon svg {
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
 }
 
 .qr-print-size input {

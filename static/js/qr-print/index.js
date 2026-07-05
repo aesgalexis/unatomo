@@ -71,6 +71,14 @@ const PRINT_ICON = `
     <path d="M6 14h12v7H6z"></path>
   </svg>
 `;
+const ZOOM_ICON = `
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <circle cx="10.5" cy="10.5" r="6.5"></circle>
+    <path d="m16 16 4.5 4.5"></path>
+    <path d="M10.5 8v5"></path>
+    <path d="M8 10.5h5"></path>
+  </svg>
+`;
 let currentMachines = [];
 let allMachines = [];
 let totalMachinesCount = 0;
@@ -441,7 +449,8 @@ const renderQrGrid = (machines, options = {}) => {
   const sizeControl = document.createElement("label");
   sizeControl.className = "qr-print-size";
   const sizeLabel = document.createElement("span");
-  sizeLabel.textContent = text.size;
+  sizeLabel.className = "qr-print-size-icon";
+  sizeLabel.innerHTML = ZOOM_ICON;
   const sizeInput = document.createElement("input");
   sizeInput.type = "range";
   sizeInput.min = "0";
