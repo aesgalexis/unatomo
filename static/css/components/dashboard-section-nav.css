@@ -79,6 +79,11 @@
   transform-origin: center;
 }
 
+.dashboard-section-icon-gallery svg {
+  transform: translateY(1px) scale(1.04);
+  transform-origin: center;
+}
+
 .dashboard-section-badge {
   position: absolute;
   top: -1.38rem;

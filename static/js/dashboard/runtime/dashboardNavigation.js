@@ -10,7 +10,7 @@ export const isPublicSectionHash = () =>
 
 export const getDashboardInternalView = () => {
   const section = getPublicSectionFromHash();
-  return ["registro", "sugerencias", "todo"].includes(section)
+  return ["registro", "galeria", "sugerencias", "todo"].includes(section)
     ? section
     : "dashboard";
 };

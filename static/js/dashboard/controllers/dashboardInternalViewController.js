@@ -4,6 +4,7 @@ import {
   MAX_TODO_LENGTH,
   SUGGESTIONS_PAGE_SIZE,
   renderRegistryDashboardView,
+  renderGalleryDashboardView,
   renderSuggestionsDashboardView,
   renderTodoDashboardView
 } from "../views/dashboardInternalViews.js";
@@ -56,6 +57,13 @@ export const createDashboardInternalViewController = ({
         state.registryVisibleCount += GLOBAL_REGISTRY_PAGE_SIZE;
         rerender({ preserveScroll: true });
       }
+    });
+    return finish();
+  };
+  const renderGallery = (machines) => {
+    prepare();
+    renderGalleryDashboardView(list, machines, {
+      query: state.searchQuery
     });
     return finish();
   };
@@ -226,6 +234,7 @@ export const createDashboardInternalViewController = ({
       return true;
     }
     if (view === "registro") return renderRegistry(machines);
+    if (view === "galeria") return renderGallery(machines);
     if (view === "sugerencias") return renderSuggestions();
     if (view === "todo") return renderTodo();
     return false;

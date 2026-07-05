@@ -3,6 +3,7 @@ import {
   GLOBAL_REGISTRY_PAGE_SIZE,
   renderGlobalRegistryView
 } from "./registry/globalRegistryView.js";
+import { renderGalleryView } from "./gallery/galleryView.js";
 import {
   MAX_SUGGESTION_LENGTH,
   SUGGESTIONS_PAGE_SIZE,
@@ -28,6 +29,12 @@ export const renderRegistryDashboardView = (container, machines = [], options = 
     seenAt: options.seenAt || "",
     visibleCount: options.visibleCount,
     onLoadMore: options.onLoadMore
+  });
+};
+
+export const renderGalleryDashboardView = (container, machines = [], options = {}) => {
+  renderGalleryView(container, machines, {
+    query: options.query || ""
   });
 };
 

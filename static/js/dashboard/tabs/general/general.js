@@ -10,6 +10,8 @@ export const render = (panel, machine, hooks, options = {}) => {
       menu.classList.remove("is-open");
       const dots = menu.querySelector(".mc-doc-menu-dots");
       if (dots) dots.setAttribute("aria-expanded", "false");
+      const menuPanel = menu.querySelector(".mc-doc-menu-panel");
+      if (menuPanel) menuPanel.hidden = true;
     });
   };
 
@@ -22,21 +24,20 @@ export const render = (panel, machine, hooks, options = {}) => {
   panel.addEventListener("click", panel.__unatomoDocMenuHandler);
 
   const setupDocMenu = (menu, dots) => {
+    const menuPanel = menu.querySelector(".mc-doc-menu-panel");
     dots.setAttribute("aria-expanded", "false");
-    menu.addEventListener("mouseleave", () => {
-      menu.classList.remove("is-hover-suppressed");
-    });
+    dots.setAttribute("aria-haspopup", "menu");
+    if (menuPanel) menuPanel.hidden = true;
     dots.addEventListener("click", (event) => {
       event.preventDefault();
       event.stopPropagation();
       const isOpen = menu.classList.contains("is-open");
       closeDocMenus();
       if (!isOpen) {
-        menu.classList.remove("is-hover-suppressed");
         menu.classList.add("is-open");
         dots.setAttribute("aria-expanded", "true");
+        if (menuPanel) menuPanel.hidden = false;
       } else {
-        menu.classList.add("is-hover-suppressed");
         try {
           dots.blur({ preventScroll: true });
         } catch {
@@ -44,6 +45,7 @@ export const render = (panel, machine, hooks, options = {}) => {
         }
       }
     });
+    menu.addEventListener("click", (event) => event.stopPropagation());
   };
 
   const rowTop = document.createElement("div");
@@ -174,11 +176,16 @@ export const render = (panel, machine, hooks, options = {}) => {
       dots.type = "button";
       dots.className = "mc-doc-menu-dots";
       dots.setAttribute("aria-label", t("general.moreOptions", "Más opciones"));
-      dots.textContent = "...";
+      dots.textContent = "•••";
 
-      const rename = document.createElement("a");
-      rename.className = "mc-doc-menu-link mc-other-doc-rename";
-      rename.href = "#";
+      const menuPanel = document.createElement("div");
+      menuPanel.className = "mc-doc-menu-panel";
+      menuPanel.setAttribute("role", "menu");
+
+      const rename = document.createElement("button");
+      rename.type = "button";
+      rename.className = "mc-doc-menu-action mc-other-doc-rename";
+      rename.setAttribute("role", "menuitem");
       rename.textContent = t("general.rename", "Renombrar");
       rename.addEventListener("click", async (event) => {
         event.preventDefault();
@@ -197,9 +204,10 @@ export const render = (panel, machine, hooks, options = {}) => {
         link.textContent = cleanName || doc.name || t("general.otherDocumentation", "Otra documentación");
       });
 
-      const remove = document.createElement("a");
-      remove.className = "mc-doc-menu-link mc-doc-menu-delete mc-other-doc-remove";
-      remove.href = "#";
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.className = "mc-doc-menu-action mc-doc-menu-delete mc-other-doc-remove";
+      remove.setAttribute("role", "menuitem");
       remove.textContent = t("general.delete", "Eliminar");
       remove.addEventListener("click", async (event) => {
         event.preventDefault();
@@ -214,10 +222,11 @@ export const render = (panel, machine, hooks, options = {}) => {
         if (!confirmed) return;
         await hooks.onDeleteMachineDocument(machine.id, "other", null, doc.id || doc.storagePath || "");
       });
-      setupDocMenu(menu, dots);
       menu.appendChild(dots);
-      menu.appendChild(remove);
-      menu.appendChild(rename);
+      menuPanel.appendChild(remove);
+      menuPanel.appendChild(rename);
+      menu.appendChild(menuPanel);
+      setupDocMenu(menu, dots);
       row.appendChild(menu);
     }
 
@@ -513,11 +522,16 @@ export const render = (panel, machine, hooks, options = {}) => {
       dots.type = "button";
       dots.className = "mc-doc-menu-dots";
       dots.setAttribute("aria-label", t("general.moreOptions", "Más opciones"));
-      dots.textContent = "...";
+      dots.textContent = "•••";
 
-      const deleteLink = document.createElement("a");
-      deleteLink.href = "#";
-      deleteLink.className = "mc-doc-menu-link mc-doc-menu-delete";
+      const menuPanel = document.createElement("div");
+      menuPanel.className = "mc-doc-menu-panel";
+      menuPanel.setAttribute("role", "menu");
+
+      const deleteLink = document.createElement("button");
+      deleteLink.type = "button";
+      deleteLink.className = "mc-doc-menu-action mc-doc-menu-delete";
+      deleteLink.setAttribute("role", "menuitem");
       deleteLink.textContent = t("general.delete", "Eliminar");
       deleteLink.addEventListener("click", async (event) => {
         event.preventDefault();
@@ -526,9 +540,10 @@ export const render = (panel, machine, hooks, options = {}) => {
         await deleteDocument();
       });
 
-      setupDocMenu(menu, dots);
       menu.appendChild(dots);
-      menu.appendChild(deleteLink);
+      menuPanel.appendChild(deleteLink);
+      menu.appendChild(menuPanel);
+      setupDocMenu(menu, dots);
       tile.appendChild(menu);
     }
 

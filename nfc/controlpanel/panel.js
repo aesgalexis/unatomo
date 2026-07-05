@@ -132,6 +132,115 @@ const text = {
   whatsNewPending: isEn
     ? "Pending: this panel control is not wired to the project flag yet."
     : "Pendiente: este control del panel aun no esta conectado a la flag del proyecto.",
+  agentCardTitle: "Codex",
+  agentCardHint: isEn
+    ? "Local owner-facing identity card for this Codex relationship."
+    : "Tarjeta local de identidad para esta relacion con Codex.",
+  agentCardLocalOnly: isEn
+    ? "Local panel card. Stored role preference stays in this browser; no Firestore write, no callable, no cloud memory."
+    : "Tarjeta local del panel. La preferencia de rol queda en este navegador; sin escritura en Firestore, sin callable, sin memoria en la nube.",
+  agentRoleLabel: isEn ? "Role" : "Rol",
+  agentRoleOptions: [
+    {
+      value: "local-coding-agent",
+      label: isEn ? "Local coding agent" : "Agente local de codigo",
+    },
+    {
+      value: "technical-collaborator",
+      label: isEn ? "Technical collaborator" : "Colaborador tecnico",
+    },
+    {
+      value: "project-copilot",
+      label: isEn ? "Project copilot" : "Copiloto de proyecto",
+    },
+  ],
+  agentCardFields: {
+    name: isEn ? "Name" : "Nombre",
+    owner: "Owner",
+    interface: isEn ? "Interface" : "Interfaz",
+    freedom: isEn ? "Freedom" : "Libertad",
+  },
+  agentCardValues: {
+    name: "Codex",
+    owner: "Alexis",
+    interface: isEn ? "VS Code Codex extension and chat" : "Extension Codex en VS Code y chat",
+    freedom: isEn
+      ? "Can inspect, propose, edit, and validate with scoped autonomy inside the project. Publishing, deployments, destructive actions, secrets, and production ownership changes still require explicit owner intent."
+      : "Puede inspeccionar, proponer, editar y validar con autonomia acotada dentro del proyecto. Publicaciones, despliegues, acciones destructivas, secretos y cambios de ownership en produccion siguen requiriendo intencion explicita del owner.",
+  },
+  agentDocsTitle: isEn ? "AI documents" : "Documentos IA",
+  agentDocsHint: isEn
+    ? "Local Markdown files related to Codex, AI collaboration, and project continuity."
+    : "Archivos Markdown locales relacionados con Codex, colaboracion IA y continuidad del proyecto.",
+  agentDocOpen: isEn ? "Open in VS Code" : "Abrir en VS Code",
+  agentDocCopy: isEn ? "Copy path" : "Copiar ruta",
+  agentDocCopied: isEn ? "Path copied." : "Ruta copiada.",
+  agentDocCopyError: isEn ? "Unable to copy path." : "No se ha podido copiar la ruta.",
+  agentDocuments: [
+    {
+      title: "AGENTS.md",
+      path: "AGENTS.md",
+      description: isEn
+        ? "Repository-level operating instructions for Codex."
+        : "Instrucciones operativas del repositorio para Codex.",
+    },
+    {
+      title: "AI collaboration context",
+      path: "docs/AI_COLLABORATION_CONTEXT.md",
+      description: isEn
+        ? "Root product lens for Codex and future AI collaborators."
+        : "Mirada raiz de producto para Codex y futuras IAs colaboradoras.",
+    },
+    {
+      title: "Codex context",
+      path: "docs/CODEX_CONTEXT.md",
+      description: isEn
+        ? "Current project map and orientation for Codex sessions."
+        : "Mapa actual del proyecto y orientacion para sesiones de Codex.",
+    },
+    {
+      title: "Product notes",
+      path: "docs/PRODUCT_NOTES.md",
+      description: isEn
+        ? "Owner product-direction notes and provisional decisions."
+        : "Notas de direccion de producto y decisiones provisionales del owner.",
+    },
+    {
+      title: "Codex memory README",
+      path: "codex-memory/README.md",
+      description: isEn
+        ? "Scope and safety rules for the local Codex memory folder."
+        : "Alcance y reglas de seguridad de la memoria local de Codex.",
+    },
+    {
+      title: "Agent card",
+      path: "codex-memory/agent-card.md",
+      description: isEn
+        ? "Local identity card for Codex in this project relationship."
+        : "Tarjeta local de identidad de Codex en esta relacion de proyecto.",
+    },
+    {
+      title: "Relationship",
+      path: "codex-memory/relationship.md",
+      description: isEn
+        ? "Working relationship between Alexis and Codex."
+        : "Relacion de trabajo entre Alexis y Codex.",
+    },
+    {
+      title: "Next move",
+      path: "codex-memory/next-move.md",
+      description: isEn
+        ? "Current proposed direction and continuity notes."
+        : "Rumbo propuesto actual y notas de continuidad.",
+    },
+    {
+      title: "Conversational AI notes",
+      path: "codex-memory/conversational-ai-notes.md",
+      description: isEn
+        ? "Inbox for notes brought from Alexis's conversational AI."
+        : "Bandeja de notas traidas desde la IA conversacional de Alexis.",
+    },
+  ],
   preferencesTitle: isEn ? "Superadmin preferences" : "Preferencias de superadmin",
   preferencesHint: isEn
     ? "Personal interface options stored only in this browser."
@@ -725,6 +834,9 @@ const renderBackupStatus = (body, status) => {
 };
 
 const WHATS_NEW_LOCAL_KEY = "unatomo_whats_new_codex_enabled_v1";
+const AGENT_ROLE_LOCAL_KEY = "unatomo_codex_agent_role_v1";
+const REPO_LOCAL_ROOT = "C:\\proyectos\\unatomo";
+const REPO_LOCAL_ROOT_URI = "C:/proyectos/unatomo";
 
 const getLocalWhatsNewFlag = (fallback) => {
   try {
@@ -816,6 +928,183 @@ const renderSuperadminPreferences = (body) => {
   row.appendChild(label);
   row.appendChild(control);
   body.appendChild(row);
+};
+
+const getLocalMdPath = (relativePath) =>
+  `${REPO_LOCAL_ROOT}\\${relativePath.replace(/\//g, "\\")}`;
+
+const getVsCodeMdUri = (relativePath) =>
+  `vscode://file/${encodeURI(`${REPO_LOCAL_ROOT_URI}/${relativePath}`)}`;
+
+const copyText = async (value) => {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(value);
+    return;
+  }
+
+  const input = document.createElement("textarea");
+  input.value = value;
+  input.setAttribute("readonly", "");
+  input.style.position = "fixed";
+  input.style.opacity = "0";
+  document.body.appendChild(input);
+  input.select();
+  const copied = document.execCommand("copy");
+  input.remove();
+  if (!copied) throw new Error("copy-failed");
+};
+
+const renderAgentDocuments = (body) => {
+  const section = document.createElement("section");
+  section.className = "controlpanel-agent-docs";
+
+  const title = document.createElement("h3");
+  title.className = "controlpanel-agent-docs-title";
+  title.textContent = text.agentDocsTitle;
+
+  const hint = document.createElement("p");
+  hint.className = "controlpanel-note";
+  hint.textContent = text.agentDocsHint;
+
+  const status = document.createElement("p");
+  status.className = "controlpanel-state controlpanel-agent-docs-status";
+  status.hidden = true;
+
+  const list = document.createElement("ul");
+  list.className = "controlpanel-agent-docs-list";
+
+  text.agentDocuments.forEach((doc) => {
+    const item = document.createElement("li");
+    item.className = "controlpanel-agent-doc";
+
+    const copy = document.createElement("div");
+    copy.className = "controlpanel-agent-doc-copy";
+
+    const name = document.createElement("strong");
+    name.textContent = doc.title;
+
+    const description = document.createElement("span");
+    description.textContent = doc.description;
+
+    const path = document.createElement("code");
+    path.textContent = doc.path;
+
+    copy.appendChild(name);
+    copy.appendChild(description);
+    copy.appendChild(path);
+
+    const actions = document.createElement("div");
+    actions.className = "controlpanel-agent-doc-actions";
+
+    const open = document.createElement("a");
+    open.className = "controlpanel-btn controlpanel-agent-doc-open";
+    open.href = getVsCodeMdUri(doc.path);
+    open.textContent = text.agentDocOpen;
+
+    const copyPath = document.createElement("button");
+    copyPath.type = "button";
+    copyPath.className = "controlpanel-btn";
+    copyPath.textContent = text.agentDocCopy;
+    copyPath.addEventListener("click", async () => {
+      try {
+        await copyText(getLocalMdPath(doc.path));
+        status.hidden = false;
+        status.textContent = text.agentDocCopied;
+        status.dataset.state = "ok";
+      } catch {
+        status.hidden = false;
+        status.textContent = text.agentDocCopyError;
+        status.dataset.state = "error";
+      }
+    });
+
+    actions.appendChild(open);
+    actions.appendChild(copyPath);
+    item.appendChild(copy);
+    item.appendChild(actions);
+    list.appendChild(item);
+  });
+
+  section.appendChild(title);
+  section.appendChild(hint);
+  section.appendChild(list);
+  section.appendChild(status);
+  body.appendChild(section);
+};
+
+const renderAgentCard = (body) => {
+  body.innerHTML = "";
+
+  const note = document.createElement("p");
+  note.className = "controlpanel-note";
+  note.textContent = text.agentCardHint;
+  body.appendChild(note);
+
+  const badge = document.createElement("p");
+  badge.className = "controlpanel-note controlpanel-note-superadmin";
+  badge.textContent = text.agentCardLocalOnly;
+  body.appendChild(badge);
+
+  const selectedRole = (() => {
+    try {
+      return localStorage.getItem(AGENT_ROLE_LOCAL_KEY) || "";
+    } catch {
+      return "";
+    }
+  })();
+  const roleOptions = text.agentRoleOptions;
+  const currentRole = roleOptions.some((option) => option.value === selectedRole)
+    ? selectedRole
+    : roleOptions[0].value;
+
+  const roleRow = document.createElement("div");
+  roleRow.className = "controlpanel-agent-role";
+
+  const roleLabel = document.createElement("label");
+  roleLabel.className = "controlpanel-agent-role-label";
+  roleLabel.htmlFor = "controlpanel-agent-role";
+  roleLabel.textContent = text.agentRoleLabel;
+
+  const roleSelect = document.createElement("select");
+  roleSelect.id = "controlpanel-agent-role";
+  roleSelect.className = "controlpanel-input controlpanel-agent-role-select";
+  roleOptions.forEach((option) => {
+    const item = document.createElement("option");
+    item.value = option.value;
+    item.textContent = option.label;
+    item.selected = option.value === currentRole;
+    roleSelect.appendChild(item);
+  });
+  roleSelect.addEventListener("change", () => {
+    try {
+      localStorage.setItem(AGENT_ROLE_LOCAL_KEY, roleSelect.value);
+    } catch {
+      // local preference only; ignore storage failures
+    }
+  });
+
+  roleRow.appendChild(roleLabel);
+  roleRow.appendChild(roleSelect);
+  body.appendChild(roleRow);
+
+  const details = document.createElement("dl");
+  details.className = "controlpanel-agent-card";
+  Object.entries(text.agentCardFields).forEach(([key, label]) => {
+    const row = document.createElement("div");
+    row.className = "controlpanel-agent-row";
+
+    const term = document.createElement("dt");
+    term.textContent = label;
+
+    const value = document.createElement("dd");
+    value.textContent = text.agentCardValues[key] || "-";
+
+    row.appendChild(term);
+    row.appendChild(value);
+    details.appendChild(row);
+  });
+  body.appendChild(details);
+  renderAgentDocuments(body);
 };
 
 const renderTags = (body, items) => {
@@ -977,6 +1266,7 @@ if (mount) {
   const integrityCard = createCard(text.integrityTitle);
   const codeStatsCard = createCard(text.codeStatsTitle);
   const backupCard = createCard(text.backupTitle);
+  const agentCard = createCard(text.agentCardTitle);
   const preferencesCard = createCard(text.preferencesTitle);
   const whatsNewCard = createCard(text.whatsNewTitle);
   const usersCard = createCard(text.usersTitle);
@@ -986,6 +1276,7 @@ if (mount) {
   wrap.appendChild(systemStatusCard);
   wrap.appendChild(integrityCard);
   wrap.appendChild(backupCard);
+  wrap.appendChild(agentCard);
   wrap.appendChild(preferencesCard);
   wrap.appendChild(whatsNewCard);
   wrap.appendChild(usersCard);
@@ -1005,6 +1296,9 @@ if (mount) {
   backupCard
     .querySelector(".controlpanel-toggle")
     ?.addEventListener("click", () => toggleCard(backupCard));
+  agentCard
+    .querySelector(".controlpanel-toggle")
+    ?.addEventListener("click", () => toggleCard(agentCard));
   preferencesCard
     .querySelector(".controlpanel-toggle")
     ?.addEventListener("click", () => toggleCard(preferencesCard));
@@ -1025,6 +1319,7 @@ if (mount) {
   const integrityBody = integrityCard.querySelector(".controlpanel-body");
   const codeStatsBody = codeStatsCard.querySelector(".controlpanel-body");
   const backupBody = backupCard.querySelector(".controlpanel-body");
+  const agentBody = agentCard.querySelector(".controlpanel-body");
   const preferencesBody = preferencesCard.querySelector(".controlpanel-body");
   const whatsNewBody = whatsNewCard.querySelector(".controlpanel-body");
   const usersBody = usersCard.querySelector(".controlpanel-body");
@@ -1183,6 +1478,7 @@ if (mount) {
   }
   if (codeStatsBody) renderState(codeStatsBody, text.codeStatsHint, text.codeStatsLoading);
   if (backupBody) renderState(backupBody, text.backupHint, text.backupLoading);
+  if (agentBody) renderAgentCard(agentBody);
   if (preferencesBody) renderSuperadminPreferences(preferencesBody);
   if (whatsNewBody) renderState(whatsNewBody, text.whatsNewHint, text.whatsNewLoading);
   if (usersBody) renderState(usersBody, text.usersHint, text.usersLoading);
@@ -1206,6 +1502,7 @@ if (mount) {
       !systemStatusBody ||
       !integrityBody ||
       !backupBody ||
+      !agentBody ||
       !preferencesBody ||
       !whatsNewBody ||
       !usersBody ||

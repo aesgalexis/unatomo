@@ -180,7 +180,10 @@ export const buildEditTaskUpdate = (
   user,
   now = new Date().toISOString()
 ) => {
-  const tasks = normalizeTasks(machine.tasks || []).map((task) => {
+  const baseTasks = normalizeTasks(machine.tasks || []);
+  const before = baseTasks.find((task) => task.id === taskId);
+  if (!before) return null;
+  const tasks = baseTasks.map((task) => {
     if (task.id !== taskId) return task;
     const frequency = patch.frequency || task.frequency || "puntual";
     return {
@@ -192,7 +195,9 @@ export const buildEditTaskUpdate = (
         frequency === "custom"
           ? Math.max(1, Math.min(999, Number(patch.customDueAmount || 1) || 1))
           : null,
-      customDueUnit: frequency === "custom" ? patch.customDueUnit || "days" : null
+      customDueUnit: frequency === "custom" ? patch.customDueUnit || "days" : null,
+      createdAt: now,
+      lastCompletedAt: null
     };
   });
   const task = tasks.find((item) => item.id === taskId);

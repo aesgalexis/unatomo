@@ -27,6 +27,7 @@ const requiredFiles = [
   "firebase/functions/src/dashboard/todos.ts",
   "firebase/functions/src/machines/adminInvites.ts",
   "firebase/functions/src/machines/deleteMachine.ts",
+  "firebase/functions/src/machines/documents.ts",
   "firebase/functions/src/machines/tags.ts",
   "firebase/functions/src/machines/transfers.ts",
   "static/js/dashboard/controllers/dashboardInternalViewController.js",
@@ -44,6 +45,7 @@ const requiredFiles = [
   "static/css/dashboard/shell.css",
   "static/css/dashboard/incident-modal.css",
   "static/css/dashboard/registry.css",
+  "static/css/dashboard/gallery.css",
   "static/css/dashboard/suggestions.css",
   "static/css/dashboard/todo.css",
   "static/css/dashboard/loading.css",
@@ -134,6 +136,7 @@ const dashboardCssImports = [
   "/static/css/dashboard/shell.css",
   "/static/css/dashboard/incident-modal.css",
   "/static/css/dashboard/registry.css",
+  "/static/css/dashboard/gallery.css",
   "/static/css/dashboard/suggestions.css",
   "/static/css/dashboard/todo.css",
   "/static/css/dashboard/loading.css",
@@ -201,8 +204,8 @@ const callableExports = Array.from(
   .map((name) => name.trim())
   .filter(Boolean);
 addCheck(
-  callableExports.length === 35 && new Set(callableExports).size === 35,
-  "Functions index.ts preserves 35 unique callable exports"
+  callableExports.length === 37 && new Set(callableExports).size === 37,
+  "Functions index.ts preserves 37 unique callable exports"
 );
 
 [

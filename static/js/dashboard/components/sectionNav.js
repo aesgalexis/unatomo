@@ -10,6 +10,12 @@ const SUGGESTIONS_ICON = `
   </svg>
 `;
 
+const GALLERY_ICON = `
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path d="M4 5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5Zm3 12h10l-3.2-4.1-2.4 3-1.7-2.1L7 17Zm1.5-8.2a1.6 1.6 0 1 0 0-3.2 1.6 1.6 0 0 0 0 3.2Z"></path>
+  </svg>
+`;
+
 const TODO_ICON = `
   <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
     <path d="M6 4h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm2.2 8.2 2.1 2.1 5-5-1.4-1.4-3.6 3.6-0.7-0.7-1.4 1.4Zm0 4h7.6v-2H8.2v2Z"></path>
@@ -40,6 +46,7 @@ export const createDashboardSectionNav = ({
   dashboardHref = "#/dashboard",
   registryHref = "#/registro",
   qrPrintHref = "",
+  galleryHref = "#/galeria",
   suggestionsHref = "#/sugerencias",
   todoHref = "#/todo",
   labels = {},
@@ -87,6 +94,13 @@ export const createDashboardSectionNav = ({
   suggestionsBadge.hidden = true;
   suggestions.link.insertBefore(suggestionsBadge, suggestions.iconEl);
 
+  const gallery = createIconLink({
+    href: galleryHref,
+    label: labels.gallery || "Galer\u00eda",
+    icon: GALLERY_ICON,
+    iconClass: "dashboard-section-icon-gallery"
+  });
+
   const todo = createIconLink({
     href: todoHref,
     label: labels.todo || "To-do",
@@ -104,6 +118,7 @@ export const createDashboardSectionNav = ({
     dashboard: dashboardLink,
     registro: registryLink,
     qrPrint: qr.link,
+    galeria: gallery.link,
     sugerencias: suggestions.link,
     todo: todo.link
   };
@@ -117,11 +132,12 @@ export const createDashboardSectionNav = ({
   sectionNav.appendChild(dashboardLink);
   sectionNav.appendChild(registryLink);
   sectionNav.appendChild(qr.link);
-  sectionNav.appendChild(suggestions.link);
+  sectionNav.appendChild(gallery.link);
   sectionNav.appendChild(todo.link);
+  sectionNav.appendChild(suggestions.link);
 
   if (attachTooltip) {
-    [qr.link, suggestions.link, todo.link].forEach((link) => {
+    [qr.link, gallery.link, todo.link, suggestions.link].forEach((link) => {
       attachTooltip(link, { placement: "bottom" });
     });
   }
@@ -132,6 +148,7 @@ export const createDashboardSectionNav = ({
     registryLink,
     registryBadge,
     qrPrintLink: qr.link,
+    galleryLink: gallery.link,
     suggestionsLink: suggestions.link,
     suggestionsBadge,
     todoLink: todo.link,

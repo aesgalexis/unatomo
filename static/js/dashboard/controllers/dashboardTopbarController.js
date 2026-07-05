@@ -5,6 +5,7 @@ export const createDashboardTopbarController = (dependencies) => {
     applyDashboardTitle,
     calculateStorageUsage,
     dashboardLink,
+    galleryLink,
     getStorageFullText,
     handleInviteDecision,
     handleTransferDecision,
@@ -22,42 +23,56 @@ export const createDashboardTopbarController = (dependencies) => {
   const syncDashboardViewChrome = () => {
     applyDashboardTitle();
     const isRegistry = state.activeView === "registro";
+    const isGallery = state.activeView === "galeria";
     const isSuggestions = state.activeView === "sugerencias";
     const isTodo = state.activeView === "todo";
-    dashboardLink.classList.toggle("is-active", !isRegistry && !isSuggestions && !isTodo);
+    dashboardLink.classList.toggle("is-active", !isRegistry && !isGallery && !isSuggestions && !isTodo);
     registryLink.classList.toggle("is-active", isRegistry);
+    galleryLink.classList.toggle("is-active", isGallery);
     suggestionsLink.classList.toggle("is-active", isSuggestions);
     todoLink.classList.toggle("is-active", isTodo);
     if (isRegistry) {
       dashboardLink.removeAttribute("aria-current");
       registryLink.setAttribute("aria-current", "page");
+      galleryLink.removeAttribute("aria-current");
+      suggestionsLink.removeAttribute("aria-current");
+      todoLink.removeAttribute("aria-current");
+    } else if (isGallery) {
+      dashboardLink.removeAttribute("aria-current");
+      registryLink.removeAttribute("aria-current");
+      galleryLink.setAttribute("aria-current", "page");
       suggestionsLink.removeAttribute("aria-current");
       todoLink.removeAttribute("aria-current");
     } else if (isSuggestions) {
       dashboardLink.removeAttribute("aria-current");
       registryLink.removeAttribute("aria-current");
+      galleryLink.removeAttribute("aria-current");
       suggestionsLink.setAttribute("aria-current", "page");
       todoLink.removeAttribute("aria-current");
     } else if (isTodo) {
       dashboardLink.removeAttribute("aria-current");
       registryLink.removeAttribute("aria-current");
+      galleryLink.removeAttribute("aria-current");
       suggestionsLink.removeAttribute("aria-current");
       todoLink.setAttribute("aria-current", "page");
     } else {
       dashboardLink.setAttribute("aria-current", "page");
       registryLink.removeAttribute("aria-current");
+      galleryLink.removeAttribute("aria-current");
       suggestionsLink.removeAttribute("aria-current");
       todoLink.removeAttribute("aria-current");
     }
-    addBar.classList.toggle("is-registry-view", isRegistry || isSuggestions || isTodo);
+    addBar.classList.toggle("is-registry-view", isRegistry || isGallery || isSuggestions || isTodo);
     searchInput.placeholder = isRegistry
       ? t("dashboard.registrySearchPlaceholder", "Buscar en registro...")
-      : isSuggestions
-        ? t("dashboard.suggestionsSearchPlaceholder", "Buscar sugerencias...")
-        : isTodo
-          ? t("dashboard.todoSearchPlaceholder", "Buscar pendientes...")
-          : t("dashboard.searchPlaceholder", "Buscar por nombre o ubicación...");
-    const primaryControlsDisabled = state.loading || isRegistry || isSuggestions || isTodo;
+      : isGallery
+        ? t("dashboard.gallerySearchPlaceholder", "Buscar en galer\u00eda...")
+        : isSuggestions
+          ? t("dashboard.suggestionsSearchPlaceholder", "Buscar sugerencias...")
+          : isTodo
+            ? t("dashboard.todoSearchPlaceholder", "Buscar pendientes...")
+            : t("dashboard.searchPlaceholder", "Buscar por nombre o ubicaci\u00f3n...");
+    const primaryControlsDisabled = state.loading || isRegistry || isGallery || isSuggestions || isTodo;
     const searchDisabled = state.loading;
     addBtn.disabled = primaryControlsDisabled;
     searchInput.disabled = searchDisabled;

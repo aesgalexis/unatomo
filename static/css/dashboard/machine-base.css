@@ -40,7 +40,8 @@
   overflow: hidden;
 }
 
-.machine-card:has(.task-menu-toggle[aria-expanded="true"]) {
+.machine-card:has(.task-menu-toggle[aria-expanded="true"]),
+.machine-card:has(.mc-doc-menu-dots[aria-expanded="true"]) {
   z-index: 35;
 }
 

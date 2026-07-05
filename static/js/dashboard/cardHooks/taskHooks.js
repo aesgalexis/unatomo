@@ -112,7 +112,9 @@ export const installTaskHooks = (hooks, deps = {}) => {
     const current = getDraftById(id);
     if (!current) return;
     const user = getUserLabel();
-    updateMachine(id, buildEditTaskUpdate(current, taskId, patch, user));
+    const updates = buildEditTaskUpdate(current, taskId, patch, user);
+    if (!updates) return;
+    updateMachine(id, updates);
     showTaskTab(id);
     renderCards({ preserveScroll: true });
     autoSave.saveNow(id, "task-edit");

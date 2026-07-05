@@ -46,6 +46,7 @@ const text = {
   navDashboard: "Dashboard",
   navRegistry: isEn ? "Registry" : "Registro",
   navQrPrint: isEn ? "QR print" : "Impresi\u00f3n QR",
+  navGallery: isEn ? "Gallery" : "Galer\u00eda",
   navSuggestions: isEn ? "Suggestions" : "Sugerencias",
   navTodo: "To-do",
   count: (visible, total) => `${visible}/${total}`,
@@ -146,12 +147,14 @@ const createSectionNav = () => {
     dashboardHref: `${text.dashboard}#/dashboard`,
     registryHref: `${text.dashboard}#/registro`,
     qrPrintHref: text.qrPrint,
+    galleryHref: `${text.dashboard}#/galeria`,
     suggestionsHref: `${text.dashboard}#/sugerencias`,
     todoHref: `${text.dashboard}#/todo`,
     labels: {
       dashboard: text.navDashboard,
       registry: text.navRegistry,
       qrPrint: text.navQrPrint,
+      gallery: text.navGallery,
       suggestions: text.navSuggestions,
       todo: text.navTodo
     },

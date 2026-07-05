@@ -105,7 +105,6 @@ import {
   scheduleMachineCardHeight as scheduleHeightSync
 } from "./rendering/machineCardLayout.js";
 
-
 const mount = document.getElementById("dashboard-mount");
 const appBasePrefix = getAppBasePrefix();
 const lang = getCurrentLang();
@@ -222,6 +221,7 @@ if (mount) {
     dashboardLink,
     registryLink,
     registryBadge,
+    galleryLink,
     suggestionsLink,
     suggestionsBadge,
     todoLink,
@@ -233,6 +233,7 @@ if (mount) {
       dashboard: t("dashboard.navDashboard", "Dashboard"),
       registry: t("dashboard.navRegistry", "Registro"),
       qrPrint: t("dashboard.navQrPrint", "Impresión QR"),
+      gallery: t("dashboard.navGallery", "Galería"),
       suggestions: t("dashboard.navSuggestions", "Sugerencias"),
       todo: t("dashboard.navTodo", "To-do")
     },
@@ -438,6 +439,7 @@ if (mount) {
     applyDashboardTitle,
     calculateStorageUsage,
     dashboardLink,
+    galleryLink,
     getStorageFullText: () => getStorageFullText(),
     handleInviteDecision: (...args) => handleInviteDecision(...args),
     handleTransferDecision: (...args) => handleTransferDecision(...args),

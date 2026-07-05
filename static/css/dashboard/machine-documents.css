@@ -2,6 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  overflow: visible;
 }
 
 .mc-doc-row {
@@ -52,6 +53,7 @@
   position: absolute;
   inset: 0;
   z-index: -2;
+  border-radius: inherit;
   background: var(--mc-doc-preview, transparent) center / cover no-repeat;
 }
 
@@ -60,8 +62,13 @@
   position: absolute;
   inset: 0;
   z-index: -1;
+  border-radius: inherit;
   background: rgba(0, 0, 0, 0.75);
   transition: background-color 0.16s ease;
+}
+
+.mc-doc-tile:has(.mc-doc-menu) {
+  overflow: visible;
 }
 
 .mc-doc-tile:not(.is-disabled):not(.is-uploading):hover,
@@ -89,13 +96,8 @@
 }
 
 .mc-doc-tile.has-preview .mc-doc-tile-file,
-.mc-doc-tile.has-preview .mc-doc-menu-dots,
-.mc-doc-tile.has-preview .mc-doc-menu-link {
+.mc-doc-tile.has-preview .mc-doc-menu-dots {
   color: rgba(255, 255, 255, 0.78);
-}
-
-.mc-doc-tile.has-preview .mc-doc-menu-link:hover {
-  color: #fff;
 }
 
 .mc-doc-tile.has-preview .mc-doc-menu-delete,
@@ -158,81 +160,135 @@
 
 .mc-doc-menu {
   position: absolute;
-  z-index: 2;
+  z-index: 20;
   right: 0.5rem;
   bottom: 0.45rem;
   display: inline-flex;
-  flex-direction: row-reverse;
   align-items: center;
-  justify-content: flex-end;
-  gap: 0.35rem;
+  justify-content: center;
   overflow: visible;
 }
 
+.mc-doc-menu:has(.mc-doc-menu-dots[aria-expanded="true"]) {
+  z-index: 40;
+}
+
 .mc-doc-menu-dots {
-  border: 0;
+  position: relative;
+  width: 1.4rem;
+  height: 1.4rem;
+  box-sizing: border-box;
+  border: 1px solid transparent;
+  border-radius: 0.35rem;
   background: transparent;
-  color: color-mix(in srgb, var(--fg) 74%, transparent);
-  font: inherit;
-  font-size: 1rem;
-  line-height: 1;
-  letter-spacing: 1px;
-  padding: 0.1rem;
+  color: color-mix(in srgb, var(--fg) 64%, transparent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+  font-weight: 400;
+  font-size: 0;
+  line-height: 0;
+  letter-spacing: 0;
+  padding: 0;
+  text-indent: 0;
   cursor: pointer;
+  opacity: 0;
+  transition: opacity 120ms ease, border-color 120ms ease, background 120ms ease;
+}
+
+.mc-doc-menu-dots::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: block;
+  width: 0.82rem;
+  height: 0.18rem;
+  background:
+    radial-gradient(circle, currentColor 0.075rem, transparent 0.08rem) left center / 0.18rem 0.18rem no-repeat,
+    radial-gradient(circle, currentColor 0.075rem, transparent 0.08rem) center / 0.18rem 0.18rem no-repeat,
+    radial-gradient(circle, currentColor 0.075rem, transparent 0.08rem) right center / 0.18rem 0.18rem no-repeat;
+  transform: translate(-50%, -50%);
 }
 
 .mc-expand .mc-doc-menu-dots {
-  border: 0;
+  border: 1px solid transparent;
   background: transparent;
-  color: color-mix(in srgb, var(--fg) 74%, transparent);
+  color: color-mix(in srgb, var(--fg) 64%, transparent);
 }
 
 .mc-expand .mc-doc-tile.has-preview .mc-doc-menu-dots {
   color: rgba(255, 255, 255, 0.78);
 }
 
-.mc-doc-menu-link {
-  color: color-mix(in srgb, var(--fg) 74%, transparent);
-  font: inherit;
-  font-size: 0.76rem;
-  line-height: 1;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  max-width: 0;
-  opacity: 0;
-  overflow: hidden;
-  padding: 0.15rem 0;
-  white-space: nowrap;
-  cursor: pointer;
-  pointer-events: none;
-  transition: max-width 0.16s ease, opacity 0.16s ease, padding 0.16s ease;
-}
-
-.mc-doc-menu:hover .mc-doc-menu-link,
-.mc-doc-menu:focus-within .mc-doc-menu-link,
-.mc-doc-menu.is-open .mc-doc-menu-link {
-  max-width: 5rem;
+.mc-doc-tile:hover .mc-doc-menu-dots,
+.mc-doc-tile:focus-within .mc-doc-menu-dots,
+.mc-other-doc-row:hover .mc-doc-menu-dots,
+.mc-other-doc-row:focus-within .mc-doc-menu-dots,
+.mc-doc-menu-dots[aria-expanded="true"] {
   opacity: 1;
-  padding: 0.15rem;
-  pointer-events: auto;
 }
 
-.mc-doc-menu.is-hover-suppressed:hover .mc-doc-menu-link {
-  max-width: 0;
-  opacity: 0;
-  padding: 0.15rem 0;
-  pointer-events: none;
-}
-
-.mc-doc-menu-link:hover {
+.mc-doc-menu-dots:hover,
+.mc-doc-menu-dots[aria-expanded="true"],
+.mc-expand .mc-doc-menu-dots:hover,
+.mc-expand .mc-doc-menu-dots[aria-expanded="true"] {
+  border-color: var(--border-subtle);
+  background: color-mix(in srgb, var(--bg) 92%, var(--fg) 8%);
   color: var(--fg);
 }
 
-.mc-doc-menu-delete {
-  color: var(--danger, #d33);
+.mc-doc-menu-panel {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 0.35rem);
+  z-index: 25;
+  min-width: 9rem;
+  width: max-content;
+  max-width: min(16rem, calc(100vw - 2rem));
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--bg) 96%, transparent);
+  box-shadow: 0 12px 28px color-mix(in srgb, #000 16%, transparent);
+  padding: 0.25rem;
 }
 
-.mc-doc-menu-delete:hover {
+.mc-doc-menu-panel[hidden] {
+  display: none;
+}
+
+.mc-doc-menu-action {
+  width: 100%;
+  border: 0;
+  border-radius: 0.35rem;
+  background: transparent;
+  color: var(--fg);
+  display: block;
+  padding: 0.42rem 0.55rem;
+  font: inherit;
+  font-size: 0.88rem;
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.mc-expand .mc-doc-menu-action {
+  border: 0;
+  background: transparent;
+  color: var(--fg);
+}
+
+.mc-doc-menu-action:hover,
+.mc-doc-menu-action:focus-visible,
+.mc-expand .mc-doc-menu-action:hover,
+.mc-expand .mc-doc-menu-action:focus-visible {
+  background: color-mix(in srgb, var(--fg) 9%, transparent);
+  outline: none;
+}
+
+.mc-doc-menu-delete,
+.mc-expand .mc-doc-menu-delete {
   color: var(--danger, #d33);
 }
 
@@ -275,6 +331,7 @@
 .mc-other-doc-list {
   display: grid;
   gap: 0.35rem;
+  overflow: visible;
 }
 
 .mc-other-doc-list:empty {
@@ -282,12 +339,17 @@
 }
 
 .mc-other-doc-row {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
   min-width: 0;
   padding: 0.15rem 0;
+}
+
+.mc-other-doc-row:has(.mc-doc-menu-dots[aria-expanded="true"]) {
+  z-index: 30;
 }
 
 .mc-other-doc-link {
@@ -312,18 +374,18 @@
 }
 
 .mc-other-doc-menu {
-  position: static;
+  position: relative;
+  right: auto;
+  bottom: auto;
+  align-self: center;
   flex: 0 0 auto;
+  margin-left: auto;
 }
 
-.mc-other-doc-menu .mc-doc-menu-link {
-  max-width: 0;
-}
-
-.mc-other-doc-menu:hover .mc-doc-menu-link,
-.mc-other-doc-menu:focus-within .mc-doc-menu-link,
-.mc-other-doc-menu.is-open .mc-doc-menu-link {
-  max-width: 6.2rem;
+.mc-other-doc-menu .mc-doc-menu-panel {
+  top: auto;
+  right: 0;
+  bottom: calc(100% + 0.35rem);
 }
 
 .mc-other-doc-menu .mc-doc-menu-delete {
@@ -406,4 +468,3 @@
     align-items: flex-start;
   }
 }
-

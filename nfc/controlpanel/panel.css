@@ -109,6 +109,126 @@
   background: #7c3aed;
 }
 
+.controlpanel-agent-card {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 12px;
+  border: 1px solid color-mix(in srgb, #7c3aed 26%, transparent);
+  border-radius: 10px;
+  background: color-mix(in srgb, #7c3aed 7%, var(--panel-bg));
+}
+
+.controlpanel-agent-role {
+  display: grid;
+  gap: 6px;
+  margin: 0 0 12px;
+}
+
+.controlpanel-agent-role-label {
+  color: color-mix(in srgb, var(--fg) 72%, transparent);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.controlpanel-agent-role-select {
+  width: 100%;
+  max-width: 320px;
+  accent-color: #7c3aed;
+}
+
+.controlpanel-agent-row {
+  display: grid;
+  grid-template-columns: minmax(110px, 0.42fr) 1fr;
+  gap: 12px;
+  min-width: 0;
+}
+
+.controlpanel-agent-row dt {
+  margin: 0;
+  color: color-mix(in srgb, var(--fg) 64%, transparent);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.controlpanel-agent-row dd {
+  margin: 0;
+  color: var(--fg);
+  font-size: 13px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.controlpanel-agent-docs {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.controlpanel-agent-docs-title {
+  margin: 0;
+  color: var(--fg);
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.controlpanel-agent-docs-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.controlpanel-agent-doc {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 0;
+  border-top: 1px solid color-mix(in srgb, var(--fg) 8%, transparent);
+}
+
+.controlpanel-agent-doc-copy {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.controlpanel-agent-doc-copy strong {
+  color: var(--fg);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.controlpanel-agent-doc-copy span {
+  color: color-mix(in srgb, var(--fg) 68%, transparent);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.controlpanel-agent-doc-copy code {
+  color: color-mix(in srgb, var(--fg) 76%, transparent);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.controlpanel-agent-doc-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.controlpanel-agent-doc-open {
+  text-decoration: none;
+}
+
+.controlpanel-agent-docs-status {
+  margin-top: 2px;
+}
+
 .controlpanel-metric {
   display: grid;
   gap: 4px;
@@ -501,5 +621,19 @@
   .controlpanel-user--action {
     grid-template-columns: minmax(0, 1fr) auto auto;
     align-items: center;
+  }
+
+  .controlpanel-agent-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .controlpanel-agent-doc {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .controlpanel-agent-doc-actions {
+    justify-content: flex-start;
   }
 }

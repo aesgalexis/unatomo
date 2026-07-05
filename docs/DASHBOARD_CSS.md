@@ -15,6 +15,7 @@ original cascade of the former monolithic stylesheet.
   menu.
 - `dashboard/incident-modal.css`: out-of-service incident modal.
 - `dashboard/registry.css`: global registry view.
+- `dashboard/gallery.css`: gallery view.
 - `dashboard/suggestions.css`: suggestions view.
 - `dashboard/todo.css`: To Do view and its narrow-screen rules.
 - `dashboard/loading.css`: loading, bootstrap, invitation, and placeholder UI.

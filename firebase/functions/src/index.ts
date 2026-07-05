@@ -51,6 +51,10 @@ export {
   listControlPanelTags,
 } from "./machines/tags";
 export {deleteMachine} from "./machines/deleteMachine";
+export {
+  createMachineDocumentDownloadUrl,
+  downloadMachineDocument,
+} from "./machines/documents";
 
 // Firebase Admin initialization and global runtime options are centralized in
 // core/firebase.ts. Keep this file as the stable public export boundary while
