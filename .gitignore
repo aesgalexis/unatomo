@@ -2,6 +2,8 @@ node_modules/
 dist/
 .vite/
 .backups/
+codex-memory/
+static/js/config/runtime-config.js
 firebase-debug.log
 .env*
 !.env.example

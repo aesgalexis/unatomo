@@ -2,7 +2,7 @@ import { readdir, readFile, stat } from "node:fs/promises";
 import path from "node:path";
 
 const ROOT = process.cwd();
-const TARGETS = ["static", "dist", "es", "index.html", "styles.css"];
+const TARGETS = ["static", "es", "en", "landing", "nfc", "firebase", "scripts", "index.html", "styles.css"];
 const KEY_REGEX = /AIza[0-9A-Za-z_-]{20,}/g;
 
 const hits = [];

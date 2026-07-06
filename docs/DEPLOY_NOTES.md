@@ -53,12 +53,9 @@ npm.cmd run doctor
 
 The static output is written to `dist/`.
 
-`static/js/config/runtime-config.js` is intentionally versioned as a public
-Firebase web-config fallback so the deployed dashboard does not fail with a
-404 before Firebase initializes. `generate-config.mjs` still refreshes it from
-`.env.local`, `.env`, or GitHub Actions secrets when values are available; if
-env values are missing, it preserves the existing checked-in values instead of
-blanking the file.
+`static/js/config/runtime-config.js` is generated from `.env.local`, `.env`, or
+GitHub Actions secrets and is intentionally ignored by git. Do not commit real
+Firebase project values to the public repository.
 
 ## Publish
 

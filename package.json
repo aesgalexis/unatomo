@@ -1,7 +1,7 @@
 {
   "name": "unatomo",
   "version": "1.0.0",
-  "description": "",
+  "description": "Machine-centered operational dashboard with QR/NFC access, history, tasks, documents, and Firebase backend.",
   "main": "index.js",
   "scripts": {
     "predev": "node scripts/generate-config.mjs",
@@ -32,9 +32,16 @@
     "type": "git",
     "url": "git+https://github.com/aesgalexis/unatomo.git"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "machines",
+    "nfc",
+    "qr",
+    "dashboard",
+    "firebase",
+    "maintenance"
+  ],
+  "author": "Alexis Santana",
+  "license": "UNLICENSED",
   "type": "commonjs",
   "bugs": {
     "url": "https://github.com/aesgalexis/unatomo/issues"

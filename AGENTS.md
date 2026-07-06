@@ -1,10 +1,11 @@
-# Codex Operating Notes
+# Agent Operating Notes
 
-This repository is the active `unatomo` project. The usual working language with the owner is Spanish, but user-facing UI must stay bilingual where the app already supports Spanish and English.
+This repository is the active `unatomo` project. User-facing UI must stay bilingual where the app already supports Spanish and English.
 
 ## Fast Orientation
 
-- Start with `docs/CODEX_CONTEXT.md` for the current project map.
+- Start with `README.md` and `docs/REPO_MAP.md` for the current project map.
+- Use `docs/PROJECT_OVERVIEW.md` for the product summary.
 - Use `docs/DASHBOARD_MODEL.md` for dashboard, machine cards, Tag ID, QR print, menu, and i18n work.
 - Use `docs/FIREBASE_MODEL.md` before changing Firebase data flows, callable functions, ownership, admin links, Tag ID, or QR cleanup.
 - Use `docs/DEPLOY_NOTES.md` before publishing or diagnosing push/build problems.
@@ -27,7 +28,7 @@ npm.cmd run deploy:nfc:backend
 ## Project Rules
 
 - Keep progress updates sparse. Prefer silent work unless there is a relevant finding, a file edit is about to happen, the task becomes long-running, or the work is blocked.
-- Publishing and deployments are owner-run by default. Codex and delegated agents
+- Publishing and deployments are owner-run by default. Agents
   must not execute `npm.cmd run site:publish`, any `deploy:nfc:*` command, or a
   targeted Firebase deploy unless the owner explicitly asks for execution in
   that turn. Local validation commands such as build, lint, syntax scans, and
@@ -37,7 +38,7 @@ npm.cmd run deploy:nfc:backend
 - Use the repository `deploy:nfc:*` scripts for Firebase deployments. They remove inherited `DEBUG` and `FIREBASE_DEBUG` values that otherwise produce very large Firebase CLI traces. For a targeted deploy, use `npm.cmd run firebase:clean -- deploy --only "functions:name"`.
 - Keep command output bounded: search the smallest relevant paths, request narrow line ranges, and avoid dumping full large files when a targeted `rg` plus a short range is enough.
 - Do not inspect generated `dist/` or `firebase/functions/lib/` unless diagnosing the build output itself. Work from source files.
-- Do not repeatedly read the same context document in one task. Start from the routed MD above, then open only the feature files it identifies.
+- Do not repeatedly read the same context document in one task. Start from the routed docs above, then open only the relevant feature files.
 - Do not leave temporary Firebase/admin scripts in the repo after one-off operations.
 - Do not change Firebase ownership/admin/tag cleanup flows without reading `docs/FIREBASE_MODEL.md`.
 - Preserve Spanish and English routes, labels, and menu entries when touching user-facing pages.

@@ -8,7 +8,8 @@
 ## Configuración Firebase (runtime)
 
 El frontend lee la configuración de Firebase desde `static/js/config/runtime-config.js`,
-que se genera automáticamente desde `.env.local` o `.env`.
+que se genera automáticamente desde `.env.local` o `.env`. Ese archivo generado
+queda fuera de git para no versionar la configuración real del proyecto.
 
 1) Copia el ejemplo:
 

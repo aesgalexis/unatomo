@@ -168,10 +168,10 @@ const text = {
       ? "Can inspect, propose, edit, and validate with scoped autonomy inside the project. Publishing, deployments, destructive actions, secrets, and production ownership changes still require explicit owner intent."
       : "Puede inspeccionar, proponer, editar y validar con autonomia acotada dentro del proyecto. Publicaciones, despliegues, acciones destructivas, secretos y cambios de ownership en produccion siguen requiriendo intencion explicita del owner.",
   },
-  agentDocsTitle: isEn ? "AI documents" : "Documentos IA",
+  agentDocsTitle: isEn ? "Project documents" : "Documentos del proyecto",
   agentDocsHint: isEn
-    ? "Local Markdown files related to Codex, AI collaboration, and project continuity."
-    : "Archivos Markdown locales relacionados con Codex, colaboracion IA y continuidad del proyecto.",
+    ? "Versioned Markdown files for public project orientation and technical work."
+    : "Archivos Markdown versionados para orientacion publica del proyecto y trabajo tecnico.",
   agentDocOpen: isEn ? "Open in VS Code" : "Abrir en VS Code",
   agentDocCopy: isEn ? "Copy path" : "Copiar ruta",
   agentDocCopied: isEn ? "Path copied." : "Ruta copiada.",
@@ -185,60 +185,39 @@ const text = {
         : "Instrucciones operativas del repositorio para Codex.",
     },
     {
-      title: "AI collaboration context",
-      path: "docs/AI_COLLABORATION_CONTEXT.md",
+      title: "Project overview",
+      path: "docs/PROJECT_OVERVIEW.md",
       description: isEn
-        ? "Root product lens for Codex and future AI collaborators."
-        : "Mirada raiz de producto para Codex y futuras IAs colaboradoras.",
+        ? "Human-readable summary of what Unatomo does and how it is shaped."
+        : "Resumen legible de que hace Unatomo y como esta enfocado.",
     },
     {
-      title: "Codex context",
-      path: "docs/CODEX_CONTEXT.md",
+      title: "Repository map",
+      path: "docs/REPO_MAP.md",
       description: isEn
-        ? "Current project map and orientation for Codex sessions."
-        : "Mapa actual del proyecto y orientacion para sesiones de Codex.",
+        ? "Quick source layout and documentation routing."
+        : "Mapa rapido del codigo y ruta de documentacion.",
     },
     {
-      title: "Product notes",
-      path: "docs/PRODUCT_NOTES.md",
+      title: "Dashboard model",
+      path: "docs/DASHBOARD_MODEL.md",
       description: isEn
-        ? "Owner product-direction notes and provisional decisions."
-        : "Notas de direccion de producto y decisiones provisionales del owner.",
+        ? "Dashboard, machine cards, QR, Tag ID, menu, and i18n notes."
+        : "Notas de dashboard, tarjetas, QR, Tag ID, menu e i18n.",
     },
     {
-      title: "Codex memory README",
-      path: "codex-memory/README.md",
+      title: "Firebase model",
+      path: "docs/FIREBASE_MODEL.md",
       description: isEn
-        ? "Scope and safety rules for the local Codex memory folder."
-        : "Alcance y reglas de seguridad de la memoria local de Codex.",
+        ? "Firebase data flows, permissions, Functions, and cleanup rules."
+        : "Flujos Firebase, permisos, Functions y reglas de limpieza.",
     },
     {
-      title: "Agent card",
-      path: "codex-memory/agent-card.md",
+      title: "Contributing",
+      path: "CONTRIBUTING.md",
       description: isEn
-        ? "Local identity card for Codex in this project relationship."
-        : "Tarjeta local de identidad de Codex en esta relacion de proyecto.",
-    },
-    {
-      title: "Relationship",
-      path: "codex-memory/relationship.md",
-      description: isEn
-        ? "Working relationship between Alexis and Codex."
-        : "Relacion de trabajo entre Alexis y Codex.",
-    },
-    {
-      title: "Next move",
-      path: "codex-memory/next-move.md",
-      description: isEn
-        ? "Current proposed direction and continuity notes."
-        : "Rumbo propuesto actual y notas de continuidad.",
-    },
-    {
-      title: "Conversational AI notes",
-      path: "codex-memory/conversational-ai-notes.md",
-      description: isEn
-        ? "Inbox for notes brought from Alexis's conversational AI."
-        : "Bandeja de notas traidas desde la IA conversacional de Alexis.",
+        ? "Human contribution rules and local validation expectations."
+        : "Reglas humanas de contribucion y validacion local esperada.",
     },
   ],
   preferencesTitle: isEn ? "Superadmin preferences" : "Preferencias de superadmin",
