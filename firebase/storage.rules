@@ -7,11 +7,7 @@ service firebase.storage {
 
     function isLaundryServicesAdmin() {
       return isSignedIn()
-        && request.auth.token.email in [
-          "aesg.alexis@gmail.com",
-          "alcalatriasm@gmail.com",
-          "alcalatriasmonica@gmail.com"
-        ];
+        && request.auth.token.laundryServicesAdmin == true;
     }
 
     function isLaundryMachineImage() {

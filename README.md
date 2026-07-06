@@ -44,6 +44,7 @@ policy.
 ```powershell
 npm.cmd install
 copy .env.example .env.local
+copy .firebaserc.example .firebaserc
 npm.cmd run dev
 ```
 
@@ -51,6 +52,8 @@ Fill `.env.local` with the Firebase web config values for the target project.
 The frontend reads a generated local file at
 `static/js/config/runtime-config.js`; that file is ignored and should not be
 committed with real project values.
+Fill `.firebaserc` with the Firebase project alias for local owner-run Firebase
+commands; that file is also ignored.
 
 ## Useful Commands
 

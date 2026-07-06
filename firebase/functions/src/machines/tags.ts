@@ -138,7 +138,6 @@ export const assignMachineTag = onCall(async (request) => {
         status: machine.status || "",
         logs: Array.isArray(machine.logs) ? machine.logs : [],
         tasks: Array.isArray(machine.tasks) ? machine.tasks : [],
-        users: Array.isArray(machine.users) ? machine.users : [],
         updatedAt: now,
         updatedBy: auth?.uid || ownerUid,
       },

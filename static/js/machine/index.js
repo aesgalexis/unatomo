@@ -3,8 +3,7 @@ import { createMachineCard } from "/static/js/dashboard/machineCardTemplate.js";
 import { installDocumentHooks } from "/static/js/dashboard/cardHooks/documentHooks.js";
 import { upsertMachine } from "/static/js/dashboard/firestoreRepo.js";
 import { generateMachineTagQr } from "/static/js/dashboard/tags/tagAssetsRepo.js";
-import { auth, db } from "/static/js/firebase/firebaseApp.js";
-import { hashPassword } from "/static/js/utils/crypto.js";
+import { auth, db, functions } from "/static/js/firebase/firebaseApp.js";
 import { initAutoSave } from "/static/js/dashboard/autoSave.js";
 import { calculateStorageUsage, STORAGE_LIMIT_BYTES } from "/static/js/configuracion/storageUsage.js";
 import { normalizeTasks } from "/static/js/dashboard/tabs/tasks/tasksModel.js";
@@ -30,6 +29,7 @@ import {
   getDoc
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+import { httpsCallable } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-functions.js";
 
 const COLLAPSED_HEIGHT = 96;
 const EXPAND_FACTOR = 2.5;
@@ -70,23 +70,18 @@ const getTagId = () => {
 
 const sessionKey = (tagId) => `unatomo_machine_session_${tagId}`;
 const persistentSessionKey = (tagId) => `unatomo_machine_remembered_session_${tagId}`;
-const REMEMBER_SESSION_MS = 30 * 24 * 60 * 60 * 1000;
-
-const normalizeName = (value) =>
-  (value || "")
-    .trim()
-    .replace(/\s+/g, " ")
-    .toLowerCase();
+const verifyMachineAccessUserCallable = httpsCallable(functions, "verifyMachineAccessUser");
+const updateMachineAccessOperationalCallable = httpsCallable(functions, "updateMachineAccessOperational");
 
 const createLocalMachineSession = (username, role, options = {}) => ({
   username,
   role: role || t("machine.userRoleFallback", "usuario"),
   source: "machine",
   remembered: !!options.remembered,
+  sessionId: options.sessionId || "",
+  sessionToken: options.sessionToken || "",
   createdAt: new Date().toISOString(),
-  expiresAt: options.remembered
-    ? new Date(Date.now() + REMEMBER_SESSION_MS).toISOString()
-    : "",
+  expiresAt: options.expiresAt || "",
 });
 
 const saveMachineSession = (tagId, session, { remember = false } = {}) => {
@@ -97,7 +92,7 @@ const saveMachineSession = (tagId, session, { remember = false } = {}) => {
     // ignore storage failures
   }
   try {
-    if (remember) {
+    if (remember && session?.source === "dashboard") {
       localStorage.setItem(persistentSessionKey(tagId), JSON.stringify(session));
     } else {
       localStorage.removeItem(persistentSessionKey(tagId));
@@ -114,7 +109,11 @@ const readStoredMachineSession = (tagId) => {
   } catch {
     session = null;
   }
-  if (session?.username) return session;
+  if (session?.username) {
+    const expiresAt = session.expiresAt ? new Date(session.expiresAt).getTime() : 0;
+    if (session.source !== "machine" || (expiresAt && expiresAt > Date.now())) return session;
+    saveMachineSession(tagId, null, { remember: false });
+  }
 
   try {
     session = JSON.parse(localStorage.getItem(persistentSessionKey(tagId)) || "null");
@@ -160,16 +159,6 @@ const showLogin = (machine, tagId, onSuccess) => {
   passInput.placeholder = t("machine.password", "Contrase\u00f1a");
   passInput.className = "machine-login-input";
 
-  const rememberLabel = document.createElement("label");
-  rememberLabel.className = "machine-login-remember";
-  const rememberInput = document.createElement("input");
-  rememberInput.type = "checkbox";
-  rememberInput.checked = true;
-  const rememberText = document.createElement("span");
-  rememberText.textContent = t("machine.rememberDevice", "Recordarme en este dispositivo");
-  rememberLabel.appendChild(rememberInput);
-  rememberLabel.appendChild(rememberText);
-
   const error = document.createElement("div");
   error.className = "machine-login-error";
 
@@ -185,29 +174,21 @@ const showLogin = (machine, tagId, onSuccess) => {
       error.textContent = t("machine.completeCredentials", "Completa usuario y contrase\u00f1a.");
       return;
     }
-    const user = (machine.users || []).find(
-      (u) => normalizeName(u.username) === normalizeName(username)
-    );
-    if (!user) {
-      error.textContent = t("machine.invalidCredentials", "Credenciales incorrectas.");
-      return;
-    }
     try {
-      const expected = user.passwordHashBase64 || "";
-      const salt = user.saltBase64 || "";
-      if (!expected || !salt) {
-        error.textContent = t("machine.userNoCredentials", "Usuario sin credenciales activas.");
-        return;
-      }
-      const hash = await hashPassword(password, salt);
-      if (hash !== expected) {
-        error.textContent = t("machine.invalidCredentials", "Credenciales incorrectas.");
-        return;
-      }
-      const userSession = createLocalMachineSession(username, user.role, {
-        remembered: rememberInput.checked
+      const response = await verifyMachineAccessUserCallable({
+        tagId,
+        username,
+        password,
       });
-      saveMachineSession(tagId, userSession, { remember: rememberInput.checked });
+      const verifiedUser = response?.data?.user || {};
+      const verifiedSession = response?.data?.session || {};
+      const userSession = createLocalMachineSession(verifiedUser.username || username, verifiedUser.role, {
+        remembered: false,
+        sessionId: verifiedSession.id,
+        sessionToken: verifiedSession.token,
+        expiresAt: verifiedSession.expiresAt,
+      });
+      saveMachineSession(tagId, userSession, { remember: false });
       overlay.remove();
       onSuccess(userSession);
     } catch {
@@ -218,7 +199,6 @@ const showLogin = (machine, tagId, onSuccess) => {
   panel.appendChild(title);
   panel.appendChild(userInput);
   panel.appendChild(passInput);
-  panel.appendChild(rememberLabel);
   panel.appendChild(error);
   panel.appendChild(btn);
   overlay.appendChild(panel);
@@ -299,7 +279,6 @@ const buildMachineAccessPatch = (machine) => ({
       : {},
   logs: machine.logs || [],
   tasks: machine.tasks || [],
-  users: machine.users || [],
   adminEmail: machine.adminEmail || "",
   adminName: machine.adminName || "",
   adminStatus: machine.adminStatus || "",
@@ -307,6 +286,12 @@ const buildMachineAccessPatch = (machine) => ({
   ownershipTransferStatus: machine.ownershipTransferStatus || "",
   activeStatusCycleId: machine.activeStatusCycleId || "",
   notifications: machine.notifications || null
+});
+
+const buildOperationalAccessPatch = (machine) => ({
+  status: machine.status || "operativa",
+  logs: machine.logs || [],
+  tasks: machine.tasks || [],
 });
 
 const state = {
@@ -329,8 +314,22 @@ const updateDraft = (id, patch) => {
 const persistDraft = async () => {
   if (!state.draft || !state.tagId) return;
   const updatedBy = state.session?.uid || state.session?.username || "machine";
-  await updateMachineAccess(state.tagId, buildMachineAccessPatch(state.draft), updatedBy);
-  if (state.session?.source === "dashboard" && state.draft.tenantId) {
+  const isDashboardSession = state.session?.source === "dashboard";
+  if (!isDashboardSession) {
+    await updateMachineAccessOperationalCallable({
+      tagId: state.tagId,
+      sessionId: state.session?.sessionId || "",
+      sessionToken: state.session?.sessionToken || "",
+      patch: buildOperationalAccessPatch(state.draft),
+    });
+  } else {
+    await updateMachineAccess(
+      state.tagId,
+      buildMachineAccessPatch(state.draft),
+      updatedBy
+    );
+  }
+  if (isDashboardSession && state.draft.tenantId) {
     await upsertMachine(state.draft.tenantId, state.draft);
   }
 };
@@ -369,11 +368,7 @@ const init = async () => {
 
   const session = readStoredMachineSession(tagId);
 
-  const existingUser =
-    session && (machineDoc.users || []).find(
-      (u) => normalizeName(u.username) === normalizeName(session.username)
-    );
-  if (!existingUser) {
+  if (!session) {
     saveMachineSession(tagId, null, { remember: false });
     showLogin(machineDoc, tagId, (userSession) => {
       state.session = userSession;

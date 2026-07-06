@@ -12,11 +12,7 @@ service cloud.firestore {
 
     function isLaundryServicesAdmin() {
       return isSignedIn()
-        && request.auth.token.email in [
-          "aesg.alexis@gmail.com",
-          "alcalatriasm@gmail.com",
-          "alcalatriasmonica@gmail.com"
-        ];
+        && request.auth.token.laundryServicesAdmin == true;
     }
 
     function isAcceptedAdminOfMachine(ownerUid, machineId) {
@@ -157,8 +153,7 @@ service cloud.firestore {
           );
       }
 
-      allow get: if (resource != null) && (ownerInviteSide() || adminInviteSide());
-      allow list: if isSignedIn();
+      allow get, list: if (resource != null) && (ownerInviteSide() || adminInviteSide());
       allow write: if false;
     }
 
@@ -175,8 +170,7 @@ service cloud.firestore {
           && resource.data.adminUid == request.auth.uid;
       }
 
-      allow get: if (resource != null) && (ownerSide() || adminSide());
-      allow list: if isSignedIn();
+      allow get, list: if (resource != null) && (ownerSide() || adminSide());
       allow write: if false;
     }
 
@@ -193,8 +187,7 @@ service cloud.firestore {
           && resource.data.toOwnerUid == request.auth.uid;
       }
 
-      allow get: if (resource != null) && (transferSenderSide() || transferRecipientSide());
-      allow list: if isSignedIn();
+      allow get, list: if (resource != null) && (transferSenderSide() || transferRecipientSide());
       allow write: if false;
     }
 
@@ -227,30 +220,9 @@ service cloud.firestore {
     }
 
     match /machine_access/{tagId} {
-      allow get: if true;
+      allow get: if resource != null
+        && canManageMachineAccess(resource.data.tenantId, resource.data.machineId);
       allow list: if false;
-
-      function isOperationalUpdate() {
-        return request.auth == null
-          && request.resource.data.diff(resource.data).changedKeys()
-            .hasOnly(["status", "logs", "tasks", "updatedAt", "updatedBy"])
-
-          && request.resource.data.tenantId == resource.data.tenantId
-          && request.resource.data.machineId == resource.data.machineId
-          && request.resource.data.users == resource.data.users
-
-          && request.resource.data.title == resource.data.title
-          && request.resource.data.brand == resource.data.brand
-          && request.resource.data.model == resource.data.model
-          && request.resource.data.year == resource.data.year
-
-          && request.resource.data.status is string
-          && request.resource.data.logs is list
-          && request.resource.data.tasks is list
-          && request.resource.data.updatedBy is string
-
-          && (request.resource.data.status in ["operativa", "fuera_de_servicio"]);
-      }
 
       function canManageMachineAccess(tenantId, machineId) {
         return isSignedIn()
@@ -260,8 +232,6 @@ service cloud.firestore {
       allow create: if canManageMachineAccess(request.resource.data.tenantId, request.resource.data.machineId);
       allow update: if canManageMachineAccess(resource.data.tenantId, resource.data.machineId);
       allow delete: if isSignedIn() && resource.data.tenantId == request.auth.uid;
-
-      allow update: if isOperationalUpdate();
     }
 
     match /agregador_maquinaria_LS/{machineId} {

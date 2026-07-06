@@ -15,9 +15,11 @@ queda fuera de git para no versionar la configuración real del proyecto.
 
 ```
 copy .env.example .env.local
+copy .firebaserc.example .firebaserc
 ```
 
-2) Rellena los valores reales de Firebase en `.env.local`.
+2) Rellena los valores reales de Firebase en `.env.local` y el proyecto local
+en `.firebaserc`.
 
 Para verificar que no haya keys filtradas:
 

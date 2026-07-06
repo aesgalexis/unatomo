@@ -1,18 +1,16 @@
-import { readdir, readFile, stat } from "node:fs/promises";
+import { execFile } from "node:child_process";
+import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { promisify } from "node:util";
 
 const ROOT = process.cwd();
-const TARGETS = ["static", "es", "en", "landing", "nfc", "firebase", "scripts", "index.html", "styles.css"];
-const IGNORED_RELATIVE_PATHS = new Set([
-  path.join("static", "js", "config", "runtime-config.js"),
-]);
 const KEY_REGEX = /AIza[0-9A-Za-z_-]{20,}/g;
+const execFileAsync = promisify(execFile);
 
 const hits = [];
 
-const scanFile = async (filePath) => {
-  const relativePath = path.relative(ROOT, filePath);
-  if (IGNORED_RELATIVE_PATHS.has(relativePath)) return;
+const scanFile = async (relativePath) => {
+  const filePath = path.join(ROOT, relativePath);
   try {
     const content = await readFile(filePath, "utf8");
     const matches = content.match(KEY_REGEX);
@@ -24,25 +22,20 @@ const scanFile = async (filePath) => {
   }
 };
 
-const scanPath = async (targetPath) => {
-  try {
-    const info = await stat(targetPath);
-    if (info.isDirectory()) {
-      const entries = await readdir(targetPath);
-      for (const entry of entries) {
-        await scanPath(path.join(targetPath, entry));
-      }
-    } else if (info.isFile()) {
-      await scanFile(targetPath);
-    }
-  } catch {
-    // ignore missing
-  }
+const listTrackedFiles = async () => {
+  const { stdout } = await execFileAsync("git", ["ls-files", "-z"], {
+    cwd: ROOT,
+    encoding: "buffer",
+    maxBuffer: 20 * 1024 * 1024,
+  });
+  return stdout
+    .toString("utf8")
+    .split("\0")
+    .filter(Boolean);
 };
 
-await Promise.all(
-  TARGETS.map((target) => scanPath(path.join(ROOT, target)))
-);
+const files = await listTrackedFiles();
+await Promise.all(files.map((file) => scanFile(file)));
 
 if (hits.length) {
   console.error("Se detectaron posibles API keys en el repo:");

@@ -13,7 +13,7 @@ import {
   updateDoc,
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 import { getDownloadURL, ref, uploadBytes } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-storage.js";
-import { auth, db, isAdminUser, storage } from "./firebase-config.js";
+import { auth, db, isAdminUser, resolveAdminUser, storage } from "./firebase-config.js";
 
 const MACHINES_COLLECTION = "agregador_maquinaria_LS";
 const COUNTERS_COLLECTION = "maquinaria_counters";
@@ -181,7 +181,11 @@ export const sortMachines = (machines) =>
     return extractSequence(a.id) - extractSequence(b.id);
   });
 
-export const observeMachineAdmin = (callback) => onAuthStateChanged(auth, callback);
+export const observeMachineAdmin = (callback) =>
+  onAuthStateChanged(auth, async (user) => {
+    if (user) await resolveAdminUser(user);
+    callback(user);
+  });
 export const ensureInitialMachinesBootstrapped = () => seedInitialMachines();
 
 const getNextSequenceForPrefix = async (prefix) => {

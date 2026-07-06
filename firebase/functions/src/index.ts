@@ -52,6 +52,11 @@ export {
 } from "./machines/tags";
 export {deleteMachine} from "./machines/deleteMachine";
 export {
+  getMachineAccessPublic,
+  updateMachineAccessOperational,
+  verifyMachineAccessUser,
+} from "./machines/access";
+export {
   createMachineDocumentDownloadUrl,
   downloadMachineDocument,
 } from "./machines/documents";
