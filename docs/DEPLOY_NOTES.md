@@ -57,6 +57,11 @@ The static output is written to `dist/`.
 GitHub Actions secrets and is intentionally ignored by git. Do not commit real
 Firebase project values to the public repository.
 
+Firebase App Check is optional until configured in Firebase Console. To enable
+the browser client, set `FIREBASE_APP_CHECK_SITE_KEY` in the runtime config
+source. Use `FIREBASE_APP_CHECK_DEBUG_TOKEN` only for local/debug sessions and
+never commit a real debug token.
+
 ## Publish
 
 ```powershell
@@ -98,6 +103,15 @@ For a targeted function deployment:
 ```powershell
 npm.cmd run firebase:clean -- deploy --only "functions:functionName"
 ```
+
+QR/machine access callables support App Check enforcement through the Functions
+environment variable `ENFORCE_APP_CHECK=true`. Deploy client App Check first and
+verify normal browser traffic before enabling enforcement, otherwise QR access
+will reject clients without valid App Check tokens.
+For a one-project local deploy, place this variable in an ignored
+`firebase/functions/.env` file before deploying Functions, or configure the
+equivalent environment variable through the Firebase/Google Cloud deployment
+flow.
 
 ## NFC Backups
 

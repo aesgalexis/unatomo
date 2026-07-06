@@ -52,6 +52,7 @@ export {
 } from "./machines/tags";
 export {deleteMachine} from "./machines/deleteMachine";
 export {
+  cleanupMachineAccessSessions,
   getMachineAccessPublic,
   updateMachineAccessOperational,
   verifyMachineAccessUser,

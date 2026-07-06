@@ -29,6 +29,9 @@ Read this before changing data flows, callable functions, machine ownership, adm
   - `qrPath`
   - `qrSize`
 - `machine_access`: public/operational access data keyed by Tag ID.
+- `machine_access_sessions`: short-lived QR/machine sessions created by
+  callable functions after a machine-local user login. Browser clients must not
+  read or write this collection directly.
 - `admin_machine_links`: accepted admin access links.
 - `admin_invites`: pending/accepted admin invitations.
 - `machine_transfer_invites`: pending/accepted/rejected machine ownership transfer requests.
@@ -118,6 +121,12 @@ frontend wrappers live under `static/js/dashboard/`.
   and maximum group depth 2 before writing. Firestore rules block direct client
   changes to those two fields so stale dashboard code cannot flatten a saved
   hierarchy.
+- `getMachineAccessPublic`, `verifyMachineAccessUser`, and
+  `updateMachineAccessOperational`: QR/machine access callables. They can enforce
+  Firebase App Check when Functions are deployed with
+  `ENFORCE_APP_CHECK=true`.
+- `cleanupMachineAccessSessions`: scheduled cleanup for expired
+  `machine_access_sessions` documents. Expired sessions are also deleted on use.
 
 ## Integrity Cleanup Log
 

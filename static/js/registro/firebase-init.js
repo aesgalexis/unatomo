@@ -1,4 +1,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+import {
+  initializeAppCheck,
+  ReCaptchaEnterpriseProvider
+} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app-check.js";
 import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 import {
   getAuth,
@@ -28,6 +32,26 @@ if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
 }
 
 export const app = initializeApp(firebaseConfig);
+
+const appCheckSiteKey = runtimeConfig.FIREBASE_APP_CHECK_SITE_KEY || "";
+const appCheckDebugToken = runtimeConfig.FIREBASE_APP_CHECK_DEBUG_TOKEN || "";
+if (appCheckDebugToken) {
+  self.FIREBASE_APPCHECK_DEBUG_TOKEN = appCheckDebugToken;
+}
+
+let initializedAppCheck = null;
+if (appCheckSiteKey) {
+  try {
+    initializedAppCheck = initializeAppCheck(app, {
+      provider: new ReCaptchaEnterpriseProvider(appCheckSiteKey),
+      isTokenAutoRefreshEnabled: true
+    });
+  } catch (error) {
+    console.warn("Firebase App Check no se pudo inicializar.", error);
+  }
+}
+
+export const appCheck = initializedAppCheck;
 
 export const db = getFirestore(app);
 export const auth = getAuth(app);

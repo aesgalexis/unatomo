@@ -234,6 +234,10 @@ service cloud.firestore {
       allow delete: if isSignedIn() && resource.data.tenantId == request.auth.uid;
     }
 
+    match /machine_access_sessions/{sessionId} {
+      allow read, write: if false;
+    }
+
     match /agregador_maquinaria_LS/{machineId} {
       allow read: if true;
       allow create, update: if isLaundryServicesAdmin();
