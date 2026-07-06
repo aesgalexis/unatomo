@@ -77,6 +77,11 @@ publish or deploy without explicit owner instruction in the current task.
 See [docs/DEPLOY_NOTES.md](docs/DEPLOY_NOTES.md) for the exact commands and
 rules.
 
+## Security
+
+This is a public repository. Read [SECURITY.md](SECURITY.md) before touching
+Firebase config, backups, QR access, App Check, or production-sensitive notes.
+
 ## Repository Notes
 
 - Do not commit `.env.local`, backup snapshots, service-account files, tokens,
