@@ -618,6 +618,17 @@
 }
 
 @media (max-width: 640px) {
+  html,
+  body {
+    touch-action: manipulation;
+  }
+
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+
   .controlpanel-user--action {
     grid-template-columns: minmax(0, 1fr) auto auto;
     align-items: center;
