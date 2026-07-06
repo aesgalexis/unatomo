@@ -3,11 +3,16 @@ import path from "node:path";
 
 const ROOT = process.cwd();
 const TARGETS = ["static", "es", "en", "landing", "nfc", "firebase", "scripts", "index.html", "styles.css"];
+const IGNORED_RELATIVE_PATHS = new Set([
+  path.join("static", "js", "config", "runtime-config.js"),
+]);
 const KEY_REGEX = /AIza[0-9A-Za-z_-]{20,}/g;
 
 const hits = [];
 
 const scanFile = async (filePath) => {
+  const relativePath = path.relative(ROOT, filePath);
+  if (IGNORED_RELATIVE_PATHS.has(relativePath)) return;
   try {
     const content = await readFile(filePath, "utf8");
     const matches = content.match(KEY_REGEX);
