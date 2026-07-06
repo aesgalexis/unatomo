@@ -155,6 +155,11 @@ a:hover {
   letter-spacing: 0.12em;
   font-size: 0.75rem;
   color: color-mix(in srgb, var(--fg) 70%, transparent);
+  text-decoration: none;
+}
+
+.ls-topbar-brand:hover {
+  opacity: 0.9;
 }
 
 .ls-topbar-logo {
@@ -1066,6 +1071,10 @@ body.page .ls-topbar #lang-toggle {
   text-align: left;
 }
 
+body.ls-contact-page .card {
+  border-radius: 0.85rem;
+}
+
 :root[data-theme="light"] body {
   background:
     radial-gradient(circle at 85% 10%, rgba(148, 163, 184, 0.08), transparent 45%),
@@ -1239,7 +1248,7 @@ textarea.field {
   }
 
   .hero-atom {
-    order: -1;
+    display: none;
   }
 
   .ls-upperfooter {

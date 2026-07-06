@@ -31,7 +31,7 @@
         <p data-i18n="card1_p3">Ponemos el foco en el análisis de los flujos de producción, mantenimiento preventivo, recambios críticos y hábitos de trabajo.</p>
         <div class="service-meta">
           <div>
-            <p class="price" data-i18n="card1_price">Desde 1390 EUR/día</p>
+            <p class="price" data-i18n="card1_price">Desde 1.090 EUR/día</p>
             <p class="price-note" data-i18n="card1_price_note">* (Gastos de traslado y alojamiento no incluidos en el precio) ** (Solo España: impuestos no incluidos)</p>
           </div>
           <div class="service-actions service-actions-bottom">
@@ -94,7 +94,7 @@
         <p data-i18n="card4_p1">Ofrecemos soporte técnico a todos nuestros clientes. Desde diagnóstico y solución de averías hasta operaciones recurrentes programadas como cambios de muletones, membranas de prensas, rodamientos, etc.</p>
         <div class="service-meta">
           <div class="service-actions">
-            <button class="btn-pill btn-pill-outline btn-disabled" type="button" disabled data-i18n="card4_cta">No disponible</button>
+            <a class="btn-pill btn-pill-outline" href="/laundryservices/ls_contacto.html?subject=card4" data-i18n="card4_cta">Solicitar</a>
           </div>
         </div>
       </article>
@@ -126,11 +126,32 @@
   <script src="/laundryservices/ls_page.js"></script>
   <script src="/laundryservices/ls_interface.js"></script>
   <script src="/laundryservices/ls_claim-loop.js"></script>
-  <script type="module">
-    import { initAtomWidget } from "/laundryservices/ls_atom-widget/ls_atom-widget.js";
+  <script>
     const atomContainer = document.getElementById("atom");
-    if (atomContainer) {
-      initAtomWidget({
+    const smallScreenQuery = window.matchMedia("(max-width: 900px)");
+    let atomWidget = null;
+    let atomWidgetModule = null;
+
+    async function syncAtomWidget() {
+      if (!atomContainer) return;
+
+      if (smallScreenQuery.matches) {
+        if (atomWidget && typeof atomWidget.destroy === "function") {
+          atomWidget.destroy();
+          atomWidget = null;
+        }
+        return;
+      }
+
+      if (atomWidget) return;
+
+      atomWidgetModule =
+        atomWidgetModule || import("/laundryservices/ls_atom-widget/ls_atom-widget.js");
+      const { initAtomWidget } = await atomWidgetModule;
+      if (smallScreenQuery.matches) return;
+      if (atomWidget) return;
+
+      atomWidget = initAtomWidget({
         container: atomContainer,
         pixelRatioCap: 1.8,
         atomScale: 0.8267,
@@ -141,6 +162,13 @@
         zoomMaxPercent: 100,
         initialZoomLevel: 8,
       });
+    }
+
+    syncAtomWidget();
+    if (smallScreenQuery.addEventListener) {
+      smallScreenQuery.addEventListener("change", syncAtomWidget);
+    } else if (smallScreenQuery.addListener) {
+      smallScreenQuery.addListener(syncAtomWidget);
     }
   </script>
   <script src="/laundryservices/ls_particles.js"></script>

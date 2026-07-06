@@ -2,13 +2,19 @@
   const mount = document.getElementById("ls-topbar-mount");
   if (!mount) return;
 
+  const normalizedPath = window.location.pathname.replace(/\/+$/, "");
+  const isLaundryHome =
+    normalizedPath === "/laundryservices" ||
+    normalizedPath === "/laundryservices/index.html";
+  const brandHref = isLaundryHome ? "https://unatomo.com/" : "/laundryservices/";
+
   mount.innerHTML = `
     <header class="ls-topbar">
       <div class="ls-topbar-inner">
-        <div class="ls-topbar-brand">
+        <a class="ls-topbar-brand" href="${brandHref}">
           <img src="/static/img/logo-unatomo-v1.6.svg" alt="unatomo" class="ls-topbar-logo" loading="lazy" />
           <span class="ls-topbar-name">Laundry Services</span>
-        </div>
+        </a>
         <div class="utility-controls" aria-label="Preferencias">
           <button id="theme-toggle" class="icon-button" type="button" aria-label="Cambiar a modo oscuro">
             <span class="icon" data-icon="sun" aria-hidden="true">

@@ -22,7 +22,7 @@
         "Realizamos un informe técnico por secciones con prioridades claras sobre en qué urge intervenir, qué mejoras programar y qué inversiones pueden resultar más rentables.",
       card1_p3:
         "Ponemos el foco en el análisis de los flujos de producción, mantenimiento preventivo, recambios críticos y hábitos de trabajo.",
-      card1_price: "Desde 1.390 EUR/día",
+      card1_price: "Desde 1.090 EUR/día",
       card1_price_note:
         "* (Gastos de traslado y alojamiento no incluidos en el precio)\n** (Solo España: impuestos no incluidos)",
       card1_cta: "Contratar",
@@ -50,7 +50,7 @@
       card4_title: "Asistencia técnica",
       card4_p1:
         "Ofrecemos soporte técnico a todos nuestros clientes. Desde diagnóstico y solución de averías hasta operaciones recurrentes programadas como cambios de muletones, membranas de prensas, rodamientos, etc.",
-      card4_cta: "No disponible",
+      card4_cta: "Solicitar",
       card8_title: "Alcance",
       card8_p1:
         "Damos soporte a lavanderías industriales, hoteleras, autoservicio y tintorerías en toda España y gran parte de Europa. Contamos con un conocimiento técnico integral en todas las áreas y colaboramos con los aliados estratégicos necesarios para cubrir cualquier desafío técnico específico que pueda presentarse.",
@@ -104,7 +104,7 @@
         "We provide a technical report by section with clear priorities on what requires urgent action, what improvements to schedule, and what investments can be more profitable.",
       card1_p3:
         "We focus on production flow analysis, preventive maintenance, critical spare parts and work practices.",
-      card1_price: "From 1.390 EUR/day",
+      card1_price: "From 1.090 EUR/day",
       card1_price_note:
         "* (Travel and accommodation costs not included in the price)\n** (Spain only: taxes not included)",
       card1_cta: "Hire",
@@ -132,7 +132,7 @@
       card4_title: "Technical assistance",
       card4_p1:
         "We offer technical support to all our clients. From fault diagnosis and repair to scheduled recurring operations such as replacing padding covers, press membranes, bearings, and more.",
-      card4_cta: "Unavailable",
+      card4_cta: "Request",
       card8_title: "Scope",
       card8_p1:
         "We support industrial laundries, hotel laundries, self-service laundries and dry cleaners throughout Spain and much of Europe. We have comprehensive technical knowledge across all areas and work with the strategic partners needed to cover any specific technical challenge that may arise.",
@@ -186,7 +186,7 @@
         "Redigiamo un rapporto tecnico per sezioni con priorita chiare su dove intervenire con urgenza, quali miglioramenti programmare e quali investimenti possono risultare piu redditizi.",
       card1_p3:
         "Ci concentriamo sull'analisi dei flussi produttivi, della manutenzione preventiva, dei ricambi critici e delle abitudini di lavoro.",
-      card1_price: "Da 1.390 EUR/giorno",
+      card1_price: "Da 1.090 EUR/giorno",
       card1_price_note:
         "* (Spese di viaggio e alloggio non incluse nel prezzo)\n** (Solo Spagna: imposte non incluse)",
       card1_cta: "Richiedi",
@@ -214,7 +214,7 @@
       card4_title: "Assistenza tecnica",
       card4_p1:
         "Offriamo supporto tecnico a tutti i nostri clienti. Dalla diagnosi e risoluzione dei guasti fino a operazioni ricorrenti programmate come sostituzione di molettone, membrane di presse, cuscinetti, ecc.",
-      card4_cta: "Non disponibile",
+      card4_cta: "Richiedi",
       card8_title: "Ambito",
       card8_p1:
         "Forniamo supporto a lavanderie industriali, alberghiere, self-service e tintorie in tutta la Spagna e in gran parte dell'Europa. Disponiamo di una conoscenza tecnica completa in tutte le aree e collaboriamo con i partner strategici necessari per coprire qualsiasi sfida tecnica specifica che possa presentarsi.",
@@ -268,7 +268,7 @@
         "Παρεχουμε τεχνικη αναφορα ανα τομεα με σαφεις προτεραιοτητες για αμεσες παρεμβασεις, προγραμματισμενες βελτιωσεις και πιο αποδοτικες επενδυσεις.",
       card1_p3:
         "Εστιαζουμε στην αναλυση ροων παραγωγης, στην προληπτικη συντηρηση, στα κρισιμα ανταλλακτικα και στις πρακτικες εργασιας.",
-      card1_price: "Απο 1.390 EUR/ημερα",
+      card1_price: "Απο 1.090 EUR/ημερα",
       card1_price_note:
         "* (Τα εξοδα μετακινησης και διαμονης δεν περιλαμβανονται στην τιμη)\n** (Μονο Ισπανια: οι φοροι δεν περιλαμβανονται)",
       card1_cta: "Αναθεση",
@@ -296,7 +296,7 @@
       card4_title: "Τεχνικη υποστηριξη",
       card4_p1:
         "Προσφερουμε τεχνικη υποστηριξη σε ολους τους πελατες μας. Απο διαγνωση και επιλυση βλαβων εως προγραμματισμενες επαναλαμβανομενες εργασιες οπως αλλαγες μουλετον, μεμβρανων πρεσας, ρουλεμαν και αλλα.",
-      card4_cta: "Μη διαθεσιμο",
+      card4_cta: "Αιτηση",
       card8_title: "Πεδιο",
       card8_p1:
         "Παρεχουμε υποστηριξη σε βιομηχανικα πλυντηρια, ξενοδοχειακες μοναδες πλυντηριων, self-service πλυντηρια και καθαριστηρια σε ολη την Ισπανια και σε μεγαλο μερος της Ευρωπης. Διαθετουμε ολοκληρωμενη τεχνικη γνωση σε ολους τους τομεις και συνεργαζομαστε με τους απαραιτητους στρατηγικους συνεργατες για να καλυψουμε καθε ειδικη τεχνικη προκληση που μπορει να προκυψει.",
