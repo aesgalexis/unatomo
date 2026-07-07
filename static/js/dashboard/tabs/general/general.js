@@ -15,6 +15,15 @@ export const render = (panel, machine, hooks, options = {}) => {
     });
   };
 
+  const scheduleContentResize = () => {
+    if (!hooks.onContentResize) return;
+    hooks.onContentResize();
+    requestAnimationFrame(() => {
+      hooks.onContentResize();
+      requestAnimationFrame(() => hooks.onContentResize());
+    });
+  };
+
   if (panel.__unatomoDocMenuHandler) {
     panel.removeEventListener("click", panel.__unatomoDocMenuHandler);
   }
@@ -300,7 +309,7 @@ export const render = (panel, machine, hooks, options = {}) => {
       if (!hooks.onUploadMachineDocument) {
         status.textContent = t("general.uploadError", "Error al cargar el archivo");
         status.dataset.state = "error";
-        if (hooks.onContentResize) hooks.onContentResize();
+        scheduleContentResize();
         return;
       }
 
@@ -310,7 +319,7 @@ export const render = (panel, machine, hooks, options = {}) => {
         status.textContent = t("general.uploading", "Subiendo...");
         status.dataset.state = "neutral";
       }
-      if (hooks.onContentResize) hooks.onContentResize();
+      scheduleContentResize();
 
       try {
         const doc = await hooks.onUploadMachineDocument(machine.id, kind, file, status, options);
@@ -330,7 +339,7 @@ export const render = (panel, machine, hooks, options = {}) => {
           window.setTimeout(() => {
             status.textContent = "";
             status.dataset.state = "";
-            if (hooks.onContentResize) hooks.onContentResize();
+            scheduleContentResize();
           }, 2200);
         }
         return doc;
@@ -357,7 +366,7 @@ export const render = (panel, machine, hooks, options = {}) => {
       } finally {
         saveBtn.disabled = false;
         tile.classList.remove("is-uploading");
-        if (hooks.onContentResize) hooks.onContentResize();
+        scheduleContentResize();
       }
     };
 
@@ -373,7 +382,7 @@ export const render = (panel, machine, hooks, options = {}) => {
         status.dataset.state = "error";
         saveBtn.hidden = true;
         fileInput.value = "";
-        if (hooks.onContentResize) hooks.onContentResize();
+        scheduleContentResize();
         return;
       }
 
@@ -406,12 +415,12 @@ export const render = (panel, machine, hooks, options = {}) => {
           if (hooks.onRefreshMachineDocuments) {
             hooks.onRefreshMachineDocuments();
           }
-          if (hooks.onContentResize) hooks.onContentResize();
+          scheduleContentResize();
         }, 2200);
       } finally {
         saveBtn.disabled = false;
         tile.classList.remove("is-uploading");
-        if (hooks.onContentResize) hooks.onContentResize();
+        scheduleContentResize();
       }
     };
 
@@ -445,14 +454,14 @@ export const render = (panel, machine, hooks, options = {}) => {
         window.setTimeout(() => {
           status.textContent = "";
           status.dataset.state = "";
-          if (hooks.onContentResize) hooks.onContentResize();
+          scheduleContentResize();
         }, 2200);
       } catch {
         status.textContent = t("general.deleteError", "No se pudo eliminar el archivo");
         status.dataset.state = "error";
       } finally {
         tile.classList.remove("is-uploading");
-        if (hooks.onContentResize) hooks.onContentResize();
+        scheduleContentResize();
       }
     };
 
@@ -495,6 +504,10 @@ export const render = (panel, machine, hooks, options = {}) => {
 
     fileInput.addEventListener("change", () => {
       const files = Array.from(fileInput.files || []);
+      if (kind === "plate") {
+        uploadFiles(files);
+        return;
+      }
       const file = files[0];
       fileName.textContent = isMultiDocument && files.length > 1
         ? t("general.filesSelected", (count) => `${count} archivos seleccionados`)(files.length)
@@ -503,7 +516,7 @@ export const render = (panel, machine, hooks, options = {}) => {
           : savedDoc?.name || t("general.upload", "Cargar");
       tile.classList.toggle("is-file", !isMultiDocument && (!!file || !!savedDoc));
       saveBtn.hidden = !files.length;
-      if (hooks.onContentResize) hooks.onContentResize();
+      scheduleContentResize();
     });
 
     saveBtn.addEventListener("click", async (event) => {

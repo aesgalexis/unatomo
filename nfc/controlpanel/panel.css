@@ -618,11 +618,6 @@
 }
 
 @media (max-width: 640px) {
-  html,
-  body {
-    touch-action: manipulation;
-  }
-
   input,
   select,
   textarea {

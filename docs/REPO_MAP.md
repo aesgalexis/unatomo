@@ -16,7 +16,8 @@ feature-specific docs.
 - `index.html`: public root page.
 - `landing/`: public landing pages and landing-specific scripts/styles.
 - `es/` and `en/`: localized public routes.
-- `nfc/es/` and `nfc/en/`: localized NFC/dashboard/auth/static pages.
+- `nfc/es/` and `nfc/en/`: localized NFC/dashboard/auth/static pages,
+  including account settings and the global access page.
 - `nfc/controlpanel/`: owner-only control panel UI.
 - `demo/`: local/demo app surfaces.
 
@@ -27,6 +28,7 @@ feature-specific docs.
 - `static/js/firebase/`: Firebase client initialization.
 - `static/js/qr-print/`: QR print page logic.
 - `static/js/registro/`: registration, login, reset, and session menu logic.
+- `static/js/accesos/`: global local-user access prototype page.
 - `static/js/site/`: locale and site-level preferences.
 - `static/css/dashboard.css`: dashboard stylesheet manifest.
 - `static/css/dashboard/`: split dashboard styles by feature.
@@ -59,6 +61,7 @@ links, Tag ID, QR cleanup, callable Functions, or data permissions.
 - `docs/DEV.md`: local setup and development commands.
 - `docs/DASHBOARD_MODEL.md`: dashboard, cards, Tag ID, QR print, menu, and i18n.
 - `docs/FIREBASE_MODEL.md`: Firebase data flows and permission model.
+- `docs/ACCESS_ROLES_MODEL.md`: QR/NFC access, global users, roles, and staged role-model migration.
 - `docs/FUNCTIONS_ARCHITECTURE.md`: callable Functions structure.
 - `docs/DEPLOY_NOTES.md`: publish/deploy policy and commands.
 - `docs/WHATS_NEW_POLICY.md`: public What's New/Novedades policy.

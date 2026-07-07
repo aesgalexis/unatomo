@@ -9,6 +9,14 @@ const LOCALIZED_PAGE_MAP = {
     es: "impresion-qr.html",
     en: "qr-print.html",
   },
+  "accesos.html": {
+    es: "accesos.html",
+    en: "access.html",
+  },
+  "access.html": {
+    es: "accesos.html",
+    en: "access.html",
+  },
 };
 
 export const getAppBasePrefix = (pathname = window.location.pathname) =>
@@ -23,6 +31,7 @@ const TEXT = {
       logout: "Cerrar sesi\u00f3n",
       register: "Registrarse",
       settings: "Configuraci\u00f3n",
+      access: "Accesos",
     },
     footer: {
       rights: (year) => `\u00a9 ${year} UNATOMO CORE SL \u00b7 Todos los derechos reservados.`,
@@ -36,6 +45,7 @@ const TEXT = {
       logout: "Sign out",
       register: "Register",
       settings: "Settings",
+      access: "Access",
     },
     footer: {
       rights: (year) => `\u00a9 ${year} UNATOMO CORE SL \u00b7 All rights reserved.`,

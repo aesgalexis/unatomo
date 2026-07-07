@@ -34,6 +34,11 @@ Tag-related backend/client wrappers:
 - `static/js/dashboard/tags/tagAssetsRepo.js`: builds Tag URLs, generates QR, disconnects tags.
 - `static/js/dashboard/machineAccessRepo.js`: syncs machine access data.
 
+Global access and role work is tracked in `docs/ACCESS_ROLES_MODEL.md`. The
+account Access/Accesos page is the intended global surface for
+owner-wide operator/user access management; individual machine configuration
+remains the machine-local editor during the transition.
+
 ## General Tab Documents
 
 Machine documentation UI lives in:

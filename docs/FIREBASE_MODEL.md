@@ -155,6 +155,14 @@ preserved.
 - Never reuse `usernames` for account handles; that collection belongs to
   machine-local operational users.
 
+## Access And Roles Direction
+
+Long-term QR/NFC access and global role management are tracked in
+`docs/ACCESS_ROLES_MODEL.md`. The current `machines.users[]` plus `usernames`
+model is transitional. Future work should separate local operator identity from
+machine assignment, and should treat public QR/NFC scans as a limited gateway
+rather than authorization to operational machine data.
+
 ## Production Safety
 
 One-off Firebase maintenance scripts should be temporary. If a script is created to transfer ownership, inspect accounts, or modify production data, remove it once the operation is complete unless the user explicitly asks to keep it.

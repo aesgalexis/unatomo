@@ -4,34 +4,41 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>unatomo</title>
-  <meta name="description" content="Unatomo control panel.">
+  <meta name="description" content="Accesos de usuario Unatomo.">
   <meta name="robots" content="noindex, nofollow" />
   <script src="/static/js/theme/theme-init.js"></script>
   <script src="/static/js/config/runtime-config.js"></script>
   <link rel="stylesheet" href="/styles.css">
-  <link rel="stylesheet" href="/nfc/controlpanel/panel.css">
+  <link rel="stylesheet" href="/static/css/accesos.css">
   <link rel="icon" href="/static/img/favicon/favicon.svg" type="image/svg+xml">
 </head>
-<body class="page" data-topbar-title="Panel" data-back-mode="history">
+
+<body class="page" data-topbar-title="Accesos" data-back-mode="history">
   <div id="topbar-mount"></div>
   <script type="module" src="/static/js/topbar.js"></script>
 
   <main class="shell page-shell">
     <section class="page-section">
-      <div id="controlpanel-mount"></div>
-      <script type="module" src="/nfc/controlpanel/panel.js"></script>
+      <div id="access-mount" class="access-wrap">
+        <div class="access-card">
+          <p class="access-note">Prototipo de accesos globales para usuarios locales. Los cambios de checkbox y PIN son visuales por ahora.</p>
+          <div class="access-status" id="access-status">Cargando accesos...</div>
+          <div class="access-table-wrap" id="access-table-wrap"></div>
+        </div>
+      </div>
+      <script type="module" src="/static/js/accesos/index.js"></script>
     </section>
 
     <div id="page-nav-mount"></div>
     <script type="module" src="/static/js/page-nav.js"></script>
 
     <div id="legal-footer" class="legal-footer"></div>
+
     <div class="footer-link">
-      <a href="/nfc/es/privacidad.html">Política de privacidad y cookies</a>
+      <a href="/nfc/es/privacidad.html">Pol&iacute;tica de privacidad y cookies</a>
     </div>
   </main>
 
   <script src="/static/js/footer.js"></script>
 </body>
 </html>
-

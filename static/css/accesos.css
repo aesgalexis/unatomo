@@ -1,0 +1,231 @@
+.access-wrap {
+  display: grid;
+  gap: 16px;
+}
+
+.access-card {
+  border: 1px solid var(--border-subtle);
+  background: var(--panel-bg);
+  border-radius: 14px;
+  padding: 18px;
+}
+
+.access-note,
+.access-status {
+  margin: 0 0 10px;
+  color: color-mix(in srgb, var(--fg) 62%, transparent);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.access-status[data-state="ok"] {
+  color: #2c974b;
+}
+
+.access-status[data-state="error"] {
+  color: var(--danger, #d33);
+}
+
+.access-table-wrap {
+  overflow-x: auto;
+}
+
+.access-create {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 12px;
+  color: color-mix(in srgb, var(--fg) 68%, transparent);
+  font-size: 13px;
+}
+
+.access-focus {
+  display: grid;
+  grid-template-columns: minmax(180px, 240px) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.access-user-list {
+  position: sticky;
+  top: 12px;
+  display: grid;
+  gap: 6px;
+  max-height: min(520px, 68vh);
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.access-user-item {
+  width: 100%;
+  border: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--bg) 96%, transparent);
+  color: var(--fg);
+  border-radius: 8px;
+  padding: 8px 10px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.access-user-item[data-active="true"] {
+  border-color: #2563eb;
+  background: color-mix(in srgb, #2563eb 10%, var(--bg));
+}
+
+.access-user-item span,
+.access-editor-title strong,
+.access-machine-row strong {
+  display: block;
+}
+
+.access-user-item small,
+.access-machine-row small {
+  display: block;
+  margin-top: 2px;
+  color: color-mix(in srgb, var(--fg) 52%, transparent);
+  font-size: 11px;
+}
+
+.access-editor {
+  min-width: 0;
+  display: grid;
+  gap: 14px;
+}
+
+.access-editor-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid color-mix(in srgb, var(--fg) 8%, transparent);
+  color: color-mix(in srgb, var(--fg) 62%, transparent);
+  font-size: 13px;
+}
+
+.access-editor-title strong {
+  color: var(--fg);
+  font-size: 15px;
+}
+
+.access-editor-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: end;
+}
+
+.access-editor-controls label {
+  display: grid;
+  gap: 5px;
+  color: color-mix(in srgb, var(--fg) 62%, transparent);
+  font-size: 12px;
+}
+
+.access-pin-actions {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.access-all-toggle {
+  display: inline-flex !important;
+  grid-template-columns: none !important;
+  gap: 8px !important;
+  align-items: center !important;
+  min-height: 30px;
+}
+
+.access-section-title {
+  color: color-mix(in srgb, var(--fg) 66%, transparent);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.access-machine-list {
+  display: grid;
+  gap: 6px;
+}
+
+.access-machine-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  padding: 8px 10px;
+  border: 1px solid color-mix(in srgb, var(--fg) 8%, transparent);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--bg) 98%, transparent);
+}
+
+.access-machine-row small[data-scope="owner"] {
+  color: #2563eb;
+}
+
+.access-machine-row small[data-scope="admin"] {
+  color: color-mix(in srgb, var(--fg) 62%, transparent);
+}
+
+.access-role,
+.access-input {
+  border: 1px solid var(--border-subtle);
+  background: var(--bg);
+  color: var(--fg);
+  border-radius: 8px;
+  padding: 5px 8px;
+  font: inherit;
+  font-size: 12px;
+}
+
+.access-role {
+  min-width: 120px;
+}
+
+.access-input {
+  min-width: 120px;
+}
+
+.access-pin-input {
+  width: 90px;
+  min-width: 90px;
+}
+
+.access-mini-btn {
+  border: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--bg) 96%, transparent);
+  color: var(--fg);
+  border-radius: 8px;
+  padding: 4px 8px;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.access-mini-btn:disabled {
+  opacity: 0.42;
+  cursor: default;
+}
+
+@media (max-width: 700px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+
+  .access-focus {
+    grid-template-columns: 1fr;
+  }
+
+  .access-user-list {
+    position: static;
+    max-height: 220px;
+  }
+
+  .access-editor-title {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

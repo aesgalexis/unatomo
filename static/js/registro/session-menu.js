@@ -16,6 +16,7 @@ const registerBtn = document.getElementById("session-menu-register");
 const MENU_ICONS = {
   panel: '<rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect>',
   settings: '<circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.56V21h-4v-.08A1.7 1.7 0 0 0 8.94 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.57 15 1.7 1.7 0 0 0 3 14H3v-4h.08A1.7 1.7 0 0 0 4.6 8.94a1.7 1.7 0 0 0-.34-1.88L4.2 7l2.83-2.83.06.06A1.7 1.7 0 0 0 9 4.57 1.7 1.7 0 0 0 10 3h4v.08A1.7 1.7 0 0 0 15.06 4.6a1.7 1.7 0 0 0 1.88-.34L17 4.2 19.83 7l-.06.06A1.7 1.7 0 0 0 19.43 9 1.7 1.7 0 0 0 21 10v4h-.08A1.7 1.7 0 0 0 19.4 15Z"></path>',
+  access: '<path d="M21 2 13.5 9.5"></path><circle cx="8" cy="16" r="5"></circle><path d="m14 8 2 2"></path><path d="m17 5 2 2"></path>',
   login: '<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><path d="m10 17 5-5-5-5"></path><path d="M15 12H3"></path>',
   logout: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><path d="m14 17 5-5-5-5"></path><path d="M19 12H7"></path>',
   register: '<path d="M15 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8" cy="7" r="4"></circle><path d="M19 8v6M22 11h-6"></path>',
@@ -51,6 +52,7 @@ if (!btn || !menu || !label || !action) {
     login: localizeEsPath("/es/auth/login.html", lang),
     register: localizeEsPath("/es/auth/registro.html", lang),
     settings: localizeEsPath("/es/configuracion.html", lang),
+    access: localizeEsPath("/es/accesos.html", lang),
     home: localizeEsPath("/es/index.html", lang),
     panel: getControlPanelPath(),
   };
@@ -71,10 +73,34 @@ if (!btn || !menu || !label || !action) {
     }
   }
 
+  let accessLink = document.getElementById("session-menu-access");
+  if (!accessLink) {
+    accessLink = document.createElement("a");
+    accessLink.id = "session-menu-access";
+    accessLink.href = paths.access;
+    accessLink.setAttribute("role", "menuitem");
+    accessLink.className = "session-menu-link";
+    accessLink.hidden = true;
+    if (profileLink && profileLink.parentNode) {
+      profileLink.parentNode.insertBefore(accessLink, profileLink.nextSibling);
+    } else if (action && action.parentNode) {
+      action.parentNode.insertBefore(accessLink, action);
+    }
+  }
+
+  const insertAfter = (node, reference) => {
+    if (!node || !reference?.parentNode) return;
+    const parent = reference.parentNode;
+    const next = reference.nextSibling;
+    if (next === node) return;
+    parent.insertBefore(node, next);
+  };
+
   const syncSessionMenuOrder = () => {
     const parent = profileLink?.parentNode || action?.parentNode || null;
     if (!parent || !profileLink) return;
     if (panelLink) parent.insertBefore(panelLink, profileLink);
+    insertAfter(accessLink, profileLink);
   };
   syncSessionMenuOrder();
 
@@ -118,6 +144,11 @@ if (!btn || !menu || !label || !action) {
       profileLink.replaceChildren();
     }
 
+    if (accessLink) {
+      accessLink.hidden = true;
+      accessLink.replaceChildren();
+    }
+
     if (panelLink) {
       panelLink.hidden = true;
       panelLink.replaceChildren();
@@ -156,6 +187,12 @@ if (!btn || !menu || !label || !action) {
       profileLink.hidden = false;
       setMenuLinkContent(profileLink, "settings", text.session.settings);
       profileLink.setAttribute("href", paths.settings);
+    }
+
+    if (accessLink) {
+      accessLink.hidden = false;
+      setMenuLinkContent(accessLink, "access", text.session.access || (lang === "en" ? "Access" : "Accesos"));
+      accessLink.setAttribute("href", paths.access);
     }
 
     if (panelLink) {
@@ -207,6 +244,14 @@ if (!btn || !menu || !label || !action) {
   if (panelLink) {
     panelLink.addEventListener("click", (event) => {
       if (!currentUser || panelLink.hidden) return;
+      event.stopPropagation();
+      closeMenu();
+    });
+  }
+
+  if (accessLink) {
+    accessLink.addEventListener("click", (event) => {
+      if (!currentUser || accessLink.hidden) return;
       event.stopPropagation();
       closeMenu();
     });

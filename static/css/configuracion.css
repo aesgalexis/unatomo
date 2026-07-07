@@ -225,11 +225,6 @@
 }
 
 @media (max-width: 700px) {
-  html,
-  body {
-    touch-action: manipulation;
-  }
-
   input,
   select,
   textarea {
