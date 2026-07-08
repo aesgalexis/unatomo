@@ -45,6 +45,7 @@
 .task-item.task-empty {
   display: flex;
   flex-direction: column;
+  padding-bottom: 0;
 }
 
 .task-body,
@@ -389,6 +390,10 @@
   gap: 0.5rem;
   flex-wrap: wrap;
   margin-top: 0.75rem;
+}
+
+.task-list:has(.task-empty) + .task-form {
+  margin-top: 0;
 }
 
 .task-title-input {
