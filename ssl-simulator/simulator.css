@@ -566,16 +566,18 @@ input[type="range"] {
 }
 
 .stepper {
+  position: relative;
   display: grid;
   grid-template-columns: 34px 1fr 34px;
   height: 32px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  overflow: hidden;
+  overflow: visible;
   background: #ffffff;
 }
 
 .stepper button {
+  position: relative;
   width: 100%;
   min-width: 0;
   min-height: 30px;
@@ -583,6 +585,14 @@ input[type="range"] {
   background: var(--neutral-soft);
   color: var(--neutral-strong);
   font-weight: 900;
+}
+
+.stepper button:first-child {
+  border-radius: 7px 0 0 7px;
+}
+
+.stepper button:last-child {
+  border-radius: 0 7px 7px 0;
 }
 
 .stepper button:disabled,
@@ -601,6 +611,44 @@ input[type="range"] {
   background: #ffffff;
   color: var(--ink);
   font-size: 0.86rem;
+}
+
+.limit-tooltip {
+  position: absolute;
+  right: -8px;
+  bottom: calc(100% + 9px);
+  z-index: 20;
+  width: max-content;
+  max-width: 220px;
+  padding: 7px 9px;
+  border-radius: 8px;
+  background: #172033;
+  color: #ffffff;
+  box-shadow: 0 10px 24px rgba(16, 32, 51, 0.18);
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: left;
+  white-space: normal;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(4px);
+  transition: opacity 120ms ease, transform 120ms ease;
+}
+
+.limit-tooltip::after {
+  content: "";
+  position: absolute;
+  right: 16px;
+  top: 100%;
+  border: 6px solid transparent;
+  border-top-color: #172033;
+}
+
+.stepper button.is-disabled:hover .limit-tooltip,
+.stepper button.is-disabled:focus-visible .limit-tooltip {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .result-stack {

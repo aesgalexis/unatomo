@@ -170,14 +170,14 @@ const presets = {
     rent: 850,
     fixedCosts: 400,
     fitoutCost: 300,
-    machines: [3, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0]
+    machines: [3, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0]
   },
   balanced: {
     storeSize: 25,
     openHours: 15,
     openDays: 30,
-    washDemand: 15,
-    dryDemand: 15,
+    washDemand: 16,
+    dryDemand: 16,
     electricityPrice: 0.22,
     gasPrice: 0.08,
     waterPrice: 2.15,
@@ -185,7 +185,7 @@ const presets = {
     rent: 850,
     fixedCosts: 400,
     fitoutCost: 300,
-    machines: [3, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0]
+    machines: [3, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0]
   },
   highTraffic: {
     storeSize: 80,
@@ -424,6 +424,7 @@ function renderMachines() {
     nextCounts[index] = count + 1;
     const canAdd = calculateRequiredArea(nextCounts) <= state.storeSize;
     const addTitle = canAdd ? "Sumar" : getText("spaceLimitTooltip");
+    const limitTooltip = canAdd ? "" : `<span class="limit-tooltip" role="tooltip">${addTitle}</span>`;
     const unitPrice = machine.purchasePrice;
     return `
       <article class="machine-row" data-machine-index="${index}">
@@ -437,7 +438,7 @@ function renderMachines() {
           <div class="stepper">
             <button type="button" data-action="dec" aria-label="Restar">-</button>
             <output>${count}</output>
-            <button type="button" data-action="inc" aria-label="${addTitle}" title="${canAdd ? "" : addTitle}" class="${canAdd ? "" : "is-disabled"}" aria-disabled="${canAdd ? "false" : "true"}">+</button>
+            <button type="button" data-action="inc" aria-label="${addTitle}" title="${canAdd ? "" : addTitle}" class="${canAdd ? "" : "is-disabled"}" aria-disabled="${canAdd ? "false" : "true"}">+${limitTooltip}</button>
           </div>
         </div>
         <label class="machine-field">
