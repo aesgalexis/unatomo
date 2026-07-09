@@ -183,8 +183,8 @@ h2 {
 
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
+  grid-template-columns: 340px repeat(2, minmax(0, 1fr)) 360px;
+  gap: 14px;
   margin: 14px 0;
 }
 
@@ -304,19 +304,14 @@ input[type="range"] {
 .field-grid input,
 .machine-input {
   width: 100%;
-  min-height: 40px;
+  min-height: 32px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  padding: 8px 10px;
+  padding: 5px 8px;
   color: var(--ink);
   background: var(--surface-strong);
-  transition: border-color 140ms ease, box-shadow 140ms ease, background 140ms ease;
-}
-
-.machine-input {
-  min-height: 32px;
-  padding: 5px 8px;
   font-size: 0.86rem;
+  transition: border-color 140ms ease, box-shadow 140ms ease, background 140ms ease;
 }
 
 .field-grid input:focus,
@@ -365,6 +360,7 @@ input[type="range"] {
 .stepper {
   display: grid;
   grid-template-columns: 34px 1fr 34px;
+  height: 32px;
   border: 1px solid var(--line);
   border-radius: 8px;
   overflow: hidden;
@@ -374,7 +370,7 @@ input[type="range"] {
 .stepper button {
   width: 100%;
   min-width: 0;
-  min-height: 34px;
+  min-height: 30px;
   border: 0;
   background: var(--neutral-soft);
   color: var(--neutral-strong);
@@ -473,6 +469,10 @@ input[type="range"] {
 }
 
 @media (max-width: 1180px) {
+  .kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .workspace {
     grid-template-columns: 1fr 1fr;
   }
