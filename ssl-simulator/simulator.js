@@ -173,11 +173,11 @@ const presets = {
     machines: [3, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0]
   },
   balanced: {
-    storeSize: 45,
+    storeSize: 25,
     openHours: 15,
     openDays: 30,
-    washDemand: 42,
-    dryDemand: 30,
+    washDemand: 15,
+    dryDemand: 15,
     electricityPrice: 0.22,
     gasPrice: 0.08,
     waterPrice: 2.15,
