@@ -1,4 +1,5 @@
-const MACHINE_PRICE_PER_KG = 1000;
+const COIN_BOX_PRICE = 900;
+const MACHINE_DISCOUNT = 0.10;
 
 const i18n = {
   es: {
@@ -22,13 +23,13 @@ const i18n = {
     washDemand: "Clientes que lavan",
     dryDemand: "Clientes que secan",
     electricity: "Electricidad EUR/kWh",
+    gas: "Gas EUR/kWh",
     water: "Agua EUR/m3",
     chemical: "Químico EUR/lavado",
     rent: "Alquiler mensual",
     fixedCosts: "Otros gastos fijos",
     fitout: "Adecuación EUR/m2",
     machines: "Máquinas",
-    machineHelp: "Precio provisional: 1000 EUR por kg. La demanda se reparte segun la capacidad instalada.",
     results: "Resultados",
     washerRevenue: "Ingresos lavado",
     dryerRevenue: "Ingresos secado",
@@ -66,7 +67,6 @@ const i18n = {
     washerMedium: "Lavadora 14 kg",
     washerLarge: "Lavadora 20 kg",
     dryer: "Secadora 18 kg",
-    vending: "Vending / extras",
     washType: "lavado",
     dryType: "secado",
     extraType: "extra",
@@ -93,13 +93,13 @@ const i18n = {
     washDemand: "Customers washing",
     dryDemand: "Customers drying",
     electricity: "Electricity EUR/kWh",
+    gas: "Gas EUR/kWh",
     water: "Water EUR/m3",
     chemical: "Chemical EUR/wash",
     rent: "Monthly rent",
     fixedCosts: "Other fixed costs",
     fitout: "Fit-out EUR/m2",
     machines: "Machines",
-    machineHelp: "Temporary price: 1000 EUR per kg. Demand is distributed by installed capacity.",
     results: "Results",
     washerRevenue: "Washer revenue",
     dryerRevenue: "Dryer revenue",
@@ -137,7 +137,6 @@ const i18n = {
     washerMedium: "Washer 14 kg",
     washerLarge: "Washer 20 kg",
     dryer: "Dryer 18 kg",
-    vending: "Vending / extras",
     washType: "wash",
     dryType: "dry",
     extraType: "extra",
@@ -153,12 +152,13 @@ const presets = {
     washDemand: 24,
     dryDemand: 17,
     electricityPrice: 0.22,
+    gasPrice: 0.08,
     waterPrice: 2.15,
     chemicalPrice: 0.32,
     rent: 750,
     fixedCosts: 550,
     fitoutCost: 420,
-    machines: [2, 1, 0, 2, 1]
+    machines: [0, 2, 0, 0, 1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0]
   },
   balanced: {
     storeSize: 45,
@@ -167,12 +167,13 @@ const presets = {
     washDemand: 42,
     dryDemand: 30,
     electricityPrice: 0.22,
+    gasPrice: 0.08,
     waterPrice: 2.15,
     chemicalPrice: 0.32,
     rent: 1250,
     fixedCosts: 850,
     fitoutCost: 450,
-    machines: [2, 2, 1, 3, 1]
+    machines: [0, 1, 1, 0, 1, 0, 0, 0, 0, 2, 1, 0, 0, 0, 0]
   },
   highTraffic: {
     storeSize: 80,
@@ -181,21 +182,36 @@ const presets = {
     washDemand: 92,
     dryDemand: 70,
     electricityPrice: 0.22,
+    gasPrice: 0.08,
     waterPrice: 2.15,
     chemicalPrice: 0.32,
     rent: 2200,
     fixedCosts: 1450,
     fitoutCost: 500,
-    machines: [3, 3, 2, 6, 2]
+    machines: [0, 1, 1, 1, 2, 1, 0, 0, 0, 2, 2, 1, 0, 0, 0]
   }
 };
 
+function netMachinePrice(basePrice, packagingPrice = 0) {
+  return Math.round((basePrice + COIN_BOX_PRICE + packagingPrice) * (1 - MACHINE_DISCOUNT));
+}
+
 const machineCatalog = [
-  { id: "washerSmall", type: "wash", capacityKg: 10, price: 5.5, minutes: 30, kwh: 1.1, waterLiters: 75, chemical: 1, areaM2: 2.2 },
-  { id: "washerMedium", type: "wash", capacityKg: 14, price: 7.5, minutes: 30, kwh: 1.5, waterLiters: 105, chemical: 1, areaM2: 2.6 },
-  { id: "washerLarge", type: "wash", capacityKg: 20, price: 10, minutes: 30, kwh: 2.1, waterLiters: 145, chemical: 1, areaM2: 3.2 },
-  { id: "dryer", type: "dry", capacityKg: 18, price: 4.5, minutes: 30, kwh: 5.2, waterLiters: 0, chemical: 0, areaM2: 2.4 },
-  { id: "vending", type: "extra", capacityKg: 0, price: 1.5, minutes: 1, kwh: 0.02, waterLiters: 0, chemical: 0, areaM2: 1.2 }
+  { id: "wrx8", label: "Lavadora WRX 8", type: "wash", capacityKg: 8, price: 4.8, minutes: 30, kwh: 0.9, waterLiters: 60, chemical: 1, areaM2: 2.0, purchasePrice: netMachinePrice(4900, 0) },
+  { id: "hs9eco", label: "Lavadora HS 9 ECO", type: "wash", capacityKg: 9, price: 5.2, minutes: 30, kwh: 1.0, waterLiters: 68, chemical: 1, areaM2: 2.1, purchasePrice: netMachinePrice(11150, 280) },
+  { id: "hs11eco", label: "Lavadora HS 11 ECO", type: "wash", capacityKg: 11, price: 6.2, minutes: 30, kwh: 1.2, waterLiters: 82, chemical: 1, areaM2: 2.3, purchasePrice: netMachinePrice(12680, 280) },
+  { id: "hs13eco", label: "Lavadora HS 13 ECO", type: "wash", capacityKg: 13, price: 7.0, minutes: 30, kwh: 1.4, waterLiters: 96, chemical: 1, areaM2: 2.5, purchasePrice: netMachinePrice(13440, 327) },
+  { id: "hs18eco", label: "Lavadora HS 18 ECO", type: "wash", capacityKg: 17, price: 8.5, minutes: 30, kwh: 1.8, waterLiters: 125, chemical: 1, areaM2: 3.0, purchasePrice: netMachinePrice(17250, 350) },
+  { id: "hs24eco", label: "Lavadora HS 24 ECO", type: "wash", capacityKg: 23, price: 10.5, minutes: 30, kwh: 2.4, waterLiters: 165, chemical: 1, areaM2: 3.5, purchasePrice: netMachinePrice(18475, 360) },
+  { id: "hs18oceano", label: "Lavadora HS 18 Océano", type: "wash", capacityKg: 18, price: 9.0, minutes: 30, kwh: 1.9, waterLiters: 130, chemical: 1, areaM2: 3.1, purchasePrice: netMachinePrice(22350, 630) },
+  { id: "hs24oceano", label: "Lavadora HS 24 Océano", type: "wash", capacityKg: 24, price: 11.0, minutes: 30, kwh: 2.5, waterLiters: 170, chemical: 1, areaM2: 3.6, purchasePrice: netMachinePrice(23580, 660) },
+  { id: "erx20", label: "Secadora ERX 20 eléctrica", type: "dry", capacityKg: 8, price: 3.8, minutes: 30, kwh: 3.2, gasKwh: 0, waterLiters: 0, chemical: 0, areaM2: 1.8, purchasePrice: netMachinePrice(4790, 0) },
+  { id: "r25plusGas", label: "Secadora R25 PLUS gas", type: "dry", capacityKg: 10, price: 4.2, minutes: 30, kwh: 0.6, gasKwh: 4.2, waterLiters: 0, chemical: 0, areaM2: 2.0, purchasePrice: netMachinePrice(7615, 340) },
+  { id: "r40plusGas", label: "Secadora R40 PLUS gas", type: "dry", capacityKg: 16, price: 5.0, minutes: 30, kwh: 0.8, gasKwh: 6.4, waterLiters: 0, chemical: 0, areaM2: 2.4, purchasePrice: netMachinePrice(8148, 420) },
+  { id: "r55plusGas", label: "Secadora R55 PLUS gas", type: "dry", capacityKg: 25, price: 6.5, minutes: 30, kwh: 1.0, gasKwh: 9.5, waterLiters: 0, chemical: 0, areaM2: 3.1, purchasePrice: netMachinePrice(9415, 485) },
+  { id: "r25plusElec", label: "Secadora R25 PLUS eléctrica", type: "dry", capacityKg: 10, price: 4.2, minutes: 30, kwh: 4.0, gasKwh: 0, waterLiters: 0, chemical: 0, areaM2: 2.0, purchasePrice: netMachinePrice(7117, 340) },
+  { id: "rz40plus", label: "Secadora RZ40 PLUS eléctrica", type: "dry", capacityKg: 16, price: 5.2, minutes: 30, kwh: 5.6, gasKwh: 0, waterLiters: 0, chemical: 0, areaM2: 2.4, purchasePrice: netMachinePrice(16335, 460) },
+  { id: "rz55plus", label: "Secadora RZ55 PLUS eléctrica", type: "dry", capacityKg: 25, price: 6.8, minutes: 30, kwh: 8.0, gasKwh: 0, waterLiters: 0, chemical: 0, areaM2: 3.1, purchasePrice: netMachinePrice(17080, 525) }
 ];
 
 let lang = "es";
@@ -225,6 +241,7 @@ const els = {
   washDemand: document.querySelector("#wash-demand"),
   dryDemand: document.querySelector("#dry-demand"),
   electricityPrice: document.querySelector("#electricity-price"),
+  gasPrice: document.querySelector("#gas-price"),
   waterPrice: document.querySelector("#water-price"),
   chemicalPrice: document.querySelector("#chemical-price"),
   rent: document.querySelector("#rent"),
@@ -306,9 +323,10 @@ function calculate(nextState) {
   const variableCostFrom = (rows, cycles) => rows.reduce((sum, row, index) => {
     const cycleCount = cycles[index] * nextState.openDays;
     const electricity = row.machine.kwh * nextState.electricityPrice;
+    const gas = (row.machine.gasKwh || 0) * nextState.gasPrice;
     const water = (row.machine.waterLiters / 1000) * nextState.waterPrice;
     const chemical = row.machine.chemical ? nextState.chemicalPrice : 0;
-    return sum + cycleCount * (electricity + water + chemical);
+    return sum + cycleCount * (electricity + gas + water + chemical);
   }, 0);
 
   const washerRevenue = revenueFrom(washRows, washCycles);
@@ -320,8 +338,7 @@ function calculate(nextState) {
   const monthlyProfit = monthlyRevenue - variableCosts - fixedCosts;
 
   const machineInvestment = machineRows.reduce((sum, row) => {
-    if (row.machine.type === "extra") return sum + row.count * 2500;
-    return sum + row.count * row.machine.capacityKg * MACHINE_PRICE_PER_KG;
+    return sum + row.count * row.machine.purchasePrice;
   }, 0);
   const fitoutInvestment = nextState.storeSize * nextState.fitoutCost;
   const initialInvestment = machineInvestment + fitoutInvestment;
@@ -397,13 +414,11 @@ function renderMachines() {
     nextCounts[index] = count + 1;
     const canAdd = calculateRequiredArea(nextCounts) <= state.storeSize;
     const addTitle = canAdd ? "Sumar" : getText("spaceLimitTooltip");
-    const investment = machine.type === "extra"
-      ? count * 2500
-      : count * machine.capacityKg * MACHINE_PRICE_PER_KG;
+    const investment = count * machine.purchasePrice;
     return `
       <article class="machine-row" data-machine-index="${index}">
         <div class="machine-name">
-          <strong>${getText(machine.id)}</strong>
+          <strong>${machine.label}</strong>
           <span>${machine.capacityKg ? `${machine.capacityKg} kg · ` : ""}${getText(`${machine.type}Type`)} · ${formatMoney(investment)}</span>
         </div>
         <div class="machine-field">

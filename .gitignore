@@ -3,6 +3,7 @@ dist/
 .vite/
 .backups/
 codex-memory/
+ssl-simulator/_private/
 static/js/config/runtime-config.js
 firebase-debug.log
 .firebaserc
