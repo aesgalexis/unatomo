@@ -7,11 +7,11 @@ const i18n = {
     topbarTitle: "Simulador SSL",
     topbarStatus: "Lavandería autoservicio",
     title: "Lavandería autoservicio",
-    intro: "Ajusta local, máquinas, horarios, precios y costes para estimar inversión, facturación, beneficio mensual y retorno.",
+    intro: "Ajusta local, máquinas, horarios, precios y costes para estimar inversión, facturación, beneficio mensual estimado y retorno.",
     scenarioLabel: "Escenario",
     investment: "Inversión inicial",
     monthlyRevenue: "Facturación mensual",
-    monthlyProfit: "Beneficio mensual",
+    monthlyProfit: "Beneficio mensual estimado",
     payback: "Retorno estimado",
     projectControls: "Proyecto",
     costSettings: "Gastos",
@@ -41,7 +41,8 @@ const i18n = {
     dryerRevenue: "Ingresos secado",
     variableCosts: "Costes variables",
     monthlyFixedCosts: "Costes fijos",
-    netProfit: "Resultado mensual",
+    netProfit: "Resultado mensual estimado",
+    taxDisclaimer: "Estimación antes de impuestos. No incluye IVA, Impuesto de Sociedades/IRPF, tasas locales ni otros costes fiscales aplicables.",
     revenue: "Ingresos",
     costs: "Costes",
     washOccupancy: "Ocupación lavado",
@@ -83,11 +84,11 @@ const i18n = {
     topbarTitle: "SSL simulator",
     topbarStatus: "Self-service laundry",
     title: "Self-service laundry",
-    intro: "Adjust store size, machines, opening hours, prices and costs to estimate investment, revenue, monthly profit and payback.",
+    intro: "Adjust store size, machines, opening hours, prices and costs to estimate investment, revenue, estimated monthly profit and payback.",
     scenarioLabel: "Scenario",
     investment: "Initial investment",
     monthlyRevenue: "Monthly revenue",
-    monthlyProfit: "Monthly profit",
+    monthlyProfit: "Estimated monthly profit",
     payback: "Estimated payback",
     projectControls: "Project",
     costSettings: "Costs",
@@ -117,7 +118,8 @@ const i18n = {
     dryerRevenue: "Dryer revenue",
     variableCosts: "Variable costs",
     monthlyFixedCosts: "Fixed costs",
-    netProfit: "Monthly result",
+    netProfit: "Estimated monthly result",
+    taxDisclaimer: "Pre-tax estimate. VAT, corporate/personal income tax, local fees and other applicable taxes are not included.",
     revenue: "Revenue",
     costs: "Costs",
     washOccupancy: "Wash occupancy",
@@ -161,46 +163,46 @@ const presets = {
     storeSize: 25,
     openHours: 14,
     openDays: 30,
-    washDemand: 24,
-    dryDemand: 17,
-    electricityPrice: 0.22,
-    gasPrice: 0.08,
-    waterPrice: 2.15,
-    chemicalPrice: 0.32,
-    rent: 850,
-    fixedCosts: 400,
-    fitoutCost: 300,
-    machines: [3, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0]
-  },
-  balanced: {
-    storeSize: 25,
-    openHours: 15,
-    openDays: 30,
     washDemand: 16,
     dryDemand: 16,
     electricityPrice: 0.22,
     gasPrice: 0.08,
     waterPrice: 2.15,
     chemicalPrice: 0.32,
-    rent: 850,
-    fixedCosts: 400,
+    rent: 650,
+    fixedCosts: 300,
     fitoutCost: 300,
     machines: [3, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0]
   },
-  highTraffic: {
-    storeSize: 80,
-    openHours: 17,
-    openDays: 31,
-    washDemand: 92,
-    dryDemand: 70,
+  balanced: {
+    storeSize: 35,
+    openHours: 15,
+    openDays: 30,
+    washDemand: 24,
+    dryDemand: 24,
     electricityPrice: 0.22,
     gasPrice: 0.08,
     waterPrice: 2.15,
     chemicalPrice: 0.32,
-    rent: 2200,
-    fixedCosts: 1450,
+    rent: 850,
+    fixedCosts: 400,
     fitoutCost: 300,
-    machines: [0, 1, 1, 1, 2, 1, 0, 2, 2, 1, 0, 0, 0]
+    machines: [3, 0, 1, 0, 0, 0, 2, 1, 0, 0, 0, 0, 0]
+  },
+  highTraffic: {
+    storeSize: 50,
+    openHours: 16,
+    openDays: 30,
+    washDemand: 34,
+    dryDemand: 34,
+    electricityPrice: 0.22,
+    gasPrice: 0.08,
+    waterPrice: 2.15,
+    chemicalPrice: 0.32,
+    rent: 1250,
+    fixedCosts: 550,
+    fitoutCost: 300,
+    machines: [3, 0, 1, 0, 1, 0, 3, 1, 0, 0, 0, 0, 0]
   }
 };
 
@@ -225,8 +227,8 @@ const machineCatalog = [
 ];
 
 let lang = "es";
-let state = structuredClone(presets.balanced);
-let activePreset = "balanced";
+let state = structuredClone(presets.small);
+let activePreset = "small";
 let machineOverrides = machineCatalog.map((machine) => ({
   price: machine.price,
   minutes: machine.minutes
@@ -547,8 +549,8 @@ document.querySelectorAll(".preset-button").forEach((button) => {
 });
 
 document.querySelector("#reset-button").addEventListener("click", () => {
-  activePreset = "balanced";
-  state = structuredClone(presets.balanced);
+  activePreset = "small";
+  state = structuredClone(presets.small);
   machineOverrides = machineCatalog.map((machine) => ({
     price: machine.price,
     minutes: machine.minutes

@@ -99,15 +99,15 @@
         </div>
 
         <div class="preset-row" aria-label="Escenarios predefinidos">
-          <button type="button" class="preset-button" data-preset="small" data-i18n="presetSmall">Pequeño</button>
-          <button type="button" class="preset-button is-active" data-preset="balanced" data-i18n="presetBalanced">Medio</button>
+          <button type="button" class="preset-button is-active" data-preset="small" data-i18n="presetSmall">Pequeño</button>
+          <button type="button" class="preset-button" data-preset="balanced" data-i18n="presetBalanced">Medio</button>
           <button type="button" class="preset-button" data-preset="highTraffic" data-i18n="presetHigh">Alto tráfico</button>
         </div>
 
         <div class="control-group">
           <label for="store-size">
             <span data-i18n="storeSize">Tamaño del local</span>
-            <output id="store-size-output">45 m2</output>
+            <output id="store-size-output">25 m2</output>
           </label>
           <input id="store-size" type="range" min="20" max="180" step="5">
         </div>
@@ -272,6 +272,9 @@
             <strong id="space-use">0 m2</strong>
           </div>
         </div>
+        <p class="tax-disclaimer" data-i18n="taxDisclaimer">
+          Estimación antes de impuestos. No incluye IVA, Impuesto de Sociedades/IRPF, tasas locales ni otros costes fiscales aplicables.
+        </p>
       </section>
     </section>
   </main>

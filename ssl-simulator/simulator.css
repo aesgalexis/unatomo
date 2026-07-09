@@ -678,6 +678,15 @@ input[type="range"] {
   border-top: 1px solid var(--line);
 }
 
+.tax-disclaimer {
+  margin: 14px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
 .bar-row {
   display: grid;
   grid-template-columns: 70px minmax(0, 1fr) 88px;
