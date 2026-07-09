@@ -547,11 +547,6 @@ input[type="range"] {
   font-size: 0.84rem;
 }
 
-.machine-name .machine-unit-price {
-  color: var(--positive);
-  font-weight: 800;
-}
-
 .stepper {
   display: grid;
   grid-template-columns: 34px 1fr 34px;
@@ -690,6 +685,10 @@ input[type="range"] {
 .footer-nav-links a {
   color: var(--muted);
   text-decoration: none;
+}
+
+.powered-by {
+  color: var(--muted);
 }
 
 .footer-nav-links a:hover,

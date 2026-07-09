@@ -17,8 +17,6 @@ const i18n = {
     costSettings: "Gastos",
     langOptionEn: "English",
     langOptionEs: "Español",
-    aboutLink: "Nosotros",
-    contactLink: "Contacto",
     privacyLink: "Política de privacidad y cookies",
     legalFooter: "UNATOMO CORE SL - Todos los derechos reservados.",
     reset: "Reiniciar",
@@ -95,8 +93,6 @@ const i18n = {
     costSettings: "Costs",
     langOptionEn: "English",
     langOptionEs: "Español",
-    aboutLink: "About us",
-    contactLink: "Contact",
     privacyLink: "Privacy and cookies policy",
     legalFooter: "UNATOMO CORE SL - All rights reserved.",
     reset: "Reset",
@@ -171,10 +167,10 @@ const presets = {
     gasPrice: 0.08,
     waterPrice: 2.15,
     chemicalPrice: 0.32,
-    rent: 750,
-    fixedCosts: 550,
+    rent: 850,
+    fixedCosts: 400,
     fitoutCost: 420,
-    machines: [0, 2, 0, 0, 1, 0, 0, 2, 0, 0, 0, 0, 0]
+    machines: [3, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0]
   },
   balanced: {
     storeSize: 45,
@@ -186,10 +182,10 @@ const presets = {
     gasPrice: 0.08,
     waterPrice: 2.15,
     chemicalPrice: 0.32,
-    rent: 1250,
-    fixedCosts: 850,
+    rent: 850,
+    fixedCosts: 400,
     fitoutCost: 450,
-    machines: [0, 1, 1, 0, 1, 0, 0, 2, 1, 0, 0, 0, 0]
+    machines: [3, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0]
   },
   highTraffic: {
     storeSize: 80,
