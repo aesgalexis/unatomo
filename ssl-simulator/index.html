@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Simulador de lavanderia autoservicio | unatomo</title>
+  <meta name="description" content="Simula la inversion, capacidad, costes y rentabilidad mensual de una lavanderia autoservicio.">
+  <meta name="robots" content="index, follow">
+  <link rel="icon" href="/static/img/favicon/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/ssl-simulator/simulator.css">
+</head>
+<body>
+  <header class="app-header">
+    <a class="brand" href="/" aria-label="unatomo">
+      <img src="/static/img/logo-unatomo-v1.5.svg" alt="unatomo">
+    </a>
+    <div class="header-actions" aria-label="Idioma">
+      <button class="lang-button is-active" type="button" data-lang="es">ES</button>
+      <button class="lang-button" type="button" data-lang="en">EN</button>
+    </div>
+  </header>
+
+  <main class="simulator-shell">
+    <section class="intro-band">
+      <div>
+        <p class="eyebrow" data-i18n="eyebrow">Simulador en tiempo real</p>
+        <h1 data-i18n="title">Lavandería autoservicio</h1>
+        <p class="intro-copy" data-i18n="intro">
+          Ajusta local, máquinas, horarios, precios y costes para estimar inversión, facturación, beneficio mensual y retorno.
+        </p>
+      </div>
+      <div class="health-panel" aria-live="polite">
+        <span data-i18n="scenarioLabel">Escenario</span>
+        <strong id="scenario-health">Equilibrado</strong>
+        <small id="scenario-note">Capacidad suficiente para la demanda actual.</small>
+      </div>
+    </section>
+
+    <section class="kpi-grid" aria-label="Resultados principales">
+      <article class="kpi">
+        <span data-i18n="investment">Inversión inicial</span>
+        <strong id="kpi-investment">0 EUR</strong>
+      </article>
+      <article class="kpi">
+        <span data-i18n="monthlyRevenue">Facturación mensual</span>
+        <strong id="kpi-revenue">0 EUR</strong>
+      </article>
+      <article class="kpi">
+        <span data-i18n="monthlyProfit">Beneficio mensual</span>
+        <strong id="kpi-profit">0 EUR</strong>
+      </article>
+      <article class="kpi">
+        <span data-i18n="payback">Retorno estimado</span>
+        <strong id="kpi-payback">-</strong>
+      </article>
+    </section>
+
+    <section class="workspace">
+      <aside class="control-panel" aria-label="Controles de simulacion">
+        <div class="section-head">
+          <h2 data-i18n="projectControls">Proyecto</h2>
+          <button type="button" class="ghost-button" id="reset-button" data-i18n="reset">Reiniciar</button>
+        </div>
+
+        <div class="preset-row" aria-label="Escenarios predefinidos">
+          <button type="button" class="preset-button" data-preset="small" data-i18n="presetSmall">Pequeño</button>
+          <button type="button" class="preset-button is-active" data-preset="balanced" data-i18n="presetBalanced">Medio</button>
+          <button type="button" class="preset-button" data-preset="highTraffic" data-i18n="presetHigh">Alto tráfico</button>
+        </div>
+
+        <div class="control-group">
+          <label for="store-size">
+            <span data-i18n="storeSize">Tamaño del local</span>
+            <output id="store-size-output">45 m2</output>
+          </label>
+          <input id="store-size" type="range" min="20" max="180" step="5">
+        </div>
+
+        <div class="control-group">
+          <label for="open-hours">
+            <span data-i18n="openHours">Horas abierto al día</span>
+            <output id="open-hours-output">15 h</output>
+          </label>
+          <input id="open-hours" type="range" min="8" max="24" step="1">
+        </div>
+
+        <div class="control-group">
+          <label for="open-days">
+            <span data-i18n="openDays">Días abierto al mes</span>
+            <output id="open-days-output">30</output>
+          </label>
+          <input id="open-days" type="range" min="20" max="31" step="1">
+        </div>
+
+        <div class="control-group">
+          <label for="wash-demand">
+            <span data-i18n="washDemand">Clientes que lavan</span>
+            <output id="wash-demand-output">42</output>
+          </label>
+          <input id="wash-demand" type="range" min="0" max="220" step="1">
+        </div>
+
+        <div class="control-group">
+          <label for="dry-demand">
+            <span data-i18n="dryDemand">Clientes que secan</span>
+            <output id="dry-demand-output">30</output>
+          </label>
+          <input id="dry-demand" type="range" min="0" max="220" step="1">
+        </div>
+
+        <section class="cost-panel" aria-label="Costes y gastos">
+          <div class="section-head">
+            <h2 data-i18n="costSettings">Gastos</h2>
+          </div>
+          <div class="field-grid cost-grid">
+            <label>
+              <span data-i18n="electricity">Electricidad EUR/kWh</span>
+              <input id="electricity-price" type="number" min="0" step="0.01">
+            </label>
+            <label>
+              <span data-i18n="water">Agua EUR/m3</span>
+              <input id="water-price" type="number" min="0" step="0.05">
+            </label>
+            <label>
+              <span data-i18n="chemical">Químico EUR/lavado</span>
+              <input id="chemical-price" type="number" min="0" step="0.05">
+            </label>
+            <label>
+              <span data-i18n="rent">Alquiler mensual</span>
+              <input id="rent" type="number" min="0" step="50">
+            </label>
+            <label>
+              <span data-i18n="fixedCosts">Otros gastos fijos</span>
+              <input id="fixed-costs" type="number" min="0" step="50">
+            </label>
+            <label>
+              <span data-i18n="fitout">Adecuación EUR/m2</span>
+              <input id="fitout-cost" type="number" min="0" step="25">
+            </label>
+          </div>
+        </section>
+
+      </aside>
+
+      <section class="machine-panel" aria-label="Configuracion de maquinas">
+        <div class="section-head">
+          <div>
+            <h2 data-i18n="machines">Máquinas</h2>
+            <p data-i18n="machineHelp">Precio provisional: 1000 EUR por kg. La demanda se reparte según la capacidad instalada.</p>
+          </div>
+          <span class="capacity-pill"><strong id="total-capacity">0</strong> kg</span>
+        </div>
+        <div id="machine-list" class="machine-list"></div>
+      </section>
+
+      <section class="results-panel" aria-label="Detalle financiero">
+        <div class="section-head">
+          <h2 data-i18n="results">Resultados</h2>
+          <span id="margin-pill" class="margin-pill">0%</span>
+        </div>
+
+        <div class="result-stack">
+          <div class="result-row">
+            <span data-i18n="washerRevenue">Ingresos lavado</span>
+            <strong id="washer-revenue">0 EUR</strong>
+          </div>
+          <div class="result-row">
+            <span data-i18n="dryerRevenue">Ingresos secado</span>
+            <strong id="dryer-revenue">0 EUR</strong>
+          </div>
+          <div class="result-row">
+            <span data-i18n="variableCosts">Costes variables</span>
+            <strong id="variable-costs">0 EUR</strong>
+          </div>
+          <div class="result-row">
+            <span data-i18n="monthlyFixedCosts">Costes fijos</span>
+            <strong id="monthly-fixed-costs">0 EUR</strong>
+          </div>
+          <div class="result-row is-total">
+            <span data-i18n="netProfit">Resultado mensual</span>
+            <strong id="net-profit">0 EUR</strong>
+          </div>
+        </div>
+
+        <div class="chart-block">
+          <div class="bar-row">
+            <span data-i18n="revenue">Ingresos</span>
+            <div class="bar-track"><i id="revenue-bar"></i></div>
+            <strong id="revenue-bar-value">0 EUR</strong>
+          </div>
+          <div class="bar-row">
+            <span data-i18n="costs">Costes</span>
+            <div class="bar-track"><i id="cost-bar"></i></div>
+            <strong id="cost-bar-value">0 EUR</strong>
+          </div>
+        </div>
+
+        <div class="capacity-block">
+          <div>
+            <span data-i18n="washOccupancy">Ocupación lavado</span>
+            <strong id="wash-occupancy">0%</strong>
+          </div>
+          <div>
+            <span data-i18n="dryOccupancy">Ocupación secado</span>
+            <strong id="dry-occupancy">0%</strong>
+          </div>
+          <div>
+            <span data-i18n="dailyWashes">Coladas/día</span>
+            <strong id="daily-washes">0</strong>
+          </div>
+          <div>
+            <span data-i18n="dailyDries">Secados/día</span>
+            <strong id="daily-dries">0</strong>
+          </div>
+          <div>
+            <span data-i18n="washCapacity">Capacidad lavado/día</span>
+            <strong id="wash-capacity">0</strong>
+          </div>
+          <div>
+            <span data-i18n="dryCapacity">Capacidad secado/día</span>
+            <strong id="dry-capacity">0</strong>
+          </div>
+          <div>
+            <span data-i18n="breakEven">Punto de equilibrio</span>
+            <strong id="break-even">0 clientes/día</strong>
+          </div>
+          <div>
+            <span data-i18n="averageTicket">Ticket medio estimado</span>
+            <strong id="average-ticket">0 EUR</strong>
+          </div>
+          <div>
+            <span data-i18n="spaceUse">Espacio estimado</span>
+            <strong id="space-use">0 m2</strong>
+          </div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script type="module" src="/ssl-simulator/simulator.js"></script>
+</body>
+</html>
