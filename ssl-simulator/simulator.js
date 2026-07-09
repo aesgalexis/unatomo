@@ -411,9 +411,7 @@ function renderMachines() {
           <div class="stepper">
             <button type="button" data-action="dec" aria-label="Restar">-</button>
             <output>${count}</output>
-            <span class="stepper-tooltip" title="${canAdd ? "" : addTitle}">
-              <button type="button" data-action="inc" aria-label="${addTitle}" ${canAdd ? "" : "disabled"}>+</button>
-            </span>
+            <button type="button" data-action="inc" aria-label="${addTitle}" title="${canAdd ? "" : addTitle}" class="${canAdd ? "" : "is-disabled"}" aria-disabled="${canAdd ? "false" : "true"}">+</button>
           </div>
         </div>
         <label class="machine-field">

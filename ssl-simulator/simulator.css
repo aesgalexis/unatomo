@@ -183,7 +183,7 @@ h2 {
 
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 12px;
   margin: 14px 0;
 }
@@ -200,14 +200,24 @@ h2 {
 }
 
 .kpi {
+  min-width: 0;
   padding: 16px;
 }
 
 .kpi strong {
   display: block;
+  min-width: 0;
   margin-top: 8px;
   font-size: clamp(1.12rem, 1.8vw, 1.55rem);
   line-height: 1.05;
+  overflow-wrap: anywhere;
+}
+
+#kpi-investment,
+#kpi-revenue,
+#kpi-profit,
+#kpi-payback {
+  max-width: 100%;
 }
 
 .workspace {
@@ -303,6 +313,12 @@ input[type="range"] {
   transition: border-color 140ms ease, box-shadow 140ms ease, background 140ms ease;
 }
 
+.machine-input {
+  min-height: 32px;
+  padding: 5px 8px;
+  font-size: 0.86rem;
+}
+
 .field-grid input:focus,
 .machine-input:focus {
   border-color: var(--accent);
@@ -356,17 +372,17 @@ input[type="range"] {
 }
 
 .stepper button {
+  width: 100%;
+  min-width: 0;
+  min-height: 34px;
   border: 0;
   background: var(--neutral-soft);
   color: var(--neutral-strong);
   font-weight: 900;
 }
 
-.stepper-tooltip {
-  display: grid;
-}
-
-.stepper button:disabled {
+.stepper button:disabled,
+.stepper button.is-disabled {
   cursor: not-allowed;
   color: #a7b0bf;
   background: #f6f8fb;
