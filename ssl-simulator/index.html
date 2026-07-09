@@ -90,7 +90,12 @@
       <aside class="control-panel" aria-label="Controles de simulacion">
         <div class="section-head">
           <h2 data-i18n="projectControls">Proyecto</h2>
-          <button type="button" class="ghost-button" id="reset-button" data-i18n="reset">Reiniciar</button>
+          <button type="button" class="ghost-button icon-button" id="reset-button" data-i18n-aria="reset" aria-label="Reiniciar">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M20 12a8 8 0 1 1-2.34-5.66"></path>
+              <path d="M20 4v6h-6"></path>
+            </svg>
+          </button>
         </div>
 
         <div class="preset-row" aria-label="Escenarios predefinidos">
@@ -275,8 +280,8 @@
     <div id="legal-footer" class="legal-footer">© 2026 UNATOMO CORE SL - Todos los derechos reservados.</div>
     <nav class="footer-nav-links" aria-label="Footer">
       <a href="/landing/ld_privacidad.html" data-i18n="privacyLink">Política de privacidad y cookies</a>
-      <span class="powered-by">Powered by <a href="https://unatomo.com/">unatomo</a></span>
     </nav>
+    <div class="powered-by">Powered by <a href="https://unatomo.com/">unatomo</a></div>
   </footer>
 
   <script type="module" src="/ssl-simulator/simulator.js"></script>

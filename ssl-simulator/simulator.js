@@ -169,7 +169,7 @@ const presets = {
     chemicalPrice: 0.32,
     rent: 850,
     fixedCosts: 400,
-    fitoutCost: 420,
+    fitoutCost: 300,
     machines: [3, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0]
   },
   balanced: {
@@ -184,7 +184,7 @@ const presets = {
     chemicalPrice: 0.32,
     rent: 850,
     fixedCosts: 400,
-    fitoutCost: 450,
+    fitoutCost: 300,
     machines: [3, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0]
   },
   highTraffic: {
@@ -199,7 +199,7 @@ const presets = {
     chemicalPrice: 0.32,
     rent: 2200,
     fixedCosts: 1450,
-    fitoutCost: 500,
+    fitoutCost: 300,
     machines: [0, 1, 1, 1, 2, 1, 0, 2, 2, 1, 0, 0, 0]
   }
 };
@@ -399,7 +399,7 @@ function syncControls() {
   const demandLimits = calculateDemandLimits(state);
   const maxWashDemand = Math.floor(demandLimits.wash);
   state.washDemand = Math.min(state.washDemand, maxWashDemand);
-  const maxDryDemand = Math.min(Math.floor(demandLimits.dry), state.washDemand);
+  const maxDryDemand = Math.floor(demandLimits.dry);
   state.dryDemand = Math.min(state.dryDemand, maxDryDemand);
 
   Object.entries(els).forEach(([key, element]) => {
@@ -507,6 +507,9 @@ function renderText() {
   document.querySelectorAll("[data-i18n]").forEach((node) => {
     node.textContent = getText(node.dataset.i18n);
   });
+  document.querySelectorAll("[data-i18n-aria]").forEach((node) => {
+    node.setAttribute("aria-label", getText(node.dataset.i18nAria));
+  });
   document.querySelector(".ssl-lang-label").textContent = lang.toUpperCase();
   document.querySelectorAll(".ssl-lang-option").forEach((button) => {
     button.classList.toggle("is-active", button.dataset.lang === lang);
@@ -526,12 +529,6 @@ function render() {
 
 function updateState(key, value) {
   state[key] = Number(value);
-  if (key === "washDemand" && state.dryDemand > state.washDemand) {
-    state.dryDemand = state.washDemand;
-  }
-  if (key === "dryDemand") {
-    state.dryDemand = Math.min(state.dryDemand, state.washDemand);
-  }
   activePreset = "";
   render();
 }
