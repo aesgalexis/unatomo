@@ -4,6 +4,8 @@ const MACHINE_DISCOUNT = 0.10;
 const i18n = {
   es: {
     eyebrow: "Simulador en tiempo real",
+    topbarTitle: "Simulador SSL",
+    topbarStatus: "Lavandería autoservicio",
     title: "Lavandería autoservicio",
     intro: "Ajusta local, máquinas, horarios, precios y costes para estimar inversión, facturación, beneficio mensual y retorno.",
     scenarioLabel: "Escenario",
@@ -13,6 +15,12 @@ const i18n = {
     payback: "Retorno estimado",
     projectControls: "Proyecto",
     costSettings: "Gastos",
+    langOptionEn: "English",
+    langOptionEs: "Español",
+    aboutLink: "Nosotros",
+    contactLink: "Contacto",
+    privacyLink: "Política de privacidad y cookies",
+    legalFooter: "UNATOMO CORE SL - Todos los derechos reservados.",
     reset: "Reiniciar",
     presetSmall: "Pequeño",
     presetBalanced: "Medio",
@@ -74,6 +82,8 @@ const i18n = {
   },
   en: {
     eyebrow: "Real-time simulator",
+    topbarTitle: "SSL simulator",
+    topbarStatus: "Self-service laundry",
     title: "Self-service laundry",
     intro: "Adjust store size, machines, opening hours, prices and costs to estimate investment, revenue, monthly profit and payback.",
     scenarioLabel: "Scenario",
@@ -83,6 +93,12 @@ const i18n = {
     payback: "Estimated payback",
     projectControls: "Project",
     costSettings: "Costs",
+    langOptionEn: "English",
+    langOptionEs: "Español",
+    aboutLink: "About us",
+    contactLink: "Contact",
+    privacyLink: "Privacy and cookies policy",
+    legalFooter: "UNATOMO CORE SL - All rights reserved.",
     reset: "Reset",
     presetSmall: "Small",
     presetBalanced: "Medium",
@@ -158,7 +174,7 @@ const presets = {
     rent: 750,
     fixedCosts: 550,
     fitoutCost: 420,
-    machines: [0, 2, 0, 0, 1, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0]
+    machines: [0, 2, 0, 0, 1, 0, 0, 2, 0, 0, 0, 0, 0]
   },
   balanced: {
     storeSize: 45,
@@ -173,7 +189,7 @@ const presets = {
     rent: 1250,
     fixedCosts: 850,
     fitoutCost: 450,
-    machines: [0, 1, 1, 0, 1, 0, 0, 0, 0, 2, 1, 0, 0, 0, 0]
+    machines: [0, 1, 1, 0, 1, 0, 0, 2, 1, 0, 0, 0, 0]
   },
   highTraffic: {
     storeSize: 80,
@@ -188,7 +204,7 @@ const presets = {
     rent: 2200,
     fixedCosts: 1450,
     fitoutCost: 500,
-    machines: [0, 1, 1, 1, 2, 1, 0, 0, 0, 2, 2, 1, 0, 0, 0]
+    machines: [0, 1, 1, 1, 2, 1, 0, 2, 2, 1, 0, 0, 0]
   }
 };
 
@@ -203,8 +219,6 @@ const machineCatalog = [
   { id: "hs13eco", label: "Lavadora HS 13 ECO", type: "wash", capacityKg: 13, price: 7.0, minutes: 30, kwh: 1.4, waterLiters: 96, chemical: 1, areaM2: 2.5, purchasePrice: netMachinePrice(13440, 327) },
   { id: "hs18eco", label: "Lavadora HS 18 ECO", type: "wash", capacityKg: 17, price: 8.5, minutes: 30, kwh: 1.8, waterLiters: 125, chemical: 1, areaM2: 3.0, purchasePrice: netMachinePrice(17250, 350) },
   { id: "hs24eco", label: "Lavadora HS 24 ECO", type: "wash", capacityKg: 23, price: 10.5, minutes: 30, kwh: 2.4, waterLiters: 165, chemical: 1, areaM2: 3.5, purchasePrice: netMachinePrice(18475, 360) },
-  { id: "hs18oceano", label: "Lavadora HS 18 Océano", type: "wash", capacityKg: 18, price: 9.0, minutes: 30, kwh: 1.9, waterLiters: 130, chemical: 1, areaM2: 3.1, purchasePrice: netMachinePrice(22350, 630) },
-  { id: "hs24oceano", label: "Lavadora HS 24 Océano", type: "wash", capacityKg: 24, price: 11.0, minutes: 30, kwh: 2.5, waterLiters: 170, chemical: 1, areaM2: 3.6, purchasePrice: netMachinePrice(23580, 660) },
   { id: "erx20", label: "Secadora ERX 20 eléctrica", type: "dry", capacityKg: 8, price: 3.8, minutes: 30, kwh: 3.2, gasKwh: 0, waterLiters: 0, chemical: 0, areaM2: 1.8, purchasePrice: netMachinePrice(4790, 0) },
   { id: "r25plusGas", label: "Secadora R25 PLUS gas", type: "dry", capacityKg: 10, price: 4.2, minutes: 30, kwh: 0.6, gasKwh: 4.2, waterLiters: 0, chemical: 0, areaM2: 2.0, purchasePrice: netMachinePrice(7615, 340) },
   { id: "r40plusGas", label: "Secadora R40 PLUS gas", type: "dry", capacityKg: 16, price: 5.0, minutes: 30, kwh: 0.8, gasKwh: 6.4, waterLiters: 0, chemical: 0, areaM2: 2.4, purchasePrice: netMachinePrice(8148, 420) },
@@ -414,12 +428,13 @@ function renderMachines() {
     nextCounts[index] = count + 1;
     const canAdd = calculateRequiredArea(nextCounts) <= state.storeSize;
     const addTitle = canAdd ? "Sumar" : getText("spaceLimitTooltip");
-    const investment = count * machine.purchasePrice;
+    const unitPrice = machine.purchasePrice;
     return `
       <article class="machine-row" data-machine-index="${index}">
         <div class="machine-name">
           <strong>${machine.label}</strong>
-          <span>${machine.capacityKg ? `${machine.capacityKg} kg · ` : ""}${getText(`${machine.type}Type`)} · ${formatMoney(investment)}</span>
+          <span>${machine.capacityKg} kg · ${getText(`${machine.type}Type`)}</span>
+          <span class="machine-unit-price">${formatMoney(unitPrice)}/ud</span>
         </div>
         <div class="machine-field">
           <span>${getText("units")}</span>
@@ -490,12 +505,17 @@ function renderResults() {
 
 function renderText() {
   document.documentElement.lang = lang;
+  document.title = lang === "en"
+    ? "Self-service laundry simulator | unatomo"
+    : "Simulador de lavanderia autoservicio | unatomo";
   document.querySelectorAll("[data-i18n]").forEach((node) => {
     node.textContent = getText(node.dataset.i18n);
   });
-  document.querySelectorAll(".lang-button").forEach((button) => {
+  document.querySelector(".ssl-lang-label").textContent = lang.toUpperCase();
+  document.querySelectorAll(".ssl-lang-option").forEach((button) => {
     button.classList.toggle("is-active", button.dataset.lang === lang);
   });
+  document.querySelector("#legal-footer").textContent = `\u00a9 ${new Date().getFullYear()} ${getText("legalFooter")}`;
 }
 
 function render() {
@@ -542,11 +562,69 @@ document.querySelector("#reset-button").addEventListener("click", () => {
   render();
 });
 
-document.querySelectorAll(".lang-button").forEach((button) => {
-  button.addEventListener("click", () => {
-    lang = button.dataset.lang;
-    render();
-  });
+const langToggle = document.querySelector("#ssl-lang-toggle");
+const langMenu = document.querySelector("#ssl-lang-menu");
+const brandToggle = document.querySelector("#brand-toggle");
+const brandMenu = document.querySelector("#brand-menu");
+
+function closeLangMenu() {
+  langMenu.hidden = true;
+  langToggle.setAttribute("aria-expanded", "false");
+}
+
+function toggleLangMenu() {
+  closeBrandMenu();
+  langMenu.hidden = !langMenu.hidden;
+  langToggle.setAttribute("aria-expanded", langMenu.hidden ? "false" : "true");
+}
+
+function closeBrandMenu() {
+  brandMenu.hidden = true;
+  brandToggle.setAttribute("aria-expanded", "false");
+}
+
+function toggleBrandMenu() {
+  closeLangMenu();
+  brandMenu.hidden = !brandMenu.hidden;
+  brandToggle.setAttribute("aria-expanded", brandMenu.hidden ? "false" : "true");
+}
+
+langToggle.addEventListener("click", (event) => {
+  event.stopPropagation();
+  toggleLangMenu();
+});
+
+langMenu.addEventListener("click", (event) => {
+  const option = event.target.closest("[data-lang]");
+  if (!option) return;
+  lang = option.dataset.lang;
+  closeLangMenu();
+  render();
+});
+
+brandToggle.addEventListener("click", (event) => {
+  event.stopPropagation();
+  toggleBrandMenu();
+});
+
+brandMenu.addEventListener("click", () => {
+  closeBrandMenu();
+});
+
+document.addEventListener("click", (event) => {
+  if (!langMenu.hidden && !langMenu.contains(event.target) && !langToggle.contains(event.target)) {
+    closeLangMenu();
+  }
+  if (!brandMenu.hidden && !brandMenu.contains(event.target) && !brandToggle.contains(event.target)) {
+    closeBrandMenu();
+  }
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    closeLangMenu();
+    closeBrandMenu();
+  }
 });
 
 els.machineList.addEventListener("input", (event) => {
