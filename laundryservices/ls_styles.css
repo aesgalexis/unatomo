@@ -391,6 +391,15 @@ a:hover {
   pointer-events: auto;
 }
 
+.ls-upperfooter-counter {
+  grid-column: 1 / -1;
+  margin: 0.25rem 0 0;
+  text-align: center;
+  font-size: 0.66rem;
+  line-height: 1;
+  color: color-mix(in srgb, var(--fg) 45%, transparent);
+}
+
 .service-card {
   position: relative;
   --card-title-color: var(--fg);

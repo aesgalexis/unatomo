@@ -73,6 +73,7 @@
           </div>
         </div>
       </div>
+      <p class="ls-upperfooter-counter js-upperfooter-counter" aria-live="polite" aria-label="Upperfooter logo moves">0</p>
     </section>
   `;
 
@@ -84,9 +85,35 @@
 
   const logo = mount.querySelector(".js-upperfooter-logo");
   const brandCol = mount.querySelector(".ls-upperfooter-brand");
+  const counter = mount.querySelector(".js-upperfooter-counter");
+  const counterKey = "lsUpperfooterLogoMoves";
+  const readCounter = () => {
+    try {
+      return Number.parseInt(window.localStorage.getItem(counterKey) || "0", 10) || 0;
+    } catch {
+      return 0;
+    }
+  };
+  const writeCounter = (value) => {
+    try {
+      window.localStorage.setItem(counterKey, String(value));
+    } catch {
+      // Keep the visible counter working when storage is unavailable.
+    }
+  };
+  let moveCount = readCounter();
+  if (counter) {
+    counter.textContent = String(moveCount);
+  }
+
   if (logo && brandCol) {
     logo.addEventListener("click", () => {
       brandCol.classList.toggle("is-logo-right");
+      moveCount += 1;
+      writeCounter(moveCount);
+      if (counter) {
+        counter.textContent = String(moveCount);
+      }
     });
   }
 })();

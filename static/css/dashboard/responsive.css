@@ -2,6 +2,7 @@
   html,
   body {
     overflow-x: hidden;
+    overflow-x: clip;
   }
 
   input,
@@ -14,6 +15,7 @@
   #machineList {
     max-width: 100%;
     overflow-x: hidden;
+    overflow-x: clip;
   }
 
   .global-registry-view {
@@ -225,6 +227,12 @@
   #machineList[data-mobile-detail="true"] .machine-card.is-mobile-focus {
     margin-bottom: 0;
     width: 100%;
+  }
+
+  #machineList[data-mobile-detail="true"]
+    .machine-card.is-mobile-focus[data-expanded="true"] {
+    max-height: none !important;
+    overflow: visible;
   }
 
   #machineList[data-mobile-detail="true"] .machine-card.is-mobile-focus.is-mobile-detail-enter {
