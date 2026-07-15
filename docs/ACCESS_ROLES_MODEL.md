@@ -187,6 +187,10 @@ Current first implementation:
   realistic density.
 - Matrix, PIN, create-user, and future-role changes are visual only in this
   phase. They should not be treated as persisted permission changes.
+- The same card has a second role-permissions tab with prototype capability
+  checkboxes grouped into reading, operational changes, and administration.
+  The `viewer` / `Solo lectura` profile is protected: its read capabilities
+  are enabled and every data-changing capability is disabled and locked.
 - This remains a transitional UI over `machines.users[]`; it is not the final
   `operator_users` / `operator_assignments` model.
 

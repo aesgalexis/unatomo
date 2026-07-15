@@ -41,7 +41,8 @@
 }
 
 .machine-card:has(.task-menu-toggle[aria-expanded="true"]),
-.machine-card:has(.mc-doc-menu-dots[aria-expanded="true"]) {
+.machine-card:has(.mc-doc-menu-dots[aria-expanded="true"]),
+.machine-card:has(.history-download-menu-toggle[aria-expanded="true"]) {
   z-index: 35;
 }
 
@@ -594,6 +595,10 @@
 }
 
 .mc-log-footer .mc-log-download {
+  margin-left: auto;
+}
+
+.mc-log-footer .history-download-menu {
   margin-left: auto;
 }
 

@@ -6,6 +6,7 @@ import {
   isTaskCreatedLog,
   isTaskNoteLog,
 } from "../history/historyEventFormatter.js";
+import { createDownloadMenu } from "../components/downloadMenu/downloadMenu.js";
 
 const RESTORE_OPERATION_TASK_SOURCE = "status-out-of-service";
 const HISTORY_VISIBLE_LIMIT = 16;
@@ -319,11 +320,10 @@ export const render = (panel, machine, hooks, options = {}) => {
   footer.appendChild(counter);
 
   if (options.canDownloadHistory !== false) {
-    const download = document.createElement("a");
-    download.className = "mc-log-download";
-    download.setAttribute("aria-label", t("history.download", "Descargar registro completo"));
-    download.setAttribute("data-tooltip", t("history.download", "Descargar registro completo"));
-    download.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 3a1 1 0 0 1 1 1v8.59l2.3-2.3a1 1 0 1 1 1.4 1.42l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 0 1 1.4-1.42l2.3 2.3V4a1 1 0 0 1 1-1Zm-7 14a1 1 0 0 1 1 1v2h12v-2a1 1 0 1 1 2 0v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1Z"/></svg>';
+    const downloadMenu = createDownloadMenu({
+      onSelect: (format) => hooks.onDownloadLogs?.(machine, format),
+    });
+    const download = downloadMenu.toggle;
     const clearTooltips = () => {
       document.querySelectorAll(".mc-tooltip").forEach((node) => node.remove());
     };
@@ -350,13 +350,7 @@ export const render = (panel, machine, hooks, options = {}) => {
     download.addEventListener("mouseenter", showTip);
     download.addEventListener("mouseleave", hideTip);
     download.addEventListener("blur", hideTip);
-    download.href = "#";
-    download.addEventListener("click", (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      if (hooks.onDownloadLogs) hooks.onDownloadLogs(machine);
-    });
-    footer.appendChild(download);
+    footer.appendChild(downloadMenu.wrap);
   }
   panel.appendChild(footer);
 };

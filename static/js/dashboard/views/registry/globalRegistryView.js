@@ -7,6 +7,11 @@ import {
   buildGlobalRegistryEntries,
   filterGlobalRegistryEntries,
 } from "./globalRegistryModel.js";
+import { createDownloadMenu } from "../../components/downloadMenu/downloadMenu.js";
+import {
+  buildGlobalHistoryRows,
+  downloadHistoryRows,
+} from "../../history/historyExport.js";
 
 export const GLOBAL_REGISTRY_PAGE_SIZE = 254;
 
@@ -50,41 +55,6 @@ const attachTooltip = (target) => {
   target.addEventListener("mouseleave", hideTip);
   target.addEventListener("blur", hideTip);
   target.addEventListener("click", hideTip);
-};
-
-const formatDownloadLine = (entry, log, locale, indent = "") => {
-  const date = formatDate(log.ts, locale);
-  const machine = entry.machine?.title || t("machine.machine", "Equipo");
-  const location = (entry.machine?.location || "").toString().trim();
-  const place = location ? ` | ${location}` : "";
-  const text = formatHistoryLog(log, { omitTaskTitle: indent.length > 0 && log.type === "task_note_added" });
-  return `${indent}[${date}] ${machine}${place} - ${text}`;
-};
-
-const buildDownloadText = (entries, locale) => {
-  const lines = [];
-  entries.forEach((entry) => {
-    lines.push(formatDownloadLine(entry, entry.log, locale));
-    (entry.relatedLogs || []).forEach((log) => {
-      lines.push(formatDownloadLine(entry, log, locale, "  "));
-    });
-    (entry.notes || []).forEach((log) => {
-      lines.push(formatDownloadLine(entry, log, locale, "  "));
-    });
-  });
-  return lines.join("\n");
-};
-
-const downloadTextFile = (content, filename) => {
-  const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
 };
 
 const isEntryUnseen = (entry = {}, seenAt = "") => toTime(entry.time) > toTime(seenAt);
@@ -226,19 +196,20 @@ export const renderGlobalRegistryView = (container, machines = [], options = {})
 
   const toolbar = document.createElement("div");
   toolbar.className = "global-registry-toolbar";
-  const download = document.createElement("button");
-  download.type = "button";
-  download.className = "global-registry-download mc-log-download";
-  download.setAttribute("aria-label", t("history.download", "Descargar registro completo"));
-  download.setAttribute("data-tooltip", t("history.download", "Descargar registro completo"));
-  download.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 3a1 1 0 0 1 1 1v8.59l2.3-2.3a1 1 0 1 1 1.4 1.42l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 0 1 1.4-1.42l2.3 2.3V4a1 1 0 0 1 1-1Zm-7 14a1 1 0 0 1 1 1v2h12v-2a1 1 0 1 1 2 0v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1Z"/></svg>';
-  download.addEventListener("click", () => {
-    const text = buildDownloadText(entries, locale);
-    const stamp = new Date().toISOString().slice(0, 10);
-    downloadTextFile(text, `registro_global_${stamp}.txt`);
+  const downloadMenu = createDownloadMenu({
+    placement: "bottom",
+    className: "global-registry-download",
+    onSelect: (format) => {
+      const stamp = new Date().toISOString().slice(0, 10);
+      downloadHistoryRows(
+        buildGlobalHistoryRows(entries),
+        `registro_global_${stamp}`,
+        format
+      );
+    },
   });
-  attachTooltip(download);
-  toolbar.appendChild(download);
+  attachTooltip(downloadMenu.toggle);
+  toolbar.appendChild(downloadMenu.wrap);
   container.appendChild(toolbar);
 
   const header = document.createElement("div");

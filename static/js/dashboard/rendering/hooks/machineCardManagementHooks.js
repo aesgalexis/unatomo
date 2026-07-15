@@ -1,3 +1,8 @@
+import {
+  buildMachineHistoryRows,
+  downloadHistoryRows,
+} from "../../history/historyExport.js";
+
 export const installMachineCardManagementHooks = (dependencies) => {
   const {
     autoSave,
@@ -24,55 +29,15 @@ export const installMachineCardManagementHooks = (dependencies) => {
     t,
     updateMachine,
   } = dependencies;
-        hooks.onDownloadLogs = (machineData) => {
-          const logs = machineData.logs || [];
-          const historyLocale = document.documentElement.lang === "en" ? "en-GB" : "es-ES";
-          const lines = logs.map((log) => {
-            const time = new Date(log.ts).toLocaleString(historyLocale);
-            if (log.type === "task") {
-              const title = log.title || t("history.task", "Tarea");
-              const user = log.user ? t("history.completedBy", (value) => ` - por ${value}`)(log.user) : "";
-              if (log.punctual) {
-                const duration = log.completionDuration ? ` (${log.completionDuration})` : "";
-                return `[${time}] ${t("history.oneOffCompleted", "Tarea puntual completada")}${duration}: ${title}${user}`;
-              }
-              const overdueText = log.overdueDuration
-                ? t("history.lateSuffix", (text) => `, ${text} tarde`)(log.overdueDuration)
-                : "";
-              const prefix = log.overdue
-                ? t("history.completedLate", (text) => `Tarea completada fuera de plazo${text}: `)(overdueText)
-                : t("history.completed", "Tarea completada: ");
-              return `[${time}] ${prefix}${title}${user}`;
-            }
-            if (log.type === "location") {
-              const value = log.value ? log.value : t("history.noLocation", "Sin ubicación");
-              return `[${time}] ${t("history.location", "Ubicación")} -> ${value}`;
-            }
-            if (log.type === "intervencion") {
-              const message = log.message || "";
-              const user = log.user ? t("history.completedBy", (value) => ` - por ${value}`)(log.user) : "";
-              return `[${time}] ${t("history.interventionLog", "Intervención")}: ${message}${user}`;
-            }
-            const value =
-              log.value === "operativa"
-                ? t("dashboard.statusByValue.operativa", "Operativo")
-                : t("dashboard.statusByValue.fuera_de_servicio", "Fuera de servicio");
-            return `[${time}] ${t("history.status", "Estado")} -> ${value}`;
-          });
-          const blob = new Blob([lines.join("\n")], {
-            type: "text/plain;charset=utf-8"
-          });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
+        hooks.onDownloadLogs = (machineData, format = "txt") => {
           const safeTitle = (machineData.title || machineData.id || "registro")
             .replace(/\s+/g, "_")
             .replace(/[^\w\-]/g, "");
-          a.href = url;
-          a.download = `registro_${safeTitle}.txt`;
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
-          URL.revokeObjectURL(url);
+          downloadHistoryRows(
+            buildMachineHistoryRows(machineData),
+            `registro_${safeTitle}`,
+            format
+          );
         };
 
         hooks.onRemoveMachine = (machineData) => {

@@ -15,13 +15,25 @@ const appBasePrefix = getAppBasePrefix();
 const textMap = {
   access: isEn ? "Access" : "Accesos",
   accessIntro: isEn
-    ? "Prototype for global local-user access. Checkbox and PIN changes are visual for now."
-    : "Prototipo de accesos globales para usuarios locales. Los cambios de checkbox y PIN son visuales por ahora.",
+    ? "Prototype for global access and role permissions. Changes are visual for now."
+    : "Prototipo de accesos globales y permisos por rol. Los cambios son solo visuales por ahora.",
   accessLoading: isEn ? "Loading access..." : "Cargando accesos...",
   accessEmpty: isEn
     ? "No local users assigned to your machines yet."
     : "Todav\u00eda no hay usuarios locales asignados a tus m\u00e1quinas.",
   accessPrototypeSaved: isEn ? "Prototype updated" : "Prototipo actualizado",
+  accessUsersTab: isEn ? "Users" : "Usuarios",
+  accessRolePermissionsTab: isEn ? "Role permissions" : "Permisos por rol",
+  accessRolePermissionsIntro: isEn
+    ? "Choose what each role can see and do after opening a machine from QR or NFC."
+    : "Define qu\u00e9 puede ver y hacer cada rol al abrir una m\u00e1quina desde QR o NFC.",
+  accessProtectedRole: isEn ? "Protected read-only profile" : "Perfil de solo lectura protegido",
+  accessPermissionsVisual: isEn
+    ? "Visual prototype. These permissions are not persisted yet."
+    : "Prototipo visual. Estos permisos todav\u00eda no se guardan.",
+  accessPermissionRead: isEn ? "Read" : "Lectura",
+  accessPermissionOperate: isEn ? "Create and update" : "Crear y actualizar",
+  accessPermissionAdmin: isEn ? "Administration" : "Administraci\u00f3n",
   accessAddUser: isEn ? "Create local user" : "Crear usuario local",
   accessNewUserPlaceholder: isEn ? "Name" : "Nombre",
   accessNewPinPlaceholder: isEn ? "PIN" : "PIN",
@@ -45,6 +57,20 @@ const textMap = {
   roleTecnico: isEn ? "Technician" : "T\u00e9cnico",
   roleViewer: isEn ? "Viewer" : "Solo lectura",
   roleExterno: isEn ? "External" : "Externo",
+  permissionViewMachine: isEn ? "View machine overview" : "Ver informaci\u00f3n de la m\u00e1quina",
+  permissionViewTasks: isEn ? "View tasks" : "Ver tareas",
+  permissionViewHistory: isEn ? "View history log" : "Leer el registro hist\u00f3rico",
+  permissionViewDocuments: isEn ? "View and download documents" : "Ver y descargar documentos",
+  permissionCreateTasks: isEn ? "Create tasks" : "Crear tareas",
+  permissionEditTasks: isEn ? "Edit tasks" : "Editar tareas",
+  permissionCompleteTasks: isEn ? "Complete tasks" : "Dar tareas por completadas",
+  permissionAddTaskNotes: isEn ? "Add task notes" : "A\u00f1adir notas a tareas",
+  permissionChangeStatus: isEn ? "Change machine status" : "Cambiar el estado de la m\u00e1quina",
+  permissionUploadImages: isEn ? "Upload images" : "Cargar im\u00e1genes",
+  permissionUploadDocuments: isEn ? "Upload documents and manuals" : "Cargar documentos y manuales",
+  permissionDeleteDocuments: isEn ? "Delete documents" : "Eliminar documentos",
+  permissionManageAccess: isEn ? "Manage users and access" : "Gestionar usuarios y accesos",
+  permissionManageTags: isEn ? "Manage QR and NFC tags" : "Gestionar QR y etiquetas NFC",
 };
 
 const LOCAL_ROLE_OPTIONS = [
@@ -54,6 +80,53 @@ const LOCAL_ROLE_OPTIONS = [
   { value: "viewer", label: textMap.roleViewer },
   { value: "externo", label: textMap.roleExterno }
 ];
+
+const CAPABILITY_DEFINITIONS = [
+  { key: "viewMachine", group: "read", label: textMap.permissionViewMachine },
+  { key: "viewTasks", group: "read", label: textMap.permissionViewTasks },
+  { key: "viewHistory", group: "read", label: textMap.permissionViewHistory },
+  { key: "viewDocuments", group: "read", label: textMap.permissionViewDocuments },
+  { key: "createTasks", group: "operate", label: textMap.permissionCreateTasks },
+  { key: "editTasks", group: "operate", label: textMap.permissionEditTasks },
+  { key: "completeTasks", group: "operate", label: textMap.permissionCompleteTasks },
+  { key: "addTaskNotes", group: "operate", label: textMap.permissionAddTaskNotes },
+  { key: "changeStatus", group: "operate", label: textMap.permissionChangeStatus },
+  { key: "uploadImages", group: "operate", label: textMap.permissionUploadImages },
+  { key: "uploadDocuments", group: "operate", label: textMap.permissionUploadDocuments },
+  { key: "deleteDocuments", group: "admin", label: textMap.permissionDeleteDocuments },
+  { key: "manageAccess", group: "admin", label: textMap.permissionManageAccess },
+  { key: "manageTags", group: "admin", label: textMap.permissionManageTags }
+];
+
+const DEFAULT_ROLE_PERMISSIONS = {
+  manager: Object.fromEntries(CAPABILITY_DEFINITIONS.map(({ key }) => [key, true])),
+  usuario: {
+    viewMachine: true, viewTasks: true, viewHistory: true, viewDocuments: true,
+    createTasks: true, editTasks: true, completeTasks: true, addTaskNotes: true,
+    changeStatus: true, uploadImages: true, uploadDocuments: false,
+    deleteDocuments: false, manageAccess: false, manageTags: false
+  },
+  tecnico: {
+    viewMachine: true, viewTasks: true, viewHistory: true, viewDocuments: true,
+    createTasks: true, editTasks: true, completeTasks: true, addTaskNotes: true,
+    changeStatus: true, uploadImages: true, uploadDocuments: true,
+    deleteDocuments: false, manageAccess: false, manageTags: false
+  },
+  viewer: Object.fromEntries(
+    CAPABILITY_DEFINITIONS.map(({ key, group }) => [key, group === "read"])
+  ),
+  externo: {
+    viewMachine: true, viewTasks: true, viewHistory: false, viewDocuments: true,
+    createTasks: false, editTasks: false, completeTasks: false, addTaskNotes: true,
+    changeStatus: false, uploadImages: true, uploadDocuments: false,
+    deleteDocuments: false, manageAccess: false, manageTags: false
+  }
+};
+
+const createDefaultRolePermissions = () =>
+  Object.fromEntries(
+    Object.entries(DEFAULT_ROLE_PERMISSIONS).map(([role, permissions]) => [role, { ...permissions }])
+  );
 
 const mount = document.getElementById("access-mount");
 const statusEl = document.getElementById("access-status");
@@ -194,7 +267,115 @@ const fetchVisibleAccessMachines = async (uid) => {
   });
 };
 
-const renderAccessPrototype = ({ machineRows, userColumnsRef, selectedUserKeyRef }) => {
+const renderRolePermissionsPrototype = ({ rolePermissionsRef, selectedRoleRef, rerender }) => {
+  const rolePermissions = rolePermissionsRef.rolePermissions;
+  if (!LOCAL_ROLE_OPTIONS.some((role) => role.value === selectedRoleRef.selectedRole)) {
+    selectedRoleRef.selectedRole = LOCAL_ROLE_OPTIONS[0].value;
+  }
+  const selectedRole = selectedRoleRef.selectedRole;
+  if (selectedRole === "viewer") {
+    rolePermissions.viewer = { ...DEFAULT_ROLE_PERMISSIONS.viewer };
+  }
+
+  const intro = document.createElement("div");
+  intro.className = "access-permissions-intro";
+  intro.innerHTML = `
+    <strong>${escapeAccessHtml(textMap.accessRolePermissionsIntro)}</strong>
+    <span>${escapeAccessHtml(textMap.accessPermissionsVisual)}</span>
+  `;
+  tableWrap.appendChild(intro);
+
+  const shell = document.createElement("div");
+  shell.className = "access-permissions-shell";
+
+  const roleList = document.createElement("div");
+  roleList.className = "access-role-list";
+  roleList.setAttribute("aria-label", textMap.accessRole);
+  LOCAL_ROLE_OPTIONS.forEach((role) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "access-role-item";
+    if (role.value === selectedRole) button.dataset.active = "true";
+    const enabledCount = CAPABILITY_DEFINITIONS.filter(
+      ({ key }) => rolePermissions[role.value]?.[key]
+    ).length;
+    button.innerHTML = `
+      <span>${escapeAccessHtml(role.label)}</span>
+      <small>${enabledCount}/${CAPABILITY_DEFINITIONS.length}</small>
+    `;
+    button.addEventListener("click", () => {
+      selectedRoleRef.selectedRole = role.value;
+      rerender();
+    });
+    roleList.appendChild(button);
+  });
+
+  const editor = document.createElement("div");
+  editor.className = "access-permissions-editor";
+  const editorTitle = document.createElement("div");
+  editorTitle.className = "access-editor-title";
+  editorTitle.innerHTML = `
+    <span>${escapeAccessHtml(textMap.accessRole)}</span>
+    <strong>${escapeAccessHtml(getRoleLabel(selectedRole))}</strong>
+  `;
+  editor.appendChild(editorTitle);
+
+  if (selectedRole === "viewer") {
+    const protectedNote = document.createElement("div");
+    protectedNote.className = "access-protected-note";
+    protectedNote.textContent = textMap.accessProtectedRole;
+    editor.appendChild(protectedNote);
+  }
+
+  ["read", "operate", "admin"].forEach((group) => {
+    const groupTitle = document.createElement("div");
+    groupTitle.className = "access-section-title access-permission-group-title";
+    groupTitle.textContent = group === "read"
+      ? textMap.accessPermissionRead
+      : group === "operate"
+        ? textMap.accessPermissionOperate
+        : textMap.accessPermissionAdmin;
+    editor.appendChild(groupTitle);
+
+    const groupList = document.createElement("div");
+    groupList.className = "access-permission-list";
+    CAPABILITY_DEFINITIONS.filter((capability) => capability.group === group).forEach((capability) => {
+      const row = document.createElement("label");
+      row.className = "access-permission-row";
+      const copy = document.createElement("span");
+      copy.textContent = capability.label;
+      const check = document.createElement("input");
+      check.type = "checkbox";
+      check.checked = !!rolePermissions[selectedRole]?.[capability.key];
+      check.disabled = selectedRole === "viewer";
+      check.addEventListener("change", () => {
+        rolePermissions[selectedRole][capability.key] = check.checked;
+        setStatus(
+          `${textMap.accessUpdated}: ${getRoleLabel(selectedRole)} · ${capability.label}`,
+          "ok"
+        );
+        rerender();
+      });
+      row.appendChild(copy);
+      row.appendChild(check);
+      groupList.appendChild(row);
+    });
+    editor.appendChild(groupList);
+  });
+
+  shell.appendChild(roleList);
+  shell.appendChild(editor);
+  tableWrap.appendChild(shell);
+};
+
+const renderAccessPrototype = ({
+  machineRows,
+  rolePermissionsRef,
+  selectedRoleRef,
+  selectedUserKeyRef,
+  uiStateRef,
+  userColumnsRef
+}) => {
   let { userColumns } = userColumnsRef;
   let { selectedUserKey } = selectedUserKeyRef;
   tableWrap.innerHTML = "";
@@ -205,8 +386,42 @@ const renderAccessPrototype = ({ machineRows, userColumnsRef, selectedUserKeyRef
   const rerender = () => {
     userColumnsRef.userColumns = userColumns;
     selectedUserKeyRef.selectedUserKey = selectedUserKey;
-    renderAccessPrototype({ machineRows, userColumnsRef, selectedUserKeyRef });
+    renderAccessPrototype({
+      machineRows,
+      rolePermissionsRef,
+      selectedRoleRef,
+      selectedUserKeyRef,
+      uiStateRef,
+      userColumnsRef
+    });
   };
+
+  const tabs = document.createElement("div");
+  tabs.className = "access-tabs";
+  tabs.setAttribute("role", "tablist");
+  [
+    { value: "users", label: textMap.accessUsersTab },
+    { value: "permissions", label: textMap.accessRolePermissionsTab }
+  ].forEach((tabData) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "access-tab";
+    button.setAttribute("role", "tab");
+    const isActive = (uiStateRef.activeView || "users") === tabData.value;
+    button.setAttribute("aria-selected", isActive ? "true" : "false");
+    button.textContent = tabData.label;
+    button.addEventListener("click", () => {
+      uiStateRef.activeView = tabData.value;
+      rerender();
+    });
+    tabs.appendChild(button);
+  });
+  tableWrap.appendChild(tabs);
+
+  if ((uiStateRef.activeView || "users") === "permissions") {
+    renderRolePermissionsPrototype({ rolePermissionsRef, selectedRoleRef, rerender });
+    return;
+  }
 
   const createForm = document.createElement("div");
   createForm.className = "access-create";
@@ -448,12 +663,18 @@ const loadGlobalAccess = async (uid) => {
   }));
   const userColumnsRef = { userColumns: collectLocalAccessRows(machines) };
   const selectedUserKeyRef = { selectedUserKey: userColumnsRef.userColumns[0]?.normalized || "" };
-  if (!userColumnsRef.userColumns.length && !machineRows.length) {
-    setStatus(textMap.accessEmpty);
-    return;
-  }
+  const rolePermissionsRef = { rolePermissions: createDefaultRolePermissions() };
+  const selectedRoleRef = { selectedRole: "manager" };
+  const uiStateRef = { activeView: "users" };
   setStatus("");
-  renderAccessPrototype({ machineRows, userColumnsRef, selectedUserKeyRef });
+  renderAccessPrototype({
+    machineRows,
+    rolePermissionsRef,
+    selectedRoleRef,
+    selectedUserKeyRef,
+    uiStateRef,
+    userColumnsRef
+  });
 };
 
 if (mount) {

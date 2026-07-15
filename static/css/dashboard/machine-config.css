@@ -1,4 +1,5 @@
 .mc-log-footer .mc-log-download {
+  margin-left: 0;
   margin-top: 0;
 }
 
@@ -48,6 +49,71 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+
+.history-download-menu {
+  position: relative;
+  display: inline-flex;
+}
+
+.history-download-menu-toggle[aria-expanded="true"] {
+  color: var(--fg);
+}
+
+.history-download-menu-panel {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 0.35rem);
+  z-index: 35;
+  width: max-content;
+  min-width: 10.5rem;
+  max-width: calc(100vw - 2rem);
+  box-sizing: border-box;
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--bg) 96%, transparent);
+  box-shadow: 0 12px 28px color-mix(in srgb, #000 16%, transparent);
+  padding: 0.25rem;
+}
+
+.history-download-menu[data-placement="bottom"] .history-download-menu-panel {
+  top: calc(100% + 0.35rem);
+  bottom: auto;
+}
+
+.history-download-menu-panel[hidden] {
+  display: none;
+}
+
+.history-download-menu-item {
+  width: 100%;
+  border: 0;
+  border-radius: 0.35rem;
+  background: transparent;
+  color: var(--fg);
+  display: grid;
+  grid-template-columns: 2.2rem max-content;
+  gap: 0.45rem;
+  align-items: center;
+  padding: 0.42rem 0.55rem;
+  font: inherit;
+  font-size: 0.88rem;
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.history-download-menu-item:hover,
+.history-download-menu-item:focus-visible {
+  background: color-mix(in srgb, var(--fg) 9%, transparent);
+  outline: none;
+}
+
+.history-download-menu-filetype {
+  color: color-mix(in srgb, var(--fg) 58%, transparent);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
 }
 
 .mc-danger-link {

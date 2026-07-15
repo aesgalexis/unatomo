@@ -31,10 +31,11 @@
 }
 
 .global-registry-download {
-  border: 0;
-  background: transparent;
-  padding: 0;
-  cursor: pointer;
+  margin: 0;
+}
+
+.global-registry-download .mc-log-download {
+  margin-top: 0;
 }
 
 .global-registry-count {
@@ -105,4 +106,3 @@
   font: inherit;
   cursor: pointer;
 }
-
