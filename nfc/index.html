@@ -1,197 +1,197 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" class="nfc-landing-page">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>unatomo</title>
-  <meta name="robots" content="index, follow" />
-  <link rel="stylesheet" href="/styles.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>UNATOMO/NFC · ¿Ya hablas con tus máquinas?</title>
+  <meta id="page-description" name="description" content="Vincula cada máquina a una ficha digital accesible mediante QR o NFC y reúne su estado, tareas, historial y documentación.">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#ffffff">
   <link rel="icon" href="/static/img/favicon/favicon.svg" type="image/svg+xml">
+  <script src="/static/js/theme/theme-init.js"></script>
   <script src="/static/js/config/runtime-config.js"></script>
   <script>
     (function () {
-      var STORAGE_KEY = "unatomo_lang";
-      function pickLang() {
-        try {
-          var saved = (localStorage.getItem(STORAGE_KEY) || "").trim().toLowerCase();
-          if (saved === "es" || saved === "en") return saved;
-        } catch (e) {}
-        var langs = Array.isArray(navigator.languages) && navigator.languages.length
-          ? navigator.languages
-          : [navigator.language || navigator.userLanguage || ""];
-        var first = String(langs[0] || "").trim().toLowerCase();
-        return first.indexOf("es") === 0 ? "es" : "en";
+      var key = "unatomo_lang";
+      var lang = "";
+      try { lang = (localStorage.getItem(key) || "").toLowerCase(); } catch (e) {}
+      if (lang !== "es" && lang !== "en") {
+        var browserLang = String((navigator.languages && navigator.languages[0]) || navigator.language || "").toLowerCase();
+        lang = browserLang.indexOf("es") === 0 ? "es" : "en";
       }
-      var lang = pickLang();
       document.documentElement.lang = lang;
       document.documentElement.dataset.lang = lang;
-      try { localStorage.setItem(STORAGE_KEY, lang); } catch (e) {}
+      try { localStorage.setItem(key, lang); } catch (e) {}
     })();
   </script>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/static/css/dashboard.css">
+  <link rel="stylesheet" href="/static/css/qr-print.css">
+  <link rel="stylesheet" href="/static/css/nfc-landing.css">
 </head>
-<body>
-  <main class="shell">
-    <img
-      src="/static/img/logo-unatomo-v1.5.svg"
-      alt="unatomo"
-      class="logo"
-      loading="lazy"
-    />
+<body class="nfc-landing">
+  <header class="landing-header">
+    <a class="landing-brand" href="/nfc/" aria-label="UNATOMO NFC">
+      <img src="/static/img/logo-unatomo-v1.6.svg" alt="unatomo">
+      <span>UNATOMO/NFC</span>
+    </a>
 
-    <h1 id="title-main">unatomo</h1>
-    <h2 id="subtitle-main"></h2>
+    <div class="landing-header-actions">
+      <a class="landing-header-login" data-session-cta href="/nfc/es/auth/login.html" data-i18n="login">Iniciar sesión</a>
+      <button id="theme-toggle" class="landing-control" type="button" aria-label="Cambiar tema"></button>
+      <div class="landing-lang-picker">
+        <button id="lang-toggle" class="landing-control landing-lang-button" type="button" aria-expanded="false" aria-controls="lang-menu" data-i18n-aria="languageLabel" aria-label="Idioma">
+          <span class="landing-control-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 2.5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 12 2.5zm7.5 9.5a7.45 7.45 0 0 1-1.2 4h-3.1a18.9 18.9 0 0 0 .6-4 18.9 18.9 0 0 0-.6-4h3.1a7.45 7.45 0 0 1 1.2 4zM12 4.6c.9 1.1 1.7 2.7 2.2 4.4H9.8c.5-1.7 1.3-3.3 2.2-4.4zM4.5 12a7.45 7.45 0 0 1 1.2-4h3.1a18.9 18.9 0 0 0-.6 4 18.9 18.9 0 0 0 .6 4H5.7a7.45 7.45 0 0 1-1.2-4zm5.3 0a16.6 16.6 0 0 1 .7-4h3a16.6 16.6 0 0 1 .7 4 16.6 16.6 0 0 1-.7 4h-3a16.6 16.6 0 0 1-.7-4zm2.2 7.4c-.9-1.1-1.7-2.7-2.2-4.4h4.4c-.5 1.7-1.3 3.3-2.2 4.4z"></path></svg>
+          </span>
+          <span class="landing-lang-label">ES</span>
+        </button>
+        <div id="lang-menu" class="landing-lang-menu" role="menu" hidden>
+          <button type="button" data-set-lang="es" lang="es" role="menuitem">Español</button>
+          <button type="button" data-set-lang="en" lang="en" role="menuitem">English</button>
+        </div>
+      </div>
+    </div>
+  </header>
 
-    <br><br>
+  <main class="page-shell">
+    <section class="landing-intro">
+      <div class="landing-intro-top">
+      <div class="intro-copy">
+        <h1 data-i18n="slogan">¿Ya hablas con tus máquinas?</h1>
+        <p class="intro-lead" data-i18n="introLead">Vincula cada máquina a una ficha digital accesible mediante QR o NFC.</p>
+        <p class="intro-detail" data-i18n="introDetail">Al iniciar sesión puedes gestionar las máquinas a las que tienes acceso y trabajar con su estado, tareas, historial, documentación y personas autorizadas.</p>
+      </div>
 
-    <div class="auth-actions" aria-label="Access">
-      <a href="/nfc/es/auth/login.html" class="btn-pill btn-pill-solid" id="go-login"></a>
+        <aside class="registration-callout registration-callout--hero" aria-labelledby="registration-access-title">
+          <h3 id="registration-access-title" data-i18n="registrationAccessTitle">¿Quieres acceder a UNATOMO/NFC?</h3>
+          <p data-i18n="registrationAccessText">Las nuevas cuentas se crean mediante código de acceso. Puedes registrarte si ya tienes uno o solicitarlo.</p>
+          <button class="landing-button landing-button-secondary" type="button" id="go-register" data-i18n="register">Registrarse</button>
+
+          <section id="register-code-box" class="access-code-card" hidden aria-labelledby="register-title">
+            <h4 id="register-title" data-i18n="registerTitle">Registro</h4>
+            <p data-i18n="registerPrompt">¿Tienes un código de acceso?</p>
+            <div class="registration-options">
+              <button id="show-code-entry" type="button" class="registration-option" data-i18n="haveCode">Sí, tengo un código</button>
+              <a id="request-code-link" class="registration-option" href="/nfc/es/contacto.html?subject=registration" data-i18n="noCode">No, solicitar uno</a>
+            </div>
+            <div id="register-code-entry" hidden>
+              <p id="register-copy" data-i18n="accessCopy">Introduce el código para crear tu cuenta.</p>
+              <div class="inline-field-row">
+                <input id="register-code-input" class="field" type="text" autocomplete="one-time-code" data-i18n-placeholder="codePlaceholder" placeholder="Código">
+                <button id="register-code-submit" type="button" class="landing-button landing-button-primary" data-i18n="continue">Continuar</button>
+              </div>
+              <p id="register-code-status" class="form-status" role="status" aria-live="polite" hidden></p>
+            </div>
+          </section>
+        </aside>
+      </div>
+
+      <section id="landing-public-stats" class="landing-public-stats" hidden aria-label="Actividad real en UNATOMO/NFC" data-i18n-aria="statsLabel">
+        <p class="landing-stats-label" data-i18n="statsEyebrow">Ya en uso</p>
+        <div class="landing-stats-row">
+          <div class="landing-stats-grid">
+            <div class="landing-stat">
+              <strong data-public-stat="machines"></strong>
+              <span data-i18n="statsMachines">Equipos registrados</span>
+            </div>
+            <div class="landing-stat">
+              <strong data-public-stat="registeredUsers"></strong>
+              <span data-i18n="statsUsers">Usuarios activos</span>
+            </div>
+            <div class="landing-stat">
+              <strong data-public-stat="linkedTags"></strong>
+              <span data-i18n="statsTags">Etiquetas QR/NFC vinculadas</span>
+            </div>
+          </div>
+          <div class="landing-stats-action">
+            <button id="landing-details-toggle" class="btn-primary" type="button" aria-expanded="false" aria-controls="landing-details" data-i18n="detailsOpen">Más información</button>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <div id="landing-details" class="landing-details" hidden>
+      <div class="landing-details-content">
+    <section class="content-section" aria-labelledby="what-title">
+      <div class="section-heading">
+        <p class="section-label" data-i18n="whatLabel">La máquina como referencia</p>
+        <h2 id="what-title" data-i18n="whatTitle">La información útil, reunida alrededor de cada equipo.</h2>
+      </div>
+      <div class="section-body two-columns">
+        <div class="body-copy">
+          <p data-i18n="whatTextOne">El contexto operativo suele quedar repartido entre mensajes, papeles, fotografías sueltas y la memoria de quienes han trabajado sobre una máquina.</p>
+          <p data-i18n="whatTextTwo">UNATOMO/NFC ofrece un lugar común para consultar qué máquina es, cuál es su estado, qué trabajo tiene pendiente y qué información se ha registrado hasta ahora.</p>
+        </div>
+        <dl class="feature-list">
+          <div><dt><svg class="feature-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.73 18 13.73 4a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg><span data-i18n="statusIncidents">Estado e incidencias</span></dt><dd data-i18n="statusIncidentsText">Situación actual, tareas asociadas y seguimiento hasta recuperar la operatividad.</dd></div>
+          <div><dt><svg class="feature-icon feature-icon-fill" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6a1 1 0 0 1 1 1v4.59l2.3 2.3a1 1 0 0 1-1.4 1.42l-2.6-2.6A1 1 0 0 1 11 12V7a1 1 0 0 1 1-1z"></path><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20m0 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16"></path></svg><span data-i18n="tasksHistory">Tareas e historial</span></dt><dd data-i18n="tasksHistoryText">Trabajo pendiente, notas y registro de los cambios realizados.</dd></div>
+          <div><dt><svg class="feature-icon feature-icon-fill" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5Zm3 12h10l-3.2-4.1-2.4 3-1.7-2.1L7 17Zm1.5-8.2a1.6 1.6 0 1 0 0-3.2 1.6 1.6 0 0 0 0 3.2Z"></path></svg><span data-i18n="documentation">Documentación</span></dt><dd data-i18n="documentationText">Placas, fotografías, manuales, notas técnicas y otros archivos.</dd></div>
+          <div><dt><svg class="feature-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 2 13.5 9.5"></path><circle cx="8" cy="16" r="5"></circle><path d="m14 8 2 2"></path><path d="m17 5 2 2"></path></svg><span data-i18n="peopleAccess">Personas y acceso</span></dt><dd data-i18n="peopleAccessText">Propietarios, administradores y usuarios autorizados según su relación con la máquina.</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="content-section access-flow-section" aria-labelledby="flow-title">
+      <div class="section-heading">
+        <p class="section-label" data-i18n="flowLabel">Acceso mediante QR o NFC</p>
+        <h2 id="flow-title" data-i18n="flowTitle">La etiqueta identifica la máquina. Los permisos determinan el acceso.</h2>
+      </div>
+      <div class="access-flow">
+        <div class="qr-frame-column">
+          <div class="qr-frame-example qr-print--framed" aria-label="Marco QR utilizado por UNATOMO/NFC" data-i18n-aria="qrFrameLabel">
+            <div class="qr-print-qr-wrap">
+              <img class="qr-print-frame" src="/static/img/LOGO%20unatomo%20v1.6%20baseQR.jpg" alt="">
+              <img id="landing-qr-code" class="qr-print-image" src="/static/img/nfc-tags-qr-es.png" alt="Código QR para abrir la sección Tags físicos" data-i18n-alt="qrAlt">
+            </div>
+          </div>
+          <p data-i18n="qrFrameCaption">Escanea este código para abrir la información pública sobre Tags físicos.</p>
+        </div>
+        <ol class="flow-list">
+          <li><span class="machine-group-count flow-step-number">1</span><div><strong data-i18n="flowOneTitle">Escanear o acercar</strong><p data-i18n="flowOneText">El QR o la etiqueta NFC abre el acceso correspondiente a esa máquina.</p></div></li>
+          <li><span class="machine-group-count flow-step-number">2</span><div><strong data-i18n="flowTwoTitle">Identificarse</strong><p data-i18n="flowTwoText">La etiqueta no funciona como autorización. El usuario accede con su identidad.</p></div></li>
+          <li><span class="machine-group-count flow-step-number">3</span><div><strong data-i18n="flowThreeTitle">Trabajar con permiso</strong><p data-i18n="flowThreeText">La aplicación muestra la información y las acciones disponibles para ese usuario.</p></div></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="content-section real-section" aria-labelledby="real-title">
+      <div class="section-heading">
+        <p class="section-label" data-i18n="betaLabel">Beta activa</p>
+        <h2 id="real-title" data-i18n="realTitle">Conectando máquinas y personas en entornos reales.</h2>
+      </div>
+      <div class="section-body two-columns">
+        <div class="body-copy">
+          <p data-i18n="realTextOne">Ya existen máquinas, códigos QR y usuarios reales utilizando UNATOMO/NFC para registrar incidencias, consultar información y mantener un contexto compartido.</p>
+          <p data-i18n="realTextTwo">La aplicación continúa evolucionando a partir de ese uso diario. La beta describe un desarrollo activo, no una demostración ni un prototipo.</p>
+        </div>
+        <div class="real-facts">
+          <p><span></span><strong data-i18n="factMachines">Equipos registrados y accesibles</strong></p>
+          <p><span></span><strong data-i18n="factTags">Etiquetas QR y NFC vinculadas</strong></p>
+          <p><span></span><strong data-i18n="factStatus">Estado e incidencias registradas</strong></p>
+          <p><span></span><strong data-i18n="factTasks">Tareas y seguimiento operativo</strong></p>
+          <p><span></span><strong data-i18n="factHistory">Historial de acciones y anotaciones</strong></p>
+          <p><span></span><strong data-i18n="factImages">Fotografías y galería por equipo</strong></p>
+          <p><span></span><strong data-i18n="factDocuments">Manuales, placas y documentación técnica</strong></p>
+          <p><span></span><strong data-i18n="factAccess">Personas autorizadas y control de acceso</strong></p>
+        </div>
+      </div>
+    </section>
+      </div>
     </div>
 
-    <section id="login-box" class="card" hidden>
-      <h3 id="login-title"></h3>
-      <p id="login-copy"></p>
-
-      <div class="form-actions" style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
-        <button type="button" class="btn-secondary btn-google" id="login-google">
-          <svg class="btn-google-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-            <path fill="#EA4335" d="M12 10.2v3.9h5.5c-.2 1.3-.9 2.4-1.9 3.2l3.1 2.4c1.8-1.7 2.9-4.1 2.9-7 0-.7-.1-1.3-.2-1.9H12z"/>
-            <path fill="#34A853" d="M12 22c2.6 0 4.8-.9 6.4-2.4l-3.1-2.4c-.9.6-2 .9-3.3.9-2.5 0-4.6-1.7-5.4-4H3.4v2.5A10 10 0 0 0 12 22z"/>
-            <path fill="#4A90E2" d="M6.6 14.1A6 6 0 0 1 6.3 12c0-.7.1-1.4.3-2.1V7.4H3.4A10 10 0 0 0 2.3 12c0 1.6.4 3.1 1.1 4.6l3.2-2.5z"/>
-            <path fill="#FBBC05" d="M12 5.9c1.4 0 2.6.5 3.5 1.4l2.6-2.6A10 10 0 0 0 3.4 7.4l3.2 2.5c.8-2.3 2.9-4 5.4-4z"/>
-          </svg>
-          <span class="btn-google-label"></span>
-        </button>
-      </div>
-
-      <br>
-
-      <form id="login-email-form" class="contact-form" novalidate>
-        <div class="form-grid">
-          <div class="form-field form-field--full">
-            <label for="login-email" id="label-login-email"></label>
-            <input id="login-email" name="email" type="email" required class="field" autocomplete="email" />
-          </div>
-
-          <div class="form-field form-field--full">
-            <label for="login-password" id="label-login-password"></label>
-            <input id="login-password" name="password" type="password" required class="field" autocomplete="current-password" />
-          </div>
-        </div>
-
-        <p id="login-status" class="form-status" role="status" aria-live="polite" hidden></p>
-
-        <div class="form-actions" style="display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap;">
-          <button type="submit" class="btn-primary" id="login-email-submit"></button>
-        </div>
-
-        <p class="footer-link" style="text-align:center; margin-top:0.75rem;">
-          <a id="reset-link" href="/nfc/es/auth/reset.html"></a>
-        </p>
-      </form>
-    </section>
-
-    <br>
-
-    <button type="button" class="btn-pill btn-pill-outline" id="go-register"></button>
-
-    <section id="register-code-box" class="card" hidden>
-      <h3 id="register-title"></h3>
-      <p id="register-copy"></p>
-      <br>
-
-      <div class="inline-field-row">
-        <input
-          id="register-code-input"
-          class="field"
-          type="text"
-          autocomplete="one-time-code"
-        >
-        <button id="register-code-submit" type="button" class="btn-secondary"></button>
-      </div>
-
-      <p id="register-code-status" class="form-status" role="status" aria-live="polite" hidden></p>
-
-      <p class="footer-link">
-        <a id="request-code-link" href="/nfc/es/contacto.html"></a>
-      </p>
-    </section>
-
-    <p id="legal-footer" class="legal-footer"></p>
-    <p class="footer-link">
-      <a id="privacy-link" href="/nfc/es/privacidad.html"></a>
-    </p>
   </main>
 
-  <script>
-    (function () {
-      var lang = document.documentElement.lang === "en" ? "en" : "es";
-      var text = {
-        es: {
-          subtitle: "\u00bfYa hablas con tus maquinas?",
-          loginButton: "Iniciar sesi\u00f3n",
-          loginTitle: "Iniciar sesi\u00f3n",
-          loginCopy: "Accede con Google o con tu correo y contrase\u00f1a.",
-          loginGoogle: "Continuar con Google",
-          loginEmail: 'Correo electr\u00f3nico<span aria-hidden="true"> *</span>',
-          loginPassword: 'Contrase\u00f1a<span aria-hidden="true"> *</span>',
-          loginSubmit: "Entrar",
-          resetLink: "Olvid\u00e9 mi contrase\u00f1a",
-          registerButton: "Registrarse",
-          registerTitle: "C\u00f3digo de acceso",
-          registerCopy: "Introduce el c\u00f3digo de invitaci\u00f3n para registrarte.",
-          registerPlaceholder: "C\u00f3digo",
-          registerSubmit: "Continuar",
-          requestCode: "Solicitar c\u00f3digo",
-          privacy: "Pol\u00edtica de privacidad y cookies"
-        },
-        en: {
-          subtitle: "Do you already talk to your machines?",
-          loginButton: "Sign in",
-          loginTitle: "Sign in",
-          loginCopy: "Continue with Google or sign in with email and password.",
-          loginGoogle: "Continue with Google",
-          loginEmail: 'Email<span aria-hidden="true"> *</span>',
-          loginPassword: 'Password<span aria-hidden="true"> *</span>',
-          loginSubmit: "Enter",
-          resetLink: "I forgot my password",
-          registerButton: "Register",
-          registerTitle: "Access code",
-          registerCopy: "Enter the invitation code to register.",
-          registerPlaceholder: "Code",
-          registerSubmit: "Continue",
-          requestCode: "Request code",
-          privacy: "Privacy and cookie policy"
-        }
-      }[lang];
+  <footer class="landing-footer">
+    <div id="legal-footer" class="legal-footer"></div>
+    <div class="footer-link">
+      <a id="footer-privacy" href="/nfc/es/privacidad.html" data-i18n="privacy">Política de privacidad y cookies</a>
+    </div>
+  </footer>
 
-      document.getElementById("subtitle-main").textContent = text.subtitle;
-      document.getElementById("go-login").textContent = text.loginButton;
-      document.getElementById("login-title").textContent = text.loginTitle;
-      document.getElementById("login-copy").textContent = text.loginCopy;
-      document.querySelector("#login-google .btn-google-label").textContent = text.loginGoogle;
-      document.getElementById("label-login-email").innerHTML = text.loginEmail;
-      document.getElementById("label-login-password").innerHTML = text.loginPassword;
-      document.getElementById("login-email-submit").textContent = text.loginSubmit;
-      document.getElementById("reset-link").textContent = text.resetLink;
-      document.getElementById("go-register").textContent = text.registerButton;
-      document.getElementById("register-title").textContent = text.registerTitle;
-      document.getElementById("register-copy").textContent = text.registerCopy;
-      document.getElementById("register-code-input").placeholder = text.registerPlaceholder;
-      document.getElementById("register-code-submit").textContent = text.registerSubmit;
-      document.getElementById("request-code-link").textContent = text.requestCode;
-      document.getElementById("privacy-link").textContent = text.privacy;
-
-      document.getElementById("reset-link").href = lang === "en" ? "/nfc/en/auth/reset.html" : "/nfc/es/auth/reset.html";
-      document.getElementById("go-login").href = lang === "en" ? "/nfc/en/auth/login.html" : "/nfc/es/auth/login.html";
-      document.getElementById("request-code-link").href = lang === "en" ? "/nfc/en/contacto.html" : "/nfc/es/contacto.html";
-      document.getElementById("privacy-link").href = lang === "en" ? "/nfc/en/privacidad.html" : "/nfc/es/privacidad.html";
-      document.querySelector(".auth-actions").setAttribute("aria-label", lang === "en" ? "Access" : "Acceso");
-    })();
-  </script>
+  <script type="module" src="/static/js/nfc-landing.js"></script>
   <script type="module" src="/static/js/theme/theme.js"></script>
-  <script src="/static/js/setup.js"></script>
   <script type="module" src="/static/js/registro/app.js"></script>
   <script src="/static/js/footer.js"></script>
 </body>
 </html>
-

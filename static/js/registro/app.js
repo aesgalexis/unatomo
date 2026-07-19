@@ -185,6 +185,8 @@ function initSetupRegisterCode() {
   const input = document.getElementById("register-code-input");
   const submit = document.getElementById("register-code-submit");
   const status = document.getElementById("register-code-status");
+  const showCodeBtn = document.getElementById("show-code-entry");
+  const codeEntry = document.getElementById("register-code-entry");
 
   if (!registerBtn || !box || !input || !submit || !status) return;
 
@@ -199,8 +201,18 @@ function initSetupRegisterCode() {
   function toggleBox() {
     box.hidden = !box.hidden;
     clearStatus();
-    if (!box.hidden) input.focus();
+    if (!box.hidden) {
+      showCodeBtn?.focus();
+    } else if (codeEntry) {
+      codeEntry.hidden = true;
+    }
   }
+
+  showCodeBtn?.addEventListener("click", () => {
+    if (codeEntry) codeEntry.hidden = false;
+    clearStatus();
+    input.focus();
+  });
 
   registerBtn.addEventListener("click", () => {
     if (!box.hidden) {
@@ -209,7 +221,8 @@ function initSetupRegisterCode() {
     }
     requestInviteCodeAndRedirect(paths.register, { showInline: toggleBox });
   });
-  if (shouldOpenInviteGate()) {
+  const shouldOpenFromQuery = new URLSearchParams(window.location.search).get("setup") === "1";
+  if (shouldOpenInviteGate() || shouldOpenFromQuery) {
     clearInviteGateFlag();
     if (box.hidden) toggleBox();
   }

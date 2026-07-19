@@ -32,6 +32,8 @@ firebase/functions/src/
 │   ├── layout.ts
 │   ├── suggestions.ts
 │   └── todos.ts
+├── publicSite/
+│   └── landingStats.ts
 └── machines/
     ├── access.ts
     ├── adminInvites.ts
@@ -55,6 +57,7 @@ firebase/functions/src/
 accounts/       account handles and account identity operations
 controlPanel/   superadmin users, status, registration codes, and tag inventory
 dashboard/      layout, suggestions, and To Do
+publicSite/     public, aggregate-only data used by unauthenticated pages
 machines/       administrator links/invites, ownership transfers, and Tag ID/QR
 core/           Firebase initialization and genuinely cross-domain primitives
 ```

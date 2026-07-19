@@ -11,6 +11,18 @@
 
   const lang = getCurrentLang();
   const basePrefix = getBasePrefix();
+  const isPublicNfcPage =
+    document.body.classList.contains("nfc-landing") ||
+    document.body.classList.contains("nfc-public-page");
+  const contactHref = isPublicNfcPage
+    ? `${basePrefix}/${lang}/contacto.html`
+    : `${basePrefix}/${lang}/index.html#/contacto`;
+  const whatsNewHref = isPublicNfcPage
+    ? `${basePrefix}/${lang}/novedades.html`
+    : `${basePrefix}/${lang}/index.html#/novedades`;
+  const tagsHref = isPublicNfcPage
+    ? `${basePrefix}/${lang}/tags.html`
+    : `${basePrefix}/${lang}/index.html#/tags`;
   const legalFooter = document.getElementById("legal-footer");
   if (!legalFooter) return;
 
@@ -25,14 +37,14 @@
 
   const links = lang === "en"
     ? [
-        { href: `${basePrefix}/en/index.html#/novedades`, label: "What’s new" },
-        { href: `${basePrefix}/en/index.html#/tags`, label: "Physical tags" },
-        { href: `${basePrefix}/en/index.html#/contacto`, label: "Contact" }
+        { href: whatsNewHref, label: "What’s new" },
+        { href: tagsHref, label: "Physical tags" },
+        { href: contactHref, label: "Contact" }
       ]
     : [
-        { href: `${basePrefix}/es/index.html#/novedades`, label: "Novedades" },
-        { href: `${basePrefix}/es/index.html#/tags`, label: "Tags f\u00edsicos" },
-        { href: `${basePrefix}/es/index.html#/contacto`, label: "Contacto" }
+        { href: whatsNewHref, label: "Novedades" },
+        { href: tagsHref, label: "Tags f\u00edsicos" },
+        { href: contactHref, label: "Contacto" }
       ];
 
   links.forEach(({ href, label }) => {

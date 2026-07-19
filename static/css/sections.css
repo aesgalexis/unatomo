@@ -7,6 +7,13 @@
   margin: 0 0 12px;
 }
 
+.nfc-public-page .section-block > h1 {
+  margin: 0 0 12px;
+  font-size: clamp(1.75rem, 5vw, 2.1rem);
+  font-weight: 570;
+  letter-spacing: -0.03em;
+}
+
 .section-block p {
   margin: 0 0 12px;
 }

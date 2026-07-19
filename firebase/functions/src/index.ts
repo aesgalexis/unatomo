@@ -61,6 +61,10 @@ export {
   createMachineDocumentDownloadUrl,
   downloadMachineDocument,
 } from "./machines/documents";
+export {
+  getPublicNfcLandingStats,
+  refreshPublicNfcLandingStats,
+} from "./publicSite/landingStats";
 
 // Firebase Admin initialization and global runtime options are centralized in
 // core/firebase.ts. Keep this file as the stable public export boundary while

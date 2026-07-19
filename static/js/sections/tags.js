@@ -1,13 +1,14 @@
-﻿const isEnglish = () => /^\/en(?:\/|$)/i.test(window.location.pathname);
+import { getCurrentLang } from "/static/js/site/locale.js";
 
-export const render = (mount) => {
-  const isEn = isEnglish();
+export const render = (mount, { headingTag = "h2" } = {}) => {
+  const isEn = getCurrentLang() === "en";
+  const heading = headingTag === "h1" ? "h1" : "h2";
   const wrap = document.createElement("div");
   wrap.className = "section-block section-tags";
 
   if (isEn) {
     wrap.innerHTML = `
-      <h2>Physical tags</h2>
+      <${heading}>Physical tags</${heading}>
 
       <p>Physical tags allow you to link a real machine directly to its digital information.</p>
       <p>The idea is simple: you place a label on the machine, scan it with your phone, and access its record, documentation, tasks or history without having to search for anything manually.</p>
@@ -88,7 +89,7 @@ export const render = (mount) => {
   }
 
   wrap.innerHTML = `
-    <h2>Tags físicos</h2>
+    <${heading}>Tags físicos</${heading}>
 
     <p>Los tags físicos permiten vincular una máquina real con su información digital de forma directa.</p>
     <p>La idea es simple: colocas una etiqueta en la máquina, la escaneas con el móvil y accedes a su ficha, documentación, tareas o historial sin tener que buscar nada manualmente.</p>

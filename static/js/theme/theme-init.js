@@ -1,9 +1,8 @@
 (() => {
   try {
     const stored = localStorage.getItem("theme");
-    const theme =
-      stored === "dark" || stored === "light" ? stored : "dark";
-    document.documentElement.dataset.theme = theme;
-    document.documentElement.style.backgroundColor = theme === "dark" ? "#000" : "#fff";
+    if (stored !== "dark" && stored !== "light") return;
+    document.documentElement.dataset.theme = stored;
+    document.documentElement.style.backgroundColor = stored === "dark" ? "#000" : "#fff";
   } catch {}
 })();

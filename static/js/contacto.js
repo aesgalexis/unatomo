@@ -1,7 +1,23 @@
 (function () {
-  const isEn = /^\/en(?:\/|$)/i.test(window.location.pathname);
+  const isEn = document.documentElement.lang.toLowerCase().startsWith("en");
   const form = document.querySelector(".contact-form");
   if (!form) return;
+
+  const requestedSubject = new URLSearchParams(window.location.search).get("subject");
+  if (requestedSubject === "registration") {
+    const subjectSelect = form.querySelector('select[name="asunto"]');
+    const registrationOption = Array.from(subjectSelect?.options || []).find((option) =>
+      /^(Registro|Registration)$/i.test(option.textContent.trim())
+    );
+    if (subjectSelect && registrationOption) subjectSelect.value = registrationOption.value;
+
+    const messageField = form.querySelector('textarea[name="mensaje"]');
+    if (messageField && !messageField.value.trim()) {
+      messageField.value = isEn
+        ? "Hello, I would like to register for UNATOMO/NFC and request an access code."
+        : "Hola, me gustaría registrarme en UNATOMO/NFC y solicitar un código de acceso.";
+    }
+  }
 
   const status = form.querySelector(".form-status");
   const submitBtn =

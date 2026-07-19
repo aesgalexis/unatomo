@@ -128,7 +128,11 @@
 }
 
 .mc-title {
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
   font-weight: 600;
+  line-height: 1.2;
   color: var(--fg);
   cursor: pointer;
 }
@@ -437,6 +441,13 @@
   margin-bottom: 12px;
   border-bottom: 1px solid var(--border-subtle);
   padding: 8px 0;
+}
+
+.machine-card[data-expanded="true"] .mc-tabs {
+  margin-left: -1.25rem;
+  margin-right: -1.25rem;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
 }
 
 .mc-tab {

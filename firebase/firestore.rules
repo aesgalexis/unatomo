@@ -29,6 +29,11 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    match /public_metrics/{metricId} {
+      allow get: if metricId == "nfc";
+      allow list, write: if false;
+    }
+
     match /users/{uid} {
       allow read: if isSignedIn() && request.auth.uid == uid;
 

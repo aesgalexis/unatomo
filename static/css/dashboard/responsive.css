@@ -166,7 +166,8 @@
 
   .machine-card[data-expanded="false"] .mc-title {
     line-height: 1.12;
-    max-height: 1.12em;
+    min-height: 28px;
+    max-height: 28px;
   }
 
   #machineList .machine-group > .machine-group-body > .machine-card-wrap,

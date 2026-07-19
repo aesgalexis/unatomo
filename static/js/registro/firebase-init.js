@@ -14,6 +14,7 @@ import {
   sendPasswordResetEmail
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 import { getStorage } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-storage.js";
+import { getFunctions } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-functions.js";
 
 const runtimeConfig = window.__UNATOMO_CONFIG__ || {};
 const firebaseConfig = {
@@ -56,6 +57,7 @@ export const appCheck = initializedAppCheck;
 export const db = getFirestore(app);
 export const auth = getAuth(app);
 export const storage = getStorage(app);
+export const functions = getFunctions(app);
 
 const buildLoginResult = async (user) => {
   if (!user) return { ok: false };

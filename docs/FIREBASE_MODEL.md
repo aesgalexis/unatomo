@@ -52,6 +52,10 @@ Read this before changing data flows, callable functions, machine ownership, adm
   It is not exposed in account settings.
   Both collections are separate from `usernames`, which stores machine-local
   credentials.
+- `public_metrics/nfc`: aggregate-only landing metrics written by the backend.
+  The public client may read this one document, but cannot list the collection
+  or write any metric. It contains only machine, registered-profile, linked-tag
+  counts, a schema version, and the last backend update timestamp.
 
 Machine documents are stored as metadata on `machines.documents`. The actual files live in Firebase Storage under:
 
@@ -127,6 +131,13 @@ frontend wrappers live under `static/js/dashboard/`.
   `ENFORCE_APP_CHECK=true`.
 - `cleanupMachineAccessSessions`: scheduled cleanup for expired
   `machine_access_sessions` documents. Expired sessions are also deleted on use.
+- `refreshPublicNfcLandingStats`: scheduled six-hour refresh of the aggregate
+  `public_metrics/nfc` document. It never publishes machine, account, Tag ID,
+  incident, task, or integrity details.
+- `getPublicNfcLandingStats`: public, no-input callable used only when the
+  aggregate does not exist yet. It creates that aggregate once and returns the
+  same three counts, so a newly deployed landing does not wait for its first
+  scheduled refresh. It follows the existing optional App Check enforcement.
 
 ## Integrity Cleanup Log
 

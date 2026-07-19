@@ -11,12 +11,12 @@ const formatDate = (value, isEn) => {
   }).format(date);
 };
 
-export const render = (mount) => {
+export const render = (mount, { headingTag = "h2" } = {}) => {
   const isEn = getCurrentLang() === "en";
   const wrap = document.createElement("div");
   wrap.className = "section-block section-whats-new";
 
-  const title = document.createElement("h2");
+  const title = document.createElement(headingTag === "h1" ? "h1" : "h2");
   title.textContent = isEn ? "What's new" : "Novedades";
   wrap.appendChild(title);
 
