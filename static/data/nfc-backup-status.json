@@ -1,7 +1,33 @@
 {
   "kind": "unatomo-nfc-backup-status",
   "overall": {
-    "status": "pending",
+    "status": "ok",
+    "startedAt": "2026-07-19T14:04:41.203Z",
+    "completedAt": "2026-07-19T14:05:30.805Z",
+    "projectId": "unatomo-c20a4",
+    "manifestFile": ".backups/2026-07-19T14-05-30-809Z-nfc-backup-manifest.json",
+    "firestoreCollections": [
+      "machines",
+      "dashboard_layout",
+      "machine_access",
+      "tags",
+      "admin_machine_links",
+      "admin_machine_invites",
+      "machine_transfer_invites",
+      "users",
+      "account_handles",
+      "account_handle_history",
+      "usernames",
+      "account_directory",
+      "dashboard_suggestions",
+      "dashboard_todos",
+      "registration_codes"
+    ],
+    "storagePrefixes": [
+      "machine-docs/",
+      "tag-qrs/"
+    ],
+    "firebaseAuth": true,
     "pendingScopes": [
       "legacy-tenant-machines",
       "restore-tools",
@@ -9,13 +35,60 @@
     ]
   },
   "firestore": {
-    "status": "pending"
+    "status": "ok",
+    "completedAt": "2026-07-19T14:09:55.185Z",
+    "file": ".backups/2026-07-19T14-09-55-186Z-nfc-firestore.json",
+    "projectId": "unatomo-c20a4",
+    "collectionCount": 15,
+    "documentCount": 330,
+    "collections": {
+      "machines": 77,
+      "dashboard_layout": 4,
+      "machine_access": 38,
+      "tags": 38,
+      "admin_machine_links": 53,
+      "admin_machine_invites": 64,
+      "machine_transfer_invites": 1,
+      "users": 7,
+      "account_handles": 1,
+      "account_handle_history": 0,
+      "usernames": 6,
+      "account_directory": 7,
+      "dashboard_suggestions": 3,
+      "dashboard_todos": 23,
+      "registration_codes": 8
+    }
   },
   "storage": {
-    "status": "pending"
+    "status": "ok",
+    "completedAt": "2026-07-19T14:10:37.392Z",
+    "file": ".backups/2026-07-19T14-09-56-274Z-nfc-storage-inventory.json",
+    "projectId": "unatomo-c20a4",
+    "bucket": "unatomo-c20a4.firebasestorage.app",
+    "prefixCount": 2,
+    "fileCount": 74,
+    "downloadedCount": 74,
+    "totalBytes": 56574013,
+    "downloadDir": ".backups/2026-07-19T14-09-56-274Z-nfc-storage-files",
+    "prefixes": {
+      "machine-docs/": {
+        "count": 33,
+        "totalBytes": 56469754
+      },
+      "tag-qrs/": {
+        "count": 41,
+        "totalBytes": 104259
+      }
+    }
   },
   "auth": {
-    "status": "pending"
+    "status": "ok",
+    "startedAt": "2026-07-19T14:10:37.820Z",
+    "completedAt": "2026-07-19T14:10:38.559Z",
+    "file": ".backups/2026-07-19T14-10-38-262Z-nfc-auth.json",
+    "projectId": "unatomo-c20a4",
+    "userCount": 9,
+    "size": 8876
   },
-  "updatedAt": ""
+  "updatedAt": "2026-07-19T14:10:38.560Z"
 }
