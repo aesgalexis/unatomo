@@ -19,7 +19,6 @@ feature-specific docs.
 - `nfc/es/` and `nfc/en/`: localized NFC/dashboard/auth/static pages,
   including account settings and the global access page.
 - `nfc/controlpanel/`: owner-only control panel UI.
-- `demo/`: local/demo app surfaces.
 
 ## Frontend Source
 
