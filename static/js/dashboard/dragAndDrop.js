@@ -213,6 +213,7 @@ export const initGroupedDragAndDrop = (listEl, callbacks = {}) => {
   });
 
   listEl.addEventListener("dragover", (event) => {
+    if (callbacks.allowReorder?.() === false) return;
     event.preventDefault();
     const dragging = draggedType === "group"
       ? listEl.querySelector(".machine-group.is-dragging")
@@ -267,6 +268,7 @@ export const initGroupedDragAndDrop = (listEl, callbacks = {}) => {
   });
 
   listEl.addEventListener("drop", (event) => {
+    if (callbacks.allowReorder?.() === false) return;
     event.preventDefault();
     if (!draggedId) return;
     if (draggedType === "group") {

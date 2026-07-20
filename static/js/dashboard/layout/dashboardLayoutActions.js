@@ -274,10 +274,10 @@ export const moveMachineAfterTarget = (layout = {}, machines = [], draggedId = "
 };
 
 export const moveMachineToGroup = (layout = {}, machines = [], draggedId = "", targetGroupId = "") => {
-  if (!draggedId || !targetGroupId) return { layout };
+  if (!draggedId) return { layout };
   const nextLayout = cloneLayout(layout);
   const groups = nextLayout.groups || [];
-  if (!groups.some((group) => group.id === targetGroupId)) return { layout };
+  if (targetGroupId && !groups.some((group) => group.id === targetGroupId)) return { layout };
   const placements = nextLayout.placements || {};
   const previousGroupId = placements[draggedId]?.groupId || "";
   const nextOrder =

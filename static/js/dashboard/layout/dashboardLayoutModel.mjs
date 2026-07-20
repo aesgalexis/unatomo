@@ -38,6 +38,9 @@ export const normalizeTabOrder = (value) => {
 export const normalizeMachineViewMode = (value) =>
   value === "flat" ? "flat" : "grouped";
 
+export const normalizeGroupPresentationMode = (value) =>
+  value === "tree" ? "tree" : "inline";
+
 export const normalizeMachineSortMode = (value) =>
   ["manual", "incidents", "name"].includes(value) ? value : "manual";
 
@@ -131,6 +134,7 @@ export const normalizeDashboardLayout = (layout = {}, options = {}) => {
     registrySeenAt: normalizeIsoString(layout?.registrySeenAt),
     suggestionsSeenAt: normalizeIsoString(layout?.suggestionsSeenAt),
     machineViewMode: normalizeMachineViewMode(layout?.machineViewMode),
+    groupPresentationMode: normalizeGroupPresentationMode(layout?.groupPresentationMode),
     machineSortMode: normalizeMachineSortMode(layout?.machineSortMode)
   };
 };

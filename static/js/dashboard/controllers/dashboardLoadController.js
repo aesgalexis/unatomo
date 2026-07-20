@@ -45,6 +45,8 @@ export const createDashboardLoadController = (dependencies) => {
     state.selectedTabById = {};
     state.configSubtabById = {};
     state.tagStatusById = {};
+    state.selectedTreeGroupId = "";
+    state.expandedTreeGroupIds = [];
     clearMobileDetailState();
     resetDashboardLoadState(state);
     state.initialGroupPriorityOrder = {};

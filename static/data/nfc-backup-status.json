@@ -36,27 +36,15 @@
   },
   "firestore": {
     "status": "ok",
-    "completedAt": "2026-07-19T14:09:55.185Z",
-    "file": ".backups/2026-07-19T14-09-55-186Z-nfc-firestore.json",
+    "completedAt": "2026-07-19T14:30:25.803Z",
+    "file": ".backups/2026-07-19T14-30-25-804Z-nfc-firestore.json",
     "projectId": "unatomo-c20a4",
-    "collectionCount": 15,
-    "documentCount": 330,
+    "collectionCount": 3,
+    "documentCount": 85,
     "collections": {
       "machines": 77,
-      "dashboard_layout": 4,
-      "machine_access": 38,
-      "tags": 38,
-      "admin_machine_links": 53,
-      "admin_machine_invites": 64,
-      "machine_transfer_invites": 1,
       "users": 7,
-      "account_handles": 1,
-      "account_handle_history": 0,
-      "usernames": 6,
-      "account_directory": 7,
-      "dashboard_suggestions": 3,
-      "dashboard_todos": 23,
-      "registration_codes": 8
+      "public_metrics": 1
     }
   },
   "storage": {
@@ -90,5 +78,5 @@
     "userCount": 9,
     "size": 8876
   },
-  "updatedAt": "2026-07-19T14:10:38.560Z"
+  "updatedAt": "2026-07-19T14:30:25.814Z"
 }

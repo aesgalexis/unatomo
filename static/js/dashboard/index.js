@@ -25,7 +25,7 @@ import { filterMachines } from "./components/machineSearch/machineFilter.js";
 import { createMachineSearchBar } from "./components/machineSearch/machineSearchBar.js";
 import { createDashboardSectionNav } from "./components/sectionNav.js";
 import { openStatusIncidentModal } from "./components/statusIncidentModal/statusIncidentModal.js";
-import { createDashboardViewMenu } from "./components/viewMenu/viewMenu.js";
+import { createDashboardGroupTreeShell } from "./components/groupTree/groupTreeShell.js";
 import { createDashboardLoading } from "./components/loading/dashboardLoading.js";
 import {
   getDashboardLoadProgress,
@@ -94,7 +94,9 @@ import { createDashboardOrderingController } from "./controllers/dashboardOrderi
 import { createMachineAccessController } from "./controllers/machineAccessController.js";
 import { createDashboardNavigationController } from "./controllers/dashboardNavigationController.js";
 import { createDashboardLoadController } from "./controllers/dashboardLoadController.js";
+import { createDashboardGroupTreeController } from "./controllers/dashboardGroupTreeController.js";
 import { createDashboardTopbarController } from "./controllers/dashboardTopbarController.js";
+import { createDashboardViewModeController } from "./controllers/dashboardViewModeController.js";
 import { createDashboardRenderer } from "./rendering/dashboardRenderer.js";
 import { createGroupSectionRenderer } from "./rendering/groupSectionRenderer.js";
 import {
@@ -136,6 +138,11 @@ if (mount) {
   let dashboardInitPromise = null;
   let dashboardSessionVersion = 0;
   let groupedDragAndDropReady = false;
+  const largeDashboardQuery = window.matchMedia("(min-width: 1280px)");
+  const isTreeModeActive = () =>
+    largeDashboardQuery.matches &&
+    state.dashboardLayout?.machineViewMode === "grouped" &&
+    state.dashboardLayout?.groupPresentationMode === "tree";
 
   const dashboardTooltips = createDashboardTooltips();
   const clearDashboardTooltips = dashboardTooltips.clear;
@@ -340,60 +347,18 @@ if (mount) {
     updateTodoNav
   } = dashboardNavigation;
 
-  const materializeCurrentFlatOrder = () => {
-    const currentSort = state.dashboardLayout?.machineSortMode || "manual";
-    if (state.dashboardLayout?.machineViewMode !== "flat" || currentSort === "manual") return;
-    const orderedIds = sortFlatMachines(state.draftMachines, currentSort)
-      .map((machine) => machine.id)
-      .filter(Boolean);
-    if (!orderedIds.length) return;
-    const result = reorderFlatMachines(state.draftMachines, orderedIds);
-    result.touchedMachineIds.forEach((id) => autoSave.scheduleSave(id, "order"));
-    state.draftMachines = result.machines;
-    saveOrderCache(result.machines);
-  };
-  const viewMenu = createDashboardViewMenu({
-    currentMode: state.dashboardLayout.machineViewMode || "grouped",
-    currentSort: state.dashboardLayout.machineSortMode || "manual",
-    onChange: (mode) => {
-      const nextGroups = mode === "grouped"
-        ? (state.dashboardLayout.groups || []).map((group) => ({
-            ...group,
-            collapsed: true
-          }))
-        : state.dashboardLayout.groups;
-      state.dashboardLayout = normalizeDashboardLayout({
-        ...state.dashboardLayout,
-        groups: nextGroups,
-        machineViewMode: mode,
-        machineSortMode: mode === "grouped"
-          ? "manual"
-          : state.dashboardLayout.machineSortMode
-      });
-      viewMenu.setMode(state.dashboardLayout.machineViewMode);
-      viewMenu.setSortMode(state.dashboardLayout.machineSortMode);
-      upsertDashboardLayout(state.uid, {
-        groups: state.dashboardLayout.groups,
-        placements: state.dashboardLayout.placements,
-        machineViewMode: state.dashboardLayout.machineViewMode,
-        machineSortMode: state.dashboardLayout.machineSortMode
-      })
-        .catch(() => notifyTopbar(t("dashboard.saveError", "Error al guardar")));
-      renderCards({ preserveScroll: true, preserveAnchor: false });
-    },
-    onSortChange: (mode) => {
-      if (mode === "manual") {
-        materializeCurrentFlatOrder();
-      }
-      state.dashboardLayout = normalizeDashboardLayout({
-        ...state.dashboardLayout,
-        machineSortMode: mode
-      });
-      viewMenu.setSortMode(state.dashboardLayout.machineSortMode);
-      upsertDashboardLayout(state.uid, { machineSortMode: state.dashboardLayout.machineSortMode })
-        .catch(() => notifyTopbar(t("dashboard.saveError", "Error al guardar")));
-      renderCards({ preserveScroll: true, preserveAnchor: false });
-    }
+  const { viewMenu } = createDashboardViewModeController({
+    getAutoSave: () => autoSave,
+    isTreeAvailable: () => largeDashboardQuery.matches,
+    normalizeDashboardLayout: (layout) => normalizeDashboardLayout(layout),
+    notifyTopbar: (message) => notifyTopbar(message),
+    renderCards: (options) => renderCards(options),
+    reorderFlatMachines,
+    saveOrderCache,
+    sortFlatMachines,
+    state,
+    t,
+    upsertDashboardLayout
   });
 
 
@@ -417,14 +382,17 @@ if (mount) {
   const inviteBanner = document.createElement("div");
   inviteBanner.className = "admin-invite-banner";
   inviteBanner.style.display = "none";
+  const { workspace: dashboardWorkspace, groupTree } = createDashboardGroupTreeShell({
+    inviteBanner,
+    filterInfo,
+    list
+  });
 
   addBar.appendChild(loadingEl);
   mount.appendChild(sectionNav);
   mount.appendChild(addBar);
   mount.appendChild(mobileBackBtn);
-  mount.appendChild(inviteBanner);
-  mount.appendChild(filterInfo);
-  mount.appendChild(list);
+  mount.appendChild(dashboardWorkspace);
 
   const updateSaveState = (message = "") => {
     setTopbarSaveStatus(message);
@@ -598,7 +566,7 @@ if (mount) {
     updateTagStatusUI
   } = dashboardMachines;
 
-  const { createGroupSection } = createGroupSectionRenderer({
+  const { createGroupSection, getGroupMenuActions } = createGroupSectionRenderer({
     canDashboardGroupHaveChildren,
     canWrapGroupWithParent,
     clearInitialGroupPriorityOrder,
@@ -632,6 +600,20 @@ if (mount) {
     syncSearchVisualState
   });
   const { captureViewportAnchor, restoreViewport } = dashboardViewport;
+  const { renderTree: renderGroupTree } = createDashboardGroupTreeController({
+    canMoveGroup: (draggedId, targetId) => canMoveGroupIntoGroup(state.dashboardLayout || {}, draggedId, targetId),
+    container: groupTree,
+    getGroupMenuActions,
+    getPendingTaskCount,
+    isTreeActive: isTreeModeActive,
+    moveGroupToGroup: (draggedId, targetId) => moveGroupToTargetGroup(draggedId, targetId),
+    moveGroupToRoot: (draggedGroupId) => moveGroupToRootLevel(draggedGroupId),
+    moveMachineToGroup: (machineId, groupId) => moveMachineToGroup(machineId, groupId),
+    normalizeStatus,
+    renderCards: (options) => renderCards(options),
+    state,
+    t
+  });
   const dashboardInternalViews = createDashboardInternalViewController({
     state,
     list,
@@ -696,9 +678,11 @@ if (mount) {
     installDocumentHooks,
     installTaskHooks,
     isMobileDashboardViewport,
+    isLargeDashboardViewport: () => largeDashboardQuery.matches,
     isOwnerMachine,
     leaveAdminRole,
     list,
+    mount,
     locallyVisibleEmptyGroupIds,
     markLocalWrite,
     normalizeDashboardLayout,
@@ -714,6 +698,7 @@ if (mount) {
     removeMachineFromState,
     renderDashboardNoResultsPlaceholder,
     renderLoadErrorPlaceholder,
+    renderGroupTree,
     renderPlaceholder,
     replaceMachine,
     RESTORE_OPERATION_TASK_SOURCE,
@@ -722,6 +707,7 @@ if (mount) {
     scheduleHeightSync,
     sortFlatMachines,
     state,
+    groupTree,
     syncDashboardViewChrome,
     syncMachineAccessListeners,
     syncMobileDetailUI,
@@ -745,6 +731,7 @@ if (mount) {
     clearInitialGroupPriorityOrder,
     computePrevOrder,
     getNextGroupTitle,
+    isTreeSelectionActive: isTreeModeActive,
     normalizeDashboardLayout,
     renderCards,
     saveDashboardLayout,
@@ -754,6 +741,7 @@ if (mount) {
   const {
     handleGroupedReorder,
     handleMixedItemReorder,
+    moveGroupToRootLevel,
     moveGroupToTargetGroup,
     moveMachineToGroup,
     moveMachineToTargetGroup
@@ -773,7 +761,15 @@ if (mount) {
           draggedGroupId,
           targetGroupId
         ),
-      allowGrouping: () => state.dashboardLayout?.machineViewMode !== "flat"
+      allowGrouping: () =>
+        state.dashboardLayout?.machineViewMode !== "flat" &&
+        (
+          state.dashboardLayout?.groupPresentationMode !== "tree" ||
+          !largeDashboardQuery.matches
+        ),
+      allowReorder: () =>
+        state.dashboardLayout?.groupPresentationMode !== "tree" ||
+        !largeDashboardQuery.matches
     });
     groupedDragAndDropReady = true;
   };
@@ -843,6 +839,10 @@ if (mount) {
       }
     }
     renderCards({ preserveScroll: false });
+  });
+
+  largeDashboardQuery.addEventListener("change", () => {
+    renderCards({ preserveScroll: true, preserveAnchor: false });
   });
 
   onAuthStateChanged(auth, async (user) => {

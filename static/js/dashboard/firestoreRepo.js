@@ -17,6 +17,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 import {
   normalizeDashboardTitle,
+  normalizeGroupPresentationMode,
   normalizeIsoString,
   normalizeMachineSortMode,
   normalizeMachineViewMode,
@@ -55,6 +56,10 @@ export const upsertDashboardLayout = async (uid, layout) => {
   const hasRegistrySeenAt = Object.prototype.hasOwnProperty.call(layout || {}, "registrySeenAt");
   const hasSuggestionsSeenAt = Object.prototype.hasOwnProperty.call(layout || {}, "suggestionsSeenAt");
   const hasMachineViewMode = Object.prototype.hasOwnProperty.call(layout || {}, "machineViewMode");
+  const hasGroupPresentationMode = Object.prototype.hasOwnProperty.call(
+    layout || {},
+    "groupPresentationMode"
+  );
   const hasMachineSortMode = Object.prototype.hasOwnProperty.call(layout || {}, "machineSortMode");
   const dashboardTitle = normalizeDashboardTitle(layout?.dashboardTitle);
   const payload = {
@@ -77,6 +82,11 @@ export const upsertDashboardLayout = async (uid, layout) => {
   }
   if (hasMachineViewMode) {
     payload.machineViewMode = normalizeMachineViewMode(layout?.machineViewMode);
+  }
+  if (hasGroupPresentationMode) {
+    payload.groupPresentationMode = normalizeGroupPresentationMode(
+      layout?.groupPresentationMode
+    );
   }
   if (hasMachineSortMode) {
     payload.machineSortMode = normalizeMachineSortMode(layout?.machineSortMode);

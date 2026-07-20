@@ -134,6 +134,7 @@ const dashboardCssImports = [
   "/static/css/effects/inactive_sections/inactive.css",
   "/static/css/components/dashboard-section-nav.css",
   "/static/css/dashboard/shell.css",
+  "/static/css/dashboard/group-tree.css",
   "/static/css/dashboard/incident-modal.css",
   "/static/css/dashboard/registry.css",
   "/static/css/dashboard/gallery.css",

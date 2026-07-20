@@ -6,6 +6,7 @@ import {
   createDashboardGroupId,
   createGroupFromMachineDrop,
   moveGroupToGroup,
+  moveGroupToRoot,
   moveMachineAfterTarget,
   moveMachineToGroup as moveMachineToDashboardGroup,
   reorderFlatMachines,
@@ -21,6 +22,7 @@ export const createDashboardOrderingController = ({
   clearInitialGroupPriorityOrder,
   computePrevOrder,
   getNextGroupTitle,
+  isTreeSelectionActive,
   normalizeDashboardLayout,
   renderCards,
   saveDashboardLayout,
@@ -171,7 +173,7 @@ export const createDashboardOrderingController = ({
 
   const moveMachineToGroup = (draggedId, targetGroupId) => {
     if (state.dashboardLayout?.machineViewMode === "flat") return;
-    if (!draggedId || !targetGroupId) return;
+    if (!draggedId) return;
     clearInitialGroupPriorityOrder(targetGroupId);
     state.dashboardLayout = normalizeDashboardLayout(state.dashboardLayout);
     const result = moveMachineToDashboardGroup(
@@ -192,6 +194,18 @@ export const createDashboardOrderingController = ({
     state.dashboardLayout = normalizeDashboardLayout(state.dashboardLayout);
     const result = moveGroupToGroup(state.dashboardLayout, draggedGroupId, targetGroupId);
     state.dashboardLayout = result.layout;
+    saveDashboardLayout();
+    renderCards({ preserveScroll: true });
+  };
+
+  const moveGroupToRootLevel = (draggedGroupId) => {
+    if (state.dashboardLayout?.machineViewMode === "flat" || !draggedGroupId) return;
+    clearInitialGroupPriorityOrder();
+    state.dashboardLayout = normalizeDashboardLayout(state.dashboardLayout);
+    state.dashboardLayout = moveGroupToRoot(
+      state.dashboardLayout,
+      draggedGroupId
+    ).layout;
     saveDashboardLayout();
     renderCards({ preserveScroll: true });
   };
@@ -217,6 +231,26 @@ export const createDashboardOrderingController = ({
     machine.role = "owner";
     machine.ownerEmail = state.adminEmail || "";
     state.draftMachines = [machine, ...state.draftMachines];
+    const selectedGroupId = state.selectedTreeGroupId || "";
+    const selectedGroupExists = isTreeSelectionActive() &&
+      (state.dashboardLayout?.groups || []).some((group) => group.id === selectedGroupId);
+    if (selectedGroupExists) {
+      const siblingOrders = Object.values(state.dashboardLayout?.placements || {})
+        .filter((placement) => placement?.groupId === selectedGroupId)
+        .map((placement) => placement.order)
+        .filter(Number.isFinite);
+      const placementOrder = siblingOrders.length
+        ? Math.min(...siblingOrders) - 1
+        : 0;
+      state.dashboardLayout = normalizeDashboardLayout({
+        ...state.dashboardLayout,
+        placements: {
+          ...(state.dashboardLayout?.placements || {}),
+          [machine.id]: {groupId: selectedGroupId, order: placementOrder}
+        }
+      });
+      saveDashboardLayout();
+    }
     saveOrderCache(state.draftMachines);
     renderCards();
     autoSave.saveNow(machine.id, "create");
@@ -225,6 +259,7 @@ export const createDashboardOrderingController = ({
   return {
     handleGroupedReorder,
     handleMixedItemReorder,
+    moveGroupToRootLevel,
     moveGroupToTargetGroup,
     moveMachineToGroup,
     moveMachineToTargetGroup

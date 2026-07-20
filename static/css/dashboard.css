@@ -1,6 +1,7 @@
 @import "/static/css/effects/inactive_sections/inactive.css";
 @import "/static/css/components/dashboard-section-nav.css";
 @import "/static/css/dashboard/shell.css";
+@import "/static/css/dashboard/group-tree.css";
 @import "/static/css/dashboard/incident-modal.css";
 @import "/static/css/dashboard/registry.css";
 @import "/static/css/dashboard/gallery.css";

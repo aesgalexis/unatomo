@@ -22,6 +22,7 @@ export const createDashboardState = ({
     registrySeenAt: "",
     suggestionsSeenAt: "",
     machineViewMode: "grouped",
+    groupPresentationMode: "inline",
     machineSortMode: "manual"
   },
   activeView,
@@ -40,6 +41,8 @@ export const createDashboardState = ({
   canTodo: false,
   isSuperadmin: false,
   searchQuery: "",
+  selectedTreeGroupId: "",
+  expandedTreeGroupIds: [],
   pendingInvites: [],
   pendingTransferInvites: [],
   mobileFocusedMachineId: "",

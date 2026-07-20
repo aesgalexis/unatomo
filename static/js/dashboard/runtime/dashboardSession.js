@@ -65,6 +65,7 @@ export const createDashboardSession = (dependencies) => {
         registrySeenAt: "",
         suggestionsSeenAt: "",
         machineViewMode: "grouped",
+        groupPresentationMode: "inline",
         machineSortMode: "manual"
       };
     }

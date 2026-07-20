@@ -27,6 +27,7 @@ const {
   createGroupFromMachineDrop,
   createParentGroup,
   deleteGroup,
+  moveMachineToGroup,
   moveGroupToGroup,
   reorderMixedItems,
 } = actionsModule;
@@ -51,13 +52,20 @@ assert.equal(
 const flatHierarchy = normalizeDashboardLayout({
   ...hierarchy,
   machineViewMode: "flat",
+  groupPresentationMode: "tree",
   machineSortMode: "name",
 });
 assert.equal(flatHierarchy.machineViewMode, "flat");
+assert.equal(flatHierarchy.groupPresentationMode, "tree");
 assert.equal(flatHierarchy.machineSortMode, "name");
 assert.equal(
   flatHierarchy.groups.find((entry) => entry.id === "area")?.parentGroupId,
   "client",
+);
+assert.equal(
+  normalizeDashboardLayout({groupPresentationMode: "unknown"})
+    .groupPresentationMode,
+  "inline",
 );
 
 const tooDeep = normalizeDashboardLayout({
@@ -178,6 +186,13 @@ assert.equal(
     ?.parentGroupId,
   "client",
 );
+const ungroupedMachine = moveMachineToGroup(
+  depthLimitLayout,
+  machines,
+  "one",
+  "",
+).layout;
+assert.equal(ungroupedMachine.placements.one.groupId, "");
 
 const deleted = deleteGroup(nested, "client").layout;
 assert.equal(

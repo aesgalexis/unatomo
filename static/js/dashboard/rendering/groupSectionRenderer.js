@@ -90,6 +90,27 @@ export const createGroupSectionRenderer = (dependencies) => {
     renderCards({ preserveScroll: true });
   }
 
+  const getGroupMenuActions = (group, depth = 0) => {
+    const actions = [];
+    if (canWrapGroupWithParent(state.dashboardLayout, group.id)) {
+      actions.push({
+        label: t("dashboard.groupAddParent", "A\u00f1adir grupo superior"),
+        onClick: () => handleAddParentGroup(group)
+      });
+    }
+    if (depth < MAX_DASHBOARD_GROUP_DEPTH) {
+      actions.push({
+        label: t("dashboard.groupAddChild", "A\u00f1adir grupo"),
+        onClick: () => handleAddChildGroup(group)
+      });
+    }
+    actions.push(
+      { label: t("dashboard.groupRename", "Renombrar"), onClick: () => handleRenameGroup(group) },
+      { label: t("dashboard.groupDelete", "Eliminar"), onClick: () => handleDeleteGroup(group) }
+    );
+    return actions;
+  };
+
   const createGroupSection = (
     group,
     depth = 0,
@@ -241,5 +262,5 @@ export const createGroupSectionRenderer = (dependencies) => {
     return { section, body };
   };
 
-  return { createGroupSection };
+  return { createGroupSection, getGroupMenuActions };
 };

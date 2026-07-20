@@ -1,7 +1,8 @@
 import { t } from "../../i18n.js";
 
 const VIEW_MODES = [
-  { id: "grouped", labelKey: "viewMenuShowGroups", fallback: "Mostrar grupos" },
+  { id: "inline", labelKey: "viewMenuInlineGroups", fallback: "Grupos en el dashboard" },
+  { id: "tree", labelKey: "viewMenuTreeGroups", fallback: "\u00c1rbol lateral" },
   { id: "flat", labelKey: "viewMenuHideGroups", fallback: "No mostrar grupos" }
 ];
 
@@ -16,7 +17,9 @@ const normalizeSort = (value) =>
 
 export const createDashboardViewMenu = ({
   currentMode = "grouped",
+  currentPresentation = "inline",
   currentSort = "manual",
+  isTreeAvailable = () => true,
   onChange,
   onSortChange
 } = {}) => {
@@ -83,9 +86,15 @@ export const createDashboardViewMenu = ({
 
   const render = () => {
     menu.innerHTML = "";
-    VIEW_MODES.forEach((item) => {
-      addItem(item, item.id === currentMode, (id) => {
-        if (id !== currentMode && onChange) onChange(id);
+    const treeAvailable = isTreeAvailable();
+    const activeViewMode = currentMode === "flat"
+      ? "flat"
+      : currentPresentation === "tree" && !treeAvailable
+        ? "inline"
+        : currentPresentation;
+    VIEW_MODES.filter((item) => item.id !== "tree" || treeAvailable).forEach((item) => {
+      addItem(item, item.id === activeViewMode, (id) => {
+        if (id !== activeViewMode && onChange) onChange(id);
       });
     });
 
@@ -130,8 +139,15 @@ export const createDashboardViewMenu = ({
       currentMode = mode === "flat" ? "flat" : "grouped";
       render();
     },
+    setPresentationMode(mode) {
+      currentPresentation = mode === "tree" ? "tree" : "inline";
+      render();
+    },
     setSortMode(mode) {
       currentSort = normalizeSort(mode);
+      render();
+    },
+    refresh() {
       render();
     },
     close

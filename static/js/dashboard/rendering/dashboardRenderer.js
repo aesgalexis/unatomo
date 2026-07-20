@@ -1,4 +1,8 @@
 import { renderMachineCards } from "./machineCardRenderer.js";
+import {
+  TREE_UNGROUPED_ID,
+  getDashboardGroupBranchIds
+} from "./groupTreeRenderer.js";
 
 export const createDashboardRenderer = (dependencies) => {
   const {
@@ -45,10 +49,12 @@ export const createDashboardRenderer = (dependencies) => {
     hashPassword,
     installDocumentHooks,
     installTaskHooks,
+    isLargeDashboardViewport,
     isMobileDashboardViewport,
     isOwnerMachine,
     leaveAdminRole,
     list,
+    mount,
     locallyVisibleEmptyGroupIds,
     markLocalWrite,
     normalizeDashboardLayout,
@@ -64,6 +70,7 @@ export const createDashboardRenderer = (dependencies) => {
     removeMachineFromState,
     renderDashboardNoResultsPlaceholder,
     renderLoadErrorPlaceholder,
+    renderGroupTree,
     renderPlaceholder,
     replaceMachine,
     RESTORE_OPERATION_TASK_SOURCE,
@@ -72,6 +79,7 @@ export const createDashboardRenderer = (dependencies) => {
     scheduleHeightSync,
     sortFlatMachines,
     state,
+    groupTree,
     syncDashboardViewChrome,
     syncMachineAccessListeners,
     syncMobileDetailUI,
@@ -107,6 +115,8 @@ export const createDashboardRenderer = (dependencies) => {
     }
     clearDashboardTooltips();
     list.innerHTML = "";
+    mount.classList.remove("has-group-tree");
+    groupTree.hidden = true;
     const machines = Array.isArray(state.draftMachines) ? state.draftMachines : [];
     updateRegistryBadge();
     updateSuggestionsBadge();
@@ -180,6 +190,7 @@ export const createDashboardRenderer = (dependencies) => {
     state.locations = computeLocations(state.draftMachines);
     state.dashboardLayout = normalizeDashboardLayout(state.dashboardLayout);
     viewMenu.setMode(state.dashboardLayout.machineViewMode);
+    viewMenu.setPresentationMode(state.dashboardLayout.groupPresentationMode);
     viewMenu.setSortMode(state.dashboardLayout.machineSortMode);
     if (state.dashboardLayout.machineViewMode === "flat") {
       visibleMachines = sortFlatMachines(
@@ -189,8 +200,13 @@ export const createDashboardRenderer = (dependencies) => {
     }
     const layoutGroups = state.dashboardLayout.groups || [];
     const layoutPlacements = state.dashboardLayout.placements || {};
+    const useTreeLayout =
+      state.dashboardLayout.machineViewMode !== "flat" &&
+      state.dashboardLayout.groupPresentationMode === "tree" &&
+      isLargeDashboardViewport();
     const useGroupedLayout =
       state.dashboardLayout.machineViewMode !== "flat" &&
+      !useTreeLayout &&
       layoutGroups.length > 0 &&
       !query;
     const validGroupIds = new Set(layoutGroups.map((group) => group.id));
@@ -200,6 +216,46 @@ export const createDashboardRenderer = (dependencies) => {
     });
     list.dataset.hasUngrouped = hasUngroupedMachines ? "true" : "false";
     const groupById = new Map(layoutGroups.map((group) => [group.id, group]));
+    if (
+      state.selectedTreeGroupId !== TREE_UNGROUPED_ID &&
+      state.selectedTreeGroupId &&
+      !groupById.has(state.selectedTreeGroupId)
+    ) {
+      state.selectedTreeGroupId = "";
+    }
+    if (useTreeLayout) {
+      mount.classList.add("has-group-tree");
+      groupTree.hidden = false;
+      renderGroupTree({
+        groups: layoutGroups,
+        placements: layoutPlacements,
+        machines: visibleMachines,
+        selectedGroupId: state.selectedTreeGroupId,
+        expandedGroupIds: state.expandedTreeGroupIds
+      });
+      if (!query && state.selectedTreeGroupId === TREE_UNGROUPED_ID) {
+        visibleMachines = visibleMachines.filter((machine) => {
+          const groupId = layoutPlacements[machine.id]?.groupId || "";
+          return !validGroupIds.has(groupId);
+        });
+      } else if (!query && state.selectedTreeGroupId) {
+        const branchIds = getDashboardGroupBranchIds(
+          layoutGroups,
+          state.selectedTreeGroupId
+        );
+        visibleMachines = visibleMachines.filter((machine) =>
+          branchIds.has(layoutPlacements[machine.id]?.groupId || "")
+        );
+      }
+      if (!visibleMachines.length) {
+        renderDashboardNoResultsPlaceholder(
+          list,
+          t("dashboard.groupTreeEmpty", "No hay m\u00e1quinas en este grupo.")
+        );
+        syncSearchVisualState();
+        return;
+      }
+    }
     const groupPathCache = new Map();
     const getGroupPath = (groupId) => {
       if (!groupId || !groupById.has(groupId)) return [];
@@ -230,7 +286,7 @@ export const createDashboardRenderer = (dependencies) => {
       ...getGroupPath(groupId).map((group) => group.order ?? 0),
       layoutPlacements[machine.id]?.order ?? machine.order ?? 0
     ];
-    const sortedVisibleMachines = useGroupedLayout
+    const sortedVisibleMachines = (useGroupedLayout || useTreeLayout)
       ? visibleMachines.slice().sort((a, b) => {
         const aPlacement = layoutPlacements[a.id] || {};
         const bPlacement = layoutPlacements[b.id] || {};
@@ -311,6 +367,17 @@ export const createDashboardRenderer = (dependencies) => {
       groupTargets.set(groupId, body);
       renderedGroups.add(groupId);
     };
+    if (useGroupedLayout) {
+      layoutGroups
+        .slice()
+        .sort((left, right) => {
+          const depthDifference =
+            getDashboardGroupDepth(layoutGroups, left.id) -
+            getDashboardGroupDepth(layoutGroups, right.id);
+          return depthDifference || (left.order ?? 0) - (right.order ?? 0);
+        })
+        .forEach((group) => renderGroup(group.id));
+    }
     renderMachineCards({
       addUserWithRegistry,
       assertStorageAvailable,
@@ -330,6 +397,7 @@ export const createDashboardRenderer = (dependencies) => {
       deleteMachine,
       deleteUserRegistry,
       disconnectMachineTag,
+      disableDrag: false,
       expandCard,
       expandedById,
       fetchMachine,
