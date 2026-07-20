@@ -7,6 +7,10 @@ export {
   claimAccountHandle,
 } from "./accounts/handles";
 export {
+  redeemRegistrationCode,
+  validateRegistrationCode,
+} from "./accounts/registration";
+export {
   createDashboardSuggestion,
   deleteDashboardSuggestion,
   listDashboardSuggestions,
@@ -27,6 +31,7 @@ export {
 } from "./controlPanel/systemAndUsers";
 export {deleteControlPanelUser} from "./controlPanel/deleteUser";
 export {
+  cleanupControlPanelLegacyRegistrationCodeLinks,
   createControlPanelRegistrationCode,
   deleteControlPanelRegistrationCode,
   listControlPanelRegistrationCodes,

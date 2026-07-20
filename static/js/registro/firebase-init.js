@@ -3,7 +3,7 @@ import {
   initializeAppCheck,
   ReCaptchaEnterpriseProvider
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app-check.js";
-import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 import {
   getAuth,
   GoogleAuthProvider,
@@ -14,7 +14,7 @@ import {
   sendPasswordResetEmail
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 import { getStorage } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-storage.js";
-import { getFunctions } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-functions.js";
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-functions.js";
 
 const runtimeConfig = window.__UNATOMO_CONFIG__ || {};
 const firebaseConfig = {
@@ -58,6 +58,8 @@ export const db = getFirestore(app);
 export const auth = getAuth(app);
 export const storage = getStorage(app);
 export const functions = getFunctions(app);
+const validateCodeCallable = httpsCallable(functions, "validateRegistrationCode");
+const redeemCodeCallable = httpsCallable(functions, "redeemRegistrationCode");
 
 const buildLoginResult = async (user) => {
   if (!user) return { ok: false };
@@ -73,16 +75,13 @@ const buildLoginResult = async (user) => {
 export async function validateRegistrationCode(code) {
   const normalized = (code || "").toString().trim().toUpperCase();
   if (!normalized) return { valid: false, reason: "empty" };
-
-  const ref = doc(db, "registration_codes", normalized);
-  const snap = await getDoc(ref);
-
-  if (!snap.exists()) return { valid: false, reason: "not_found", code: normalized };
-
-  const data = snap.data() || {};
-  if (data.active === false) return { valid: false, reason: "inactive", code: normalized };
-
-  return { valid: true, code: normalized, data };
+  const response = await validateCodeCallable({ code: normalized });
+  const result = response?.data || {};
+  return {
+    valid: result.valid === true,
+    reason: (result.reason || "").toString(),
+    code: (result.code || normalized).toString()
+  };
 }
 
 
@@ -103,23 +102,17 @@ export async function getUserRegistrationState(userOrUid) {
   return {
     allowed: true,
     reason: "ok",
-    code: (profile.regCode || "").toString().trim().toUpperCase(),
     profile
   };
 }
 
-async function upsertUserProfile(user, regCode) {
-  const userRef = doc(db, "users", user.uid);
-
-  await setDoc(userRef, {
-    uid: user.uid,
-    email: user.email || "",
-    displayName: user.displayName || "",
-    photoURL: user.photoURL || "",
-    regCode: regCode,
-    updatedAt: serverTimestamp(),
-    createdAt: serverTimestamp()
-  }, { merge: true });
+async function redeemCodeForUser(user, regCode) {
+  const response = await redeemCodeCallable({
+    code: (regCode || "").toString().trim().toUpperCase(),
+    displayName: user?.displayName || "",
+    photoURL: user?.photoURL || ""
+  });
+  return response?.data || { ok: false };
 }
 
 export async function registerWithGoogle(regCode) {
@@ -132,8 +125,7 @@ export async function registerWithGoogle(regCode) {
   const user = result.user;
   if (!user) return { ok: false };
 
-  await upsertUserProfile(user, code);
-  return { ok: true, uid: user.uid };
+  return redeemCodeForUser(user, code);
 }
 
 export async function completeCurrentUserRegistration(regCode) {
@@ -141,8 +133,7 @@ export async function completeCurrentUserRegistration(regCode) {
   const user = auth.currentUser;
   if (!user || !code) return { ok: false };
 
-  await upsertUserProfile(user, code);
-  return { ok: true, uid: user.uid };
+  return redeemCodeForUser(user, code);
 }
 
 export async function registerWithEmail(regCode, email, password, displayName) {
@@ -158,8 +149,7 @@ export async function registerWithEmail(regCode, email, password, displayName) {
     await updateProfile(cred.user, { displayName: displayName.toString().trim() });
   }
 
-  await upsertUserProfile(cred.user, code);
-  return { ok: true, uid: cred.user.uid };
+  return redeemCodeForUser(cred.user, code);
 }
 
 export async function loginWithGoogle() {

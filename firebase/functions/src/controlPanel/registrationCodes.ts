@@ -97,18 +97,34 @@ export const deleteControlPanelRegistrationCode = onCall(async (request) => {
   );
   if (!refs.length) throw new HttpsError("not-found", "code-not-found");
 
-  const now = admin.firestore.FieldValue.serverTimestamp();
-  await Promise.all(
-    refs.map((docSnap) =>
-      docSnap.ref.set(
-        {
-          active: false,
-          updatedAt: now,
-        },
-        {merge: true},
-      ),
-    ),
-  );
+  const batch = db.batch();
+  refs.forEach((docSnap) => batch.delete(docSnap.ref));
+  await batch.commit();
 
   return {ok: true, code};
 });
+
+export const cleanupControlPanelLegacyRegistrationCodeLinks = onCall(
+  async (request) => {
+    const auth = request.auth;
+    if (!auth) throw new HttpsError("unauthenticated", "auth-required");
+    assertControlPanelAccess(auth);
+
+    const usersSnap = await db.collection("users").get();
+    const legacyUsers = usersSnap.docs.filter(
+      (docSnap) => docSnap.data()?.regCode !== undefined,
+    );
+
+    for (let offset = 0; offset < legacyUsers.length; offset += 450) {
+      const batch = db.batch();
+      legacyUsers.slice(offset, offset + 450).forEach((docSnap) => {
+        batch.update(docSnap.ref, {
+          regCode: admin.firestore.FieldValue.delete(),
+        });
+      });
+      await batch.commit();
+    }
+
+    return {ok: true, cleaned: legacyUsers.length};
+  },
+);

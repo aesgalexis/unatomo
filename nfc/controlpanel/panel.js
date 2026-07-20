@@ -265,8 +265,8 @@ const text = {
     ? "Unable to load registration codes."
     : "No se han podido cargar los c\u00f3digos de registro.",
   codesHint: isEn
-    ? "Currently active registration codes."
-    : "C\u00f3digos de registro actualmente activos.",
+    ? "Unused active registration codes. A code disappears after registering one account."
+    : "C\u00f3digos activos sin usar. Cada c\u00f3digo desaparece al registrar una cuenta.",
   codePlaceholder: isEn ? "Custom code (optional)" : "C\u00f3digo personalizado (opcional)",
   addCode: isEn ? "Add code" : "A\u00f1adir c\u00f3digo",
   deleteCode: isEn ? "Delete" : "Eliminar",
@@ -284,6 +284,16 @@ const text = {
   codeActionError: isEn
     ? "Unable to update registration codes."
     : "No se han podido actualizar los c\u00f3digos de registro.",
+  cleanupLegacyCodes: isEn ? "Remove legacy links" : "Eliminar v\u00ednculos antiguos",
+  cleanupLegacyCodesConfirm: isEn
+    ? "Remove registration-code references from existing accounts? Account access will not be affected."
+    : "\u00bfEliminar las referencias a c\u00f3digos de las cuentas existentes? El acceso de las cuentas no se ver\u00e1 afectado.",
+  cleanupLegacyCodesRunning: isEn
+    ? "Removing legacy links..."
+    : "Eliminando v\u00ednculos antiguos...",
+  cleanupLegacyCodesDone: isEn
+    ? (count) => `${count} legacy account links removed.`
+    : (count) => `Se han eliminado ${count} v\u00ednculos antiguos de cuentas.`,
   noName: isEn ? "Unnamed user" : "Usuario sin nombre",
   noEmail: isEn ? "No email" : "Sin correo",
   tagsTitle: isEn ? "Tag IDs" : "Tag ID",
@@ -332,6 +342,10 @@ const getSystemStatusCallable = httpsCallable(
 const listCodesCallable = httpsCallable(functions, "listControlPanelRegistrationCodes");
 const createCodeCallable = httpsCallable(functions, "createControlPanelRegistrationCode");
 const deleteCodeCallable = httpsCallable(functions, "deleteControlPanelRegistrationCode");
+const cleanupLegacyCodeLinksCallable = httpsCallable(
+  functions,
+  "cleanupControlPanelLegacyRegistrationCodeLinks"
+);
 const listTagsCallable = httpsCallable(functions, "listControlPanelTags");
 const deleteUserCallable = httpsCallable(functions, "deleteControlPanelUser");
 const setUserCollaboratorCallable = httpsCallable(
@@ -1178,6 +1192,14 @@ const renderCodes = (body, items, handlers = {}) => {
     if (handlers.onAddCode) handlers.onAddCode(codeInput.value || "");
   });
 
+  const cleanupBtn = document.createElement("button");
+  cleanupBtn.type = "button";
+  cleanupBtn.className = "controlpanel-btn";
+  cleanupBtn.textContent = text.cleanupLegacyCodes;
+  cleanupBtn.addEventListener("click", () => {
+    if (handlers.onCleanupLegacyLinks) handlers.onCleanupLegacyLinks();
+  });
+
   codeInput.addEventListener("input", () => {
     codeInput.value = codeInput.value.toUpperCase().replace(/\s+/g, "");
   });
@@ -1189,6 +1211,7 @@ const renderCodes = (body, items, handlers = {}) => {
 
   actions.appendChild(codeInput);
   actions.appendChild(addBtn);
+  actions.appendChild(cleanupBtn);
   body.appendChild(actions);
 
   const status = document.createElement("p");
@@ -1203,7 +1226,9 @@ const renderCodes = (body, items, handlers = {}) => {
     else status.removeAttribute("data-state");
   };
 
-  if (handlers.setStatusRef) handlers.setStatusRef(setStatus, addBtn, codeInput);
+  if (handlers.setStatusRef) {
+    handlers.setStatusRef(setStatus, addBtn, codeInput, cleanupBtn);
+  }
 
   if (!items.length) {
     const empty = document.createElement("p");
@@ -1307,6 +1332,7 @@ if (mount) {
   let updateCodesStatus = () => {};
   let addCodeButton = null;
   let addCodeInput = null;
+  let cleanupLegacyCodeLinksButton = null;
 
   const loadSystemStatus = async () => {
     if (!systemStatusBody || !integrityBody) return;
@@ -1348,10 +1374,11 @@ if (mount) {
       const codesResponse = await listCodesCallable();
       const codes = Array.isArray(codesResponse?.data?.items) ? codesResponse.data.items : [];
       renderCodes(codesBody, codes, {
-        setStatusRef: (setStatus, addBtn, codeInput) => {
+        setStatusRef: (setStatus, addBtn, codeInput, cleanupBtn) => {
           updateCodesStatus = setStatus;
           addCodeButton = addBtn;
           addCodeInput = codeInput;
+          cleanupLegacyCodeLinksButton = cleanupBtn;
         },
         onAddCode: async (rawCode) => {
           if (addCodeButton) addCodeButton.disabled = true;
@@ -1382,6 +1409,24 @@ if (mount) {
             updateCodesStatus(text.codeDeleted(code), "");
           } catch {
             updateCodesStatus(text.codeActionError, "error");
+          }
+        },
+        onCleanupLegacyLinks: async () => {
+          if (!window.confirm(text.cleanupLegacyCodesConfirm)) return;
+          if (cleanupLegacyCodeLinksButton) {
+            cleanupLegacyCodeLinksButton.disabled = true;
+          }
+          updateCodesStatus(text.cleanupLegacyCodesRunning);
+          try {
+            const response = await cleanupLegacyCodeLinksCallable();
+            const cleaned = Number(response?.data?.cleaned || 0);
+            updateCodesStatus(text.cleanupLegacyCodesDone(cleaned), "");
+          } catch {
+            updateCodesStatus(text.codeActionError, "error");
+          } finally {
+            if (cleanupLegacyCodeLinksButton) {
+              cleanupLegacyCodeLinksButton.disabled = false;
+            }
           }
         },
       });

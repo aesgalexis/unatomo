@@ -24,9 +24,7 @@ service cloud.firestore {
     }
 
     match /registration_codes/{code} {
-      allow get: if true;
-      allow list: if false;
-      allow write: if false;
+      allow read, write: if false;
     }
 
     match /public_metrics/{metricId} {
@@ -37,15 +35,7 @@ service cloud.firestore {
     match /users/{uid} {
       allow read: if isSignedIn() && request.auth.uid == uid;
 
-      function hasActiveRegistrationCode() {
-        return request.resource.data.regCode is string
-          && exists(/databases/$(database)/documents/registration_codes/$(request.resource.data.regCode))
-          && get(/databases/$(database)/documents/registration_codes/$(request.resource.data.regCode)).data.active == true;
-      }
-
-      allow create: if isSignedIn()
-                    && request.auth.uid == uid
-                    && hasActiveRegistrationCode();
+      allow create: if false;
 
       allow update: if isSignedIn()
                     && request.auth.uid == uid
@@ -55,20 +45,6 @@ service cloud.firestore {
                           .hasOnly(["company", "updatedAt"])
                         && request.resource.data.company is string
                         && request.resource.data.company.size() <= 60
-                      )
-                      ||
-                      (
-                        hasActiveRegistrationCode()
-                        && request.resource.data.diff(resource.data).affectedKeys()
-                          .hasOnly([
-                            "uid",
-                            "email",
-                            "displayName",
-                            "photoURL",
-                            "regCode",
-                            "updatedAt",
-                            "createdAt"
-                          ])
                       )
                     );
 

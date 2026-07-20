@@ -44,6 +44,10 @@ Read this before changing data flows, callable functions, machine ownership, adm
   currently resolve from the local part of an enabled user's email address.
 - `users/{uid}.suggestionsCollaborator`: superadmin-controlled boolean that
   enables both the `Sugerencias` and `To do` views for that user.
+- `registration_codes`: unused, active single-use account registration codes.
+  The backend atomically creates `users/{uid}` and deletes the redeemed code.
+  User profiles do not retain the code that created them. Browser clients
+  cannot read or write this collection directly.
 - `account_directory`: account lookup and display metadata keyed by normalized
   email.
 - `account_handles`: public account-handle index keyed by normalized handle.
@@ -100,6 +104,14 @@ frontend wrappers live under `static/js/dashboard/`.
   links, invitations, transfer invitations, document files, and Tag QR files.
   Do not restore direct client-side machine deletion.
 - `setControlPanelUserCollaborator`: superadmin-only toggle for suggestion collaborators.
+- `validateRegistrationCode`: checks an exact code without exposing the
+  registration-code document to the browser.
+- `redeemRegistrationCode`: authenticated, transactional registration. It
+  creates the user profile without `regCode` and deletes the code in the same
+  transaction, so two accounts cannot redeem it.
+- `cleanupControlPanelLegacyRegistrationCodeLinks`: superadmin-only,
+  idempotent removal of old `users.regCode` fields. It does not delete or
+  disable accounts.
 - `createDashboardSuggestion`: creates a suggestion for `superadmin` or an enabled collaborator.
 - `listDashboardSuggestions`: lists own suggestions for collaborators and all suggestions for `superadmin`.
 - `markDashboardSuggestionsSeen`: stores the superadmin suggestions seen timestamp.

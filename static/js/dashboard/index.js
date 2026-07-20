@@ -297,7 +297,7 @@ if (mount) {
       } else if (state.activeView === "todo") {
         state.todoPage = 1;
       }
-      renderCards({ preserveScroll: true });
+      renderCards({ preserveScroll: true, preserveAnchor: false });
     }
   });
   searchInput.addEventListener("input", () => {

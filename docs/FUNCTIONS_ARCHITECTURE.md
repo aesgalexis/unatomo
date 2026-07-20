@@ -41,6 +41,9 @@ firebase/functions/src/
     └── transfers.ts
 ```
 
+- `accounts/registration.ts` owns registration-code validation and atomic,
+  single-use redemption; `controlPanel/registrationCodes.ts` owns code
+  creation, listing, deletion, and legacy-link cleanup.
 - `index.ts` is an export-only public Functions entry point. Callables must be
   re-exported from this file under their existing names.
 - `core/firebase.ts` is the single initialization boundary for Firebase Admin,
@@ -128,3 +131,12 @@ must not be used as source files.
   invitations, document files, and Tag QR files.
 - The dashboard no longer performs a partial client-side machine deletion.
 - The public callable boundary now contains 35 exports.
+
+### 2026-07-20 - Single-use registration codes
+
+- Added backend-only code validation and transactional redemption under
+  `accounts/registration.ts`.
+- A successful first registration creates the profile without a code link and
+  deletes the redeemed code atomically.
+- Added a superadmin cleanup callable for legacy `users.regCode` fields.
+- The public callable boundary now contains 46 exports.

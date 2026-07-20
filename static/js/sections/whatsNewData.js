@@ -1,6 +1,16 @@
 export const whatsNewEntries = [
   {
     date: "2026-07-20",
+    es: "Los c\u00f3digos de registro ahora son de un solo uso y dejan de vincularse a la cuenta creada.",
+    en: "Registration codes are now single-use and are no longer linked to the account they create.",
+  },
+  {
+    date: "2026-07-20",
+    es: "Las cuentas con sesión iniciada entran directamente al dashboard desde UNATOMO/NFC.",
+    en: "Signed-in accounts now open the dashboard directly from UNATOMO/NFC.",
+  },
+  {
+    date: "2026-07-20",
     es: "Las vistas de grupos y árbol lateral permiten ordenar las máquinas por incidencias o nombre.",
     en: "Grouped and side-tree views can now sort machines by incidents or name.",
   },

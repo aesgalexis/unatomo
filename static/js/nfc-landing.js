@@ -125,6 +125,33 @@ const localized = {
   privacy: lang === "en" ? "/nfc/en/privacidad.html" : "/nfc/es/privacidad.html"
 };
 
+const LANDING_RETURN_STATE_KEY = "unatomoNfcLandingReturn";
+let suppressDashboardRedirect = false;
+let dashboardRedirectStarted = false;
+
+const consumeLandingReturnState = () => {
+  const currentState = window.history.state;
+  if (!currentState || currentState[LANDING_RETURN_STATE_KEY] !== true) return false;
+  const nextState = {...currentState};
+  delete nextState[LANDING_RETURN_STATE_KEY];
+  window.history.replaceState(nextState, "", window.location.href);
+  return true;
+};
+
+const markLandingReturnState = () => {
+  const currentState = window.history.state;
+  const nextState = currentState && typeof currentState === "object"
+    ? {...currentState}
+    : {};
+  nextState[LANDING_RETURN_STATE_KEY] = true;
+  window.history.replaceState(nextState, "", window.location.href);
+};
+
+suppressDashboardRedirect = consumeLandingReturnState();
+window.addEventListener("pageshow", () => {
+  if (consumeLandingReturnState()) suppressDashboardRedirect = true;
+});
+
 document.querySelectorAll("[data-session-cta]").forEach((link) => { link.href = localized.login; });
 document.getElementById("request-code-link")?.setAttribute("href", `${localized.contact}?subject=registration`);
 document.getElementById("footer-privacy")?.setAttribute("href", localized.privacy);
@@ -171,6 +198,11 @@ onAuthStateChanged(auth, async (user) => {
     document.querySelectorAll("[data-session-cta]").forEach((link) => {
       link.href = localized.dashboard;
       link.textContent = text.openDashboard;
+      link.onclick = markLandingReturnState;
     });
+    if (suppressDashboardRedirect || dashboardRedirectStarted) return;
+    dashboardRedirectStarted = true;
+    markLandingReturnState();
+    window.location.assign(localized.dashboard);
   } catch {}
 });

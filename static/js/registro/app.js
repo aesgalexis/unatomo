@@ -372,6 +372,10 @@ function initRegisterPage() {
     status.hidden = true;
     status.textContent = "";
   }
+  function clearStoredRegistrationCode() {
+    try { sessionStorage.removeItem("unatomo_access_code"); } catch {}
+    try { localStorage.removeItem("unatomo_access_code"); } catch {}
+  }
 
   (async () => {
     let code = "";
@@ -401,8 +405,7 @@ function initRegisterPage() {
 
     const check = await validateRegistrationCode(code);
     if (!check.valid) {
-      try { sessionStorage.removeItem("unatomo_access_code"); } catch {}
-      try { localStorage.removeItem("unatomo_access_code"); } catch {}
+      clearStoredRegistrationCode();
       return window.location.replace(paths.setup);
     }
 
@@ -419,6 +422,7 @@ function initRegisterPage() {
           : await registerWithGoogle(code);
         if (!res.ok) return setStatus(text.registerFailed);
 
+        clearStoredRegistrationCode();
         setStatus(text.registerSuccess);
         setTimeout(() => (window.location.href = paths.home), 650);
       } catch {
@@ -445,9 +449,12 @@ function initRegisterPage() {
         if (btnEmail) btnEmail.disabled = true;
         setStatus(text.creatingAccount);
 
-        const res = await registerWithEmail(code, email, p1, nombre);
+        const res = auth.currentUser
+          ? await completeCurrentUserRegistration(code)
+          : await registerWithEmail(code, email, p1, nombre);
         if (!res.ok) return setStatus(text.registerFailed);
 
+        clearStoredRegistrationCode();
         setStatus(text.registerSuccess);
         setTimeout(() => (window.location.href = paths.home), 650);
       } catch (e2) {

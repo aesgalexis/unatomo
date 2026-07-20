@@ -21,6 +21,7 @@ const requiredFiles = [
   "static/js/dashboard/components/loading/dashboardPlaceholders.js",
   "firebase/functions/src/core/firebase.ts",
   "firebase/functions/src/accounts/handles.ts",
+  "firebase/functions/src/accounts/registration.ts",
   "firebase/functions/src/controlPanel/systemAndUsers.ts",
   "firebase/functions/src/dashboard/layout.ts",
   "firebase/functions/src/dashboard/suggestions.ts",
@@ -122,6 +123,12 @@ requiredFiles.forEach((relativePath) => {
 });
 
 const indexJs = read("static/js/dashboard/index.js");
+const nfcLanding = read("static/js/nfc-landing.js");
+const registrationClient = read("static/js/registro/firebase-init.js");
+const registrationBackend = read(
+  "firebase/functions/src/accounts/registration.ts"
+);
+const firestoreRules = read("firebase/firestore.rules");
 const dashboardRenderer = read("static/js/dashboard/rendering/dashboardRenderer.js");
 const dashboardViewMenu = read("static/js/dashboard/components/viewMenu/viewMenu.js");
 const dashboardDragAndDrop = read("static/js/dashboard/dragAndDrop.js");
@@ -182,6 +189,49 @@ addCheck(
 addCheck(
   indexJs.split(/\r?\n/).length <= 900,
   "dashboard index.js remains below 900 lines"
+);
+addCheck(
+  indexJs.includes(
+    "renderCards({ preserveScroll: true, preserveAnchor: false })"
+  ),
+  "machine search preserves absolute scroll instead of a filtered machine anchor"
+);
+addCheck(
+  nfcLanding.includes("window.location.assign(localized.dashboard)"),
+  "authenticated NFC landing routes directly to the localized dashboard"
+);
+addCheck(
+  nfcLanding.includes("window.history.replaceState") &&
+    nfcLanding.includes("LANDING_RETURN_STATE_KEY"),
+  "NFC landing stores a history-entry return exception before dashboard navigation"
+);
+addCheck(
+  nfcLanding.includes('window.addEventListener("pageshow"') &&
+    nfcLanding.includes("suppressDashboardRedirect"),
+  "NFC landing consumes the return exception across browser back-forward cache restores"
+);
+addCheck(
+  registrationBackend.includes("db.runTransaction") &&
+    registrationBackend.includes("transaction.create(userRef") &&
+    registrationBackend.includes("transaction.delete(codeRef)"),
+  "registration code redemption creates the profile and deletes the code transactionally"
+);
+addCheck(
+  !registrationClient.includes('doc(db, "registration_codes"') &&
+    registrationClient.includes('httpsCallable(functions, "validateRegistrationCode")') &&
+    registrationClient.includes('httpsCallable(functions, "redeemRegistrationCode")'),
+  "registration client validates and redeems codes only through backend callables"
+);
+addCheck(
+  !registrationClient.includes("regCode:") &&
+    !registrationClient.includes("profile.regCode"),
+  "registration client does not persist or expose a code link on user profiles"
+);
+addCheck(
+  /match \/registration_codes\/\{code\}\s*\{\s*allow read, write: if false;\s*\}/s.test(
+    firestoreRules
+  ),
+  "Firestore rules keep registration codes backend-only"
 );
 addCheck(
   !dashboardViewMenu.includes("sortDisabled") &&
@@ -253,8 +303,8 @@ const callableExports = Array.from(
   .map((name) => name.trim())
   .filter(Boolean);
 addCheck(
-  callableExports.length === 43 && new Set(callableExports).size === 43,
-  "Functions index.ts preserves 43 unique function exports"
+  callableExports.length === 46 && new Set(callableExports).size === 46,
+  "Functions index.ts preserves 46 unique function exports"
 );
 
 [
