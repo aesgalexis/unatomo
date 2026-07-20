@@ -5,6 +5,7 @@ import { upsertMachineAccessFromMachine } from "../machineAccessRepo.js";
 
 export const createDashboardAutoSave = ({
   getDraftById,
+  clearLocalWrite,
   markLocalWrite,
   state,
   t,
@@ -56,5 +57,6 @@ export const createDashboardAutoSave = ({
     }
     updateTagStatusUI(machine.id);
   },
-  onSaveStart: (machineId) => markLocalWrite(machineId)
+  onSaveStart: (machineId) => markLocalWrite(machineId),
+  onSaveIdle: (machineId) => clearLocalWrite(machineId)
 });

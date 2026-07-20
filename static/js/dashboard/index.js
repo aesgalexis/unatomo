@@ -536,6 +536,7 @@ if (mount) {
     upsertDashboardLayout
   });
   const {
+    clearLocalWrite,
     clearInitialGroupPriorityOrder,
     clearRebuildTimer,
     cleanupSubscriptions,
@@ -550,7 +551,6 @@ if (mount) {
     scheduleRebuild,
     syncMachineAccessListeners
   } = dashboardData;
-
   const dashboardMachines = createDashboardMachineState({
     getDraftIndex,
     list,
@@ -584,8 +584,8 @@ if (mount) {
     state,
     t
   });
-
   const autoSave = createDashboardAutoSave({
+    clearLocalWrite,
     getDraftById,
     markLocalWrite,
     state,

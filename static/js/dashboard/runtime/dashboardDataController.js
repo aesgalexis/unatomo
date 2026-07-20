@@ -67,6 +67,7 @@ export const createDashboardDataController = (dependencies) => {
   };
 
   const applyOperationalPatch = (machineId, operational) => {
+    if (isRecentLocalWrite(machineId)) return;
     const current = getDraftById(machineId);
     if (!current) return;
     current.status = normalizeStatus(operational.status ?? current.status);
@@ -194,12 +195,19 @@ export const createDashboardDataController = (dependencies) => {
   };
 
   const localWriteAt = new Map();
+  const pendingLocalWrites = new Set();
   const markLocalWrite = (machineId) => {
     if (!machineId) return;
+    pendingLocalWrites.add(machineId);
     localWriteAt.set(machineId, Date.now());
+  };
+  const clearLocalWrite = (machineId) => {
+    if (!machineId) return;
+    pendingLocalWrites.delete(machineId);
   };
   const isRecentLocalWrite = (machineId, windowMs = 1500) => {
     if (!machineId) return false;
+    if (pendingLocalWrites.has(machineId)) return true;
     const ts = localWriteAt.get(machineId);
     return typeof ts === "number" && Date.now() - ts < windowMs;
   };
@@ -248,6 +256,7 @@ export const createDashboardDataController = (dependencies) => {
 
   return {
     applyOperationalPatch,
+    clearLocalWrite,
     clearInitialGroupPriorityOrder,
     clearRebuildTimer,
     cleanupSubscriptions,

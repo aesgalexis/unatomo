@@ -10,7 +10,6 @@
   min-height: 150px;
   gap: 0.65rem;
   text-align: center;
-  border-bottom: 0;
 }
 
 .task-empty-icon {
@@ -42,10 +41,17 @@
   padding-top: 1.05rem;
 }
 
+.task-item:last-child {
+  margin-right: -1.25rem;
+  margin-left: -1.25rem;
+  padding-right: 1.25rem;
+  padding-left: 1.25rem;
+}
+
 .task-item.task-empty {
   display: flex;
   flex-direction: column;
-  padding-bottom: 0;
+  padding-bottom: 1.5rem;
 }
 
 .task-body,
@@ -390,10 +396,6 @@
   gap: 0.5rem;
   flex-wrap: wrap;
   margin-top: 0.75rem;
-}
-
-.task-list:has(.task-empty) + .task-form {
-  margin-top: 0;
 }
 
 .task-title-input {

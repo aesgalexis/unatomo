@@ -27,6 +27,7 @@
     "check:nfc:layout": "node scripts/validate-dashboard-layout-backup.mjs",
     "check:nfc:group-hierarchy": "node scripts/test-dashboard-group-hierarchy.mjs",
     "check:nfc:sorting": "node scripts/test-dashboard-sorting.mjs",
+    "check:nfc:autosave": "node scripts/test-dashboard-autosave.mjs",
     "check:nfc:architecture": "node scripts/check-nfc-architecture.mjs"
   },
   "repository": {
