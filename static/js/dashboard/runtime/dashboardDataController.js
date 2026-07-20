@@ -144,9 +144,14 @@ export const createDashboardDataController = (dependencies) => {
   };
 
   const compareMachineDefaultPriority = (a, b) => {
-    const aDown = normalizeStatus(a.status) === "fuera_de_servicio" ? 0 : 1;
-    const bDown = normalizeStatus(b.status) === "fuera_de_servicio" ? 0 : 1;
-    if (aDown !== bDown) return aDown - bDown;
+    const statusRank = (machine) => {
+      const status = normalizeStatus(machine.status);
+      if (status === "fuera_de_servicio") return 0;
+      if (status === "desconectada") return 2;
+      return 1;
+    };
+    const statusDiff = statusRank(a) - statusRank(b);
+    if (statusDiff) return statusDiff;
     const aPending = getPendingTaskCount(a);
     const bPending = getPendingTaskCount(b);
     if (aPending !== bPending) return bPending - aPending;

@@ -1,3 +1,5 @@
+import { openOperationalReturnModal } from "../../components/operationalReturnModal/operationalReturnModal.js";
+
 export const installMachineCardCoreHooks = (dependencies) => {
   const {
     assertStorageAvailable,
@@ -77,23 +79,56 @@ export const installMachineCardCoreHooks = (dependencies) => {
             "tasks.restoreOperation",
             "Volver a poner la máquina en operatividad"
           );
+          const pendingRestoreTask = (current.tasks || []).find(
+            (task) =>
+              task.source === RESTORE_OPERATION_TASK_SOURCE &&
+              task.frequency === "puntual"
+          );
           let incidentDetails = null;
+          let operationalDetails = null;
           if (currentStatus !== "fuera_de_servicio" && nextStatus === "fuera_de_servicio") {
             pendingStatusIncidentMachineIds.add(machine.id);
             try {
               incidentDetails = await openStatusIncidentModal({
                 machineTitle: current.title || machine.title || "",
-                defaultTitle: defaultRestoreTitle
+                defaultTitle: pendingRestoreTask?.title || defaultRestoreTitle,
+                defaultDescription: pendingRestoreTask?.description || "",
+                hasPendingTask: !!pendingRestoreTask
               });
               if (!incidentDetails) return;
             } finally {
               pendingStatusIncidentMachineIds.delete(machine.id);
             }
           }
+          if (currentStatus === "fuera_de_servicio" && nextStatus === "operativa") {
+            pendingStatusIncidentMachineIds.add(machine.id);
+            try {
+              operationalDetails = await openOperationalReturnModal({
+                machineTitle: current.title || machine.title || "",
+                completesTask: !!pendingRestoreTask,
+                changesStatus: true
+              });
+              if (!operationalDetails) return;
+              if (pendingRestoreTask && hooks.onCompleteTask) {
+                await hooks.onCompleteTask(
+                  machine.id,
+                  pendingRestoreTask.id,
+                  {},
+                  operationalDetails
+                );
+                return;
+              }
+            } finally {
+              pendingStatusIncidentMachineIds.delete(machine.id);
+            }
+          }
+          const targetStatus = incidentDetails?.disconnected
+            ? "desconectada"
+            : nextStatus;
           const statusUpdate = buildStatusToggleUpdate(
             machine.id,
             current,
-            nextStatus,
+            targetStatus,
             user,
             {
               normalizeStatus,
@@ -102,6 +137,16 @@ export const installMachineCardCoreHooks = (dependencies) => {
               restoreNote: (incidentDetails?.note || "").trim()
             }
           );
+          const operationalNote = (operationalDetails?.note || "").trim();
+          if (operationalNote) {
+            statusUpdate.logs.push({
+              ts: new Date().toISOString(),
+              type: "intervencion",
+              message: operationalNote.slice(0, 512),
+              user,
+              source: "status-return"
+            });
+          }
           replaceMachine(machine.id, {
             ...current,
             ...statusUpdate
@@ -109,7 +154,9 @@ export const installMachineCardCoreHooks = (dependencies) => {
 
           const selectedImages = Array.isArray(incidentDetails?.images)
             ? incidentDetails.images
-            : [];
+            : Array.isArray(operationalDetails?.images)
+              ? operationalDetails.images
+              : [];
           const restoreTask = statusUpdate.tasks?.find(
             (task) =>
               task.source === RESTORE_OPERATION_TASK_SOURCE &&
@@ -117,7 +164,7 @@ export const installMachineCardCoreHooks = (dependencies) => {
           );
           const uploadedAttachments = [];
           let failedUploads = 0;
-          if (selectedImages.length && restoreTask && hooks.onUploadMachineDocument) {
+          if (selectedImages.length && hooks.onUploadMachineDocument) {
             notifyTopbar(t("dashboard.incidentUploadingImages", "Subiendo imágenes..."));
             for (const file of selectedImages) {
               try {
@@ -132,9 +179,9 @@ export const installMachineCardCoreHooks = (dependencies) => {
                     rethrow: true,
                     preserveTab: true,
                     documentMetadata: {
-                      context: "task-attachment",
-                      linkedTaskId: restoreTask.id,
-                      linkedStatusCycleId: restoreTask.statusCycleId || ""
+                      context: restoreTask ? "task-attachment" : "status-return",
+                      linkedTaskId: restoreTask?.id || "",
+                      linkedStatusCycleId: restoreTask?.statusCycleId || ""
                     }
                   }
                 );

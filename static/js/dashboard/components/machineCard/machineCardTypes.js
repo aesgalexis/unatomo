@@ -2,7 +2,8 @@ import { t } from "/static/js/dashboard/i18n.js";
 
 export const STATUS_LABELS = {
   operativa: t("status.operativa", "Operativo"),
-  fuera_de_servicio: t("status.fuera_de_servicio", "Fuera de servicio")
+  fuera_de_servicio: t("status.fuera_de_servicio", "Fuera de servicio"),
+  desconectada: t("status.desconectada", "Desconectada")
 };
 
 export const TAB_KEYS = ["quehaceres", "historial", "general", "configuracion"];

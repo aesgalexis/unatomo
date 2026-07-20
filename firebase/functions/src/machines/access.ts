@@ -268,7 +268,7 @@ export const updateMachineAccessOperational = onCall(
     const logs = Array.isArray(patch.logs) ? patch.logs : null;
     const tasks = Array.isArray(patch.tasks) ? patch.tasks : null;
     if (
-      !["operativa", "fuera_de_servicio"].includes(status) ||
+      !["operativa", "fuera_de_servicio", "desconectada"].includes(status) ||
       !logs ||
       !tasks
     ) {

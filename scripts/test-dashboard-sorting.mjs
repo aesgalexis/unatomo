@@ -29,23 +29,30 @@ const machines = [
     status: "operativa",
     tasks: [{pending: true}, {pending: true}],
   },
+  {
+    id: "delta",
+    title: "Delta",
+    order: 4,
+    status: "desconectada",
+    tasks: [{pending: true}, {pending: true}, {pending: true}],
+  },
 ];
 
 assert.deepEqual(
   sortFlatMachines(machines, "manual").map((machine) => machine.id),
-  ["charlie", "bravo", "alpha"],
+  ["charlie", "bravo", "alpha", "delta"],
 );
 assert.deepEqual(
   sortFlatMachines(machines, "name").map((machine) => machine.id),
-  ["alpha", "bravo", "charlie"],
+  ["alpha", "bravo", "charlie", "delta"],
 );
 assert.deepEqual(
   sortFlatMachines(machines, "incidents").map((machine) => machine.id),
-  ["bravo", "alpha", "charlie"],
+  ["bravo", "alpha", "charlie", "delta"],
 );
 assert.deepEqual(
   machines.map((machine) => machine.id),
-  ["charlie", "bravo", "alpha"],
+  ["charlie", "bravo", "alpha", "delta"],
   "sorting must not mutate dashboard machine state",
 );
 

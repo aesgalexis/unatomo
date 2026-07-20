@@ -286,11 +286,13 @@ export const buildStatusToggleUpdate = (
   const now = options.now || new Date().toISOString();
   const normalizeStatus = options.normalizeStatus || ((value) => value || "operativa");
   const currentStatus = normalizeStatus(machine.status);
+  let tasks = normalizeTasks(machine.tasks || []);
+  const pendingRestoreTask = getPendingRestoreOperationTask(tasks);
   const statusCycleId =
+    pendingRestoreTask?.statusCycleId ||
     machine.statusCycleId ||
     machine.activeStatusCycleId ||
     createStatusCycleId(machineId);
-  let tasks = normalizeTasks(machine.tasks || []);
   const logs = [
     ...(machine.logs || []),
     {
@@ -310,40 +312,44 @@ export const buildStatusToggleUpdate = (
   ];
 
   if (currentStatus !== "fuera_de_servicio" && nextStatus === "fuera_de_servicio") {
-    const pendingRestoreTask = getPendingRestoreOperationTask(tasks);
     if (pendingRestoreTask) {
-      tasks = tasks.filter((task) => task.id !== pendingRestoreTask.id);
-    }
-    const restoreTask = {
-      ...createRestoreOperationTask(user, {
-        now,
-        title: options.restoreTitle,
-        description: options.restoreDescription,
-        notes: options.restoreNote
-          ? [{
-              id: createId("n"),
-              text: options.restoreNote.toString().trim().slice(0, 512),
-              createdAt: now,
-              createdBy: user
-            }]
-          : []
-      }),
-      statusCycleId
-    };
-    tasks = [restoreTask, ...tasks];
-    logs.push({
-      ts: now,
-      type: "task_created",
-      taskId: restoreTask.id,
-      title: restoreTask.title,
-      description: restoreTask.description || "",
-      user,
-      source: RESTORE_OPERATION_TASK_SOURCE,
-      statusCycleId
-    });
-    const initialNote = restoreTask.notes?.[0];
-    if (initialNote?.text) {
-      logs.push({
+      const title = (options.restoreTitle || pendingRestoreTask.title || "Tarea")
+        .toString().trim().slice(0, 64);
+      const description = (options.restoreDescription ?? pendingRestoreTask.description ?? "")
+        .toString().trim().slice(0, 1024);
+      const noteText = (options.restoreNote || "").toString().trim().slice(0, 512);
+      const initialNote = noteText
+        ? { id: createId("n"), text: noteText, createdAt: now, createdBy: user }
+        : null;
+      const restoreTask = {
+        ...pendingRestoreTask,
+        title,
+        description,
+        notes: initialNote
+          ? [...(pendingRestoreTask.notes || []), initialNote]
+          : pendingRestoreTask.notes || [],
+        source: RESTORE_OPERATION_TASK_SOURCE,
+        automated: true,
+        statusTarget: "operativa",
+        statusCycleId
+      };
+      tasks = tasks.map((task) => task.id === restoreTask.id ? restoreTask : task);
+      if (
+        title !== pendingRestoreTask.title ||
+        description !== (pendingRestoreTask.description || "")
+      ) {
+        logs.push({
+          ts: now,
+          type: "task_edited",
+          taskId: restoreTask.id,
+          title,
+          description,
+          user,
+          source: RESTORE_OPERATION_TASK_SOURCE,
+          statusCycleId
+        });
+      }
+      if (initialNote) logs.push({
         ts: now,
         type: "task_note_added",
         taskId: restoreTask.id,
@@ -353,6 +359,47 @@ export const buildStatusToggleUpdate = (
         source: RESTORE_OPERATION_TASK_SOURCE,
         statusCycleId
       });
+    } else {
+      const restoreTask = {
+        ...createRestoreOperationTask(user, {
+          now,
+          title: options.restoreTitle,
+          description: options.restoreDescription,
+          notes: options.restoreNote
+            ? [{
+                id: createId("n"),
+                text: options.restoreNote.toString().trim().slice(0, 512),
+                createdAt: now,
+                createdBy: user
+              }]
+            : []
+        }),
+        statusCycleId
+      };
+      tasks = [restoreTask, ...tasks];
+      logs.push({
+        ts: now,
+        type: "task_created",
+        taskId: restoreTask.id,
+        title: restoreTask.title,
+        description: restoreTask.description || "",
+        user,
+        source: RESTORE_OPERATION_TASK_SOURCE,
+        statusCycleId
+      });
+      const initialNote = restoreTask.notes?.[0];
+      if (initialNote?.text) {
+        logs.push({
+          ts: now,
+          type: "task_note_added",
+          taskId: restoreTask.id,
+          title: restoreTask.title,
+          note: initialNote.text,
+          user,
+          source: RESTORE_OPERATION_TASK_SOURCE,
+          statusCycleId
+        });
+      }
     }
   }
 

@@ -49,6 +49,17 @@
   font-size: 0.9rem;
 }
 
+.status-incident-summary {
+  margin: 0 0 0.15rem;
+  border-left: 3px solid #dc2626;
+  border-radius: 0.2rem;
+  background: color-mix(in srgb, #dc2626 7%, transparent);
+  color: color-mix(in srgb, var(--fg) 78%, transparent);
+  font-size: 0.9rem;
+  line-height: 1.45;
+  padding: 0.7rem 0.8rem;
+}
+
 .status-incident-warning-icon {
   display: inline-flex;
   width: 3.25rem;
@@ -66,6 +77,32 @@
   gap: 0.8rem;
 }
 
+.status-incident-details {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.status-incident-details[hidden] {
+  display: none;
+}
+
+.status-incident-disconnect-choice {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: color-mix(in srgb, var(--fg) 72%, transparent);
+  font-size: 0.86rem;
+  cursor: pointer;
+}
+
+.status-incident-disconnect-input {
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+  accent-color: #6b7280;
+}
+
 .status-incident-field {
   display: grid;
   gap: 0.35rem;
@@ -76,6 +113,7 @@
 .status-incident-input,
 .status-incident-textarea {
   width: 100%;
+  box-sizing: border-box;
   border: 1px solid var(--border-subtle);
   border-radius: 0.65rem;
   background: color-mix(in srgb, var(--bg) 96%, transparent);
@@ -88,6 +126,7 @@
 
 .status-incident-textarea {
   resize: vertical;
+  overflow-y: hidden;
 }
 
 .status-incident-input:focus,
@@ -96,26 +135,23 @@
   outline: none;
 }
 
-.status-incident-add-note {
-  justify-self: start;
-  border: 0;
-  background: transparent;
-  color: color-mix(in srgb, var(--fg) 74%, transparent);
-  font: inherit;
-  font-size: 0.86rem;
-  padding: 0;
-  cursor: pointer;
+.status-incident-followup {
+  margin-top: 0.15rem;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 0.9rem;
 }
 
-.status-incident-add-note:hover,
-.status-incident-add-note:focus-visible {
-  color: var(--fg);
-  text-decoration: underline;
-  outline: none;
+.status-incident-followup-title {
+  margin: 0;
+  font-size: 0.94rem;
+  font-weight: 650;
 }
 
-.status-incident-note-wrap[hidden] {
-  display: none;
+.status-incident-followup-help {
+  margin: 0.25rem 0 0;
+  color: color-mix(in srgb, var(--fg) 62%, transparent);
+  font-size: 0.84rem;
+  line-height: 1.4;
 }
 
 .status-incident-image-box {
@@ -202,9 +238,36 @@
 }
 
 .status-incident-confirm {
-  border: 1px solid #2c974b;
-  background: linear-gradient(135deg, #2da44e, #2c974b);
+  border: 1px solid #b91c1c;
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
   color: #fff;
   font-weight: 650;
 }
 
+.status-incident-confirm-disconnected {
+  border-color: #4b5563;
+  background: linear-gradient(135deg, #6b7280, #4b5563);
+}
+
+.status-incident-dialog.is-disconnected .status-incident-summary {
+  border-left-color: #6b7280;
+  background: color-mix(in srgb, #6b7280 7%, transparent);
+}
+
+.status-incident-dialog.is-disconnected .status-incident-warning-icon {
+  color: #6b7280;
+}
+
+.status-return-dialog .status-incident-summary {
+  border-left-color: #16a34a;
+  background: color-mix(in srgb, #16a34a 7%, transparent);
+}
+
+.status-return-dialog .status-incident-warning-icon {
+  color: #16a34a;
+}
+
+.status-return-confirm {
+  border-color: #15803d;
+  background: linear-gradient(135deg, #16a34a, #15803d);
+}

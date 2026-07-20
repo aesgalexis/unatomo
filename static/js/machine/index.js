@@ -239,7 +239,9 @@ const hasDashboardMachineAccess = async (user, machineDoc) => {
 };
 
 const normalizeStatus = (value) =>
-  value === "desconectada" ? "fuera_de_servicio" : value || "operativa";
+  ["operativa", "fuera_de_servicio", "desconectada"].includes(value)
+    ? value
+    : "operativa";
 
 const normalizeMachineAccessDraft = (machineDoc) => ({
   ...machineDoc,

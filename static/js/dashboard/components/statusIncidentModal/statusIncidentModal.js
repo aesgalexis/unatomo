@@ -2,7 +2,9 @@ import { t } from "../../i18n.js";
 
 export const openStatusIncidentModal = ({
   machineTitle = "",
-  defaultTitle = ""
+  defaultTitle = "",
+  defaultDescription = "",
+  hasPendingTask = false
 } = {}) =>
   new Promise((resolve) => {
     const previousActive = document.activeElement;
@@ -17,16 +19,32 @@ export const openStatusIncidentModal = ({
     dialog.setAttribute("aria-modal", "true");
     dialog.setAttribute(
       "aria-label",
-      t("dashboard.incidentModalTitle", "Máquina fuera de servicio")
+      t("dashboard.incidentModalTitle", "Poner máquina fuera de servicio")
     );
 
     const title = document.createElement("h2");
     title.className = "status-incident-title";
-    title.textContent = t("dashboard.incidentModalTitle", "Máquina fuera de servicio");
+    title.textContent = t(
+      "dashboard.incidentModalTitle",
+      "Poner máquina fuera de servicio"
+    );
 
     const machine = document.createElement("p");
     machine.className = "status-incident-machine";
     machine.textContent = machineTitle || t("machine.machine", "Equipo");
+
+    const summary = document.createElement("p");
+    summary.className = "status-incident-summary";
+    const incidentSummary = hasPendingTask
+      ? t(
+          "dashboard.incidentModalSummaryExisting",
+          "La máquina se marcará como fuera de servicio y conservará su tarea de reactivación pendiente. Al completarla, volverá a estar operativa."
+        )
+      : t(
+          "dashboard.incidentModalSummary",
+          "La máquina se marcará como fuera de servicio. También se creará una tarea de reactivación que, al completarse, volverá a ponerla operativa."
+        );
+    summary.textContent = incidentSummary;
 
     const header = document.createElement("div");
     header.className = "status-incident-header";
@@ -48,6 +66,22 @@ export const openStatusIncidentModal = ({
     const form = document.createElement("form");
     form.className = "status-incident-form";
 
+    const disconnectChoice = document.createElement("label");
+    disconnectChoice.className = "status-incident-disconnect-choice";
+    const disconnectInput = document.createElement("input");
+    disconnectInput.type = "checkbox";
+    disconnectInput.className = "status-incident-disconnect-input";
+    const disconnectText = document.createElement("span");
+    disconnectText.textContent = t(
+      "dashboard.incidentDisconnectChoice",
+      "Desconectar"
+    );
+    disconnectChoice.appendChild(disconnectInput);
+    disconnectChoice.appendChild(disconnectText);
+
+    const details = document.createElement("div");
+    details.className = "status-incident-details";
+
     const createField = ({ label, control }) => {
       const wrap = document.createElement("label");
       wrap.className = "status-incident-field";
@@ -56,6 +90,16 @@ export const openStatusIncidentModal = ({
       wrap.appendChild(text);
       wrap.appendChild(control);
       return wrap;
+    };
+
+    const enableAutoGrow = (textarea) => {
+      const resize = () => {
+        textarea.style.height = "auto";
+        const borderHeight = textarea.offsetHeight - textarea.clientHeight;
+        textarea.style.height = `${textarea.scrollHeight + borderHeight}px`;
+      };
+      textarea.addEventListener("input", resize);
+      return resize;
     };
 
     const taskTitle = document.createElement("input");
@@ -72,41 +116,50 @@ export const openStatusIncidentModal = ({
     const description = document.createElement("textarea");
     description.className = "status-incident-textarea";
     description.maxLength = 1024;
-    description.rows = 4;
+    description.rows = 2;
+    description.value = defaultDescription;
     description.placeholder = t(
       "dashboard.incidentDescriptionPlaceholder",
       "¿Qué le ocurre a la máquina?"
     );
     description.setAttribute(
       "aria-label",
-      t("dashboard.incidentDescription", "Descripción")
+      t("dashboard.incidentDescription", "Motivo")
     );
 
-    const noteWrap = document.createElement("div");
-    noteWrap.className = "status-incident-note-wrap";
-    noteWrap.hidden = true;
+    const followup = document.createElement("div");
+    followup.className = "status-incident-followup";
+    const followupTitle = document.createElement("h3");
+    followupTitle.className = "status-incident-followup-title";
+    followupTitle.textContent = t(
+      "dashboard.incidentFollowupTitle",
+      "Tarea de reactivación"
+    );
+    const followupHelp = document.createElement("p");
+    followupHelp.className = "status-incident-followup-help";
+    followupHelp.textContent = hasPendingTask
+      ? t(
+          "dashboard.incidentFollowupHelpExisting",
+          "Se conservarán sus notas e imágenes. Al completar la tarea, la máquina volverá a estar operativa."
+        )
+      : t(
+          "dashboard.incidentFollowupHelp",
+          "Esta tarea se crea automáticamente. Al completarla, la máquina volverá a estar operativa."
+        );
+    followup.appendChild(followupTitle);
+    followup.appendChild(followupHelp);
 
     const note = document.createElement("textarea");
     note.className = "status-incident-textarea status-incident-note";
     note.maxLength = 512;
-    note.rows = 3;
+    note.rows = 2;
     note.placeholder = "";
-    note.setAttribute("aria-label", t("dashboard.incidentNote", "Nota"));
-    noteWrap.appendChild(createField({
-      label: t("dashboard.incidentNote", "Nota"),
-      control: note
-    }));
-
-    const addNote = document.createElement("button");
-    addNote.type = "button";
-    addNote.className = "status-incident-add-note";
-    addNote.textContent = t("dashboard.incidentAddNote", "Añadir nota");
-    addNote.addEventListener("click", () => {
-      noteWrap.hidden = false;
-      addNote.hidden = true;
-      window.requestAnimationFrame(() => note.focus({ preventScroll: true }));
-    });
-
+    note.setAttribute(
+      "aria-label",
+      t("dashboard.incidentNote", "Nota")
+    );
+    const resizeDescription = enableAutoGrow(description);
+    const resizeNote = enableAutoGrow(note);
     const imageBox = document.createElement("div");
     imageBox.className = "status-incident-image-box";
     imageBox.setAttribute("role", "button");
@@ -183,23 +236,50 @@ export const openStatusIncidentModal = ({
     const confirm = document.createElement("button");
     confirm.type = "submit";
     confirm.className = "status-incident-confirm";
-    confirm.textContent = t("dashboard.confirm", "Confirmar");
+    confirm.textContent = t("dashboard.incidentConfirm", "Poner fuera de servicio");
+
+    disconnectInput.addEventListener("change", () => {
+      const disconnected = disconnectInput.checked;
+      details.hidden = disconnected;
+      dialog.classList.toggle("is-disconnected", disconnected);
+      const modalTitle = disconnected
+        ? t("dashboard.incidentDisconnectTitle", "Marcar máquina como desconectada")
+        : t("dashboard.incidentModalTitle", "Poner máquina fuera de servicio");
+      title.textContent = modalTitle;
+      dialog.setAttribute("aria-label", modalTitle);
+      summary.textContent = disconnected
+        ? t(
+            "dashboard.incidentDisconnectSummary",
+            "La máquina se registrará como desconectada. No se creará ninguna tarea."
+          )
+        : incidentSummary;
+      confirm.textContent = disconnected
+        ? t("dashboard.incidentDisconnectConfirm", "Desconectar")
+        : t("dashboard.incidentConfirm", "Poner fuera de servicio");
+      confirm.classList.toggle("status-incident-confirm-disconnected", disconnected);
+    });
 
     actions.appendChild(cancel);
     actions.appendChild(confirm);
 
-    form.appendChild(createField({
+    form.appendChild(summary);
+    details.appendChild(createField({
+      label: t("dashboard.incidentDescription", "Motivo"),
+      control: description
+    }));
+    details.appendChild(followup);
+    details.appendChild(createField({
       label: t("dashboard.incidentTaskTitle", "Título de la tarea"),
       control: taskTitle
     }));
-    form.appendChild(createField({
-      label: t("dashboard.incidentDescription", "Descripción"),
-      control: description
+    details.appendChild(createField({
+      label: t("dashboard.incidentNote", "Nota"),
+      control: note
     }));
-    form.appendChild(addNote);
-    form.appendChild(noteWrap);
-    form.appendChild(imageBox);
-    form.appendChild(imageInput);
+    details.appendChild(imageBox);
+    details.appendChild(imageInput);
+    form.appendChild(details);
+    form.appendChild(disconnectChoice);
     form.appendChild(actions);
 
     dialog.appendChild(header);
@@ -229,11 +309,13 @@ export const openStatusIncidentModal = ({
     };
 
     const submit = () => {
+      const disconnected = disconnectInput.checked;
       cleanup({
-        title: taskTitle.value,
-        description: description.value,
-        note: note.value,
-        images: selectedImages
+        disconnected,
+        title: disconnected ? "" : taskTitle.value,
+        description: disconnected ? "" : description.value,
+        note: disconnected ? "" : note.value,
+        images: disconnected ? [] : selectedImages
       });
     };
 
@@ -252,7 +334,8 @@ export const openStatusIncidentModal = ({
     document.addEventListener("keydown", onKeyDown, true);
 
     window.requestAnimationFrame(() => {
-      taskTitle.focus({ preventScroll: true });
-      taskTitle.select();
+      resizeDescription();
+      resizeNote();
+      description.focus({ preventScroll: true });
     });
   });

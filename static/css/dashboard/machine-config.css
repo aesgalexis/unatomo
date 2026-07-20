@@ -60,6 +60,11 @@
   color: var(--fg);
 }
 
+.history-download-menu .history-download-menu-toggle {
+  border: none;
+  background: transparent;
+}
+
 .history-download-menu-panel {
   position: absolute;
   right: 0;
@@ -101,6 +106,11 @@
   text-align: left;
   cursor: pointer;
   white-space: nowrap;
+}
+
+.history-download-menu .history-download-menu-item {
+  border: 0;
+  background: transparent;
 }
 
 .history-download-menu-item:hover,

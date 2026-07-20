@@ -19,7 +19,9 @@ export const normalizeMachine = (raw, index = 0) => {
     model: typeof raw.model === "string" ? raw.model : "",
     serial: typeof raw.serial === "string" ? raw.serial : "",
     year: typeof raw.year === "number" ? raw.year : null,
-    status: raw.status === "desconectada" ? "fuera_de_servicio" : raw.status || "operativa",
+    status: ["operativa", "fuera_de_servicio", "desconectada"].includes(raw.status)
+      ? raw.status
+      : "operativa",
     location: typeof raw.location === "string" ? raw.location : "",
     tagId: typeof raw.tagId === "string" ? raw.tagId : null,
     tagUrl: typeof raw.tagUrl === "string" ? raw.tagUrl : "",

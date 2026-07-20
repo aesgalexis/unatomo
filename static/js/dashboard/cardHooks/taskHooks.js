@@ -6,6 +6,9 @@ import {
   buildEditTaskUpdate,
   buildRemoveTaskUpdate
 } from "/static/js/dashboard/tabs/tasks/taskActions.js";
+import { openOperationalReturnModal } from "/static/js/dashboard/components/operationalReturnModal/operationalReturnModal.js";
+
+const RESTORE_OPERATION_TASK_SOURCE = "status-out-of-service";
 
 export const installTaskHooks = (hooks, deps = {}) => {
   const {
@@ -21,6 +24,7 @@ export const installTaskHooks = (hooks, deps = {}) => {
   } = deps;
 
   const getUserLabel = () => state.adminLabel || t("dashboard.admin", "Administrador");
+  const pendingCompletionTaskIds = new Set();
   const showTaskTab = (id) => {
     if (!state.selectedTabById) state.selectedTabById = {};
     state.selectedTabById[id] = "quehaceres";
@@ -120,15 +124,92 @@ export const installTaskHooks = (hooks, deps = {}) => {
     autoSave.saveNow(id, "task-edit");
   };
 
-  hooks.onCompleteTask = (id, taskId) => {
-    const current = getDraftById(id);
-    const user = getUserLabel();
-    const updates = buildCompleteTaskUpdate(id, current, taskId, user, { normalizeStatus });
-    if (!updates) return;
-    updateMachine(id, updates);
-    showTaskTab(id);
-    renderCards({ preserveScroll: true });
-    notifyTopbar(t("dashboard.taskCompleted", "Tarea completada"));
-    autoSave.saveNow(id, "task-complete");
+  hooks.onCompleteTask = async (id, taskId, _context = {}, completionDetails) => {
+    const pendingKey = `${id}:${taskId}`;
+    if (pendingCompletionTaskIds.has(pendingKey)) return false;
+    const initial = getDraftById(id);
+    const initialTask = initial?.tasks?.find((task) => task.id === taskId);
+    if (!initial || !initialTask) return false;
+    const isRestoreTask = initialTask.source === RESTORE_OPERATION_TASK_SOURCE;
+    pendingCompletionTaskIds.add(pendingKey);
+    try {
+      let details = completionDetails;
+      if (isRestoreTask && details === undefined) {
+        details = await openOperationalReturnModal({
+          machineTitle: initial.title || "",
+          completesTask: true,
+          changesStatus: normalizeStatus(initial.status) !== "operativa"
+        });
+        if (!details) return false;
+      }
+
+      const user = getUserLabel();
+      const noteText = isRestoreTask ? (details?.note || "").trim() : "";
+      if (noteText) {
+        const current = getDraftById(id);
+        const noteUpdate = buildAddTaskNoteUpdate(current, taskId, noteText, user);
+        if (noteUpdate) updateMachine(id, noteUpdate);
+      }
+
+      const selectedImages = isRestoreTask && Array.isArray(details?.images)
+        ? details.images.slice(0, 10)
+        : [];
+      const uploadedAttachments = [];
+      let failedUploads = 0;
+      if (selectedImages.length && hooks.onUploadMachineDocument) {
+        notifyTopbar(t("dashboard.incidentUploadingImages", "Subiendo imágenes..."));
+        for (const file of selectedImages) {
+          try {
+            const uploaded = await hooks.onUploadMachineDocument(
+              id,
+              "other",
+              file,
+              null,
+              {
+                silent: true,
+                deferRender: true,
+                rethrow: true,
+                preserveTab: true,
+                documentMetadata: {
+                  context: "task-attachment",
+                  linkedTaskId: taskId,
+                  linkedStatusCycleId: initialTask.statusCycleId || ""
+                }
+              }
+            );
+            if (uploaded) uploadedAttachments.push(uploaded);
+          } catch {
+            failedUploads += 1;
+          }
+        }
+      }
+      if (uploadedAttachments.length) {
+        const current = getDraftById(id);
+        const attachmentUpdate = buildAddTaskAttachmentsUpdate(
+          current,
+          taskId,
+          uploadedAttachments,
+          user
+        );
+        if (attachmentUpdate) updateMachine(id, attachmentUpdate);
+      }
+
+      const current = getDraftById(id);
+      const updates = buildCompleteTaskUpdate(id, current, taskId, user, { normalizeStatus });
+      if (!updates) return false;
+      updateMachine(id, updates);
+      showTaskTab(id);
+      renderCards({ preserveScroll: true });
+      notifyTopbar(t("dashboard.taskCompleted", "Tarea completada"));
+      if (failedUploads) {
+        notifyTopbar(t("dashboard.incidentImageUploadError", "Alguna imagen no se pudo subir"));
+      } else if (uploadedAttachments.length) {
+        notifyTopbar(t("dashboard.incidentImagesUploaded", "Imágenes guardadas"));
+      }
+      autoSave.saveNow(id, "task-complete");
+      return true;
+    } finally {
+      pendingCompletionTaskIds.delete(pendingKey);
+    }
   };
 };

@@ -148,14 +148,11 @@ if (mount) {
   const clearDashboardTooltips = dashboardTooltips.clear;
   const attachDashboardTooltip = dashboardTooltips.attach;
   dashboardTooltips.installGlobalCleanup();
-
-
   const statusLabels = {
     operativa: t("dashboard.statusByValue.operativa", "Operativo"),
-    fuera_de_servicio: t("dashboard.statusByValue.fuera_de_servicio", "Fuera de servicio")
+    fuera_de_servicio: t("dashboard.statusByValue.fuera_de_servicio", "Fuera de servicio"),
+    desconectada: t("dashboard.statusByValue.desconectada", "Desconectada")
   };
-
-
   const withTimeout = (promise, ms = 6000) =>
     new Promise((resolve, reject) => {
       const timer = setTimeout(() => reject(new Error("timeout")), ms);
