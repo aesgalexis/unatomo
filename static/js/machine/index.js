@@ -510,20 +510,6 @@ const renderMachine = () => {
     autoSave.saveNow(state.tagId, "task-complete");
   };
 
-  hooks.onAddIntervention = (machineData, message) => {
-    const user = getActorLabel();
-    state.draft = {
-      ...machineDoc,
-      logs: [
-        ...(machineDoc.logs || []),
-        { ts: new Date().toISOString(), type: "intervencion", message, user }
-      ]
-    };
-    renderMachine();
-    notifyTopbar(t("machine.interventionDone", "Intervención realizada"));
-    autoSave.saveNow(state.tagId, "intervencion");
-  };
-
   hooks.onTitleUpdate = (_node, nextTitle) => {
     if (!isDashboardAdmin) return false;
     const title = (nextTitle || "").trim();

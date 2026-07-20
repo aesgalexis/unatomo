@@ -222,6 +222,7 @@ Task implementation files:
 - `static/js/dashboard/tabs/tasks/tasksTime.js`: frequency and due/overdue calculation, including custom frequency.
 - `static/js/dashboard/cardHooks/taskHooks.js`: machine-card task hooks for create, remove, note, edit, and complete actions.
 - `static/js/dashboard/tabs/historial.js`: history rendering. Task notes, task completion/edit events, and the status-linked return to `operativa` are grouped under the original task-created log when the log has a matching `taskId`; title fallback exists for older records.
+- Individual machine history is read-only: entries come from product actions and cannot be added manually from the history tab. Legacy manual intervention entries remain renderable.
 - `static/js/dashboard/rendering/dashboardRenderer.js`: coordinates the
   machine-card render loop.
 - `static/js/dashboard/rendering/hooks/machineCardCoreHooks.js` installs the

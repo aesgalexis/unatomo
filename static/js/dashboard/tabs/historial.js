@@ -119,36 +119,6 @@ export const render = (panel, machine, hooks, options = {}) => {
 
   const locale = document.documentElement.lang === "en" ? "en-GB" : "es-ES";
 
-  const form = document.createElement("div");
-  form.className = "mc-log-form";
-
-  const input = document.createElement("input");
-  input.type = "text";
-  input.maxLength = 255;
-  input.className = "mc-log-input";
-  input.setAttribute("aria-label", t("history.intervention", "Intervencion"));
-  input.addEventListener("click", (event) => event.stopPropagation());
-
-  const btn = document.createElement("button");
-  btn.type = "button";
-  btn.className = "mc-log-btn";
-  btn.textContent = t("history.register", "Registrar");
-  btn.addEventListener("click", (event) => {
-    event.stopPropagation();
-    const value = input.value.trim();
-    if (!value) return;
-    if (hooks.onAddIntervention) hooks.onAddIntervention(machine, value);
-    input.value = "";
-  });
-
-  form.appendChild(input);
-  form.appendChild(btn);
-  panel.appendChild(form);
-
-  const sepTop = document.createElement("hr");
-  sepTop.className = "mc-sep";
-  panel.appendChild(sepTop);
-
   const list = document.createElement("div");
   list.className = "mc-log-list";
   if (!total) {
@@ -308,7 +278,7 @@ export const render = (panel, machine, hooks, options = {}) => {
   panel.appendChild(list);
 
   const sep = document.createElement("hr");
-  sep.className = "mc-sep";
+  sep.className = "mc-sep mc-log-sep";
   panel.appendChild(sep);
 
   const footer = document.createElement("div");

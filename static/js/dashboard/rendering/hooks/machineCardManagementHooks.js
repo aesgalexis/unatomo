@@ -78,22 +78,6 @@ export const installMachineCardManagementHooks = (dependencies) => {
           leaveAdminRole(machineData.id).catch(() => {});
         };
 
-        hooks.onAddIntervention = (machineData, message) => {
-          const current = getDraftById(machineData.id) || machineData;
-          const user = state.adminLabel || t("dashboard.admin", "Administrador");
-          const logs = [
-            ...(current.logs || []),
-            { ts: new Date().toISOString(), type: "intervencion", message, user }
-          ];
-          updateMachine(machineData.id, { logs });
-          if (!state.selectedTabById) state.selectedTabById = {};
-          state.selectedTabById[machineData.id] = "historial";
-          state.expandedById = Array.from(expandedById);
-          renderCards({ preserveScroll: true });
-          notifyTopbar(t("dashboard.interventionDone", "Intervención realizada"));
-          autoSave.saveNow(machineData.id, "intervencion");
-        };
-
         installTaskHooks(hooks, {
           autoSave,
           expandedById,

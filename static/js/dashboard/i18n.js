@@ -119,8 +119,6 @@ const TEXT = {
       months: "meses",
     },
     history: {
-      intervention: "Intervenci\u00f3n",
-      register: "Registrar",
       empty: "Sin registros.",
       task: "Tarea",
       completedBy: (user) => ` - por ${user}`,
@@ -380,7 +378,6 @@ const TEXT = {
       stateUpdated: "Estado actualizado",
       taskCreated: "Tarea creada",
       taskCompleted: "Tarea completada",
-      interventionDone: "Intervenci\u00f3n realizada",
       tagLinked: "Tag enlazado",
       tagDisconnected: "Tag desconectado",
       tagGenerated: "Tag ID generado",
@@ -394,7 +391,6 @@ const TEXT = {
         desconectada: "Desconectada",
       },
       historyLocation: "Ubicaci\u00f3n",
-      historyIntervention: "Intervenci\u00f3n",
       noLocation: "Sin ubicaci\u00f3n",
     },
     machine: {
@@ -414,7 +410,6 @@ const TEXT = {
       statusUpdated: "Estado actualizado",
       taskCreated: "Tarea creada",
       taskCompleted: "Tarea completada",
-      interventionDone: "Intervenci\u00f3n realizada",
       userRoleFallback: "usuario",
     },
     sections: {
@@ -537,8 +532,6 @@ const TEXT = {
       months: "months",
     },
     history: {
-      intervention: "Intervention",
-      register: "Log",
       empty: "No records.",
       task: "Task",
       completedBy: (user) => ` - by ${user}`,
@@ -798,7 +791,6 @@ const TEXT = {
       stateUpdated: "Status updated",
       taskCreated: "Task created",
       taskCompleted: "Task completed",
-      interventionDone: "Intervention logged",
       tagLinked: "Tag linked",
       tagDisconnected: "Tag disconnected",
       tagGenerated: "Tag ID generated",
@@ -812,7 +804,6 @@ const TEXT = {
         desconectada: "Disconnected",
       },
       historyLocation: "Location",
-      historyIntervention: "Intervention",
       noLocation: "No location",
     },
     machine: {
@@ -832,7 +823,6 @@ const TEXT = {
       statusUpdated: "Status updated",
       taskCreated: "Task created",
       taskCompleted: "Task completed",
-      interventionDone: "Intervention logged",
       userRoleFallback: "user",
     },
     sections: {
