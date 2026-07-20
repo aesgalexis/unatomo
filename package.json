@@ -26,6 +26,7 @@
     "backup:nfc:all": "node scripts/backup-nfc-all.mjs",
     "check:nfc:layout": "node scripts/validate-dashboard-layout-backup.mjs",
     "check:nfc:group-hierarchy": "node scripts/test-dashboard-group-hierarchy.mjs",
+    "check:nfc:sorting": "node scripts/test-dashboard-sorting.mjs",
     "check:nfc:architecture": "node scripts/check-nfc-architecture.mjs"
   },
   "repository": {

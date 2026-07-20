@@ -47,23 +47,13 @@ export const createDashboardViewMenu = ({
     button.setAttribute("aria-expanded", "false");
   };
 
-  const addItem = (item, active, onSelect, { disabled = false } = {}) => {
+  const addItem = (item, active, onSelect) => {
     const option = document.createElement("button");
     option.type = "button";
     option.className = "dashboard-view-menu-item";
     option.setAttribute("role", "menuitemradio");
     option.setAttribute("aria-checked", active ? "true" : "false");
-    option.disabled = disabled;
-    option.setAttribute("aria-disabled", disabled ? "true" : "false");
     option.dataset.mode = item.id;
-    if (disabled) {
-      const tooltip = t(
-        "dashboard.sortDisabledTooltip",
-        "Para poder ordenar\nla vista de grupos\ndebe estar deshabilitada."
-      );
-      option.dataset.tooltip = tooltip;
-      option.setAttribute("aria-label", `${t(`dashboard.${item.labelKey}`, item.fallback)}. ${tooltip}`);
-    }
 
     const check = document.createElement("span");
     check.className = "dashboard-view-menu-check";
@@ -77,7 +67,6 @@ export const createDashboardViewMenu = ({
     option.addEventListener("click", (event) => {
       event.preventDefault();
       event.stopPropagation();
-      if (disabled) return;
       close();
       onSelect(item.id);
     });
@@ -107,12 +96,10 @@ export const createDashboardViewMenu = ({
     label.textContent = t("dashboard.sortMenuTitle", "Ordenar");
     menu.appendChild(label);
 
-    const sortDisabled = currentMode !== "flat";
     SORT_MODES.forEach((item) => {
-      const disabled = sortDisabled && item.id !== "manual";
       addItem(item, item.id === currentSort, (id) => {
         if (id !== currentSort && onSortChange) onSortChange(id);
-      }, { disabled });
+      });
     });
   };
 

@@ -79,7 +79,7 @@ import {
   isMobileViewport,
   isPublicSectionHash
 } from "./runtime/dashboardNavigation.js";
-import { normalizeMachineStatus as normalizeStatus, sortFlatMachines } from "./runtime/dashboardSorting.js";
+import { compareMachinesBySortMode, normalizeMachineStatus as normalizeStatus, sortFlatMachines } from "./runtime/dashboardSorting.js";
 import { loadOrderCache, saveOrderCache } from "./runtime/orderCache.js";
 import { createDashboardTooltips } from "./runtime/dashboardTooltips.js";
 import { createDashboardTitleController } from "./runtime/dashboardTitleController.js";
@@ -646,6 +646,7 @@ if (mount) {
     captureViewportAnchor,
     cardRefs,
     clearDashboardTooltips,
+    compareMachinesBySortMode,
     clearMobileDetailState,
     collapseCard,
     computeLocations,
@@ -767,9 +768,8 @@ if (mount) {
           state.dashboardLayout?.groupPresentationMode !== "tree" ||
           !largeDashboardQuery.matches
         ),
-      allowReorder: () =>
-        state.dashboardLayout?.groupPresentationMode !== "tree" ||
-        !largeDashboardQuery.matches
+      allowReorder: () => !isTreeModeActive(),
+      allowMachineReorder: () => state.dashboardLayout?.machineSortMode === "manual" && !isTreeModeActive()
     });
     groupedDragAndDropReady = true;
   };

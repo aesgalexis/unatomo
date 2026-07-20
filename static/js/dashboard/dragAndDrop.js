@@ -212,8 +212,15 @@ export const initGroupedDragAndDrop = (listEl, callbacks = {}) => {
     draggedType = "";
   });
 
+  const isDraggedItemReorderAllowed = () =>
+    draggedType === "machine" && callbacks.allowMachineReorder
+      ? callbacks.allowMachineReorder() !== false
+      : callbacks.allowReorder?.() !== false;
+
   listEl.addEventListener("dragover", (event) => {
-    if (callbacks.allowReorder?.() === false) return;
+    const allowReorder = isDraggedItemReorderAllowed();
+    const allowGrouping = callbacks.allowGrouping?.() !== false;
+    if (!allowReorder && !allowGrouping) return;
     event.preventDefault();
     const dragging = draggedType === "group"
       ? listEl.querySelector(".machine-group.is-dragging")
@@ -221,7 +228,6 @@ export const initGroupedDragAndDrop = (listEl, callbacks = {}) => {
     if (!dragging || !placeholder) return;
     const targetGroup = getTargetGroup(event.target);
     const targetCard = draggedType === "machine" ? event.target.closest(".machine-card") : null;
-    const allowGrouping = callbacks.allowGrouping?.() !== false;
     if (
       draggedType === "group" &&
       allowGrouping &&
@@ -254,6 +260,7 @@ export const initGroupedDragAndDrop = (listEl, callbacks = {}) => {
     } else {
       clearCenterTarget();
     }
+    if (!allowReorder) return;
     if (draggedType === "group") {
       const body = getGroupDropBody(listEl, event.target, dragging, event);
       const afterElement = getDragAfterElement(body, event.clientY);
@@ -268,7 +275,9 @@ export const initGroupedDragAndDrop = (listEl, callbacks = {}) => {
   });
 
   listEl.addEventListener("drop", (event) => {
-    if (callbacks.allowReorder?.() === false) return;
+    const allowReorder = isDraggedItemReorderAllowed();
+    const allowGrouping = callbacks.allowGrouping?.() !== false;
+    if (!allowReorder && !allowGrouping) return;
     event.preventDefault();
     if (!draggedId) return;
     if (draggedType === "group") {
@@ -277,7 +286,7 @@ export const initGroupedDragAndDrop = (listEl, callbacks = {}) => {
       const draggingGroup = listEl.querySelector(".machine-group.is-dragging");
       if (
         centerTargetGroup &&
-        callbacks.allowGrouping?.() !== false &&
+        allowGrouping &&
         targetGroupId &&
         targetGroupId !== draggedId &&
         callbacks.canDropGroupOnGroup?.(draggedId, targetGroupId) !== false
@@ -300,7 +309,7 @@ export const initGroupedDragAndDrop = (listEl, callbacks = {}) => {
     const dragItem = getDragItem(dragging);
     const targetGroup = getTargetGroup(event.target);
     if (
-      callbacks.allowGrouping?.() !== false &&
+      allowGrouping &&
       targetGroup &&
       event.target.closest(".machine-group-header")
     ) {
@@ -313,7 +322,7 @@ export const initGroupedDragAndDrop = (listEl, callbacks = {}) => {
     const targetId = targetCard?.dataset.machineId || "";
 
     if (
-      callbacks.allowGrouping?.() !== false &&
+      allowGrouping &&
       targetId &&
       targetId !== draggedId &&
       (targetCard === centerTargetCard || isCenterCardDrop(event, targetCard))
@@ -321,6 +330,20 @@ export const initGroupedDragAndDrop = (listEl, callbacks = {}) => {
       if (placeholder && placeholder.parentNode) placeholder.parentNode.removeChild(placeholder);
       clearCenterTarget();
       callbacks.onDropOnCard?.(draggedId, targetId);
+      return;
+    }
+
+    if (!allowReorder) {
+      const body = getDropBody(listEl, event.target);
+      const sourceGroupId = dragItem?.closest?.(".machine-group")?.dataset.groupId || "";
+      const targetGroupId = body === listEl
+        ? ""
+        : body.closest?.(".machine-group")?.dataset.groupId || "";
+      if (placeholder?.parentNode) placeholder.parentNode.removeChild(placeholder);
+      clearCenterTarget();
+      if (sourceGroupId !== targetGroupId) {
+        callbacks.onDropMachineOnGroup?.(draggedId, targetGroupId);
+      }
       return;
     }
 

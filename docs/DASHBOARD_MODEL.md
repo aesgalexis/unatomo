@@ -102,7 +102,7 @@ Current scope:
   session and keep their expanded state only for that session. Creating a
   machine while a real tree group is selected places the new machine directly
   in that group.
-- `machineSortMode` stores the flat-view sort preference (`manual`, `incidents`, `name`). It applies only when `machineViewMode` is `flat`; grouped membership and placement data must remain untouched.
+- `machineSortMode` stores the card sort preference (`manual`, `incidents`, `name`). It applies in flat, inline-group, and side-tree presentations. Inline sorting orders machines only within their current group (and within the ungrouped list), while tree sorting orders the visible cards in the selected branch. Automatic sorting never changes group membership, placement order, or the tree's group order; manual placement drag is disabled until the sort returns to `manual`.
 
 Layout normalization lives in `static/js/dashboard/layout/dashboardLayoutModel.mjs`
 and is shared by runtime rendering and Firestore save preparation. Future group

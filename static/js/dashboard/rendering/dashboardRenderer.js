@@ -17,6 +17,7 @@ export const createDashboardRenderer = (dependencies) => {
     captureViewportAnchor,
     cardRefs,
     clearDashboardTooltips,
+    compareMachinesBySortMode,
     clearMobileDetailState,
     collapseCard,
     computeLocations,
@@ -192,12 +193,6 @@ export const createDashboardRenderer = (dependencies) => {
     viewMenu.setMode(state.dashboardLayout.machineViewMode);
     viewMenu.setPresentationMode(state.dashboardLayout.groupPresentationMode);
     viewMenu.setSortMode(state.dashboardLayout.machineSortMode);
-    if (state.dashboardLayout.machineViewMode === "flat") {
-      visibleMachines = sortFlatMachines(
-        visibleMachines,
-        state.dashboardLayout.machineSortMode
-      );
-    }
     const layoutGroups = state.dashboardLayout.groups || [];
     const layoutPlacements = state.dashboardLayout.placements || {};
     const useTreeLayout =
@@ -256,6 +251,19 @@ export const createDashboardRenderer = (dependencies) => {
         return;
       }
     }
+    const machineSortMode = state.dashboardLayout.machineSortMode || "manual";
+    const useTreeMachineSort = useTreeLayout && machineSortMode !== "manual";
+    const useInlineMachineSort =
+      state.dashboardLayout.machineViewMode !== "flat" &&
+      !useTreeLayout &&
+      machineSortMode !== "manual";
+    if (
+      state.dashboardLayout.machineViewMode === "flat" ||
+      useTreeMachineSort ||
+      (useInlineMachineSort && !useGroupedLayout)
+    ) {
+      visibleMachines = sortFlatMachines(visibleMachines, machineSortMode);
+    }
     const groupPathCache = new Map();
     const getGroupPath = (groupId) => {
       if (!groupId || !groupById.has(groupId)) return [];
@@ -286,7 +294,7 @@ export const createDashboardRenderer = (dependencies) => {
       ...getGroupPath(groupId).map((group) => group.order ?? 0),
       layoutPlacements[machine.id]?.order ?? machine.order ?? 0
     ];
-    const sortedVisibleMachines = (useGroupedLayout || useTreeLayout)
+    const sortedVisibleMachines = !useTreeMachineSort && (useGroupedLayout || useTreeLayout)
       ? visibleMachines.slice().sort((a, b) => {
         const aPlacement = layoutPlacements[a.id] || {};
         const bPlacement = layoutPlacements[b.id] || {};
@@ -294,6 +302,9 @@ export const createDashboardRenderer = (dependencies) => {
         const bGroupId = validGroupIds.has(bPlacement.groupId) ? bPlacement.groupId : "";
         if (!!aGroupId !== !!bGroupId) return aGroupId ? -1 : 1;
         if (aGroupId && aGroupId === bGroupId) {
+          if (useInlineMachineSort) {
+            return compareMachinesBySortMode(a, b, machineSortMode);
+          }
           const priorityOrder = state.initialGroupPriorityOrder?.[aGroupId] || {};
           const aPriorityOrder = priorityOrder[a.id];
           const bPriorityOrder = priorityOrder[b.id];
@@ -312,6 +323,9 @@ export const createDashboardRenderer = (dependencies) => {
             getMachineOrderPath(b, bGroupId)
           );
           if (pathOrder) return pathOrder;
+        }
+        if (!aGroupId && !bGroupId && useInlineMachineSort) {
+          return compareMachinesBySortMode(a, b, machineSortMode);
         }
         return (a.order ?? 0) - (b.order ?? 0);
       })

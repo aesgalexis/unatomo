@@ -58,6 +58,15 @@ const flatHierarchy = normalizeDashboardLayout({
 assert.equal(flatHierarchy.machineViewMode, "flat");
 assert.equal(flatHierarchy.groupPresentationMode, "tree");
 assert.equal(flatHierarchy.machineSortMode, "name");
+const sortedTreeHierarchy = normalizeDashboardLayout({
+  ...hierarchy,
+  machineViewMode: "grouped",
+  groupPresentationMode: "tree",
+  machineSortMode: "incidents",
+});
+assert.equal(sortedTreeHierarchy.machineViewMode, "grouped");
+assert.equal(sortedTreeHierarchy.groupPresentationMode, "tree");
+assert.equal(sortedTreeHierarchy.machineSortMode, "incidents");
 assert.equal(
   flatHierarchy.groups.find((entry) => entry.id === "area")?.parentGroupId,
   "client",

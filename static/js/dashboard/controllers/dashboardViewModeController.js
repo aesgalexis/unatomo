@@ -43,9 +43,7 @@ export const createDashboardViewModeController = ({
         groups,
         machineViewMode,
         groupPresentationMode,
-        machineSortMode: machineViewMode === "grouped"
-          ? "manual"
-          : state.dashboardLayout.machineSortMode
+        machineSortMode: state.dashboardLayout.machineSortMode
       });
       viewMenu.setMode(state.dashboardLayout.machineViewMode);
       viewMenu.setPresentationMode(state.dashboardLayout.groupPresentationMode);

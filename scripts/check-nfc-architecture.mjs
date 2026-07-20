@@ -35,7 +35,9 @@ const requiredFiles = [
   "static/js/dashboard/controllers/dashboardNavigationController.js",
   "static/js/dashboard/controllers/dashboardOrderingController.js",
   "static/js/dashboard/controllers/dashboardTopbarController.js",
+  "static/js/dashboard/controllers/dashboardViewModeController.js",
   "static/js/dashboard/controllers/machineAccessController.js",
+  "static/js/dashboard/components/viewMenu/viewMenu.js",
   "static/js/dashboard/rendering/dashboardRenderer.js",
   "static/js/dashboard/rendering/groupSectionRenderer.js",
   "static/js/dashboard/rendering/machineCardRenderer.js",
@@ -120,6 +122,12 @@ requiredFiles.forEach((relativePath) => {
 });
 
 const indexJs = read("static/js/dashboard/index.js");
+const dashboardRenderer = read("static/js/dashboard/rendering/dashboardRenderer.js");
+const dashboardViewMenu = read("static/js/dashboard/components/viewMenu/viewMenu.js");
+const dashboardDragAndDrop = read("static/js/dashboard/dragAndDrop.js");
+const dashboardViewModeController = read(
+  "static/js/dashboard/controllers/dashboardViewModeController.js"
+);
 const taskHooks = read("static/js/dashboard/cardHooks/taskHooks.js");
 const documentHooks = read("static/js/dashboard/cardHooks/documentHooks.js");
 const machineCardController = read(
@@ -174,6 +182,46 @@ addCheck(
 addCheck(
   indexJs.split(/\r?\n/).length <= 900,
   "dashboard index.js remains below 900 lines"
+);
+addCheck(
+  !dashboardViewMenu.includes("sortDisabled") &&
+    !dashboardViewMenu.includes("sortAvailable"),
+  "dashboard sort menu enables automatic sorting in every machine presentation"
+);
+addCheck(
+  dashboardViewModeController.includes(
+    "machineSortMode: state.dashboardLayout.machineSortMode"
+  ),
+  "changing machine presentation preserves the selected card sort"
+);
+addCheck(
+  dashboardRenderer.includes(
+    'const useTreeMachineSort = useTreeLayout && machineSortMode !== "manual"'
+  ) && dashboardRenderer.includes(
+    'state.dashboardLayout.machineViewMode === "flat" ||'
+  ) && dashboardRenderer.includes(
+    "useTreeMachineSort ||"
+  ),
+  "dashboard renderer applies the shared card sorter to flat and side-tree views"
+);
+addCheck(
+  dashboardRenderer.includes(
+    "!useTreeMachineSort && (useGroupedLayout || useTreeLayout)"
+  ),
+  "manual side-tree rendering preserves hierarchical placement order"
+);
+addCheck(
+  dashboardRenderer.includes(
+    'state.dashboardLayout.machineViewMode !== "flat" &&'
+  ) && dashboardRenderer.includes(
+    "compareMachinesBySortMode(a, b, machineSortMode)"
+  ),
+  "inline groups sort cards within each placement without reordering groups"
+);
+addCheck(
+  dashboardDragAndDrop.includes("callbacks.allowMachineReorder") &&
+    dashboardDragAndDrop.includes("if (!allowReorder && !allowGrouping) return"),
+  "automatic card sorting blocks manual placement reorder but preserves grouping drops"
 );
 [
   "createMachineCard(",

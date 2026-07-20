@@ -1,5 +1,10 @@
 export const whatsNewEntries = [
   {
+    date: "2026-07-20",
+    es: "Las vistas de grupos y árbol lateral permiten ordenar las máquinas por incidencias o nombre.",
+    en: "Grouped and side-tree views can now sort machines by incidents or name.",
+  },
+  {
     date: "2026-06-21",
     es: "El dashboard puede alternar entre vista con grupos y lista plana, con orden por incidencias o nombre.",
     en: "The dashboard can switch between grouped and flat views, with sorting by incidents or name.",
