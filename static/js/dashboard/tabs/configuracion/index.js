@@ -363,9 +363,10 @@ export const render = (panel, machine, hooks, options = {}) => {
   renderNotificaciones(notifsPanel, machine, hooks, options);
 
   const sep3 = document.createElement("hr");
-  sep3.className = "mc-sep";
+  sep3.className = "mc-sep mc-config-footer-sep";
 
   const removeRow = document.createElement("div");
+  removeRow.className = "mc-config-footer";
   const removeLink = document.createElement("a");
   removeLink.className = "mc-log-download mc-danger-link";
   removeLink.href = "#";

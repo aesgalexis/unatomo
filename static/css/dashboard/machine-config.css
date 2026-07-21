@@ -498,9 +498,19 @@
   margin: 0.75rem 0 0.75rem;
 }
 
-.mc-log-sep {
+.mc-log-sep,
+.mc-config-footer-sep {
   margin-right: -1.25rem;
   margin-left: -1.25rem;
+}
+
+.mc-config-footer {
+  display: flex;
+  align-items: center;
+}
+
+.mc-config-footer .mc-log-download {
+  margin-top: 0;
 }
 
 .mc-user-list {

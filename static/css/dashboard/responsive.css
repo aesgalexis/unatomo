@@ -11,6 +11,23 @@
     font-size: 16px;
   }
 
+  .add-search {
+    font-size: 16px;
+  }
+
+  .add-search:focus,
+  .add-search.is-active-search {
+    flex: 1 0 100%;
+    width: 100%;
+    max-width: 100%;
+    transition: none;
+  }
+
+  .add-bar > .dashboard-view-menu + .add-search:focus,
+  .add-bar > .dashboard-view-menu + .add-search.is-active-search {
+    margin-left: 0;
+  }
+
   #dashboard-mount,
   #machineList {
     max-width: 100%;
