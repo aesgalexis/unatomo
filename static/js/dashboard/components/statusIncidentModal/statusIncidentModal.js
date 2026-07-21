@@ -15,6 +15,7 @@ export const openStatusIncidentModal = ({
 
     const dialog = document.createElement("section");
     dialog.className = "status-incident-dialog";
+    dialog.tabIndex = -1;
     dialog.setAttribute("role", "dialog");
     dialog.setAttribute("aria-modal", "true");
     dialog.setAttribute(
@@ -333,6 +334,19 @@ export const openStatusIncidentModal = ({
     window.requestAnimationFrame(() => {
       resizeDescription();
       resizeNote();
+      const avoidEditableAutofocus = window.matchMedia?.(
+        "(max-width: 700px), (pointer: coarse)"
+      )?.matches;
+      if (avoidEditableAutofocus) {
+        overlay.scrollTop = 0;
+        dialog.scrollTop = 0;
+        dialog.focus({ preventScroll: true });
+        window.requestAnimationFrame(() => {
+          overlay.scrollTop = 0;
+          dialog.scrollTop = 0;
+        });
+        return;
+      }
       description.focus({ preventScroll: true });
     });
   });

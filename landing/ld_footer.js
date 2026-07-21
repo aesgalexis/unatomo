@@ -47,7 +47,7 @@
     const year = new Date().getFullYear();
     const lang = document.documentElement.lang;
     const labels = fallbackLabels(lang);
-    const text = dict?.legal_footer || "UNATOMO CORE SL - Todos los derechos reservados.";
+    const text = dict?.legal_footer || "UNATOMO CORE SL \u00b7 Todos los derechos reservados.";
     const links = [
       { href: "/landing/nosotros/", label: dict?.about_link || labels.about },
       { href: "/nfc/", label: dict?.nfc_link || "NFC" },
@@ -68,12 +68,12 @@
     ? {
         legal_footer:
           document.documentElement.lang === "en"
-            ? "UNATOMO CORE SL - All rights reserved."
+            ? "UNATOMO CORE SL \u00b7 All rights reserved."
             : document.documentElement.lang === "it"
-              ? "UNATOMO CORE SL - Tutti i diritti riservati."
+              ? "UNATOMO CORE SL \u00b7 Tutti i diritti riservati."
               : document.documentElement.lang === "el"
-                ? "UNATOMO CORE SL - \u039c\u03b5 \u03b5\u03c0\u03b9\u03c6\u03cd\u03bb\u03b1\u03be\u03b7 \u03c0\u03b1\u03bd\u03c4\u03cc\u03c2 \u03b4\u03b9\u03ba\u03b1\u03b9\u03ce\u03bc\u03b1\u03c4\u03bf\u03c2."
-                : "UNATOMO CORE SL - Todos los derechos reservados.",
+                ? "UNATOMO CORE SL \u00b7 \u039c\u03b5 \u03b5\u03c0\u03b9\u03c6\u03cd\u03bb\u03b1\u03be\u03b7 \u03c0\u03b1\u03bd\u03c4\u03cc\u03c2 \u03b4\u03b9\u03ba\u03b1\u03b9\u03ce\u03bc\u03b1\u03c4\u03bf\u03c2."
+                : "UNATOMO CORE SL \u00b7 Todos los derechos reservados.",
       }
     : null);
 

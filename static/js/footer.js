@@ -142,16 +142,16 @@
 
   if (privacyLink) {
     privacyLink.classList.add("footer-disclosure-privacy");
+    const privacyRow = document.createElement("p");
+    privacyRow.className = "footer-disclosure-privacy-row";
+    privacyRow.appendChild(privacyLink);
+    identity.appendChild(privacyRow);
     privacyFooter.remove();
   }
 
   const legal = document.createElement("p");
   legal.className = "footer-disclosure-legal";
-  legal.append(legalText);
-  if (privacyLink) {
-    legal.append(" \u00b7 ");
-    legal.appendChild(privacyLink);
-  }
+  legal.textContent = legalText;
   identity.appendChild(legal);
   panel.appendChild(meta);
 

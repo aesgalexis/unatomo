@@ -4,7 +4,7 @@
 
   const render = (dict) => {
     const year = new Date().getFullYear();
-    const text = dict?.legal_footer || "UNATOMO CORE SL - Todos los derechos reservados.";
+    const text = dict?.legal_footer || "UNATOMO CORE SL \u00b7 Todos los derechos reservados.";
     if (window.renderLandingDisclosureFooter) {
       window.renderLandingDisclosureFooter({ legalFooterText: text });
     } else {
@@ -16,12 +16,12 @@
     ? {
         legal_footer:
           document.documentElement.lang === "en"
-            ? "UNATOMO CORE SL - All rights reserved."
+            ? "UNATOMO CORE SL \u00b7 All rights reserved."
             : document.documentElement.lang === "it"
-              ? "UNATOMO CORE SL - Tutti i diritti riservati."
+              ? "UNATOMO CORE SL \u00b7 Tutti i diritti riservati."
               : document.documentElement.lang === "el"
-                ? "UNATOMO CORE SL - Me epifylaxi pantos dikaiomatos."
-                : "UNATOMO CORE SL - Todos los derechos reservados.",
+                ? "UNATOMO CORE SL \u00b7 Me epifylaxi pantos dikaiomatos."
+                : "UNATOMO CORE SL \u00b7 Todos los derechos reservados.",
       }
     : null);
 

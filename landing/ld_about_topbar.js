@@ -2,12 +2,20 @@
   const mount = document.getElementById("landing-topbar-mount");
   if (!mount) return;
 
+  const pathname = window.location.pathname.replace(/\/+$/, "");
+  const section = pathname.includes("/landing/contacto")
+    ? { label: "UNATOMO/Contacto", i18n: "topbar_contact" }
+    : pathname.includes("/landing/nosotros")
+      ? { label: "UNATOMO/Nosotros", i18n: "topbar_about" }
+      : { label: "UNATOMO", i18n: "" };
+  const sectionI18n = section.i18n ? ` data-i18n="${section.i18n}"` : "";
+
   mount.innerHTML = `
     <header class="landing-topbar">
       <div class="landing-topbar-inner">
         <a class="landing-topbar-brand" href="/" aria-label="unatomo">
           <img src="/static/img/logo-unatomo-v1.6.svg" alt="unatomo" class="landing-topbar-logo" loading="lazy" />
-          <span class="landing-topbar-name">unatomo</span>
+          <span class="landing-topbar-name"${sectionI18n}>${section.label}</span>
         </a>
         <div class="utility-controls" aria-label="Preferencias">
           <div class="lang-picker">

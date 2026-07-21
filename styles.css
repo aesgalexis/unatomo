@@ -365,8 +365,16 @@ a:hover {
   text-decoration: underline;
 }
 
-.footer-disclosure-panel .footer-disclosure-legal {
+.footer-disclosure-panel .footer-disclosure-privacy-row {
   margin: 0.65rem 0 0;
+  color: color-mix(in srgb, var(--fg) 72%, transparent);
+  font-size: 0.68rem;
+  line-height: 1.4;
+  text-align: left;
+}
+
+.footer-disclosure-panel .footer-disclosure-legal {
+  margin: 0.25rem 0 0;
   color: color-mix(in srgb, var(--fg) 62%, transparent);
   font-size: 0.68rem;
   line-height: 1.4;
