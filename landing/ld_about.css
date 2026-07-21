@@ -368,6 +368,9 @@ body.landing-contact-page .page-shell {
 }
 
 body.landing-contact-page .contacto {
+  width: 100%;
+  max-width: 600px;
+  margin-inline: auto;
   display: grid;
   gap: 1.1rem;
 }

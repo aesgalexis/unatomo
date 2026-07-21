@@ -96,11 +96,10 @@
   company.className = "footer-disclosure-company";
   company.append("Powered by ");
   const poweredByLink = document.createElement("a");
-  poweredByLink.href = "https://unatomo.com/";
-  poweredByLink.target = "_blank";
-  poweredByLink.rel = "noopener";
-  poweredByLink.textContent = "UNATOMO";
+  poweredByLink.href = "/landing/nosotros/";
+  poweredByLink.textContent = "people who like machines";
   company.appendChild(poweredByLink);
+  company.append(".");
   identity.appendChild(brand);
   identity.appendChild(tagline);
   identity.appendChild(company);

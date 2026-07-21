@@ -156,6 +156,10 @@
   text-align: left;
 }
 
+.landing-footer-disclosure .footer-disclosure-company.is-reserved-space {
+  min-height: 1.125rem;
+}
+
 .landing-footer-disclosure .footer-disclosure-company a,
 .landing-footer-disclosure .footer-disclosure-tech-links a,
 .landing-footer-disclosure .footer-disclosure-contact-item,

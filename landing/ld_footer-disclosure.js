@@ -118,11 +118,26 @@
     tagline.className = "footer-disclosure-tagline";
     const company = document.createElement("p");
     company.className = "footer-disclosure-company";
-    company.append("Powered by ");
-    const poweredByLink = document.createElement("a");
-    poweredByLink.href = "https://unatomo.com/";
-    poweredByLink.textContent = "UNATOMO";
-    company.appendChild(poweredByLink);
+    if (rootFooterLogo) {
+      company.classList.add("is-reserved-space");
+      company.setAttribute("aria-hidden", "true");
+    } else if (getNormalizedPath().startsWith("/landing/nosotros")) {
+      company.append("Powered by ");
+      const ourselvesLink = document.createElement("a");
+      ourselvesLink.href = "#landing-topbar-mount";
+      ourselvesLink.textContent = "ourselves";
+      ourselvesLink.addEventListener("click", (event) => {
+        event.preventDefault();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+      company.append(ourselvesLink, ".");
+    } else {
+      company.append("Powered by ");
+      const poweredByLink = document.createElement("a");
+      poweredByLink.href = "https://unatomo.com/";
+      poweredByLink.textContent = "UNATOMO";
+      company.appendChild(poweredByLink);
+    }
     identity.appendChild(tagline);
     identity.appendChild(company);
     panel.appendChild(identity);
