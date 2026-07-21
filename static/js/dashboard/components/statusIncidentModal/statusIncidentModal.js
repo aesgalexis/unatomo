@@ -55,9 +55,9 @@ export const openStatusIncidentModal = ({
     warningIcon.setAttribute("aria-hidden", "true");
     warningIcon.innerHTML =
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
-      'stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' +
-      '<path d="M21.73 18 13.73 4a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>' +
-      '<path d="M12 9v4"/><path d="M12 17h.01"/></svg>';
+      'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+      '<circle cx="12" cy="12" r="9"/><path d="M12 8v5"/>' +
+      '<path d="M12 16.5h.01"/></svg>';
     heading.appendChild(title);
     heading.appendChild(machine);
     header.appendChild(heading);
@@ -236,7 +236,7 @@ export const openStatusIncidentModal = ({
     const confirm = document.createElement("button");
     confirm.type = "submit";
     confirm.className = "status-incident-confirm";
-    confirm.textContent = t("dashboard.incidentConfirm", "Poner fuera de servicio");
+    confirm.textContent = t("dashboard.confirm", "Confirmar");
 
     disconnectInput.addEventListener("change", () => {
       const disconnected = disconnectInput.checked;
@@ -253,9 +253,6 @@ export const openStatusIncidentModal = ({
             "La máquina se registrará como desconectada. No se creará ninguna tarea."
           )
         : incidentSummary;
-      confirm.textContent = disconnected
-        ? t("dashboard.incidentDisconnectConfirm", "Desconectar")
-        : t("dashboard.incidentConfirm", "Poner fuera de servicio");
       confirm.classList.toggle("status-incident-confirm-disconnected", disconnected);
     });
 

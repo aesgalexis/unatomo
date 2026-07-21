@@ -1,3 +1,9 @@
+import {
+  loadHiddenTreeGroupIds,
+  loadShowTreeIncidentCounts,
+  loadShowTreeTaskCounts
+} from "../runtime/dashboardGroupVisibilityStorage.js";
+
 export const createDashboardLoadController = (dependencies) => {
   const {
     addBtn,
@@ -47,6 +53,9 @@ export const createDashboardLoadController = (dependencies) => {
     state.tagStatusById = {};
     state.selectedTreeGroupId = "";
     state.expandedTreeGroupIds = [];
+    state.hiddenTreeGroupIds = loadHiddenTreeGroupIds(uid);
+    state.showTreeIncidentCounts = loadShowTreeIncidentCounts(uid);
+    state.showTreeTaskCounts = loadShowTreeTaskCounts(uid);
     clearMobileDetailState();
     resetDashboardLoadState(state);
     state.initialGroupPriorityOrder = {};

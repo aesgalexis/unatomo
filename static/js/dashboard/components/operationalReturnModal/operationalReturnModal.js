@@ -161,9 +161,7 @@ export const openOperationalReturnModal = ({
     const confirm = document.createElement("button");
     confirm.type = "submit";
     confirm.className = "status-incident-confirm status-return-confirm";
-    confirm.textContent = changesStatus
-      ? t("dashboard.returnModalConfirm", "Poner operativa")
-      : t("dashboard.returnModalComplete", "Completar tarea");
+    confirm.textContent = t("dashboard.confirm", "Confirmar");
     actions.appendChild(cancel);
     actions.appendChild(confirm);
 

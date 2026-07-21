@@ -1,6 +1,15 @@
 const TREE_ALL_ID = "";
 export const TREE_UNGROUPED_ID = "__ungrouped__";
 
+const VISIBILITY_ICONS = {
+  visible:
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.75 12s3.35-6 9.25-6 9.25 6 9.25 6-3.35 6-9.25 6-9.25-6-9.25-6Z"/><circle cx="12" cy="12" r="2.6"/></svg>',
+  hidden:
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.7 6.1A10.7 10.7 0 0 1 12 6c5.9 0 9.25 6 9.25 6a15.4 15.4 0 0 1-2.1 2.85M6.15 6.15C3.9 7.7 2.75 12 2.75 12s3.35 6 9.25 6a10.7 10.7 0 0 0 3.1-.45"/><path d="M9.8 9.8a3.1 3.1 0 0 0 4.4 4.4"/></svg>',
+  mixed:
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.75 12s3.35-6 9.25-6 9.25 6 9.25 6-3.35 6-9.25 6-9.25-6-9.25-6Z"/><path d="M9.5 12h5"/></svg>'
+};
+
 const addToAncestors = (map, groupById, groupId, amount) => {
   const seen = new Set();
   let currentId = groupId;
@@ -28,12 +37,18 @@ export const getDashboardGroupBranchIds = (groups = [], groupId = "") => {
 };
 
 export const createDashboardGroupTreeRenderer = ({
+  attachTooltip,
   container,
   getGroupMenuActions,
   getPendingTaskCount,
   normalizeStatus,
+  onCreateGroup,
   onSelect,
+  onShowAllGroups,
   onToggle,
+  onToggleIncidentCounts,
+  onToggleTaskCounts,
+  onToggleVisibility,
   t
 }) => {
   let activeMenuPanel = null;
@@ -44,7 +59,7 @@ export const createDashboardGroupTreeRenderer = ({
     if (activeMenuToggle) activeMenuToggle.setAttribute("aria-expanded", "false");
     activeMenuToggle = null;
   };
-  const openMenu = (toggle, group, depth) => {
+  const openMenu = (toggle, actions = []) => {
     if (activeMenuToggle === toggle) {
       closeMenu();
       return;
@@ -53,11 +68,15 @@ export const createDashboardGroupTreeRenderer = ({
     const panel = document.createElement("div");
     panel.className = "dashboard-group-tree-menu-panel";
     panel.setAttribute("role", "menu");
-    getGroupMenuActions(group, depth).forEach((action) => {
+    actions.forEach((action) => {
       const button = document.createElement("button");
       button.type = "button";
       button.className = "dashboard-group-tree-menu-action";
-      button.setAttribute("role", "menuitem");
+      const checkable = typeof action.checked === "boolean";
+      button.classList.toggle("is-checkable", checkable);
+      button.classList.toggle("is-checked", action.checked === true);
+      button.setAttribute("role", checkable ? "menuitemcheckbox" : "menuitem");
+      if (checkable) button.setAttribute("aria-checked", action.checked ? "true" : "false");
       button.textContent = action.label;
       button.addEventListener("click", (event) => {
         event.preventDefault();
@@ -93,16 +112,91 @@ export const createDashboardGroupTreeRenderer = ({
     placements = {},
     machines = [],
     selectedGroupId = "",
-    expandedGroupIds = []
+    expandedGroupIds = [],
+    hiddenGroupIds = [],
+    showIncidentCounts = true,
+    showTaskCounts = true
   }) => {
     closeMenu();
     container.innerHTML = "";
     container.setAttribute("aria-label", t("dashboard.groupTreeAria", "\u00c1rbol de grupos"));
+    const validGroupIds = new Set(groups.map((group) => group.id));
+    const hiddenIds = new Set(
+      hiddenGroupIds.filter((groupId) => validGroupIds.has(groupId))
+    );
 
+    const header = document.createElement("div");
+    header.className = "dashboard-group-tree-header";
     const title = document.createElement("div");
     title.className = "dashboard-group-tree-title";
     title.textContent = t("dashboard.groupTreeTitle", "Grupos");
-    container.appendChild(title);
+    const createButton = document.createElement("button");
+    createButton.type = "button";
+    createButton.className = "dashboard-group-tree-create";
+    createButton.innerHTML =
+      '<svg viewBox="0 0 18 18" aria-hidden="true">' +
+      '<path d="M9 3.75v10.5M3.75 9h10.5"/></svg>';
+    const createLabel = t("dashboard.addGroupAria", "Crear grupo");
+    createButton.setAttribute("aria-label", createLabel);
+    createButton.setAttribute("data-tooltip", createLabel);
+    attachTooltip?.(createButton);
+    createButton.addEventListener("click", () => onCreateGroup?.());
+    const preferencesButton = document.createElement("button");
+    preferencesButton.type = "button";
+    preferencesButton.className = "dashboard-group-tree-preferences";
+    preferencesButton.innerHTML =
+      '<svg viewBox="0 0 18 18" aria-hidden="true">' +
+      '<circle cx="4" cy="9" r="1.15"/>' +
+      '<circle cx="9" cy="9" r="1.15"/>' +
+      '<circle cx="14" cy="9" r="1.15"/>' +
+      '</svg>';
+    const preferencesLabel = t("dashboard.groupTreePreferences", "Preferencias");
+    preferencesButton.setAttribute("aria-label", preferencesLabel);
+    preferencesButton.setAttribute("data-tooltip", preferencesLabel);
+    preferencesButton.setAttribute("aria-haspopup", "menu");
+    preferencesButton.setAttribute("aria-expanded", "false");
+    attachTooltip?.(preferencesButton);
+    preferencesButton.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      openMenu(preferencesButton, [
+        {
+          label: t("dashboard.groupTreeShowIncidentCounts", "Mostrar incidencias"),
+          checked: showIncidentCounts,
+          onClick: () => onToggleIncidentCounts?.()
+        },
+        {
+          label: t("dashboard.groupTreeShowTaskCounts", "Mostrar tareas"),
+          checked: showTaskCounts,
+          onClick: () => onToggleTaskCounts?.()
+        }
+      ]);
+    });
+    const headerActions = document.createElement("div");
+    headerActions.className = "dashboard-group-tree-header-actions";
+    headerActions.appendChild(createButton);
+    headerActions.appendChild(preferencesButton);
+    header.appendChild(title);
+    header.appendChild(headerActions);
+    container.appendChild(header);
+
+    if (hiddenIds.size) {
+      const summary = document.createElement("div");
+      summary.className = "dashboard-group-tree-visibility-summary";
+      const summaryText = document.createElement("span");
+      summaryText.textContent = t(
+        "dashboard.groupTreeHiddenCount",
+        (count) => `${count} grupos ocultos`
+      )(hiddenIds.size);
+      const showAllButton = document.createElement("button");
+      showAllButton.type = "button";
+      showAllButton.className = "dashboard-group-tree-show-all";
+      showAllButton.textContent = t("dashboard.groupTreeShowAll", "Mostrar todos");
+      showAllButton.addEventListener("click", () => onShowAllGroups?.());
+      summary.appendChild(summaryText);
+      summary.appendChild(showAllButton);
+      container.appendChild(summary);
+    }
 
     const tree = document.createElement("div");
     tree.className = "dashboard-group-tree-list";
@@ -110,7 +204,6 @@ export const createDashboardGroupTreeRenderer = ({
     container.appendChild(tree);
 
     const groupById = new Map(groups.map((group) => [group.id, group]));
-    const validGroupIds = new Set(groupById.keys());
     const machineCounts = new Map();
     const pendingCounts = new Map();
     const downCounts = new Map();
@@ -124,18 +217,22 @@ export const createDashboardGroupTreeRenderer = ({
         return;
       }
       addToAncestors(machineCounts, groupById, groupId, 1);
-      addToAncestors(
-        pendingCounts,
-        groupById,
-        groupId,
-        getPendingTaskCount(machine)
-      );
-      addToAncestors(
-        downCounts,
-        groupById,
-        groupId,
-        normalizeStatus(machine.status) === "fuera_de_servicio" ? 1 : 0
-      );
+      if (showTaskCounts && !hiddenIds.has(groupId)) {
+        addToAncestors(
+          pendingCounts,
+          groupById,
+          groupId,
+          getPendingTaskCount(machine)
+        );
+      }
+      if (showIncidentCounts && !hiddenIds.has(groupId)) {
+        addToAncestors(
+          downCounts,
+          groupById,
+          groupId,
+          normalizeStatus(machine.status) === "fuera_de_servicio" ? 1 : 0
+        );
+      }
     });
 
     const createNode = ({
@@ -149,7 +246,8 @@ export const createDashboardGroupTreeRenderer = ({
       icon = "",
       showMachineCount = false,
       group = null,
-      dropType = ""
+      dropType = "",
+      visibilityState = "visible"
     }) => {
       const row = document.createElement("div");
       row.className = "dashboard-group-tree-row";
@@ -166,8 +264,13 @@ export const createDashboardGroupTreeRenderer = ({
       const showAggregateBadges = !hasChildren || !expandedIds.has(id);
       row.classList.toggle(
         "has-status",
-        showAggregateBadges && (down > 0 || pending > 0)
+        showAggregateBadges && (
+          (showIncidentCounts && down > 0) || (showTaskCounts && pending > 0)
+        )
       );
+      row.classList.toggle("is-visibility-hidden", visibilityState === "hidden");
+      row.classList.toggle("is-visibility-mixed", visibilityState === "mixed");
+      row.classList.toggle("is-selected", selectedGroupId === id);
 
       if (hasChildren) {
         const collapsed = !expandedIds.has(id);
@@ -220,13 +323,13 @@ export const createDashboardGroupTreeRenderer = ({
       nodeLabel.textContent = label;
       button.appendChild(nodeLabel);
 
-      if (showAggregateBadges && down > 0) {
+      if (showIncidentCounts && showAggregateBadges && down > 0) {
         const badge = document.createElement("span");
         badge.className = "dashboard-group-tree-badge is-down";
         badge.textContent = String(down);
         button.appendChild(badge);
       }
-      if (showAggregateBadges && pending > 0) {
+      if (showTaskCounts && showAggregateBadges && pending > 0) {
         const badge = document.createElement("span");
         badge.className = "dashboard-group-tree-badge is-pending";
         badge.textContent = String(pending);
@@ -248,6 +351,26 @@ export const createDashboardGroupTreeRenderer = ({
       if (group) {
         const actionSlot = document.createElement("span");
         actionSlot.className = "dashboard-group-tree-action-slot";
+        const visibilityToggle = document.createElement("button");
+        visibilityToggle.type = "button";
+        visibilityToggle.className = "dashboard-group-tree-visibility-toggle";
+        visibilityToggle.classList.add(`is-${visibilityState}`);
+        visibilityToggle.innerHTML = VISIBILITY_ICONS[visibilityState] || VISIBILITY_ICONS.visible;
+        visibilityToggle.setAttribute(
+          "aria-pressed",
+          visibilityState === "mixed" ? "mixed" : visibilityState === "visible" ? "true" : "false"
+        );
+        const visibilityLabel = visibilityState === "hidden"
+          ? t("dashboard.groupTreeShowGroup", (value) => `Mostrar m\u00e1quinas de ${value}`)(label)
+          : t("dashboard.groupTreeHideGroup", (value) => `Ocultar m\u00e1quinas de ${value}`)(label);
+        visibilityToggle.setAttribute("aria-label", visibilityLabel);
+        visibilityToggle.setAttribute("data-tooltip", visibilityLabel);
+        attachTooltip?.(visibilityToggle, { placement: "right" });
+        visibilityToggle.addEventListener("click", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          onToggleVisibility?.(group.id);
+        });
         const menuToggle = document.createElement("button");
         menuToggle.type = "button";
         menuToggle.className = "dashboard-group-tree-menu-toggle";
@@ -263,8 +386,9 @@ export const createDashboardGroupTreeRenderer = ({
         menuToggle.addEventListener("click", (event) => {
           event.preventDefault();
           event.stopPropagation();
-          openMenu(menuToggle, group, Math.max(0, depth - 1));
+          openMenu(menuToggle, getGroupMenuActions(group, Math.max(0, depth - 1)));
         });
+        actionSlot.appendChild(visibilityToggle);
         actionSlot.appendChild(menuToggle);
         row.appendChild(actionSlot);
       }
@@ -305,7 +429,13 @@ export const createDashboardGroupTreeRenderer = ({
           hasChildren: (childrenByParent.get(group.id) || []).length > 0,
           icon: "folder",
           group,
-          dropType: "group"
+          dropType: "group",
+          visibilityState: (() => {
+            const branchIds = getDashboardGroupBranchIds(groups, group.id);
+            const hiddenCount = Array.from(branchIds).filter((id) => hiddenIds.has(id)).length;
+            if (!hiddenCount) return "visible";
+            return hiddenCount === branchIds.size ? "hidden" : "mixed";
+          })()
         });
         if (expandedIds.has(group.id)) appendChildren(group.id, depth + 1);
       });

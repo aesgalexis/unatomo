@@ -64,7 +64,7 @@
   display: inline-flex;
   width: 3.25rem;
   height: 3.25rem;
-  color: color-mix(in srgb, var(--fg) 46%, transparent);
+  color: #dc2626;
 }
 
 .status-incident-warning-icon svg {
@@ -241,7 +241,6 @@
   border: 1px solid #b91c1c;
   background: linear-gradient(135deg, #dc2626, #b91c1c);
   color: #fff;
-  font-weight: 650;
 }
 
 .status-incident-confirm-disconnected {

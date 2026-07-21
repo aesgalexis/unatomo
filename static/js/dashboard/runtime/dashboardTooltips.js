@@ -16,14 +16,21 @@ export const createDashboardTooltips = () => {
       tipEl.textContent = label;
       document.body.appendChild(tipEl);
       const rect = target.getBoundingClientRect();
-      const left = align === "right"
-        ? rect.right - tipEl.offsetWidth
-        : align === "left"
-          ? rect.left
-          : rect.left + (rect.width - tipEl.offsetWidth) / 2;
-      const top = placement === "bottom"
-        ? rect.bottom + 10
-        : rect.top - tipEl.offsetHeight - 10;
+      const sidePlacement = placement === "left" || placement === "right";
+      const left = placement === "right"
+        ? rect.right + 10
+        : placement === "left"
+          ? rect.left - tipEl.offsetWidth - 10
+          : align === "right"
+            ? rect.right - tipEl.offsetWidth
+            : align === "left"
+              ? rect.left
+              : rect.left + (rect.width - tipEl.offsetWidth) / 2;
+      const top = sidePlacement
+        ? rect.top + (rect.height - tipEl.offsetHeight) / 2
+        : placement === "bottom"
+          ? rect.bottom + 10
+          : rect.top - tipEl.offsetHeight - 10;
       tipEl.style.top = `${Math.max(8, top)}px`;
       tipEl.style.left = `${Math.max(8, left)}px`;
     };

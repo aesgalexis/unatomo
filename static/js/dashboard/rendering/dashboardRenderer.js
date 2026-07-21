@@ -205,6 +205,9 @@ export const createDashboardRenderer = (dependencies) => {
       layoutGroups.length > 0 &&
       !query;
     const validGroupIds = new Set(layoutGroups.map((group) => group.id));
+    const hiddenTreeGroupIds = new Set(
+      (state.hiddenTreeGroupIds || []).filter((groupId) => validGroupIds.has(groupId))
+    );
     const hasUngroupedMachines = useGroupedLayout && visibleMachines.some((machine) => {
       const groupId = layoutPlacements[machine.id]?.groupId || "";
       return !validGroupIds.has(groupId);
@@ -226,8 +229,23 @@ export const createDashboardRenderer = (dependencies) => {
         placements: layoutPlacements,
         machines: visibleMachines,
         selectedGroupId: state.selectedTreeGroupId,
-        expandedGroupIds: state.expandedTreeGroupIds
+        expandedGroupIds: state.expandedTreeGroupIds,
+        hiddenGroupIds: Array.from(hiddenTreeGroupIds),
+        showIncidentCounts: state.showTreeIncidentCounts !== false,
+        showTaskCounts: state.showTreeTaskCounts !== false
       });
+      if (hiddenTreeGroupIds.size) {
+        visibleMachines = visibleMachines.filter((machine) => {
+          const groupId = layoutPlacements[machine.id]?.groupId || "";
+          return !hiddenTreeGroupIds.has(groupId);
+        });
+        if (query) {
+          filterInfo.textContent = t(
+            "dashboard.showingResults",
+            (visible, total) => `Showing ${visible}/${total} machines`
+          )(visibleMachines.length, machines.length);
+        }
+      }
       if (!query && state.selectedTreeGroupId === TREE_UNGROUPED_ID) {
         visibleMachines = visibleMachines.filter((machine) => {
           const groupId = layoutPlacements[machine.id]?.groupId || "";
@@ -245,7 +263,12 @@ export const createDashboardRenderer = (dependencies) => {
       if (!visibleMachines.length) {
         renderDashboardNoResultsPlaceholder(
           list,
-          t("dashboard.groupTreeEmpty", "No hay m\u00e1quinas en este grupo.")
+          hiddenTreeGroupIds.size
+            ? t(
+                "dashboard.groupTreeVisibilityEmpty",
+                "No hay m\u00e1quinas visibles con los filtros actuales."
+              )
+            : t("dashboard.groupTreeEmpty", "No hay m\u00e1quinas en este grupo.")
         );
         syncSearchVisualState();
         return;

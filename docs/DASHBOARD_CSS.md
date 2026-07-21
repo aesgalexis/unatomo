@@ -19,6 +19,8 @@ original cascade of the former monolithic stylesheet.
 - `dashboard/suggestions.css`: suggestions view.
 - `dashboard/todo.css`: To Do view and its narrow-screen rules.
 - `dashboard/loading.css`: loading, bootstrap, invitation, and placeholder UI.
+- `dashboard/group-tree.css`: side-tree layout, group actions, visibility
+  controls, status badges, and drag/drop states.
 - `dashboard/machine-base.css`: machine-card base, tabs, history, and groups.
 - `dashboard/machine-documents.css`: plate/manual/other document UI.
 - `dashboard/machine-config.css`: logs, destructive controls, users, Tag ID,
@@ -40,6 +42,10 @@ settings, not machine-card configuration.
 4. Run `npm.cmd run check:nfc:architecture` after any manifest or file move.
 5. Test the dashboard and `/nfc/{lang}/m.html` because both consume the stable
    `dashboard.css` entry point.
+6. Keep controls visually consistent with established site components whenever
+   possible. Buttons should inherit the site's normal font weight by default;
+   use semantic color to communicate state instead of bespoke bold typography,
+   and reuse shared action labels for equivalent actions.
 
 ## Migration Record
 

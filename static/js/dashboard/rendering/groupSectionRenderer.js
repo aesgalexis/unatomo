@@ -6,6 +6,7 @@ export const createGroupSectionRenderer = (dependencies) => {
     createChildGroup,
     createDashboardGroupId,
     createParentGroup,
+    createRootGroup,
     deleteGroup,
     getNextGroupTitle,
     locallyVisibleEmptyGroupIds,
@@ -60,6 +61,22 @@ export const createGroupSectionRenderer = (dependencies) => {
     const newGroupId = createDashboardGroupId();
     state.dashboardLayout = normalizeDashboardLayout(state.dashboardLayout);
     state.dashboardLayout = createChildGroup(state.dashboardLayout, group.id, {
+      id: newGroupId,
+      title: cleanTitle
+    }).layout;
+    locallyVisibleEmptyGroupIds.add(newGroupId);
+    saveDashboardLayout();
+    renderCards({ preserveScroll: true });
+  }
+
+  function handleAddRootGroup() {
+    const suggestedTitle = getNextGroupTitle();
+    const title = window.prompt(t("dashboard.addGroupPrompt", "Nombre del grupo"), suggestedTitle);
+    if (title === null) return;
+    const cleanTitle = (title || "").trim() || suggestedTitle;
+    const newGroupId = createDashboardGroupId();
+    state.dashboardLayout = normalizeDashboardLayout(state.dashboardLayout);
+    state.dashboardLayout = createRootGroup(state.dashboardLayout, {
       id: newGroupId,
       title: cleanTitle
     }).layout;
@@ -262,5 +279,5 @@ export const createGroupSectionRenderer = (dependencies) => {
     return { section, body };
   };
 
-  return { createGroupSection, getGroupMenuActions };
+  return { createGroupSection, getGroupMenuActions, handleAddRootGroup };
 };

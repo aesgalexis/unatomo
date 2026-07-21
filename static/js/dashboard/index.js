@@ -56,6 +56,7 @@ import {
   createDashboardGroupId,
   createChildGroup,
   createParentGroup,
+  createRootGroup,
   deleteGroup,
   getNextDashboardGroupTitle,
   renameGroup,
@@ -562,14 +563,14 @@ if (mount) {
     updateMachine,
     updateTagStatusUI
   } = dashboardMachines;
-
-  const { createGroupSection, getGroupMenuActions } = createGroupSectionRenderer({
+  const { createGroupSection, getGroupMenuActions, handleAddRootGroup } = createGroupSectionRenderer({
     canDashboardGroupHaveChildren,
     canWrapGroupWithParent,
     clearInitialGroupPriorityOrder,
     createChildGroup,
     createDashboardGroupId,
     createParentGroup,
+    createRootGroup,
     deleteGroup,
     getNextGroupTitle,
     locallyVisibleEmptyGroupIds,
@@ -598,6 +599,7 @@ if (mount) {
   });
   const { captureViewportAnchor, restoreViewport } = dashboardViewport;
   const { renderTree: renderGroupTree } = createDashboardGroupTreeController({
+    attachTooltip: attachDashboardTooltip,
     canMoveGroup: (draggedId, targetId) => canMoveGroupIntoGroup(state.dashboardLayout || {}, draggedId, targetId),
     container: groupTree,
     getGroupMenuActions,
@@ -607,6 +609,7 @@ if (mount) {
     moveGroupToRoot: (draggedGroupId) => moveGroupToRootLevel(draggedGroupId),
     moveMachineToGroup: (machineId, groupId) => moveMachineToGroup(machineId, groupId),
     normalizeStatus,
+    onCreateGroup: handleAddRootGroup,
     renderCards: (options) => renderCards(options),
     state,
     t

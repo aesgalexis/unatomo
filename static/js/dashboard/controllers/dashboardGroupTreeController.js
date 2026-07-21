@@ -2,8 +2,14 @@ import {
   createDashboardGroupTreeRenderer,
   getDashboardGroupBranchIds
 } from "../rendering/groupTreeRenderer.js";
+import {
+  saveHiddenTreeGroupIds,
+  saveShowTreeIncidentCounts,
+  saveShowTreeTaskCounts
+} from "../runtime/dashboardGroupVisibilityStorage.js";
 
 export const createDashboardGroupTreeController = ({
+  attachTooltip,
   canMoveGroup,
   container,
   getGroupMenuActions,
@@ -13,15 +19,18 @@ export const createDashboardGroupTreeController = ({
   moveGroupToRoot,
   moveMachineToGroup,
   normalizeStatus,
+  onCreateGroup,
   renderCards,
   state,
   t
 }) => {
   const renderer = createDashboardGroupTreeRenderer({
+    attachTooltip,
     container,
     getGroupMenuActions,
     getPendingTaskCount,
     normalizeStatus,
+    onCreateGroup,
     onSelect: (groupId) => {
       if (state.selectedTreeGroupId === groupId) return;
       state.selectedTreeGroupId = groupId;
@@ -41,6 +50,42 @@ export const createDashboardGroupTreeController = ({
         state.selectedTreeGroupId = groupId;
       }
       state.expandedTreeGroupIds = Array.from(expandedIds);
+      renderCards({preserveScroll: true, preserveAnchor: false});
+    },
+    onToggleVisibility: (groupId) => {
+      const branchIds = getDashboardGroupBranchIds(
+        state.dashboardLayout?.groups || [],
+        groupId
+      );
+      if (!branchIds.size) return;
+      const hiddenIds = new Set(state.hiddenTreeGroupIds || []);
+      const hideBranch = !Array.from(branchIds).every((id) => hiddenIds.has(id));
+      branchIds.forEach((id) => {
+        if (hideBranch) hiddenIds.add(id);
+        else hiddenIds.delete(id);
+      });
+      if (hideBranch && branchIds.has(state.selectedTreeGroupId)) {
+        state.selectedTreeGroupId = "";
+        state.expandedById = [];
+      }
+      state.hiddenTreeGroupIds = Array.from(hiddenIds);
+      saveHiddenTreeGroupIds(state.uid, state.hiddenTreeGroupIds);
+      renderCards({preserveScroll: true, preserveAnchor: false});
+    },
+    onShowAllGroups: () => {
+      if (!(state.hiddenTreeGroupIds || []).length) return;
+      state.hiddenTreeGroupIds = [];
+      saveHiddenTreeGroupIds(state.uid, []);
+      renderCards({preserveScroll: true, preserveAnchor: false});
+    },
+    onToggleIncidentCounts: () => {
+      state.showTreeIncidentCounts = state.showTreeIncidentCounts === false;
+      saveShowTreeIncidentCounts(state.uid, state.showTreeIncidentCounts);
+      renderCards({preserveScroll: true, preserveAnchor: false});
+    },
+    onToggleTaskCounts: () => {
+      state.showTreeTaskCounts = state.showTreeTaskCounts === false;
+      saveShowTreeTaskCounts(state.uid, state.showTreeTaskCounts);
       renderCards({preserveScroll: true, preserveAnchor: false});
     },
     t
@@ -71,7 +116,9 @@ export const createDashboardGroupTreeController = ({
     if (!isTreeActive()) return;
     const treeRow = event.target.closest?.(".dashboard-group-tree-row[data-group-id]");
     if (treeRow && container.contains(treeRow)) {
-      if (event.target.closest(".dashboard-group-tree-toggle, .dashboard-group-tree-menu-toggle")) {
+      if (event.target.closest(
+        ".dashboard-group-tree-toggle, .dashboard-group-tree-visibility-toggle, .dashboard-group-tree-menu-toggle"
+      )) {
         event.preventDefault();
         return;
       }

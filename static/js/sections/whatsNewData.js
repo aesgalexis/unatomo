@@ -1,13 +1,13 @@
 export const whatsNewEntries = [
   {
-    date: "2026-07-20",
-    es: "Los c\u00f3digos de registro ahora son de un solo uso y dejan de vincularse a la cuenta creada.",
-    en: "Registration codes are now single-use and are no longer linked to the account they create.",
+    date: "2026-07-21",
+    es: "El \u00e1rbol lateral permite mostrar u ocultar grupos completos y personalizar sus contadores de incidencias y tareas.",
+    en: "The side tree can show or hide entire groups and customize their incident and task counters.",
   },
   {
-    date: "2026-07-20",
-    es: "Las cuentas con sesión iniciada entran directamente al dashboard desde UNATOMO/NFC.",
-    en: "Signed-in accounts now open the dashboard directly from UNATOMO/NFC.",
+    date: "2026-07-21",
+    es: "Los registros se pueden descargar en formato CSV compatible con Excel y hojas de c\u00e1lculo.",
+    en: "Records can now be downloaded in a CSV format compatible with Excel and spreadsheet applications.",
   },
   {
     date: "2026-07-20",

@@ -54,7 +54,11 @@
       { href: "/landing/contacto/", label: dict?.contact_link || labels.contact },
     ];
 
-    legalFooter.textContent = "\u00a9 " + year + " " + text;
+    if (window.renderLandingDisclosureFooter) {
+      window.renderLandingDisclosureFooter({ legalFooterText: text });
+    } else {
+      legalFooter.textContent = "\u00a9 " + year + " " + text;
+    }
 
     downbar.innerHTML = "";
     downbar.appendChild(createNavLinks(links, "landing-downbar-links"));

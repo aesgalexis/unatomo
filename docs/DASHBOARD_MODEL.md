@@ -78,6 +78,22 @@ Current scope:
 - Group headers expose a hover menu for renaming, deleting the group without
   deleting machines, adding a child below levels 0 and 1, and adding a superior
   group when the existing subtree still fits within the depth limit.
+- Side-tree mode exposes a direct `+` action beside `Groups` / `Grupos` for
+  creating a new root group. Child groups continue to be created from each
+  group's contextual menu.
+- Side-tree group rows expose a visibility control on hover or keyboard focus.
+  Hiding a group hides the machines assigned to that group and recursively
+  applies the same state to its current descendants; mixed descendant states
+  are shown on the parent. Hidden and mixed controls remain visible, a summary
+  can restore all groups, and the hidden-group set is stored per account in
+  local browser storage rather than in the shared dashboard layout. Search and
+  branch selection operate only on groups that remain visible. Machines in
+  hidden groups do not contribute to the red out-of-service totals of their
+  ancestors.
+- The side-tree header has a preferences menu beside the create-group action.
+  Local per-account preferences control whether red incident totals and orange
+  pending-task totals are shown on group rows; both default to enabled. Hidden
+  groups do not contribute to either visible aggregate.
 - Every group uses the same record shape. `parentGroupId` expresses the
   hierarchy; depth is calculated and is not stored. The normalizer preserves
   levels 0-2, rejects cycles, and flattens only groups that would exceed depth
@@ -205,6 +221,8 @@ History event contract:
 ## Status-Linked Tasks
 
 When a machine changes from `operativa` to `fuera_de_servicio`, the dashboard creates one pending one-off task with `source: "status-out-of-service"` to return the machine to operation. The status change opens a modal where the user records the reason and can edit the visible reactivation-task title, description, and note. This behavior is account-independent and must apply to every dashboard user who can change the machine status, not only to the `superadmin`. Status-linked restore tasks are always rendered before ordinary tasks. Completing that task, or changing the machine back to `operativa` directly, opens the same operational-return modal for a closing note and optional images. Confirming either path completes the pending restore task, changes the machine to `operativa`, and writes the linked events to history. Do not duplicate this task while one pending status-linked restore task already exists: reopen and update the same task while preserving its ID, notes, attachments, and status cycle.
+
+Status-change modal primary actions use the consistent label `Confirmar` / `Confirm` for out-of-service, disconnected, and return-to-operation flows. Preserve their semantic red, gray, and green colors without replacing the common action label or introducing a heavier button font.
 
 `desconectada` is a separate gray state for a machine that is intentionally switched off, not faulty. It is selected through the secondary checkbox in the out-of-service modal; choosing it collapses the incident fields and confirms without creating a restore task. A disconnected machine does not count as out of service and is sorted last in incident ordering. Clicking its status returns it directly to `operativa`.
 

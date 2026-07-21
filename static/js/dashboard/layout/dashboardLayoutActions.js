@@ -377,6 +377,25 @@ export const createParentGroup = (layout = {}, groupId = "", group = {}) => {
   return { layout: nextLayout };
 };
 
+export const createRootGroup = (layout = {}, group = {}) => {
+  if (!group?.id) return { layout };
+  const nextLayout = cloneLayout(layout);
+  const groups = nextLayout.groups || [];
+  if (groups.some((entry) => entry.id === group.id)) return { layout };
+  groups.push({
+    id: group.id,
+    title: (group.title || "Grupo").toString().trim().slice(0, 40) || "Grupo",
+    parentGroupId: "",
+    order:
+      groups
+        .filter((entry) => !entry.parentGroupId)
+        .reduce((max, entry) => Math.max(max, typeof entry.order === "number" ? entry.order : 0), -1) + 1,
+    collapsed: false
+  });
+  nextLayout.groups = groups;
+  return { layout: nextLayout };
+};
+
 export const createChildGroup = (layout = {}, parentGroupId = "", group = {}) => {
   if (!parentGroupId || !group?.id) return { layout };
   const nextLayout = cloneLayout(layout);

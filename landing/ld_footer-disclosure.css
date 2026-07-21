@@ -1,0 +1,238 @@
+.legal-footer.landing-footer-disclosure {
+  width: min(100%, 876px);
+  margin-top: 4.5rem;
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 1;
+}
+
+.landing-footer-disclosure .footer-disclosure-control {
+  position: relative;
+  width: 3rem;
+  min-height: 2.75rem;
+  max-height: 2.75rem;
+  max-width: calc(100vw - 2rem);
+  border-radius: 1rem;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  background: transparent;
+  padding: 0;
+  transition:
+    width 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    max-height 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    padding 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 220ms ease,
+    box-shadow 220ms ease;
+}
+
+.landing-footer-disclosure .footer-disclosure-control.is-open {
+  width: min(42rem, calc(100vw - 2rem));
+  max-height: 30rem;
+  background: color-mix(in srgb, var(--bg) 96%, var(--fg) 4%);
+  box-shadow: 0 16px 38px color-mix(in srgb, #000 14%, transparent);
+  padding: 1.15rem 1.35rem 1.2rem;
+}
+
+.landing-footer-disclosure .footer-disclosure-control.is-opening,
+.landing-footer-disclosure .footer-disclosure-control.is-open,
+.landing-footer-disclosure .footer-disclosure-control.is-closing {
+  overflow: hidden;
+}
+
+.landing-footer-disclosure .footer-disclosure-toggle {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 3rem;
+  height: 2.75rem;
+  border: 1px solid transparent;
+  border-radius: 0.75rem;
+  background: transparent;
+  color: color-mix(in srgb, var(--fg) 54%, transparent);
+  padding: 0.35rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  z-index: 2;
+  transition:
+    top 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    left 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    color 160ms ease,
+    background-color 160ms ease;
+}
+
+.landing-footer-disclosure .footer-disclosure-control.is-open .footer-disclosure-toggle {
+  top: 1rem;
+  left: 1rem;
+  transform: translateX(0);
+}
+
+.landing-footer-disclosure .footer-disclosure-icon {
+  width: 2.2rem;
+  height: 1.85rem;
+  display: block;
+  background: currentColor;
+  -webkit-mask: url("/static/img/winged-foot.svg") center / contain no-repeat;
+  mask: url("/static/img/winged-foot.svg") center / contain no-repeat;
+}
+
+.landing-footer-disclosure .footer-disclosure-toggle:hover,
+.landing-footer-disclosure .footer-disclosure-toggle:focus-visible {
+  background: color-mix(in srgb, var(--fg) 6%, transparent);
+  color: var(--fg);
+  outline: none;
+}
+
+.landing-footer-disclosure .footer-disclosure-toggle[aria-expanded="true"] {
+  background: transparent;
+  color: var(--fg);
+}
+
+.landing-footer-disclosure .footer-disclosure-panel {
+  width: auto;
+  margin: 0 0 0 4.5rem;
+  color: var(--fg);
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  column-gap: 2rem;
+  row-gap: 1.1rem;
+  text-align: left;
+  opacity: 0;
+  transform: translateX(0.9rem);
+  transition:
+    opacity 180ms ease 100ms,
+    transform 240ms cubic-bezier(0.22, 1, 0.36, 1) 80ms;
+}
+
+.landing-footer-disclosure .footer-disclosure-panel[hidden] {
+  display: none;
+}
+
+.landing-footer-disclosure .footer-disclosure-control.is-open .footer-disclosure-panel {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.landing-footer-disclosure .footer-disclosure-control.is-closing .footer-disclosure-panel {
+  opacity: 0;
+  transform: translateX(0.55rem);
+  transition: opacity 100ms ease, transform 120ms ease;
+}
+
+.landing-footer-disclosure .footer-disclosure-identity,
+.landing-footer-disclosure .footer-disclosure-meta {
+  min-width: 0;
+}
+
+.landing-footer-disclosure .footer-disclosure-brand {
+  color: var(--fg);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+}
+
+.landing-footer-disclosure .footer-disclosure-tagline {
+  margin: 0.45rem 0 0;
+  color: var(--fg);
+  font-size: 1rem;
+  line-height: 1.4;
+  text-align: left;
+}
+
+.landing-footer-disclosure .footer-disclosure-company {
+  margin: 0.65rem 0 0;
+  color: color-mix(in srgb, var(--fg) 65%, transparent);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  text-align: left;
+}
+
+.landing-footer-disclosure .footer-disclosure-company a,
+.landing-footer-disclosure .footer-disclosure-tech-links a,
+.landing-footer-disclosure .footer-disclosure-privacy {
+  color: inherit;
+  text-decoration: none;
+}
+
+.landing-footer-disclosure .footer-disclosure-company a:hover,
+.landing-footer-disclosure .footer-disclosure-company a:focus-visible,
+.landing-footer-disclosure .footer-disclosure-tech-links a:hover,
+.landing-footer-disclosure .footer-disclosure-tech-links a:focus-visible,
+.landing-footer-disclosure .footer-disclosure-privacy:hover,
+.landing-footer-disclosure .footer-disclosure-privacy:focus-visible {
+  color: var(--fg);
+  text-decoration: underline;
+}
+
+.landing-footer-disclosure .footer-disclosure-credits-title {
+  color: color-mix(in srgb, var(--fg) 58%, transparent);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.landing-footer-disclosure .footer-disclosure-tech-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.landing-footer-disclosure .footer-disclosure-tech-links a {
+  color: var(--fg);
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+.landing-footer-disclosure .footer-disclosure-tech-note {
+  margin: 0.55rem 0 0;
+  color: color-mix(in srgb, var(--fg) 68%, transparent);
+  font-size: 0.72rem;
+  line-height: 1.5;
+  text-align: left;
+}
+
+.landing-footer-disclosure .footer-disclosure-legal {
+  margin: 0.65rem 0 0;
+  color: color-mix(in srgb, var(--fg) 62%, transparent);
+  font-size: 0.68rem;
+  line-height: 1.4;
+  text-align: left;
+}
+
+.landing-privacy-page .landing-footer-disclosure {
+  margin-top: 3.5rem;
+}
+
+@media (max-width: 560px) {
+  .landing-footer-disclosure .footer-disclosure-control.is-open {
+    max-height: 44rem;
+    padding: 1rem 1.1rem 1.15rem;
+  }
+
+  .landing-footer-disclosure .footer-disclosure-panel {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.15rem;
+    margin: 3.45rem 0 0;
+  }
+
+  .landing-footer-disclosure .footer-disclosure-control.is-open .footer-disclosure-toggle {
+    top: 0.8rem;
+    left: 0.8rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-footer-disclosure .footer-disclosure-control,
+  .landing-footer-disclosure .footer-disclosure-toggle,
+  .landing-footer-disclosure .footer-disclosure-panel {
+    transition: none;
+  }
+}
