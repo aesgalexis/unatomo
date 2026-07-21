@@ -100,9 +100,13 @@
 }
 
 .task-pending {
-  color: var(--danger, #d33);
+  color: #f97316;
   font-weight: 600;
   font-size: 0.85rem;
+}
+
+.task-pending.is-active-restore {
+  color: var(--danger, #d33);
 }
 
 .task-complete-btn {

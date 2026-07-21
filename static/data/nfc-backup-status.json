@@ -1,33 +1,9 @@
 {
   "kind": "unatomo-nfc-backup-status",
   "overall": {
-    "status": "ok",
-    "startedAt": "2026-07-19T14:04:41.203Z",
-    "completedAt": "2026-07-19T14:05:30.805Z",
+    "status": "running",
+    "startedAt": "2026-07-21T17:51:49.286Z",
     "projectId": "unatomo-c20a4",
-    "manifestFile": ".backups/2026-07-19T14-05-30-809Z-nfc-backup-manifest.json",
-    "firestoreCollections": [
-      "machines",
-      "dashboard_layout",
-      "machine_access",
-      "tags",
-      "admin_machine_links",
-      "admin_machine_invites",
-      "machine_transfer_invites",
-      "users",
-      "account_handles",
-      "account_handle_history",
-      "usernames",
-      "account_directory",
-      "dashboard_suggestions",
-      "dashboard_todos",
-      "registration_codes"
-    ],
-    "storagePrefixes": [
-      "machine-docs/",
-      "tag-qrs/"
-    ],
-    "firebaseAuth": true,
     "pendingScopes": [
       "legacy-tenant-machines",
       "restore-tools",
@@ -78,5 +54,5 @@
     "userCount": 9,
     "size": 8876
   },
-  "updatedAt": "2026-07-19T14:30:25.814Z"
+  "updatedAt": "2026-07-21T17:51:49.288Z"
 }

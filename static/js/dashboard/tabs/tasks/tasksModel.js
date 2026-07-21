@@ -2,7 +2,7 @@ const MAX_TITLE = 64;
 const MAX_DESCRIPTION = 1024;
 const MAX_NOTE = 512;
 const CUSTOM_UNITS = ["hours", "days", "weeks", "months"];
-const RESTORE_OPERATION_TASK_SOURCE = "status-out-of-service";
+export const RESTORE_OPERATION_TASK_SOURCE = "status-out-of-service";
 
 const toIso = (value) => {
   const date = value ? new Date(value) : null;

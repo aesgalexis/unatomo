@@ -4,6 +4,7 @@ import {
   MAX_TASK_DESCRIPTION,
   MAX_TASK_NOTE,
   MAX_TASK_TITLE,
+  RESTORE_OPERATION_TASK_SOURCE,
   createTask,
   normalizeTasks
 } from "./tasksModel.js";
@@ -322,6 +323,10 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
       if (timing.pending) {
         const pending = document.createElement("span");
         pending.className = "task-pending";
+        const isActiveRestoreTask =
+          task.source === RESTORE_OPERATION_TASK_SOURCE &&
+          machine.status === "fuera_de_servicio";
+        pending.classList.toggle("is-active-restore", isActiveRestoreTask);
         pending.textContent = t("tasks.pending", "Pendiente");
         meta.appendChild(pending);
       }
