@@ -3,7 +3,7 @@ const MACHINE_DISCOUNT = 0.10;
 
 const i18n = {
   es: {
-    eyebrow: "Simulador en tiempo real",
+    eyebrow: "Simulador de lavandería autoservicio",
     topbarTitle: "Simulador SSL",
     topbarStatus: "Lavandería autoservicio",
     title: "Lavandería autoservicio",
@@ -18,7 +18,7 @@ const i18n = {
     langOptionEn: "English",
     langOptionEs: "Español",
     privacyLink: "Política de privacidad y cookies",
-    legalFooter: "UNATOMO CORE SL - Todos los derechos reservados.",
+    legalFooter: "UNATOMO CORE SL \u00b7 Todos los derechos reservados.",
     reset: "Reiniciar",
     presetSmall: "Pequeño",
     presetBalanced: "Medio",
@@ -80,7 +80,7 @@ const i18n = {
     spaceLimitTooltip: "No cabe en el local actual. Aumenta los m2 o reduce otras máquinas."
   },
   en: {
-    eyebrow: "Real-time simulator",
+    eyebrow: "Self-service laundry simulator",
     topbarTitle: "SSL simulator",
     topbarStatus: "Self-service laundry",
     title: "Self-service laundry",
@@ -95,7 +95,7 @@ const i18n = {
     langOptionEn: "English",
     langOptionEs: "Español",
     privacyLink: "Privacy and cookies policy",
-    legalFooter: "UNATOMO CORE SL - All rights reserved.",
+    legalFooter: "UNATOMO CORE SL \u00b7 All rights reserved.",
     reset: "Reset",
     presetSmall: "Small",
     presetBalanced: "Medium",
@@ -160,7 +160,7 @@ const i18n = {
 
 const presets = {
   small: {
-    storeSize: 25,
+    storeSize: 40,
     openHours: 14,
     openDays: 30,
     washDemand: 16,
@@ -420,8 +420,18 @@ function syncControls() {
 }
 
 function renderMachines() {
-  els.machineList.innerHTML = machineCatalog.map((machine, index) => {
-    const count = Number(state.machines[index] || 0);
+  const orderedMachines = machineCatalog
+    .map((machine, index) => ({
+      machine,
+      index,
+      count: Number(state.machines[index] || 0)
+    }))
+    .sort((left, right) => {
+      const usageOrder = Number(right.count > 0) - Number(left.count > 0);
+      return usageOrder || left.index - right.index;
+    });
+
+  els.machineList.innerHTML = orderedMachines.map(({ machine, index, count }) => {
     const nextCounts = [...state.machines];
     nextCounts[index] = count + 1;
     const canAdd = calculateRequiredArea(nextCounts) <= state.storeSize;
@@ -429,7 +439,7 @@ function renderMachines() {
     const limitTooltip = canAdd ? "" : `<span class="limit-tooltip" role="tooltip">${addTitle}</span>`;
     const unitPrice = machine.purchasePrice;
     return `
-      <article class="machine-row" data-machine-index="${index}">
+      <article class="machine-row${count > 0 ? " has-units" : " is-unused"}" data-machine-index="${index}">
         <div class="machine-name">
           <strong>${machine.label}</strong>
           <span>${machine.capacityKg} kg · ${getText(`${machine.type}Type`)}</span>
@@ -517,7 +527,13 @@ function renderText() {
   document.querySelectorAll(".ssl-lang-option").forEach((button) => {
     button.classList.toggle("is-active", button.dataset.lang === lang);
   });
-  document.querySelector("#legal-footer").textContent = `\u00a9 ${new Date().getFullYear()} ${getText("legalFooter")}`;
+  const legalFooterText = getText("legalFooter");
+  if (window.renderLandingDisclosureFooter) {
+    window.renderLandingDisclosureFooter({ legalFooterText });
+  } else {
+    document.querySelector("#legal-footer").textContent =
+      `\u00a9 ${new Date().getFullYear()} ${legalFooterText}`;
+  }
 }
 
 function render() {

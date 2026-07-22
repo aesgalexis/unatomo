@@ -4,6 +4,9 @@ import { extname, join, normalize } from "node:path";
 
 const root = process.cwd();
 const port = Number(process.env.PORT || 5174);
+const cleanDirectoryRoutes = new Map([
+  ["/ssl-simulator", "/ssl-simulator/index.html"]
+]);
 
 const mime = {
   ".html": "text/html; charset=utf-8",
@@ -21,7 +24,8 @@ const mime = {
 
 const safePath = (urlPath) => {
   const cleaned = decodeURIComponent(urlPath.split("?")[0]);
-  const withIndex = cleaned.endsWith("/") ? `${cleaned}index.html` : cleaned;
+  const withIndex = cleanDirectoryRoutes.get(cleaned) ||
+    (cleaned.endsWith("/") ? `${cleaned}index.html` : cleaned);
   const resolved = normalize(join(root, withIndex));
   if (!resolved.startsWith(root)) return null;
   return resolved;

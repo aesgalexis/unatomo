@@ -8,6 +8,7 @@
   <meta name="robots" content="index, follow">
   <link rel="icon" href="/static/img/favicon/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/ssl-simulator/simulator.css">
+  <link rel="stylesheet" href="/landing/ld_footer-disclosure.css">
 </head>
 <body>
   <header class="ssl-topbar">
@@ -44,7 +45,7 @@
   <main class="simulator-shell">
     <section class="intro-band">
       <div>
-        <p class="eyebrow" data-i18n="eyebrow">Simulador en tiempo real</p>
+        <p class="eyebrow" data-i18n="eyebrow">Simulador de lavandería autoservicio</p>
         <div class="title-line">
           <h1 data-i18n="title">Lavandería autoservicio</h1>
           <div class="brand-picker">
@@ -107,9 +108,9 @@
         <div class="control-group">
           <label for="store-size">
             <span data-i18n="storeSize">Tamaño del local</span>
-            <output id="store-size-output">25 m2</output>
+            <output id="store-size-output">40 m2</output>
           </label>
-          <input id="store-size" type="range" min="20" max="180" step="5">
+          <input id="store-size" type="range" min="20" max="180" step="5" value="40">
         </div>
 
         <div class="control-group">
@@ -280,13 +281,13 @@
   </main>
 
   <footer class="ssl-footer">
-    <div id="legal-footer" class="legal-footer">© 2026 UNATOMO CORE SL - Todos los derechos reservados.</div>
-    <nav class="footer-nav-links" aria-label="Footer">
+    <div id="legal-footer" class="legal-footer"></div>
+    <div class="footer-link">
       <a href="/landing/ld_privacidad.html" data-i18n="privacyLink">Política de privacidad y cookies</a>
-    </nav>
-    <div class="powered-by">Powered by <a href="https://unatomo.com/">unatomo</a></div>
+    </div>
   </footer>
 
+  <script src="/landing/ld_footer-disclosure.js"></script>
   <script type="module" src="/ssl-simulator/simulator.js"></script>
 </body>
 </html>

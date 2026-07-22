@@ -75,7 +75,8 @@
       path === "/landing" ||
       path === "/landing/index.html" ||
       path.startsWith("/landing/nosotros") ||
-      path.startsWith("/landing/contacto")
+      path.startsWith("/landing/contacto") ||
+      path.startsWith("/ssl-simulator")
     );
   };
 
@@ -131,6 +132,15 @@
         window.scrollTo({ top: 0, behavior: "smooth" });
       });
       company.append(ourselvesLink, ".");
+    } else if (
+      getNormalizedPath().startsWith("/landing/contacto") ||
+      getNormalizedPath().startsWith("/ssl-simulator")
+    ) {
+      company.append("Powered by ");
+      const poweredByLink = document.createElement("a");
+      poweredByLink.href = "/landing/nosotros/";
+      poweredByLink.textContent = "people who like machines";
+      company.append(poweredByLink, ".");
     } else {
       company.append("Powered by ");
       const poweredByLink = document.createElement("a");
