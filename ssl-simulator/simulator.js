@@ -30,11 +30,11 @@ const i18n = {
     dryDemand: "Clientes que secan",
     electricity: "Electricidad EUR/kWh",
     gas: "Gas EUR/kWh",
-    water: "Agua EUR/m3",
+    water: "Agua EUR/m³",
     chemical: "Químico EUR/lavado",
     rent: "Alquiler mensual",
     fixedCosts: "Otros gastos fijos",
-    fitout: "Adecuación EUR/m2",
+    fitout: "Adecuación EUR/m²",
     machines: "Máquinas",
     results: "Resultados",
     washerRevenue: "Ingresos lavado",
@@ -66,7 +66,7 @@ const i18n = {
     saturatedNote: "La demanda supera la capacidad diaria calculada por máquinas, horas abiertas y duración de ciclo.",
     overbuiltNote: "Hay mucha capacidad libre. Revisa inversión o demanda.",
     losingNote: "El beneficio mensual es negativo con estos valores.",
-    tightSpaceNote: "La configuración supera el tamaño del local. Sube m2 o reduce máquinas.",
+    tightSpaceNote: "La configuración supera el tamaño del local. Aumenta los m² o reduce máquinas.",
     months: "meses",
     noPayback: "Sin retorno",
     clientsDay: "clientes/día",
@@ -77,7 +77,7 @@ const i18n = {
     washType: "lavado",
     dryType: "secado",
     extraType: "extra",
-    spaceLimitTooltip: "No cabe en el local actual. Aumenta los m2 o reduce otras máquinas."
+    spaceLimitTooltip: "No cabe en el local actual. Aumenta los m² o reduce otras máquinas."
   },
   en: {
     eyebrow: "Self-service laundry simulator",
@@ -107,11 +107,11 @@ const i18n = {
     dryDemand: "Customers drying",
     electricity: "Electricity EUR/kWh",
     gas: "Gas EUR/kWh",
-    water: "Water EUR/m3",
+    water: "Water EUR/m³",
     chemical: "Chemical EUR/wash",
     rent: "Monthly rent",
     fixedCosts: "Other fixed costs",
-    fitout: "Fit-out EUR/m2",
+    fitout: "Fit-out EUR/m²",
     machines: "Machines",
     results: "Results",
     washerRevenue: "Washer revenue",
@@ -143,7 +143,7 @@ const i18n = {
     saturatedNote: "Demand exceeds daily capacity calculated from machines, opening hours and cycle duration.",
     overbuiltNote: "There is too much idle capacity. Review investment or demand.",
     losingNote: "Monthly profit is negative with these values.",
-    tightSpaceNote: "The setup exceeds the store size. Increase m2 or reduce machines.",
+    tightSpaceNote: "The setup exceeds the store size. Increase the area or reduce machines.",
     months: "months",
     noPayback: "No payback",
     clientsDay: "customers/day",
@@ -154,7 +154,7 @@ const i18n = {
     washType: "wash",
     dryType: "dry",
     extraType: "extra",
-    spaceLimitTooltip: "It does not fit in the current store. Increase m2 or remove other machines."
+    spaceLimitTooltip: "It does not fit in the current store. Increase the area or remove other machines."
   }
 };
 
@@ -408,7 +408,7 @@ function syncControls() {
     if (!element || key === "machineList") return;
     element.value = state[key];
   });
-  document.querySelector("#store-size-output").textContent = `${state.storeSize} m2`;
+  document.querySelector("#store-size-output").textContent = `${state.storeSize} m²`;
   document.querySelector("#open-hours-output").textContent = `${state.openHours} h`;
   document.querySelector("#open-days-output").textContent = state.openDays;
   els.washDemand.max = maxWashDemand;
@@ -497,7 +497,7 @@ function renderResults() {
   document.querySelector("#dry-capacity").textContent = Math.floor(result.dryCapacity);
   document.querySelector("#break-even").textContent = `${Math.ceil(result.breakEvenClients)} ${getText("clientsDay")}`;
   document.querySelector("#average-ticket").textContent = formatMoney(result.averageRevenuePerCustomer, true);
-  document.querySelector("#space-use").textContent = `${Math.ceil(result.requiredArea)} / ${state.storeSize} m2`;
+  document.querySelector("#space-use").textContent = `${Math.ceil(result.requiredArea)} / ${state.storeSize} m²`;
   document.querySelector("#margin-pill").textContent = `${Math.round(result.margin * 100)}%`;
   document.querySelector("#margin-pill").classList.toggle("is-negative", result.margin < 0);
 
@@ -516,7 +516,7 @@ function renderText() {
   document.documentElement.lang = lang;
   document.title = lang === "en"
     ? "Self-service laundry simulator | unatomo"
-    : "Simulador de lavanderia autoservicio | unatomo";
+    : "Simulador de lavandería autoservicio | unatomo";
   document.querySelectorAll("[data-i18n]").forEach((node) => {
     node.textContent = getText(node.dataset.i18n);
   });
