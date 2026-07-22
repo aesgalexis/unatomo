@@ -22,7 +22,7 @@ export const createDashboardState = ({
     registrySeenAt: "",
     suggestionsSeenAt: "",
     machineViewMode: "grouped",
-    groupPresentationMode: "inline",
+    groupPresentationMode: "tree",
     machineSortMode: "manual"
   },
   activeView,

@@ -203,6 +203,18 @@ export const createDashboardGroupTreeRenderer = ({
     tree.setAttribute("role", "tree");
     container.appendChild(tree);
 
+    const appendEmptyMessage = (message) => {
+      const empty = document.createElement("p");
+      empty.className = "dashboard-group-tree-empty";
+      empty.textContent = message;
+      container.appendChild(empty);
+    };
+
+    if (!groups.length && !machines.length) {
+      appendEmptyMessage(t("dashboard.groupTreeNoGroups", "A\u00fan no hay grupos."));
+      return;
+    }
+
     const groupById = new Map(groups.map((group) => [group.id, group]));
     const machineCounts = new Map();
     const pendingCounts = new Map();
@@ -403,6 +415,16 @@ export const createDashboardGroupTreeRenderer = ({
       showMachineCount: true,
       dropType: "all"
     });
+
+    if (!groups.length) {
+      appendEmptyMessage(
+        t(
+          "dashboard.groupTreeCreateFirst",
+          "Crea un grupo para organizar tus m\u00e1quinas."
+        )
+      );
+      return;
+    }
 
     const childrenByParent = new Map();
     groups.forEach((group) => {

@@ -1,5 +1,3 @@
-import { initThemeToggle } from "/static/js/theme/theme-toggle.js";
-
 const mount = document.getElementById("topbar-mount");
 const lang = document.documentElement.lang.toLowerCase().startsWith("en") ? "en" : "es";
 const isLoginPage = /^\/nfc\/(?:es|en)\/auth\/login\.html$/.test(window.location.pathname);
@@ -15,7 +13,6 @@ if (mount) {
       </a>
       <div class="landing-header-actions">
         ${isLoginPage ? "" : `<a class="landing-header-login" href="${loginPath}">${loginLabel}</a>`}
-        <button id="theme-toggle" class="landing-control" type="button" aria-label="${lang === "en" ? "Change theme" : "Cambiar tema"}"></button>
         <div class="landing-lang-picker">
           <button id="lang-toggle" class="landing-control landing-lang-button" type="button" aria-expanded="false" aria-controls="lang-menu" aria-label="${lang === "en" ? "Language" : "Idioma"}">
             <span class="landing-control-icon" aria-hidden="true">
@@ -32,8 +29,6 @@ if (mount) {
     </header>
   `;
 }
-
-initThemeToggle();
 
 const langToggle = document.getElementById("lang-toggle");
 const langMenu = document.getElementById("lang-menu");

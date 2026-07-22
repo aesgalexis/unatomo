@@ -105,9 +105,10 @@ Current scope:
 - `dashboardTitle` stores the user's editable dashboard topbar title, capped at 32 characters. Empty value falls back to `Dashboard`.
 - `tabOrder` stores the global order for machine-card tabs and applies to all machines. It is edited from the Settings/Configuración page preferences card.
 - `machineViewMode` stores whether the dashboard renders saved groups (`grouped`, default) or a flat machine list (`flat`). Flat view never changes group membership or creates groups.
-- `groupPresentationMode` stores how grouped machines are presented: `inline`
-  keeps the existing collapsible sections inside the machine list, while `tree`
-  shows a branch-filtering group tree fixed to the left edge below the topbar on
+- `groupPresentationMode` stores how grouped machines are presented. `tree` is
+  the default for accounts without a saved preference and shows a branch-filtering
+  group tree fixed to the left edge below the topbar, while `inline` keeps the
+  existing collapsible sections inside the machine list. The tree is available on
   viewports at least 1280 px wide. It does not resize or displace the centered
   machine column. Smaller viewports fall back to `inline` without overwriting
   the saved preference. Tree mode supports the shared group menu plus

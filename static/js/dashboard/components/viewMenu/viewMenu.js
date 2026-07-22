@@ -17,7 +17,7 @@ const normalizeSort = (value) =>
 
 export const createDashboardViewMenu = ({
   currentMode = "grouped",
-  currentPresentation = "inline",
+  currentPresentation = "tree",
   currentSort = "manual",
   isTreeAvailable = () => true,
   onChange,

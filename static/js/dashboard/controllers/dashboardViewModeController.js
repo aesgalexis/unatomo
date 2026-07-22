@@ -28,7 +28,7 @@ export const createDashboardViewModeController = ({
 
   const viewMenu = createDashboardViewMenu({
     currentMode: state.dashboardLayout.machineViewMode || "grouped",
-    currentPresentation: state.dashboardLayout.groupPresentationMode || "inline",
+    currentPresentation: state.dashboardLayout.groupPresentationMode || "tree",
     currentSort: state.dashboardLayout.machineSortMode || "manual",
     isTreeAvailable,
     onChange: (viewMode) => {

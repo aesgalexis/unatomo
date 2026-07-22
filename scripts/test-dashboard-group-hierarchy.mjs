@@ -74,6 +74,12 @@ assert.equal(
 assert.equal(
   normalizeDashboardLayout({groupPresentationMode: "unknown"})
     .groupPresentationMode,
+  "tree",
+);
+assert.equal(normalizeDashboardLayout({}).groupPresentationMode, "tree");
+assert.equal(
+  normalizeDashboardLayout({groupPresentationMode: "inline"})
+    .groupPresentationMode,
   "inline",
 );
 

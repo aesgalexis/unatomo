@@ -56,7 +56,7 @@
   border: 1px solid transparent;
   border-radius: 0.75rem;
   background: transparent;
-  color: color-mix(in srgb, var(--fg) 54%, transparent);
+  color: color-mix(in srgb, var(--fg) 70%, transparent);
   padding: 0.35rem;
   display: inline-flex;
   align-items: center;
@@ -79,13 +79,15 @@
 }
 
 .landing-footer-disclosure .footer-disclosure-icon {
-  width: 2.2rem;
-  height: 1.85rem;
+  width: 2.35rem;
+  height: 2.15rem;
   display: block;
   background: currentColor;
-  -webkit-mask: url("/static/img/winged-foot.svg") center / contain no-repeat;
-  mask: url("/static/img/winged-foot.svg") center / contain no-repeat;
+  -webkit-mask: url("/static/img/winged-shoe.png") center / contain no-repeat;
+  mask: url("/static/img/winged-shoe.png") center / contain no-repeat;
 }
+
+/* Legacy footer icon: /static/img/winged-foot.svg; 2.2rem × 1.85rem; collapsed color at 54%. */
 
 .landing-footer-disclosure .footer-disclosure-toggle:hover,
 .landing-footer-disclosure .footer-disclosure-toggle:focus-visible {

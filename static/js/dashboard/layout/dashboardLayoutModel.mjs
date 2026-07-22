@@ -39,7 +39,7 @@ export const normalizeMachineViewMode = (value) =>
   value === "flat" ? "flat" : "grouped";
 
 export const normalizeGroupPresentationMode = (value) =>
-  value === "tree" ? "tree" : "inline";
+  value === "inline" ? "inline" : "tree";
 
 export const normalizeMachineSortMode = (value) =>
   ["manual", "incidents", "name"].includes(value) ? value : "manual";

@@ -134,6 +134,16 @@ export const createDashboardRenderer = (dependencies) => {
           .filter(Boolean)
       )
     ).sort((a, b) => a.localeCompare(b, "es"));
+    state.dashboardLayout = normalizeDashboardLayout(state.dashboardLayout);
+    viewMenu.setMode(state.dashboardLayout.machineViewMode);
+    viewMenu.setPresentationMode(state.dashboardLayout.groupPresentationMode);
+    viewMenu.setSortMode(state.dashboardLayout.machineSortMode);
+    const layoutGroups = state.dashboardLayout.groups || [];
+    const layoutPlacements = state.dashboardLayout.placements || {};
+    const useTreeLayout =
+      state.dashboardLayout.machineViewMode !== "flat" &&
+      state.dashboardLayout.groupPresentationMode === "tree" &&
+      isLargeDashboardViewport();
     if (query) {
       filterInfo.textContent = t(
         "dashboard.showingResults",
@@ -157,6 +167,20 @@ export const createDashboardRenderer = (dependencies) => {
           restoreViewport(prevScrollY || 0, renderAnchor);
         }
         return;
+      }
+      if (useTreeLayout) {
+        mount.classList.add("has-group-tree");
+        groupTree.hidden = false;
+        renderGroupTree({
+          groups: layoutGroups,
+          placements: layoutPlacements,
+          machines: [],
+          selectedGroupId: state.selectedTreeGroupId,
+          expandedGroupIds: state.expandedTreeGroupIds,
+          hiddenGroupIds: state.hiddenTreeGroupIds || [],
+          showIncidentCounts: state.showTreeIncidentCounts !== false,
+          showTaskCounts: state.showTreeTaskCounts !== false
+        });
       }
       renderPlaceholder();
       if (preserveScroll) {
@@ -189,16 +213,6 @@ export const createDashboardRenderer = (dependencies) => {
 
     cardRefs.clear();
     state.locations = computeLocations(state.draftMachines);
-    state.dashboardLayout = normalizeDashboardLayout(state.dashboardLayout);
-    viewMenu.setMode(state.dashboardLayout.machineViewMode);
-    viewMenu.setPresentationMode(state.dashboardLayout.groupPresentationMode);
-    viewMenu.setSortMode(state.dashboardLayout.machineSortMode);
-    const layoutGroups = state.dashboardLayout.groups || [];
-    const layoutPlacements = state.dashboardLayout.placements || {};
-    const useTreeLayout =
-      state.dashboardLayout.machineViewMode !== "flat" &&
-      state.dashboardLayout.groupPresentationMode === "tree" &&
-      isLargeDashboardViewport();
     const useGroupedLayout =
       state.dashboardLayout.machineViewMode !== "flat" &&
       !useTreeLayout &&
