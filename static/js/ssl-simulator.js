@@ -15,6 +15,15 @@ const i18n = {
     payback: "Retorno estimado",
     projectControls: "Configuración",
     costSettings: "Gastos",
+    actionsLabel: "Acciones",
+    languageLabel: "Idioma",
+    mainResultsLabel: "Resultados principales",
+    controlsLabel: "Controles de simulación",
+    presetsLabel: "Escenarios predefinidos",
+    machinesLabel: "Configuración de máquinas",
+    financialDetailsLabel: "Detalle financiero",
+    mobileNotice: "Este simulador está pensado para visualizarse en un ordenador.",
+    closeMobileNotice: "Cerrar aviso",
     langOptionEn: "English",
     langOptionEs: "Español",
     privacyLink: "Política de privacidad y cookies",
@@ -24,39 +33,42 @@ const i18n = {
     presetBalanced: "Medio",
     presetHigh: "Alto tráfico",
     storeSize: "Tamaño del local",
-    openHours: "Horas abierto al día",
-    openDays: "Días abierto al mes",
+    openHours: "Horas de apertura al día",
+    openDays: "Días de apertura al mes",
     washDemand: "Clientes que lavan",
     dryDemand: "Clientes que secan",
-    electricity: "Electricidad EUR/kWh",
-    gas: "Gas EUR/kWh",
-    water: "Agua EUR/m³",
-    chemical: "Químico EUR/lavado",
+    electricity: "Electricidad (EUR/kWh)",
+    gas: "Gas (EUR/kWh)",
+    water: "Agua (EUR/m³)",
+    chemical: "Producto químico (EUR/lavado)",
     rent: "Alquiler mensual",
     fixedCosts: "Otros gastos fijos",
-    fitout: "Adecuación EUR/m²",
+    fitout: "Adecuación (EUR/m²)",
     machines: "Máquinas",
     results: "Resultados",
-    washerRevenue: "Ingresos lavado",
-    dryerRevenue: "Ingresos secado",
+    washerRevenue: "Ingresos por lavado",
+    dryerRevenue: "Ingresos por secado",
     variableCosts: "Costes variables",
     monthlyFixedCosts: "Costes fijos",
     netProfit: "Resultado mensual estimado",
     taxDisclaimer: "Estimación antes de impuestos. No incluye IVA, Impuesto de Sociedades/IRPF, tasas locales ni otros costes fiscales aplicables.",
     revenue: "Ingresos",
     costs: "Costes",
-    washOccupancy: "Ocupación lavado",
-    dryOccupancy: "Ocupación secado",
+    washOccupancy: "Ocupación de lavado",
+    dryOccupancy: "Ocupación de secado",
     dailyWashes: "Coladas/día",
     dailyDries: "Secados/día",
-    washCapacity: "Capacidad lavado/día",
-    dryCapacity: "Capacidad secado/día",
+    washCapacity: "Capacidad de lavado/día",
+    dryCapacity: "Capacidad de secado/día",
     breakEven: "Punto de equilibrio",
     averageTicket: "Ticket medio estimado",
     spaceUse: "Espacio estimado",
     units: "Unidades",
-    price: "Precio ciclo",
-    minutes: "Min/ciclo",
+    unitAbbreviation: "ud",
+    price: "Precio por ciclo",
+    minutes: "Duración del ciclo",
+    addUnit: "Añadir una unidad",
+    subtractUnit: "Restar una unidad",
     balanced: "Equilibrado",
     saturated: "Saturado",
     overbuilt: "Sobredimensionado",
@@ -92,6 +104,15 @@ const i18n = {
     payback: "Estimated payback",
     projectControls: "Configuration",
     costSettings: "Costs",
+    actionsLabel: "Actions",
+    languageLabel: "Language",
+    mainResultsLabel: "Main results",
+    controlsLabel: "Simulation controls",
+    presetsLabel: "Preset scenarios",
+    machinesLabel: "Machine configuration",
+    financialDetailsLabel: "Financial details",
+    mobileNotice: "This simulator is designed to be viewed on a computer.",
+    closeMobileNotice: "Dismiss notice",
     langOptionEn: "English",
     langOptionEs: "Español",
     privacyLink: "Privacy and cookies policy",
@@ -105,13 +126,13 @@ const i18n = {
     openDays: "Open days per month",
     washDemand: "Customers washing",
     dryDemand: "Customers drying",
-    electricity: "Electricity EUR/kWh",
-    gas: "Gas EUR/kWh",
-    water: "Water EUR/m³",
-    chemical: "Chemical EUR/wash",
+    electricity: "Electricity (EUR/kWh)",
+    gas: "Gas (EUR/kWh)",
+    water: "Water (EUR/m³)",
+    chemical: "Detergent (EUR/wash)",
     rent: "Monthly rent",
     fixedCosts: "Other fixed costs",
-    fitout: "Fit-out EUR/m²",
+    fitout: "Fit-out (EUR/m²)",
     machines: "Machines",
     results: "Results",
     washerRevenue: "Washer revenue",
@@ -132,8 +153,11 @@ const i18n = {
     averageTicket: "Estimated average ticket",
     spaceUse: "Estimated space",
     units: "Units",
-    price: "Cycle price",
-    minutes: "Min/cycle",
+    unitAbbreviation: "unit",
+    price: "Price per cycle",
+    minutes: "Cycle duration",
+    addUnit: "Add one unit",
+    subtractUnit: "Remove one unit",
     balanced: "Balanced",
     saturated: "Saturated",
     overbuilt: "Overbuilt",
@@ -175,7 +199,7 @@ const presets = {
     machines: [3, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0]
   },
   balanced: {
-    storeSize: 35,
+    storeSize: 55,
     openHours: 15,
     openDays: 30,
     washDemand: 24,
@@ -190,7 +214,7 @@ const presets = {
     machines: [3, 0, 1, 0, 0, 0, 2, 1, 0, 0, 0, 0, 0]
   },
   highTraffic: {
-    storeSize: 50,
+    storeSize: 75,
     openHours: 16,
     openDays: 30,
     washDemand: 34,
@@ -211,19 +235,19 @@ function netMachinePrice(basePrice, packagingPrice = 0) {
 }
 
 const machineCatalog = [
-  { id: "wrx8", label: "Lavadora WRX 8", type: "wash", capacityKg: 8, price: 4.8, minutes: 30, kwh: 0.9, waterLiters: 60, chemical: 1, areaM2: 2.0, purchasePrice: netMachinePrice(4900, 0) },
-  { id: "hs9eco", label: "Lavadora HS 9 ECO", type: "wash", capacityKg: 9, price: 5.2, minutes: 30, kwh: 1.0, waterLiters: 68, chemical: 1, areaM2: 2.1, purchasePrice: netMachinePrice(11150, 280) },
-  { id: "hs11eco", label: "Lavadora HS 11 ECO", type: "wash", capacityKg: 11, price: 6.2, minutes: 30, kwh: 1.2, waterLiters: 82, chemical: 1, areaM2: 2.3, purchasePrice: netMachinePrice(12680, 280) },
-  { id: "hs13eco", label: "Lavadora HS 13 ECO", type: "wash", capacityKg: 13, price: 7.0, minutes: 30, kwh: 1.4, waterLiters: 96, chemical: 1, areaM2: 2.5, purchasePrice: netMachinePrice(13440, 327) },
-  { id: "hs18eco", label: "Lavadora HS 18 ECO", type: "wash", capacityKg: 17, price: 8.5, minutes: 30, kwh: 1.8, waterLiters: 125, chemical: 1, areaM2: 3.0, purchasePrice: netMachinePrice(17250, 350) },
-  { id: "hs24eco", label: "Lavadora HS 24 ECO", type: "wash", capacityKg: 23, price: 10.5, minutes: 30, kwh: 2.4, waterLiters: 165, chemical: 1, areaM2: 3.5, purchasePrice: netMachinePrice(18475, 360) },
-  { id: "erx20", label: "Secadora ERX 20 eléctrica", type: "dry", capacityKg: 8, price: 3.8, minutes: 30, kwh: 3.2, gasKwh: 0, waterLiters: 0, chemical: 0, areaM2: 1.8, purchasePrice: netMachinePrice(4790, 0) },
-  { id: "r25plusGas", label: "Secadora R25 PLUS gas", type: "dry", capacityKg: 10, price: 4.2, minutes: 30, kwh: 0.6, gasKwh: 4.2, waterLiters: 0, chemical: 0, areaM2: 2.0, purchasePrice: netMachinePrice(7615, 340) },
-  { id: "r40plusGas", label: "Secadora R40 PLUS gas", type: "dry", capacityKg: 16, price: 5.0, minutes: 30, kwh: 0.8, gasKwh: 6.4, waterLiters: 0, chemical: 0, areaM2: 2.4, purchasePrice: netMachinePrice(8148, 420) },
-  { id: "r55plusGas", label: "Secadora R55 PLUS gas", type: "dry", capacityKg: 25, price: 6.5, minutes: 30, kwh: 1.0, gasKwh: 9.5, waterLiters: 0, chemical: 0, areaM2: 3.1, purchasePrice: netMachinePrice(9415, 485) },
-  { id: "r25plusElec", label: "Secadora R25 PLUS eléctrica", type: "dry", capacityKg: 10, price: 4.2, minutes: 30, kwh: 4.0, gasKwh: 0, waterLiters: 0, chemical: 0, areaM2: 2.0, purchasePrice: netMachinePrice(7117, 340) },
-  { id: "rz40plus", label: "Secadora RZ40 PLUS eléctrica", type: "dry", capacityKg: 16, price: 5.2, minutes: 30, kwh: 5.6, gasKwh: 0, waterLiters: 0, chemical: 0, areaM2: 2.4, purchasePrice: netMachinePrice(16335, 460) },
-  { id: "rz55plus", label: "Secadora RZ55 PLUS eléctrica", type: "dry", capacityKg: 25, price: 6.8, minutes: 30, kwh: 8.0, gasKwh: 0, waterLiters: 0, chemical: 0, areaM2: 3.1, purchasePrice: netMachinePrice(17080, 525) }
+  { id: "wrx8", label: "Lavadora WRX 8", labelEn: "Washer WRX 8", type: "wash", capacityKg: 8, price: 4.8, minutes: 30, kwh: 0.9, waterLiters: 60, chemical: 1, areaM2: 2.0, purchasePrice: netMachinePrice(4900, 0) },
+  { id: "hs9eco", label: "Lavadora HS 9 ECO", labelEn: "Washer HS 9 ECO", type: "wash", capacityKg: 9, price: 5.2, minutes: 30, kwh: 1.0, waterLiters: 68, chemical: 1, areaM2: 2.1, purchasePrice: netMachinePrice(11150, 280) },
+  { id: "hs11eco", label: "Lavadora HS 11 ECO", labelEn: "Washer HS 11 ECO", type: "wash", capacityKg: 11, price: 6.2, minutes: 30, kwh: 1.2, waterLiters: 82, chemical: 1, areaM2: 2.3, purchasePrice: netMachinePrice(12680, 280) },
+  { id: "hs13eco", label: "Lavadora HS 13 ECO", labelEn: "Washer HS 13 ECO", type: "wash", capacityKg: 13, price: 7.0, minutes: 30, kwh: 1.4, waterLiters: 96, chemical: 1, areaM2: 2.5, purchasePrice: netMachinePrice(13440, 327) },
+  { id: "hs18eco", label: "Lavadora HS 18 ECO", labelEn: "Washer HS 18 ECO", type: "wash", capacityKg: 17, price: 8.5, minutes: 30, kwh: 1.8, waterLiters: 125, chemical: 1, areaM2: 3.0, purchasePrice: netMachinePrice(17250, 350) },
+  { id: "hs24eco", label: "Lavadora HS 24 ECO", labelEn: "Washer HS 24 ECO", type: "wash", capacityKg: 23, price: 10.5, minutes: 30, kwh: 2.4, waterLiters: 165, chemical: 1, areaM2: 3.5, purchasePrice: netMachinePrice(18475, 360) },
+  { id: "erx20", label: "Secadora ERX 20 eléctrica", labelEn: "Electric dryer ERX 20", type: "dry", capacityKg: 8, price: 3.8, minutes: 30, kwh: 3.2, gasKwh: 0, waterLiters: 0, chemical: 0, areaM2: 1.8, purchasePrice: netMachinePrice(4790, 0) },
+  { id: "r25plusGas", label: "Secadora R25 PLUS gas", labelEn: "Gas dryer R25 PLUS", type: "dry", capacityKg: 10, price: 4.2, minutes: 30, kwh: 0.6, gasKwh: 4.2, waterLiters: 0, chemical: 0, areaM2: 2.0, purchasePrice: netMachinePrice(7615, 340) },
+  { id: "r40plusGas", label: "Secadora R40 PLUS gas", labelEn: "Gas dryer R40 PLUS", type: "dry", capacityKg: 16, price: 5.0, minutes: 30, kwh: 0.8, gasKwh: 6.4, waterLiters: 0, chemical: 0, areaM2: 2.4, purchasePrice: netMachinePrice(8148, 420) },
+  { id: "r55plusGas", label: "Secadora R55 PLUS gas", labelEn: "Gas dryer R55 PLUS", type: "dry", capacityKg: 25, price: 6.5, minutes: 30, kwh: 1.0, gasKwh: 9.5, waterLiters: 0, chemical: 0, areaM2: 3.1, purchasePrice: netMachinePrice(9415, 485) },
+  { id: "r25plusElec", label: "Secadora R25 PLUS eléctrica", labelEn: "Electric dryer R25 PLUS", type: "dry", capacityKg: 10, price: 4.2, minutes: 30, kwh: 4.0, gasKwh: 0, waterLiters: 0, chemical: 0, areaM2: 2.0, purchasePrice: netMachinePrice(7117, 340) },
+  { id: "rz40plus", label: "Secadora RZ40 PLUS eléctrica", labelEn: "Electric dryer RZ40 PLUS", type: "dry", capacityKg: 16, price: 5.2, minutes: 30, kwh: 5.6, gasKwh: 0, waterLiters: 0, chemical: 0, areaM2: 2.4, purchasePrice: netMachinePrice(16335, 460) },
+  { id: "rz55plus", label: "Secadora RZ55 PLUS eléctrica", labelEn: "Electric dryer RZ55 PLUS", type: "dry", capacityKg: 25, price: 6.8, minutes: 30, kwh: 8.0, gasKwh: 0, waterLiters: 0, chemical: 0, areaM2: 3.1, purchasePrice: netMachinePrice(17080, 525) }
 ];
 
 let lang = "es";
@@ -234,17 +258,23 @@ let machineOverrides = machineCatalog.map((machine) => ({
   minutes: machine.minutes
 }));
 
-const money = new Intl.NumberFormat("es-ES", {
-  style: "currency",
-  currency: "EUR",
-  maximumFractionDigits: 0
-});
-
-const preciseMoney = new Intl.NumberFormat("es-ES", {
-  style: "currency",
-  currency: "EUR",
-  maximumFractionDigits: 2
-});
+const moneyFormatters = Object.fromEntries(
+  Object.entries({ es: "es-ES", en: "en-IE" }).map(([language, locale]) => [
+    language,
+    {
+      rounded: new Intl.NumberFormat(locale, {
+        style: "currency",
+        currency: "EUR",
+        maximumFractionDigits: 0
+      }),
+      precise: new Intl.NumberFormat(locale, {
+        style: "currency",
+        currency: "EUR",
+        maximumFractionDigits: 2
+      })
+    }
+  ])
+);
 
 const els = {
   storeSize: document.querySelector("#store-size"),
@@ -263,7 +293,9 @@ const els = {
 };
 
 function formatMoney(value, precise = false) {
-  return (precise ? preciseMoney : money).format(Number.isFinite(value) ? value : 0);
+  const formatters = moneyFormatters[lang] || moneyFormatters.es;
+  return (precise ? formatters.precise : formatters.rounded)
+    .format(Number.isFinite(value) ? value : 0);
 }
 
 function getText(key) {
@@ -435,20 +467,20 @@ function renderMachines() {
     const nextCounts = [...state.machines];
     nextCounts[index] = count + 1;
     const canAdd = calculateRequiredArea(nextCounts) <= state.storeSize;
-    const addTitle = canAdd ? "Sumar" : getText("spaceLimitTooltip");
+    const addTitle = canAdd ? getText("addUnit") : getText("spaceLimitTooltip");
     const limitTooltip = canAdd ? "" : `<span class="limit-tooltip" role="tooltip">${addTitle}</span>`;
     const unitPrice = machine.purchasePrice;
     return `
       <article class="machine-row${count > 0 ? " has-units" : " is-unused"}" data-machine-index="${index}">
         <div class="machine-name">
-          <strong>${machine.label}</strong>
+          <strong>${lang === "en" ? machine.labelEn : machine.label}</strong>
           <span>${machine.capacityKg} kg · ${getText(`${machine.type}Type`)}</span>
-          <span class="machine-unit-price">${formatMoney(unitPrice)}/ud</span>
+          <span class="machine-unit-price">${formatMoney(unitPrice)}/${getText("unitAbbreviation")}</span>
         </div>
         <div class="machine-field">
           <span>${getText("units")}</span>
           <div class="stepper">
-            <button type="button" data-action="dec" aria-label="Restar">-</button>
+            <button type="button" data-action="dec" aria-label="${getText("subtractUnit")}">-</button>
             <output>${count}</output>
             <button type="button" data-action="inc" aria-label="${addTitle}" title="${canAdd ? "" : addTitle}" class="${canAdd ? "" : "is-disabled"}" aria-disabled="${canAdd ? "false" : "true"}">+${limitTooltip}</button>
           </div>
@@ -578,6 +610,22 @@ const langToggle = document.querySelector("#ssl-lang-toggle");
 const langMenu = document.querySelector("#ssl-lang-menu");
 const brandToggle = document.querySelector("#brand-toggle");
 const brandMenu = document.querySelector("#brand-menu");
+const mobileViewNotice = document.querySelector("#mobile-view-notice");
+const mobileViewNoticeClose = document.querySelector("#mobile-view-notice-close");
+const mobileNoticeDismissedKey = "unatomo_ssl_mobile_notice_dismissed_v1";
+
+try {
+  if (localStorage.getItem(mobileNoticeDismissedKey) === "true") {
+    mobileViewNotice?.classList.add("is-dismissed");
+  }
+} catch {}
+
+mobileViewNoticeClose?.addEventListener("click", () => {
+  mobileViewNotice?.classList.add("is-dismissed");
+  try {
+    localStorage.setItem(mobileNoticeDismissedKey, "true");
+  } catch {}
+});
 
 function closeLangMenu() {
   langMenu.hidden = true;

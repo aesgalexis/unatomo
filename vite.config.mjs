@@ -1,5 +1,6 @@
 const cleanDirectoryRoutes = new Map([
-  ["/ssl-simulator", "/ssl-simulator/index.html"]
+  ["/ssl-simulator", "/ssl-simulator.html"],
+  ["/ssl-simulator/", "/ssl-simulator.html"]
 ]);
 
 const rewriteCleanDirectoryRoute = (request) => {

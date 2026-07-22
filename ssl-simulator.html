@@ -6,8 +6,9 @@
   <title>Simulador de lavandería autoservicio | unatomo</title>
   <meta name="description" content="Simula la inversión, capacidad, costes y rentabilidad mensual de una lavandería autoservicio.">
   <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://unatomo.com/ssl-simulator">
   <link rel="icon" href="/static/img/favicon/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/ssl-simulator/simulator.css">
+  <link rel="stylesheet" href="/static/css/ssl-simulator.css">
   <link rel="stylesheet" href="/landing/ld_footer-disclosure.css">
 </head>
 <body>
@@ -23,9 +24,9 @@
         </div>
       </div>
 
-      <div class="ssl-topbar-actions" aria-label="Acciones">
+      <div class="ssl-topbar-actions" data-i18n-aria="actionsLabel" aria-label="Acciones">
         <div class="ssl-lang-picker">
-          <button id="ssl-lang-toggle" class="ssl-lang-button" type="button" aria-expanded="false" aria-controls="ssl-lang-menu">
+          <button id="ssl-lang-toggle" class="ssl-lang-button" type="button" aria-expanded="false" aria-controls="ssl-lang-menu" data-i18n-aria="languageLabel" aria-label="Idioma">
             <span class="ssl-lang-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" role="img" focusable="false">
                 <path d="M12 2.5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 12 2.5zm7.5 9.5a7.45 7.45 0 0 1-1.2 4h-3.1a18.9 18.9 0 0 0 .6-4 18.9 18.9 0 0 0-.6-4h3.1a7.45 7.45 0 0 1 1.2 4zM12 4.6c.9 1.1 1.7 2.7 2.2 4.4H9.8c.5-1.7 1.3-3.3 2.2-4.4zM4.5 12a7.45 7.45 0 0 1 1.2-4h3.1a18.9 18.9 0 0 0-.6 4 18.9 18.9 0 0 0 .6 4H5.7a7.45 7.45 0 0 1-1.2-4zm5.3 0a16.6 16.6 0 0 1 .7-4h3a16.6 16.6 0 0 1 .7 4 16.6 16.6 0 0 1-.7 4h-3a16.6 16.6 0 0 1-.7-4zm2.2 7.4c-.9-1.1-1.7-2.7-2.2-4.4h4.4c-.5 1.7-1.3 3.3-2.2 4.4zM18.3 16h-3.1a18.9 18.9 0 0 0 .6-4 18.9 18.9 0 0 0-.6-4h3.1a7.45 7.45 0 0 1 0 8z" fill="currentColor"></path>
@@ -41,6 +42,11 @@
       </div>
     </div>
   </header>
+
+  <aside id="mobile-view-notice" class="mobile-view-notice" role="note">
+    <span data-i18n="mobileNotice">Este simulador está pensado para visualizarse en un ordenador.</span>
+    <button id="mobile-view-notice-close" class="mobile-view-notice-close" type="button" data-i18n-aria="closeMobileNotice" aria-label="Cerrar aviso">×</button>
+  </aside>
 
   <main class="simulator-shell">
     <section class="intro-band">
@@ -68,7 +74,7 @@
       </div>
     </section>
 
-    <section class="kpi-grid" aria-label="Resultados principales">
+    <section class="kpi-grid" data-i18n-aria="mainResultsLabel" aria-label="Resultados principales">
       <article class="kpi">
         <span data-i18n="investment">Inversión inicial</span>
         <strong id="kpi-investment">0 EUR</strong>
@@ -88,7 +94,7 @@
     </section>
 
     <section class="workspace">
-      <aside class="control-panel" aria-label="Controles de simulación">
+      <aside class="control-panel" data-i18n-aria="controlsLabel" aria-label="Controles de simulación">
         <div class="section-head">
           <h2 data-i18n="projectControls">Configuración</h2>
           <button type="button" class="ghost-button icon-button" id="reset-button" data-i18n-aria="reset" aria-label="Reiniciar">
@@ -99,7 +105,7 @@
           </button>
         </div>
 
-        <div class="preset-row" aria-label="Escenarios predefinidos">
+        <div class="preset-row" data-i18n-aria="presetsLabel" aria-label="Escenarios predefinidos">
           <button type="button" class="preset-button is-active" data-preset="small" data-i18n="presetSmall">Pequeño</button>
           <button type="button" class="preset-button" data-preset="balanced" data-i18n="presetBalanced">Medio</button>
           <button type="button" class="preset-button" data-preset="highTraffic" data-i18n="presetHigh">Alto tráfico</button>
@@ -115,34 +121,34 @@
 
         <div class="control-group">
           <label for="open-hours">
-            <span data-i18n="openHours">Horas abierto al día</span>
-            <output id="open-hours-output">15 h</output>
+            <span data-i18n="openHours">Horas de apertura al día</span>
+            <output id="open-hours-output">14 h</output>
           </label>
-          <input id="open-hours" type="range" min="8" max="24" step="1">
+          <input id="open-hours" type="range" min="8" max="24" step="1" value="14">
         </div>
 
         <div class="control-group">
           <label for="open-days">
-            <span data-i18n="openDays">Días abierto al mes</span>
+            <span data-i18n="openDays">Días de apertura al mes</span>
             <output id="open-days-output">30</output>
           </label>
-          <input id="open-days" type="range" min="20" max="31" step="1">
+          <input id="open-days" type="range" min="20" max="31" step="1" value="30">
         </div>
 
         <div class="control-group">
           <label for="wash-demand">
             <span data-i18n="washDemand">Clientes que lavan</span>
-            <output id="wash-demand-output">42</output>
+            <output id="wash-demand-output">16</output>
           </label>
-          <input id="wash-demand" type="range" min="0" max="220" step="1">
+          <input id="wash-demand" type="range" min="0" max="220" step="1" value="16">
         </div>
 
         <div class="control-group">
           <label for="dry-demand">
             <span data-i18n="dryDemand">Clientes que secan</span>
-            <output id="dry-demand-output">30</output>
+            <output id="dry-demand-output">16</output>
           </label>
-          <input id="dry-demand" type="range" min="0" max="220" step="1">
+          <input id="dry-demand" type="range" min="0" max="220" step="1" value="16">
         </div>
 
         <section class="cost-panel" aria-label="Costes y gastos">
@@ -151,39 +157,39 @@
           </div>
           <div class="field-grid cost-grid">
             <label>
-              <span data-i18n="electricity">Electricidad EUR/kWh</span>
-              <input id="electricity-price" type="number" min="0" step="0.01">
+              <span data-i18n="electricity">Electricidad (EUR/kWh)</span>
+              <input id="electricity-price" type="number" min="0" step="0.01" value="0.22">
             </label>
             <label>
-              <span data-i18n="gas">Gas EUR/kWh</span>
-              <input id="gas-price" type="number" min="0" step="0.01">
+              <span data-i18n="gas">Gas (EUR/kWh)</span>
+              <input id="gas-price" type="number" min="0" step="0.01" value="0.08">
             </label>
             <label>
-              <span data-i18n="water">Agua EUR/m³</span>
-              <input id="water-price" type="number" min="0" step="0.05">
+              <span data-i18n="water">Agua (EUR/m³)</span>
+              <input id="water-price" type="number" min="0" step="0.05" value="2.15">
             </label>
             <label>
-              <span data-i18n="chemical">Químico EUR/lavado</span>
-              <input id="chemical-price" type="number" min="0" step="0.05">
+              <span data-i18n="chemical">Producto químico (EUR/lavado)</span>
+              <input id="chemical-price" type="number" min="0" step="0.05" value="0.32">
             </label>
             <label>
               <span data-i18n="rent">Alquiler mensual</span>
-              <input id="rent" type="number" min="0" step="50">
+              <input id="rent" type="number" min="0" step="50" value="650">
             </label>
             <label>
               <span data-i18n="fixedCosts">Otros gastos fijos</span>
-              <input id="fixed-costs" type="number" min="0" step="50">
+              <input id="fixed-costs" type="number" min="0" step="50" value="300">
             </label>
             <label>
-              <span data-i18n="fitout">Adecuación EUR/m²</span>
-              <input id="fitout-cost" type="number" min="0" step="25">
+              <span data-i18n="fitout">Adecuación (EUR/m²)</span>
+              <input id="fitout-cost" type="number" min="0" step="25" value="300">
             </label>
           </div>
         </section>
 
       </aside>
 
-      <section class="machine-panel" aria-label="Configuración de máquinas">
+      <section class="machine-panel" data-i18n-aria="machinesLabel" aria-label="Configuración de máquinas">
         <div class="section-head">
           <div>
             <h2 data-i18n="machines">Máquinas</h2>
@@ -193,7 +199,7 @@
         <div id="machine-list" class="machine-list"></div>
       </section>
 
-      <section class="results-panel" aria-label="Detalle financiero">
+      <section class="results-panel" data-i18n-aria="financialDetailsLabel" aria-label="Detalle financiero">
         <div class="section-head">
           <h2 data-i18n="results">Resultados</h2>
           <span id="margin-pill" class="margin-pill">0%</span>
@@ -201,11 +207,11 @@
 
         <div class="result-stack">
           <div class="result-row">
-            <span data-i18n="washerRevenue">Ingresos lavado</span>
+            <span data-i18n="washerRevenue">Ingresos por lavado</span>
             <strong id="washer-revenue">0 EUR</strong>
           </div>
           <div class="result-row">
-            <span data-i18n="dryerRevenue">Ingresos secado</span>
+            <span data-i18n="dryerRevenue">Ingresos por secado</span>
             <strong id="dryer-revenue">0 EUR</strong>
           </div>
           <div class="result-row">
@@ -237,11 +243,11 @@
 
         <div class="capacity-block">
           <div>
-            <span data-i18n="washOccupancy">Ocupación lavado</span>
+            <span data-i18n="washOccupancy">Ocupación de lavado</span>
             <strong id="wash-occupancy">0%</strong>
           </div>
           <div>
-            <span data-i18n="dryOccupancy">Ocupación secado</span>
+            <span data-i18n="dryOccupancy">Ocupación de secado</span>
             <strong id="dry-occupancy">0%</strong>
           </div>
           <div>
@@ -253,11 +259,11 @@
             <strong id="daily-dries">0</strong>
           </div>
           <div>
-            <span data-i18n="washCapacity">Capacidad lavado/día</span>
+            <span data-i18n="washCapacity">Capacidad de lavado/día</span>
             <strong id="wash-capacity">0</strong>
           </div>
           <div>
-            <span data-i18n="dryCapacity">Capacidad secado/día</span>
+            <span data-i18n="dryCapacity">Capacidad de secado/día</span>
             <strong id="dry-capacity">0</strong>
           </div>
           <div>
@@ -288,6 +294,6 @@
   </footer>
 
   <script src="/landing/ld_footer-disclosure.js"></script>
-  <script type="module" src="/ssl-simulator/simulator.js"></script>
+  <script type="module" src="/static/js/ssl-simulator.js"></script>
 </body>
 </html>

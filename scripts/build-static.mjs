@@ -4,7 +4,14 @@ import path from "node:path";
 const ROOT = process.cwd();
 const DIST = path.join(ROOT, "dist");
 
-const IGNORE_DIRS = new Set([".git", "node_modules", "dist", ".vscode"]);
+const IGNORE_DIRS = new Set([
+  ".git",
+  "node_modules",
+  "dist",
+  ".vscode",
+  "_private",
+  "ssl-simulator"
+]);
 const IGNORE_FILES = new Set(["package.json", "package-lock.json"]);
 
 async function copyRecursive(src, dst) {

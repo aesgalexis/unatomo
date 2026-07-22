@@ -1,3 +1,24 @@
-<meta http-equiv="refresh" content="0; url=/nfc/es/">
-<script>location.replace('/nfc/es/');</script>
-<title>404</title>
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Redireccionando…</title>
+  <script>
+    const requestedPath = window.location.pathname.replace(/\/+$/, "");
+    const targetPath = requestedPath === "/ssl-simulator"
+      ? "/ssl-simulator"
+      : "/nfc/es/";
+    const target = new URL(targetPath, window.location.origin);
+    if (targetPath === "/ssl-simulator") {
+      target.search = window.location.search;
+      target.hash = window.location.hash;
+    }
+    window.location.replace(target.toString());
+  </script>
+</head>
+<body>
+  <p>Redireccionando…</p>
+</body>
+</html>
