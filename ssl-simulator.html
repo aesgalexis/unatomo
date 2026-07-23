@@ -43,11 +43,6 @@
     </div>
   </header>
 
-  <aside id="mobile-view-notice" class="mobile-view-notice" role="note">
-    <span data-i18n="mobileNotice">Este simulador está pensado para visualizarse en un ordenador.</span>
-    <button id="mobile-view-notice-close" class="mobile-view-notice-close" type="button" data-i18n-aria="closeMobileNotice" aria-label="Cerrar aviso">×</button>
-  </aside>
-
   <main class="simulator-shell">
     <section class="intro-band">
       <div>
@@ -93,8 +88,31 @@
       </article>
     </section>
 
-    <section class="workspace">
-      <aside class="control-panel" data-i18n-aria="controlsLabel" aria-label="Controles de simulación">
+    <nav class="mobile-workspace-nav" data-i18n-aria="mobileNavLabel" aria-label="Secciones del simulador">
+      <button type="button" class="mobile-workspace-tab is-active" data-mobile-panel="configuration" aria-pressed="true">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M4 7h10M18 7h2M4 17h2M10 17h10M14 4v6M6 14v6"></path>
+        </svg>
+        <span data-i18n="mobileConfiguration">Configurar</span>
+      </button>
+      <button type="button" class="mobile-workspace-tab" data-mobile-panel="machines" aria-pressed="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <rect x="4" y="3" width="16" height="18" rx="2"></rect>
+          <circle cx="12" cy="13" r="4"></circle>
+          <path d="M8 7h.01M11 7h5"></path>
+        </svg>
+        <span data-i18n="mobileMachines">Máquinas</span>
+      </button>
+      <button type="button" class="mobile-workspace-tab" data-mobile-panel="results" aria-pressed="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M5 20V10M12 20V4M19 20v-7"></path>
+        </svg>
+        <span data-i18n="mobileResults">Resultados</span>
+      </button>
+    </nav>
+
+    <section class="workspace" data-mobile-active-panel="configuration">
+      <aside class="control-panel is-mobile-active" data-mobile-panel-content="configuration" data-i18n-aria="controlsLabel" aria-label="Controles de simulación">
         <div class="section-head">
           <h2 data-i18n="projectControls">Configuración</h2>
           <button type="button" class="ghost-button icon-button" id="reset-button" data-i18n-aria="reset" aria-label="Reiniciar">
@@ -151,11 +169,15 @@
           <input id="dry-demand" type="range" min="0" max="220" step="1" value="16">
         </div>
 
-        <section class="cost-panel" aria-label="Costes y gastos">
+        <section class="cost-panel is-mobile-collapsed" data-i18n-aria="costSettings" aria-label="Gastos">
           <div class="section-head">
             <h2 data-i18n="costSettings">Gastos</h2>
+            <button type="button" class="cost-panel-toggle" id="cost-panel-toggle" aria-expanded="false" aria-controls="cost-grid">
+              <span data-i18n="expandCosts">Mostrar</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m7 10 5 5 5-5"></path></svg>
+            </button>
           </div>
-          <div class="field-grid cost-grid">
+          <div class="field-grid cost-grid" id="cost-grid">
             <label>
               <span data-i18n="electricity">Electricidad (EUR/kWh)</span>
               <input id="electricity-price" type="number" min="0" step="0.01" value="0.22">
@@ -189,17 +211,18 @@
 
       </aside>
 
-      <section class="machine-panel" data-i18n-aria="machinesLabel" aria-label="Configuración de máquinas">
+      <section class="machine-panel" data-mobile-panel-content="machines" data-i18n-aria="machinesLabel" aria-label="Configuración de máquinas">
         <div class="section-head">
           <div>
             <h2 data-i18n="machines">Máquinas</h2>
           </div>
           <span class="capacity-pill"><strong id="total-capacity">0</strong> kg</span>
         </div>
+        <button type="button" class="unused-machines-toggle" id="unused-machines-toggle" aria-expanded="false" aria-controls="machine-list"></button>
         <div id="machine-list" class="machine-list"></div>
       </section>
 
-      <section class="results-panel" data-i18n-aria="financialDetailsLabel" aria-label="Detalle financiero">
+      <section class="results-panel" data-mobile-panel-content="results" data-i18n-aria="financialDetailsLabel" aria-label="Detalle financiero">
         <div class="section-head">
           <h2 data-i18n="results">Resultados</h2>
           <span id="margin-pill" class="margin-pill">0%</span>

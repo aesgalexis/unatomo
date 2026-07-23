@@ -131,8 +131,13 @@ p {
   opacity: 0.9;
 }
 
-.landing-topbar-name {
+.landing-topbar-name,
+.landing-topbar-mobile-name {
   font-size: 0.8rem;
+}
+
+.landing-topbar-mobile-name {
+  display: none;
 }
 
 .utility-controls {
@@ -638,8 +643,29 @@ textarea.field {
     padding: 0 18px 0 0.75rem;
   }
 
+  .landing-topbar-brand {
+    min-width: 0;
+    gap: 0.5rem;
+  }
+
+  .landing-topbar-logo,
+  .utility-controls {
+    flex: 0 0 auto;
+  }
+
   .landing-topbar-name {
     display: none;
+  }
+
+  .landing-topbar-mobile-name {
+    display: block;
+    min-width: 0;
+    max-width: min(44vw, 11rem);
+    overflow: hidden;
+    color: var(--fg);
+    line-height: 1.15;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .icon-button {

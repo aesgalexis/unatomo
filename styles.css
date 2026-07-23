@@ -925,6 +925,17 @@ body.page li {
   cursor: default;
 }
 
+.topbar-mobile-name {
+  display: none;
+  color: var(--fg);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  line-height: 1.15;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
 .topbar-title {
   font-size: clamp(1.3rem, 4vw, 1.8rem);
   color: var(--fg);
@@ -1080,6 +1091,20 @@ textarea.field {
   min-height: 160px;
   resize: vertical;
   line-height: 1.5;
+}
+
+@media (max-width: 600px) {
+  .topbar-inner {
+    padding-left: 0.75rem;
+  }
+
+  .topbar-title-wrap {
+    display: none;
+  }
+
+  .topbar-mobile-name {
+    display: block;
+  }
 }
 
 @media (max-width: 768px) {

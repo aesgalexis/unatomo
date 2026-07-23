@@ -22,8 +22,14 @@ const i18n = {
     presetsLabel: "Escenarios predefinidos",
     machinesLabel: "Configuración de máquinas",
     financialDetailsLabel: "Detalle financiero",
-    mobileNotice: "Este simulador está pensado para visualizarse en un ordenador.",
-    closeMobileNotice: "Cerrar aviso",
+    mobileNavLabel: "Secciones del simulador",
+    mobileConfiguration: "Configurar",
+    mobileMachines: "Máquinas",
+    mobileResults: "Resultados",
+    expandCosts: "Mostrar",
+    collapseCosts: "Ocultar",
+    showAvailableMachines: "Mostrar máquinas disponibles",
+    hideAvailableMachines: "Ocultar máquinas disponibles",
     langOptionEn: "English",
     langOptionEs: "Español",
     privacyLink: "Política de privacidad y cookies",
@@ -111,8 +117,14 @@ const i18n = {
     presetsLabel: "Preset scenarios",
     machinesLabel: "Machine configuration",
     financialDetailsLabel: "Financial details",
-    mobileNotice: "This simulator is designed to be viewed on a computer.",
-    closeMobileNotice: "Dismiss notice",
+    mobileNavLabel: "Simulator sections",
+    mobileConfiguration: "Configure",
+    mobileMachines: "Machines",
+    mobileResults: "Results",
+    expandCosts: "Show",
+    collapseCosts: "Hide",
+    showAvailableMachines: "Show available machines",
+    hideAvailableMachines: "Hide available machines",
     langOptionEn: "English",
     langOptionEs: "Español",
     privacyLink: "Privacy and cookies policy",
@@ -253,6 +265,9 @@ const machineCatalog = [
 let lang = "es";
 let state = structuredClone(presets.small);
 let activePreset = "small";
+let activeMobilePanel = "configuration";
+let costsExpanded = false;
+let showUnusedMachines = false;
 let machineOverrides = machineCatalog.map((machine) => ({
   price: machine.price,
   minutes: machine.minutes
@@ -496,6 +511,17 @@ function renderMachines() {
       </article>
     `;
   }).join("");
+
+  const unusedCount = orderedMachines.filter(({ count }) => count === 0).length;
+  const unusedToggle = document.querySelector("#unused-machines-toggle");
+  els.machineList.classList.toggle("hide-unused", !showUnusedMachines);
+  if (unusedToggle) {
+    unusedToggle.hidden = unusedCount === 0;
+    unusedToggle.setAttribute("aria-expanded", showUnusedMachines ? "true" : "false");
+    unusedToggle.textContent = showUnusedMachines
+      ? getText("hideAvailableMachines")
+      : `${getText("showAvailableMachines")} (${unusedCount})`;
+  }
 }
 
 function renderResults() {
@@ -559,6 +585,11 @@ function renderText() {
   document.querySelectorAll(".ssl-lang-option").forEach((button) => {
     button.classList.toggle("is-active", button.dataset.lang === lang);
   });
+  const costToggleLabel = document.querySelector("#cost-panel-toggle [data-i18n]");
+  if (costToggleLabel) {
+    costToggleLabel.dataset.i18n = costsExpanded ? "collapseCosts" : "expandCosts";
+    costToggleLabel.textContent = getText(costToggleLabel.dataset.i18n);
+  }
   const legalFooterText = getText("legalFooter");
   if (window.renderLandingDisclosureFooter) {
     window.renderLandingDisclosureFooter({ legalFooterText });
@@ -610,22 +641,53 @@ const langToggle = document.querySelector("#ssl-lang-toggle");
 const langMenu = document.querySelector("#ssl-lang-menu");
 const brandToggle = document.querySelector("#brand-toggle");
 const brandMenu = document.querySelector("#brand-menu");
-const mobileViewNotice = document.querySelector("#mobile-view-notice");
-const mobileViewNoticeClose = document.querySelector("#mobile-view-notice-close");
-const mobileNoticeDismissedKey = "unatomo_ssl_mobile_notice_dismissed_v1";
+const mobileWorkspaceNav = document.querySelector(".mobile-workspace-nav");
+const workspace = document.querySelector(".workspace");
+const costPanel = document.querySelector(".cost-panel");
+const costPanelToggle = document.querySelector("#cost-panel-toggle");
+const unusedMachinesToggle = document.querySelector("#unused-machines-toggle");
 
-try {
-  if (localStorage.getItem(mobileNoticeDismissedKey) === "true") {
-    mobileViewNotice?.classList.add("is-dismissed");
+function syncMobileWorkspace() {
+  workspace.dataset.mobileActivePanel = activeMobilePanel;
+  document.querySelectorAll("[data-mobile-panel-content]").forEach((panel) => {
+    panel.classList.toggle("is-mobile-active", panel.dataset.mobilePanelContent === activeMobilePanel);
+  });
+  document.querySelectorAll("[data-mobile-panel]").forEach((button) => {
+    const isActive = button.dataset.mobilePanel === activeMobilePanel;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-pressed", isActive ? "true" : "false");
+  });
+}
+
+function syncCostPanel() {
+  costPanel?.classList.toggle("is-mobile-collapsed", !costsExpanded);
+  costPanelToggle?.setAttribute("aria-expanded", costsExpanded ? "true" : "false");
+  const label = costPanelToggle?.querySelector("[data-i18n]");
+  if (label) {
+    label.dataset.i18n = costsExpanded ? "collapseCosts" : "expandCosts";
+    label.textContent = getText(label.dataset.i18n);
   }
-} catch {}
+}
 
-mobileViewNoticeClose?.addEventListener("click", () => {
-  mobileViewNotice?.classList.add("is-dismissed");
-  try {
-    localStorage.setItem(mobileNoticeDismissedKey, "true");
-  } catch {}
+mobileWorkspaceNav?.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-mobile-panel]");
+  if (!button) return;
+  activeMobilePanel = button.dataset.mobilePanel;
+  syncMobileWorkspace();
 });
+
+costPanelToggle?.addEventListener("click", () => {
+  costsExpanded = !costsExpanded;
+  syncCostPanel();
+});
+
+unusedMachinesToggle?.addEventListener("click", () => {
+  showUnusedMachines = !showUnusedMachines;
+  renderMachines();
+});
+
+syncMobileWorkspace();
+syncCostPanel();
 
 function closeLangMenu() {
   langMenu.hidden = true;

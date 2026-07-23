@@ -4,11 +4,27 @@
 
   const pathname = window.location.pathname.replace(/\/+$/, "");
   const section = pathname.includes("/landing/contacto")
-    ? { label: "UNATOMO/Contacto", i18n: "topbar_contact" }
+    ? {
+        label: "UNATOMO/Contacto",
+        i18n: "topbar_contact",
+        mobileLabel: "/Contacto",
+        mobileI18n: "topbar_contact_mobile"
+      }
     : pathname.includes("/landing/nosotros")
-      ? { label: "UNATOMO/Nosotros", i18n: "topbar_about" }
-      : { label: "UNATOMO", i18n: "" };
+      ? {
+          label: "UNATOMO/Nosotros",
+          i18n: "topbar_about",
+          mobileLabel: "/Nosotros",
+          mobileI18n: "topbar_about_mobile"
+        }
+      : { label: "UNATOMO", i18n: "", mobileLabel: "", mobileI18n: "" };
   const sectionI18n = section.i18n ? ` data-i18n="${section.i18n}"` : "";
+  const mobileSectionI18n = section.mobileI18n
+    ? ` data-i18n="${section.mobileI18n}"`
+    : "";
+  const mobileSectionName = section.mobileLabel
+    ? `<span class="landing-topbar-mobile-name"${mobileSectionI18n}>${section.mobileLabel}</span>`
+    : "";
 
   mount.innerHTML = `
     <header class="landing-topbar">
@@ -16,6 +32,7 @@
         <a class="landing-topbar-brand" href="/" aria-label="unatomo">
           <img src="/static/img/logo-unatomo-v1.6.svg" alt="unatomo" class="landing-topbar-logo" loading="lazy" />
           <span class="landing-topbar-name"${sectionI18n}>${section.label}</span>
+          ${mobileSectionName}
         </a>
         <div class="utility-controls" aria-label="Preferencias">
           <div class="lang-picker">

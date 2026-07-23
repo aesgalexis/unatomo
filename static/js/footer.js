@@ -174,16 +174,34 @@
     scrollFrame = null;
   };
 
+  const scrollToDocumentEnd = () => {
+    const documentHeight = Math.max(
+      document.documentElement?.scrollHeight || 0,
+      document.body?.scrollHeight || 0
+    );
+    window.scrollTo({ top: documentHeight, left: 0, behavior: "auto" });
+  };
+
   const followExpansion = (until) => {
     if (!control.classList.contains("is-open")) {
       scrollFrame = null;
       return;
     }
-    const viewportBottom = window.innerHeight || document.documentElement.clientHeight;
-    const overflow = control.getBoundingClientRect().bottom + 16 - viewportBottom;
-    if (overflow > 0) window.scrollBy({ top: overflow, left: 0, behavior: "auto" });
+    const isMobileViewport = window.matchMedia?.("(max-width: 768px)").matches;
+    if (isMobileViewport) {
+      scrollToDocumentEnd();
+    } else {
+      const viewportBottom = window.innerHeight || document.documentElement.clientHeight;
+      const overflow = control.getBoundingClientRect().bottom + 16 - viewportBottom;
+      if (overflow > 0) window.scrollBy({ top: overflow, left: 0, behavior: "auto" });
+    }
     if (performance.now() < until) {
       scrollFrame = window.requestAnimationFrame(() => followExpansion(until));
+    } else if (isMobileViewport) {
+      scrollFrame = window.requestAnimationFrame(() => {
+        scrollToDocumentEnd();
+        scrollFrame = null;
+      });
     } else {
       scrollFrame = null;
     }
