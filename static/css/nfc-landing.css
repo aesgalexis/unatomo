@@ -67,6 +67,10 @@ body.nfc-landing {
   letter-spacing: 0.12em;
 }
 
+.landing-brand-mobile-name {
+  display: none;
+}
+
 .footer-identity span {
   font-size: 0.76rem;
   font-weight: 650;
@@ -305,7 +309,8 @@ body.nfc-public-page #theme-toggle {
 
 @media (max-width: 600px) {
   .landing-header { width: auto; padding: 0 1.5rem; }
-  .landing-brand span { display: none; }
+  .landing-brand-name { display: none; }
+  .landing-brand-mobile-name { display: inline; }
   .landing-intro, .content-section, .landing-footer { width: calc(100% - 3rem); max-width: calc(100% - 3rem); }
   .landing-intro { padding-top: 4.5rem; }
   .landing-intro h1 { font-size: clamp(2.45rem, 11vw, 3.2rem); }
