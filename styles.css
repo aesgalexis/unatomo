@@ -29,6 +29,10 @@
   --panel-bg: #000000;
 }
 
+html.nfc-dashboard-page {
+  background-color: color-mix(in srgb, var(--fg) 8%, var(--bg));
+}
+
 *,
 *::before,
 *::after {

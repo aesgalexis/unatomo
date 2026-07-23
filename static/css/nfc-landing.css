@@ -6,6 +6,9 @@
 
 html { width: 100%; max-width: 100%; overflow-x: hidden; scroll-behavior: smooth; }
 html.nfc-landing-page { overflow-y: scroll; scrollbar-gutter: stable; }
+html.nfc-landing-page {
+  background-color: color-mix(in srgb, var(--fg) 8%, var(--bg));
+}
 
 body.nfc-landing {
   width: 100%;
@@ -308,7 +311,7 @@ body.nfc-public-page #theme-toggle {
 }
 
 @media (max-width: 600px) {
-  .landing-header { width: auto; padding: 0 1.5rem; }
+  .landing-header { width: auto; padding: 0 1.5rem 0 0.75rem; }
   .landing-brand-name { display: none; }
   .landing-brand-mobile-name { display: inline; }
   .landing-intro, .content-section, .landing-footer { width: calc(100% - 3rem); max-width: calc(100% - 3rem); }
