@@ -273,6 +273,7 @@
 
 @media (max-width: 700px) {
   .status-incident-overlay {
+    box-sizing: border-box;
     height: 100%;
     height: 100dvh;
     align-items: flex-start;
@@ -291,7 +292,7 @@
     flex: 0 0 auto;
     width: 100%;
     max-height: none;
-    margin-block: auto;
+    margin-block: 0;
     overflow: visible;
   }
 }
