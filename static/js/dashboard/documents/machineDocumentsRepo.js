@@ -4,7 +4,7 @@ import {
   uploadBytes,
   getDownloadURL,
   deleteObject
-} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-storage.js";
+} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-storage.js";
 
 const MAX_ORIGINAL_BYTES = 12 * 1024 * 1024;
 const MAX_MANUAL_BYTES = 25 * 1024 * 1024;

@@ -4,7 +4,7 @@ import {
   onSnapshot,
   query,
   where
-} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 import { db } from "/static/js/firebase/firebaseApp.js";
 import { normalizeMachine } from "../machineStore.js";
 import {

@@ -1,7 +1,7 @@
 import {
   doc,
   onSnapshot
-} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 import { db } from "/static/js/firebase/firebaseApp.js";
 
 export const createMachineAccessSync = ({ applyOperationalPatch }) => {

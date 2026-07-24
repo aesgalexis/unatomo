@@ -1,11 +1,11 @@
-﻿import { onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+import { onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 import {
   collection,
   doc,
   getDocs,
   serverTimestamp,
   setDoc
-} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 import { auth, db, getUserRegistrationState } from "/static/js/firebase/firebaseApp.js";
 import { fetchLinksForAdmin } from "/static/js/dashboard/admin/adminLinksRepo.js";
 import { upsertAccountDirectory } from "/static/js/dashboard/admin/accountDirectoryRepo.js";

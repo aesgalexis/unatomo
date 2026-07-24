@@ -1,8 +1,8 @@
 import {
   doc,
   getDoc
-} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
-import { httpsCallable } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-functions.js";
+} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+import { httpsCallable } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-functions.js";
 
 const CACHE_KEY = "unatomo_nfc_public_stats_v1";
 const CACHE_FRESH_MS = 60 * 60 * 1000;

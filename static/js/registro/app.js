@@ -19,7 +19,7 @@ import {
 import {
   onAuthStateChanged,
   signOut
-} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 import { getAppBasePrefix, getCurrentLang, localizeEsPath } from "/static/js/site/locale.js";
 
 const lang = getCurrentLang();
@@ -34,9 +34,37 @@ const paths = {
 
 const text = {
   connectingGoogle: isEn ? "Connecting to Google..." : "Conectando con Google...",
+  googleTakingLonger: isEn
+    ? "Google is taking longer than usual. Keep this page open."
+    : "Google está tardando más de lo habitual. Mantén esta página abierta.",
+  checkingAccount: isEn ? "Checking your account..." : "Comprobando tu cuenta...",
+  accountCheckTakingLonger: isEn
+    ? "Checking your account is taking longer than usual..."
+    : "La comprobación de tu cuenta está tardando más de lo habitual...",
+  accountCheckError: isEn
+    ? "We could not check your account. Check your connection and try again."
+    : "No hemos podido comprobar tu cuenta. Revisa la conexión e inténtalo de nuevo.",
   loginFailed: isEn ? "Could not sign in." : "No se pudo iniciar sesión.",
   loginSuccess: isEn ? "Signed in. Redirecting..." : "Sesión iniciada. Redirigiendo...",
   googleLoginError: isEn ? "Error signing in with Google." : "Error en el inicio de sesión con Google.",
+  googlePopupBlocked: isEn
+    ? "Safari blocked the Google window. Allow pop-ups for this site and try again."
+    : "Safari ha bloqueado la ventana de Google. Permite las ventanas emergentes para este sitio e inténtalo de nuevo.",
+  googlePopupClosed: isEn
+    ? "The Google window closed before sign-in finished. Try again."
+    : "La ventana de Google se cerró antes de completar el acceso. Inténtalo de nuevo.",
+  googleNetworkError: isEn
+    ? "Google could not be reached. Check your connection and try again."
+    : "No se ha podido conectar con Google. Revisa la conexión e inténtalo de nuevo.",
+  googleStorageError: isEn
+    ? "Safari cannot save the session. Try a non-private tab and allow site storage."
+    : "Safari no puede guardar la sesión. Usa una pestaña no privada y permite el almacenamiento del sitio.",
+  googleUnauthorizedDomain: isEn
+    ? "This domain is not authorized for Google sign-in."
+    : "Este dominio no está autorizado para acceder con Google.",
+  googleInterrupted: isEn
+    ? "The previous Google sign-in was interrupted. Try again."
+    : "El acceso anterior con Google se interrumpió. Inténtalo de nuevo.",
   requiredFields: isEn ? "Complete the required fields." : "Completa los campos obligatorios.",
   signingIn: isEn ? "Signing in..." : "Iniciando sesión...",
   wrongCredentials: isEn ? "Incorrect email or password." : "Correo o contraseña incorrectos.",
@@ -74,13 +102,63 @@ const goActivationFlow = () => {
   window.location.href = paths.setup;
 };
 
-const handleLoginResult = (res, setStatus) => {
-  if (res?.needsRegistration) {
-    setStatus(text.activationRequired);
-    setTimeout(goActivationFlow, 650);
-    return true;
+const getErrorCode = (error) => (error?.code || "").toString().trim();
+
+const reportAuthFailure = (context, error) => {
+  console.warn(`[auth] ${context}`, {
+    code: getErrorCode(error) || "unknown"
+  });
+};
+
+const getGoogleErrorText = (error, fallback = text.googleLoginError) => {
+  const code = getErrorCode(error);
+  if (code === "auth/popup-blocked") return text.googlePopupBlocked;
+  if (code === "auth/popup-closed-by-user") return text.googlePopupClosed;
+  if (code === "auth/cancelled-popup-request") return text.googleInterrupted;
+  if (code === "auth/network-request-failed") return text.googleNetworkError;
+  if (
+    code === "auth/web-storage-unsupported" ||
+    code === "auth/operation-not-supported-in-this-environment"
+  ) {
+    return text.googleStorageError;
   }
-  return false;
+  if (code === "auth/unauthorized-domain") return text.googleUnauthorizedDomain;
+  if (code === "auth/too-many-requests") return text.tooManyRequests;
+  return fallback;
+};
+
+const startSlowStatusTimer = (setStatus, message, delay = 15000) =>
+  window.setTimeout(() => setStatus(message), delay);
+
+const completeAuthenticatedLogin = async (user, setStatus, onSuccess) => {
+  if (!user) {
+    setStatus(text.loginFailed);
+    return false;
+  }
+
+  setStatus(text.checkingAccount);
+  const slowTimer = startSlowStatusTimer(
+    setStatus,
+    text.accountCheckTakingLonger
+  );
+  try {
+    const registration = await getUserRegistrationState(user);
+    if (!registration.allowed) {
+      setStatus(text.activationRequired);
+      setTimeout(goActivationFlow, 650);
+      return false;
+    }
+
+    setStatus(text.loginSuccess);
+    setTimeout(onSuccess, 650);
+    return true;
+  } catch (error) {
+    reportAuthFailure("profile-check-failed", error);
+    setStatus(text.accountCheckError);
+    return false;
+  } finally {
+    window.clearTimeout(slowTimer);
+  }
 };
 
 function initSetupLogin() {
@@ -112,6 +190,7 @@ function initSetupLogin() {
     clearStatus();
     if (!box.hidden) emailInput.focus();
   }
+  let interactiveLoginInProgress = false;
 
   btnOpen.addEventListener("click", (event) => {
     event.preventDefault();
@@ -119,28 +198,37 @@ function initSetupLogin() {
   });
 
   onAuthStateChanged(auth, async (user) => {
-    if (!user) return;
-    try {
-      const registration = await getUserRegistrationState(user);
-      if (registration.allowed) window.location.href = paths.home;
-    } catch {}
+    if (!user || interactiveLoginInProgress) return;
+    await completeAuthenticatedLogin(
+      user,
+      showStatus,
+      () => (window.location.href = paths.home)
+    );
   });
 
   btnGoogle.addEventListener("click", async () => {
     clearStatus();
+    let slowTimer = 0;
     try {
+      interactiveLoginInProgress = true;
       btnGoogle.disabled = true;
       showStatus(text.connectingGoogle);
+      slowTimer = startSlowStatusTimer(showStatus, text.googleTakingLonger);
 
       const res = await loginWithGoogle();
-      if (handleLoginResult(res, showStatus)) return;
+      window.clearTimeout(slowTimer);
       if (!res.ok) return showStatus(text.loginFailed);
-
-      showStatus(text.loginSuccess);
-      setTimeout(() => (window.location.href = paths.home), 650);
-    } catch {
-      showStatus(text.googleLoginError);
+      await completeAuthenticatedLogin(
+        res.user,
+        showStatus,
+        () => (window.location.href = paths.home)
+      );
+    } catch (error) {
+      reportAuthFailure("google-login-failed", error);
+      showStatus(getGoogleErrorText(error));
     } finally {
+      window.clearTimeout(slowTimer);
+      interactiveLoginInProgress = false;
       btnGoogle.disabled = false;
     }
   });
@@ -154,15 +242,17 @@ function initSetupLogin() {
     if (!email || !pw) return showStatus(text.requiredFields);
 
     try {
+      interactiveLoginInProgress = true;
       if (btnEmail) btnEmail.disabled = true;
       showStatus(text.signingIn);
 
       const res = await loginWithEmail(email, pw);
-      if (handleLoginResult(res, showStatus)) return;
       if (!res.ok) return showStatus(text.loginFailed);
-
-      showStatus(text.loginSuccess);
-      setTimeout(() => (window.location.href = paths.home), 650);
+      await completeAuthenticatedLogin(
+        res.user,
+        showStatus,
+        () => (window.location.href = paths.home)
+      );
     } catch (e2) {
       const code = String(e2.code || "");
       if (
@@ -174,6 +264,7 @@ function initSetupLogin() {
       else if (code.includes("auth/too-many-requests")) showStatus(text.tooManyRequests);
       else showStatus(text.loginError);
     } finally {
+      interactiveLoginInProgress = false;
       if (btnEmail) btnEmail.disabled = false;
     }
   });
@@ -289,35 +380,34 @@ function initLoginPage() {
   function goHome() {
     window.location.href = paths.home;
   }
+  let interactiveLoginInProgress = false;
 
   document.documentElement.style.visibility = "visible";
 
   onAuthStateChanged(auth, async (user) => {
-    if (!user) return;
-    try {
-      const registration = await getUserRegistrationState(user);
-      if (registration.allowed) goHome();
-      else goActivationFlow();
-    } catch {
-      goActivationFlow();
-    }
+    if (!user || interactiveLoginInProgress) return;
+    await completeAuthenticatedLogin(user, setStatus, goHome);
   });
 
   btnGoogle.addEventListener("click", async () => {
     clearStatus();
+    let slowTimer = 0;
     try {
+      interactiveLoginInProgress = true;
       btnGoogle.disabled = true;
       setStatus(text.connectingGoogle);
+      slowTimer = startSlowStatusTimer(setStatus, text.googleTakingLonger);
 
       const res = await loginWithGoogle();
-      if (handleLoginResult(res, setStatus)) return;
+      window.clearTimeout(slowTimer);
       if (!res.ok) return setStatus(text.loginFailed);
-
-      setStatus(text.loginSuccess);
-      setTimeout(goHome, 650);
-    } catch {
-      setStatus(text.googleLoginError);
+      await completeAuthenticatedLogin(res.user, setStatus, goHome);
+    } catch (error) {
+      reportAuthFailure("google-login-failed", error);
+      setStatus(getGoogleErrorText(error));
     } finally {
+      window.clearTimeout(slowTimer);
+      interactiveLoginInProgress = false;
       btnGoogle.disabled = false;
     }
   });
@@ -331,15 +421,13 @@ function initLoginPage() {
     if (!email || !password) return setStatus(text.requiredFields);
 
     try {
+      interactiveLoginInProgress = true;
       if (btnEmail) btnEmail.disabled = true;
       setStatus(text.signingIn);
 
       const res = await loginWithEmail(email, password);
-      if (handleLoginResult(res, setStatus)) return;
       if (!res.ok) return setStatus(text.loginFailed);
-
-      setStatus(text.loginSuccess);
-      setTimeout(goHome, 650);
+      await completeAuthenticatedLogin(res.user, setStatus, goHome);
     } catch (e2) {
       const code = String(e2.code || "");
       if (
@@ -351,6 +439,7 @@ function initLoginPage() {
       else if (code.includes("auth/too-many-requests")) setStatus(text.tooManyRequests);
       else setStatus(text.loginError);
     } finally {
+      interactiveLoginInProgress = false;
       if (btnEmail) btnEmail.disabled = false;
     }
   });

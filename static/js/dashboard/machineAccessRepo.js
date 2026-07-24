@@ -3,8 +3,8 @@ import {
   doc,
   setDoc,
   serverTimestamp
-} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
-import { httpsCallable } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-functions.js";
+} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+import { httpsCallable } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-functions.js";
 
 const getMachineAccessPublicCallable = httpsCallable(functions, "getMachineAccessPublic");
 

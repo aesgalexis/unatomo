@@ -4,8 +4,8 @@ import {
   getDoc,
   serverTimestamp,
   setDoc
-} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
-import { httpsCallable } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-functions.js";
+} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+import { httpsCallable } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-functions.js";
 import { getCurrentLang } from "/static/js/site/locale.js";
 
 const assignMachineTagCallable = httpsCallable(functions, "assignMachineTag");

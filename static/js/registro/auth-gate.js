@@ -1,5 +1,5 @@
 import { auth, getUserRegistrationState } from "/static/js/registro/firebase-init.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 import { getCurrentLang } from "/static/js/site/locale.js";
 
 const SELECTOR = "[data-requires-auth]";

@@ -1,4 +1,4 @@
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 import { auth, getUserRegistrationState } from "/static/js/firebase/firebaseApp.js";
 import { fetchLinksForAdmin } from "/static/js/dashboard/admin/adminLinksRepo.js";
 import { fetchMachine, fetchMachines } from "/static/js/dashboard/firestoreRepo.js";

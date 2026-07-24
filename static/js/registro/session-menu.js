@@ -1,5 +1,5 @@
 import { auth, getUserRegistrationState } from "/static/js/registro/firebase-init.js";
-import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 import { requestInviteCodeAndRedirect } from "/static/js/registro/invite-gate.js";
 import { upsertAccountDirectory } from "/static/js/dashboard/admin/accountDirectoryRepo.js";
 import { getCurrentLang, getLocaleText, localizeEsPath } from "/static/js/site/locale.js";

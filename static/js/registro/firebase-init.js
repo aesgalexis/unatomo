@@ -1,9 +1,9 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
 import {
   initializeAppCheck,
   ReCaptchaEnterpriseProvider
-} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app-check.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app-check.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 import {
   getAuth,
   GoogleAuthProvider,
@@ -12,9 +12,9 @@ import {
   signInWithEmailAndPassword,
   updateProfile,
   sendPasswordResetEmail
-} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
-import { getStorage } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-storage.js";
-import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-functions.js";
+} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+import { getStorage } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-storage.js";
+import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-functions.js";
 
 const runtimeConfig = window.__UNATOMO_CONFIG__ || {};
 const firebaseConfig = {
@@ -61,16 +61,16 @@ export const functions = getFunctions(app);
 const validateCodeCallable = httpsCallable(functions, "validateRegistrationCode");
 const redeemCodeCallable = httpsCallable(functions, "redeemRegistrationCode");
 
-const buildLoginResult = async (user) => {
-  if (!user) return { ok: false };
-  const registration = await getUserRegistrationState(user);
-  return {
-    ok: registration.allowed,
-    uid: user.uid,
-    needsRegistration: !registration.allowed,
-    registrationReason: registration.reason || ""
-  };
-};
+const buildAuthResult = (user) => ({
+  ok: !!user,
+  user: user || null,
+  uid: user?.uid || ""
+});
+
+let pendingRegistrationCheck = null;
+let pendingRegistrationUid = "";
+let verifiedRegistrationState = null;
+let verifiedRegistrationUid = "";
 
 export async function validateRegistrationCode(code) {
   const normalized = (code || "").toString().trim().toUpperCase();
@@ -96,14 +96,37 @@ export async function getUserProfile(userOrUid) {
   return { id: snap.id, ...(snap.data() || {}) };
 }
 
-export async function getUserRegistrationState(userOrUid) {
-  const profile = await getUserProfile(userOrUid);
-  if (!profile) return { allowed: false, reason: "missing_profile" };
-  return {
-    allowed: true,
-    reason: "ok",
-    profile
-  };
+export function getUserRegistrationState(userOrUid) {
+  const uid = typeof userOrUid === "string"
+    ? userOrUid.trim()
+    : (userOrUid?.uid || "").toString().trim();
+  if (!uid) return Promise.resolve({ allowed: false, reason: "missing_user" });
+  if (verifiedRegistrationState && verifiedRegistrationUid === uid) {
+    return Promise.resolve(verifiedRegistrationState);
+  }
+  if (pendingRegistrationCheck && pendingRegistrationUid === uid) {
+    return pendingRegistrationCheck;
+  }
+
+  pendingRegistrationUid = uid;
+  pendingRegistrationCheck = getUserProfile(uid)
+    .then((profile) => {
+      if (!profile) return { allowed: false, reason: "missing_profile" };
+      const registration = {
+        allowed: true,
+        reason: "ok",
+        profile
+      };
+      verifiedRegistrationUid = uid;
+      verifiedRegistrationState = registration;
+      return registration;
+    })
+    .finally(() => {
+      if (pendingRegistrationUid !== uid) return;
+      pendingRegistrationCheck = null;
+      pendingRegistrationUid = "";
+    });
+  return pendingRegistrationCheck;
 }
 
 async function redeemCodeForUser(user, regCode) {
@@ -155,21 +178,14 @@ export async function registerWithEmail(regCode, email, password, displayName) {
 export async function loginWithGoogle() {
   const provider = new GoogleAuthProvider();
   const result = await signInWithPopup(auth, provider);
-  return buildLoginResult(result.user);
+  return buildAuthResult(result.user);
 }
 
 export async function loginWithEmail(email, password) {
   const em = (email || "").toString().trim();
   const pw = (password || "").toString();
   const cred = await signInWithEmailAndPassword(auth, em, pw);
-  if (!cred.user) return { ok: false };
-  const registration = await getUserRegistrationState(cred.user);
-  return {
-    ok: registration.allowed,
-    uid: cred.user.uid,
-    needsRegistration: !registration.allowed,
-    registrationReason: registration.reason || ""
-  };
+  return buildAuthResult(cred.user);
 }
 
 export async function sendPasswordReset(email) {

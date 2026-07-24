@@ -1,5 +1,5 @@
 import { auth, db, functions, getUserRegistrationState } from "/static/js/registro/firebase-init.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 import { initPublicNfcLandingStats } from "/static/js/nfc-landing/publicStats.js";
 
 const copy = {

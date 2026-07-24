@@ -1,4 +1,4 @@
-﻿import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 import { auth, getUserRegistrationState } from "/static/js/firebase/firebaseApp.js";
 import { fetchMachines, fetchLegacyMachines, migrateLegacyMachines, fetchMachine, upsertMachine, deleteMachine, addUserWithRegistry, deleteUserRegistry, fetchDashboardLayout, upsertDashboardLayout } from "./firestoreRepo.js";
 import { upsertAccountDirectory, normalizeEmail, getDisplayNameByEmail } from "./admin/accountDirectoryRepo.js";

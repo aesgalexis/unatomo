@@ -1,5 +1,5 @@
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
-import { httpsCallable } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-functions.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+import { httpsCallable } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-functions.js";
 import { auth, functions } from "/static/js/firebase/firebaseApp.js";
 import { getCurrentLang, localizeEsPath } from "/static/js/site/locale.js";
 import {

@@ -1,5 +1,5 @@
 import { functions } from "/static/js/firebase/firebaseApp.js";
-import { httpsCallable } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-functions.js";
+import { httpsCallable } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-functions.js";
 
 const checkAvailabilityCallable = httpsCallable(
   functions,

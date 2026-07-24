@@ -1,7 +1,7 @@
 import { db, functions } from "/static/js/firebase/firebaseApp.js";
 import {
   httpsCallable
-} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-functions.js";
+} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-functions.js";
 import {
   collection,
   doc,
@@ -14,7 +14,7 @@ import {
   writeBatch,
   setDoc,
   deleteDoc
-} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 import {
   normalizeDashboardTitle,
   normalizeGroupPresentationMode,

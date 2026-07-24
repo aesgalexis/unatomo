@@ -6,7 +6,7 @@ import {
   getDocs,
   query,
   where
-} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
 const LINKS_COLLECTION = "admin_machine_links";
 

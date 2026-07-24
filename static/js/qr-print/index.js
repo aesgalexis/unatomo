@@ -1,4 +1,4 @@
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 import {
   collection,
   doc,
@@ -6,7 +6,7 @@ import {
   getDocs,
   query,
   where
-} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 import { auth, db, getUserRegistrationState } from "/static/js/firebase/firebaseApp.js";
 import { getCurrentLang, localizeEsPath } from "/static/js/site/locale.js";
 import { normalizeDashboardTitle } from "/static/js/dashboard/layout/dashboardLayoutModel.mjs";

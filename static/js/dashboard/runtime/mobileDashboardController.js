@@ -30,6 +30,7 @@ export const createMobileDashboardController = (dependencies) => {
   const syncMobileDetailUI = () => {
     const focusedId = state.mobileFocusedMachineId || "";
     const enabled = isMobileDashboardViewport() && !!focusedId;
+    const wasEnabled = mount.dataset.mobileDetail === "true";
     mount.dataset.mobileDetail = enabled ? "true" : "false";
     list.dataset.mobileDetail = enabled ? "true" : "false";
     list.dataset.mobileFocusedId = enabled ? focusedId : "";
@@ -48,6 +49,7 @@ export const createMobileDashboardController = (dependencies) => {
       const containsFocused = enabled && !!wrap.querySelector(`.machine-card[data-machine-id="${focusedId}"]`);
       wrap.classList.toggle("is-mobile-focus-path", containsFocused);
     });
+    if (enabled && !wasEnabled) resetInitialMobileScroll();
     state.mobileDetailJustEntered = false;
   };
 
