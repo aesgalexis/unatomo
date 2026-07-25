@@ -272,6 +272,10 @@
 }
 
 @media (max-width: 700px) {
+  body.status-incident-open {
+    top: 0;
+  }
+
   .status-incident-overlay {
     box-sizing: border-box;
     height: 100%;
