@@ -39,11 +39,11 @@ export const openStatusIncidentModal = ({
     const incidentSummary = hasPendingTask
       ? t(
           "dashboard.incidentModalSummaryExisting",
-          "La máquina se marcará como fuera de servicio y conservará su tarea de reactivación pendiente. Al completarla, volverá a estar operativa."
+          "La máquina se marcará como fuera de servicio."
         )
       : t(
           "dashboard.incidentModalSummary",
-          "La máquina se marcará como fuera de servicio. También se creará una tarea de reactivación que, al completarse, volverá a ponerla operativa."
+          "La máquina se marcará como fuera de servicio."
         );
     summary.textContent = incidentSummary;
 
