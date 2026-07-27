@@ -23,6 +23,23 @@
   font-weight: 600;
 }
 
+.machine-login-public-details {
+  margin: -0.35rem 0 0.75rem;
+  color: color-mix(in srgb, var(--fg) 68%, transparent);
+  font-size: 0.88rem;
+}
+
+.machine-login-public-plate {
+  display: block;
+  width: 100%;
+  max-height: 180px;
+  margin: 0 0 0.75rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.75rem;
+  object-fit: contain;
+  background: color-mix(in srgb, var(--bg) 94%, transparent);
+}
+
 .machine-login-input {
   width: 100%;
   margin-top: 0.5rem;
@@ -66,4 +83,3 @@
   font-size: 0.95rem;
   line-height: 1.2;
 }
-

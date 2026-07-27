@@ -33,9 +33,17 @@ export const upsertMachineAccessFromMachine = async (tenantId, machine, updatedB
   );
 };
 
-export const fetchMachineAccess = async (tagId) => {
-  const response = await getMachineAccessPublicCallable({ tagId });
-  return response?.data?.machine || null;
+export const fetchMachineAccess = async (tagId, session = null) => {
+  const response = await getMachineAccessPublicCallable({
+    tagId,
+    sessionId: session?.sessionId || "",
+    sessionToken: session?.sessionToken || ""
+  });
+  return {
+    machine: response?.data?.machine || null,
+    permissions: response?.data?.permissions || null,
+    role: response?.data?.role || ""
+  };
 };
 
 export const updateMachineAccess = async (tagId, patch, updatedBy) => {

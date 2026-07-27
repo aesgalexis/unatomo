@@ -226,6 +226,33 @@ export const createDashboardOrderingController = ({
   addBtn.addEventListener("click", () => {
     const order = computePrevOrder();
     const machine = createDraftMachine(state.draftMachines.length + 1, order);
+    const ownerMachines = state.draftMachines.filter(
+      (item) => (item.tenantId || item.ownerUid || state.uid) === state.uid &&
+        (item.role || "owner") !== "admin"
+    );
+    if (ownerMachines.length) {
+      const inheritedAccessPolicy = ownerMachines.find(
+        (item) => item.accessRolePermissions
+      )?.accessRolePermissions;
+      if (inheritedAccessPolicy) {
+        machine.accessRolePermissions = structuredClone(inheritedAccessPolicy);
+      }
+      const globalUsers = new Map();
+      ownerMachines.forEach((item) => {
+        (item.users || []).forEach((user) => {
+          const key = (user.username || "").trim().replace(/\s+/g, " ").toLowerCase();
+          if (!key) return;
+          const current = globalUsers.get(key) || { user, machineIds: new Set() };
+          current.machineIds.add(item.id);
+          globalUsers.set(key, current);
+        });
+      });
+      machine.users = Array.from(globalUsers.values())
+        .filter(({ user, machineIds }) =>
+          user.accessScope === "all" && machineIds.size === ownerMachines.length
+        )
+        .map(({ user }) => ({ ...user }));
+    }
     machine.title = getUniqueTitle();
     machine.tenantId = state.uid;
     machine.role = "owner";

@@ -1,26 +1,35 @@
-export const canSeeTab = (role, tab) => {
+import { getAccessRolePermissions } from "./accessRoles.js";
+
+const getPermissions = (role, configured) => {
+  if (role === "admin") return null;
+  return getAccessRolePermissions(role, configured);
+};
+
+export const canSeeTab = (role, tab, configured) => {
   if (role === "admin") {
     return ["quehaceres", "general", "historial", "configuracion"].includes(tab);
   }
-  if (role === "usuario") return tab === "quehaceres";
-  if (role === "tecnico" || role === "externo") {
-    return ["quehaceres", "general", "historial"].includes(tab);
-  }
+  const permissions = getPermissions(role, configured);
+  if (tab === "quehaceres") return permissions.viewTasks;
+  if (tab === "general") return permissions.viewMachine ||
+    permissions.viewPlate ||
+    permissions.viewDocuments;
+  if (tab === "historial") return permissions.viewHistory;
   return false;
 };
 
-export const canEditStatus = (role) => {
-  return role === "usuario" || role === "admin";
-};
+export const canUseCapability = (role, capability, configured) =>
+  role === "admin" || !!getPermissions(role, configured)?.[capability];
 
-export const canEditTasks = (role) => {
-  return role === "admin";
-};
+export const canEditStatus = (role, configured) =>
+  canUseCapability(role, "changeStatus", configured);
 
-export const canDownloadHistory = (role) => {
-  return role === "tecnico" || role === "admin";
-};
+export const canEditTasks = (role, configured) =>
+  canUseCapability(role, "createTasks", configured) ||
+  canUseCapability(role, "editTasks", configured) ||
+  canUseCapability(role, "deleteTasks", configured);
 
-export const canSeeConfig = (role) => {
-  return role === "admin";
-};
+export const canDownloadHistory = (role, configured) =>
+  canUseCapability(role, "viewHistory", configured);
+
+export const canSeeConfig = (role) => role === "admin";

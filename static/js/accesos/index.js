@@ -1,7 +1,22 @@
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 import { auth, getUserRegistrationState } from "/static/js/firebase/firebaseApp.js";
 import { fetchLinksForAdmin } from "/static/js/dashboard/admin/adminLinksRepo.js";
-import { fetchMachine, fetchMachines } from "/static/js/dashboard/firestoreRepo.js";
+import {
+  fetchMachine,
+  fetchMachines,
+  deleteGlobalLocalUser,
+  saveGlobalLocalUser,
+  saveMachineAccessRolePermissions
+} from "/static/js/dashboard/firestoreRepo.js";
+import {
+  DEFAULT_ACCESS_ROLE_PERMISSIONS,
+  normalizeAccessRole,
+  normalizeAccessRolePermissions
+} from "/static/js/machine/accessRoles.js";
+import {
+  generateSaltBase64,
+  hashPassword
+} from "/static/js/utils/crypto.js";
 import {
   getAppBasePrefix,
   getCurrentLang,
@@ -15,22 +30,21 @@ const appBasePrefix = getAppBasePrefix();
 const textMap = {
   access: isEn ? "Access" : "Accesos",
   accessIntro: isEn
-    ? "Prototype for global access and role permissions. Changes are visual for now."
-    : "Prototipo de accesos globales y permisos por rol. Los cambios son solo visuales por ahora.",
+    ? "Manage local users, machine assignments, and role permissions."
+    : "Gestiona usuarios locales, asignaciones a máquinas y permisos por rol.",
   accessLoading: isEn ? "Loading access..." : "Cargando accesos...",
   accessEmpty: isEn
     ? "No local users assigned to your machines yet."
     : "Todav\u00eda no hay usuarios locales asignados a tus m\u00e1quinas.",
-  accessPrototypeSaved: isEn ? "Prototype updated" : "Prototipo actualizado",
+  accessPrototypeSaved: isEn ? "Changes saved" : "Cambios guardados",
   accessUsersTab: isEn ? "Users" : "Usuarios",
   accessRolePermissionsTab: isEn ? "Role permissions" : "Permisos por rol",
   accessRolePermissionsIntro: isEn
     ? "Choose what each role can see and do after opening a machine from QR or NFC."
     : "Define qu\u00e9 puede ver y hacer cada rol al abrir una m\u00e1quina desde QR o NFC.",
-  accessProtectedRole: isEn ? "Protected read-only profile" : "Perfil de solo lectura protegido",
   accessPermissionsVisual: isEn
-    ? "Visual prototype. These permissions are not persisted yet."
-    : "Prototipo visual. Estos permisos todav\u00eda no se guardan.",
+    ? "Changes apply to the machines visible in this access space."
+    : "Los cambios se aplican a las máquinas visibles en este espacio de acceso.",
   accessPermissionRead: isEn ? "Read" : "Lectura",
   accessPermissionOperate: isEn ? "Create and update" : "Crear y actualizar",
   accessPermissionAdmin: isEn ? "Administration" : "Administraci\u00f3n",
@@ -38,6 +52,11 @@ const textMap = {
   accessNewUserPlaceholder: isEn ? "Name" : "Nombre",
   accessNewPinPlaceholder: isEn ? "PIN" : "PIN",
   accessCreate: isEn ? "Create" : "Crear",
+  accessDeleteUser: isEn ? "Delete user" : "Eliminar usuario",
+  accessDeleteConfirm: isEn
+    ? (name) => `Delete ${name} from the global list and every machine?`
+    : (name) => `¿Eliminar a ${name} de la lista global y de todas las máquinas?`,
+  accessUserDeleted: isEn ? "User deleted" : "Usuario eliminado",
   accessPin: isEn ? "PIN" : "PIN",
   accessSavePin: isEn ? "Save PIN" : "Guardar PIN",
   accessAllMachines: isEn ? "All" : "Todas",
@@ -45,82 +64,59 @@ const textMap = {
   accessAdminMachine: isEn ? "Admin" : "Administrada",
   accessSelectedUser: isEn ? "Selected user" : "Usuario seleccionado",
   accessAssignments: isEn ? "Machine access" : "Acceso a m\u00e1quinas",
+  accessSpace: isEn ? "Access space" : "Espacio de acceso",
   accessUser: isEn ? "User" : "Usuario",
   accessLocalType: isEn ? "Local PIN" : "PIN local",
-  accessPrototypeType: isEn ? "Prototype" : "Prototipo",
+  accessPrototypeType: isEn ? "New local user" : "Usuario local nuevo",
   accessRole: isEn ? "Role" : "Rol",
   accessRoleMixed: isEn ? "Mixed" : "Mixto",
   accessUpdated: isEn ? "Access preview updated" : "Vista de accesos actualizada",
   accessError: isEn ? "Could not update access" : "No se pudieron actualizar los accesos",
-  roleManager: isEn ? "Manager" : "Gestor",
   roleUsuario: isEn ? "Operator" : "Operario",
   roleTecnico: isEn ? "Technician" : "T\u00e9cnico",
-  roleViewer: isEn ? "Viewer" : "Solo lectura",
-  roleExterno: isEn ? "External" : "Externo",
+  publicAccess: isEn ? "Public information" : "Información pública",
+  publicAccessHelp: isEn
+    ? "Public is not assigned to users. A QR/NFC scan only shows basic machine information and the plate."
+    : "Público no se asigna a usuarios. Un escaneo QR/NFC solo muestra información básica de la máquina y la placa.",
+  saving: isEn ? "Saving..." : "Guardando...",
   permissionViewMachine: isEn ? "View machine overview" : "Ver informaci\u00f3n de la m\u00e1quina",
+  permissionViewPlate: isEn ? "View plate" : "Ver placa",
   permissionViewTasks: isEn ? "View tasks" : "Ver tareas",
   permissionViewHistory: isEn ? "View history log" : "Leer el registro hist\u00f3rico",
   permissionViewDocuments: isEn ? "View and download documents" : "Ver y descargar documentos",
   permissionCreateTasks: isEn ? "Create tasks" : "Crear tareas",
   permissionEditTasks: isEn ? "Edit tasks" : "Editar tareas",
+  permissionDeleteTasks: isEn ? "Delete tasks" : "Eliminar tareas",
   permissionCompleteTasks: isEn ? "Complete tasks" : "Dar tareas por completadas",
   permissionAddTaskNotes: isEn ? "Add task notes" : "A\u00f1adir notas a tareas",
   permissionChangeStatus: isEn ? "Change machine status" : "Cambiar el estado de la m\u00e1quina",
   permissionUploadImages: isEn ? "Upload images" : "Cargar im\u00e1genes",
   permissionUploadDocuments: isEn ? "Upload documents and manuals" : "Cargar documentos y manuales",
   permissionDeleteDocuments: isEn ? "Delete documents" : "Eliminar documentos",
-  permissionManageAccess: isEn ? "Manage users and access" : "Gestionar usuarios y accesos",
-  permissionManageTags: isEn ? "Manage QR and NFC tags" : "Gestionar QR y etiquetas NFC",
 };
 
 const LOCAL_ROLE_OPTIONS = [
-  { value: "manager", label: textMap.roleManager },
-  { value: "usuario", label: textMap.roleUsuario },
-  { value: "tecnico", label: textMap.roleTecnico },
-  { value: "viewer", label: textMap.roleViewer },
-  { value: "externo", label: textMap.roleExterno }
+  { value: "operator", label: textMap.roleUsuario },
+  { value: "technician", label: textMap.roleTecnico }
 ];
 
 const CAPABILITY_DEFINITIONS = [
   { key: "viewMachine", group: "read", label: textMap.permissionViewMachine },
+  { key: "viewPlate", group: "read", label: textMap.permissionViewPlate },
   { key: "viewTasks", group: "read", label: textMap.permissionViewTasks },
   { key: "viewHistory", group: "read", label: textMap.permissionViewHistory },
   { key: "viewDocuments", group: "read", label: textMap.permissionViewDocuments },
   { key: "createTasks", group: "operate", label: textMap.permissionCreateTasks },
   { key: "editTasks", group: "operate", label: textMap.permissionEditTasks },
+  { key: "deleteTasks", group: "operate", label: textMap.permissionDeleteTasks },
   { key: "completeTasks", group: "operate", label: textMap.permissionCompleteTasks },
   { key: "addTaskNotes", group: "operate", label: textMap.permissionAddTaskNotes },
-  { key: "changeStatus", group: "operate", label: textMap.permissionChangeStatus },
-  { key: "uploadImages", group: "operate", label: textMap.permissionUploadImages },
-  { key: "uploadDocuments", group: "operate", label: textMap.permissionUploadDocuments },
-  { key: "deleteDocuments", group: "admin", label: textMap.permissionDeleteDocuments },
-  { key: "manageAccess", group: "admin", label: textMap.permissionManageAccess },
-  { key: "manageTags", group: "admin", label: textMap.permissionManageTags }
+  { key: "changeStatus", group: "operate", label: textMap.permissionChangeStatus }
 ];
 
 const DEFAULT_ROLE_PERMISSIONS = {
-  manager: Object.fromEntries(CAPABILITY_DEFINITIONS.map(({ key }) => [key, true])),
-  usuario: {
-    viewMachine: true, viewTasks: true, viewHistory: true, viewDocuments: true,
-    createTasks: true, editTasks: true, completeTasks: true, addTaskNotes: true,
-    changeStatus: true, uploadImages: true, uploadDocuments: false,
-    deleteDocuments: false, manageAccess: false, manageTags: false
-  },
-  tecnico: {
-    viewMachine: true, viewTasks: true, viewHistory: true, viewDocuments: true,
-    createTasks: true, editTasks: true, completeTasks: true, addTaskNotes: true,
-    changeStatus: true, uploadImages: true, uploadDocuments: true,
-    deleteDocuments: false, manageAccess: false, manageTags: false
-  },
-  viewer: Object.fromEntries(
-    CAPABILITY_DEFINITIONS.map(({ key, group }) => [key, group === "read"])
-  ),
-  externo: {
-    viewMachine: true, viewTasks: true, viewHistory: false, viewDocuments: true,
-    createTasks: false, editTasks: false, completeTasks: false, addTaskNotes: true,
-    changeStatus: false, uploadImages: true, uploadDocuments: false,
-    deleteDocuments: false, manageAccess: false, manageTags: false
-  }
+  operator: { ...DEFAULT_ACCESS_ROLE_PERMISSIONS.operator },
+  technician: { ...DEFAULT_ACCESS_ROLE_PERMISSIONS.technician }
 };
 
 const createDefaultRolePermissions = () =>
@@ -171,12 +167,16 @@ const collectLocalAccessRows = (machines = []) => {
       if (!normalized) return;
       const current = byUser.get(normalized) || {
         normalized,
+        id: (localUser.id || "").toString(),
         username: (localUser.username || normalized).toString(),
         assignments: [],
-        role: (localUser.role || "usuario").toString(),
+        role: normalizeAccessRole(localUser.role),
+        saltBase64: (localUser.saltBase64 || "").toString(),
+        passwordHashBase64: (localUser.passwordHashBase64 || "").toString(),
+        createdAt: (localUser.createdAt || "").toString(),
         prototypeOnly: false
       };
-      const role = (localUser.role || "usuario").toString();
+      const role = normalizeAccessRole(localUser.role);
       current.assignments.push({
         machineId: machine.id,
         machineTitle: getMachineTitle(machine),
@@ -184,40 +184,14 @@ const collectLocalAccessRows = (machines = []) => {
         userId: localUser.id || "",
         prototypeOnly: false
       });
-      if (!current.role || current.role === "usuario") current.role = role;
+      if (!current.role || current.role === "operator") current.role = role;
+      if (!current.saltBase64) current.saltBase64 = (localUser.saltBase64 || "").toString();
+      if (!current.passwordHashBase64) {
+        current.passwordHashBase64 = (localUser.passwordHashBase64 || "").toString();
+      }
       byUser.set(normalized, current);
     });
   });
-
-  const prototypeMachineNames = new Set(["test machine", "test machine 2"]);
-  const prototypeMachines = machines.filter((machine) =>
-    prototypeMachineNames.has(normalizeLocalUsername(getMachineTitle(machine)))
-  );
-  if (prototypeMachines.length) {
-    [
-      { username: "Lucia", role: "manager" },
-      { username: "Paco", role: "usuario" },
-      { username: "Luis", role: "tecnico" },
-      { username: "Ana", role: "viewer" },
-      { username: "Marta", role: "externo" }
-    ].forEach((demoUser) => {
-      const normalized = normalizeLocalUsername(demoUser.username);
-      if (byUser.has(normalized)) return;
-      byUser.set(normalized, {
-        normalized,
-        username: demoUser.username,
-        role: demoUser.role,
-        prototypeOnly: true,
-        assignments: prototypeMachines.map((machine) => ({
-          machineId: machine.id,
-          machineTitle: getMachineTitle(machine),
-          role: demoUser.role,
-          userId: `prototype_${normalized}_${machine.id}`,
-          prototypeOnly: true
-        }))
-      });
-    });
-  }
 
   return Array.from(byUser.values()).sort((a, b) =>
     a.username.localeCompare(b.username, currentLang)
@@ -267,16 +241,17 @@ const fetchVisibleAccessMachines = async (uid) => {
   });
 };
 
-const renderRolePermissionsPrototype = ({ rolePermissionsRef, selectedRoleRef, rerender }) => {
+const renderRolePermissionsPrototype = ({
+  rolePermissionsRef,
+  selectedRoleRef,
+  rerender,
+  saveRolePermissions
+}) => {
   const rolePermissions = rolePermissionsRef.rolePermissions;
   if (!LOCAL_ROLE_OPTIONS.some((role) => role.value === selectedRoleRef.selectedRole)) {
     selectedRoleRef.selectedRole = LOCAL_ROLE_OPTIONS[0].value;
   }
   const selectedRole = selectedRoleRef.selectedRole;
-  if (selectedRole === "viewer") {
-    rolePermissions.viewer = { ...DEFAULT_ROLE_PERMISSIONS.viewer };
-  }
-
   const intro = document.createElement("div");
   intro.className = "access-permissions-intro";
   intro.innerHTML = `
@@ -284,6 +259,14 @@ const renderRolePermissionsPrototype = ({ rolePermissionsRef, selectedRoleRef, r
     <span>${escapeAccessHtml(textMap.accessPermissionsVisual)}</span>
   `;
   tableWrap.appendChild(intro);
+
+  const publicNote = document.createElement("div");
+  publicNote.className = "access-protected-note";
+  publicNote.innerHTML = `
+    <strong>${escapeAccessHtml(textMap.publicAccess)}</strong>
+    <span>${escapeAccessHtml(textMap.publicAccessHelp)}</span>
+  `;
+  tableWrap.appendChild(publicNote);
 
   const shell = document.createElement("div");
   shell.className = "access-permissions-shell";
@@ -320,14 +303,7 @@ const renderRolePermissionsPrototype = ({ rolePermissionsRef, selectedRoleRef, r
   `;
   editor.appendChild(editorTitle);
 
-  if (selectedRole === "viewer") {
-    const protectedNote = document.createElement("div");
-    protectedNote.className = "access-protected-note";
-    protectedNote.textContent = textMap.accessProtectedRole;
-    editor.appendChild(protectedNote);
-  }
-
-  ["read", "operate", "admin"].forEach((group) => {
+  ["read", "operate"].forEach((group) => {
     const groupTitle = document.createElement("div");
     groupTitle.className = "access-section-title access-permission-group-title";
     groupTitle.textContent = group === "read"
@@ -347,9 +323,17 @@ const renderRolePermissionsPrototype = ({ rolePermissionsRef, selectedRoleRef, r
       const check = document.createElement("input");
       check.type = "checkbox";
       check.checked = !!rolePermissions[selectedRole]?.[capability.key];
-      check.disabled = selectedRole === "viewer";
-      check.addEventListener("change", () => {
+      check.addEventListener("change", async () => {
         rolePermissions[selectedRole][capability.key] = check.checked;
+        setStatus(textMap.saving);
+        try {
+          await saveRolePermissions(rolePermissions);
+        } catch {
+          rolePermissions[selectedRole][capability.key] = !check.checked;
+          setStatus(textMap.accessError, "error");
+          rerender();
+          return;
+        }
         setStatus(
           `${textMap.accessUpdated}: ${getRoleLabel(selectedRole)} · ${capability.label}`,
           "ok"
@@ -374,7 +358,11 @@ const renderAccessPrototype = ({
   selectedRoleRef,
   selectedUserKeyRef,
   uiStateRef,
-  userColumnsRef
+  userColumnsRef,
+  saveRolePermissions,
+  saveUser,
+  deleteUser,
+  canManageIdentities
 }) => {
   let { userColumns } = userColumnsRef;
   let { selectedUserKey } = selectedUserKeyRef;
@@ -392,7 +380,11 @@ const renderAccessPrototype = ({
       selectedRoleRef,
       selectedUserKeyRef,
       uiStateRef,
-      userColumnsRef
+      userColumnsRef,
+      saveRolePermissions,
+      saveUser,
+      deleteUser,
+      canManageIdentities
     });
   };
 
@@ -419,12 +411,18 @@ const renderAccessPrototype = ({
   tableWrap.appendChild(tabs);
 
   if ((uiStateRef.activeView || "users") === "permissions") {
-    renderRolePermissionsPrototype({ rolePermissionsRef, selectedRoleRef, rerender });
+    renderRolePermissionsPrototype({
+      rolePermissionsRef,
+      selectedRoleRef,
+      rerender,
+      saveRolePermissions
+    });
     return;
   }
 
   const createForm = document.createElement("div");
   createForm.className = "access-create";
+  createForm.hidden = !canManageIdentities;
 
   const nameInput = document.createElement("input");
   nameInput.className = "access-input";
@@ -452,23 +450,43 @@ const renderAccessPrototype = ({
   createButton.type = "button";
   createButton.className = "access-mini-btn";
   createButton.textContent = textMap.accessCreate;
-  createButton.addEventListener("click", () => {
+  createButton.addEventListener("click", async () => {
     const username = nameInput.value.trim().replace(/\s+/g, " ");
     const normalized = normalizeLocalUsername(username);
-    if (!normalized || userColumns.some((row) => row.normalized === normalized)) {
+    const password = pinInput.value.trim();
+    if (!normalized || !password || userColumns.some((row) => row.normalized === normalized)) {
       nameInput.setAttribute("aria-invalid", "true");
       return;
     }
-    userColumns = [
-      ...userColumns,
-      {
-        normalized,
-        username,
-        role: roleSelect.value || "usuario",
-        prototypeOnly: true,
-        assignments: []
-      }
-    ].sort((a, b) => a.username.localeCompare(b.username, currentLang));
+    createButton.disabled = true;
+    setStatus(textMap.saving);
+    const saltBase64 = generateSaltBase64();
+    const nextUser = {
+      normalized,
+      username,
+      role: normalizeAccessRole(roleSelect.value),
+      saltBase64,
+      passwordHashBase64: await hashPassword(password, saltBase64),
+      isNew: true,
+      prototypeOnly: false,
+      assignments: machineRows.map((machine) => ({
+        machineId: machine.id,
+        machineTitle: machine.title,
+        role: normalizeAccessRole(roleSelect.value),
+        prototypeOnly: false
+      }))
+    };
+    try {
+      await saveUser(nextUser);
+      nextUser.isNew = false;
+    } catch {
+      createButton.disabled = false;
+      setStatus(textMap.accessError, "error");
+      return;
+    }
+    userColumns = [...userColumns, nextUser].sort((a, b) =>
+      a.username.localeCompare(b.username, currentLang)
+    );
     selectedUserKey = normalized;
     setStatus(textMap.accessPrototypeSaved, "ok");
     rerender();
@@ -532,16 +550,30 @@ const renderAccessPrototype = ({
   roleLabel.textContent = textMap.accessRole;
   const select = document.createElement("select");
   select.className = "access-role";
+  select.disabled = !canManageIdentities;
   LOCAL_ROLE_OPTIONS.forEach((optionData) => {
     const option = document.createElement("option");
     option.value = optionData.value;
     option.textContent = optionData.label;
-    if ((selectedUser.role || "usuario") === optionData.value) option.selected = true;
+    if (normalizeAccessRole(selectedUser.role) === optionData.value) option.selected = true;
     select.appendChild(option);
   });
-  select.addEventListener("change", () => {
-    selectedUser.role = select.value;
-    setStatus(`${textMap.accessUpdated}: ${selectedUser.username} -> ${getRoleLabel(selectedUser.role)}`, "ok");
+  select.addEventListener("change", async () => {
+    const previousRole = selectedUser.role;
+    selectedUser.role = normalizeAccessRole(select.value);
+    selectedUser.assignments = selectedUser.assignments.map((assignment) => ({
+      ...assignment,
+      role: selectedUser.role
+    }));
+    setStatus(textMap.saving);
+    try {
+      await saveUser(selectedUser);
+      setStatus(`${textMap.accessUpdated}: ${selectedUser.username} → ${getRoleLabel(selectedUser.role)}`, "ok");
+    } catch {
+      selectedUser.role = previousRole;
+      setStatus(textMap.accessError, "error");
+      rerender();
+    }
   });
   roleLabel.appendChild(select);
 
@@ -554,12 +586,29 @@ const renderAccessPrototype = ({
   pinInputEdit.type = "password";
   pinInputEdit.maxLength = 8;
   pinInputEdit.placeholder = textMap.accessNewPinPlaceholder;
+  pinInputEdit.disabled = !canManageIdentities;
   const savePin = document.createElement("button");
   savePin.type = "button";
   savePin.className = "access-mini-btn";
   savePin.textContent = textMap.accessSavePin;
-  savePin.addEventListener("click", () => {
-    setStatus(`${textMap.accessPrototypeSaved}: ${selectedUser.username}`, "ok");
+  savePin.disabled = !canManageIdentities;
+  savePin.addEventListener("click", async () => {
+    const password = pinInputEdit.value.trim();
+    if (!password) return;
+    const previousSalt = selectedUser.saltBase64;
+    const previousHash = selectedUser.passwordHashBase64;
+    const saltBase64 = generateSaltBase64();
+    selectedUser.saltBase64 = saltBase64;
+    selectedUser.passwordHashBase64 = await hashPassword(password, saltBase64);
+    setStatus(textMap.saving);
+    try {
+      await saveUser(selectedUser);
+      setStatus(`${textMap.accessPrototypeSaved}: ${selectedUser.username}`, "ok");
+    } catch {
+      selectedUser.saltBase64 = previousSalt;
+      selectedUser.passwordHashBase64 = previousHash;
+      setStatus(textMap.accessError, "error");
+    }
     pinInputEdit.value = "";
   });
   pinActions.appendChild(pinInputEdit);
@@ -572,7 +621,8 @@ const renderAccessPrototype = ({
   allCheck.type = "checkbox";
   const assignedIds = new Set(selectedUser.assignments.map((item) => item.machineId));
   allCheck.checked = machineRows.length > 0 && machineRows.every((machine) => assignedIds.has(machine.id));
-  allCheck.addEventListener("change", () => {
+  allCheck.addEventListener("change", async () => {
+    const previousAssignments = selectedUser.assignments;
     selectedUser.assignments = allCheck.checked
       ? machineRows.map((machine) => ({
           machineId: machine.id,
@@ -581,7 +631,14 @@ const renderAccessPrototype = ({
           prototypeOnly: true
         }))
       : [];
-    setStatus(textMap.accessPrototypeSaved, "ok");
+    setStatus(textMap.saving);
+    try {
+      await saveUser(selectedUser);
+      setStatus(textMap.accessPrototypeSaved, "ok");
+    } catch {
+      selectedUser.assignments = previousAssignments;
+      setStatus(textMap.accessError, "error");
+    }
     rerender();
   });
   allWrap.appendChild(allCheck);
@@ -591,6 +648,31 @@ const renderAccessPrototype = ({
   controls.appendChild(pinWrap);
   controls.appendChild(allWrap);
   editor.appendChild(controls);
+
+  if (canManageIdentities) {
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.className = "access-mini-btn access-delete-user";
+    deleteButton.textContent = textMap.accessDeleteUser;
+    deleteButton.addEventListener("click", async () => {
+      if (!window.confirm(textMap.accessDeleteConfirm(selectedUser.username))) return;
+      deleteButton.disabled = true;
+      setStatus(textMap.saving);
+      try {
+        await deleteUser(selectedUser);
+        userColumns = userColumns.filter(
+          (user) => user.normalized !== selectedUser.normalized
+        );
+        selectedUserKey = userColumns[0]?.normalized || "";
+        setStatus(textMap.accessUserDeleted, "ok");
+        rerender();
+      } catch {
+        deleteButton.disabled = false;
+        setStatus(textMap.accessError, "error");
+      }
+    });
+    editor.appendChild(deleteButton);
+  }
 
   const assignmentsTitle = document.createElement("div");
   assignmentsTitle.className = "access-section-title";
@@ -612,7 +694,8 @@ const renderAccessPrototype = ({
     check.type = "checkbox";
     const current = new Set(selectedUser.assignments.map((item) => item.machineId));
     check.checked = current.has(machine.id);
-    check.addEventListener("change", () => {
+    check.addEventListener("change", async () => {
+      const previousAssignments = selectedUser.assignments;
       const next = new Set(selectedUser.assignments.map((item) => item.machineId));
       if (check.checked) next.add(machine.id);
       else next.delete(machine.id);
@@ -624,7 +707,14 @@ const renderAccessPrototype = ({
           role: selectedUser.role,
           prototypeOnly: true
         }));
-      setStatus(textMap.accessPrototypeSaved, "ok");
+      setStatus(textMap.saving);
+      try {
+        await saveUser(selectedUser);
+        setStatus(textMap.accessPrototypeSaved, "ok");
+      } catch {
+        selectedUser.assignments = previousAssignments;
+        setStatus(textMap.accessError, "error");
+      }
       rerender();
     });
     const copy = document.createElement("span");
@@ -643,7 +733,7 @@ const renderAccessPrototype = ({
   tableWrap.appendChild(shell);
 };
 
-const loadGlobalAccess = async (uid) => {
+const loadGlobalAccess = async (uid, preferredOwnerUid = "") => {
   if (!mount || !statusEl || !tableWrap) return;
   setStatus(textMap.accessLoading);
   tableWrap.innerHTML = "";
@@ -655,17 +745,126 @@ const loadGlobalAccess = async (uid) => {
     return;
   }
 
-  const machineRows = machines.map((machine) => ({
+  const contextByOwner = new Map();
+  machines.forEach((machine) => {
+    const ownerUid = machine.ownerUid || machine.tenantId || "";
+    if (!ownerUid) return;
+    const context = contextByOwner.get(ownerUid) || {
+      ownerUid,
+      ownerEmail: machine.ownerEmail || "",
+      machines: []
+    };
+    context.machines.push(machine);
+    contextByOwner.set(ownerUid, context);
+  });
+  const contexts = Array.from(contextByOwner.values()).sort((left, right) => {
+    if (left.ownerUid === uid) return -1;
+    if (right.ownerUid === uid) return 1;
+    return (left.ownerEmail || left.ownerUid).localeCompare(right.ownerEmail || right.ownerUid);
+  });
+  const contextOwnerUid = contexts.some((context) => context.ownerUid === preferredOwnerUid)
+    ? preferredOwnerUid
+    : (contexts[0]?.ownerUid || "");
+  const contextMachines = machines.filter(
+    (machine) => (machine.ownerUid || machine.tenantId) === contextOwnerUid
+  );
+  document.getElementById("access-context-wrap")?.remove();
+  if (contexts.length > 1) {
+    const contextWrap = document.createElement("label");
+    contextWrap.id = "access-context-wrap";
+    contextWrap.className = "access-create";
+    contextWrap.textContent = textMap.accessSpace;
+    const contextSelect = document.createElement("select");
+    contextSelect.className = "access-role";
+    contexts.forEach((context) => {
+      const option = document.createElement("option");
+      option.value = context.ownerUid;
+      option.textContent = context.ownerUid === uid
+        ? (isEn ? "My machines" : "Mis máquinas")
+        : (context.ownerEmail || (isEn ? "Administered machines" : "Máquinas administradas"));
+      option.selected = context.ownerUid === contextOwnerUid;
+      contextSelect.appendChild(option);
+    });
+    contextSelect.addEventListener("change", () => {
+      loadGlobalAccess(uid, contextSelect.value);
+    });
+    contextWrap.appendChild(contextSelect);
+    statusEl.parentElement?.insertBefore(contextWrap, statusEl);
+  }
+  const machineRows = contextMachines.map((machine) => ({
     id: machine.id,
     title: getMachineTitle(machine) || machine.id,
     scope: machine.accessScope || "owner",
-    scopeLabel: machine.accessScopeLabel || textMap.accessOwnerMachine
+    scopeLabel: machine.accessScopeLabel || textMap.accessOwnerMachine,
+    ownerUid: machine.ownerUid || machine.tenantId || contextOwnerUid
   }));
-  const userColumnsRef = { userColumns: collectLocalAccessRows(machines) };
+  const userColumnsRef = { userColumns: collectLocalAccessRows(contextMachines) };
   const selectedUserKeyRef = { selectedUserKey: userColumnsRef.userColumns[0]?.normalized || "" };
-  const rolePermissionsRef = { rolePermissions: createDefaultRolePermissions() };
-  const selectedRoleRef = { selectedRole: "manager" };
+  const configuredPermissions = contextMachines.find(
+    (machine) => machine.accessRolePermissions
+  )?.accessRolePermissions;
+  const rolePermissionsRef = {
+    rolePermissions: normalizeAccessRolePermissions(
+      configuredPermissions || createDefaultRolePermissions()
+    )
+  };
+  const selectedRoleRef = { selectedRole: "operator" };
   const uiStateRef = { activeView: "users" };
+  const saveRolePermissions = async (permissions) => {
+    const normalized = normalizeAccessRolePermissions(permissions);
+    await saveMachineAccessRolePermissions(uid, contextMachines, normalized);
+    contextMachines.forEach((machine) => {
+      machine.accessRolePermissions = normalized;
+    });
+    rolePermissionsRef.rolePermissions = normalized;
+  };
+  const saveUser = async (user) => {
+    await saveGlobalLocalUser({
+      ownerUid: contextOwnerUid,
+      actorUid: uid,
+      machines: contextMachines,
+      assignedMachineIds: user.assignments.map((assignment) => assignment.machineId),
+      user: {
+        id: user.id || `u_${user.normalized.replace(/[^a-z0-9_-]/g, "_")}`,
+        username: user.username,
+        role: normalizeAccessRole(user.role),
+        createdAt: user.createdAt || new Date().toISOString(),
+        saltBase64: user.saltBase64,
+        passwordHashBase64: user.passwordHashBase64,
+        isNew: !!user.isNew
+      }
+    });
+    const assigned = new Set(user.assignments.map((assignment) => assignment.machineId));
+    contextMachines.forEach((machine) => {
+      const others = (machine.users || []).filter(
+        (item) => normalizeLocalUsername(item.username) !== user.normalized
+      );
+      machine.users = assigned.has(machine.id)
+        ? [...others, {
+            id: user.id || `u_${user.normalized.replace(/[^a-z0-9_-]/g, "_")}`,
+            username: user.username,
+            role: normalizeAccessRole(user.role),
+            accessScope: assigned.size === contextMachines.length ? "all" : "selected",
+            createdAt: user.createdAt || new Date().toISOString(),
+            saltBase64: user.saltBase64,
+            passwordHashBase64: user.passwordHashBase64
+          }]
+        : others;
+    });
+  };
+  const deleteUser = async (user) => {
+    await deleteGlobalLocalUser({
+      ownerUid: contextOwnerUid,
+      actorUid: uid,
+      machines: contextMachines,
+      username: user.username
+    });
+    contextMachines.forEach((machine) => {
+      machine.users = (machine.users || []).filter(
+        (item) => normalizeLocalUsername(item.username) !== user.normalized
+      );
+    });
+  };
   setStatus("");
   renderAccessPrototype({
     machineRows,
@@ -673,7 +872,11 @@ const loadGlobalAccess = async (uid) => {
     selectedRoleRef,
     selectedUserKeyRef,
     uiStateRef,
-    userColumnsRef
+    userColumnsRef,
+    saveRolePermissions,
+    saveUser,
+    deleteUser,
+    canManageIdentities: contextOwnerUid === uid
   });
 };
 

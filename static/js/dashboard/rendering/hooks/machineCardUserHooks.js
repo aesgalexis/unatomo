@@ -92,7 +92,11 @@ export const installMachineCardUserHooks = (dependencies) => {
             const newUser = {
               id: (window.crypto.randomUUID && window.crypto.randomUUID()) || `u_${Date.now()}`,
               username: existingGlobal ? existingGlobal.username : username,
-              role: "usuario",
+              role: existingGlobal?.role === "tecnico" ||
+                existingGlobal?.role === "technician" ?
+                "technician" :
+                "operator",
+              accessScope: existingGlobal?.accessScope || "selected",
               createdAt: new Date().toISOString(),
               saltBase64,
               passwordHashBase64

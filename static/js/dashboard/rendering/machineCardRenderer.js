@@ -112,7 +112,6 @@ export const renderMachineCards = (dependencies) => {
           canEditConfig: true,
           visibleTabs: ["quehaceres", "historial", "general", "configuracion"],
           tabOrder: state.dashboardLayout.tabOrder,
-          userRoles: ["usuario", "tecnico", "externo"],
           createdBy: state.adminLabel || null,
           operationalSource: machine._operationalSource || "local",
           locations: state.locations,

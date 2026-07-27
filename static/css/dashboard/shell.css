@@ -20,8 +20,7 @@ body.page .topbar {
   max-width: min(50vw, 32ch);
   min-height: 1.2em;
   line-height: 1.15;
-  overflow-x: hidden;
-  overflow-y: visible;
+  overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   cursor: text;

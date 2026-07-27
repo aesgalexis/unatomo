@@ -35,7 +35,9 @@ export const render = (container, machine, hooks, options = {}) => {
   if (availableUsers.length) {
     userSelect.appendChild(addUserOption("", t("config.select", "Seleccionar")));
     availableUsers.forEach((name) => userSelect.appendChild(addUserOption(name, name)));
-    userSelect.appendChild(addUserOption("__add__", t("config.addNew", "+ Añadir nuevo...")));
+  } else {
+    userSelect.appendChild(addUserOption("", t("config.select", "Seleccionar")));
+    userSelect.disabled = true;
   }
 
   const addNewBtn = document.createElement("button");
@@ -188,11 +190,12 @@ export const render = (container, machine, hooks, options = {}) => {
   const userLine = document.createElement("div");
   userLine.className = "mc-user-add-line";
   userLine.appendChild(userSelect);
-  userLine.appendChild(addNewBtn);
-  userLine.appendChild(userInput);
-  userLine.appendChild(passInput);
-  userLine.appendChild(addBtn);
-  userLine.appendChild(cancelBtn);
+  const manageAccessLink = document.createElement("a");
+  manageAccessLink.className = "mc-user-add-new";
+  manageAccessLink.href = t("config.accessPath", "/nfc/es/accesos.html");
+  manageAccessLink.textContent = t("config.manageAccess", "Gestionar accesos");
+  manageAccessLink.addEventListener("click", (event) => event.stopPropagation());
+  userLine.appendChild(manageAccessLink);
 
   addControls.appendChild(userLine);
 
@@ -202,11 +205,9 @@ export const render = (container, machine, hooks, options = {}) => {
   const list = document.createElement("div");
   list.className = "mc-user-list";
 
-  const roles = options.userRoles || ["usuario", "tecnico", "externo"];
   const labels = {
-    usuario: t("config.user", "Usuario"),
-    tecnico: t("config.technician", "Técnico"),
-    externo: t("config.external", "Externo"),
+    operator: t("config.operator", "Operario"),
+    technician: t("config.technician", "Técnico"),
   };
 
   (machine.users || []).forEach((user) => {
@@ -217,25 +218,12 @@ export const render = (container, machine, hooks, options = {}) => {
     name.className = "mc-user-name";
     name.textContent = user.username;
 
-    const role = document.createElement("select");
+    const role = document.createElement("span");
     role.className = "mc-user-role";
-    roles.forEach((opt) => {
-      const option = document.createElement("option");
-      option.value = opt;
-      option.textContent = labels[opt] || opt;
-      if (user.role === opt) option.selected = true;
-      role.appendChild(option);
-    });
-    role.addEventListener("click", (event) => event.stopPropagation());
-    role.addEventListener("change", (event) => {
-      event.stopPropagation();
-      if (hooks.onUpdateUserRole) {
-        hooks.onUpdateUserRole(machine.id, user.id, role.value);
-      }
-    });
-    if (!canEditConfig || options.disableConfigActions) {
-      role.disabled = true;
-    }
+    const normalizedRole = user.role === "tecnico" || user.role === "technician"
+      ? "technician"
+      : "operator";
+    role.textContent = labels[normalizedRole] || normalizedRole;
 
     const pinWrap = document.createElement("div");
     pinWrap.className = "mc-user-pin-wrap";
@@ -374,9 +362,7 @@ export const render = (container, machine, hooks, options = {}) => {
 
     row.appendChild(name);
     row.appendChild(role);
-    row.appendChild(pinWrap);
     row.appendChild(remove);
-    row.appendChild(pinActions);
     list.appendChild(row);
   });
 

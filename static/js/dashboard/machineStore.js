@@ -35,6 +35,10 @@ export const normalizeMachine = (raw, index = 0) => {
     logs: Array.isArray(raw.logs) ? raw.logs : [],
     tasks: normalizeTasks(raw.tasks),
     users: Array.isArray(raw.users) ? raw.users : [],
+    accessRolePermissions:
+      raw.accessRolePermissions && typeof raw.accessRolePermissions === "object"
+        ? raw.accessRolePermissions
+        : {},
     adminEmail: typeof raw.adminEmail === "string" ? raw.adminEmail : "",
     adminName: typeof raw.adminName === "string" ? raw.adminName : "",
     adminStatus: typeof raw.adminStatus === "string" ? raw.adminStatus : "",
@@ -93,6 +97,7 @@ export const createDraftMachine = (count, order) => {
     logs: [],
     tasks: [],
     users: [],
+    accessRolePermissions: {},
     adminEmail: "",
     adminName: "",
     adminStatus: "",

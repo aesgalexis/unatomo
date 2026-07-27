@@ -49,7 +49,7 @@ export const createDashboardDataController = (dependencies) => {
       machines.map(async (machine) => {
         if (!machine.tagId) return { ...machine, _operationalSource: "local" };
         try {
-          const access = await fetchMachineAccess(machine.tagId);
+          const { machine: access } = await fetchMachineAccess(machine.tagId);
           if (!access) return { ...machine, _operationalSource: "local" };
           return {
             ...machine,

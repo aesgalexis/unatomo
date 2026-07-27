@@ -3,7 +3,7 @@ import { createMachineCard } from "/static/js/dashboard/machineCardTemplate.js";
 import { installDocumentHooks } from "/static/js/dashboard/cardHooks/documentHooks.js";
 import { upsertMachine } from "/static/js/dashboard/firestoreRepo.js";
 import { generateMachineTagQr } from "/static/js/dashboard/tags/tagAssetsRepo.js";
-import { auth, db, functions } from "/static/js/firebase/firebaseApp.js";
+import { auth, functions } from "/static/js/firebase/firebaseApp.js";
 import { initAutoSave } from "/static/js/dashboard/autoSave.js";
 import { calculateStorageUsage, STORAGE_LIMIT_BYTES } from "/static/js/configuracion/storageUsage.js";
 import { normalizeTasks } from "/static/js/dashboard/tabs/tasks/tasksModel.js";
@@ -20,14 +20,13 @@ import { t } from "/static/js/dashboard/i18n.js";
 import {
   canSeeTab,
   canEditStatus,
-  canEditTasks,
   canDownloadHistory,
-  canSeeConfig
+  canSeeConfig,
+  canUseCapability
 } from "./permissions.js";
 import {
-  doc,
-  getDoc
-} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+  normalizeAccessRole
+} from "./accessRoles.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 import { httpsCallable } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-functions.js";
 
@@ -76,6 +75,7 @@ const updateMachineAccessOperationalCallable = httpsCallable(functions, "updateM
 const createLocalMachineSession = (username, role, options = {}) => ({
   username,
   role: role || t("machine.userRoleFallback", "usuario"),
+  permissions: options.permissions || null,
   source: "machine",
   remembered: !!options.remembered,
   sessionId: options.sessionId || "",
@@ -148,6 +148,15 @@ const showLogin = (machine, tagId, onSuccess) => {
   const title = document.createElement("h3");
   const name = machine.title || t("machine.machine", "Equipo");
   title.textContent = t("machine.accessTo", (value) => `Acceso a ${value}`)(name);
+  const publicDetails = document.createElement("p");
+  publicDetails.className = "machine-login-public-details";
+  publicDetails.textContent = [machine.brand, machine.model].filter(Boolean).join(" · ");
+  const plateUrl = machine.documents?.plate?.url || "";
+  const plate = document.createElement("img");
+  plate.className = "machine-login-public-plate";
+  plate.alt = t("general.plate", "Placa");
+  plate.src = plateUrl;
+  plate.hidden = !plateUrl;
 
   const userInput = document.createElement("input");
   userInput.type = "text";
@@ -182,21 +191,26 @@ const showLogin = (machine, tagId, onSuccess) => {
       });
       const verifiedUser = response?.data?.user || {};
       const verifiedSession = response?.data?.session || {};
+      const verifiedMachine = response?.data?.machine || null;
+      const permissions = response?.data?.permissions || null;
       const userSession = createLocalMachineSession(verifiedUser.username || username, verifiedUser.role, {
         remembered: false,
+        permissions,
         sessionId: verifiedSession.id,
         sessionToken: verifiedSession.token,
         expiresAt: verifiedSession.expiresAt,
       });
       saveMachineSession(tagId, userSession, { remember: false });
       overlay.remove();
-      onSuccess(userSession);
+      onSuccess(userSession, verifiedMachine, permissions);
     } catch {
       error.textContent = t("machine.validationError", "Error al validar credenciales.");
     }
   });
 
   panel.appendChild(title);
+  if (publicDetails.textContent) panel.appendChild(publicDetails);
+  if (plateUrl) panel.appendChild(plate);
   panel.appendChild(userInput);
   panel.appendChild(passInput);
   panel.appendChild(error);
@@ -220,23 +234,6 @@ const buildDashboardSession = (user, machineDoc) => ({
   uid: user.uid,
   machineId: machineDoc.machineId || "",
 });
-
-const hasDashboardMachineAccess = async (user, machineDoc) => {
-  if (!user || !machineDoc?.machineId || !machineDoc?.tenantId) return false;
-  if (machineDoc.tenantId === user.uid) return true;
-  try {
-    const linkId = `${machineDoc.machineId}_${user.uid}`;
-    const snap = await getDoc(doc(db, "admin_machine_links", linkId));
-    if (!snap.exists()) return false;
-    const data = snap.data() || {};
-    return data.adminUid === user.uid &&
-      data.ownerUid === machineDoc.tenantId &&
-      data.machineId === machineDoc.machineId &&
-      data.status === "accepted";
-  } catch {
-    return false;
-  }
-};
 
 const normalizeStatus = (value) =>
   ["operativa", "fuera_de_servicio", "desconectada"].includes(value)
@@ -351,14 +348,15 @@ const init = async () => {
   }
   state.tagId = tagId;
 
-  const machineDoc = await fetchMachineAccess(tagId);
+  const authUser = await waitForAuthState();
+  const initialAccess = await fetchMachineAccess(tagId);
+  const machineDoc = initialAccess.machine;
   if (!machineDoc) {
     renderMessage(t("machine.tagNotFound", "Tag no encontrado."));
     return;
   }
 
-  const authUser = await waitForAuthState();
-  if (await hasDashboardMachineAccess(authUser, machineDoc)) {
+  if (authUser && !machineDoc.publicAccess) {
     const dashboardSession = buildDashboardSession(authUser, machineDoc);
     sessionStorage.setItem(sessionKey(tagId), JSON.stringify(dashboardSession));
     state.uid = authUser.uid;
@@ -372,16 +370,32 @@ const init = async () => {
 
   if (!session) {
     saveMachineSession(tagId, null, { remember: false });
-    showLogin(machineDoc, tagId, (userSession) => {
+    showLogin(machineDoc, tagId, (userSession, verifiedMachine, permissions) => {
       state.session = userSession;
-      state.draft = normalizeMachineAccessDraft(machineDoc);
+      state.session.permissions = permissions;
+      state.draft = normalizeMachineAccessDraft(verifiedMachine || machineDoc);
       renderMachine();
     });
     return;
   }
 
-  state.session = session;
-  state.draft = normalizeMachineAccessDraft(machineDoc);
+  const sessionAccess = await fetchMachineAccess(tagId, session);
+  if (!sessionAccess.machine || sessionAccess.machine.publicAccess) {
+    saveMachineSession(tagId, null, { remember: false });
+    showLogin(machineDoc, tagId, (userSession, verifiedMachine, permissions) => {
+      state.session = userSession;
+      state.session.permissions = permissions;
+      state.draft = normalizeMachineAccessDraft(verifiedMachine || machineDoc);
+      renderMachine();
+    });
+    return;
+  }
+  state.session = {
+    ...session,
+    role: sessionAccess.role || session.role,
+    permissions: sessionAccess.permissions || session.permissions
+  };
+  state.draft = normalizeMachineAccessDraft(sessionAccess.machine);
   renderMachine();
 };
 
@@ -390,21 +404,30 @@ const renderMachine = () => {
   const session = state.session;
   list.innerHTML = "";
 
-  const role = session.role || t("machine.userRoleFallback", "usuario");
+  const role = session.role === "admin"
+    ? "admin"
+    : normalizeAccessRole(session.role);
+  const configuredPermissions = machineDoc.accessRolePermissions || {};
   const isDashboardAdmin = role === "admin" && session.source === "dashboard";
   const visibleTabs = ["quehaceres", "general", "historial", "configuracion"].filter((tab) =>
-    canSeeTab(role, tab)
+    canSeeTab(role, tab, configuredPermissions)
   );
 
   const { card, hooks } = createMachineCard(machineDoc, {
     mode: "single",
     disableDrag: true,
     hideConfig: !canSeeConfig(role),
-    canEditStatus: canEditStatus(role),
-    canEditTasks: canEditTasks(role),
-    canCompleteTasks: true,
-    canDownloadHistory: canDownloadHistory(role),
+    canEditStatus: canEditStatus(role, configuredPermissions),
+    canCreateTasks: canUseCapability(role, "createTasks", configuredPermissions),
+    canEditTasks: canUseCapability(role, "editTasks", configuredPermissions),
+    canDeleteTasks: canUseCapability(role, "deleteTasks", configuredPermissions),
+    canCompleteTasks: canUseCapability(role, "completeTasks", configuredPermissions),
+    canAddTaskNotes: canUseCapability(role, "addTaskNotes", configuredPermissions),
+    canUploadTaskImages: canUseCapability(role, "uploadImages", configuredPermissions),
+    canDownloadHistory: canDownloadHistory(role, configuredPermissions),
     canEditGeneral: isDashboardAdmin,
+    canViewPlate: canUseCapability(role, "viewPlate", configuredPermissions),
+    canViewDocuments: canUseCapability(role, "viewDocuments", configuredPermissions),
     canEditLocation: isDashboardAdmin,
     canEditConfig: isDashboardAdmin,
     visibleTabs,
@@ -440,7 +463,7 @@ const renderMachine = () => {
   };
 
   hooks.onStatusToggle = () => {
-    if (!canEditStatus(role)) return;
+    if (!canUseCapability(role, "changeStatus", configuredPermissions)) return;
     const statusOrder = ["operativa", "fuera_de_servicio"];
     const currentStatus = normalizeStatus(machineDoc.status);
     const idx = statusOrder.indexOf(currentStatus);
@@ -459,7 +482,7 @@ const renderMachine = () => {
   };
 
   hooks.onAddTask = (id, task) => {
-    if (!canEditTasks(role)) return;
+    if (!canUseCapability(role, "createTasks", configuredPermissions)) return;
     state.draft = { ...machineDoc, ...buildAddTaskUpdate(machineDoc, task, getActorLabel()) };
     renderMachine();
     notifyTopbar(t("machine.taskCreated", "Tarea creada"));
@@ -467,7 +490,7 @@ const renderMachine = () => {
   };
 
   hooks.onRemoveTask = (id, taskId) => {
-    if (!canEditTasks(role)) return;
+    if (!canUseCapability(role, "deleteTasks", configuredPermissions)) return;
     state.draft = {
       ...machineDoc,
       ...buildRemoveTaskUpdate(machineDoc, taskId, getActorLabel())
@@ -477,7 +500,7 @@ const renderMachine = () => {
   };
 
   hooks.onAddTaskNote = (id, taskId, text) => {
-    if (!canEditTasks(role)) return;
+    if (!canUseCapability(role, "addTaskNotes", configuredPermissions)) return;
     const updates = buildAddTaskNoteUpdate(machineDoc, taskId, text, getActorLabel());
     if (!updates) return;
     state.draft = { ...machineDoc, ...updates };
@@ -486,7 +509,7 @@ const renderMachine = () => {
   };
 
   hooks.onEditTask = (id, taskId, patch) => {
-    if (!canEditTasks(role)) return;
+    if (!canUseCapability(role, "editTasks", configuredPermissions)) return;
     state.draft = {
       ...machineDoc,
       ...buildEditTaskUpdate(machineDoc, taskId, patch, getActorLabel())
@@ -496,6 +519,7 @@ const renderMachine = () => {
   };
 
   hooks.onCompleteTask = (id, taskId) => {
+    if (!canUseCapability(role, "completeTasks", configuredPermissions)) return;
     const updates = buildCompleteTaskUpdate(
       machineDoc.id,
       machineDoc,

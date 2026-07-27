@@ -118,6 +118,9 @@
 }
 
 .access-protected-note {
+  display: grid;
+  gap: 3px;
+  margin-bottom: 14px;
   border: 1px solid color-mix(in srgb, #2563eb 28%, transparent);
   border-radius: 8px;
   background: color-mix(in srgb, #2563eb 7%, var(--bg));
@@ -337,6 +340,13 @@
 .access-mini-btn:disabled {
   opacity: 0.42;
   cursor: default;
+}
+
+.access-delete-user {
+  justify-self: start;
+  border-color: color-mix(in srgb, #dc2626 42%, transparent);
+  color: #dc2626;
+  background: color-mix(in srgb, #dc2626 7%, var(--bg));
 }
 
 @media (max-width: 700px) {

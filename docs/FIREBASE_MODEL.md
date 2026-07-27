@@ -28,7 +28,9 @@ Read this before changing data flows, callable functions, machine ownership, adm
   - `qrUrl`
   - `qrPath`
   - `qrSize`
-- `machine_access`: public/operational access data keyed by Tag ID.
+- `machine_access`: operational access data keyed by Tag ID. Unauthenticated
+  clients receive only a server-sanitized public projection; the document
+  itself is not public Firestore data.
 - `machine_access_sessions`: short-lived QR/machine sessions created by
   callable functions after a machine-local user login. Browser clients must not
   read or write this collection directly.
@@ -138,7 +140,13 @@ frontend wrappers live under `static/js/dashboard/`.
   changes to those two fields so stale dashboard code cannot flatten a saved
   hierarchy.
 - `getMachineAccessPublic`, `verifyMachineAccessUser`, and
-  `updateMachineAccessOperational`: QR/machine access callables. They can enforce
+  `updateMachineAccessOperational`: QR/machine access callables.
+  `getMachineAccessPublic` is contextual: unauthenticated callers receive only
+  name, brand/model, and plate; accepted owner/admin accounts receive the
+  managed projection; valid local sessions receive only fields allowed by
+  their `operator` or `technician` role. Operational updates enforce status
+  and task capabilities in the backend instead of relying on hidden UI
+  controls. They can enforce
   Firebase App Check when Functions are deployed with
   `ENFORCE_APP_CHECK=true`.
 - `cleanupMachineAccessSessions`: scheduled cleanup for expired

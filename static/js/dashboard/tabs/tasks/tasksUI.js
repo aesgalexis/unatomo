@@ -94,7 +94,11 @@ const createTaskMenu = ({
   hooks,
   openNoteForm,
   openImagePicker,
-  openEditForm
+  openEditForm,
+  canAddNotes,
+  canUploadImages,
+  canEditTask,
+  canDeleteTask
 }) => {
   const menu = document.createElement("span");
   menu.className = "task-menu";
@@ -192,10 +196,10 @@ const createTaskMenu = ({
 
   menu.addEventListener("click", (event) => event.stopPropagation());
   menu.appendChild(dots);
-  panel.appendChild(note);
-  panel.appendChild(images);
-  panel.appendChild(edit);
-  panel.appendChild(remove);
+  if (canAddNotes) panel.appendChild(note);
+  if (canUploadImages) panel.appendChild(images);
+  if (canEditTask) panel.appendChild(edit);
+  if (canDeleteTask) panel.appendChild(remove);
   menu.appendChild(panel);
   return menu;
 };
@@ -289,8 +293,12 @@ const renderAttachments = (item, task, hooks) => {
 
 export const renderTasksPanel = (panel, machine, hooks, options = {}, context = {}) => {
   panel.innerHTML = "";
+  const canCreateTasks = options.canCreateTasks ?? options.canEditTasks !== false;
   const canEditTasks = options.canEditTasks !== false;
+  const canDeleteTasks = options.canDeleteTasks ?? canEditTasks;
   const canCompleteTasks = options.canCompleteTasks !== false;
+  const canAddTaskNotes = options.canAddTaskNotes ?? canEditTasks;
+  const canUploadTaskImages = options.canUploadTaskImages ?? canEditTasks;
 
   const list = document.createElement("div");
   list.className = "task-list";
@@ -441,7 +449,7 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
 
       const actions = document.createElement("div");
       actions.className = "task-actions-left";
-      if (canEditTasks) {
+      if (canAddTaskNotes || canUploadTaskImages || canEditTasks || canDeleteTasks) {
         const openImagePicker = () => {
           const input = document.createElement("input");
           input.type = "file";
@@ -464,7 +472,11 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
           hooks,
           openNoteForm,
           openImagePicker,
-          openEditForm
+          openEditForm,
+          canAddNotes: canAddTaskNotes,
+          canUploadImages: canUploadTaskImages,
+          canEditTask: canEditTasks,
+          canDeleteTask: canDeleteTasks
         }));
       }
 
@@ -473,7 +485,7 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
       side.appendChild(meta);
       line1.appendChild(title);
       line1.appendChild(side);
-      if (canEditTasks) {
+      if (canAddTaskNotes || canUploadTaskImages || canEditTasks || canDeleteTasks) {
         body.appendChild(actions);
       }
       body.appendChild(line1);
@@ -513,7 +525,7 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
 
   panel.appendChild(list);
 
-  if (canEditTasks) {
+  if (canCreateTasks) {
     const formRow = document.createElement("div");
     formRow.className = "task-form";
 

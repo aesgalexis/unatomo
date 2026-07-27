@@ -130,39 +130,45 @@ Operational data should not be public by default:
 - Configuration.
 - User lists.
 
-Current note: `getMachineAccessPublic` still returns `logs` and `tasks` from
-`machine_access`. That should be reduced before QR use becomes broad.
+`getMachineAccessPublic` now returns only machine name, brand/model, and plate
+metadata to unauthenticated callers. Tasks, history, location, serial,
+configuration, and users require an accepted account relationship or a valid
+short-lived local machine session.
 
 ## Roles And Capabilities
 
 Roles should be translated into capabilities. Code should ask whether a user can
 perform an action, not scatter role-name checks through UI and callables.
 
-Initial future role names:
+The assignable local roles are deliberately limited:
 
-- `manager`: manage configuration, QR/tag access, users, documents, tasks, and
-  operational state.
-- `operator`: work with operational tasks and machine state.
-- `technician`: view technical context, history, documents, and tasks; edit only
-  the operational areas explicitly allowed.
-- `viewer`: read-only access to permitted machine information.
-- `external`: restricted and usually temporary access.
+- `operator`: execute existing work. Its default profile can complete or
+  reopen tasks, add notes, and change machine status, but cannot create, edit,
+  or delete task definitions.
+- `technician`: includes the operator workflow and can create and edit tasks,
+  read history, and view technical documents by default.
 
-Existing local roles during transition:
+`manager`, `viewer`, and `external` are not assignable roles. Machine owners
+and accepted administrators are authenticated account relationships, not
+local PIN roles. Public access is a safe unauthenticated projection, not a
+user role.
 
-- `usuario`
-- `tecnico`
-- `externo`
+Legacy `usuario` values normalize to `operator`; legacy `tecnico` values
+normalize to `technician`. Other legacy local values normalize conservatively
+to `operator` when they are next saved from the Access surface.
 
-The first implementation may keep these stored values while the UI and model
-move toward capability-based handling.
+Capabilities remain editable for both local roles, but only within the read
+and operational capability set. A local PIN role cannot be elevated to account
+administration, ownership transfer, machine deletion, access management, or
+Tag/QR management. The backend is authoritative; hidden UI is not permission
+enforcement.
 
 ## Global Access Management
 
 The dashboard account access page is the global place to manage people and
 access across an owner's machines.
 
-Current first implementation:
+Current transitional implementation:
 
 - `nfc/es/accesos.html` and `nfc/en/access.html` load
   `static/js/accesos/index.js`.
@@ -175,23 +181,28 @@ Current first implementation:
   those visible machines.
 - It avoids horizontal scrolling across users. Users are shown in a persistent
   selector list; the selected user stays in focus until another user is chosen.
-- The focused user editor exposes prototype role, PIN, `All` / `Todas`, and
-  per-machine access controls. Owner machines appear first, followed by
-  administered machines.
-- It includes prototype controls for creating a local user, changing PIN, and
-  changing the displayed role.
-- When a machine named `test machine` or `test machine 2` exists, the UI adds
-  prototype users across the planned role set (`manager`, operator displayed
-  from the legacy `usuario` value, `technician`, `viewer`, `external`) and
-  assigns them to those lab machines so the matrix can be evaluated with
-  realistic density.
-- Matrix, PIN, create-user, and future-role changes are visual only in this
-  phase. They should not be treated as persisted permission changes.
-- The same card has a second role-permissions tab with prototype capability
-  checkboxes grouped into reading, operational changes, and administration.
-  The `viewer` / `Solo lectura` profile is protected: its read capabilities
-  are enabled and every data-changing capability is disabled and locked.
-- This remains a transitional UI over `machines.users[]`; it is not the final
+- The focused user editor exposes stable role, PIN, `All` / `Todas`, and
+  per-machine access controls.
+- New users created by the owner are assigned to all machines in that owner
+  context by default. Users saved with `accessScope: "all"` are inherited by future
+  machines created from that owner's dashboard.
+- User, PIN, role, assignment, and role-capability changes are persisted. The
+  compatibility implementation mirrors credentials and assignments into
+  `machines.users[]` and `usernames`.
+- Owners can delete a global local user. The operation atomically removes the
+  user from every owner machine in the current context and deletes the
+  corresponding `usernames` registry document.
+- The machine configuration tab shows who has access and can assign an
+  existing user or remove that machine assignment. Identity creation, PIN
+  changes, and stable role changes belong to the global Access page.
+- Accepted per-machine administrators can edit role capabilities and
+  assignments in their administered context, but global identity, PIN, and
+  stable-role changes remain owner-controlled so they cannot affect machines
+  outside their administration.
+- The permissions tab edits only `operator` and `technician`, grouped into
+  reading and operational changes. Public information is described separately
+  because it is not assigned to a user.
+- This remains a compatibility UI over `machines.users[]`; it is not the final
   `operator_users` / `operator_assignments` model.
 
 The first version groups existing local machine users by normalized username and
@@ -212,7 +223,6 @@ Later versions should add:
 - PIN rotation.
 - Active/disabled state.
 - Account invitation or conversion.
-- Expiry for external users.
 - Last access/audit metadata.
 
 ## Migration Strategy
@@ -221,12 +231,14 @@ Work in stages:
 
 1. Document the access contract and role direction.
 2. Add a global access overview in Settings using current `machines.users[]`.
-3. Centralize role-to-capability logic for QR machine pages.
-4. Limit public QR callable output to safe gateway data.
-5. Add backend callables for global local-user management.
-6. Introduce `operator_users` and `operator_assignments`.
-7. Migrate current `machines.users[]` users into the new collections.
-8. Keep compatibility reads until old clients are no longer relevant.
+3. Centralize role-to-capability logic for QR machine pages. Implemented.
+4. Limit public QR callable output to safe gateway data. Implemented.
+5. Enforce operational capabilities in backend callables. Implemented for
+   status, task definitions, completion, notes, and task images.
+6. Add backend callables for normalized global local-user management.
+7. Introduce `operator_users` and `operator_assignments`.
+8. Migrate current `machines.users[]` users into the new collections.
+9. Keep compatibility reads until old clients are no longer relevant.
 
 Direct browser writes are acceptable only for the current transitional model.
 The long-term global user management surface should use callables so role
@@ -238,8 +250,6 @@ consistent.
 - Whether public QR gateway should show machine status before authentication.
 - Whether local users should be owner-wide from day one in the new model, or
   tenant/account scoped with future organization support.
-- Exact capability matrix for each future role.
-- Whether accepted administrators can manage operator users for machines they
-  administer, or only owners can manage global access.
+- Whether accepted administrators should eventually receive an explicit
+  owner-wide administration grant rather than their current per-machine scope.
 - How much history/audit to expose for local operator actions.
-- Expiry rules for external users and temporary access.

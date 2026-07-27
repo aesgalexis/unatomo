@@ -3,6 +3,8 @@ import { t } from "/static/js/dashboard/i18n.js";
 export const render = (panel, machine, hooks, options = {}) => {
   panel.innerHTML = "";
   const canEditGeneral = options.canEditGeneral !== false;
+  const canViewPlate = options.canViewPlate !== false;
+  const canViewDocuments = options.canViewDocuments !== false;
   const maxOtherDocDisplayName = 40;
 
   const closeDocMenus = () => {
@@ -573,22 +575,26 @@ export const render = (panel, machine, hooks, options = {}) => {
 
   const tiles = document.createElement("div");
   tiles.className = "mc-doc-tiles";
-  tiles.appendChild(createDocumentTile("plate", t("general.plate", "Placa")));
-  tiles.appendChild(createDocumentTile("manual", t("general.manual", "Manual")));
-  tiles.appendChild(createDocumentTile("other", t("general.otherDocumentation", "Otra documentación")));
-  manualWrap.appendChild(tiles);
+  if (canViewPlate) {
+    tiles.appendChild(createDocumentTile("plate", t("general.plate", "Placa")));
+  }
+  if (canViewDocuments) {
+    tiles.appendChild(createDocumentTile("manual", t("general.manual", "Manual")));
+    tiles.appendChild(createDocumentTile("other", t("general.otherDocumentation", "Otra documentación")));
+  }
+  if (canViewPlate || canViewDocuments) manualWrap.appendChild(tiles);
 
   const otherDocs = Array.isArray(machine.documents?.other) ? machine.documents.other : [];
   const otherDocsSep = document.createElement("hr");
   otherDocsSep.className = "mc-doc-list-sep";
-  manualWrap.appendChild(otherDocsSep);
+  if (canViewDocuments) manualWrap.appendChild(otherDocsSep);
 
   otherDocsList = document.createElement("div");
   otherDocsList.className = "mc-other-doc-list";
-  if (otherDocs.length) {
+  if (canViewDocuments && otherDocs.length) {
     otherDocs.forEach(appendOtherDocRow);
   }
-  manualWrap.appendChild(otherDocsList);
+  if (canViewDocuments) manualWrap.appendChild(otherDocsList);
 
   panel.appendChild(manualWrap);
 };
