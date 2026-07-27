@@ -119,6 +119,7 @@ export const createDashboardGroupTreeRenderer = ({
   }) => {
     closeMenu();
     container.innerHTML = "";
+    container.className = "dashboard-group-tree";
     container.setAttribute("aria-label", t("dashboard.groupTreeAria", "\u00c1rbol de grupos"));
     const validGroupIds = new Set(groups.map((group) => group.id));
     const hiddenIds = new Set(

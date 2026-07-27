@@ -151,7 +151,10 @@ The assignable local roles are deliberately limited:
 `manager`, `viewer`, and `external` are not assignable roles. Machine owners
 and accepted administrators are authenticated account relationships, not
 local PIN roles. Public access is a safe unauthenticated projection, not a
-user role.
+user identity. In the role-permission editor it is represented as a third
+profile so its read projection can be configured consistently. Only
+`view*` capabilities can be enabled for Public; every operational capability
+is forced off by the backend.
 
 Legacy `usuario` values normalize to `operator`; legacy `tecnico` values
 normalize to `technician`. Other legacy local values normalize conservatively
@@ -168,11 +171,13 @@ enforcement.
 The dashboard account access page is the global place to manage people and
 access across an owner's machines.
 
-Current transitional implementation:
+Current implementation:
 
-- `nfc/es/accesos.html` and `nfc/en/access.html` load
-  `static/js/accesos/index.js`.
-- The session user menu links to `Accesos` / `Access` with a key icon.
+- The dashboard exposes access management through `#/usuarios` and `#/users`.
+  This dashboard-native view uses expandable person cards,
+  dashboard search and add controls, context switching for owner/admin
+  machines, an aggregate `All users` tree node, and a separate role panel.
+- Machine configuration links open the dashboard `Usuarios` / `Users` view.
 - The card reads owner machines first and administrator-linked machines after
   them. Admin links are treated like the live dashboard listener: links marked
   `left` or `rejected` are ignored, and each linked machine is loaded
@@ -186,22 +191,24 @@ Current transitional implementation:
 - New users created by the owner are assigned to all machines in that owner
   context by default. Users saved with `accessScope: "all"` are inherited by future
   machines created from that owner's dashboard.
-- User, PIN, role, assignment, and role-capability changes are persisted. The
-  compatibility implementation mirrors credentials and assignments into
-  `machines.users[]` and `usernames`.
+- User, PIN, role, assignment, deletion, and role-capability changes are
+  persisted through authenticated callable functions. The compatibility
+  implementation mirrors credentials and assignments into `machines.users[]`
+  and `usernames` after verifying ownership or every accepted per-machine
+  administrator link in the requested context.
 - Owners can delete a global local user. The operation atomically removes the
   user from every owner machine in the current context and deletes the
   corresponding `usernames` registry document.
 - The machine configuration tab shows who has access and can assign an
   existing user or remove that machine assignment. Identity creation, PIN
-  changes, and stable role changes belong to the global Access page.
-- Accepted per-machine administrators can edit role capabilities and
-  assignments in their administered context, but global identity, PIN, and
-  stable-role changes remain owner-controlled so they cannot affect machines
-  outside their administration.
-- The permissions tab edits only `operator` and `technician`, grouped into
-  reading and operational changes. Public information is described separately
-  because it is not assigned to a user.
+  changes, and stable role changes belong to the global Users view.
+- Accepted per-machine administrators can create local identities inside an
+  administered owner context and edit role capabilities and assignments for
+  the machines visible in that context. They can also remove local identities
+  from that administered context regardless of who originally created them.
+  They cannot affect machines outside their accepted administration scope.
+- The permissions panel edits `operator`, `technician`, and the constrained
+  public profile. Public can only enable supported read capabilities.
 - This remains a compatibility UI over `machines.users[]`; it is not the final
   `operator_users` / `operator_assignments` model.
 
@@ -236,6 +243,8 @@ Work in stages:
 5. Enforce operational capabilities in backend callables. Implemented for
    status, task definitions, completion, notes, and task images.
 6. Add backend callables for normalized global local-user management.
+   Implemented for save/create, assignment changes, deletion, and role
+   capability policies.
 7. Introduce `operator_users` and `operator_assignments`.
 8. Migrate current `machines.users[]` users into the new collections.
 9. Keep compatibility reads until old clients are no longer relevant.

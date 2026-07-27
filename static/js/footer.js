@@ -23,6 +23,8 @@
   const tagsHref = isPublicNfcPage
     ? `${basePrefix}/${lang}/tags.html`
     : `${basePrefix}/${lang}/index.html#/tags`;
+  const suggestionsHash = lang === "en" ? "#/suggestions" : "#/sugerencias";
+  const suggestionsHref = `${basePrefix}/${lang}/index.html${suggestionsHash}`;
   const legalFooter = document.getElementById("legal-footer");
   if (!legalFooter) return;
 
@@ -107,6 +109,20 @@
 
   const meta = document.createElement("div");
   meta.className = "footer-disclosure-meta";
+  const suggestionsLink = document.createElement("a");
+  suggestionsLink.className = "footer-suggestions-link";
+  suggestionsLink.href = suggestionsHref;
+  suggestionsLink.hidden = true;
+  suggestionsLink.setAttribute(
+    "aria-label",
+    lang === "en" ? "Open suggestions inbox" : "Abrir buz\u00f3n de sugerencias"
+  );
+  suggestionsLink.innerHTML = `
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M13 2 4 14h7l-1 8 10-13h-7V2Z"></path>
+    </svg>
+    <span>${lang === "en" ? "Suggestions" : "Sugerencias"}</span>
+  `;
   const creditsTitle = document.createElement("div");
   creditsTitle.className = "footer-disclosure-credits-title";
   creditsTitle.textContent = lang === "en"
@@ -135,6 +151,7 @@
     ? "Developed using tools from OpenAI Codex. Authentication, data, and storage on Google Firebase; code and publishing with GitHub."
     : "Desarrollado con herramientas de OpenAI Codex. Autenticaci\u00f3n, datos y almacenamiento sobre Firebase de Google; c\u00f3digo y publicaci\u00f3n con GitHub.";
 
+  nav.appendChild(suggestionsLink);
   meta.appendChild(creditsTitle);
   meta.appendChild(technologyLinks);
   meta.appendChild(technologyNote);
@@ -225,6 +242,48 @@
     }, reducedMotion ? 0 : 120);
     if (restoreFocus) toggle.focus();
   };
+
+  const setSuggestionsVisibility = (visible) => {
+    suggestionsLink.hidden = !visible;
+  };
+  window.addEventListener("unatomo:auth", (event) => {
+    setSuggestionsVisibility(event.detail?.state === "user");
+  });
+  setSuggestionsVisibility(document.documentElement.dataset.auth === "user");
+  Promise.all([
+    import("/static/js/firebase/firebaseApp.js"),
+    import("https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js")
+  ])
+    .then(([firebaseApp, firebaseAuth]) => {
+      firebaseAuth.onAuthStateChanged(firebaseApp.auth, async (user) => {
+        if (!user) {
+          setSuggestionsVisibility(false);
+          return;
+        }
+        try {
+          const registration = await firebaseApp.getUserRegistrationState(user);
+          setSuggestionsVisibility(registration.allowed === true);
+        } catch {
+          setSuggestionsVisibility(false);
+        }
+      });
+    })
+    .catch(() => setSuggestionsVisibility(false));
+
+  suggestionsLink.addEventListener("click", (event) => {
+    try {
+      window.sessionStorage.setItem("unatomo:suggestions-scroll-top", "true");
+    } catch {}
+    const targetUrl = new URL(suggestionsLink.href, window.location.href);
+    const isCurrentSuggestionsView =
+      targetUrl.pathname === window.location.pathname &&
+      targetUrl.hash === window.location.hash;
+    if (isCurrentSuggestionsView) {
+      event.preventDefault();
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+      closePanel();
+    }
+  });
 
   toggle.addEventListener("click", (event) => {
     event.preventDefault();

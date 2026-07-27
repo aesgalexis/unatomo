@@ -158,6 +158,8 @@ The main dashboard page has internal hash views:
 
 - `#/dashboard`: the normal machine-card and group view.
 - `#/registro`: the global registry view.
+- `#/usuarios` (Spanish) / `#/users` (English): dashboard-native local-user
+  cards, machine assignments, and editable role capabilities.
 - `#/sugerencias`: the collaborator suggestions view.
 - `#/todo`: the To Do view for `superadmin` and users enabled as
   collaborators with `users/{uid}.suggestionsCollaborator`.
@@ -172,6 +174,11 @@ Files:
 - `static/js/dashboard/views/registry/globalRegistryModel.js`: flattens logs from all machines visible to the current account, sorts them newest-first, and groups task notes under their task-created event.
 - `static/js/dashboard/views/suggestions/`: renders and submits dashboard suggestions through callable functions.
 - `static/js/dashboard/views/todo/`: renders and manages private To Do lists through separate callable functions.
+- `static/js/dashboard/views/users/`: builds owner/admin access contexts and
+  renders the dashboard-native user cards without replacing the standalone
+  access page. At desktop tree width it uses the dashboard sidebar shell for
+  an independent account/roles tree; narrower layouts retain the account
+  selector and Roles link.
 - `static/js/dashboard/views/registry/globalRegistryView.js`: renders the global registry and `Cargar más` / `Load more` pagination.
 
 Global registry scope:

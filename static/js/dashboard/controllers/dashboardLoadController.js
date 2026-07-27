@@ -47,6 +47,10 @@ export const createDashboardLoadController = (dependencies) => {
     state.todoShowCompleted = false;
     state.todoCollaborators = [];
     state.todoCollaboratorsReady = false;
+    state.usersContextOwnerUid = "";
+    state.expandedUsers = [];
+    state.usersCreateOpen = false;
+    state.usersPolicyOpen = false;
     state.expandedById = [];
     state.selectedTabById = {};
     state.configSubtabById = {};

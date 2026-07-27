@@ -10,10 +10,26 @@ export const isPublicSectionHash = () =>
 
 export const getDashboardInternalView = () => {
   const section = getPublicSectionFromHash();
-  return ["registro", "galeria", "sugerencias", "todo"].includes(section)
-    ? section
+  const normalizedSection =
+    section === "users"
+      ? "usuarios"
+      : section === "suggestions"
+        ? "sugerencias"
+        : section;
+  return ["registro", "galeria", "usuarios", "sugerencias", "todo"].includes(normalizedSection)
+    ? normalizedSection
     : "dashboard";
 };
 
 export const isMobileViewport = () =>
   !!(window.matchMedia && window.matchMedia("(max-width: 768px)").matches);
+
+export const scrollSuggestionsViewToTop = () => {
+  try {
+    window.sessionStorage.removeItem("unatomo:suggestions-scroll-top");
+  } catch {}
+  window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  window.requestAnimationFrame(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  });
+};

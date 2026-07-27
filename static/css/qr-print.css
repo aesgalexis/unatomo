@@ -2,7 +2,7 @@
 
 html,
 body.page {
-  scrollbar-gutter: auto;
+  scrollbar-gutter: stable;
 }
 
 body.page {

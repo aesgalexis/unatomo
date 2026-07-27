@@ -121,13 +121,36 @@ const sanitizePublicMachine = (
   access: FirebaseFirestore.DocumentData,
   machine: FirebaseFirestore.DocumentData,
 ) => {
-  const plate = sanitizeDocumentMetadata(machine.documents?.plate);
+  const permissions = getAccessRolePermissions(
+    "public",
+    machine.accessRolePermissions,
+  );
+  const documents = permissions.viewDocuments ?
+    sanitizeDocuments(machine.documents) :
+    permissions.viewPlate && machine.documents?.plate ?
+      {plate: sanitizeDocumentMetadata(machine.documents.plate)} :
+      {};
   return {
     id: tagId,
     title: (access.title || machine.title || "").toString(),
-    brand: (access.brand || machine.brand || "").toString(),
-    model: (access.model || machine.model || "").toString(),
-    documents: plate ? {plate} : {},
+    brand: permissions.viewMachine ?
+      (access.brand || machine.brand || "").toString() :
+      "",
+    model: permissions.viewMachine ?
+      (access.model || machine.model || "").toString() :
+      "",
+    serial: permissions.viewMachine ? (access.serial || "").toString() : "",
+    year: permissions.viewMachine ? access.year ?? null : null,
+    location: permissions.viewMachine ? (access.location || "").toString() : "",
+    status: (access.status || "operativa").toString(),
+    documents,
+    logs: permissions.viewHistory && Array.isArray(access.logs) ?
+      access.logs :
+      [],
+    tasks: permissions.viewTasks && Array.isArray(access.tasks) ?
+      access.tasks :
+      [],
+    permissions,
     publicAccess: true,
   };
 };

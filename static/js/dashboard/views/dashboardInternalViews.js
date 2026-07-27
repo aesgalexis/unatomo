@@ -14,6 +14,7 @@ import {
   TODO_PAGE_SIZE,
   renderTodoView
 } from "./todo/todoView.js";
+import { renderUsersView } from "./users/usersView.js";
 
 export {
   GLOBAL_REGISTRY_PAGE_SIZE,
@@ -36,6 +37,10 @@ export const renderGalleryDashboardView = (container, machines = [], options = {
   renderGalleryView(container, machines, {
     query: options.query || ""
   });
+};
+
+export const renderUsersDashboardView = (container, machines = [], options = {}) => {
+  renderUsersView(container, machines, options);
 };
 
 export const renderTodoDashboardView = (container, options = {}) => {

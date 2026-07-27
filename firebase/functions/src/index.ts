@@ -57,6 +57,11 @@ export {
 } from "./machines/tags";
 export {deleteMachine} from "./machines/deleteMachine";
 export {
+  deleteGlobalLocalUserAccess,
+  saveGlobalLocalUserAccess,
+  saveMachineAccessRolePermissionsAccess,
+} from "./machines/localUsers";
+export {
   cleanupMachineAccessSessions,
   getMachineAccessPublic,
   updateMachineAccessOperational,

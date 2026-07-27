@@ -13,8 +13,7 @@ export const createDashboardSuggestion = onCall(async (request) => {
   const userRef = db.collection("users").doc(auth.uid);
   const userSnap = await userRef.get();
   const userData = userSnap.data() || {};
-  const canSuggest =
-    isControlPanelAuth(auth) || userData.suggestionsCollaborator === true;
+  const canSuggest = isControlPanelAuth(auth) || userSnap.exists;
   if (!canSuggest) {
     throw new HttpsError("permission-denied", "suggestions-disabled");
   }
@@ -126,10 +125,8 @@ export const listDashboardSuggestions = onCall(async (request) => {
   if (!auth) throw new HttpsError("unauthenticated", "auth-required");
 
   const userSnap = await db.collection("users").doc(auth.uid).get();
-  const userData = userSnap.data() || {};
   const isSuperadmin = isControlPanelAuth(auth);
-  const canSuggest =
-    isSuperadmin || userData.suggestionsCollaborator === true;
+  const canSuggest = isSuperadmin || userSnap.exists;
   if (!canSuggest) {
     return {
       ok: true,
@@ -210,4 +207,3 @@ export const markDashboardSuggestionsSeen = onCall(async (request) => {
   );
   return {ok: true, suggestionsSeenAt: seenAt};
 });
-

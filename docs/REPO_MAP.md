@@ -27,7 +27,6 @@ feature-specific docs.
 - `static/js/firebase/`: Firebase client initialization.
 - `static/js/qr-print/`: QR print page logic.
 - `static/js/registro/`: registration, login, reset, and session menu logic.
-- `static/js/accesos/`: global local-user access prototype page.
 - `static/js/site/`: locale and site-level preferences.
 - `static/css/dashboard.css`: dashboard stylesheet manifest.
 - `static/css/dashboard/`: split dashboard styles by feature.

@@ -33,6 +33,18 @@ const saveDashboardGroupLayoutCallable = httpsCallable(
   "saveDashboardGroupLayout"
 );
 const deleteMachineCallable = httpsCallable(functions, "deleteMachine");
+const saveGlobalLocalUserAccessCallable = httpsCallable(
+  functions,
+  "saveGlobalLocalUserAccess"
+);
+const deleteGlobalLocalUserAccessCallable = httpsCallable(
+  functions,
+  "deleteGlobalLocalUserAccess"
+);
+const saveMachineAccessRolePermissionsAccessCallable = httpsCallable(
+  functions,
+  "saveMachineAccessRolePermissionsAccess"
+);
 
 export const fetchMachines = async (uid) => {
   const q = query(machinesCollection, where("ownerUid", "==", uid));
@@ -310,69 +322,21 @@ export const saveGlobalLocalUser = async ({
   assignedMachineIds,
   user
 }) => {
-  const normalized = (user?.username || "").trim().replace(/\s+/g, " ").toLowerCase();
-  if (!ownerUid || !actorUid || !normalized || !user?.saltBase64 || !user?.passwordHashBase64) {
+  if (!ownerUid || !actorUid || !user?.username) {
     throw new Error("invalid-global-user");
   }
-  if (actorUid === ownerUid && user.isNew) {
-    const existingRegistry = await getDoc(usernamesDoc(ownerUid, normalized));
-    if (existingRegistry.exists()) throw new Error("duplicate-user");
-  }
-  const visibleMachines = (machines || []).filter(
+  const machineIds = (machines || []).filter(
     (machine) => machine?.id && (machine.ownerUid || machine.tenantId) === ownerUid
-  );
-  if (!visibleMachines.length || visibleMachines.length > 450) {
+  ).map((machine) => machine.id);
+  if (!machineIds.length || machineIds.length > 450) {
     throw new Error("invalid-machine-scope");
   }
-  const assigned = new Set(assignedMachineIds || []);
-  const accessScope = assigned.size === visibleMachines.length ? "all" : "selected";
-  const batch = writeBatch(db);
-  const timestamp = serverTimestamp();
-  visibleMachines.forEach((machine) => {
-    const currentUsers = Array.isArray(machine.users) ? machine.users : [];
-    const withoutUser = currentUsers.filter(
-      (item) => (item?.username || "").trim().replace(/\s+/g, " ").toLowerCase() !== normalized
-    );
-    const users = assigned.has(machine.id)
-      ? [...withoutUser, {
-          id: user.id,
-          username: user.username,
-          role: user.role,
-          createdAt: user.createdAt,
-          saltBase64: user.saltBase64,
-          passwordHashBase64: user.passwordHashBase64,
-          accessScope
-        }]
-      : withoutUser;
-    batch.set(
-      doc(db, "machines", machine.id),
-      { users, updatedAt: timestamp, updatedBy: actorUid },
-      { merge: true }
-    );
+  await saveGlobalLocalUserAccessCallable({
+    ownerUid,
+    machineIds,
+    assignedMachineIds: assignedMachineIds || [],
+    user
   });
-  const referenceMachine = visibleMachines.find((machine) => assigned.has(machine.id)) ||
-    visibleMachines[0];
-  if (actorUid === ownerUid) {
-    batch.set(
-      usernamesDoc(ownerUid, normalized),
-      {
-        username: user.username,
-        saltBase64: user.saltBase64,
-        passwordHashBase64: user.passwordHashBase64,
-        role: user.role,
-        ownerUid,
-        machineId: referenceMachine.id,
-        scope: accessScope,
-        machineIds: visibleMachines
-          .filter((machine) => assigned.has(machine.id))
-          .map((machine) => machine.id),
-        updatedAt: timestamp,
-        updatedBy: actorUid
-      },
-      { merge: true }
-    );
-  }
-  await batch.commit();
 };
 
 export const saveMachineAccessRolePermissions = async (
@@ -384,16 +348,12 @@ export const saveMachineAccessRolePermissions = async (
   if (!actorUid || !targets.length || targets.length > 450) {
     throw new Error("invalid-role-policy-scope");
   }
-  const batch = writeBatch(db);
-  const timestamp = serverTimestamp();
-  targets.forEach((machine) => {
-    batch.set(
-      doc(db, "machines", machine.id),
-      { accessRolePermissions, updatedAt: timestamp, updatedBy: actorUid },
-      { merge: true }
-    );
+  const ownerUid = targets[0].ownerUid || targets[0].tenantId || "";
+  await saveMachineAccessRolePermissionsAccessCallable({
+    ownerUid,
+    machineIds: targets.map((machine) => machine.id),
+    accessRolePermissions
   });
-  await batch.commit();
 };
 
 export const deleteGlobalLocalUser = async ({
@@ -403,28 +363,18 @@ export const deleteGlobalLocalUser = async ({
   username
 }) => {
   const normalized = (username || "").trim().replace(/\s+/g, " ").toLowerCase();
-  if (!ownerUid || actorUid !== ownerUid || !normalized) {
+  if (!ownerUid || !actorUid || !normalized) {
     throw new Error("global-user-delete-not-allowed");
   }
-  const ownerMachines = (machines || []).filter(
+  const machineIds = (machines || []).filter(
     (machine) => machine?.id && (machine.ownerUid || machine.tenantId) === ownerUid
-  );
-  if (!ownerMachines.length || ownerMachines.length > 450) {
+  ).map((machine) => machine.id);
+  if (!machineIds.length || machineIds.length > 450) {
     throw new Error("invalid-machine-scope");
   }
-  const batch = writeBatch(db);
-  const timestamp = serverTimestamp();
-  ownerMachines.forEach((machine) => {
-    const users = (Array.isArray(machine.users) ? machine.users : []).filter(
-      (item) =>
-        (item?.username || "").trim().replace(/\s+/g, " ").toLowerCase() !== normalized
-    );
-    batch.set(
-      doc(db, "machines", machine.id),
-      { users, updatedAt: timestamp, updatedBy: actorUid },
-      { merge: true }
-    );
+  await deleteGlobalLocalUserAccessCallable({
+    ownerUid,
+    machineIds,
+    username
   });
-  batch.delete(usernamesDoc(ownerUid, normalized));
-  await batch.commit();
 };

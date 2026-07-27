@@ -224,6 +224,15 @@ export const createDashboardOrderingController = ({
   };
 
   addBtn.addEventListener("click", () => {
+    if (state.activeView === "usuarios") {
+      state.usersPolicyOpen = false;
+      if (state.usersContextOwnerUid === "__all__") {
+        state.usersContextOwnerUid = state.uid || "";
+      }
+      state.usersCreateOpen = !state.usersCreateOpen;
+      renderCards({ preserveScroll: true });
+      return;
+    }
     const order = computePrevOrder();
     const machine = createDraftMachine(state.draftMachines.length + 1, order);
     const ownerMachines = state.draftMachines.filter(

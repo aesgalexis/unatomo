@@ -75,11 +75,7 @@ import { calculateStorageUsage, STORAGE_LIMIT_BYTES } from "/static/js/configura
 import { getAppBasePrefix, getCurrentLang, setSavedLang } from "/static/js/site/locale.js";
 import { t } from "./i18n.js";
 import { createDashboardState } from "./runtime/dashboardState.js";
-import {
-  getDashboardInternalView,
-  isMobileViewport,
-  isPublicSectionHash
-} from "./runtime/dashboardNavigation.js";
+import { getDashboardInternalView, isMobileViewport, isPublicSectionHash, scrollSuggestionsViewToTop } from "./runtime/dashboardNavigation.js";
 import { compareMachinesBySortMode, normalizeMachineStatus as normalizeStatus, sortFlatMachines } from "./runtime/dashboardSorting.js";
 import { loadOrderCache, saveOrderCache } from "./runtime/orderCache.js";
 import { createDashboardTooltips } from "./runtime/dashboardTooltips.js";
@@ -131,6 +127,7 @@ if (mount) {
     registryPageSize: GLOBAL_REGISTRY_PAGE_SIZE,
     suggestionsPageSize: SUGGESTIONS_PAGE_SIZE
   });
+  if (state.activeView === "sugerencias") scrollSuggestionsViewToTop();
 
   const cardRefs = new Map();
   const locallyVisibleEmptyGroupIds = new Set();
@@ -226,19 +223,19 @@ if (mount) {
     dashboardLink,
     registryLink,
     registryBadge,
-    galleryLink,
+    galleryLink, usersLink,
     suggestionsLink,
     suggestionsBadge,
     todoLink,
     todoBadge
   } = createDashboardSectionNav({
     ariaLabel: t("dashboard.sectionNavAria", "Secciones"),
-    qrPrintHref,
+    qrPrintHref, usersHref: lang === "en" ? "#/users" : "#/usuarios",
     labels: {
       dashboard: t("dashboard.navDashboard", "Dashboard"),
       registry: t("dashboard.navRegistry", "Registro"),
       qrPrint: t("dashboard.navQrPrint", "Impresión QR"),
-      gallery: t("dashboard.navGallery", "Galería"),
+      gallery: t("dashboard.navGallery", "Galería"), users: t("dashboard.navUsers", "Usuarios"),
       suggestions: t("dashboard.navSuggestions", "Sugerencias"),
       todo: t("dashboard.navTodo", "To-do")
     },
@@ -417,7 +414,7 @@ if (mount) {
     STORAGE_LIMIT_BYTES,
     suggestionsLink,
     t,
-    todoLink,
+    todoLink, usersLink,
     viewMenu
   });
   const {
@@ -628,7 +625,7 @@ if (mount) {
     loadSuggestions,
     loadTodos,
     notifyTopbar,
-    setInlineStatus: setDashboardInlineStatus
+    setInlineStatus: setDashboardInlineStatus, mount, groupTree, isLargeDashboardViewport: () => largeDashboardQuery.matches
   });
 
   const {
@@ -830,6 +827,7 @@ if (mount) {
     if (nextView === "sugerencias") {
       state.suggestionsVisibleCount = SUGGESTIONS_PAGE_SIZE;
       loadSuggestions({ preserveScroll: false });
+      scrollSuggestionsViewToTop();
     }
     if (nextView === "todo") {
       state.todoPage = 1;
@@ -839,6 +837,7 @@ if (mount) {
       }
     }
     renderCards({ preserveScroll: false });
+    if (nextView === "sugerencias") scrollSuggestionsViewToTop();
   });
 
   largeDashboardQuery.addEventListener("change", () => {
@@ -865,7 +864,7 @@ if (mount) {
         window.location.href = `${appBasePrefix || ""}/?setup=1`;
         return;
       }
-      state.canSuggest = registration.profile?.suggestionsCollaborator === true;
+      state.canSuggest = true;
       state.canTodo = registration.profile?.suggestionsCollaborator === true;
       state.isSuperadmin = await isControlPanelUser(user);
     } catch {
@@ -884,6 +883,7 @@ if (mount) {
     activeDashboardUid = user.uid;
     const sessionVersion = ++dashboardSessionVersion;
     dashboardInitPromise = initDashboard(user.uid, user, sessionVersion)
+      .then(() => dashboardSessionVersion === sessionVersion && state.activeView === "sugerencias" && scrollSuggestionsViewToTop())
       .catch(() => {
         if (dashboardSessionVersion !== sessionVersion) return;
         markDashboardLoadFailure(state);

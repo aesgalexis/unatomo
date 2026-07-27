@@ -6,7 +6,8 @@ import {
   renderRegistryDashboardView,
   renderGalleryDashboardView,
   renderSuggestionsDashboardView,
-  renderTodoDashboardView
+  renderTodoDashboardView,
+  renderUsersDashboardView
 } from "../views/dashboardInternalViews.js";
 import {
   createDashboardSuggestion,
@@ -18,6 +19,23 @@ import {
   deleteDashboardTodo,
   updateDashboardTodo
 } from "../views/todo/todoRepo.js";
+import {
+  deleteGlobalLocalUser,
+  saveGlobalLocalUser,
+  saveMachineAccessRolePermissions
+} from "../firestoreRepo.js";
+import {
+  generateSaltBase64,
+  hashPassword
+} from "/static/js/utils/crypto.js";
+import {
+  buildUserAccessContexts,
+  collectAccessUsers,
+  removeUserFromMachines,
+  USERS_ALL_CONTEXT_ID,
+  updateUsersInMachines
+} from "../views/users/usersModel.js";
+import { renderUsersTree } from "../views/users/usersTree.js";
 
 export const createDashboardInternalViewController = ({
   state,
@@ -33,8 +51,25 @@ export const createDashboardInternalViewController = ({
   loadSuggestions,
   loadTodos,
   notifyTopbar,
-  setInlineStatus
+  setInlineStatus,
+  mount,
+  groupTree,
+  isLargeDashboardViewport
 }) => {
+  const getUsersContext = (ownerUid = state.usersContextOwnerUid) => {
+    const contexts = buildUserAccessContexts(state.draftMachines, state.uid);
+    const context = contexts.find((item) => item.ownerUid === ownerUid) ||
+      contexts[0] ||
+      null;
+    if (
+      context &&
+      state.usersContextOwnerUid !== USERS_ALL_CONTEXT_ID &&
+      state.usersContextOwnerUid !== context.ownerUid
+    ) {
+      state.usersContextOwnerUid = context.ownerUid;
+    }
+    return context;
+  };
   const finish = () => {
     syncMachineAccessListeners(state.draftMachines);
     if (state.loading && state.ownerReady && state.adminReady) updateLoading();
@@ -64,6 +99,244 @@ export const createDashboardInternalViewController = ({
     prepare();
     renderGalleryDashboardView(list, machines, {
       query: state.searchQuery
+    });
+    return finish();
+  };
+  const renderUsers = (machines) => {
+    prepare();
+    const contexts = buildUserAccessContexts(machines, state.uid);
+    const useSideTree = !!isLargeDashboardViewport?.();
+    if (useSideTree) {
+      if (!state.usersContextOwnerUid) {
+        state.usersContextOwnerUid = USERS_ALL_CONTEXT_ID;
+      }
+      mount.classList.add("has-group-tree");
+      groupTree.hidden = false;
+      renderUsersTree(groupTree, {
+        contexts,
+        selectedOwnerUid: state.usersContextOwnerUid,
+        policyOpen: state.usersPolicyOpen,
+        isEn: document.documentElement.lang?.toLowerCase().startsWith("en"),
+        onSelectContext: (ownerUid) => {
+          state.usersContextOwnerUid = ownerUid;
+          state.usersPolicyOpen = false;
+          state.usersCreateOpen = false;
+          state.expandedUsers = [];
+          rerender({ preserveScroll: false });
+        },
+        onSelectRoles: () => {
+          if (state.usersContextOwnerUid === USERS_ALL_CONTEXT_ID) {
+            state.usersContextOwnerUid =
+              contexts.find((item) => item.isOwner)?.ownerUid ||
+              contexts[0]?.ownerUid ||
+              "";
+          }
+          state.usersPolicyOpen = true;
+          state.usersCreateOpen = false;
+          state.expandedUsers = [];
+          rerender({ preserveScroll: false });
+        }
+      });
+    }
+    renderUsersDashboardView(list, machines, {
+      currentUid: state.uid,
+      query: state.searchQuery,
+      contextOwnerUid: state.usersContextOwnerUid,
+      expandedUsers: state.expandedUsers,
+      createOpen: state.usersCreateOpen,
+      policyOpen: state.usersPolicyOpen,
+      showInlineNavigation: !useSideTree,
+      isEn: document.documentElement.lang?.toLowerCase().startsWith("en"),
+      onContextChange: (ownerUid) => {
+        state.usersContextOwnerUid = ownerUid;
+        state.usersCreateOpen = false;
+        state.expandedUsers = [];
+        rerender({ preserveScroll: true });
+      },
+      onToggleUser: (username) => {
+        state.expandedUsers = state.expandedUsers.includes(username)
+          ? []
+          : [username];
+        rerender({ preserveScroll: true });
+      },
+      onCloseCreate: () => {
+        state.usersCreateOpen = false;
+        rerender({ preserveScroll: true });
+      },
+      onCreate: async ({ username, pin, role }, button) => {
+        const context = getUsersContext();
+        if (!context) return;
+        const cleanUsername = (username || "").trim().replace(/\s+/g, " ");
+        if (!cleanUsername || !pin) return;
+        button.disabled = true;
+        setInlineStatus(t("dashboard.usersSaving", "Guardando..."));
+        try {
+          const normalizedUsername = cleanUsername.toLowerCase();
+          if (collectAccessUsers(context.machines).some(
+            (item) => item.normalized === normalizedUsername
+          )) {
+            throw new Error("duplicate-user");
+          }
+          const saltBase64 = generateSaltBase64();
+          const passwordHashBase64 = await hashPassword(pin, saltBase64);
+          const user = {
+            id: globalThis.crypto?.randomUUID?.() || `user-${Date.now()}`,
+            username: cleanUsername,
+            role,
+            createdAt: new Date().toISOString(),
+            saltBase64,
+            passwordHashBase64,
+            isNew: true
+          };
+          const machineIds = context.machines.map((machine) => machine.id);
+          await saveGlobalLocalUser({
+            ownerUid: context.ownerUid,
+            actorUid: state.uid,
+            machines: context.machines,
+            assignedMachineIds: machineIds,
+            user
+          });
+          state.draftMachines = updateUsersInMachines(
+            state.draftMachines,
+            context,
+            user,
+            machineIds
+          );
+          state.usersCreateOpen = false;
+          setInlineStatus(t("dashboard.usersCreated", "Usuario creado"), "ok");
+          rerender({ preserveScroll: true });
+        } catch (error) {
+          const duplicate = `${error?.message || ""}`.includes("duplicate-user");
+          setInlineStatus(
+            duplicate
+              ? t("dashboard.userExists", "El usuario ya existe")
+              : t("dashboard.usersSaveError", "No se pudo guardar el usuario"),
+            "error"
+          );
+          button.disabled = false;
+        }
+      },
+      onSaveUser: async (user, button) => {
+        const context = getUsersContext(user.contextOwnerUid);
+        if (!context || !user.assignedMachineIds?.length) {
+          notifyTopbar(t("dashboard.usersNeedMachine", "Selecciona al menos una máquina"));
+          return;
+        }
+        button.disabled = true;
+        setInlineStatus(t("dashboard.usersSaving", "Guardando..."));
+        try {
+          let saltBase64 = user.saltBase64;
+          let passwordHashBase64 = user.passwordHashBase64;
+          if (user.pin) {
+            if (!context.isOwner) throw new Error("pin-owner-only");
+            saltBase64 = generateSaltBase64();
+            passwordHashBase64 = await hashPassword(user.pin, saltBase64);
+          }
+          const savedUser = {
+            id: user.id,
+            username: user.username,
+            role: user.role,
+            createdAt: user.createdAt,
+            saltBase64,
+            passwordHashBase64
+          };
+          await saveGlobalLocalUser({
+            ownerUid: context.ownerUid,
+            actorUid: state.uid,
+            machines: context.machines,
+            assignedMachineIds: user.assignedMachineIds,
+            user: savedUser
+          });
+          state.draftMachines = updateUsersInMachines(
+            state.draftMachines,
+            context,
+            savedUser,
+            user.assignedMachineIds
+          );
+          setInlineStatus(t("dashboard.usersSaved", "Usuario actualizado"), "ok");
+          rerender({ preserveScroll: true });
+        } catch {
+          button.disabled = false;
+          setInlineStatus(t("dashboard.usersSaveError", "No se pudo guardar el usuario"), "error");
+        }
+      },
+      onDeleteUser: async (user, button) => {
+        const context = getUsersContext(user.contextOwnerUid);
+        if (!context) return;
+        const confirmed = window.confirm(
+          t(
+            "dashboard.usersDeleteConfirm",
+            (name) => `¿Eliminar a ${name} de todas las máquinas?`
+          )(user.username)
+        );
+        if (!confirmed) return;
+        button.disabled = true;
+        setInlineStatus(t("dashboard.usersDeleting", "Eliminando..."));
+        try {
+          await deleteGlobalLocalUser({
+            ownerUid: context.ownerUid,
+            actorUid: state.uid,
+            machines: context.machines,
+            username: user.username
+          });
+          state.draftMachines = removeUserFromMachines(
+            state.draftMachines,
+            context.ownerUid,
+            user.username
+          );
+          state.expandedUsers = state.expandedUsers.filter((item) => item !== user.cardKey);
+          setInlineStatus(t("dashboard.usersDeleted", "Usuario eliminado"), "ok");
+          rerender({ preserveScroll: true });
+        } catch (error) {
+          console.error("Unable to delete dashboard user", {
+            code: error?.code || "",
+            message: error?.message || "",
+            stage: error?.userDeleteStage || ""
+          });
+          button.disabled = false;
+          const code = (error?.code || "").toString().replace(/^firestore\//, "");
+          const stage = error?.userDeleteStage || "";
+          const detail = [stage, code].filter(Boolean).join(": ");
+          setInlineStatus(
+            detail
+              ? `${t("dashboard.usersDeleteError", "No se pudo eliminar")} (${detail})`
+              : t("dashboard.usersDeleteError", "No se pudo eliminar"),
+            "error"
+          );
+        }
+      },
+      onTogglePolicy: () => {
+        if (
+          !state.usersPolicyOpen &&
+          state.usersContextOwnerUid === USERS_ALL_CONTEXT_ID
+        ) {
+          state.usersContextOwnerUid =
+            contexts.find((item) => item.isOwner)?.ownerUid ||
+            contexts[0]?.ownerUid ||
+            "";
+        }
+        state.usersPolicyOpen = !state.usersPolicyOpen;
+        rerender({ preserveScroll: true });
+      },
+      onSavePolicy: async (permissions, button) => {
+        const context = getUsersContext();
+        if (!context) return;
+        button.disabled = true;
+        setInlineStatus(t("dashboard.usersSaving", "Guardando..."));
+        try {
+          await saveMachineAccessRolePermissions(state.uid, context.machines, permissions);
+          state.draftMachines = state.draftMachines.map((machine) =>
+            (machine.ownerUid || machine.tenantId) === context.ownerUid
+              ? { ...machine, accessRolePermissions: structuredClone(permissions) }
+              : machine
+          );
+          setInlineStatus(t("dashboard.usersPermissionsSaved", "Permisos actualizados"), "ok");
+          rerender({ preserveScroll: true });
+        } catch {
+          button.disabled = false;
+          setInlineStatus(t("dashboard.usersPermissionsError", "No se pudieron guardar los permisos"), "error");
+        }
+      }
     });
     return finish();
   };
@@ -235,6 +508,7 @@ export const createDashboardInternalViewController = ({
     }
     if (view === "registro") return renderRegistry(machines);
     if (view === "galeria") return renderGallery(machines);
+    if (view === "usuarios") return renderUsers(machines);
     if (view === "sugerencias") return renderSuggestions();
     if (view === "todo") return renderTodo();
     return false;

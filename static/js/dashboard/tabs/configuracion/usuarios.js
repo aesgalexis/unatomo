@@ -192,7 +192,7 @@ export const render = (container, machine, hooks, options = {}) => {
   userLine.appendChild(userSelect);
   const manageAccessLink = document.createElement("a");
   manageAccessLink.className = "mc-user-add-new";
-  manageAccessLink.href = t("config.accessPath", "/nfc/es/accesos.html");
+  manageAccessLink.href = t("config.accessPath", "/nfc/es/index.html#/usuarios");
   manageAccessLink.textContent = t("config.manageAccess", "Gestionar accesos");
   manageAccessLink.addEventListener("click", (event) => event.stopPropagation());
   userLine.appendChild(manageAccessLink);

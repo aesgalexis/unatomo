@@ -19,9 +19,10 @@ export const ACCESS_CAPABILITIES = [
 ] as const;
 export type AccessCapability = typeof ACCESS_CAPABILITIES[number];
 export type AccessPermissions = Record<AccessCapability, boolean>;
+type AccessPermissionRole = LocalAccessRole | "public";
 
 export const DEFAULT_ACCESS_ROLE_PERMISSIONS: Record<
-  LocalAccessRole,
+  AccessPermissionRole,
   AccessPermissions
 > = {
   operator: {
@@ -56,6 +57,22 @@ export const DEFAULT_ACCESS_ROLE_PERMISSIONS: Record<
     uploadDocuments: false,
     deleteDocuments: false,
   },
+  public: {
+    viewMachine: true,
+    viewPlate: true,
+    viewTasks: false,
+    viewHistory: false,
+    viewDocuments: false,
+    createTasks: false,
+    editTasks: false,
+    deleteTasks: false,
+    completeTasks: false,
+    addTaskNotes: false,
+    changeStatus: false,
+    uploadImages: false,
+    uploadDocuments: false,
+    deleteDocuments: false,
+  },
 };
 
 export const normalizeAccessRole = (value: unknown): LocalAccessRole => {
@@ -69,7 +86,10 @@ export const getAccessRolePermissions = (
   roleValue: unknown,
   configured: unknown,
 ): AccessPermissions => {
-  const role = normalizeAccessRole(roleValue);
+  const role: AccessPermissionRole =
+    (roleValue || "").toString().trim().toLowerCase() === "public" ?
+      "public" :
+      normalizeAccessRole(roleValue);
   const defaults = DEFAULT_ACCESS_ROLE_PERMISSIONS[role];
   const allConfigured = configured && typeof configured === "object" ?
     configured as Record<string, unknown> :

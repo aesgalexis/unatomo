@@ -18,6 +18,7 @@ export const createDashboardTopbarController = (dependencies) => {
     suggestionsLink,
     t,
     todoLink,
+    usersLink,
     viewMenu,
   } = dependencies;
   const syncDashboardViewChrome = () => {
@@ -26,41 +27,55 @@ export const createDashboardTopbarController = (dependencies) => {
     const isGallery = state.activeView === "galeria";
     const isSuggestions = state.activeView === "sugerencias";
     const isTodo = state.activeView === "todo";
-    dashboardLink.classList.toggle("is-active", !isRegistry && !isGallery && !isSuggestions && !isTodo);
+    const isUsers = state.activeView === "usuarios";
+    dashboardLink.classList.toggle("is-active", !isRegistry && !isGallery && !isSuggestions && !isTodo && !isUsers);
     registryLink.classList.toggle("is-active", isRegistry);
     galleryLink.classList.toggle("is-active", isGallery);
     suggestionsLink.classList.toggle("is-active", isSuggestions);
     todoLink.classList.toggle("is-active", isTodo);
+    usersLink.classList.toggle("is-active", isUsers);
     if (isRegistry) {
       dashboardLink.removeAttribute("aria-current");
       registryLink.setAttribute("aria-current", "page");
       galleryLink.removeAttribute("aria-current");
       suggestionsLink.removeAttribute("aria-current");
       todoLink.removeAttribute("aria-current");
+      usersLink.removeAttribute("aria-current");
     } else if (isGallery) {
       dashboardLink.removeAttribute("aria-current");
       registryLink.removeAttribute("aria-current");
       galleryLink.setAttribute("aria-current", "page");
       suggestionsLink.removeAttribute("aria-current");
       todoLink.removeAttribute("aria-current");
+      usersLink.removeAttribute("aria-current");
     } else if (isSuggestions) {
       dashboardLink.removeAttribute("aria-current");
       registryLink.removeAttribute("aria-current");
       galleryLink.removeAttribute("aria-current");
       suggestionsLink.setAttribute("aria-current", "page");
       todoLink.removeAttribute("aria-current");
+      usersLink.removeAttribute("aria-current");
     } else if (isTodo) {
       dashboardLink.removeAttribute("aria-current");
       registryLink.removeAttribute("aria-current");
       galleryLink.removeAttribute("aria-current");
       suggestionsLink.removeAttribute("aria-current");
       todoLink.setAttribute("aria-current", "page");
+      usersLink.removeAttribute("aria-current");
+    } else if (isUsers) {
+      dashboardLink.removeAttribute("aria-current");
+      registryLink.removeAttribute("aria-current");
+      galleryLink.removeAttribute("aria-current");
+      suggestionsLink.removeAttribute("aria-current");
+      todoLink.removeAttribute("aria-current");
+      usersLink.setAttribute("aria-current", "page");
     } else {
       dashboardLink.setAttribute("aria-current", "page");
       registryLink.removeAttribute("aria-current");
       galleryLink.removeAttribute("aria-current");
       suggestionsLink.removeAttribute("aria-current");
       todoLink.removeAttribute("aria-current");
+      usersLink.removeAttribute("aria-current");
     }
     addBar.classList.toggle("is-registry-view", isRegistry || isGallery || isSuggestions || isTodo);
     searchInput.placeholder = isRegistry
@@ -71,15 +86,24 @@ export const createDashboardTopbarController = (dependencies) => {
           ? t("dashboard.suggestionsSearchPlaceholder", "Buscar sugerencias...")
           : isTodo
             ? t("dashboard.todoSearchPlaceholder", "Buscar pendientes...")
+            : isUsers
+              ? t("dashboard.usersSearchPlaceholder", "Buscar usuarios...")
             : t("dashboard.searchPlaceholder", "Buscar por nombre o ubicaci\u00f3n...");
     const primaryControlsDisabled = state.loading || isRegistry || isGallery || isSuggestions || isTodo;
+    const viewMenuDisabled = primaryControlsDisabled || isUsers;
     const searchDisabled = state.loading;
     addBtn.disabled = primaryControlsDisabled;
     searchInput.disabled = searchDisabled;
-    viewMenu.button.disabled = primaryControlsDisabled;
+    viewMenu.button.disabled = viewMenuDisabled;
     addBtn.setAttribute("aria-disabled", primaryControlsDisabled ? "true" : "false");
     searchInput.setAttribute("aria-disabled", searchDisabled ? "true" : "false");
-    viewMenu.button.setAttribute("aria-disabled", primaryControlsDisabled ? "true" : "false");
+    viewMenu.button.setAttribute("aria-disabled", viewMenuDisabled ? "true" : "false");
+    addBtn.setAttribute(
+      "aria-label",
+      isUsers
+        ? t("dashboard.usersAddAria", "Añadir usuario")
+        : t("dashboard.addAria", "Añadir")
+    );
   };
 
   const renderTopbarNotifications = () => {

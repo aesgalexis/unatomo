@@ -52,6 +52,22 @@ export const DEFAULT_ACCESS_ROLE_PERMISSIONS = Object.freeze({
     uploadImages: false,
     uploadDocuments: false,
     deleteDocuments: false
+  }),
+  public: Object.freeze({
+    viewMachine: true,
+    viewPlate: true,
+    viewTasks: false,
+    viewHistory: false,
+    viewDocuments: false,
+    createTasks: false,
+    editTasks: false,
+    deleteTasks: false,
+    completeTasks: false,
+    addTaskNotes: false,
+    changeStatus: false,
+    uploadImages: false,
+    uploadDocuments: false,
+    deleteDocuments: false
   })
 });
 
@@ -64,7 +80,7 @@ export const normalizeAccessRole = (value) => {
 };
 
 export const getAccessRolePermissions = (role, configured = {}) => {
-  const normalizedRole = normalizeAccessRole(role);
+  const normalizedRole = role === "public" ? "public" : normalizeAccessRole(role);
   const defaults = DEFAULT_ACCESS_ROLE_PERMISSIONS[normalizedRole];
   const roleConfig = configured?.[normalizedRole] || {};
   return Object.fromEntries(
@@ -77,7 +93,7 @@ export const getAccessRolePermissions = (role, configured = {}) => {
 
 export const normalizeAccessRolePermissions = (configured = {}) =>
   Object.fromEntries(
-    Object.values(ACCESS_ROLES).map((role) => [
+    [...Object.values(ACCESS_ROLES), "public"].map((role) => [
       role,
       getAccessRolePermissions(role, configured)
     ])

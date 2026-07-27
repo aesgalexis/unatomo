@@ -22,6 +22,12 @@ const TODO_ICON = `
   </svg>
 `;
 
+const USERS_ICON = `
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm6.5 1a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7ZM2 20a7 7 0 0 1 14 0v1H2v-1Zm13.2 1H22v-1a6 6 0 0 0-7.4-5.8A8.9 8.9 0 0 1 17 20v1h-1.8Z"></path>
+  </svg>
+`;
+
 const createIconLink = ({
   href,
   label,
@@ -47,6 +53,7 @@ export const createDashboardSectionNav = ({
   registryHref = "#/registro",
   qrPrintHref = "",
   galleryHref = "#/galeria",
+  usersHref = "#/usuarios",
   suggestionsHref = "#/sugerencias",
   todoHref = "#/todo",
   labels = {},
@@ -101,6 +108,13 @@ export const createDashboardSectionNav = ({
     iconClass: "dashboard-section-icon-gallery"
   });
 
+  const users = createIconLink({
+    href: usersHref,
+    label: labels.users || "Usuarios",
+    icon: USERS_ICON,
+    iconClass: "dashboard-section-icon-users"
+  });
+
   const todo = createIconLink({
     href: todoHref,
     label: labels.todo || "To-do",
@@ -119,6 +133,7 @@ export const createDashboardSectionNav = ({
     registro: registryLink,
     qrPrint: qr.link,
     galeria: gallery.link,
+    usuarios: users.link,
     sugerencias: suggestions.link,
     todo: todo.link
   };
@@ -131,13 +146,13 @@ export const createDashboardSectionNav = ({
 
   sectionNav.appendChild(dashboardLink);
   sectionNav.appendChild(registryLink);
+  sectionNav.appendChild(users.link);
   sectionNav.appendChild(qr.link);
   sectionNav.appendChild(gallery.link);
   sectionNav.appendChild(todo.link);
-  sectionNav.appendChild(suggestions.link);
 
   if (attachTooltip) {
-    [qr.link, gallery.link, todo.link, suggestions.link].forEach((link) => {
+    [users.link, qr.link, gallery.link, todo.link].forEach((link) => {
       attachTooltip(link, { placement: "bottom" });
     });
   }
@@ -149,6 +164,7 @@ export const createDashboardSectionNav = ({
     registryBadge,
     qrPrintLink: qr.link,
     galleryLink: gallery.link,
+    usersLink: users.link,
     suggestionsLink: suggestions.link,
     suggestionsBadge,
     todoLink: todo.link,
