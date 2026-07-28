@@ -5,6 +5,11 @@ This repository is the active `unatomo` project. User-facing UI must stay biling
 ## Fast Orientation
 
 - Start with `README.md` and `docs/REPO_MAP.md` for the current project map.
+- Use `docs/SUBAGENTS.md` to decide whether and how to delegate work. For every
+  non-trivial task, assess whether a bounded subagent would improve coverage,
+  independent judgment, context hygiene, or verification quality. Quality and
+  coherent token use matter more than speed; delegate when beneficial, not by
+  quota.
 - Use `docs/PROJECT_OVERVIEW.md` for the product summary.
 - Use `docs/DASHBOARD_MODEL.md` for dashboard, machine cards, Tag ID, QR print, menu, and i18n work.
 - Use `docs/FIREBASE_MODEL.md` before changing Firebase data flows, callable functions, ownership, admin links, Tag ID, or QR cleanup.

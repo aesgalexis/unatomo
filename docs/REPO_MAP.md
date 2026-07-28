@@ -55,6 +55,8 @@ links, Tag ID, QR cleanup, callable Functions, or data permissions.
 
 ## Documentation Routing
 
+- `docs/SUBAGENTS.md`: quality-first delegation, model/reasoning selection,
+  token discipline, edit ownership, and subagent verification.
 - `docs/PROJECT_OVERVIEW.md`: what the product does and why it exists.
 - `docs/DEV.md`: local setup and development commands.
 - `docs/DASHBOARD_MODEL.md`: dashboard, cards, Tag ID, QR print, menu, and i18n.
