@@ -85,7 +85,7 @@ export const createDashboardTopbarController = (dependencies) => {
         : isSuggestions
           ? t("dashboard.suggestionsSearchPlaceholder", "Buscar sugerencias...")
           : isTodo
-            ? t("dashboard.todoSearchPlaceholder", "Buscar pendientes...")
+            ? t("dashboard.todoSearchPlaceholder", "Buscar tareas...")
             : isUsers
               ? t("dashboard.usersSearchPlaceholder", "Buscar usuarios...")
             : t("dashboard.searchPlaceholder", "Buscar por nombre o ubicaci\u00f3n...");

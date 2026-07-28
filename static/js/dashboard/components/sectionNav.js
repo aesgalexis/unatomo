@@ -55,7 +55,7 @@ export const createDashboardSectionNav = ({
   galleryHref = "#/galeria",
   usersHref = "#/usuarios",
   suggestionsHref = "#/sugerencias",
-  todoHref = "#/todo",
+  todoHref = "#/tareas",
   labels = {},
   active = "dashboard",
   showSuggestions = false,
@@ -117,7 +117,7 @@ export const createDashboardSectionNav = ({
 
   const todo = createIconLink({
     href: todoHref,
-    label: labels.todo || "To-do",
+    label: labels.todo || "Tareas",
     icon: TODO_ICON,
     extraClass: todoSuperadmin ? "dashboard-section-link-superadmin" : "",
     iconClass: "dashboard-section-icon-todo"

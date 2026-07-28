@@ -458,7 +458,7 @@ export const createDashboardInternalViewController = ({
         try {
           await deleteDashboardTodo(todoId);
           state.todos = (state.todos || []).filter((item) => item.id !== todoId);
-          setInlineStatus(t("dashboard.todoDeleted", "Pendiente eliminado"), "ok");
+          setInlineStatus(t("dashboard.todoDeleted", "Tarea eliminada"), "ok");
           rerender({ preserveScroll: true });
           await loadTodos({ preserveScroll: true });
         } catch {
@@ -476,12 +476,12 @@ export const createDashboardInternalViewController = ({
           await createDashboardTodo(textValue.slice(0, MAX_TODO_LENGTH));
           if (controls.input) controls.input.value = "";
           controls.resetRecipients?.();
-          setInlineStatus(t("dashboard.todoSaved", "Pendiente añadido"), "ok");
+          setInlineStatus(t("dashboard.todoSaved", "Tarea añadida"), "ok");
           await loadTodos({ preserveScroll: true });
         } catch (error) {
           const reason = `${error?.code || ""} ${error?.message || ""}`;
           const message = reason.includes("todo-mention-not-found")
-            ? t("dashboard.todoMentionNotFound", "No existe un usuario To Do con esa mención")
+            ? t("dashboard.todoMentionNotFound", "No existe un usuario de Tareas con esa mención")
             : reason.includes("todo-mention-ambiguous")
               ? t("dashboard.todoMentionAmbiguous", "Esa mención corresponde a más de una cuenta")
               : reason.includes("todo-recipient-disabled")

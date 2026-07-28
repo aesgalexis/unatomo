@@ -164,7 +164,7 @@ export const renderTodoView = (container, options = {}) => {
   input.className = "todo-input";
   input.maxLength = MAX_TODO_LENGTH;
   input.rows = 3;
-  input.placeholder = t("dashboard.todoPlaceholder", "Añadir pendiente...");
+  input.placeholder = t("dashboard.todoPlaceholder", "Añadir tarea...");
   input.disabled = !canTodo;
   const suggestions = document.createElement("div");
   suggestions.className = "todo-mention-suggestions";
@@ -187,9 +187,9 @@ export const renderTodoView = (container, options = {}) => {
     input.placeholder = selectedRecipients.length
       ? t(
           "dashboard.todoSharedPlaceholder",
-          "Añadir pendiente compartido..."
+          "Añadir tarea compartida..."
         )
-      : t("dashboard.todoPlaceholder", "Añadir pendiente...");
+      : t("dashboard.todoPlaceholder", "Añadir tarea...");
     selectedRecipients.forEach((person) => {
       const chip = document.createElement("span");
       chip.className = "todo-recipient-chip";
@@ -362,7 +362,7 @@ export const renderTodoView = (container, options = {}) => {
   const header = document.createElement("div");
   header.className = "todo-header";
   const title = document.createElement("h3");
-  title.textContent = t("dashboard.todoTitle", "To-do");
+  title.textContent = t("dashboard.todoTitle", "Tareas");
   const headerActions = document.createElement("div");
   headerActions.className = "todo-header-actions";
   const count = document.createElement("span");
@@ -426,7 +426,7 @@ export const renderTodoView = (container, options = {}) => {
     empty.className = "todo-empty";
     empty.textContent = (options.query || "").trim()
       ? t("dashboard.noResults", (value) => `No results for "${value}".`)(options.query)
-      : t("dashboard.todoEmpty", "Sin pendientes.");
+      : t("dashboard.todoEmpty", "Sin tareas.");
     container.appendChild(empty);
     return;
   }

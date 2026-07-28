@@ -34,7 +34,7 @@ const text = {
   systemOutOfService: isEn ? "Out of service" : "Fuera de servicio",
   systemTags: "Tags",
   systemPendingTasks: isEn ? "Pending tasks" : "Tareas pendientes",
-  systemPendingTodos: isEn ? "Pending to-dos" : "Pendientes To-do",
+  systemPendingTodos: isEn ? "Pending global tasks" : "Tareas globales pendientes",
   systemOpenSuggestions: isEn ? "Open suggestions" : "Sugerencias abiertas",
   systemPendingInvites: isEn ? "Pending invites" : "Invitaciones pendientes",
   systemPendingTransfers: isEn ? "Pending transfers" : "Transferencias pendientes",

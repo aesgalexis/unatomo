@@ -48,7 +48,7 @@ const text = {
   navQrPrint: isEn ? "QR print" : "Impresi\u00f3n QR",
   navGallery: isEn ? "Gallery" : "Galer\u00eda",
   navSuggestions: isEn ? "Suggestions" : "Sugerencias",
-  navTodo: "To-do",
+  navTodo: isEn ? "Tasks" : "Tareas",
   count: (visible, total) => `${visible}/${total}`,
   login: localizeEsPath("/es/auth/login.html", lang),
   home: localizeEsPath("/es/index.html", lang),
@@ -157,7 +157,7 @@ const createSectionNav = () => {
     qrPrintHref: text.qrPrint,
     galleryHref: `${text.dashboard}#/galeria`,
     suggestionsHref: `${text.dashboard}#/sugerencias`,
-    todoHref: `${text.dashboard}#/todo`,
+    todoHref: `${text.dashboard}#/${isEn ? "tasks" : "tareas"}`,
     labels: {
       dashboard: text.navDashboard,
       registry: text.navRegistry,

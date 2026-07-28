@@ -10,12 +10,12 @@ export const isPublicSectionHash = () =>
 
 export const getDashboardInternalView = () => {
   const section = getPublicSectionFromHash();
-  const normalizedSection =
-    section === "users"
-      ? "usuarios"
-      : section === "suggestions"
-        ? "sugerencias"
-        : section;
+  const normalizedSection = {
+    users: "usuarios",
+    suggestions: "sugerencias",
+    tareas: "todo",
+    tasks: "todo",
+  }[section] || section;
   return ["registro", "galeria", "usuarios", "sugerencias", "todo"].includes(normalizedSection)
     ? normalizedSection
     : "dashboard";

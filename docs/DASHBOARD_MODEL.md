@@ -161,8 +161,9 @@ The main dashboard page has internal hash views:
 - `#/usuarios` (Spanish) / `#/users` (English): dashboard-native local-user
   cards, machine assignments, and editable role capabilities.
 - `#/sugerencias`: the collaborator suggestions view.
-- `#/todo`: the To Do view for `superadmin` and users enabled as
-  collaborators with `users/{uid}.suggestionsCollaborator`.
+- `#/tareas` (Spanish) / `#/tasks` (English): the dashboard-level Tasks view
+  for `superadmin` and enabled collaborators. The legacy `#/todo` route remains
+  accepted as an alias.
 
 Files:
 
@@ -173,7 +174,9 @@ Files:
 - `static/js/dashboard/history/historyEventFormatter.js`: shared formatter and grouping helpers for machine history events. It preserves known legacy event text and falls back to `summary`, `message`, `messageKey`, or `type` for future events.
 - `static/js/dashboard/views/registry/globalRegistryModel.js`: flattens logs from all machines visible to the current account, sorts them newest-first, and groups task notes under their task-created event.
 - `static/js/dashboard/views/suggestions/`: renders and submits dashboard suggestions through callable functions.
-- `static/js/dashboard/views/todo/`: renders and manages private To Do lists through separate callable functions.
+- `static/js/dashboard/views/todo/`: renders and manages dashboard-level Tasks
+  through separate callable functions. The internal `todo` name is retained to
+  keep this module distinct from per-machine tasks.
 - `static/js/dashboard/views/users/`: builds owner/admin access contexts and
   renders the dashboard-native user cards without replacing the standalone
   access page. At desktop tree width it uses the dashboard sidebar shell for
@@ -202,21 +205,22 @@ Suggestions scope:
 - Normal collaborators can submit and see their own suggestions. The superadmin can see all suggestions and gets an unseen badge over the `Sugerencias` nav link.
 - Suggestions use callable functions instead of direct Firestore reads so global access stays behind the existing hashed superadmin check.
 
-To Do scope:
+Dashboard Tasks scope:
 
-- The `To do` link uses the violet accent only for `superadmin`; collaborators
+- The `Tareas` / `Tasks` link uses the violet accent only for `superadmin`; collaborators
   see the ordinary navigation color.
-- The view is separate from suggestions and uses its own callable functions and `dashboard_todos` collection.
-- `superadmin` and collaborators can use To Do. Private items remain visible
+- The view is separate from suggestions and from the tasks belonging to each
+  machine. It uses its own callable functions and `dashboard_todos` collection.
+- `superadmin` and collaborators can use dashboard Tasks. Private items remain visible
   only to their owner; shared items are visible to their participants.
 - Pending items are shown by default, with an eye control to include completed
   items. The list uses 50-item pages and keeps its pagination above the shared
   `Volver` / `Arriba` page navigation controls.
-- To Do item deletion is available only to the owner through the row's
+- Dashboard Task deletion is available only to the owner through the row's
   three-dot menu. Shared participants can still change completion state.
 - Mention autocomplete prefers each collaborator's current public
   `accountHandle`. Accounts without one continue to use the local part of their
-  email during the transition. Shared To Do documents persist participant
+  email during the transition. Shared dashboard Task documents persist participant
   UIDs; the visible mention is metadata, never the permission key. Previous
   handles continue resolving to the same UID permanently.
 

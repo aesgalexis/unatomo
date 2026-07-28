@@ -444,12 +444,17 @@
 }
 
 .task-create-btn {
+  height: 32px;
   border-radius: 0.6rem;
   border: 1px solid var(--border-subtle);
   background: color-mix(in srgb, var(--bg) 96%, transparent);
   color: var(--fg);
   padding: 0.35rem 0.7rem;
   font: inherit;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
 }
 

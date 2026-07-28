@@ -59,7 +59,7 @@ firebase/functions/src/
 ```text
 accounts/       account handles and account identity operations
 controlPanel/   superadmin users, status, registration codes, and tag inventory
-dashboard/      layout, suggestions, and To Do
+dashboard/      layout, suggestions, and dashboard Tasks
 publicSite/     public, aggregate-only data used by unauthenticated pages
 machines/       administrator links/invites, ownership transfers, and Tag ID/QR
 core/           Firebase initialization and genuinely cross-domain primitives
@@ -107,13 +107,13 @@ must not be used as source files.
   `core/auth.ts`.
 - Moved `saveDashboardGroupLayout` to `dashboard/layout.ts` and re-exported it
   from `index.ts` under the same public name.
-- Left suggestions and To Do together in `index.ts` for the next dashboard
+- Left suggestions and dashboard Tasks together in `index.ts` for the next dashboard
   extraction because they share collaborator and identity dependencies.
 - TypeScript build and ESLint pass with the same 34 public callable exports.
 
 ### 2026-06-23 — Phase 2
 
-- Extracted Dashboard layout, suggestions, and To Do callables.
+- Extracted Dashboard layout, suggestions, and Tasks callables.
 - Extracted account handles, control-panel status/users/registration codes,
   administrator invitations, ownership transfers, Tag ID/QR, and user cleanup.
 - Promoted only genuinely shared handle, code, Storage, quota, Firebase, and

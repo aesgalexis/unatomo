@@ -39,7 +39,8 @@ Read this before changing data flows, callable functions, machine ownership, adm
 - `machine_transfer_invites`: pending/accepted/rejected machine ownership transfer requests.
 - `dashboard_layout/{uid}`: per-user dashboard grouping/layout preferences. Groups may include `parentGroupId` for one-level subgroups; `dashboardTitle` stores the user's editable dashboard topbar title; `registrySeenAt` stores the last time the user left the global registry view after seeing current activity; `machineViewMode` and `machineSortMode` store dashboard display preferences.
 - `dashboard_suggestions`: collaborator suggestions submitted from `#/sugerencias`. Normal collaborators see their own suggestions; `superadmin` sees all through callable functions.
-- `dashboard_todos`: dashboard To Do items managed through callable functions.
+- `dashboard_todos`: dashboard-level Tasks managed through callable functions;
+  these remain separate from per-machine tasks.
   Private items belong only to `ownerUid`. Shared items keep one canonical
   document with `participantUids`, `owner`, and `sharedWith`: every participant
   may complete or reopen it, while only `ownerUid` may delete it. Mentions
@@ -118,10 +119,11 @@ frontend wrappers live under `static/js/dashboard/`.
 - `listDashboardSuggestions`: lists own suggestions for collaborators and all suggestions for `superadmin`.
 - `markDashboardSuggestionsSeen`: stores the superadmin suggestions seen timestamp.
 - `listDashboardTodos`, `createDashboardTodo`, `updateDashboardTodo`,
-  `deleteDashboardTodo`: manage private and shared To Do items. Shared
+  `deleteDashboardTodo`: manage private and shared dashboard Tasks. Shared
   participants may update completion state; deletion remains owner-only.
-- `listDashboardTodoCollaborators`: returns enabled collaborators for the To Do
-  mention autocomplete; it is available only to To Do users. Account handles
+- `listDashboardTodoCollaborators`: returns enabled collaborators for the
+  dashboard Tasks mention autocomplete; it is available only to Tasks users.
+  Account handles
   are preferred, with the legacy email-local mention retained for accounts
   that have not claimed a handle.
 - `checkAccountHandleAvailability`, `claimAccountHandle`,

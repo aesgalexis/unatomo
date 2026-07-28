@@ -17,7 +17,8 @@ original cascade of the former monolithic stylesheet.
 - `dashboard/registry.css`: global registry view.
 - `dashboard/gallery.css`: gallery view.
 - `dashboard/suggestions.css`: suggestions view.
-- `dashboard/todo.css`: To Do view and its narrow-screen rules.
+- `dashboard/todo.css`: dashboard Tasks view and its narrow-screen rules
+  (`todo` remains the internal module name).
 - `dashboard/loading.css`: loading, bootstrap, invitation, and placeholder UI.
 - `dashboard/group-tree.css`: side-tree layout, group actions, visibility
   controls, status badges, and drag/drop states.

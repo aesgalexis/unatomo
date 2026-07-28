@@ -230,14 +230,14 @@ if (mount) {
     todoBadge
   } = createDashboardSectionNav({
     ariaLabel: t("dashboard.sectionNavAria", "Secciones"),
-    qrPrintHref, usersHref: lang === "en" ? "#/users" : "#/usuarios",
+    qrPrintHref, usersHref: lang === "en" ? "#/users" : "#/usuarios", todoHref: lang === "en" ? "#/tasks" : "#/tareas",
     labels: {
       dashboard: t("dashboard.navDashboard", "Dashboard"),
       registry: t("dashboard.navRegistry", "Registro"),
       qrPrint: t("dashboard.navQrPrint", "Impresión QR"),
       gallery: t("dashboard.navGallery", "Galería"), users: t("dashboard.navUsers", "Usuarios"),
       suggestions: t("dashboard.navSuggestions", "Sugerencias"),
-      todo: t("dashboard.navTodo", "To-do")
+      todo: t("dashboard.navTodo", "Tareas")
     },
     active: "dashboard",
     attachTooltip: attachDashboardTooltip
