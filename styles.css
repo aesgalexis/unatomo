@@ -1141,6 +1141,16 @@ textarea.field {
   justify-content: center;
 }
 
+body.nfc-public-page .contact-form-card {
+  padding-bottom: 0;
+}
+
+body.nfc-public-page .contact-form-card .form-actions {
+  min-height: 5.5rem;
+  margin-top: 0;
+  align-items: center;
+}
+
 .form-status {
   margin-top: 0.75rem;
   min-height: 1.6em;
@@ -1156,6 +1166,10 @@ textarea.field {
 .form-status[hidden] {
   display: flex !important;
   visibility: hidden;
+}
+
+body.nfc-public-page .contact-form-card .form-status[hidden] {
+  display: none !important;
 }
 
 .form-status::before {

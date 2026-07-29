@@ -388,6 +388,10 @@ body.landing-contact-page .contacto {
   text-align: left;
 }
 
+body.landing-contact-page .contact-form-card {
+  padding-bottom: 0;
+}
+
 .contact-info {
   margin-top: 0.4rem;
 }
@@ -475,6 +479,14 @@ textarea.field {
   grid-column: 1 / -1;
 }
 
+body.landing-contact-page .form-actions {
+  min-height: 5.5rem;
+  margin-top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .form-actions {
   margin-top: 1.5rem;
   display: flex;
@@ -527,6 +539,10 @@ textarea.field {
 .form-status[hidden] {
   display: flex !important;
   visibility: hidden;
+}
+
+body.landing-contact-page .form-status[hidden] {
+  display: none !important;
 }
 
 .form-status[data-state="success"] {

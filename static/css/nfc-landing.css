@@ -169,6 +169,10 @@ body.nfc-public-page #theme-toggle {
   padding: 1.3rem 1.4rem;
 }
 
+.nfc-public-page .contacto .card.contact-form-card {
+  padding-bottom: 0;
+}
+
 .nfc-public-page .contact-info {
   margin-top: 0.4rem;
 }

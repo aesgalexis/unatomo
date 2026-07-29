@@ -61,6 +61,7 @@ body {
   user-select: none;
   -webkit-user-select: none;
   background:
+    radial-gradient(ellipse 90% 28rem at 50% 100%, rgba(139, 92, 246, 0.18), rgba(109, 40, 217, 0.08) 38%, transparent 76%),
     radial-gradient(circle at 85% 10%, color-mix(in srgb, var(--fg) 8%, transparent), transparent 55%),
     radial-gradient(circle at 10% 15%, color-mix(in srgb, var(--fg) 5%, transparent), transparent 50%),
     var(--bg);
@@ -70,29 +71,6 @@ body {
   font-size: 0.95rem;
   display: block;
   text-align: left;
-}
-
-body.page::before {
-  content: "";
-  position: absolute;
-  z-index: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: clamp(32rem, 24vw, 48rem);
-  pointer-events: none;
-  background:
-    radial-gradient(
-      ellipse 72% 58% at 50% 100%,
-      rgba(139, 92, 246, 0.2) 0%,
-      rgba(109, 40, 217, 0.09) 38%,
-      transparent 76%
-    );
-  filter: blur(12px);
-}
-
-:root[data-theme="light"] body.page::before {
-  opacity: 0.42;
 }
 
 h1,
@@ -1571,6 +1549,7 @@ body.ls-contact-page .contact-form-card {
 
 :root[data-theme="light"] body {
   background:
+    radial-gradient(ellipse 90% 28rem at 50% 100%, rgba(139, 92, 246, 0.08), transparent 74%),
     radial-gradient(circle at 85% 10%, rgba(148, 163, 184, 0.08), transparent 45%),
     radial-gradient(circle at 12% 18%, rgba(203, 213, 225, 0.12), transparent 40%),
     linear-gradient(180deg, #ffffff 0%, #f5f7fb 52%, #e5e7eb 100%);
@@ -1578,6 +1557,7 @@ body.ls-contact-page .contact-form-card {
 
 :root[data-theme="light"] body.ls-maquinaria-page {
   background:
+    radial-gradient(ellipse 90% 28rem at 50% 100%, rgba(139, 92, 246, 0.08), transparent 74%),
     radial-gradient(circle at 85% 10%, rgba(148, 163, 184, 0.08), transparent 45%),
     radial-gradient(circle at 12% 18%, rgba(203, 213, 225, 0.12), transparent 40%),
     linear-gradient(180deg, #ffffff 0%, #f5f7fb 52%, #e5e7eb 100%);
@@ -1585,6 +1565,7 @@ body.ls-contact-page .contact-form-card {
 
 :root[data-theme="dark"] body {
   background:
+    radial-gradient(ellipse 90% 28rem at 50% 100%, rgba(139, 92, 246, 0.22), rgba(109, 40, 217, 0.09) 38%, transparent 76%),
     radial-gradient(circle at 85% 10%, rgba(96, 165, 250, 0.12), transparent 45%),
     radial-gradient(circle at 12% 18%, rgba(56, 189, 248, 0.08), transparent 40%),
     linear-gradient(180deg, #07111f 0%, #04070d 52%, #000000 100%);
@@ -1592,6 +1573,7 @@ body.ls-contact-page .contact-form-card {
 
 :root[data-theme="dark"] body.ls-maquinaria-page {
   background:
+    radial-gradient(ellipse 90% 28rem at 50% 100%, rgba(139, 92, 246, 0.22), rgba(109, 40, 217, 0.09) 38%, transparent 76%),
     radial-gradient(circle at 85% 10%, rgba(96, 165, 250, 0.12), transparent 45%),
     radial-gradient(circle at 12% 18%, rgba(56, 189, 248, 0.08), transparent 40%),
     linear-gradient(180deg, #07111f 0%, #04070d 52%, #000000 100%);
@@ -1730,6 +1712,10 @@ textarea.field {
 .form-status[hidden] {
   display: flex !important;
   visibility: hidden;
+}
+
+body.ls-contact-page .form-status[hidden] {
+  display: none !important;
 }
 
 .form-status[data-state="success"] {

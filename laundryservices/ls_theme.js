@@ -3,18 +3,13 @@
   const btn = document.getElementById("theme-toggle");
   const THEME_KEY = "ls_theme";
 
-  const prefersDark =
-    window.matchMedia &&
-    window.matchMedia("(prefers-color-scheme: dark)").matches;
-
   let saved = null;
   try {
     saved = localStorage.getItem(THEME_KEY);
   } catch {}
 
-  if (saved === "light" || saved === "dark") {
-    root.setAttribute("data-theme", saved);
-  }
+  const initialTheme = saved === "light" || saved === "dark" ? saved : "dark";
+  root.setAttribute("data-theme", initialTheme);
 
   updateButton(getCurrentTheme());
 
@@ -30,20 +25,10 @@
     });
   }
 
-  if (!saved && window.matchMedia) {
-    const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    const handler = (e) => {
-      root.removeAttribute("data-theme");
-      updateButton(e.matches ? "dark" : "light");
-    };
-    if (mq.addEventListener) mq.addEventListener("change", handler);
-    else if (mq.addListener) mq.addListener(handler);
-  }
-
   function getCurrentTheme() {
     const attr = root.getAttribute("data-theme");
     if (attr === "light" || attr === "dark") return attr;
-    return prefersDark ? "dark" : "light";
+    return "dark";
   }
 
   function updateButton(mode) {
