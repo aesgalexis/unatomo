@@ -15,7 +15,7 @@
       hero_lead:
         "",
       closing_claim: "Tu proceso, Nuestra visión",
-      card1_title: "Auditoría técnica y de procesos",
+      card1_title: "Auditoría técnica y mejora de procesos",
       card1_p1:
         "Detección de puntos críticos para optimizar el rendimiento de planta. Realizamos una inspección integral para identificar dónde se está perdiendo rendimiento y cómo se podría evitar. Nos centramos en corregir cuellos de botella, fallos recurrentes y desajustes operativos que lastran la producción en el día a día.",
       card1_p2:
@@ -26,7 +26,7 @@
       card1_price_note:
         "* (Gastos de traslado y alojamiento no incluidos en el precio)\n** (Solo España: impuestos no incluidos)",
       card1_cta: "Contratar",
-      card2_title: "Asesoría independiente de equipamiento",
+      card2_title: "Inversiones y equipamiento",
       card2_p1:
         "Validación técnica de inversiones sin conflictos de interés. Aportamos perspectiva técnica antes de que cierren su próxima compra. No representamos marcas ni cobramos comisiones de fabricantes. Nuestro objetivo es asegurar que el equipo sea el adecuado para su operativa real y que se adapte a sus necesidades.",
       card2_p2:
@@ -37,7 +37,7 @@
         "Acompañamiento: revisión del pliego técnico y comparativa de alternativas para ayudarle a tomar la decisión final.",
       card2_price: "Desde 1,5% del coste de la inversión",
       card2_cta: "Solicitar",
-      card3_title: "Control de productividad y captura de datos",
+      card3_title: "Productividad y herramientas digitales",
       card3_p1:
         "Contamos con soluciones de software específico para recabar datos de todo lo que se pueda considerar relevante para la producción. Contadores de piezas por tipo de ropa y cliente, que implementamos en plegadores o líneas de planchado de cualquier tipo. Conectamos el sistema con bases de datos nuevas o con bases existentes.",
       card3_cta: "Más información",
@@ -47,7 +47,7 @@
       card6_p1_after: ".",
       card6_used_cta: "De ocasión",
       card6_cta: "Nueva",
-      card4_title: "Asistencia técnica",
+      card4_title: "Asistencia técnica y resolución de problemas",
       card4_p1:
         "Ofrecemos soporte técnico a todos nuestros clientes. Desde diagnóstico y solución de averías hasta operaciones recurrentes programadas como cambios de muletones, membranas de prensas, rodamientos, etc.",
       card4_cta: "Solicitar",
@@ -74,7 +74,11 @@
       contact_phone_field_label: "Teléfono",
       contact_subject_label: "Asunto",
       contact_subject_placeholder: "Selecciona un asunto…",
-      contact_subject_other: "Otro",
+      contact_subject_audit: "Solicitar una auditoría técnica",
+      contact_subject_assistance: "Asistencia técnica y resolución de problemas",
+      contact_subject_investment: "Inversiones y equipamiento",
+      contact_subject_digital: "Productividad y herramientas digitales",
+      contact_subject_other: "Otra consulta",
       contact_brand_label: "Marca",
       contact_brand_placeholder: "Selecciona una marca…",
       contact_model_label: "Modelo",
@@ -97,7 +101,7 @@
       hero_lead:
         "",
       closing_claim: "Your process, Our insight",
-      card1_title: "Technical and process audit",
+      card1_title: "Technical audit and process improvement",
       card1_p1:
         "Detection of critical points to optimize plant performance. We perform a full inspection to identify where performance is being lost and how to prevent it. We focus on correcting bottlenecks, recurring failures and operational imbalances that hurt day-to-day production.",
       card1_p2:
@@ -108,7 +112,7 @@
       card1_price_note:
         "* (Travel and accommodation costs not included in the price)\n** (Spain only: taxes not included)",
       card1_cta: "Hire",
-      card2_title: "Independent equipment advisory",
+      card2_title: "Investment and equipment",
       card2_p1:
         "Technical validation of investments without conflicts of interest. We provide technical perspective before you close your next purchase. We do not represent brands or receive commissions from manufacturers. Our goal is to ensure the equipment is suitable for your actual operation and adapts to your needs.",
       card2_p2:
@@ -119,7 +123,7 @@
         "Support: review of the technical specification and comparison of alternatives to help you make the final decision.",
       card2_price: "From 1.5% of investment cost",
       card2_cta: "Request",
-      card3_title: "Productivity control and data capture",
+      card3_title: "Productivity and digital tools",
       card3_p1:
         "We provide dedicated software solutions to collect data from everything considered relevant to production. Piece counters by garment type and customer, implemented on folders or ironing lines of any kind. We connect the system to new databases or to existing databases.",
       card3_cta: "More information",
@@ -129,7 +133,7 @@
       card6_p1_after: ".",
       card6_used_cta: "Used",
       card6_cta: "New",
-      card4_title: "Technical assistance",
+      card4_title: "Technical assistance and problem solving",
       card4_p1:
         "We offer technical support to all our clients. From fault diagnosis and repair to scheduled recurring operations such as replacing padding covers, press membranes, bearings, and more.",
       card4_cta: "Request",
@@ -156,7 +160,11 @@
       contact_phone_field_label: "Phone",
       contact_subject_label: "Subject",
       contact_subject_placeholder: "Select a subject…",
-      contact_subject_other: "Other",
+      contact_subject_audit: "Request a technical audit",
+      contact_subject_assistance: "Technical assistance and problem solving",
+      contact_subject_investment: "Investment and equipment",
+      contact_subject_digital: "Productivity and digital tools",
+      contact_subject_other: "Other enquiry",
       contact_brand_label: "Brand",
       contact_brand_placeholder: "Select a brand…",
       contact_model_label: "Model",
@@ -179,7 +187,7 @@
       hero_lead:
         "",
       closing_claim: "Il tuo processo, La nostra visione",
-      card1_title: "Audit tecnico e di processo",
+      card1_title: "Audit tecnico e miglioramento dei processi",
       card1_p1:
         "Individuazione dei punti critici per ottimizzare le prestazioni dell'impianto. Effettuiamo un'ispezione completa per identificare dove si perde rendimento e come evitarlo. Ci concentriamo sulla correzione di colli di bottiglia, guasti ricorrenti e squilibri operativi che penalizzano la produzione quotidiana.",
       card1_p2:
@@ -190,7 +198,7 @@
       card1_price_note:
         "* (Spese di viaggio e alloggio non incluse nel prezzo)\n** (Solo Spagna: imposte non incluse)",
       card1_cta: "Richiedi",
-      card2_title: "Consulenza indipendente sulle attrezzature",
+      card2_title: "Investimenti e attrezzature",
       card2_p1:
         "Validazione tecnica degli investimenti senza conflitti di interesse. Forniamo una prospettiva tecnica prima che concludiate il vostro prossimo acquisto. Non rappresentiamo marchi e non percepiamo commissioni dai produttori. Il nostro obiettivo e garantire che l'attrezzatura sia adatta alla vostra operativita reale e alle vostre esigenze.",
       card2_p2:
@@ -201,7 +209,7 @@
         "Affiancamento: revisione del capitolato tecnico e confronto tra alternative per aiutarvi nella decisione finale.",
       card2_price: "Da 1,5% del costo dell'investimento",
       card2_cta: "Richiedi",
-      card3_title: "Controllo della produttivita e acquisizione dati",
+      card3_title: "Produttivita e strumenti digitali",
       card3_p1:
         "Disponiamo di soluzioni software specifiche per raccogliere dati su tutto cio che puo essere considerato rilevante per la produzione. Contatori di pezzi per tipologia di biancheria e cliente, che implementiamo su piegatrici o linee di stiratura di qualsiasi tipo. Colleghiamo il sistema a nuove basi dati o a basi dati esistenti.",
       card3_cta: "Maggiori informazioni",
@@ -211,7 +219,7 @@
       card6_p1_after: ".",
       card6_used_cta: "Usati",
       card6_cta: "Nuova",
-      card4_title: "Assistenza tecnica",
+      card4_title: "Assistenza tecnica e risoluzione dei problemi",
       card4_p1:
         "Offriamo supporto tecnico a tutti i nostri clienti. Dalla diagnosi e risoluzione dei guasti fino a operazioni ricorrenti programmate come sostituzione di molettone, membrane di presse, cuscinetti, ecc.",
       card4_cta: "Richiedi",
@@ -238,7 +246,11 @@
       contact_phone_field_label: "Telefono",
       contact_subject_label: "Oggetto",
       contact_subject_placeholder: "Seleziona un oggetto…",
-      contact_subject_other: "Altro",
+      contact_subject_audit: "Richiedere un audit tecnico",
+      contact_subject_assistance: "Assistenza tecnica e risoluzione dei problemi",
+      contact_subject_investment: "Investimenti e attrezzature",
+      contact_subject_digital: "Produttività e strumenti digitali",
+      contact_subject_other: "Altra richiesta",
       contact_brand_label: "Marca",
       contact_brand_placeholder: "Seleziona una marca…",
       contact_model_label: "Modello",
@@ -261,7 +273,7 @@
       hero_lead:
         "",
       closing_claim: "Η διαδικασία σας, η γνώση μας",
-      card1_title: "Τεχνικος και λειτουργικος ελεγχος",
+      card1_title: "Τεχνικος ελεγχος και βελτιωση διαδικασιων",
       card1_p1:
         "Εντοπισμος κρισιμων σημειων για βελτιστοποιηση της αποδοσης της μοναδας. Πραγματοποιουμε ολοκληρωμενη επιθεωρηση για να εντοπισουμε που χανεται αποδοση και πως μπορει να αποτραπει. Εστιαζουμε στη διορθωση σημειων συμφόρησης, επαναλαμβανομενων βλαβων και λειτουργικων αστοχιων που επηρεαζουν την καθημερινη παραγωγη.",
       card1_p2:
@@ -272,7 +284,7 @@
       card1_price_note:
         "* (Τα εξοδα μετακινησης και διαμονης δεν περιλαμβανονται στην τιμη)\n** (Μονο Ισπανια: οι φοροι δεν περιλαμβανονται)",
       card1_cta: "Αναθεση",
-      card2_title: "Ανεξαρτητη συμβουλευτικη εξοπλισμου",
+      card2_title: "Επενδυσεις και εξοπλισμος",
       card2_p1:
         "Τεχνικη αξιολογηση επενδυσεων χωρις συγκρουση συμφεροντων. Παρεχουμε τεχνικη οπτικη πριν την επομενη αγορα σας. Δεν εκπροσωπουμε μαρκες και δεν λαμβανουμε προμηθειες απο κατασκευαστες. Στοχος μας ειναι ο εξοπλισμος να ειναι καταλληλος για την πραγματικη λειτουργια σας και να προσαρμοζεται στις αναγκες σας.",
       card2_p2:
@@ -283,7 +295,7 @@
         "Υποστηριξη: ελεγχος τεχνικων προδιαγραφων και συγκριση εναλλακτικων για να σας βοηθησουμε να παρετε την τελικη αποφαση.",
       card2_price: "Απο 1,5% του κοστους επενδυσης",
       card2_cta: "Αιτηση",
-      card3_title: "Ελεγχος παραγωγικοτητας και συλλογη δεδομενων",
+      card3_title: "Παραγωγικοτητα και ψηφιακα εργαλεια",
       card3_p1:
         "Διαθετουμε ειδικες λυσεις λογισμικου για τη συλλογη δεδομενων απο καθε στοιχειο που θεωρειται σημαντικο για την παραγωγη. Μετρητες τεμαχιων ανα τυπο ρουχου και πελατη, που υλοποιουμε σε διπλωτικα ή γραμμες σιδερωματος καθε τυπου. Συνδεουμε το συστημα με νεες ή υπαρχουσες βασεις δεδομενων.",
       card3_cta: "Περισσότερες πληροφορίες",
@@ -293,7 +305,7 @@
       card6_p1_after: ".",
       card6_used_cta: "Μεταχειρισμενα",
       card6_cta: "Νεα",
-      card4_title: "Τεχνικη υποστηριξη",
+      card4_title: "Τεχνικη υποστηριξη και επιλυση προβληματων",
       card4_p1:
         "Προσφερουμε τεχνικη υποστηριξη σε ολους τους πελατες μας. Απο διαγνωση και επιλυση βλαβων εως προγραμματισμενες επαναλαμβανομενες εργασιες οπως αλλαγες μουλετον, μεμβρανων πρεσας, ρουλεμαν και αλλα.",
       card4_cta: "Αιτηση",
@@ -320,7 +332,11 @@
       contact_phone_field_label: "Τηλέφωνο",
       contact_subject_label: "Θέμα",
       contact_subject_placeholder: "Επιλέξτε θέμα…",
-      contact_subject_other: "Άλλο",
+      contact_subject_audit: "Αίτημα τεχνικού ελέγχου",
+      contact_subject_assistance: "Τεχνική υποστήριξη και επίλυση προβλημάτων",
+      contact_subject_investment: "Επενδύσεις και εξοπλισμός",
+      contact_subject_digital: "Παραγωγικότητα και ψηφιακά εργαλεία",
+      contact_subject_other: "Άλλο ερώτημα",
       contact_brand_label: "Μάρκα",
       contact_brand_placeholder: "Επιλέξτε μάρκα…",
       contact_model_label: "Μοντέλο",

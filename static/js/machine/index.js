@@ -142,6 +142,11 @@ const readStoredMachineSession = (tagId) => {
 const showLogin = (machine, tagId, { onSuccess, onContinueAsGuest }) => {
   const overlay = document.createElement("div");
   overlay.className = "machine-login-overlay";
+  document.body.classList.add("machine-login-active");
+  const closeOverlay = () => {
+    overlay.remove();
+    document.body.classList.remove("machine-login-active");
+  };
 
   const panel = document.createElement("div");
   panel.className = "machine-login-panel";
@@ -215,7 +220,7 @@ const showLogin = (machine, tagId, { onSuccess, onContinueAsGuest }) => {
         expiresAt: verifiedSession.expiresAt,
       });
       saveMachineSession(tagId, userSession, { remember: false });
-      overlay.remove();
+      closeOverlay();
       onSuccess(userSession, verifiedMachine, permissions);
     } catch {
       error.textContent = t("machine.validationError", "Error al validar credenciales.");
@@ -223,7 +228,7 @@ const showLogin = (machine, tagId, { onSuccess, onContinueAsGuest }) => {
   });
 
   guestBtn.addEventListener("click", () => {
-    overlay.remove();
+    closeOverlay();
     onContinueAsGuest(machine);
   });
 
@@ -237,7 +242,7 @@ const showLogin = (machine, tagId, { onSuccess, onContinueAsGuest }) => {
   panel.appendChild(guestBtn);
   panel.appendChild(register);
   overlay.appendChild(panel);
-  mount.appendChild(overlay);
+  document.body.appendChild(overlay);
 };
 
 const waitForAuthState = () =>

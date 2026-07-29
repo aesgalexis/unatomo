@@ -237,6 +237,7 @@
       transitionTimer = window.setTimeout(() => {
         panel.hidden = true;
         control.classList.remove("is-closing");
+        document.body.classList.remove("footer-disclosure-expanded");
         transitionTimer = null;
       }, reducedMotion ? 0 : 340);
     }, reducedMotion ? 0 : 120);
@@ -294,6 +295,7 @@
       return;
     }
     clearTransition();
+    document.body.classList.add("footer-disclosure-expanded");
     control.classList.remove("is-closing");
     control.classList.add("is-opening");
     panel.hidden = false;

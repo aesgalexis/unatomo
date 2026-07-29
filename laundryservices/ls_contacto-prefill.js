@@ -1,16 +1,18 @@
 (() => {
   const select = document.getElementById("asunto");
-  const brandSelect = document.getElementById("marca");
   const messageField = document.getElementById("mensaje");
-  const recambiosOnlyFields = Array.from(
-    document.querySelectorAll("[data-recambios-only]")
-  );
   if (!select) return;
 
-  const allowed = new Set(["card1", "card2", "card3", "card4", "card5", "card6", "other"]);
+  const allowed = new Set(["audit", "assistance", "investment", "digital", "other"]);
+  const legacySubjects = {
+    card1: "audit",
+    card2: "investment",
+    card3: "digital",
+    card4: "assistance",
+    card5: "other",
+    card6: "investment",
+  };
   const params = new URLSearchParams(window.location.search);
-  const initialSubject = (params.get("subject") || "").trim().toLowerCase();
-  const fromRecambios = initialSubject === "card5";
   const machineType = (params.get("type") || "").trim();
   const machineBrand = (params.get("brand") || "").trim();
   const machineModel = (params.get("model") || "").trim();
@@ -38,44 +40,14 @@
       return `Voglio ricevere informazioni sulla seguente macchina: ${machineLabel}`;
     }
     if (lang === "el") {
-      return `Θελω να λαβω πληροφοριες για το ακολουθο μηχανημα: ${machineLabel}`;
+      return `Θέλω να λάβω πληροφορίες για το ακόλουθο μηχάνημα: ${machineLabel}`;
     }
-    return `Quiero recibir información sobre la siguiente maquina: ${machineLabel}`;
-  };
-
-  const populateBrands = () => {
-    if (!brandSelect) return;
-    const brands = Array.isArray(window.lsRecambiosBrandList)
-      ? [...window.lsRecambiosBrandList].sort((a, b) =>
-          String(a).localeCompare(String(b), "es", { sensitivity: "base" })
-        )
-      : [];
-    const placeholder = brandSelect.querySelector('option[value=""]');
-    const currentValue = brandSelect.value;
-    brandSelect.innerHTML = "";
-    if (placeholder) brandSelect.appendChild(placeholder);
-
-    for (const brand of brands) {
-      const option = document.createElement("option");
-      option.value = brand;
-      option.textContent = brand;
-      brandSelect.appendChild(option);
-    }
-
-    if (currentValue && brandSelect.querySelector(`option[value="${currentValue}"]`)) {
-      brandSelect.value = currentValue;
-    }
-  };
-
-  const setRecambiosFieldsVisible = (visible) => {
-    for (const field of recambiosOnlyFields) {
-      field.hidden = !visible;
-      field.setAttribute("aria-hidden", visible ? "false" : "true");
-    }
+    return `Quiero recibir información sobre la siguiente máquina: ${machineLabel}`;
   };
 
   const applySubject = () => {
-    const subject = (params.get("subject") || "").trim().toLowerCase();
+    const requestedSubject = (params.get("subject") || "").trim().toLowerCase();
+    const subject = legacySubjects[requestedSubject] || requestedSubject;
     if (!allowed.has(subject)) return;
     if (!select.querySelector(`option[value="${subject}"]`)) return;
     select.value = subject;
@@ -89,10 +61,8 @@
     messageField.value = nextMessage;
   };
 
-  populateBrands();
   applySubject();
   applyMessage();
-  setRecambiosFieldsVisible(fromRecambios);
   document.addEventListener("app:language-change", () => {
     applySubject();
     applyMessage();

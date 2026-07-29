@@ -13,7 +13,9 @@
       <div class="ls-topbar-inner">
         <a class="ls-topbar-brand" href="${brandHref}">
           <img src="/static/img/logo-unatomo-v1.6.svg" alt="unatomo" class="ls-topbar-logo" loading="lazy" />
-          <span class="ls-topbar-name">Laundry Services</span>
+          <span class="ls-topbar-name">
+            <span class="ls-topbar-parent-name">unatomo</span><span class="ls-topbar-divider" aria-hidden="true">/</span><span>Laundry Services</span>
+          </span>
         </a>
         <div class="utility-controls" aria-label="Preferencias">
           <button id="theme-toggle" class="icon-button" type="button" aria-label="Cambiar a modo oscuro">

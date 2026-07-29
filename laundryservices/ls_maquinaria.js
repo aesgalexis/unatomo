@@ -282,7 +282,7 @@ if (copies.length) {
   const buildInfoHref = (machine, lang) => {
     const type = translateType(machine.categoria, lang);
     const params = new URLSearchParams({
-      subject: "card6",
+      subject: "investment",
       type,
       brand: machine.marca || "",
       model: machine.modelo || "",
