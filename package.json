@@ -8,6 +8,7 @@
     "predev:static": "node scripts/generate-config.mjs",
     "prebuild": "node scripts/generate-config.mjs",
     "dev": "vite",
+    "dev:machine-lab": "vite --open /dev/machine-lab/",
     "dev:static": "node scripts/dev-server.mjs",
     "build": "node scripts/build-static.mjs",
     "preview": "vite preview",
@@ -29,6 +30,7 @@
     "check:nfc:sorting": "node scripts/test-dashboard-sorting.mjs",
     "check:nfc:autosave": "node scripts/test-dashboard-autosave.mjs",
     "check:nfc:status-incident": "node scripts/test-dashboard-status-incident.mjs",
+    "check:machine-lab": "node scripts/check-machine-lab.mjs",
     "check:nfc:architecture": "node scripts/check-nfc-architecture.mjs"
   },
   "repository": {

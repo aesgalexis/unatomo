@@ -280,7 +280,7 @@ body.nfc-public-page #theme-toggle {
 
 .registration-callout { max-width: 420px; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-subtle); }
 .registration-callout--hero { width: 100%; max-width: 340px; margin: 0.35rem 0 0; }
-.registration-callout h3 { margin: 0; color: var(--fg); font-size: 1rem; font-weight: 620; line-height: 1.35; }
+.registration-callout h3 { margin: 0; scroll-margin-top: 91px; color: var(--fg); font-size: 1rem; font-weight: 620; line-height: 1.35; }
 .registration-callout > p { margin-top: 0.55rem; color: var(--landing-muted); font-size: 0.86rem; line-height: 1.6; }
 .registration-callout > .landing-button { margin-top: 1rem; }
 .registration-callout .access-code-card { width: 100%; margin: 1.25rem 0 0; padding: 1rem; border: 1px solid var(--border-subtle); border-radius: 1rem; background: var(--bg); }

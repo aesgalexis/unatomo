@@ -151,6 +151,11 @@ frontend wrappers live under `static/js/dashboard/`.
   controls. They can enforce
   Firebase App Check when Functions are deployed with
   `ENFORCE_APP_CHECK=true`.
+- `uploadMachineAccessDocument`: raw document-upload endpoint for valid
+  short-lived machine-local sessions. It revalidates the current role
+  capabilities, file signature, MIME type, size, owner path, task linkage, and
+  account storage quota before updating canonical `machines.documents`
+  metadata. Storage rules remain closed to direct local-PIN writes.
 - `cleanupMachineAccessSessions`: scheduled cleanup for expired
   `machine_access_sessions` documents. Expired sessions are also deleted on use.
 - `refreshPublicNfcLandingStats`: scheduled six-hour refresh of the aggregate

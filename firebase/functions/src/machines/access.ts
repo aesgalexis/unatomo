@@ -24,7 +24,7 @@ const MACHINE_SESSION_CLEANUP_LIMIT = 400;
 const APP_CHECK_ENFORCED = process.env.ENFORCE_APP_CHECK === "true";
 const CALLABLE_OPTIONS = {enforceAppCheck: APP_CHECK_ENFORCED};
 
-const normalizeMachineUsername = (value: unknown) =>
+export const normalizeMachineUsername = (value: unknown) =>
   (value || "")
     .toString()
     .trim()
@@ -155,7 +155,7 @@ const sanitizePublicMachine = (
   };
 };
 
-const getValidMachineSession = async (
+export const getValidMachineSession = async (
   tagId: string,
   sessionId: string,
   sessionToken: string,

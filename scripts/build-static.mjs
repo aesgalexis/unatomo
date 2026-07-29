@@ -3,6 +3,7 @@ import path from "node:path";
 
 const ROOT = process.cwd();
 const DIST = path.join(ROOT, "dist");
+const ROOT_IGNORE_DIRS = new Set(["dev"]);
 
 const IGNORE_DIRS = new Set([
   ".git",
@@ -19,6 +20,8 @@ async function copyRecursive(src, dst) {
 
   if (s.isDirectory()) {
     const name = path.basename(src);
+    const relative = path.relative(ROOT, src);
+    if (ROOT_IGNORE_DIRS.has(relative)) return;
     if (IGNORE_DIRS.has(name)) return;
 
     await mkdir(dst, { recursive: true });

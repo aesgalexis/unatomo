@@ -5,6 +5,8 @@ export const render = (panel, machine, hooks, options = {}) => {
   const canEditGeneral = options.canEditGeneral !== false;
   const canViewPlate = options.canViewPlate !== false;
   const canViewDocuments = options.canViewDocuments !== false;
+  const canUploadDocuments = options.canUploadDocuments ?? canEditGeneral;
+  const canDeleteDocuments = options.canDeleteDocuments ?? canEditGeneral;
   const maxOtherDocDisplayName = 40;
 
   const closeDocMenus = () => {
@@ -179,7 +181,7 @@ export const render = (panel, machine, hooks, options = {}) => {
 
     row.appendChild(link);
 
-    if (canEditGeneral && hooks.onDeleteMachineDocument) {
+    if (canDeleteDocuments) {
       const menu = document.createElement("div");
       menu.className = "mc-doc-menu mc-other-doc-menu";
 
@@ -246,7 +248,9 @@ export const render = (panel, machine, hooks, options = {}) => {
 
   const createDocumentTile = (kind, labelText) => {
     const savedDoc = kind === "other" ? null : machine.documents?.[kind] || null;
-    const canUpload = canEditGeneral && ["plate", "manual", "other"].includes(kind);
+    const canUpload =
+      canUploadDocuments &&
+      ["plate", "manual", "other"].includes(kind);
     const isMultiDocument = kind === "other";
     const maxBatchFiles = 10;
     let currentUrl = savedDoc?.url || "";
@@ -267,7 +271,7 @@ export const render = (panel, machine, hooks, options = {}) => {
 
     const icon = document.createElement("span");
     icon.className = "mc-doc-tile-icon";
-    icon.dataset.symbol = savedDoc ? "✓" : "+";
+    icon.dataset.symbol = savedDoc ? "✓" : canUpload ? "+" : "—";
 
     const label = document.createElement("span");
     label.className = "mc-doc-tile-label";
@@ -275,7 +279,11 @@ export const render = (panel, machine, hooks, options = {}) => {
 
     const fileName = document.createElement("span");
     fileName.className = "mc-doc-tile-file";
-    fileName.textContent = savedDoc?.name || t("general.upload", "Cargar");
+    fileName.textContent = savedDoc?.name || (
+      canUpload
+        ? t("general.upload", "Cargar")
+        : t("general.noDocument", "Sin documento")
+    );
 
     const fileInput = document.createElement("input");
     fileInput.type = "file";
@@ -530,7 +538,7 @@ export const render = (panel, machine, hooks, options = {}) => {
     actions.className = "mc-manual-actions mc-doc-actions";
 
     let menu = null;
-    if (canUpload && savedDoc) {
+    if (savedDoc && (canUpload || canDeleteDocuments)) {
       menu = document.createElement("div");
       menu.className = "mc-doc-menu";
       const dots = document.createElement("button");
@@ -543,20 +551,37 @@ export const render = (panel, machine, hooks, options = {}) => {
       menuPanel.className = "mc-doc-menu-panel";
       menuPanel.setAttribute("role", "menu");
 
-      const deleteLink = document.createElement("button");
-      deleteLink.type = "button";
-      deleteLink.className = "mc-doc-menu-action mc-doc-menu-delete";
-      deleteLink.setAttribute("role", "menuitem");
-      deleteLink.textContent = t("general.delete", "Eliminar");
-      deleteLink.addEventListener("click", async (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        closeDocMenus();
-        await deleteDocument();
-      });
+      if (canUpload) {
+        const changeLink = document.createElement("button");
+        changeLink.type = "button";
+        changeLink.className = "mc-doc-menu-action";
+        changeLink.setAttribute("role", "menuitem");
+        changeLink.textContent = t("general.change", "Cambiar");
+        changeLink.addEventListener("click", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          closeDocMenus();
+          fileInput.click();
+        });
+        menuPanel.appendChild(changeLink);
+      }
+
+      if (canDeleteDocuments) {
+        const deleteLink = document.createElement("button");
+        deleteLink.type = "button";
+        deleteLink.className = "mc-doc-menu-action mc-doc-menu-delete";
+        deleteLink.setAttribute("role", "menuitem");
+        deleteLink.textContent = t("general.delete", "Eliminar");
+        deleteLink.addEventListener("click", async (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          closeDocMenus();
+          await deleteDocument();
+        });
+        menuPanel.appendChild(deleteLink);
+      }
 
       menu.appendChild(dots);
-      menuPanel.appendChild(deleteLink);
       menu.appendChild(menuPanel);
       setupDocMenu(menu, dots);
       tile.appendChild(menu);
@@ -580,7 +605,9 @@ export const render = (panel, machine, hooks, options = {}) => {
   }
   if (canViewDocuments) {
     tiles.appendChild(createDocumentTile("manual", t("general.manual", "Manual")));
-    tiles.appendChild(createDocumentTile("other", t("general.otherDocumentation", "Otra documentación")));
+    if (canUploadDocuments) {
+      tiles.appendChild(createDocumentTile("other", t("general.otherDocumentation", "Otra documentación")));
+    }
   }
   if (canViewPlate || canViewDocuments) manualWrap.appendChild(tiles);
 

@@ -70,6 +70,7 @@ export {
 export {
   createMachineDocumentDownloadUrl,
   downloadMachineDocument,
+  uploadMachineAccessDocument,
 } from "./machines/documents";
 export {
   getPublicNfcLandingStats,

@@ -230,6 +230,12 @@
   opacity: 1;
 }
 
+@media (hover: none) {
+  .mc-doc-menu-dots {
+    opacity: 1;
+  }
+}
+
 .mc-doc-menu-dots:hover,
 .mc-doc-menu-dots[aria-expanded="true"],
 .mc-expand .mc-doc-menu-dots:hover,

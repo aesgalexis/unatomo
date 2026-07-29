@@ -316,6 +316,10 @@ function initSetupRegisterCode() {
   if (shouldOpenInviteGate() || shouldOpenFromQuery) {
     clearInviteGateFlag();
     if (box.hidden) toggleBox();
+    const registrationTitle = document.getElementById("registration-access-title");
+    requestAnimationFrame(() => {
+      registrationTitle?.scrollIntoView({ block: "start" });
+    });
   }
   async function go() {
     clearStatus();

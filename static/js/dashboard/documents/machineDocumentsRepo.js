@@ -83,6 +83,11 @@ const compressPlateImage = async (file) => {
   return canvasToBlob(canvas);
 };
 
+export const preparePlateImageUpload = async (file) => {
+  validatePlateImage(file);
+  return compressPlateImage(file);
+};
+
 export const validatePlateImage = (file) => {
   if (!file) throw new Error("file-missing");
   if (!ALLOWED_PLATE_TYPES.has(file.type)) throw new Error("file-type");
@@ -107,7 +112,7 @@ export const uploadPlateDocument = async ({ machine, file, uploadedBy }) => {
   const machineId = (machine.id || "").trim();
   if (!ownerUid || !machineId || !uploadedBy) throw new Error("missing-context");
 
-  const compressed = await compressPlateImage(file);
+  const compressed = await preparePlateImageUpload(file);
   const ext = extensionForType(compressed.type || "image/jpeg");
   const storagePath = `machine-docs/${ownerUid}/${machineId}/plate/plate.${ext}`;
   const storageRef = ref(storage, storagePath);

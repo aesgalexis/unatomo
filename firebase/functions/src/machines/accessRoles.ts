@@ -53,8 +53,8 @@ export const DEFAULT_ACCESS_ROLE_PERMISSIONS: Record<
     completeTasks: true,
     addTaskNotes: true,
     changeStatus: true,
-    uploadImages: false,
-    uploadDocuments: false,
+    uploadImages: true,
+    uploadDocuments: true,
     deleteDocuments: false,
   },
   public: {

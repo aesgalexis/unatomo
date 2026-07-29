@@ -209,17 +209,15 @@
   background: color-mix(in srgb, var(--bg) 96%, transparent);
   color: var(--fg);
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
 }
 
-.mc-user-add-new {
-  border: 1px solid var(--border-subtle);
-  border-radius: 0.5rem;
-  padding: 0.2rem 0.4rem;
-  height: 32px;
-  font: inherit;
-  background: color-mix(in srgb, var(--bg) 96%, transparent);
-  color: var(--fg);
-  cursor: pointer;
+.mc-user-add-new:hover,
+.mc-user-add-new:focus-visible {
+  text-decoration: none;
 }
 
 

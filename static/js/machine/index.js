@@ -15,6 +15,7 @@ import {
   buildRemoveTaskUpdate,
   buildStatusToggleUpdate
 } from "/static/js/dashboard/tabs/tasks/taskActions.js";
+import { uploadMachineAccessDocument } from "./machineDocumentUploads.js";
 import { setTopbarSaveStatus } from "/static/js/topbar/save-status.js";
 import { t } from "/static/js/dashboard/i18n.js";
 import {
@@ -138,7 +139,7 @@ const readStoredMachineSession = (tagId) => {
   return session;
 };
 
-const showLogin = (machine, tagId, onSuccess) => {
+const showLogin = (machine, tagId, { onSuccess, onContinueAsGuest }) => {
   const overlay = document.createElement("div");
   overlay.className = "machine-login-overlay";
 
@@ -176,6 +177,19 @@ const showLogin = (machine, tagId, onSuccess) => {
   btn.className = "btn-add";
   btn.textContent = t("machine.enter", "Entrar");
 
+  const guestBtn = document.createElement("button");
+  guestBtn.type = "button";
+  guestBtn.className = "machine-login-guest";
+  guestBtn.textContent = t("machine.continueAsGuest", "Continuar sin iniciar sesi\u00f3n");
+
+  const register = document.createElement("p");
+  register.className = "machine-login-register";
+  register.append(t("machine.noAccount", "\u00bfNo tienes una cuenta?"), " ");
+  const registerLink = document.createElement("a");
+  registerLink.href = "/nfc/?setup=1#registration-access-title";
+  registerLink.textContent = t("machine.register", "Reg\u00edstrate");
+  register.appendChild(registerLink);
+
   btn.addEventListener("click", async () => {
     const username = userInput.value.trim();
     const password = passInput.value.trim();
@@ -208,6 +222,11 @@ const showLogin = (machine, tagId, onSuccess) => {
     }
   });
 
+  guestBtn.addEventListener("click", () => {
+    overlay.remove();
+    onContinueAsGuest(machine);
+  });
+
   panel.appendChild(title);
   if (publicDetails.textContent) panel.appendChild(publicDetails);
   if (plateUrl) panel.appendChild(plate);
@@ -215,8 +234,10 @@ const showLogin = (machine, tagId, onSuccess) => {
   panel.appendChild(passInput);
   panel.appendChild(error);
   panel.appendChild(btn);
+  panel.appendChild(guestBtn);
+  panel.appendChild(register);
   overlay.appendChild(panel);
-  document.body.appendChild(overlay);
+  mount.appendChild(overlay);
 };
 
 const waitForAuthState = () =>
@@ -370,11 +391,23 @@ const init = async () => {
 
   if (!session) {
     saveMachineSession(tagId, null, { remember: false });
-    showLogin(machineDoc, tagId, (userSession, verifiedMachine, permissions) => {
-      state.session = userSession;
-      state.session.permissions = permissions;
-      state.draft = normalizeMachineAccessDraft(verifiedMachine || machineDoc);
-      renderMachine();
+    showLogin(machineDoc, tagId, {
+      onSuccess: (userSession, verifiedMachine, permissions) => {
+        state.session = userSession;
+        state.session.permissions = permissions;
+        state.draft = normalizeMachineAccessDraft(verifiedMachine || machineDoc);
+        renderMachine();
+      },
+      onContinueAsGuest: (publicMachine) => {
+        state.session = {
+          username: "",
+          role: "public",
+          permissions: publicMachine.permissions || null,
+          source: "public"
+        };
+        state.draft = normalizeMachineAccessDraft(publicMachine);
+        renderMachine();
+      }
     });
     return;
   }
@@ -382,11 +415,23 @@ const init = async () => {
   const sessionAccess = await fetchMachineAccess(tagId, session);
   if (!sessionAccess.machine || sessionAccess.machine.publicAccess) {
     saveMachineSession(tagId, null, { remember: false });
-    showLogin(machineDoc, tagId, (userSession, verifiedMachine, permissions) => {
-      state.session = userSession;
-      state.session.permissions = permissions;
-      state.draft = normalizeMachineAccessDraft(verifiedMachine || machineDoc);
-      renderMachine();
+    showLogin(machineDoc, tagId, {
+      onSuccess: (userSession, verifiedMachine, permissions) => {
+        state.session = userSession;
+        state.session.permissions = permissions;
+        state.draft = normalizeMachineAccessDraft(verifiedMachine || machineDoc);
+        renderMachine();
+      },
+      onContinueAsGuest: (publicMachine) => {
+        state.session = {
+          username: "",
+          role: "public",
+          permissions: publicMachine.permissions || null,
+          source: "public"
+        };
+        state.draft = normalizeMachineAccessDraft(publicMachine);
+        renderMachine();
+      }
     });
     return;
   }
@@ -406,9 +451,27 @@ const renderMachine = () => {
 
   const role = session.role === "admin"
     ? "admin"
-    : normalizeAccessRole(session.role);
-  const configuredPermissions = machineDoc.accessRolePermissions || {};
+    : session.role === "public"
+      ? "public"
+      : normalizeAccessRole(session.role);
+  const configuredPermissions = session.permissions
+    ? {
+        ...(machineDoc.accessRolePermissions || {}),
+        [role]: session.permissions
+      }
+    : machineDoc.accessRolePermissions || {};
   const isDashboardAdmin = role === "admin" && session.source === "dashboard";
+  const canUploadDocuments = canUseCapability(
+    role,
+    "uploadDocuments",
+    configuredPermissions
+  );
+  const canDeleteDocuments = isDashboardAdmin;
+  const canUploadTaskImages = canUseCapability(
+    role,
+    "uploadImages",
+    configuredPermissions
+  );
   const visibleTabs = ["quehaceres", "general", "historial", "configuracion"].filter((tab) =>
     canSeeTab(role, tab, configuredPermissions)
   );
@@ -423,11 +486,13 @@ const renderMachine = () => {
     canDeleteTasks: canUseCapability(role, "deleteTasks", configuredPermissions),
     canCompleteTasks: canUseCapability(role, "completeTasks", configuredPermissions),
     canAddTaskNotes: canUseCapability(role, "addTaskNotes", configuredPermissions),
-    canUploadTaskImages: canUseCapability(role, "uploadImages", configuredPermissions),
+    canUploadTaskImages,
     canDownloadHistory: canDownloadHistory(role, configuredPermissions),
     canEditGeneral: isDashboardAdmin,
     canViewPlate: canUseCapability(role, "viewPlate", configuredPermissions),
     canViewDocuments: canUseCapability(role, "viewDocuments", configuredPermissions),
+    canUploadDocuments,
+    canDeleteDocuments,
     canEditLocation: isDashboardAdmin,
     canEditConfig: isDashboardAdmin,
     visibleTabs,
@@ -506,6 +571,48 @@ const renderMachine = () => {
     state.draft = { ...machineDoc, ...updates };
     renderMachine();
     autoSave.saveNow(state.tagId, "task-note");
+  };
+
+  hooks.onAddTaskImages = async (id, taskId, files = []) => {
+    if (!canUploadTaskImages || !hooks.onUploadMachineDocument) return;
+    const task = machineDoc.tasks?.find((item) => item.id === taskId);
+    const selected = Array.from(files || []).slice(0, 10);
+    if (!task || !selected.length) return;
+    const uploadedAttachments = [];
+    let failedUploads = 0;
+    notifyTopbar(t("dashboard.incidentUploadingImages", "Subiendo imágenes..."));
+    for (const file of selected) {
+      try {
+        const uploaded = await hooks.onUploadMachineDocument(
+          id,
+          "other",
+          file,
+          null,
+          {
+            silent: true,
+            deferRender: true,
+            rethrow: true,
+            preserveTab: true,
+            documentMetadata: {
+              context: "task-attachment",
+              linkedTaskId: task.id,
+              linkedStatusCycleId: task.statusCycleId || ""
+            }
+          }
+        );
+        if (uploaded) uploadedAttachments.push(uploaded);
+      } catch {
+        failedUploads += 1;
+      }
+    }
+    if (uploadedAttachments.length) {
+      renderMachine();
+    }
+    if (failedUploads) {
+      notifyTopbar(t("dashboard.incidentImageUploadError", "Alguna imagen no se pudo subir"));
+    } else if (uploadedAttachments.length) {
+      notifyTopbar(t("dashboard.incidentImagesUploaded", "Imágenes guardadas"));
+    }
   };
 
   hooks.onEditTask = (id, taskId, patch) => {
@@ -663,6 +770,58 @@ const renderMachine = () => {
         );
       }
     });
+  } else if (
+    session.source === "machine" &&
+    (canUploadDocuments || canUploadTaskImages)
+  ) {
+    hooks.onUploadMachineDocument = async (
+      id,
+      kind,
+      file,
+      statusEl,
+      options = {}
+    ) => {
+      if (kind === "other" && options.documentMetadata?.context === "task-attachment") {
+        if (!canUploadTaskImages) throw new Error("permission-denied");
+      } else if (!canUploadDocuments) {
+        throw new Error("permission-denied");
+      }
+      const uploadResult = await uploadMachineAccessDocument({
+        tagId: state.tagId,
+        session: state.session,
+        kind,
+        file,
+        documentMetadata: options.documentMetadata || {}
+      });
+      const uploaded = uploadResult.document;
+      const currentDocuments = state.draft.documents || {};
+      const documents = kind === "other"
+        ? {
+            ...currentDocuments,
+            other: [
+              ...(Array.isArray(currentDocuments.other) ? currentDocuments.other : []),
+              uploaded
+            ]
+          }
+        : {
+            ...currentDocuments,
+            [kind]: uploaded
+          };
+      state.draft = {
+        ...state.draft,
+        ...(uploadResult.operationalPatch || {}),
+        documents
+      };
+      if (statusEl) {
+        statusEl.textContent = t("general.uploadSaved", "Archivo guardado");
+        statusEl.dataset.state = "ok";
+      }
+      if (!options.silent) {
+        notifyTopbar(t("general.uploadSaved", "Archivo guardado"));
+      }
+      return uploaded;
+    };
+    hooks.onRefreshMachineDocuments = () => {};
   }
 };
 

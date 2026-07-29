@@ -145,8 +145,9 @@ The assignable local roles are deliberately limited:
 - `operator`: execute existing work. Its default profile can complete or
   reopen tasks, add notes, and change machine status, but cannot create, edit,
   or delete task definitions.
-- `technician`: includes the operator workflow and can create and edit tasks,
-  read history, and view technical documents by default.
+- `technician`: includes the operator workflow and can create and edit task
+  definitions, read history, and upload images and technical documents by
+  default. It cannot delete task definitions or machine documents.
 
 `manager`, `viewer`, and `external` are not assignable roles. Machine owners
 and accepted administrators are authenticated account relationships, not

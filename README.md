@@ -55,6 +55,16 @@ committed with real project values.
 Fill `.firebaserc` with the Firebase project alias for local owner-run Firebase
 commands; that file is also ignored.
 
+For the local-only three-role QR machine visual lab:
+
+```powershell
+npm.cmd run dev:machine-lab
+```
+
+This opens `dev/machine-lab/` with the live Test Machine QR page in three
+independent mobile frames for visitor, operator, and technician review. The lab
+itself is excluded from the production `dist/` build.
+
 ## Useful Commands
 
 ```powershell

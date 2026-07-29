@@ -1,8 +1,8 @@
 import {HttpsError} from "firebase-functions/v2/https";
 import {machinesCol, storageBucket} from "./firebase";
 
-const ACCOUNT_STORAGE_LIMIT_BYTES = 1024 * 1024 * 1024;
-const QR_FALLBACK_BYTES = 4 * 1024;
+export const ACCOUNT_STORAGE_LIMIT_BYTES = 1024 * 1024 * 1024;
+export const QR_FALLBACK_BYTES = 4 * 1024;
 
 export const toSafeStorageSize = (value: unknown) => {
   const parsed = Number(value || 0);
@@ -85,4 +85,3 @@ export const assertAccountStorageAvailable = async (
   }
   return usageBytes;
 };
-

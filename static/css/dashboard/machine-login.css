@@ -1,11 +1,19 @@
 .machine-login-overlay {
-  position: fixed;
-  inset: 0;
+  position: relative;
+  width: 100%;
+  min-height: max(520px, calc(100svh - 220px));
+  box-sizing: border-box;
+  padding: 1.25rem 0;
   background: color-mix(in srgb, #000 45%, transparent);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1200;
+  border-radius: 1rem;
+}
+
+.nfc-public-page .page-shell > .legal-footer.footer-disclosure {
+  position: relative;
+  z-index: 1;
 }
 
 .machine-login-panel {
@@ -82,4 +90,36 @@
   padding: 0.6rem 1.4rem;
   font-size: 0.95rem;
   line-height: 1.2;
+}
+
+.machine-login-guest {
+  display: block;
+  width: 100%;
+  margin-top: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.75rem;
+  background: transparent;
+  color: var(--fg);
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.machine-login-guest:hover,
+.machine-login-guest:focus-visible {
+  border-color: color-mix(in srgb, var(--fg) 52%, transparent);
+  background: color-mix(in srgb, var(--fg) 6%, transparent);
+}
+
+.machine-login-register {
+  margin: 0.85rem 0 0;
+  color: color-mix(in srgb, var(--fg) 68%, transparent);
+  font-size: 0.82rem;
+  text-align: center;
+}
+
+.machine-login-register a {
+  color: inherit;
+  text-underline-offset: 0.16em;
 }
