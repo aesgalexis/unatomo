@@ -11,6 +11,8 @@
     "dev:machine-lab": "vite --open /dev/machine-lab/",
     "dev:static": "node scripts/dev-server.mjs",
     "build": "node scripts/build-static.mjs",
+    "stats:code": "node scripts/generate-code-stats.mjs",
+    "build:with-stats": "npm run stats:code && npm run build",
     "preview": "vite preview",
     "site:publish": "node scripts/site-publish.mjs",
     "lint:links": "node scripts/lint-links.mjs",

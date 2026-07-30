@@ -4,14 +4,14 @@ Updated: 2026-07-28
 
 ## Purpose
 
-Use subagents to improve coverage, independent judgment, context hygiene, and
-verification quality. Speed is not the objective. A delegated task should earn
-its additional token cost by producing a useful independent result or by
-keeping noisy exploration out of the main thread.
+Subagents are optional and off by default. There is no per-task requirement to
+assess delegation or to read this document. Use it only when the user requests
+delegation or when a clearly independent, high-risk review is worth the extra
+context and token cost.
 
-For every non-trivial task, the primary agent should briefly assess whether one
-or more bounded subtasks would benefit from delegation. Use subagents when that
-assessment is positive; do not create them merely to satisfy a quota.
+A delegated task must produce a useful independent result or keep substantial
+noisy exploration out of the main thread. Speed alone is not a reason to
+delegate.
 
 ## When Delegation Is Useful
 
@@ -55,6 +55,8 @@ Do not delegate when:
   Create a new one only when a genuinely independent perspective is valuable.
 - Avoid delegation chains unless a subagent discovers a new, bounded task whose
   value clearly exceeds its context and token cost.
+- Do not fork the full conversation history by default. Pass only the recent
+  turns or a concise task-specific context package needed for the subtask.
 
 ## Model And Reasoning Guide
 
@@ -142,4 +144,3 @@ Official references:
 - [Codex subagents](https://learn.chatgpt.com/docs/agent-configuration/subagents)
 - [GPT-5.6 Luna model page](https://developers.openai.com/api/docs/models/gpt-5.6-luna)
 - [Codex configuration reference](https://learn.chatgpt.com/docs/config-file/config-reference)
-

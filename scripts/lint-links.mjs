@@ -4,17 +4,23 @@ import path from "node:path";
 const root = process.cwd();
 const exts = new Set([".html", ".js", ".mjs", ".css"]);
 const ignoreDirs = new Set(["node_modules", ".git", "dist"]);
+const ignorePaths = new Set(["firebase/functions/lib"]);
+
+const toPosix = (value) => value.replaceAll("\\", "/");
 
 const walk = (dir, files = []) => {
   const entries = fs.readdirSync(dir, { withFileTypes: true });
   for (const entry of entries) {
+    const entryPath = path.join(dir, entry.name);
     if (entry.isDirectory()) {
       if (ignoreDirs.has(entry.name)) continue;
-      walk(path.join(dir, entry.name), files);
+      const relativePath = toPosix(path.relative(root, entryPath));
+      if (ignorePaths.has(relativePath)) continue;
+      walk(entryPath, files);
     } else if (entry.isFile()) {
       const ext = path.extname(entry.name);
       if (exts.has(ext)) {
-        files.push(path.join(dir, entry.name));
+        files.push(entryPath);
       }
     }
   }
@@ -36,22 +42,47 @@ const regex = /\/(?:static|es|en|nfc|controlpanel)\/[^\s"'<>)]*/g;
 for (const file of files) {
   const content = fs.readFileSync(file, "utf8");
   const matches = content.match(regex) || [];
-  matches.forEach((match) => rawMatches.push({ file, match }));
+  matches
+    .filter((match) => !match.includes("${"))
+    .forEach((match) => rawMatches.push({ file, match }));
 }
 
-const missing = [];
+const missingByTarget = new Map();
 for (const { file, match } of rawMatches) {
   const target = normalizeTarget(match);
   const diskPath = path.join(root, target.replace(/^\//, ""));
   if (!fs.existsSync(diskPath)) {
-    missing.push({ file, match, diskPath });
+    const existing = missingByTarget.get(target) || {
+      target,
+      references: 0,
+      files: new Set(),
+    };
+    existing.references += 1;
+    existing.files.add(toPosix(path.relative(root, file)));
+    missingByTarget.set(target, existing);
   }
 }
+
+const missing = [...missingByTarget.values()].sort((a, b) =>
+  a.target.localeCompare(b.target),
+);
 
 if (missing.length) {
   console.error("Enlaces faltantes:");
   missing.forEach((entry) => {
-    console.error(`- ${entry.match} (referenciado en ${entry.file})`);
+    const filesList = [...entry.files];
+    const example = filesList[0];
+    const extraFiles =
+      filesList.length > 1
+        ? `, ${filesList.length - 1} ${
+            filesList.length === 2 ? "archivo" : "archivos"
+          } más`
+        : "";
+    const referenceLabel =
+      entry.references === 1 ? "referencia" : "referencias";
+    console.error(
+      `- ${entry.target} (${entry.references} ${referenceLabel}; ${example}${extraFiles})`,
+    );
   });
   process.exit(1);
 } else {

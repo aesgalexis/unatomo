@@ -38,9 +38,6 @@ async function copyRecursive(src, dst) {
   }
 }
 
-await import("./generate-config.mjs");
-await import("./generate-code-stats.mjs");
-
 await rm(DIST, { recursive: true, force: true });
 await mkdir(DIST, { recursive: true });
 

@@ -1,95 +1,52 @@
-﻿# Desarrollo
+# Local Development
 
-## Requisitos
+This is the authoritative setup and local-command guide. Publishing and
+deployment instructions live in [DEPLOY_NOTES.md](DEPLOY_NOTES.md).
 
-- Node.js 22.12+ (recomendado) o 20.19+
-- Si usas Node 24 y Vite falla, cambia a Node LTS
+## Requirements
 
-## Configuración Firebase (runtime)
+- Node.js 22.12.0 (recommended; 20.19+ supported)
+- npm 11.0.0
+- Firebase project credentials for live backend flows
 
-El frontend lee la configuración de Firebase desde `static/js/config/runtime-config.js`,
-que se genera automáticamente desde `.env.local` o `.env`. Ese archivo generado
-queda fuera de git para no versionar la configuración real del proyecto.
+Use `npm.cmd` in Windows PowerShell if the execution policy blocks `npm`.
 
-1) Copia el ejemplo:
+## Setup
 
-```
+```powershell
+npm.cmd install
 copy .env.example .env.local
 copy .firebaserc.example .firebaserc
+npm.cmd run dev
 ```
 
-2) Rellena los valores reales de Firebase en `.env.local` y el proyecto local
-en `.firebaserc`.
+Fill `.env.local` with the Firebase web configuration and `.firebaserc` with
+the local project alias. The generated
+`static/js/config/runtime-config.js` is ignored and must not be committed with
+real values.
 
-Para verificar que no haya keys filtradas:
+## Development Commands
 
-```
-npm run scan:secrets
-```
-
-## Deploy (GitHub Pages)
-
-El workflow genera `runtime-config.js` desde secrets de GitHub.
-Configura estos secrets en el repositorio:
-
-- `FIREBASE_API_KEY`
-- `FIREBASE_AUTH_DOMAIN`
-- `FIREBASE_PROJECT_ID`
-- `FIREBASE_STORAGE_BUCKET`
-- `FIREBASE_MESSAGING_SENDER_ID`
-- `FIREBASE_APP_ID`
-- `FIREBASE_MEASUREMENT_ID`
-
-## Firebase CLI (rules/functions)
-
-Los artefactos de Firebase viven en `firebase/`:
-
-- Reglas: `firebase/firestore.rules`
-- Índices: `firebase/firestore.indexes.json`
-- Functions: `firebase/functions`
-
-El CLI sigue leyendo `firebase.json` desde la raíz.
-
-## Instalar
-
-```
-npm i
+```powershell
+npm.cmd run dev
+npm.cmd run dev:static
+npm.cmd run dev:machine-lab
 ```
 
-## Levantar entorno de desarrollo
+Use `dev:static` as the fallback if Vite fails. Run `npm.cmd run doctor` to
+diagnose dependency or Node-version problems.
 
-```
-npm run dev
-```
+## Validation
 
-Si `npm run dev` falla dentro de `node_modules/vite`, ejecuta:
+Choose checks proportionally to the change:
 
-```
-npm run doctor
-```
-
-Reinstala dependencias y, si hace falta, usa Node LTS o el servidor estático:
-
-```
-npm run dev:static
+```powershell
+node scripts\syntax-scan.mjs static\js
+npm.cmd run build
+npm.cmd run lint:links
+npm.cmd run scan:secrets
+npm.cmd run check:nfc:architecture
 ```
 
-## Probar rutas de máquina (hash)
-
-- Listado: `/nfc/es/index.html#/`
-- Detalle: `/nfc/es/index.html#/m/mx-101`
-- Config: `/nfc/es/index.html#/m/mx-101/config`
-
-## Checklist antes de publicar
-
-- `npm run lint:links`
-- Navegar:
-  - `/`
-  - `/nfc/index.html`
-  - `/nfc/es/index.html`
-  - `/nfc/es/contacto.html`
-  - `/nfc/es/privacidad.html`
-  - `/nfc/es/auth/login.html`
-  - `/nfc/es/auth/registro.html`
-  - `/nfc/es/auth/reset.html`
-- Sin errores en consola.
+`npm.cmd run build` does not update the tracked code statistics. Run
+`npm.cmd run stats:code` only when those statistics should be refreshed.

@@ -3,9 +3,12 @@
 This map is the quick human entry point. Deeper operating notes live in the
 feature-specific docs.
 
+For the larger model documents, inspect their headings first and read the
+relevant sections instead of loading the complete file by default.
+
 ## Root
 
-- `README.md`: public entry point and setup summary.
+- `README.md`: concise public entry point and documentation links.
 - `package.json`: scripts, metadata, and Node/npm version hints.
 - `firebase.json`: Firebase Hosting/Firestore/Storage/Functions configuration.
 - `.env.example`: template for local Firebase web config.
@@ -44,7 +47,10 @@ links, Tag ID, QR cleanup, callable Functions, or data permissions.
 
 ## Scripts
 
-- `scripts/build-static.mjs`: static build output to `dist/`.
+- `scripts/build-static.mjs`: static build output to `dist/`; it does not
+  regenerate tracked code statistics.
+- `scripts/generate-code-stats.mjs`: explicitly refreshes
+  `static/data/code-stats.json`.
 - `scripts/generate-config.mjs`: generates runtime Firebase config.
 - `scripts/dev-server.mjs`: simple static development server.
 - `scripts/site-publish.mjs`: owner-run publish helper.
@@ -55,25 +61,13 @@ links, Tag ID, QR cleanup, callable Functions, or data permissions.
 
 ## Documentation Routing
 
-- `docs/SUBAGENTS.md`: quality-first delegation, model/reasoning selection,
-  token discipline, edit ownership, and subagent verification.
+- `docs/SUBAGENTS.md`: optional delegation playbook; read only when delegation
+  is explicitly requested or clearly justified.
 - `docs/PROJECT_OVERVIEW.md`: what the product does and why it exists.
-- `docs/DEV.md`: local setup and development commands.
+- `docs/DEV.md`: authoritative local setup and development commands.
 - `docs/DASHBOARD_MODEL.md`: dashboard, cards, Tag ID, QR print, menu, and i18n.
 - `docs/FIREBASE_MODEL.md`: Firebase data flows and permission model.
 - `docs/ACCESS_ROLES_MODEL.md`: QR/NFC access, global users, roles, and staged role-model migration.
 - `docs/FUNCTIONS_ARCHITECTURE.md`: callable Functions structure.
 - `docs/DEPLOY_NOTES.md`: publish/deploy policy and commands.
 - `docs/WHATS_NEW_POLICY.md`: public What's New/Novedades policy.
-
-## Ignored Local Data
-
-- `node_modules/`
-- `dist/`
-- `.vite/`
-- `.backups/`
-- `.env*` except `.env.example`
-- `codex-memory/`
-
-Do not commit secrets, backup snapshots, local memory notes, service-account
-files, or private production data.

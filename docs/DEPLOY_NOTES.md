@@ -52,6 +52,9 @@ npm.cmd run doctor
 - `node scripts/build-static.mjs`
 
 The static output is written to `dist/`.
+The normal build does not rewrite `static/data/code-stats.json`. Refresh it
+explicitly with `npm.cmd run stats:code`, or use
+`npm.cmd run build:with-stats` when both outputs are needed.
 
 `static/js/config/runtime-config.js` is generated from `.env.local`, `.env`, or
 GitHub Actions secrets and is intentionally ignored by git. Do not commit real
@@ -68,7 +71,9 @@ never commit a real debug token.
 npm.cmd run site:publish
 ```
 
-This generates runtime config, builds the static site, commits when there are changes, and attempts to push.
+This runs `build:with-stats`, commits when there are changes, and attempts to
+push. The GitHub Pages workflow also uses `build:with-stats`, so deployed code
+statistics remain current without making ordinary local builds rewrite them.
 
 If push is rejected with `fetch first`, the remote branch has commits not present locally. Fetch/integrate remote changes before pushing. Do not force push unless the user explicitly asks and the remote state has been reviewed.
 
