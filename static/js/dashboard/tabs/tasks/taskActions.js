@@ -1,4 +1,4 @@
-import { normalizeTasks } from "./tasksModel.js";
+import { normalizeTaskAssignee, normalizeTasks } from "./tasksModel.js";
 import {
   getCompletionDuration,
   getOverdueDuration,
@@ -10,6 +10,9 @@ export const RESTORE_OPERATION_TASK_SOURCE = "status-out-of-service";
 const createId = (prefix) =>
   (window.crypto?.randomUUID && window.crypto.randomUUID()) ||
   `${prefix}_${Date.now().toString(36)}`;
+
+const sameAssignment = (left, right) =>
+  JSON.stringify(left || null) === JSON.stringify(right || null);
 
 export const createStatusCycleId = (machineId) =>
   `status_${machineId || "machine"}_${Date.now().toString(36)}`;
@@ -65,7 +68,8 @@ export const buildAddTaskUpdate = (machine, task, user, now = new Date().toISOSt
         taskId: task.id,
         title: task.title || "Tarea",
         description: task.description || "",
-        user
+        user,
+        assignedTo: task.assignedTo || null
       }
     ]
   };
@@ -84,6 +88,7 @@ export const buildRemoveTaskUpdate = (machine, taskId, user, now = new Date().to
         title: removed?.title || "Tarea",
         description: removed?.description || "",
         user,
+        assignedTo: removed?.assignedTo || null,
         source: removed?.source || "",
         statusCycleId: getRestoreTaskCycleId(removed, machine)
       }
@@ -122,6 +127,7 @@ export const buildAddTaskNoteUpdate = (
         title: task?.title || "Tarea",
         note: note.text,
         user,
+        assignedTo: task?.assignedTo || null,
         source: task?.source || "",
         statusCycleId: getRestoreTaskCycleId(task, machine)
       }
@@ -166,6 +172,7 @@ export const buildAddTaskAttachmentsUpdate = (
       contentType: attachment.contentType || "",
       storagePath: attachment.storagePath || "",
       user,
+      assignedTo: task.assignedTo || null,
       source: task.source || "",
       statusCycleId: getRestoreTaskCycleId(task, machine)
     }))
@@ -183,9 +190,13 @@ export const buildEditTaskUpdate = (
   const baseTasks = normalizeTasks(machine.tasks || []);
   const before = baseTasks.find((task) => task.id === taskId);
   if (!before) return null;
+  const hasAssignmentPatch = Object.prototype.hasOwnProperty.call(patch, "assignedTo");
   const tasks = baseTasks.map((task) => {
     if (task.id !== taskId) return task;
     const frequency = patch.frequency || task.frequency || "puntual";
+    const assignedTo = hasAssignmentPatch
+      ? normalizeTaskAssignee(patch.assignedTo)
+      : task.assignedTo || null;
     return {
       ...task,
       title: (patch.title || task.title || "Tarea").toString().trim().slice(0, 64),
@@ -196,26 +207,54 @@ export const buildEditTaskUpdate = (
           ? Math.max(1, Math.min(999, Number(patch.customDueAmount || 1) || 1))
           : null,
       customDueUnit: frequency === "custom" ? patch.customDueUnit || "days" : null,
+      assignedTo,
       createdAt: now,
       lastCompletedAt: null
     };
   });
   const task = tasks.find((item) => item.id === taskId);
+  const assignmentChanged = !sameAssignment(before.assignedTo, task?.assignedTo);
+  const definitionChanged = [
+    "title",
+    "description",
+    "frequency",
+    "customDueAmount",
+    "customDueUnit"
+  ].some((key) => JSON.stringify(before[key] ?? null) !== JSON.stringify(task?.[key] ?? null));
+  if (!definitionChanged) {
+    task.createdAt = before.createdAt;
+    task.lastCompletedAt = before.lastCompletedAt;
+  }
+  const appendedLogs = [];
+  if (definitionChanged) {
+    appendedLogs.push({
+      ts: now,
+      type: "task_edited",
+      taskId,
+      title: task?.title || "Tarea",
+      description: task?.description || "",
+      user,
+      assignedTo: task?.assignedTo || null,
+      source: task?.source || "",
+      statusCycleId: getRestoreTaskCycleId(task, machine)
+    });
+  }
+  if (assignmentChanged) {
+    appendedLogs.push({
+      ts: now,
+      type: "task_assignment_changed",
+      taskId,
+      title: task?.title || "Tarea",
+      user,
+      previousAssignedTo: before.assignedTo || null,
+      assignedTo: task?.assignedTo || null,
+      source: task?.source || "",
+      statusCycleId: getRestoreTaskCycleId(task, machine)
+    });
+  }
   return {
     tasks,
-    logs: [
-      ...(machine.logs || []),
-      {
-        ts: now,
-        type: "task_edited",
-        taskId,
-        title: task?.title || "Tarea",
-        description: task?.description || "",
-        user,
-        source: task?.source || "",
-        statusCycleId: getRestoreTaskCycleId(task, machine)
-      }
-    ]
+    logs: [...(machine.logs || []), ...appendedLogs]
   };
 };
 
@@ -252,6 +291,7 @@ export const buildCompleteTaskUpdate = (
       taskId,
       title: before.title || "Tarea",
       user,
+      assignedTo: before.assignedTo || null,
       overdue: !!getTaskTiming(before).pending,
       overdueDuration: getOverdueDuration(before),
       punctual: before.frequency === "puntual",
@@ -345,6 +385,7 @@ export const buildStatusToggleUpdate = (
           title,
           description,
           user,
+          assignedTo: restoreTask.assignedTo || null,
           source: RESTORE_OPERATION_TASK_SOURCE,
           statusCycleId
         });
@@ -356,6 +397,7 @@ export const buildStatusToggleUpdate = (
         title: restoreTask.title,
         note: initialNote.text,
         user,
+        assignedTo: restoreTask.assignedTo || null,
         source: RESTORE_OPERATION_TASK_SOURCE,
         statusCycleId
       });
@@ -384,6 +426,7 @@ export const buildStatusToggleUpdate = (
         title: restoreTask.title,
         description: restoreTask.description || "",
         user,
+        assignedTo: restoreTask.assignedTo || null,
         source: RESTORE_OPERATION_TASK_SOURCE,
         statusCycleId
       });
@@ -396,6 +439,7 @@ export const buildStatusToggleUpdate = (
           title: restoreTask.title,
           note: initialNote.text,
           user,
+          assignedTo: restoreTask.assignedTo || null,
           source: RESTORE_OPERATION_TASK_SOURCE,
           statusCycleId
         });

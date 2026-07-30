@@ -20,6 +20,7 @@ import {
   normalizeMachineUsername,
 } from "./access";
 import {getAccessRolePermissions} from "./accessRoles";
+import {canMachineUserSeeTask} from "./taskVisibility";
 
 const DOWNLOAD_TOKEN_TTL_MS = 2 * 60 * 1000;
 const DOWNLOAD_TOKEN_COLLECTION = "machine_document_download_tokens";
@@ -375,7 +376,7 @@ export const uploadMachineAccessDocument = onRequest(
         ) {
           throw new HttpsError("permission-denied", "tag-machine-mismatch");
         }
-        assertLocalUploadAllowed(
+        const currentUser = assertLocalUploadAllowed(
           current,
           username,
           documentMetadata,
@@ -435,6 +436,9 @@ export const uploadMachineAccessDocument = onRequest(
           if (!linkedTaskId || !linkedTask) {
             throw new HttpsError("failed-precondition", "task-not-found");
           }
+          if (!canMachineUserSeeTask(linkedTask, currentUser)) {
+            throw new HttpsError("permission-denied", "task-not-visible");
+          }
           const linkedStatusCycleId = (
             linkedTask.statusCycleId ||
             access.activeStatusCycleId ||
@@ -474,6 +478,7 @@ export const uploadMachineAccessDocument = onRequest(
               contentType,
               storagePath: uploadedPath,
               user: username,
+              assignedTo: linkedTask.assignedTo || null,
               source: (linkedTask.source || "").toString(),
               statusCycleId: linkedStatusCycleId,
             },

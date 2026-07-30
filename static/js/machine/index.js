@@ -74,6 +74,7 @@ const verifyMachineAccessUserCallable = httpsCallable(functions, "verifyMachineA
 const updateMachineAccessOperationalCallable = httpsCallable(functions, "updateMachineAccessOperational");
 
 const createLocalMachineSession = (username, role, options = {}) => ({
+  userId: options.userId || "",
   username,
   role: role || t("machine.userRoleFallback", "usuario"),
   permissions: options.permissions || null,
@@ -213,6 +214,7 @@ const showLogin = (machine, tagId, { onSuccess, onContinueAsGuest }) => {
       const verifiedMachine = response?.data?.machine || null;
       const permissions = response?.data?.permissions || null;
       const userSession = createLocalMachineSession(verifiedUser.username || username, verifiedUser.role, {
+        userId: verifiedUser.userId,
         remembered: false,
         permissions,
         sessionId: verifiedSession.id,

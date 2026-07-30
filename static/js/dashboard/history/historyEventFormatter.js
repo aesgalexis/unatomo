@@ -107,6 +107,16 @@ export const formatHistoryLog = (log = {}, options = {}) => {
     return `${t("history.taskEdited", "Tarea editada")}: ${title}${user}`;
   }
 
+  if (log.type === "task_assignment_changed") {
+    const title = log.title || t("history.task", "Tarea");
+    const username = String(log.assignedTo?.username || "").trim();
+    const assignment = username
+      ? t("history.taskAssigned", (value) => `Tarea asignada a ${value}`)(username)
+      : t("history.taskUnassigned", "Asignación eliminada");
+    const user = completedBy(log.user);
+    return `${assignment}: ${title}${user}`;
+  }
+
   if (log.type === "admin_accept") {
     const admin = log.admin ? ` ${log.admin}` : "";
     const user = completedBy(log.user);

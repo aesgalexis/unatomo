@@ -40,6 +40,7 @@ const isTaskChildLog = (log = {}) =>
   isTaskAttachmentLog(log) ||
   log.type === "task" ||
   log.type === "task_edited" ||
+  log.type === "task_assignment_changed" ||
   log.type === "task_removed";
 
 const addGroupedLog = (map, key, entry) => {

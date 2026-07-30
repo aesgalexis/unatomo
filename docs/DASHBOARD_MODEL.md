@@ -252,6 +252,25 @@ Task implementation files:
 - `static/js/dashboard/tabs/tasks/tasksTime.js`: frequency and due/overdue calculation, including custom frequency.
 - `static/js/dashboard/cardHooks/taskHooks.js`: machine-card task hooks for create, remove, note, edit, and complete actions.
 - `static/js/dashboard/tabs/historial.js`: history rendering. Task notes, task completion/edit events, and the status-linked return to `operativa` are grouped under the original task-created log when the log has a matching `taskId`; title fallback exists for older records.
+
+Task assignment:
+
+- Machine tasks may include `assignedTo: { userId, username, role }`. Missing
+  or `null` assignment means the task is visible to every local user who can
+  view tasks on that machine.
+- Only machine-local `operator` and `technician` users are assignable. Owners
+  and accepted administrators manage and see every task but are not assignment
+  targets.
+- An assigned task is returned only to its assigned local user. Owners and
+  accepted administrators retain their existing create, edit, complete, and
+  delete behavior.
+- Assignment is preserved across recurring completions. Assignment-only edits
+  do not restart the task schedule, and assignment changes are written as
+  `task_assignment_changed` history events.
+- Local task projections also remove history rows belonging to tasks assigned
+  to another user. Local operational updates merge the caller's visible task
+  subset back into the canonical access document so hidden tasks cannot be
+  removed or modified accidentally.
 - Individual machine history is read-only: entries come from product actions and cannot be added manually from the history tab. Legacy manual intervention entries remain renderable.
 - `static/js/dashboard/rendering/dashboardRenderer.js`: coordinates the
   machine-card render loop.

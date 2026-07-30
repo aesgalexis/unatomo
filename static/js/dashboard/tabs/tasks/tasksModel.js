@@ -2,6 +2,7 @@ const MAX_TITLE = 64;
 const MAX_DESCRIPTION = 1024;
 const MAX_NOTE = 512;
 const CUSTOM_UNITS = ["hours", "days", "weeks", "months"];
+const ASSIGNABLE_ROLES = ["operator", "technician"];
 export const RESTORE_OPERATION_TASK_SOURCE = "status-out-of-service";
 
 const toIso = (value) => {
@@ -24,6 +25,15 @@ const normalizeAttachment = (raw) => {
     uploadedAt: toIso(raw.uploadedAt),
     uploadedBy: raw.uploadedBy || null
   };
+};
+
+export const normalizeTaskAssignee = (raw) => {
+  if (!raw || typeof raw !== "object") return null;
+  const userId = String(raw.userId || raw.id || "").trim().slice(0, 160);
+  const username = String(raw.username || "").trim().slice(0, 60);
+  const role = raw.role === "tecnico" ? "technician" : String(raw.role || "").trim();
+  if ((!userId && !username) || !ASSIGNABLE_ROLES.includes(role)) return null;
+  return { userId, username, role };
 };
 
 export const normalizeTask = (raw) => {
@@ -76,6 +86,7 @@ export const normalizeTask = (raw) => {
     createdAt: toIso(raw.createdAt),
     lastCompletedAt: raw.lastCompletedAt ?? null,
     createdBy: raw.createdBy || null,
+    assignedTo: normalizeTaskAssignee(raw.assignedTo),
     source: raw.source || null,
     automated: raw.automated === true,
     statusTarget: raw.statusTarget || null,
@@ -104,7 +115,8 @@ export const createTask = ({
   frequency,
   customDueAmount,
   customDueUnit,
-  createdBy
+  createdBy,
+  assignedTo
 }) => {
   const cleanDesc = (description || "").trim();
   const trimmedDesc =
@@ -133,7 +145,8 @@ export const createTask = ({
       attachments: [],
       createdAt: new Date().toISOString(),
       lastCompletedAt: null,
-      createdBy: createdBy || null
+      createdBy: createdBy || null,
+      assignedTo: normalizeTaskAssignee(assignedTo)
     }
   };
 };

@@ -149,6 +149,13 @@ The assignable local roles are deliberately limited:
   definitions, read history, and upload images and technical documents by
   default. It cannot delete task definitions or machine documents.
 
+Machine tasks can be left unassigned or assigned to one local `operator` or
+`technician`. Assigned tasks and their task-linked history are visible only to
+that local identity; owners and accepted administrators always retain full
+visibility and their existing management permissions. Assignment narrows
+visibility, while the role capability profile still decides which actions the
+assigned user may perform.
+
 `manager`, `viewer`, and `external` are not assignable roles. Machine owners
 and accepted administrators are authenticated account relationships, not
 local PIN roles. Public access is a safe unauthenticated projection, not a

@@ -18,6 +18,10 @@ import {
   getAccessRolePermissions,
   normalizeAccessRole,
 } from "./accessRoles";
+import {
+  filterTaskDataForUser,
+  getTaskAssignee,
+} from "./taskVisibility";
 
 const MACHINE_SESSION_TTL_MS = 8 * 60 * 60 * 1000;
 const MACHINE_SESSION_CLEANUP_LIMIT = 400;
@@ -30,6 +34,29 @@ export const normalizeMachineUsername = (value: unknown) =>
     .trim()
     .replace(/\s+/g, " ")
     .toLowerCase();
+
+const sanitizeAssignableUsers = (value: unknown) =>
+  (Array.isArray(value) ? value : [])
+    .map((raw) => {
+      const user = raw && typeof raw === "object" ?
+        raw as Record<string, unknown> :
+        {};
+      const username = (user.username || "").toString().trim();
+      const rawRole = (user.role || "").toString().trim().toLowerCase();
+      if (
+        !["operator", "technician", "usuario", "tecnico"].includes(rawRole)
+      ) {
+        return null;
+      }
+      const role = normalizeAccessRole(user.role);
+      if (!username) return null;
+      return {
+        userId: (user.id || "").toString().trim(),
+        username,
+        role,
+      };
+    })
+    .filter(Boolean);
 
 const hashPassword = (password: string, saltBase64: string) =>
   pbkdf2Sync(
@@ -95,26 +122,38 @@ const sanitizeMachineAccess = (
   data: FirebaseFirestore.DocumentData,
   machine: FirebaseFirestore.DocumentData,
   permissions?: AccessPermissions,
-) => ({
-  tenantId: (data.tenantId || "").toString(),
-  ownerUid: (data.ownerUid || data.tenantId || "").toString(),
-  machineId: (data.machineId || "").toString(),
-  title: (data.title || "").toString(),
-  brand: permissions?.viewMachine ? (data.brand || "").toString() : "",
-  model: permissions?.viewMachine ? (data.model || "").toString() : "",
-  serial: permissions?.viewMachine ? (data.serial || "").toString() : "",
-  year: permissions?.viewMachine ? data.year ?? null : null,
-  location: permissions?.viewMachine ? (data.location || "").toString() : "",
-  status: (data.status || "operativa").toString(),
-  documents: permissions?.viewDocuments ?
-    sanitizeDocuments(machine.documents) :
-    permissions?.viewPlate && machine.documents?.plate ?
-      {plate: sanitizeDocumentMetadata(machine.documents.plate)} :
-      {},
-  logs: permissions?.viewHistory && Array.isArray(data.logs) ? data.logs : [],
-  tasks: permissions?.viewTasks && Array.isArray(data.tasks) ? data.tasks : [],
-  accessRolePermissions: machine.accessRolePermissions || {},
-});
+  localUser?: Record<string, unknown> | null,
+) => {
+  const taskData = localUser ?
+    filterTaskDataForUser(data.tasks, data.logs, localUser) :
+    {
+      tasks: Array.isArray(data.tasks) ? data.tasks : [],
+      logs: Array.isArray(data.logs) ? data.logs : [],
+    };
+  return {
+    tenantId: (data.tenantId || "").toString(),
+    ownerUid: (data.ownerUid || data.tenantId || "").toString(),
+    machineId: (data.machineId || "").toString(),
+    title: (data.title || "").toString(),
+    brand: permissions?.viewMachine ? (data.brand || "").toString() : "",
+    model: permissions?.viewMachine ? (data.model || "").toString() : "",
+    serial: permissions?.viewMachine ? (data.serial || "").toString() : "",
+    year: permissions?.viewMachine ? data.year ?? null : null,
+    location: permissions?.viewMachine ? (data.location || "").toString() : "",
+    status: (data.status || "operativa").toString(),
+    documents: permissions?.viewDocuments ?
+      sanitizeDocuments(machine.documents) :
+      permissions?.viewPlate && machine.documents?.plate ?
+        {plate: sanitizeDocumentMetadata(machine.documents.plate)} :
+        {},
+    logs: permissions?.viewHistory ? taskData.logs : [],
+    tasks: permissions?.viewTasks ? taskData.tasks : [],
+    assignableUsers: permissions?.viewTasks ?
+      sanitizeAssignableUsers(machine.users) :
+      [],
+    accessRolePermissions: machine.accessRolePermissions || {},
+  };
+};
 
 const sanitizePublicMachine = (
   tagId: string,
@@ -125,6 +164,7 @@ const sanitizePublicMachine = (
     "public",
     machine.accessRolePermissions,
   );
+  const taskData = filterTaskDataForUser(access.tasks, access.logs, null);
   const documents = permissions.viewDocuments ?
     sanitizeDocuments(machine.documents) :
     permissions.viewPlate && machine.documents?.plate ?
@@ -144,12 +184,8 @@ const sanitizePublicMachine = (
     location: permissions.viewMachine ? (access.location || "").toString() : "",
     status: (access.status || "operativa").toString(),
     documents,
-    logs: permissions.viewHistory && Array.isArray(access.logs) ?
-      access.logs :
-      [],
-    tasks: permissions.viewTasks && Array.isArray(access.tasks) ?
-      access.tasks :
-      [],
+    logs: permissions.viewHistory ? taskData.logs : [],
+    tasks: permissions.viewTasks ? taskData.tasks : [],
     permissions,
     publicAccess: true,
   };
@@ -179,6 +215,105 @@ export const getValidMachineSession = async (
 
 const sameJson = (left: unknown, right: unknown) =>
   JSON.stringify(left ?? null) === JSON.stringify(right ?? null);
+
+const normalizeTaskAssignments = (
+  tasks: Array<Record<string, unknown>>,
+  usersValue: unknown,
+) => {
+  const users = (Array.isArray(usersValue) ? usersValue : [])
+    .filter((raw) => raw && typeof raw === "object")
+    .map((raw) => raw as Record<string, unknown>);
+  return tasks.map((task) => {
+    if (!task.assignedTo) return {...task, assignedTo: null};
+    const assignee = getTaskAssignee(task);
+    if (!assignee) {
+      throw new HttpsError("invalid-argument", "task-assignee-invalid");
+    }
+    const matched = users.find((user) => {
+      const userId = (user.id || "").toString().trim();
+      if (assignee.userId && userId) return assignee.userId === userId;
+      return (
+        !!assignee.username &&
+        normalizeMachineUsername(user.username) ===
+          normalizeMachineUsername(assignee.username)
+      );
+    });
+    if (!matched) {
+      throw new HttpsError("invalid-argument", "task-assignee-not-found");
+    }
+    const rawRole = (matched.role || "").toString().trim().toLowerCase();
+    if (
+      !["operator", "technician", "usuario", "tecnico"].includes(rawRole)
+    ) {
+      throw new HttpsError("invalid-argument", "task-assignee-role-invalid");
+    }
+    const role = normalizeAccessRole(matched.role);
+    return {
+      ...task,
+      assignedTo: {
+        userId: (matched.id || "").toString().trim(),
+        username: (matched.username || "").toString().trim(),
+        role,
+      },
+    };
+  });
+};
+
+const mergeVisibleTasks = (
+  currentTasks: Array<Record<string, unknown>>,
+  visibleCurrentTasks: Array<Record<string, unknown>>,
+  nextVisibleTasks: Array<Record<string, unknown>>,
+) => {
+  const visibleIds = new Set(
+    visibleCurrentTasks.map((task) => (task.id || "").toString()),
+  );
+  const currentIds = new Set(
+    currentTasks.map((task) => (task.id || "").toString()),
+  );
+  const nextById = new Map(
+    nextVisibleTasks.map((task) => [(task.id || "").toString(), task]),
+  );
+  const added = nextVisibleTasks.filter((task) =>
+    !currentIds.has((task.id || "").toString()),
+  );
+  const existing = currentTasks.flatMap((task) => {
+    const taskId = (task.id || "").toString();
+    if (!visibleIds.has(taskId)) return [task];
+    const next = nextById.get(taskId);
+    return next ? [next] : [];
+  });
+  return [...added, ...existing];
+};
+
+const assertTaskLogsBelongToVisibleTasks = (
+  logs: Array<Record<string, unknown>>,
+  currentTasks: Array<Record<string, unknown>>,
+  nextTasks: Array<Record<string, unknown>>,
+) => {
+  const currentById = new Map(
+    currentTasks.map((task) => [(task.id || "").toString(), task]),
+  );
+  const nextById = new Map(
+    nextTasks.map((task) => [(task.id || "").toString(), task]),
+  );
+  logs.forEach((log) => {
+    const taskId = (log.taskId || "").toString().trim();
+    if (!taskId) return;
+    const task = nextById.get(taskId) || currentById.get(taskId);
+    if (!task) {
+      throw new HttpsError("permission-denied", "task-not-visible");
+    }
+    if (
+      Object.prototype.hasOwnProperty.call(log, "assignedTo") &&
+      !sameJson(log.assignedTo, task.assignedTo)
+    ) {
+      throw new HttpsError(
+        "permission-denied",
+        "task-assignment-log-mismatch",
+      );
+    }
+  });
+};
 
 const assertOperationalPatchAllowed = (
   current: FirebaseFirestore.DocumentData,
@@ -238,6 +373,7 @@ const assertOperationalPatchAllowed = (
       "frequency",
       "customDueAmount",
       "customDueUnit",
+      "assignedTo",
     ].some((key) => !sameJson(before[key], nextTask[key]));
     if (definitionChanged && !permissions.editTasks) {
       throw new HttpsError("permission-denied", "task-edit-not-allowed");
@@ -398,7 +534,7 @@ export const getMachineAccessPublic = onCall(
         ok: true,
         machine: {
           id: accessSnap.id,
-          ...sanitizeMachineAccess(access, machine, permissions),
+          ...sanitizeMachineAccess(access, machine, permissions, currentUser),
         },
         permissions,
         role: normalizeAccessRole(currentUser.role),
@@ -478,6 +614,7 @@ export const verifyMachineAccessUser = onCall(
       machineId,
       tenantId,
       username: (user.username || username).toString(),
+      userId: (user.id || "").toString(),
       role,
       permissions,
       tokenHash: hashSessionToken(sessionToken),
@@ -488,13 +625,14 @@ export const verifyMachineAccessUser = onCall(
     return {
       ok: true,
       user: {
+        userId: (user.id || "").toString(),
         username: (user.username || username).toString(),
         role,
       },
       permissions,
       machine: {
         id: accessSnap.id,
-        ...sanitizeMachineAccess(access, machine, permissions),
+        ...sanitizeMachineAccess(access, machine, permissions, user),
       },
       session: {
         id: sessionId,
@@ -587,12 +725,72 @@ export const updateMachineAccessOperational = onCall(
       currentUser.role,
       machine.accessRolePermissions,
     );
-    assertOperationalPatchAllowed(access, status, logs, tasks, permissions);
+    const currentTasks = Array.isArray(access.tasks) ?
+      access.tasks as Array<Record<string, unknown>> :
+      [];
+    const currentLogs = Array.isArray(access.logs) ?
+      access.logs as Array<Record<string, unknown>> :
+      [];
+    const currentTaskData = filterTaskDataForUser(
+      currentTasks,
+      currentLogs,
+      currentUser,
+    );
+    const visibleTaskIds = new Set(
+      currentTaskData.tasks.map((task) => (task.id || "").toString()),
+    );
+    const hasHiddenRestoreTask = currentTasks.some((task) =>
+      task.source === "status-out-of-service" &&
+      !visibleTaskIds.has((task.id || "").toString()),
+    );
+    if (
+      (access.status || "operativa").toString() === "fuera_de_servicio" &&
+      status !== "fuera_de_servicio" &&
+      hasHiddenRestoreTask
+    ) {
+      throw new HttpsError(
+        "permission-denied",
+        "restore-task-assigned-to-other-user",
+      );
+    }
+    const currentVisibleTasks = normalizeTaskAssignments(
+      currentTaskData.tasks,
+      machine.users,
+    );
+    const nextVisibleTasks = normalizeTaskAssignments(
+      tasks as Array<Record<string, unknown>>,
+      machine.users,
+    );
+    const nextLogs = logs as Array<Record<string, unknown>>;
+    const projectedCurrent = {
+      ...access,
+      tasks: currentVisibleTasks,
+      logs: currentTaskData.logs,
+    };
+    assertOperationalPatchAllowed(
+      projectedCurrent,
+      status,
+      nextLogs,
+      nextVisibleTasks,
+      permissions,
+    );
+    const appendedLogs = nextLogs.slice(currentTaskData.logs.length);
+    assertTaskLogsBelongToVisibleTasks(
+      appendedLogs,
+      currentVisibleTasks,
+      nextVisibleTasks,
+    );
+    const mergedTasks = mergeVisibleTasks(
+      currentTasks,
+      currentTaskData.tasks,
+      nextVisibleTasks,
+    );
+    const mergedLogs = [...currentLogs, ...appendedLogs];
 
     await accessRef.update({
       status,
-      logs,
-      tasks,
+      logs: mergedLogs,
+      tasks: mergedTasks,
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       updatedBy: (session.username || "machine").toString(),
     });

@@ -148,7 +148,10 @@ frontend wrappers live under `static/js/dashboard/`.
   managed projection; valid local sessions receive only fields allowed by
   their `operator` or `technician` role. Operational updates enforce status
   and task capabilities in the backend instead of relying on hidden UI
-  controls. They can enforce
+  controls. Assigned machine tasks are filtered by the stable local-user ID
+  (with normalized username fallback for legacy data); unassigned tasks remain
+  visible to every authorized local user. Local writes merge only the caller's
+  visible subset, preserving tasks assigned to other users. They can enforce
   Firebase App Check when Functions are deployed with
   `ENFORCE_APP_CHECK=true`.
 - `uploadMachineAccessDocument`: raw document-upload endpoint for valid

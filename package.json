@@ -32,6 +32,7 @@
     "check:nfc:sorting": "node scripts/test-dashboard-sorting.mjs",
     "check:nfc:autosave": "node scripts/test-dashboard-autosave.mjs",
     "check:nfc:status-incident": "node scripts/test-dashboard-status-incident.mjs",
+    "check:nfc:task-assignment": "node scripts/test-dashboard-task-assignment.mjs",
     "check:machine-lab": "node scripts/check-machine-lab.mjs",
     "check:nfc:architecture": "node scripts/check-nfc-architecture.mjs"
   },

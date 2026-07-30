@@ -38,7 +38,8 @@ const isTaskChildLog = (log = {}) =>
   isTaskNoteLog(log) ||
   isTaskAttachmentLog(log) ||
   log.type === "task" ||
-  log.type === "task_edited";
+  log.type === "task_edited" ||
+  log.type === "task_assignment_changed";
 
 const isStatusDownLog = (log = {}) =>
   log.type === "status" && log.value === "fuera_de_servicio";

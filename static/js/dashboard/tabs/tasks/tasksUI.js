@@ -6,6 +6,7 @@ import {
   MAX_TASK_TITLE,
   RESTORE_OPERATION_TASK_SOURCE,
   createTask,
+  normalizeTaskAssignee,
   normalizeTasks
 } from "./tasksModel.js";
 import { getTaskTiming } from "./tasksTime.js";
@@ -58,6 +59,97 @@ const createFrequencySelect = (value = "") => {
   select.value = value || "";
   select.addEventListener("click", (event) => event.stopPropagation());
   return select;
+};
+
+const normalizeRole = (value) =>
+  value === "tecnico" || value === "technician" ? "technician" : "operator";
+
+const getAssignableUsers = (machine = {}) => {
+  const source = Array.isArray(machine.assignableUsers)
+    ? machine.assignableUsers
+    : Array.isArray(machine.users)
+      ? machine.users
+      : [];
+  const seen = new Set();
+  return source
+    .filter((user) =>
+      ["operator", "technician", "usuario", "tecnico"].includes(
+        String(user?.role || "").trim().toLowerCase()
+      )
+    )
+    .map((user) => ({
+        userId: String(user?.userId || user?.id || "").trim(),
+        username: String(user?.username || "").trim(),
+        role: normalizeRole(user?.role)
+      }))
+    .filter((user) => {
+      const key = user.userId || user.username.toLowerCase();
+      if (!key || !user.username || seen.has(key)) return false;
+      seen.add(key);
+      return user.role === "operator" || user.role === "technician";
+    })
+    .sort((left, right) =>
+      left.username.localeCompare(right.username, undefined, { sensitivity: "base" })
+    );
+};
+
+const getAssigneeKey = (assignee) => {
+  const normalized = normalizeTaskAssignee(assignee);
+  return normalized ? normalized.userId || `username:${normalized.username.toLowerCase()}` : "";
+};
+
+const createAssigneeSelect = (machine, value = null) => {
+  const select = document.createElement("select");
+  select.className = "task-assignee-select";
+  const unassigned = document.createElement("option");
+  unassigned.value = "";
+  unassigned.textContent = t("tasks.unassigned", "Sin asignar");
+  select.appendChild(unassigned);
+  getAssignableUsers(machine).forEach((user) => {
+    const option = document.createElement("option");
+    option.value = user.userId || `username:${user.username.toLowerCase()}`;
+    option.textContent = `${user.username} · ${
+      user.role === "technician"
+        ? t("config.technician", "Técnico")
+        : t("config.operator", "Operario")
+    }`;
+    option.dataset.userId = user.userId;
+    option.dataset.username = user.username;
+    option.dataset.role = user.role;
+    select.appendChild(option);
+  });
+  const current = normalizeTaskAssignee(value);
+  const currentKey = getAssigneeKey(current);
+  if (
+    currentKey &&
+    !Array.from(select.options).some((option) => option.value === currentKey)
+  ) {
+    const unavailable = document.createElement("option");
+    unavailable.value = currentKey;
+    unavailable.textContent = t(
+      "tasks.assigneeUnavailable",
+      (username) => `${username} · no disponible`
+    )(current.username);
+    unavailable.dataset.userId = current.userId;
+    unavailable.dataset.username = current.username;
+    unavailable.dataset.role = current.role;
+    select.appendChild(unavailable);
+  }
+  select.value = currentKey;
+  if (!select.value) select.value = "";
+  select.setAttribute("aria-label", t("tasks.assignTo", "Asignar a"));
+  select.addEventListener("click", (event) => event.stopPropagation());
+  return select;
+};
+
+const readAssigneeSelect = (select) => {
+  const option = select.options[select.selectedIndex];
+  if (!option?.value) return null;
+  return normalizeTaskAssignee({
+    userId: option.dataset.userId,
+    username: option.dataset.username,
+    role: option.dataset.role
+  });
 };
 
 const createCustomControls = (task = {}) => {
@@ -322,6 +414,16 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
       const meta = document.createElement("div");
       meta.className = "task-meta";
 
+      if (task.assignedTo?.username) {
+        const assignee = document.createElement("span");
+        assignee.className = "task-assignee";
+        assignee.textContent = t(
+          "tasks.assignedTo",
+          (username) => `Asignada a ${username}`
+        )(task.assignedTo.username);
+        meta.appendChild(assignee);
+      }
+
       const timing = getTaskTiming(task);
       const remaining = document.createElement("span");
       remaining.className = "task-remaining";
@@ -411,6 +513,7 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
         descInput.value = task.description || "";
         descInput.addEventListener("click", (event) => event.stopPropagation());
         const freqSelect = createFrequencySelect(task.frequency);
+        const assigneeSelect = createAssigneeSelect(machine, task.assignedTo);
         const custom = createCustomControls(task);
         custom.wrap.hidden = freqSelect.value !== "custom";
         freqSelect.addEventListener("change", () => {
@@ -431,13 +534,15 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
               description: descInput.value,
               frequency: freqSelect.value,
               customDueAmount: custom.amount.value,
-              customDueUnit: custom.unit.value
+              customDueUnit: custom.unit.value,
+              assignedTo: readAssigneeSelect(assigneeSelect)
             });
           }
         });
         wrap.appendChild(titleInput);
         wrap.appendChild(descInput);
         wrap.appendChild(freqSelect);
+        wrap.appendChild(assigneeSelect);
         wrap.appendChild(custom.wrap);
         wrap.appendChild(save);
         forms.appendChild(wrap);
@@ -544,6 +649,7 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
     descInput.addEventListener("click", (event) => event.stopPropagation());
 
     const freqSelect = createFrequencySelect("");
+    const assigneeSelect = createAssigneeSelect(machine);
     const custom = createCustomControls();
     custom.wrap.hidden = true;
     freqSelect.addEventListener("change", () => {
@@ -566,6 +672,7 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
         customDueAmount: custom.amount.value,
         customDueUnit: custom.unit.value,
         createdBy: context.createdBy || null,
+        assignedTo: readAssigneeSelect(assigneeSelect),
       });
       if (error) {
         const prev = createBtn.textContent;
@@ -578,11 +685,13 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
       descInput.value = "";
       custom.amount.value = "1";
       custom.unit.value = "days";
+      assigneeSelect.value = "";
     });
 
     formRow.appendChild(titleInput);
     formRow.appendChild(descInput);
     formRow.appendChild(freqSelect);
+    formRow.appendChild(assigneeSelect);
     formRow.appendChild(custom.wrap);
     formRow.appendChild(createBtn);
 
