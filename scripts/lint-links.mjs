@@ -32,7 +32,11 @@ const normalizeTarget = (url) => {
   if (target.includes("#")) target = target.split("#")[0];
   if (target.includes("?")) target = target.split("?")[0];
   if (target.endsWith("/")) target += "index.html";
-  return target;
+  try {
+    return decodeURIComponent(target);
+  } catch {
+    return target;
+  }
 };
 
 const rawMatches = [];
@@ -41,17 +45,45 @@ const regex = /\/(?:static|es|en|nfc|controlpanel)\/[^\s"'<>)]*/g;
 
 for (const file of files) {
   const content = fs.readFileSync(file, "utf8");
-  const matches = content.match(regex) || [];
-  matches
-    .filter((match) => !match.includes("${"))
-    .forEach((match) => rawMatches.push({ file, match }));
+  for (const result of content.matchAll(regex)) {
+    const match = result[0];
+    if (match.includes("${")) continue;
+
+    const contextStart = Math.max(0, result.index - 120);
+    const contextBefore = content.slice(contextStart, result.index);
+    const usesPathPredicate =
+      /\.(?:startsWith|endsWith|includes)\s*\([^)]*$/.test(contextBefore);
+    if (usesPathPredicate) continue;
+
+    rawMatches.push({
+      file,
+      match,
+      contextBefore,
+    });
+  }
 }
 
 const missingByTarget = new Map();
-for (const { file, match } of rawMatches) {
+for (const { file, match, contextBefore } of rawMatches) {
   const target = normalizeTarget(match);
-  const diskPath = path.join(root, target.replace(/^\//, ""));
-  if (!fs.existsSync(diskPath)) {
+  const candidates = [target];
+  const usesLocalizedResolver =
+    /\blocalizeEsPath\s*\([^)]*$/.test(contextBefore);
+  const usesDynamicBasePrefix =
+    /\$\{[^}]*\b(?:appBasePrefix|basePrefix)\b[^}]*\}/.test(contextBefore);
+
+  if (
+    /^\/(?:es|en)\//.test(target) &&
+    (usesLocalizedResolver || usesDynamicBasePrefix)
+  ) {
+    candidates.push(`/nfc${target}`);
+  }
+
+  const exists = candidates.some((candidate) =>
+    fs.existsSync(path.join(root, candidate.replace(/^\//, ""))),
+  );
+
+  if (!exists) {
     const existing = missingByTarget.get(target) || {
       target,
       references: 0,
