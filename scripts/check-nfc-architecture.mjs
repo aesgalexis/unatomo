@@ -7,6 +7,14 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
 
 const resolveRootImport = (request) => {
+  const normalizedRequest = path.normalize(request);
+  const rootPrefix = `${ROOT}${path.sep}`;
+  if (
+    path.isAbsolute(normalizedRequest) &&
+    (normalizedRequest === ROOT || normalizedRequest.startsWith(rootPrefix))
+  ) {
+    return normalizedRequest;
+  }
   const normalized = request.replace(/^[/\\]+/, "");
   if (/^[A-Za-z]:[\\/]/.test(normalized)) return path.normalize(normalized);
   return path.resolve(ROOT, normalized);
