@@ -161,8 +161,8 @@ The main dashboard page has internal hash views:
 - `#/usuarios` (Spanish) / `#/users` (English): dashboard-native local-user
   cards, machine assignments, and editable role capabilities.
 - `#/sugerencias`: the collaborator suggestions view.
-- `#/tareas` (Spanish) / `#/tasks` (English): the dashboard-level Tasks view
-  for `superadmin` and enabled collaborators. The legacy `#/todo` route remains
+- `#/tareas` (Spanish) / `#/tasks` (English): the account-wide machine Tasks
+  view for every authenticated account. The legacy `#/todo` route remains
   accepted as an alias.
 
 Files:
@@ -174,9 +174,9 @@ Files:
 - `static/js/dashboard/history/historyEventFormatter.js`: shared formatter and grouping helpers for machine history events. It preserves known legacy event text and falls back to `summary`, `message`, `messageKey`, or `type` for future events.
 - `static/js/dashboard/views/registry/globalRegistryModel.js`: flattens logs from all machines visible to the current account, sorts them newest-first, and groups task notes under their task-created event.
 - `static/js/dashboard/views/suggestions/`: renders and submits dashboard suggestions through callable functions.
-- `static/js/dashboard/views/todo/`: renders and manages dashboard-level Tasks
-  through separate callable functions. The internal `todo` name is retained to
-  keep this module distinct from per-machine tasks.
+- `static/js/dashboard/views/machineTasks/`: flattens the tasks from every
+  owner/admin machine already visible to the account and creates new tasks
+  through the same machine mutation/autosave path used by machine cards.
 - `static/js/dashboard/views/users/`: builds owner/admin access contexts and
   renders the dashboard-native user cards without replacing the standalone
   access page. At desktop tree width it uses the dashboard sidebar shell for
@@ -207,22 +207,26 @@ Suggestions scope:
 
 Dashboard Tasks scope:
 
-- The `Tareas` / `Tasks` link uses the violet accent only for `superadmin`; collaborators
-  see the ordinary navigation color.
-- The view is separate from suggestions and from the tasks belonging to each
-  machine. It uses its own callable functions and `dashboard_todos` collection.
-- `superadmin` and collaborators can use dashboard Tasks. Private items remain visible
-  only to their owner; shared items are visible to their participants.
-- Pending items are shown by default, with an eye control to include completed
-  items. The list uses 50-item pages and keeps its pagination above the shared
-  `Volver` / `Arriba` page navigation controls.
-- Dashboard Task deletion is available only to the owner through the row's
-  three-dot menu. Shared participants can still change completion state.
-- Mention autocomplete prefers each collaborator's current public
-  `accountHandle`. Accounts without one continue to use the local part of their
-  email during the transition. Shared dashboard Task documents persist participant
-  UIDs; the visible mention is metadata, never the permission key. Previous
-  handles continue resolving to the same UID permanently.
+- The `Tareas` / `Tasks` link is visible to every authenticated account and
+  always uses the ordinary navigation color.
+- The view lists tasks from all machines already visible to the account:
+  owner machines plus machines with accepted administrator access. It never
+  broadens machine access or queries hidden machines.
+- New tasks require a target machine and reuse the canonical per-machine task
+  model, history mutation, permissions, and autosave flow.
+- The global task composer is bidirectional with the structured create fields.
+  It recognizes `#Machine`, `**Title**`, `/frequency`, and `@assignee`; typing
+  commands updates the controls, while control changes rebuild the formatted
+  command. `#`, `/`, and `@` provide contextual autocomplete. An omitted
+  frequency remains a one-off task, matching per-machine creation.
+- The list uses 50-item pages. Search matches task, assignee, machine, location,
+  ownership/admin metadata, and due-state text.
+- Pending rows come from the current `machines.tasks` arrays. Completed rows
+  are reconstructed from each machine's `type: "task"` completion history so
+  completed one-off tasks remain visible after their active task is removed.
+  The section-navigation badge counts pending active tasks only.
+- The former personal/shared `dashboard_todos` feature is legacy data and is
+  not rendered by the dashboard.
 
 History event contract:
 

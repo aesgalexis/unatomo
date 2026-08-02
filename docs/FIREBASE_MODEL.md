@@ -39,14 +39,12 @@ Read this before changing data flows, callable functions, machine ownership, adm
 - `machine_transfer_invites`: pending/accepted/rejected machine ownership transfer requests.
 - `dashboard_layout/{uid}`: per-user dashboard grouping/layout preferences. Groups may include `parentGroupId` for one-level subgroups; `dashboardTitle` stores the user's editable dashboard topbar title; `registrySeenAt` stores the last time the user left the global registry view after seeing current activity; `machineViewMode` and `machineSortMode` store dashboard display preferences.
 - `dashboard_suggestions`: collaborator suggestions submitted from `#/sugerencias`. Normal collaborators see their own suggestions; `superadmin` sees all through callable functions.
-- `dashboard_todos`: dashboard-level Tasks managed through callable functions;
-  these remain separate from per-machine tasks.
-  Private items belong only to `ownerUid`. Shared items keep one canonical
-  document with `participantUids`, `owner`, and `sharedWith`: every participant
-  may complete or reopen it, while only `ownerUid` may delete it. Mentions
-  currently resolve from the local part of an enabled user's email address.
+- `dashboard_todos`: legacy personal/shared task documents. The dashboard no
+  longer reads this collection; account-wide Tasks are derived from the
+  canonical `machines.tasks` arrays visible through owner/admin access. Remove
+  legacy documents only through an explicitly approved production cleanup.
 - `users/{uid}.suggestionsCollaborator`: superadmin-controlled boolean that
-  enables both the `Sugerencias` and `To do` views for that user.
+  enables `Sugerencias`; it no longer controls the machine Tasks view.
 - `registration_codes`: unused, active single-use account registration codes.
   The backend atomically creates `users/{uid}` and deletes the redeemed code.
   User profiles do not retain the code that created them. Browser clients

@@ -61,6 +61,8 @@ links, Tag ID, QR cleanup, callable Functions, or data permissions.
 
 ## Documentation Routing
 
+- `docs/CHATGPT_CODEX_HANDOFF.md`: guide for turning owner conversations into
+  grounded, actionable implementation prompts for Codex.
 - `docs/SUBAGENTS.md`: optional delegation playbook; read only when delegation
   is explicitly requested or clearly justified.
 - `docs/PROJECT_OVERVIEW.md`: what the product does and why it exists.

@@ -68,6 +68,18 @@ export const createDashboardViewModeController = ({
         machineSortMode: state.dashboardLayout.machineSortMode
       }).catch(() => notifyTopbar(t("dashboard.saveError", "Error al guardar")));
       renderCards({preserveScroll: true, preserveAnchor: false});
+    },
+    onTaskStatusChange: (statusFilter) => {
+      state.todoStatusFilter = statusFilter;
+      state.todoPage = 1;
+      renderCards({ preserveScroll: true, preserveAnchor: false });
+      requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "smooth" }));
+    },
+    onTaskSortChange: (sort) => {
+      state.todoSort = sort;
+      state.todoPage = 1;
+      renderCards({ preserveScroll: true, preserveAnchor: false });
+      requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "smooth" }));
     }
   });
 

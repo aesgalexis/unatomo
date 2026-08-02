@@ -12,6 +12,20 @@ const SORT_MODES = [
   { id: "name", labelKey: "sortName", fallback: "Nombre A-Z" }
 ];
 
+const TASK_STATUS_MODES = [
+  { id: "visible", labelKey: "todoStatusVisible", fallback: "Por defecto" },
+  { id: "pending", labelKey: "todoStatusPending", fallback: "Pendientes" },
+  { id: "completed", labelKey: "todoStatusCompleted", fallback: "Completadas" },
+  { id: "all", labelKey: "todoStatusAll", fallback: "Todas" }
+];
+
+const TASK_SORT_MODES = [
+  { id: "created-desc", labelKey: "todoSortNewest", fallback: "Más recientes primero" },
+  { id: "created-asc", labelKey: "todoSortOldest", fallback: "Más antiguas primero" },
+  { id: "machine-asc", labelKey: "todoSortMachine", fallback: "Equipo A-Z" },
+  { id: "title-asc", labelKey: "todoSortTitle", fallback: "Título A-Z" }
+];
+
 const normalizeSort = (value) =>
   SORT_MODES.some((item) => item.id === value) ? value : "manual";
 
@@ -21,7 +35,9 @@ export const createDashboardViewMenu = ({
   currentSort = "manual",
   isTreeAvailable = () => true,
   onChange,
-  onSortChange
+  onSortChange,
+  onTaskStatusChange,
+  onTaskSortChange
 } = {}) => {
   const wrap = document.createElement("div");
   wrap.className = "dashboard-view-menu";
@@ -41,6 +57,9 @@ export const createDashboardViewMenu = ({
   menu.className = "dashboard-view-menu-panel";
   menu.setAttribute("role", "menu");
   menu.hidden = true;
+  let taskMode = false;
+  let currentTaskStatus = "visible";
+  let currentTaskSort = "created-desc";
 
   const close = () => {
     menu.hidden = true;
@@ -75,6 +94,37 @@ export const createDashboardViewMenu = ({
 
   const render = () => {
     menu.innerHTML = "";
+    button.setAttribute(
+      "aria-label",
+      taskMode ? t("dashboard.todoFilter", "Filtrar y ordenar") : t("dashboard.orderAria", "Ordenar")
+    );
+    if (taskMode) {
+      const statusLabel = document.createElement("div");
+      statusLabel.className = "dashboard-view-menu-label";
+      statusLabel.textContent = t("dashboard.todoStatus", "Estado");
+      menu.appendChild(statusLabel);
+      TASK_STATUS_MODES.forEach((item) => {
+        addItem(item, item.id === currentTaskStatus, (id) => {
+          if (id !== currentTaskStatus) onTaskStatusChange?.(id);
+        });
+      });
+
+      const separator = document.createElement("div");
+      separator.className = "dashboard-view-menu-separator";
+      menu.appendChild(separator);
+
+      const sortLabel = document.createElement("div");
+      sortLabel.className = "dashboard-view-menu-label";
+      sortLabel.textContent = t("dashboard.todoSort", "Ordenar por");
+      menu.appendChild(sortLabel);
+      TASK_SORT_MODES.forEach((item) => {
+        addItem(item, item.id === currentTaskSort, (id) => {
+          if (id !== currentTaskSort) onTaskSortChange?.(id);
+        });
+      });
+      return;
+    }
+
     const treeAvailable = isTreeAvailable();
     const activeViewMode = currentMode === "flat"
       ? "flat"
@@ -132,6 +182,17 @@ export const createDashboardViewMenu = ({
     },
     setSortMode(mode) {
       currentSort = normalizeSort(mode);
+      render();
+    },
+    setTaskMode(enabled, { statusFilter = "visible", sort = "created-desc" } = {}) {
+      close();
+      taskMode = !!enabled;
+      currentTaskStatus = TASK_STATUS_MODES.some((item) => item.id === statusFilter)
+        ? statusFilter
+        : "visible";
+      currentTaskSort = TASK_SORT_MODES.some((item) => item.id === sort)
+        ? sort
+        : "created-desc";
       render();
     },
     refresh() {

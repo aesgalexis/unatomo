@@ -239,7 +239,7 @@ if (mount) {
       suggestions: t("dashboard.navSuggestions", "Sugerencias"),
       todo: t("dashboard.navTodo", "Tareas")
     },
-    active: "dashboard",
+    active: "dashboard", showTodo: true,
     attachTooltip: attachDashboardTooltip
   });
 
@@ -625,7 +625,8 @@ if (mount) {
     loadSuggestions,
     loadTodos,
     notifyTopbar,
-    setInlineStatus: setDashboardInlineStatus, mount, groupTree, isLargeDashboardViewport: () => largeDashboardQuery.matches
+    setInlineStatus: setDashboardInlineStatus, mount, groupTree, autoSave, getDraftById, updateMachine,
+    isLargeDashboardViewport: () => largeDashboardQuery.matches
   });
 
   const {
@@ -865,7 +866,6 @@ if (mount) {
         return;
       }
       state.canSuggest = true;
-      state.canTodo = registration.profile?.suggestionsCollaborator === true;
       state.isSuperadmin = await isControlPanelUser(user);
     } catch {
       window.location.href = `${appBasePrefix || ""}/?setup=1`;

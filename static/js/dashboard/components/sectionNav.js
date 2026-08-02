@@ -146,13 +146,13 @@ export const createDashboardSectionNav = ({
 
   sectionNav.appendChild(dashboardLink);
   sectionNav.appendChild(registryLink);
-  sectionNav.appendChild(users.link);
-  sectionNav.appendChild(qr.link);
-  sectionNav.appendChild(gallery.link);
   sectionNav.appendChild(todo.link);
+  sectionNav.appendChild(users.link);
+  sectionNav.appendChild(gallery.link);
+  sectionNav.appendChild(qr.link);
 
   if (attachTooltip) {
-    [users.link, qr.link, gallery.link, todo.link].forEach((link) => {
+    [todo.link, users.link, gallery.link, qr.link].forEach((link) => {
       attachTooltip(link, { placement: "bottom" });
     });
   }

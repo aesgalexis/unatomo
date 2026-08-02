@@ -78,6 +78,7 @@ export const createDashboardTopbarController = (dependencies) => {
       usersLink.removeAttribute("aria-current");
     }
     addBar.classList.toggle("is-registry-view", isRegistry || isGallery || isSuggestions || isTodo);
+    addBar.classList.toggle("is-todo-view", isTodo);
     searchInput.placeholder = isRegistry
       ? t("dashboard.registrySearchPlaceholder", "Buscar en registro...")
       : isGallery
@@ -89,13 +90,13 @@ export const createDashboardTopbarController = (dependencies) => {
             : isUsers
               ? t("dashboard.usersSearchPlaceholder", "Buscar usuarios...")
             : t("dashboard.searchPlaceholder", "Buscar por nombre o ubicaci\u00f3n...");
-    const primaryControlsDisabled = state.loading || isRegistry || isGallery || isSuggestions || isTodo;
-    const viewMenuDisabled = primaryControlsDisabled || isUsers;
+    const addDisabled = state.loading || isRegistry || isGallery || isSuggestions;
+    const viewMenuDisabled = state.loading || isRegistry || isGallery || isSuggestions || isUsers;
     const searchDisabled = state.loading;
-    addBtn.disabled = primaryControlsDisabled;
+    addBtn.disabled = addDisabled;
     searchInput.disabled = searchDisabled;
     viewMenu.button.disabled = viewMenuDisabled;
-    addBtn.setAttribute("aria-disabled", primaryControlsDisabled ? "true" : "false");
+    addBtn.setAttribute("aria-disabled", addDisabled ? "true" : "false");
     searchInput.setAttribute("aria-disabled", searchDisabled ? "true" : "false");
     viewMenu.button.setAttribute("aria-disabled", viewMenuDisabled ? "true" : "false");
     addBtn.setAttribute(

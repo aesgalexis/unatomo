@@ -15,6 +15,14 @@ import {
   updateDashboardSuggestionResolved
 } from "../views/suggestions/suggestionsRepo.js";
 import {
+  buildAddTaskAttachmentsUpdate,
+  buildAddTaskNoteUpdate,
+  buildAddTaskUpdate,
+  buildCompleteTaskUpdate,
+  buildRemoveTaskUpdate
+} from "../tabs/tasks/taskActions.js";
+import { createTask } from "../tabs/tasks/tasksModel.js";
+import {
   createDashboardTodo,
   deleteDashboardTodo,
   updateDashboardTodo
@@ -54,7 +62,10 @@ export const createDashboardInternalViewController = ({
   setInlineStatus,
   mount,
   groupTree,
-  isLargeDashboardViewport
+  isLargeDashboardViewport,
+  autoSave,
+  getDraftById,
+  updateMachine
 }) => {
   const getUsersContext = (ownerUid = state.usersContextOwnerUid) => {
     const contexts = buildUserAccessContexts(state.draftMachines, state.uid);
@@ -424,47 +435,119 @@ export const createDashboardInternalViewController = ({
     });
     return finish();
   };
-  const renderTodo = () => {
+  const renderTodo = (viewOptions = {}) => {
     prepare();
-    renderTodoDashboardView(list, {
-      items: state.todos,
-      ready: state.todosReady,
-      canTodo: state.canTodo || state.isSuperadmin,
-      collaborators: state.todoCollaborators,
+    renderTodoDashboardView(list, state.draftMachines || [], {
       query: state.searchQuery,
       page: state.todoPage,
+      createOpen: state.todoCreateOpen,
       showCompleted: state.todoShowCompleted,
+      statusFilter: state.todoStatusFilter,
+      sort: state.todoSort,
       onPageChange: (page) => {
         state.todoPage = page;
         rerender({ preserveScroll: true });
+        requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "smooth" }));
       },
       onShowCompletedChange: (showCompleted) => {
         state.todoShowCompleted = showCompleted;
+        state.todoStatusFilter = "visible";
         state.todoPage = 1;
         rerender({ preserveScroll: true });
       },
-      onBack: () => { window.location.hash = "#/dashboard"; },
-      onToggle: async (todoId, completed) => {
-        try {
-          await updateDashboardTodo(todoId, completed);
-          await loadTodos({ preserveScroll: true });
-        } catch {
-          notifyTopbar(t("dashboard.saveError", "Error al guardar"));
+      onCreate: async (values) => {
+        const current = getDraftById(values.machineId);
+        if (!current) return;
+        const actor = state.adminLabel || t("dashboard.admin", "Administrador");
+        const { task } = createTask({ ...values, createdBy: actor });
+        updateMachine(current.id, buildAddTaskUpdate(current, task, actor));
+        rerender({ preserveScroll: true });
+        notifyTopbar(t("dashboard.taskCreated", "Tarea creada"));
+        await autoSave.saveNow(current.id, "add-task-global-view");
+      },
+      onAddTaskNote: async (machineId, taskId, text) => {
+        const current = getDraftById(machineId);
+        if (!current) return;
+        const actor = state.adminLabel || t("dashboard.admin", "Administrador");
+        const updates = buildAddTaskNoteUpdate(current, taskId, text, actor);
+        if (!updates) return;
+        updateMachine(machineId, updates);
+        rerender({ preserveScroll: true });
+        await autoSave.saveNow(machineId, "task-note-global-view");
+      },
+      onAddTaskImages: async (machineId, taskId, files = []) => {
+        const current = getDraftById(machineId);
+        const task = current?.tasks?.find((item) => item.id === taskId);
+        const selected = Array.from(files || []).slice(0, 10);
+        if (!current || !task || !selected.length || !viewOptions.uploadMachineDocument) return;
+        const actor = state.adminLabel || t("dashboard.admin", "Administrador");
+        const uploaded = [];
+        let failedUploads = 0;
+        notifyTopbar(t("dashboard.incidentUploadingImages", "Subiendo imágenes..."));
+        for (const file of selected) {
+          try {
+            const result = await viewOptions.uploadMachineDocument(
+              machineId,
+              "other",
+              file,
+              null,
+              {
+                silent: true,
+                deferRender: true,
+                rethrow: true,
+                preserveTab: true,
+                documentMetadata: {
+                  context: "task-attachment",
+                  linkedTaskId: task.id,
+                  linkedStatusCycleId: task.statusCycleId || ""
+                }
+              }
+            );
+            if (result) uploaded.push(result);
+          } catch {
+            failedUploads += 1;
+          }
+        }
+        const latest = getDraftById(machineId);
+        const updates = latest
+          ? buildAddTaskAttachmentsUpdate(latest, taskId, uploaded, actor)
+          : null;
+        if (!updates) {
+          if (failedUploads) {
+            notifyTopbar(t("dashboard.incidentImageUploadError", "Alguna imagen no se pudo subir"));
+          }
+          return;
+        }
+        updateMachine(machineId, updates);
+        rerender({ preserveScroll: true });
+        await autoSave.saveNow(machineId, "task-images-global-view");
+        if (failedUploads) {
+          notifyTopbar(t("dashboard.incidentImageUploadError", "Alguna imagen no se pudo subir"));
+        } else {
+          notifyTopbar(t("dashboard.incidentImagesUploaded", "Imágenes guardadas"));
         }
       },
-      onDelete: async (todoId, button) => {
-        if (button) button.disabled = true;
-        setInlineStatus(t("dashboard.todoDeleting", "Eliminando..."));
-        try {
-          await deleteDashboardTodo(todoId);
-          state.todos = (state.todos || []).filter((item) => item.id !== todoId);
-          setInlineStatus(t("dashboard.todoDeleted", "Tarea eliminada"), "ok");
-          rerender({ preserveScroll: true });
-          await loadTodos({ preserveScroll: true });
-        } catch {
-          if (button) button.disabled = false;
-          setInlineStatus(t("dashboard.todoDeleteError", "No se pudo eliminar"), "error");
-        }
+      onCompleteTask: async (machineId, taskId) => {
+        const current = getDraftById(machineId);
+        if (!current) return;
+        const actor = state.adminLabel || t("dashboard.admin", "Administrador");
+        const updates = buildCompleteTaskUpdate(machineId, current, taskId, actor);
+        if (!updates) return;
+        updateMachine(machineId, updates);
+        state.todoPage = 1;
+        rerender({ preserveScroll: true });
+        await autoSave.saveNow(machineId, "task-complete-global-view");
+      },
+      onRemoveTask: async (machineId, taskId) => {
+        const current = getDraftById(machineId);
+        if (!current) return;
+        const actor = state.adminLabel || t("dashboard.admin", "Administrador");
+        const updates = buildRemoveTaskUpdate(current, taskId, actor);
+        if (!updates) return;
+        updateMachine(machineId, updates);
+        state.todoPage = 1;
+        rerender({ preserveScroll: true });
+        await autoSave.saveNow(machineId, "task-remove-global-view");
       },
       onSubmit: async (rawText, controls = {}) => {
         const textValue = (rawText || "").toString().trim();
@@ -497,12 +580,8 @@ export const createDashboardInternalViewController = ({
     return finish();
   };
 
-  const render = (view, machines) => {
+  const render = (view, machines, viewOptions = {}) => {
     if (view === "sugerencias" && !state.canSuggest && !state.isSuperadmin) {
-      window.location.hash = "#/dashboard";
-      return true;
-    }
-    if (view === "todo" && !state.canTodo && !state.isSuperadmin) {
       window.location.hash = "#/dashboard";
       return true;
     }
@@ -510,7 +589,7 @@ export const createDashboardInternalViewController = ({
     if (view === "galeria") return renderGallery(machines);
     if (view === "usuarios") return renderUsers(machines);
     if (view === "sugerencias") return renderSuggestions();
-    if (view === "todo") return renderTodo();
+    if (view === "todo") return renderTodo(viewOptions);
     return false;
   };
 

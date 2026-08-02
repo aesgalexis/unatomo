@@ -5,10 +5,7 @@ import {
   markDashboardSuggestionsSeen
 } from "../views/suggestions/suggestionsRepo.js";
 import { countUnseenSuggestions } from "../views/suggestions/suggestionsView.js";
-import {
-  fetchDashboardTodoCollaborators,
-  fetchDashboardTodos
-} from "../views/todo/todoRepo.js";
+import { getTaskTiming } from "../tabs/tasks/tasksTime.js";
 
 export const createDashboardNavigationController = ({
   state,
@@ -48,15 +45,13 @@ export const createDashboardNavigationController = ({
   };
 
   const updateTodoNav = () => {
-    const visible = state.canTodo || state.isSuperadmin;
-    todoLink.hidden = !visible;
-    todoLink.classList.toggle(
-      "dashboard-section-link-superadmin",
-      state.isSuperadmin
+    todoLink.hidden = false;
+    todoLink.classList.remove("dashboard-section-link-superadmin");
+    const count = (state.draftMachines || []).reduce(
+      (total, machine) => total + (Array.isArray(machine?.tasks) ? machine.tasks : [])
+        .filter((task) => !task?.lastCompletedAt || getTaskTiming(task).pending).length,
+      0
     );
-    const count = visible
-      ? (state.todos || []).filter((item) => item && item.completed !== true).length
-      : 0;
     todoBadge.hidden = count <= 0;
     todoBadge.textContent = count > 99 ? "99+" : String(count);
     todoLink.classList.toggle("has-unseen", count > 0);
@@ -123,36 +118,16 @@ export const createDashboardNavigationController = ({
   };
 
   const loadTodos = async ({ preserveScroll = true } = {}) => {
-    if (!state.canTodo && !state.isSuperadmin) return;
-    try {
-      const result = await fetchDashboardTodos(500);
-      state.canTodo = result.canTodo;
-      state.isSuperadmin = result.isSuperadmin || state.isSuperadmin;
-      state.todos = result.items;
-      state.todosReady = true;
-      updateTodoNav();
-      if (state.activeView === "todo") {
-        renderCards({ preserveScroll });
-      }
-    } catch {
-      state.todosReady = true;
-      updateTodoNav();
+    state.canTodo = true;
+    state.todosReady = true;
+    updateTodoNav();
+    if (state.activeView === "todo") {
+      renderCards({ preserveScroll });
     }
   };
   const loadTodoCollaborators = async () => {
-    if (!state.canTodo && !state.isSuperadmin) return;
-    try {
-      const collaborators = await fetchDashboardTodoCollaborators();
-      state.todoCollaborators.splice(
-        0,
-        state.todoCollaborators.length,
-        ...collaborators
-      );
-    } catch {
-      state.todoCollaborators.splice(0, state.todoCollaborators.length);
-    } finally {
-      state.todoCollaboratorsReady = true;
-    }
+    state.todoCollaborators.splice(0, state.todoCollaborators.length);
+    state.todoCollaboratorsReady = true;
   };
   return {
     loadSuggestions,
@@ -165,4 +140,3 @@ export const createDashboardNavigationController = ({
     updateTodoNav
   };
 };
-

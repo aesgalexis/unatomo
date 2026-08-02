@@ -122,7 +122,26 @@ export const createDashboardRenderer = (dependencies) => {
     updateRegistryBadge();
     updateSuggestionsBadge();
     updateTodoNav();
-    if (dashboardInternalViews.render(state.activeView, machines)) return;
+    viewMenu.setTaskMode(state.activeView === "todo", {
+      statusFilter: state.todoStatusFilter,
+      sort: state.todoSort
+    });
+    const taskDocumentHooks = {};
+    installDocumentHooks(taskDocumentHooks, {
+      assertStorageAvailable,
+      expandedById: new Set(state.expandedById || []),
+      getDraftById,
+      notifyTopbar,
+      refreshStorageFullState,
+      renderCards,
+      state,
+      t,
+      updateMachine,
+      upsertMachine
+    });
+    if (dashboardInternalViews.render(state.activeView, machines, {
+      uploadMachineDocument: taskDocumentHooks.onUploadMachineDocument
+    })) return;
     list.className = "";
     const query = (state.searchQuery || "").trim();
     let visibleMachines = filterMachines(machines, query);

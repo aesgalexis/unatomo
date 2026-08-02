@@ -10,16 +10,17 @@ import {
   renderSuggestionsView
 } from "./suggestions/suggestionsView.js";
 import {
-  MAX_TODO_LENGTH,
-  TODO_PAGE_SIZE,
-  renderTodoView
-} from "./todo/todoView.js";
+  MACHINE_TASKS_PAGE_SIZE,
+  renderMachineTasksView
+} from "./machineTasks/machineTasksView.js";
+import { MAX_TODO_LENGTH, TODO_PAGE_SIZE } from "./todo/todoView.js";
 import { renderUsersView } from "./users/usersView.js";
 
 export {
   GLOBAL_REGISTRY_PAGE_SIZE,
   MAX_SUGGESTION_LENGTH,
   SUGGESTIONS_PAGE_SIZE,
+  MACHINE_TASKS_PAGE_SIZE,
   MAX_TODO_LENGTH,
   TODO_PAGE_SIZE
 };
@@ -43,21 +44,22 @@ export const renderUsersDashboardView = (container, machines = [], options = {})
   renderUsersView(container, machines, options);
 };
 
-export const renderTodoDashboardView = (container, options = {}) => {
-  renderTodoView(container, {
-    items: options.items || [],
-    ready: !!options.ready,
-    canTodo: !!options.canTodo,
-    collaborators: options.collaborators || [],
+export const renderTodoDashboardView = (container, machines = [], options = {}) => {
+  renderMachineTasksView(container, machines, {
     query: options.query || "",
     page: options.page,
+    createOpen: !!options.createOpen,
     showCompleted: !!options.showCompleted,
+    statusFilter: options.statusFilter,
+    sort: options.sort,
     onPageChange: options.onPageChange,
     onShowCompletedChange: options.onShowCompletedChange,
-    onBack: options.onBack,
-    onSubmit: options.onSubmit,
-    onToggle: options.onToggle,
-    onDelete: options.onDelete
+    onCreate: options.onCreate,
+    onAddTaskNote: options.onAddTaskNote,
+    onAddTaskImages: options.onAddTaskImages,
+    onCompleteTask: options.onCompleteTask,
+    onRemoveTask: options.onRemoveTask,
+    uploadMachineDocument: options.uploadMachineDocument,
   });
 };
 

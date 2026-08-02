@@ -15,7 +15,7 @@ import { createDashboardSectionNav } from "/static/js/dashboard/components/secti
 import { countUnseenGlobalRegistryEntries } from "/static/js/dashboard/views/registry/globalRegistryModel.js";
 import { fetchDashboardSuggestions } from "/static/js/dashboard/views/suggestions/suggestionsRepo.js";
 import { countUnseenSuggestions } from "/static/js/dashboard/views/suggestions/suggestionsView.js";
-import { fetchDashboardTodos } from "/static/js/dashboard/views/todo/todoRepo.js";
+import { getTaskTiming } from "/static/js/dashboard/tabs/tasks/tasksTime.js";
 
 const mount = document.getElementById("qr-print-mount");
 const lang = getCurrentLang();
@@ -87,8 +87,6 @@ let useFrame = true;
 let printBackNames = false;
 let loadingProgressTimer = null;
 let showSuggestionsNav = false;
-let showTodoNav = false;
-let todoNavSuperadmin = false;
 let registryBadgeCount = 0;
 let suggestionsBadgeCount = 0;
 let todoBadgeCount = 0;
@@ -154,12 +152,14 @@ const createSectionNav = () => {
     ariaLabel: text.sectionNavAria,
     dashboardHref: `${text.dashboard}#/dashboard`,
     registryHref: `${text.dashboard}#/registro`,
+    usersHref: `${text.dashboard}#/${isEn ? "users" : "usuarios"}`,
     qrPrintHref: text.qrPrint,
     galleryHref: `${text.dashboard}#/galeria`,
     suggestionsHref: `${text.dashboard}#/sugerencias`,
     todoHref: `${text.dashboard}#/${isEn ? "tasks" : "tareas"}`,
     labels: {
       dashboard: text.navDashboard,
+      users: isEn ? "Users" : "Usuarios",
       registry: text.navRegistry,
       qrPrint: text.navQrPrint,
       gallery: text.navGallery,
@@ -168,8 +168,8 @@ const createSectionNav = () => {
     },
     active: "qrPrint",
     showSuggestions: showSuggestionsNav,
-    showTodo: showTodoNav,
-    todoSuperadmin: todoNavSuperadmin,
+    showTodo: true,
+    todoSuperadmin: false,
     extraClass: "qr-print-section-nav"
   });
   refs.registryBadge.hidden = registryBadgeCount <= 0;
@@ -185,15 +185,6 @@ const createSectionNav = () => {
 };
 
 const canShowSuggestionsNav = async (user, registration) => {
-  if (registration?.profile?.suggestionsCollaborator === true) return true;
-  try {
-    return await isControlPanelUser(user);
-  } catch {
-    return false;
-  }
-};
-
-const canShowTodoNav = async (user, registration) => {
   if (registration?.profile?.suggestionsCollaborator === true) return true;
   try {
     return await isControlPanelUser(user);
@@ -223,14 +214,11 @@ const loadSectionNavCounts = async (uid, sourceMachines = []) => {
         : 0;
     } catch {}
   }
-  if (showTodoNav) {
-    try {
-      const result = await fetchDashboardTodos(500);
-      todoBadgeCount = (result.items || [])
-        .filter((item) => item && item.completed !== true)
-        .length;
-    } catch {}
-  }
+  todoBadgeCount = sourceMachines.reduce(
+    (total, machine) => total + (Array.isArray(machine?.tasks) ? machine.tasks : [])
+      .filter((task) => !task?.lastCompletedAt || getTaskTiming(task).pending).length,
+    0
+  );
 };
 
 const normalizeSearch = (value) =>
@@ -692,15 +680,7 @@ if (mount) {
         window.location.href = text.home;
         return;
       }
-      try {
-        todoNavSuperadmin = await isControlPanelUser(user);
-      } catch {
-        todoNavSuperadmin = false;
-      }
-      [showSuggestionsNav, showTodoNav] = await Promise.all([
-        canShowSuggestionsNav(user, registration),
-        canShowTodoNav(user, registration)
-      ]);
+      showSuggestionsNav = await canShowSuggestionsNav(user, registration);
       const sourceMachines = await fetchAccessibleMachines(user.uid);
       await loadSectionNavCounts(user.uid, sourceMachines);
       const machines = await buildQrMachines(sourceMachines);

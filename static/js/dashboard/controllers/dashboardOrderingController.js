@@ -224,6 +224,11 @@ export const createDashboardOrderingController = ({
   };
 
   addBtn.addEventListener("click", () => {
+    if (state.activeView === "todo") {
+      state.todoCreateOpen = !state.todoCreateOpen;
+      renderCards({ preserveScroll: true });
+      return;
+    }
     if (state.activeView === "usuarios") {
       state.usersPolicyOpen = false;
       if (state.usersContextOwnerUid === "__all__") {
