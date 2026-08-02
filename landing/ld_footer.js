@@ -1,4 +1,12 @@
 (() => {
+  const normalizedPath = window.location.pathname.replace(/\/+$/, "") || "/";
+  const isNosotrosPage = normalizedPath === "/landing/nosotros" ||
+    normalizedPath === "/landing/nosotros/index.html";
+  if (isNosotrosPage) {
+    document.querySelector(".landing-downbar")?.remove();
+    return;
+  }
+
   const legalFooter = document.getElementById("legal-footer");
   if (!legalFooter) return;
 
@@ -48,7 +56,6 @@
     const year = new Date().getFullYear();
     const lang = document.documentElement.lang;
     const labels = fallbackLabels(lang);
-    const normalizedPath = window.location.pathname.replace(/\/+$/, "") || "/";
     const isHome = normalizedPath === "/" ||
       normalizedPath === "/index.html" ||
       normalizedPath === "/landing" ||

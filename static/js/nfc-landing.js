@@ -126,15 +126,51 @@ const localized = {
 };
 
 const LANDING_RETURN_STATE_KEY = "unatomoNfcLandingReturn";
+const LANDING_RETURN_STORAGE_KEY = "unatomoNfcLandingReturnPending";
+const LANDING_RETURN_MAX_AGE_MS = 30 * 60 * 1000;
 let suppressDashboardRedirect = false;
 let dashboardRedirectStarted = false;
 
-const consumeLandingReturnState = () => {
+const isBackForwardNavigation = () =>
+  window.performance?.getEntriesByType?.("navigation")?.[0]?.type === "back_forward";
+
+const clearLandingReturnStorage = () => {
+  try {
+    window.sessionStorage.removeItem(LANDING_RETURN_STORAGE_KEY);
+  } catch {}
+};
+
+const readLandingReturnStorage = () => {
+  try {
+    const value = JSON.parse(window.sessionStorage.getItem(LANDING_RETURN_STORAGE_KEY) || "null");
+    if (!value || value.path !== window.location.pathname) return null;
+    const age = Date.now() - Number(value.timestamp || 0);
+    if (!Number.isFinite(age) || age < 0 || age > LANDING_RETURN_MAX_AGE_MS) return null;
+    return value;
+  } catch {
+    return null;
+  }
+};
+
+const consumeLandingReturnState = ({ allowSessionFallback = false } = {}) => {
   const currentState = window.history.state;
-  if (!currentState || currentState[LANDING_RETURN_STATE_KEY] !== true) return false;
-  const nextState = {...currentState};
-  delete nextState[LANDING_RETURN_STATE_KEY];
-  window.history.replaceState(nextState, "", window.location.href);
+  if (currentState?.[LANDING_RETURN_STATE_KEY] === true) {
+    const nextState = {...currentState};
+    delete nextState[LANDING_RETURN_STATE_KEY];
+    window.history.replaceState(nextState, "", window.location.href);
+    clearLandingReturnStorage();
+    return true;
+  }
+  if (!allowSessionFallback) {
+    clearLandingReturnStorage();
+    return false;
+  }
+  const pendingReturn = readLandingReturnStorage();
+  if (!pendingReturn) {
+    clearLandingReturnStorage();
+    return false;
+  }
+  clearLandingReturnStorage();
   return true;
 };
 
@@ -145,11 +181,24 @@ const markLandingReturnState = () => {
     : {};
   nextState[LANDING_RETURN_STATE_KEY] = true;
   window.history.replaceState(nextState, "", window.location.href);
+  try {
+    window.sessionStorage.setItem(
+      LANDING_RETURN_STORAGE_KEY,
+      JSON.stringify({
+        path: window.location.pathname,
+        timestamp: Date.now()
+      })
+    );
+  } catch {}
 };
 
-suppressDashboardRedirect = consumeLandingReturnState();
-window.addEventListener("pageshow", () => {
-  if (consumeLandingReturnState()) suppressDashboardRedirect = true;
+suppressDashboardRedirect = consumeLandingReturnState({
+  allowSessionFallback: isBackForwardNavigation()
+});
+window.addEventListener("pageshow", (event) => {
+  if (consumeLandingReturnState({
+    allowSessionFallback: event.persisted || isBackForwardNavigation()
+  })) suppressDashboardRedirect = true;
 });
 
 document.querySelectorAll("[data-session-cta]").forEach((link) => { link.href = localized.login; });
