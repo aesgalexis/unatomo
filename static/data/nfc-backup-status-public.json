@@ -1,0 +1,28 @@
+{
+  "kind": "unatomo-nfc-backup-status",
+  "overall": {
+    "status": "ok",
+    "completedAt": "2026-07-21T17:52:46.763Z",
+    "firestoreCollectionCount": 15,
+    "storagePrefixCount": 2,
+    "firebaseAuth": true
+  },
+  "firestore": {
+    "status": "ok",
+    "completedAt": "2026-07-21T17:51:57.870Z",
+    "collectionCount": 15,
+    "documentCount": 333
+  },
+  "storage": {
+    "status": "ok",
+    "completedAt": "2026-07-21T17:52:45.781Z",
+    "fileCount": 74,
+    "totalBytes": 56574013
+  },
+  "auth": {
+    "status": "ok",
+    "completedAt": "2026-07-21T17:52:46.719Z",
+    "userCount": 9,
+    "size": 8876
+  }
+}

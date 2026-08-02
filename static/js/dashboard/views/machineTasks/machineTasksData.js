@@ -13,7 +13,7 @@ const looksLikeInternalUserId = (value) => {
   if (!label) return false;
   return (
     /^[0-9a-f]{8}-[0-9a-f-]{27}$/i.test(label) ||
-    /^[A-Za-z0-9_-]{20,128}$/.test(label)
+    /^[A-Za-z0-9_-]{28}$/.test(label)
   );
 };
 

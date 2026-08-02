@@ -26,7 +26,7 @@ the user-facing app already supports both.
 - `docs/DEPLOY_NOTES.md`: required before publishing, deploying, or diagnosing
   build/push problems.
 - `docs/WHATS_NEW_POLICY.md`: required before public `Novedades` / `What's new`
-  entries; respect `docs/codex-flags.json`.
+  entries; respect `static/data/codex-flags.json`.
 - `docs/DEV.md`: setup and local commands. Older architecture notes are
   secondary when they conflict with the routed documents above.
 

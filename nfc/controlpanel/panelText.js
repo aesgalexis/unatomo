@@ -117,8 +117,8 @@ export const createPanelText = (isEn) => {
     whatsNewDisable: isEn ? "Disable locally" : "Desactivar localmente",
     whatsNewEnable: isEn ? "Enable locally" : "Activar localmente",
     whatsNewSource: isEn
-      ? "Authoritative source: docs/codex-flags.json"
-      : "Fuente autoritativa: docs/codex-flags.json",
+      ? "Authoritative source: static/data/codex-flags.json"
+      : "Fuente autoritativa: static/data/codex-flags.json",
     whatsNewPending: isEn
       ? "Pending: this panel control is not wired to the project flag yet."
       : "Pendiente: este control del panel aun no esta conectado a la flag del proyecto.",

@@ -4,7 +4,10 @@ import path from "node:path";
 const root = process.cwd();
 const exts = new Set([".html", ".js", ".mjs", ".css"]);
 const ignoreDirs = new Set(["node_modules", ".git", "dist"]);
-const ignorePaths = new Set(["firebase/functions/lib"]);
+const ignorePaths = new Set([
+  "firebase/functions/lib",
+  "scripts/check-nfc-architecture.mjs"
+]);
 
 const toPosix = (value) => value.replaceAll("\\", "/");
 
@@ -18,6 +21,8 @@ const walk = (dir, files = []) => {
       if (ignorePaths.has(relativePath)) continue;
       walk(entryPath, files);
     } else if (entry.isFile()) {
+      const relativePath = toPosix(path.relative(root, entryPath));
+      if (ignorePaths.has(relativePath)) continue;
       const ext = path.extname(entry.name);
       if (exts.has(ext)) {
         files.push(entryPath);

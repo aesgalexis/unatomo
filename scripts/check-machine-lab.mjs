@@ -26,8 +26,20 @@ if (/<(?:button|select|input)\b/i.test(html)) {
 }
 
 const buildScript = await readFile(path.join(ROOT, "scripts", "build-static.mjs"), "utf8");
-if (!buildScript.includes('ROOT_IGNORE_DIRS = new Set(["dev"])')) {
-  throw new Error("El build no excluye explícitamente dev/.");
+const readAllowlist = (name) => {
+  const match = buildScript.match(
+    new RegExp(`const ${name} = \\[([\\s\\S]*?)\\];`),
+  );
+  if (!match) throw new Error(`No se encontró la allowlist ${name}.`);
+  return [...match[1].matchAll(/['\"]([^'\"]+)['\"]/g)].map(
+    ([, value]) => value,
+  );
+};
+const publicFiles = readAllowlist("PUBLIC_FILES");
+const publicDirectories = readAllowlist("PUBLIC_DIRECTORIES");
+const publicPaths = [...publicFiles, ...publicDirectories];
+if (publicPaths.some((value) => value === "dev" || value.startsWith("dev/"))) {
+  throw new Error("La allowlist pública no debe publicar dev/.");
 }
 
 try {

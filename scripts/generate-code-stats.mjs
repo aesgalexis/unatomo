@@ -17,7 +17,8 @@ const IGNORE_DIRS = new Set([
 const IGNORE_FILES = new Set([
   "package-lock.json",
   path.join("static", "data", "code-stats.json"),
-  path.join("static", "data", "nfc-backup-status.json")
+  path.join("static", "data", "nfc-backup-status.json"),
+  path.join("static", "data", "nfc-backup-status-public.json")
 ]);
 
 const CODE_EXTENSIONS = new Set([

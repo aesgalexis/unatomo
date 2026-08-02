@@ -237,7 +237,7 @@ if (mount) {
     if (!backupBody) return;
     renderState(backupBody, text.backupHint, text.backupLoading);
     try {
-      const response = await fetch(`/static/data/nfc-backup-status.json?ts=${Date.now()}`, {
+      const response = await fetch(`/static/data/nfc-backup-status-public.json?ts=${Date.now()}`, {
         cache: "no-store"
       });
       if (!response.ok) throw new Error("backup-status-unavailable");
@@ -252,7 +252,7 @@ if (mount) {
     if (!whatsNewBody) return;
     renderState(whatsNewBody, text.whatsNewHint, text.whatsNewLoading);
     try {
-      const response = await fetch(`/docs/codex-flags.json?ts=${Date.now()}`, {
+      const response = await fetch(`/static/data/codex-flags.json?ts=${Date.now()}`, {
         cache: "no-store"
       });
       const flags = response.ok ? await response.json() : {};

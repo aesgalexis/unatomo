@@ -6,6 +6,12 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
 
+const resolveRootImport = (request) => {
+  const normalized = request.replace(/^[/\\]+/, "");
+  if (/^[A-Za-z]:[\\/]/.test(normalized)) return path.normalize(normalized);
+  return path.resolve(ROOT, normalized);
+};
+
 const read = (relativePath) =>
   readFileSync(path.join(ROOT, relativePath), "utf8");
 
@@ -93,7 +99,7 @@ try {
       name: "dashboard-root-imports",
       setup(buildApi) {
         buildApi.onResolve({ filter: /^\// }, (args) => ({
-          path: path.join(ROOT, args.path.slice(1))
+          path: resolveRootImport(args.path)
         }));
         buildApi.onResolve({ filter: /^https:\/\// }, (args) => ({
           path: args.path,
@@ -123,7 +129,7 @@ try {
       name: "control-panel-root-imports",
       setup(buildApi) {
         buildApi.onResolve({ filter: /^\// }, (args) => ({
-          path: path.join(ROOT, args.path.slice(1))
+          path: resolveRootImport(args.path)
         }));
         buildApi.onResolve({ filter: /^https:\/\// }, (args) => ({
           path: args.path,
@@ -152,7 +158,7 @@ try {
       name: "dashboard-css-root-imports",
       setup(buildApi) {
         buildApi.onResolve({ filter: /^\// }, (args) => ({
-          path: path.join(ROOT, args.path.slice(1))
+          path: resolveRootImport(args.path)
         }));
       }
     }]

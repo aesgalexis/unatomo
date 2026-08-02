@@ -97,12 +97,16 @@ export const createStatsBackupRenderer = ({ text, isEn }) => {
     appendBackupMeta(card, text.backupAge, formatBackupAge(completedAt, text.noData));
     appendBackupMeta(card, text.backupProject, item.projectId);
     appendBackupMeta(card, text.backupManifest, item.manifestFile);
-    const collectionCount = Array.isArray(item.firestoreCollections)
-      ? item.firestoreCollections.length
-      : 0;
-    const prefixCount = Array.isArray(item.storagePrefixes)
-      ? item.storagePrefixes.length
-      : 0;
+    const collectionCount = Number.isFinite(Number(item.firestoreCollectionCount))
+      ? Number(item.firestoreCollectionCount)
+      : Array.isArray(item.firestoreCollections)
+        ? item.firestoreCollections.length
+        : 0;
+    const prefixCount = Number.isFinite(Number(item.storagePrefixCount))
+      ? Number(item.storagePrefixCount)
+      : Array.isArray(item.storagePrefixes)
+        ? item.storagePrefixes.length
+        : 0;
     if (collectionCount || prefixCount) {
       const authCoverage = item.firebaseAuth ? " · Authentication" : "";
       appendBackupMeta(
