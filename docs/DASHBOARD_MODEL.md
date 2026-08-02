@@ -174,9 +174,20 @@ Files:
 - `static/js/dashboard/history/historyEventFormatter.js`: shared formatter and grouping helpers for machine history events. It preserves known legacy event text and falls back to `summary`, `message`, `messageKey`, or `type` for future events.
 - `static/js/dashboard/views/registry/globalRegistryModel.js`: flattens logs from all machines visible to the current account, sorts them newest-first, and groups task notes under their task-created event.
 - `static/js/dashboard/views/suggestions/`: renders and submits dashboard suggestions through callable functions.
-- `static/js/dashboard/views/machineTasks/`: flattens the tasks from every
-  owner/admin machine already visible to the account and creates new tasks
-  through the same machine mutation/autosave path used by machine cards.
+- `static/js/dashboard/views/machineTasks/machineTasksView.js`: composes the
+  account-wide task view, header, download, and pagination while preserving
+  the public `renderMachineTasksView` and `MACHINE_TASKS_PAGE_SIZE` exports;
+  creation and task actions still flow through the existing callbacks and
+  machine mutation/autosave path.
+- `static/js/dashboard/views/machineTasks/machineTasksData.js`: flattens the
+  tasks from every owner/admin machine already visible to the account,
+  reconstructs completed tasks from history, and owns search, filters, and
+  ordering.
+- `static/js/dashboard/views/machineTasks/machineTasksComposer.js`: renders
+  the active command composer, including bidirectional parsing and
+  autocompletion for `#`, `/`, and `@`.
+- `static/js/dashboard/views/machineTasks/machineTasksRows.js`: renders task
+  rows, related notes/images, tooltips, and the task action menu.
 - `static/js/dashboard/views/users/`: builds owner/admin access contexts and
   renders the dashboard-native user cards without replacing the standalone
   access page. At desktop tree width it uses the dashboard sidebar shell for

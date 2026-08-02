@@ -4,14 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="/static/img/favicon/favicon.svg" type="image/svg+xml">
   <title>Redireccionando…</title>
   <script>
     const requestedPath = window.location.pathname.replace(/\/+$/, "");
     const targetPath = requestedPath === "/ssl-simulator"
-      ? "/ssl-simulator"
+      ? "/ssl-simulator.html"
       : "/nfc/es/";
     const target = new URL(targetPath, window.location.origin);
-    if (targetPath === "/ssl-simulator") {
+    if (targetPath === "/ssl-simulator.html") {
       target.search = window.location.search;
       target.hash = window.location.hash;
     }

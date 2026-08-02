@@ -59,7 +59,7 @@ body {
   gap: 1.1rem;
 }
 
-.closing-claim h2 {
+.closing-claim h1 {
   font-size: clamp(2.2rem, 4.6vw, 3.2rem);
   letter-spacing: -0.03em;
   color: var(--fg);

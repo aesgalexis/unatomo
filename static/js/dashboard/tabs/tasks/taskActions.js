@@ -146,7 +146,10 @@ export const buildAddTaskAttachmentsUpdate = (
     .filter((attachment) => attachment?.url)
     .map((attachment) => ({
       ...attachment,
-      documentId: attachment.documentId || attachment.id || ""
+      documentId: attachment.documentId || attachment.id || "",
+      // The upload result contains the Firebase UID. Task history already
+      // receives the readable actor, so keep that same value on the task.
+      uploadedBy: user || null
     }));
   if (!added.length) return null;
 

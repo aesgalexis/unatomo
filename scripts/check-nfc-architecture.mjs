@@ -14,6 +14,10 @@ const requiredFiles = [
   "static/js/dashboard/data/machineAccessSync.js",
   "static/js/dashboard/layout/dashboardLayoutActions.js",
   "static/js/dashboard/views/dashboardInternalViews.js",
+  "static/js/dashboard/views/machineTasks/machineTasksView.js",
+  "static/js/dashboard/views/machineTasks/machineTasksData.js",
+  "static/js/dashboard/views/machineTasks/machineTasksComposer.js",
+  "static/js/dashboard/views/machineTasks/machineTasksRows.js",
   "static/js/dashboard/cardHooks/taskHooks.js",
   "static/js/dashboard/cardHooks/documentHooks.js",
   "static/js/dashboard/tabs/tasks/taskActions.js",
@@ -45,6 +49,16 @@ const requiredFiles = [
   "static/js/dashboard/runtime/dashboardDataController.js",
   "static/js/dashboard/runtime/dashboardSession.js",
   "static/js/dashboard/runtime/dashboardState.js",
+  "nfc/controlpanel/panel.js",
+  "nfc/controlpanel/panelCallables.js",
+  "nfc/controlpanel/panelCodes.js",
+  "nfc/controlpanel/panelLocalCards.js",
+  "nfc/controlpanel/panelShared.js",
+  "nfc/controlpanel/panelStatsBackup.js",
+  "nfc/controlpanel/panelSystemIntegrity.js",
+  "nfc/controlpanel/panelTags.js",
+  "nfc/controlpanel/panelText.js",
+  "nfc/controlpanel/panelUsers.js",
   "static/css/dashboard/shell.css",
   "static/css/dashboard/incident-modal.css",
   "static/css/dashboard/registry.css",
@@ -96,6 +110,36 @@ addCheck(
   "dashboard ES module graph resolves with valid named exports"
 );
 
+let controlPanelModuleGraphOk = true;
+try {
+  await build({
+    entryPoints: [path.join(ROOT, "nfc/controlpanel/panel.js")],
+    bundle: true,
+    format: "esm",
+    platform: "browser",
+    write: false,
+    logLevel: "silent",
+    plugins: [{
+      name: "control-panel-root-imports",
+      setup(buildApi) {
+        buildApi.onResolve({ filter: /^\// }, (args) => ({
+          path: path.join(ROOT, args.path.slice(1))
+        }));
+        buildApi.onResolve({ filter: /^https:\/\// }, (args) => ({
+          path: args.path,
+          external: true
+        }));
+      }
+    }]
+  });
+} catch {
+  controlPanelModuleGraphOk = false;
+}
+addCheck(
+  controlPanelModuleGraphOk,
+  "control panel ES module graph resolves with valid imports"
+);
+
 let dashboardCssGraphOk = true;
 try {
   await build({
@@ -143,6 +187,12 @@ const machineCardController = read(
 const taggedMachinePage = read("static/js/machine/index.js");
 const dashboardSubscriptions = read("static/js/dashboard/data/dashboardSubscriptions.js");
 const taskActions = read("static/js/dashboard/tabs/tasks/taskActions.js");
+const machineTasksView = read("static/js/dashboard/views/machineTasks/machineTasksView.js");
+const machineTasksData = read("static/js/dashboard/views/machineTasks/machineTasksData.js");
+const machineTasksComposer = read(
+  "static/js/dashboard/views/machineTasks/machineTasksComposer.js"
+);
+const machineTasksRows = read("static/js/dashboard/views/machineTasks/machineTasksRows.js");
 const functionsIndex = read("firebase/functions/src/index.ts");
 const dashboardCssManifest = read("static/css/dashboard.css");
 const dashboardCssImports = [
@@ -177,6 +227,36 @@ addCheck(
     dashboardCssImports.length,
   "dashboard.css remains an import-only manifest"
 );
+
+addCheck(
+  machineTasksView.includes('from "./machineTasksData.js"') &&
+    machineTasksView.includes('from "./machineTasksComposer.js"') &&
+    machineTasksView.includes('from "./machineTasksRows.js"'),
+  "machineTasksView composes the data, composer, and row modules"
+);
+addCheck(
+  machineTasksData.includes("prepareMachineTaskEntries") &&
+    !machineTasksData.includes("document.createElement"),
+  "machineTasksData owns task preparation without rendering DOM"
+);
+addCheck(
+  machineTasksComposer.includes("renderMachineTaskComposer") &&
+    machineTasksComposer.includes("contentEditable"),
+  "machineTasksComposer owns command creation and editing"
+);
+addCheck(
+  machineTasksRows.includes("createTaskActionsMenu") &&
+    machineTasksRows.includes("renderMachineTaskRows"),
+  "machineTasksRows owns task rows and actions"
+);
+[
+  "chooseMachine",
+  "renderCreateForm",
+  "renderExpandedCreateForm",
+  "createTaskFilterMenu"
+].forEach((needle) => {
+  addCheck(!machineTasksView.includes(needle), `machineTasksView has no legacy implementation: ${needle}`);
+});
 
 addCheck(
   machineCardController.includes("hooks.onContentResize()"),

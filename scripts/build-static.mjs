@@ -1,46 +1,62 @@
-import { rm, mkdir, readdir, stat, copyFile } from "node:fs/promises";
+import { cp, mkdir, rm, copyFile } from "node:fs/promises";
 import path from "node:path";
 
 const ROOT = process.cwd();
 const DIST = path.join(ROOT, "dist");
-const ROOT_IGNORE_DIRS = new Set(["dev"]);
 
-const IGNORE_DIRS = new Set([
-  ".git",
-  "node_modules",
-  "dist",
-  ".vscode",
-  "_private",
-  "ssl-simulator"
+// Keep this manifest deliberately explicit. The repository contains source,
+// documentation, deployment configuration and Firebase Functions that must
+// never be part of the GitHub Pages artifact.
+const PUBLIC_FILES = [
+  ".nojekyll",
+  "404.html",
+  "CNAME",
+  "index.html",
+  "robots.txt",
+  "sitemap.xml",
+  "ssl-simulator.html",
+  "styles.css"
+];
+
+const PUBLIC_DIRECTORIES = [
+  "en",
+  "es",
+  "landing",
+  "laundry",
+  "laundryservices",
+  "nfc",
+  "static"
+];
+
+// These files are not public site resources. The widget module and stylesheet
+// remain public because the Laundry Services home page imports them at runtime.
+const PUBLIC_EXCLUDED_PATHS = new Set([
+  "laundryservices/ls_atom-widget/ls_demo.html",
+  "static/data/nfc-backup-status.json"
 ]);
-const IGNORE_FILES = new Set(["package.json", "package-lock.json"]);
 
-async function copyRecursive(src, dst) {
-  const s = await stat(src);
+const toRelativePath = (filePath) =>
+  path.relative(ROOT, filePath).split(path.sep).join("/");
 
-  if (s.isDirectory()) {
-    const name = path.basename(src);
-    const relative = path.relative(ROOT, src);
-    if (ROOT_IGNORE_DIRS.has(relative)) return;
-    if (IGNORE_DIRS.has(name)) return;
-
-    await mkdir(dst, { recursive: true });
-    const entries = await readdir(src);
-    for (const entry of entries) {
-      await copyRecursive(path.join(src, entry), path.join(dst, entry));
-    }
-  } else {
-    const name = path.basename(src);
-    if (IGNORE_FILES.has(name)) return;
-
-    await mkdir(path.dirname(dst), { recursive: true });
-    await copyFile(src, dst);
-  }
-}
+const shouldCopy = (filePath) => !PUBLIC_EXCLUDED_PATHS.has(toRelativePath(filePath));
 
 await rm(DIST, { recursive: true, force: true });
 await mkdir(DIST, { recursive: true });
 
-await copyRecursive(ROOT, DIST);
+for (const file of PUBLIC_FILES) {
+  const source = path.join(ROOT, file);
+  const destination = path.join(DIST, file);
+  await mkdir(path.dirname(destination), { recursive: true });
+  await copyFile(source, destination);
+}
 
-console.log("✅ dist/ listo (copia estática completa).");
+for (const directory of PUBLIC_DIRECTORIES) {
+  const source = path.join(ROOT, directory);
+  const destination = path.join(DIST, directory);
+  await cp(source, destination, {
+    recursive: true,
+    filter: shouldCopy
+  });
+}
+
+console.log("dist/ listo (artefacto estatico publico).");

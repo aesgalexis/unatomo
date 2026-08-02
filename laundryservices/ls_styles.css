@@ -97,6 +97,13 @@ h1 {
   -webkit-user-select: none;
 }
 
+.contact-form-title {
+  margin: 0;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+}
+
 h2 {
   font-size: clamp(1.3rem, 2.6vw, 1.7rem);
   color: var(--fg);

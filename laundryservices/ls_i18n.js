@@ -3,7 +3,7 @@
 
   const I18N = {
     es: {
-      page_title: "unatomo | Laundry Services",
+      page_title: "UNATOMO | Laundry Services",
       page_desc:
         "Servicios técnicos para lavanderías industriales: auditoría, asesoramiento y control de productividad.",
       lang_option_en: "English",
@@ -58,7 +58,7 @@
       card5_p1:
         "Tenemos acceso a recambios originales de las principales marcas del sector, así como recambios genéricos. También suministramos consumibles de todo tipo, desde bandas de algodón o muletones hasta convertidores de frecuencia o pantallas. Dinos que necesitas y te ayudamos a encontrarlo.",
       card5_cta: "Solicitar",
-      contact_page_title: "Contacto · unatomo | Laundry Services",
+      contact_page_title: "Contacto | UNATOMO · Laundry Services",
       contact_email_label: "Correo electrónico:",
       contact_phone_label: "Teléfono:",
       contact_hours_label: "Horario de atención:",
@@ -89,7 +89,7 @@
       legal_footer: "UNATOMO CORE SL - Todos los derechos reservados.",
     },
     en: {
-      page_title: "unatomo | Laundry Services",
+      page_title: "UNATOMO | Laundry Services",
       page_desc:
         "Technical services for industrial laundries: audits, advisory and productivity control.",
       lang_option_en: "English",
@@ -144,7 +144,7 @@
       card5_p1:
         "We have access to original spare parts from the leading brands in the industry, as well as generic spare parts. We also supply all kinds of consumables, from cotton belts or padding covers to frequency converters or displays. Tell us what you need and we'll help you find it.",
       card5_cta: "Request",
-      contact_page_title: "Contact · unatomo | Laundry Services",
+      contact_page_title: "Contact | UNATOMO · Laundry Services",
       contact_email_label: "Email:",
       contact_phone_label: "Phone:",
       contact_hours_label: "Support hours:",
@@ -175,7 +175,7 @@
       legal_footer: "UNATOMO CORE SL - All rights reserved.",
     },
     it: {
-      page_title: "unatomo | Laundry Services",
+      page_title: "UNATOMO | Laundry Services",
       page_desc:
         "Servizi tecnici per lavanderie industriali: audit, consulenza e controllo della produttivita.",
       lang_option_en: "English",
@@ -230,7 +230,7 @@
       card5_p1:
         "Abbiamo accesso a ricambi originali dei principali marchi del settore, cosi come a ricambi generici. Forniamo anche consumabili di ogni tipo, da nastri in cotone o molettone fino a convertitori di frequenza o schermi. Dicci di cosa hai bisogno e ti aiuteremo a trovarlo.",
       card5_cta: "Richiedi",
-      contact_page_title: "Contatto · unatomo | Laundry Services",
+      contact_page_title: "Contatto | UNATOMO · Laundry Services",
       contact_email_label: "Email:",
       contact_phone_label: "Telefono:",
       contact_hours_label: "Orario di assistenza:",
@@ -261,7 +261,7 @@
       legal_footer: "UNATOMO CORE SL - Tutti i diritti riservati.",
     },
     el: {
-      page_title: "unatomo | Laundry Services",
+      page_title: "UNATOMO | Laundry Services",
       page_desc:
         "Τεχνικές υπηρεσίες για βιομηχανικά πλυντήρια: έλεγχος, συμβουλευτική και έλεγχος παραγωγικότητας.",
       lang_option_en: "English",
@@ -316,7 +316,7 @@
       card5_p1:
         "Εχουμε προσβαση σε γνησια ανταλλακτικα απο τις κυριοτερες μαρκες του κλαδου, καθως και σε γενικα ανταλλακτικα. Επισης προμηθευουμε καθε ειδους αναλωσιμα, απο βαμβακερες ταινιες ή μουλετον μεχρι μετατροπεις συχνοτητας ή οθονες. Πειτε μας τι χρειαζεστε και θα σας βοηθησουμε να το βρειτε.",
       card5_cta: "Αιτηση",
-      contact_page_title: "Επικοινωνία · unatomo | Laundry Services",
+      contact_page_title: "Επικοινωνία | UNATOMO · Laundry Services",
       contact_email_label: "Email:",
       contact_phone_label: "Τηλέφωνο:",
       contact_hours_label: "Ωράριο εξυπηρέτησης:",

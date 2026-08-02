@@ -2,70 +2,56 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://unatomo.com/</loc>
-    <lastmod>2026-05-10</lastmod>
   </url>
   <url>
     <loc>https://unatomo.com/landing/ld_privacidad.html</loc>
-    <lastmod>2026-05-10</lastmod>
   </url>
   <url>
     <loc>https://unatomo.com/landing/nosotros/</loc>
-    <lastmod>2026-05-20</lastmod>
   </url>
   <url>
     <loc>https://unatomo.com/landing/contacto/</loc>
-    <lastmod>2026-05-20</lastmod>
   </url>
   <url>
     <loc>https://unatomo.com/nfc/</loc>
-    <lastmod>2026-07-20</lastmod>
   </url>
   <url>
     <loc>https://unatomo.com/nfc/es/contacto.html</loc>
-    <lastmod>2026-07-20</lastmod>
   </url>
   <url>
     <loc>https://unatomo.com/nfc/en/contacto.html</loc>
-    <lastmod>2026-07-20</lastmod>
   </url>
   <url>
     <loc>https://unatomo.com/nfc/es/privacidad.html</loc>
-    <lastmod>2026-07-20</lastmod>
   </url>
   <url>
     <loc>https://unatomo.com/nfc/en/privacidad.html</loc>
-    <lastmod>2026-07-20</lastmod>
   </url>
   <url>
     <loc>https://unatomo.com/nfc/es/tags.html</loc>
-    <lastmod>2026-07-20</lastmod>
   </url>
   <url>
     <loc>https://unatomo.com/nfc/en/tags.html</loc>
-    <lastmod>2026-07-20</lastmod>
   </url>
   <url>
     <loc>https://unatomo.com/nfc/es/novedades.html</loc>
-    <lastmod>2026-07-20</lastmod>
   </url>
   <url>
     <loc>https://unatomo.com/nfc/en/novedades.html</loc>
-    <lastmod>2026-07-20</lastmod>
   </url>
   <url>
     <loc>https://unatomo.com/laundryservices/</loc>
-    <lastmod>2026-05-09</lastmod>
   </url>
   <url>
     <loc>https://unatomo.com/laundryservices/ls_contacto.html</loc>
-    <lastmod>2026-05-09</lastmod>
   </url>
   <url>
     <loc>https://unatomo.com/laundryservices/ls_maquinaria.html</loc>
-    <lastmod>2026-05-09</lastmod>
   </url>
   <url>
     <loc>https://unatomo.com/laundryservices/ls_privacidad.html</loc>
-    <lastmod>2026-05-09</lastmod>
+  </url>
+  <url>
+    <loc>https://unatomo.com/ssl-simulator.html</loc>
   </url>
 </urlset>

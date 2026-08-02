@@ -26,7 +26,8 @@
           ? "Contatto"
           : lang === "el"
             ? "\u0395\u03c0\u03b9\u03ba\u03bf\u03b9\u03bd\u03c9\u03bd\u03af\u03b1"
-            : "Contacto"
+            : "Contacto",
+    laundry: "Laundry Services"
   });
 
   const createNavLinks = (links, className) => {
@@ -47,12 +48,20 @@
     const year = new Date().getFullYear();
     const lang = document.documentElement.lang;
     const labels = fallbackLabels(lang);
+    const normalizedPath = window.location.pathname.replace(/\/+$/, "") || "/";
+    const isHome = normalizedPath === "/" ||
+      normalizedPath === "/index.html" ||
+      normalizedPath === "/landing" ||
+      normalizedPath === "/landing/index.html";
     const text = dict?.legal_footer || "UNATOMO CORE SL \u00b7 Todos los derechos reservados.";
     const links = [
       { href: "/landing/nosotros/", label: dict?.about_link || labels.about },
       { href: "/nfc/", label: dict?.nfc_link || "NFC" },
       { href: "/landing/contacto/", label: dict?.contact_link || labels.contact },
     ];
+    if (!isHome) {
+      links.push({ href: "/laundryservices/", label: dict?.laundry_link || labels.laundry });
+    }
 
     if (window.renderLandingDisclosureFooter) {
       window.renderLandingDisclosureFooter({ legalFooterText: text });

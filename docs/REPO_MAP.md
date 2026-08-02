@@ -21,7 +21,12 @@ relevant sections instead of loading the complete file by default.
 - `es/` and `en/`: localized public routes.
 - `nfc/es/` and `nfc/en/`: localized NFC/dashboard/auth/static pages,
   including account settings and the global access page.
-- `nfc/controlpanel/`: owner-only control panel UI.
+- `nfc/controlpanel/`: owner-only control panel UI. `panel.js` is the small
+  entry/composition layer; `panelText.js`, `panelShared.js`,
+  `panelSystemIntegrity.js`, `panelStatsBackup.js`, `panelLocalCards.js`,
+  `panelUsers.js`, `panelCodes.js`, `panelTags.js`, and `panelCallables.js`
+  contain the localized text, shared primitives, card renderers, and callable
+  wrappers by responsibility.
 
 ## Frontend Source
 

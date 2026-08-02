@@ -3,8 +3,9 @@
 
   const I18N = {
     es: {
-      page_title: "Sobre nosotros | unatomo",
-      page_desc: "Información sobre UNATOMO CORE SL.",
+      page_title: "Nosotros | UNATOMO CORE SL",
+      page_desc: "Conoce UNATOMO CORE SL, sus divisiones Laundry Services y UNATOMO NFC, y el equipo detrás de sus soluciones técnicas y digitales.",
+      contact_page_desc: "Contacta con UNATOMO CORE SL para consultas sobre sus divisiones, servicios técnicos y soluciones digitales.",
       lang_option_en: "English",
       lang_option_it: "Italiano",
       lang_option_es: "Español",
@@ -16,7 +17,7 @@
       topbar_contact: "UNATOMO/Contacto",
       topbar_about_mobile: "/Nosotros",
       topbar_contact_mobile: "/Contacto",
-      contact_page_title: "Contacto · unatomo",
+      contact_page_title: "Contacto | UNATOMO CORE SL",
       contact_email_label: "Correo electrónico:",
       contact_phone_label: "Teléfono:",
       contact_hours_label: "Horario de atención:",
@@ -41,8 +42,9 @@
       page_nav_top: "Arriba",
     },
     en: {
-      page_title: "About us | unatomo",
-      page_desc: "Information about UNATOMO CORE SL.",
+      page_title: "About us | UNATOMO CORE SL",
+      page_desc: "Learn about UNATOMO CORE SL, its Laundry Services and UNATOMO NFC divisions, and the team behind its technical and digital solutions.",
+      contact_page_desc: "Contact UNATOMO CORE SL about its divisions, technical services, and digital solutions.",
       lang_option_en: "English",
       lang_option_it: "Italiano",
       lang_option_es: "Español",
@@ -54,7 +56,7 @@
       topbar_contact: "UNATOMO/Contact",
       topbar_about_mobile: "/About",
       topbar_contact_mobile: "/Contact",
-      contact_page_title: "Contact · unatomo",
+      contact_page_title: "Contact | UNATOMO CORE SL",
       contact_email_label: "Email:",
       contact_phone_label: "Phone:",
       contact_hours_label: "Support hours:",
@@ -79,8 +81,9 @@
       page_nav_top: "Top",
     },
     it: {
-      page_title: "Chi siamo | unatomo",
-      page_desc: "Informazioni su UNATOMO CORE SL.",
+      page_title: "Chi siamo | UNATOMO CORE SL",
+      page_desc: "Scopri UNATOMO CORE SL, le divisioni Laundry Services e UNATOMO NFC e il team dietro le sue soluzioni tecniche e digitali.",
+      contact_page_desc: "Contatta UNATOMO CORE SL per informazioni sulle sue divisioni, sui servizi tecnici e sulle soluzioni digitali.",
       lang_option_en: "English",
       lang_option_it: "Italiano",
       lang_option_es: "Español",
@@ -92,7 +95,7 @@
       topbar_contact: "UNATOMO/Contatto",
       topbar_about_mobile: "/Chi siamo",
       topbar_contact_mobile: "/Contatto",
-      contact_page_title: "Contatto · unatomo",
+      contact_page_title: "Contatto | UNATOMO CORE SL",
       contact_email_label: "Email:",
       contact_phone_label: "Telefono:",
       contact_hours_label: "Orario di assistenza:",
@@ -117,8 +120,9 @@
       page_nav_top: "Su",
     },
     el: {
-      page_title: "Schetika me emas | unatomo",
-      page_desc: "Plirofories gia tin UNATOMO CORE SL.",
+      page_title: "Schetika me emas | UNATOMO CORE SL",
+      page_desc: "Mathte gia tin UNATOMO CORE SL, tis dieythynseis Laundry Services kai UNATOMO NFC kai tin omada piso apo tis technikes kai psifiakes lisis tis.",
+      contact_page_desc: "Epikoinonise me tin UNATOMO CORE SL gia tis dieythynseis, tis technikes ypiresies kai tis psifiakes lisis tis.",
       lang_option_en: "English",
       lang_option_it: "Italiano",
       lang_option_es: "Español",
@@ -130,7 +134,7 @@
       topbar_contact: "UNATOMO/Epikoinonia",
       topbar_about_mobile: "/Schetika me emas",
       topbar_contact_mobile: "/Epikoinonia",
-      contact_page_title: "Epikoinonia · unatomo",
+      contact_page_title: "Epikoinonia | UNATOMO CORE SL",
       contact_email_label: "Email:",
       contact_phone_label: "Tilefono:",
       contact_hours_label: "Ores ypostirixis:",
@@ -170,9 +174,10 @@
       el.textContent = t[key];
     });
 
-    document.title = t.page_title;
+    const isContactPage = window.location.pathname.includes("/landing/contacto");
+    document.title = isContactPage ? t.contact_page_title : t.page_title;
     const desc = document.querySelector('meta[name="description"]');
-    if (desc) desc.setAttribute("content", t.page_desc);
+    if (desc) desc.setAttribute("content", isContactPage ? t.contact_page_desc : t.page_desc);
 
     const label = document.querySelector(".lang-label");
     if (label) {
