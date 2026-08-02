@@ -899,48 +899,15 @@ const renderCommandCreateForm = (root, machines, onCreate, fieldsOpen = false) =
     selection.addRange(range);
   };
   const renderEditor = (focus = false) => {
-    editor.replaceChildren();
-    const appendSpace = () => {
-      if (editor.childNodes.length) editor.appendChild(document.createTextNode(" "));
-    };
+    const fields = [
+      draft.title,
+      draft.description,
+      frequencyToken(),
+      draft.assignedTo?.username ? `@${draft.assignedTo.username}` : ""
+    ].filter(Boolean);
     const machine = getMachine();
-    if (machine) {
-      const token = document.createElement("span");
-      token.className = "machine-task-command-token";
-      token.textContent = `#${machineLabel(machine)}`;
-      editor.appendChild(token);
-      editor.appendChild(document.createTextNode(","));
-    }
-    if (draft.title) {
-      appendSpace();
-      const strong = document.createElement("strong");
-      strong.textContent = draft.title;
-      editor.appendChild(strong);
-      if (draft.description || draft.frequency || draft.assignedTo) {
-        editor.appendChild(document.createTextNode(","));
-      }
-    }
-    if (draft.description) {
-      appendSpace();
-      editor.appendChild(document.createTextNode(draft.description));
-      if (draft.frequency || draft.assignedTo) editor.appendChild(document.createTextNode(","));
-    }
-    const frequency = frequencyToken();
-    if (frequency) {
-      appendSpace();
-      const token = document.createElement("span");
-      token.className = "machine-task-command-token";
-      token.textContent = frequency;
-      editor.appendChild(token);
-      if (draft.assignedTo) editor.appendChild(document.createTextNode(","));
-    }
-    if (draft.assignedTo?.username) {
-      appendSpace();
-      const token = document.createElement("span");
-      token.className = "machine-task-command-token";
-      token.textContent = `@${draft.assignedTo.username}`;
-      editor.appendChild(token);
-    }
+    const command = `${machine ? `#${machineLabel(machine)}, ` : ""}${fields.join(", ")}`;
+    if (editor.textContent !== command) editor.textContent = command;
     if (focus) {
       editor.focus();
       setCaretAtEnd();
@@ -979,12 +946,10 @@ const renderCommandCreateForm = (root, machines, onCreate, fieldsOpen = false) =
     const structuredSegments = /^\s*,/.test(remainder)
       ? remainder.replace(/^\s*,\s*/, "").split(",")
       : null;
-    const renderedTitle = editor.querySelector("strong")?.textContent?.replace(/,+\s*$/, "").trim() || "";
     const titleMatch = remainder.match(/\*\*([^*]+)\*\*/);
     const structuredTitle = structuredSegments?.[0]?.replace(/^\*\*|\*\*$/g, "").trim() || "";
-    let title = renderedTitle || titleMatch?.[1]?.trim() || structuredTitle;
+    let title = titleMatch?.[1]?.trim() || structuredTitle;
     if (titleMatch) remainder = removeOnce(remainder, titleMatch[0]);
-    else if (renderedTitle) remainder = removeOnce(remainder, renderedTitle);
     else {
       const plainTitleMatch = remainder.match(/^\s*,\s*([^,/@]+?)(?=\s*(?:,|\/|@|$))/);
       if (plainTitleMatch) {
@@ -1073,31 +1038,15 @@ const renderCommandCreateForm = (root, machines, onCreate, fieldsOpen = false) =
     }
     setCaretAtEnd();
   };
-  const formatTypedTitle = () => {
+  const normalizeEditorSeparators = (preserveCaret = true) => {
     const text = String(editor.textContent || "");
-    const machine = getMachine();
-    if (!machine) return;
-    const machineToken = `#${machineLabel(machine)}`;
-    const machineStart = normalizeCommandText(text).indexOf(normalizeCommandText(machineToken));
-    if (machineStart < 0) return;
-    const firstComma = text.indexOf(",", machineStart + machineToken.length);
-    if (firstComma < 0) return;
-    const secondComma = text.indexOf(",", firstComma + 1);
-    const rawTitleEnd = secondComma < 0 ? text.length : secondComma;
-    const titleStart = firstComma + 1 + (text.slice(firstComma + 1, rawTitleEnd).match(/^\s*/)?.[0].length || 0);
-    const titleEnd = rawTitleEnd - (text.slice(titleStart, rawTitleEnd).match(/\s*$/)?.[0].length || 0);
-    if (titleEnd <= titleStart) return;
-    const caret = getCaretOffset();
-    const prefix = document.createTextNode(text.slice(0, machineStart));
-    const machineNode = document.createElement("span");
-    machineNode.className = "machine-task-command-token";
-    machineNode.textContent = text.slice(machineStart, machineStart + machineToken.length);
-    const beforeTitle = document.createTextNode(text.slice(machineStart + machineToken.length, titleStart));
-    const titleNode = document.createElement("strong");
-    titleNode.textContent = text.slice(titleStart, titleEnd);
-    const suffix = document.createTextNode(text.slice(titleEnd));
-    editor.replaceChildren(prefix, machineNode, beforeTitle, titleNode, suffix);
-    setCaretOffset(caret);
+    const caret = preserveCaret ? getCaretOffset() : 0;
+    const normalized = text.replace(/\s*,\s*/g, ", ");
+    if (normalized === text) return;
+    editor.textContent = normalized;
+    if (preserveCaret) {
+      setCaretOffset(text.slice(0, caret).replace(/\s*,\s*/g, ", ").length);
+    }
   };
   const closeSuggestions = () => {
     suggestions.hidden = true;
@@ -1122,7 +1071,7 @@ const renderCommandCreateForm = (root, machines, onCreate, fieldsOpen = false) =
       end: caret
     } : null);
     if (!range) return;
-    editor.textContent = `${text.slice(0, range.start)}${replacement} ${text.slice(range.end)}`.trim();
+    editor.textContent = `${text.slice(0, range.start)}${replacement} ${text.slice(range.end)}`;
     parseEditor();
     renderEditor(true);
     closeSuggestions();
@@ -1241,9 +1190,9 @@ const renderCommandCreateForm = (root, machines, onCreate, fieldsOpen = false) =
   customAmount.addEventListener("input", syncDraftFromFields);
   customUnit.addEventListener("change", syncDraftFromFields);
   assigneeSelect.addEventListener("change", syncDraftFromFields);
-  editor.addEventListener("input", () => {
+  editor.addEventListener("input", (event) => {
+    if (!event.inputType || event.inputType.startsWith("insert")) normalizeEditorSeparators();
     parseEditor();
-    formatTypedTitle();
     refreshSuggestions();
   });
   editor.addEventListener("keydown", (event) => {
@@ -1274,6 +1223,7 @@ const renderCommandCreateForm = (root, machines, onCreate, fieldsOpen = false) =
   editor.addEventListener("blur", () => {
     window.setTimeout(() => {
       if (!suggestions.matches(":hover")) closeSuggestions();
+      normalizeEditorSeparators(false);
       parseEditor();
       renderEditor();
     }, 120);

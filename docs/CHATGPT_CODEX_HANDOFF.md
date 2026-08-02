@@ -1,147 +1,100 @@
 # ChatGPT to Codex Handoff
 
-This document helps ChatGPT turn a conversation with the repository owner into
-a precise implementation prompt for Codex. It is a prompt-writing guide, not a
-replacement for `AGENTS.md` or the feature-specific documentation.
+Use this guide when turning a conversation with the owner into a prompt for
+Codex Luna. The goal is simple: understand what the owner means and express it
+clearly enough for Luna to implement it in the right part of the repository.
 
-## Role
+This is a prompt-writing guide. It is not a second `AGENTS.md`, a test plan, or
+a reporting template.
 
-When asked to prepare work for Codex:
+## What ChatGPT Should Do
 
-- Capture the owner's actual intent, decisions, priorities, and constraints.
-- Produce a self-contained implementation brief that Codex can act on.
-- Use repository access to verify relevant names, paths, and existing behavior.
-- Do not prescribe an internal implementation when the repository should be
-  inspected first. State the required behavior and acceptance criteria.
-- Do not make repository changes unless the owner separately asks ChatGPT to do
-  so. The normal output of this workflow is a prompt for Codex.
+- Interpret the owner's intent, including informal language and decisions made
+  during the conversation.
+- Return one concise, copyable prompt for Codex.
+- Preserve the owner's priorities and do not invent requirements.
+- Point to the most likely working area: directories, files, components,
+  routes, styles, functions, or documentation.
+- Keep the task focused. Do not turn a small request into a repository-wide
+  investigation.
 
-## Sources Of Truth
+ChatGPT should not ask Luna for a progress report, a long explanation, a large
+test matrix, or a final audit. Luna can follow the repository's existing
+`AGENTS.md` rules and perform the normal checks those rules require.
 
-Before drafting the handoff, read:
+## How To Locate The Work
 
-1. `AGENTS.md` for durable repository operating rules.
-2. `docs/REPO_MAP.md` when the task is broad or the affected area is unclear.
-3. Only the feature documentation routed by those files and relevant to the
-   requested work.
+Every prompt should include a short **Working area** section. Use repository
+access to ground it in real paths when possible:
 
-Do not copy all repository instructions into the handoff. Reference them and
-repeat only constraints that are especially important for the task. If the
-conversation conflicts with current repository documentation, identify the
-conflict instead of silently choosing one version.
+- **Primary area:** where the change most likely belongs.
+- **Related area:** another location that may need a small coordinated change.
+- **Outside scope:** areas that should not be touched.
 
-ChatGPT's connected repository may not contain local, uncommitted changes from
-the owner's Codex workspace. Never claim that the connected branch is the exact
-current working tree. Tell Codex to inspect the local status and current code
-before editing.
+If the exact file is not known, name the nearest reliable area and tell Luna to
+locate the existing implementation there before editing. Do not guess a file or
+API merely to make the prompt look specific. Consult `docs/REPO_MAP.md` only as
+much as needed to find the area; mention a deeper documentation file only when
+the task actually concerns that domain.
 
-## Drafting Workflow
+## Prompt Contents
 
-1. Distill the conversation into one primary outcome.
-2. Separate confirmed decisions from suggestions and unresolved questions.
-3. Inspect the smallest useful repository scope to ground the brief.
-4. Define observable acceptance criteria without inventing product behavior.
-5. State explicit exclusions when they protect the task from scope creep.
-6. Include proportional validation and any owner-only follow-up commands.
-7. Ask the owner a question only when a missing choice would materially change
-   the result and cannot be discovered safely from the repository.
+Keep the prompt to these essentials:
 
-Prefer concise prompts. Codex already has repository access and loads
-`AGENTS.md`; it does not need large pasted files, speculative code, or a diary of
-the conversation.
+- **What I want:** the requested outcome in the owner's terms.
+- **Why:** only the product context needed to make the right decision.
+- **Working area:** primary, related, and excluded areas.
+- **Expected result:** what should be different when the work is complete.
+- **Constraints:** confirmed decisions, localization, compatibility, safety, or
+  other boundaries that matter.
 
-## Required Handoff Contents
+Include acceptance details only when they clarify the expected result. Do not
+add separate sections for validation, reports, deployment, or retrospective
+unless the owner explicitly asks for them.
 
-Every Codex prompt should contain, when applicable:
+Always remind Luna to inspect the current implementation before editing and to
+preserve unrelated user changes. Do not authorize publishing, deployment,
+production mutations, commits, pushes, or destructive operations unless the
+owner explicitly requested them.
 
-- **Objective:** the outcome to achieve and why it matters.
-- **User context:** relevant product intent or decisions from the conversation.
-- **Scope:** behavior and areas that are included.
-- **Out of scope:** adjacent changes that should not be made.
-- **Acceptance criteria:** concrete, observable conditions for completion.
-- **Repository guidance:** the specific documentation Codex should consult.
-- **Safety constraints:** production data, permissions, ownership, secrets,
-  localization, or compatibility concerns relevant to this task.
-- **Validation:** targeted checks, tests, build, or visual review expected.
-- **Handoff:** what Codex should report, including whether publish or deploy is
-  required and the exact owner-run commands when applicable.
-
-Tell Codex to preserve unrelated user changes and inspect before editing. Do not
-request a commit, push, publish, deployment, production mutation, or destructive
-operation unless the owner explicitly requested that action in the current
-conversation.
-
-## Model And Reasoning Recommendation
-
-The normal execution target is GPT-5.6 Luna with `high` reasoning. Recommend
-Luna with `xhigh` reasoning when the task is ambiguous, cross-cutting, involves
-several interacting state flows, or needs substantial diagnosis before editing.
-
-For high-risk security, authorization, ownership, production-data, or major
-architectural work, flag that GPT-5.6 Sol may be the safer execution choice.
-Model selection is a recommendation outside the prompt; do not assume that text
-inside the handoff can change Codex's active model or reasoning level.
-
-## Prompt Template
-
-Use this structure and remove sections that add no value:
+## Copyable Template
 
 ```md
-Implement the following change in the Unatomo repository.
+Implement this change in the Unatomo repository.
 
-## Objective
+## What I want
 
-[Single primary outcome and its purpose.]
+[Translate the owner's request into one clear outcome.]
 
-## Context and confirmed decisions
+## Why
 
-- [Only conversation details that affect implementation.]
+[Relevant product context, if it affects the implementation.]
 
-## Scope
+## Working area
 
-- [Required behavior or affected surface.]
+- Primary: [directory, file, component, route, or function].
+- Related: [nearby area, or "none known"].
+- Outside scope: [areas that must remain untouched].
 
-## Out of scope
+## Expected result
 
-- [Explicit exclusions, if needed.]
+- [Concrete behavior or visible result.]
 
-## Acceptance criteria
+## Constraints
 
-- [Observable completion condition.]
-
-## Repository guidance and constraints
-
-- Read `AGENTS.md` and [specific routed documentation].
-- Inspect the current working tree and implementation before editing.
+- Read `AGENTS.md` and only the relevant repository guidance.
+- Inspect the existing implementation in the working area before editing.
 - Preserve unrelated user changes.
-- [Task-specific safety, data, localization, or compatibility constraint.]
-
-## Validation
-
-- [Targeted checks appropriate to the risk and change size.]
-
-## Final handoff
-
-Report the outcome, relevant files changed, validation performed, and any
-remaining risk. State whether publish/deploy is needed; do not run owner-only
-publish/deploy steps unless explicitly requested.
+- [Any confirmed task-specific constraint.]
 ```
 
-Above the prompt, ChatGPT may add a short recommendation such as:
+Do not put model-selection instructions inside the prompt. The normal target is
+Luna with `high` reasoning; the owner can choose `xhigh` when the task is
+especially ambiguous or cross-cutting.
 
-`Recommended execution: GPT-5.6 Luna, reasoning high.`
+## Quick Check Before Sending
 
-Keep that recommendation outside the copyable prompt when practical.
-
-## Quality Check
-
-Before returning the prompt, verify that it:
-
-- Represents the latest owner decision rather than an earlier idea.
-- Contains one coherent objective or clearly separated independent tasks.
-- Distinguishes facts, assumptions, and open questions.
-- Does not invent files, APIs, data models, tests, or current workspace state.
-- Gives Codex room to choose an implementation based on current code.
-- Defines what success looks like and how it should be checked.
-- Does not authorize operations the owner did not request.
+Make sure the prompt reflects the latest owner decision, names a plausible work
+area, distinguishes the desired result from implementation guesses, and is
+short enough that Luna can start immediately.
 
