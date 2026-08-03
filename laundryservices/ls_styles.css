@@ -259,8 +259,10 @@ a:hover {
 .service-pillars {
   margin-top: 5.4rem;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: #07111f;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(0, 0, 0, 0.52);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   color: #ffffff;
 }
 
@@ -272,6 +274,7 @@ a:hover {
 .service-pillar {
   min-height: 280px;
   padding: 2.35rem 2rem 2.45rem;
+  transition: background-color 220ms ease;
 }
 
 .service-pillar:nth-child(odd) {
@@ -289,13 +292,17 @@ a:hover {
   margin: 0 auto 1.35rem;
   object-fit: contain;
   flex: 0 0 auto;
+  opacity: 0.68;
+  transform: scale(0.96);
+  transition: opacity 220ms ease, transform 220ms ease;
 }
 
 .service-pillar-title {
   margin: 0 0 0.65rem;
-  color: #ffffff;
+  color: rgba(255, 255, 255, 0.86);
   font-size: clamp(1.2rem, 2.4vw, 1.55rem);
   line-height: 1.25;
+  transition: color 220ms ease;
 }
 
 .page-shell .service-pillars .service-pillar-description,
@@ -303,6 +310,57 @@ a:hover {
   margin: 0;
   color: rgba(255, 255, 255, 0.76);
   line-height: 1.6;
+}
+
+.service-pillar:hover {
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.service-pillar:hover .service-pillar-icon,
+.service-pillar:focus-visible .service-pillar-icon {
+  opacity: 1;
+  transform: translateY(-3px) scale(1.03);
+}
+
+.service-pillar:hover .service-pillar-title,
+.service-pillar:focus-visible .service-pillar-title {
+  color: #ffffff;
+}
+
+.service-pillar--link {
+  position: relative;
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.service-pillar--link:hover,
+.service-pillar--link:focus-visible {
+  opacity: 1;
+}
+
+.service-pillar--link:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.75);
+  outline-offset: -4px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.service-pillar-link-arrow {
+  position: absolute;
+  top: 1.2rem;
+  right: 1.25rem;
+  color: #ffffff;
+  font-size: 1rem;
+  opacity: 0.35;
+  transform: translate(0, 0);
+  transition: opacity 220ms ease, transform 220ms ease;
+}
+
+.service-pillar--link:hover .service-pillar-link-arrow,
+.service-pillar--link:focus-visible .service-pillar-link-arrow {
+  opacity: 1;
+  transform: translate(2px, -2px);
 }
 
 .positioning-block,
@@ -1851,6 +1909,30 @@ body.ls-contact-page .form-status[hidden] {
     width: 90px;
     height: 90px;
     margin-bottom: 1.1rem;
+    opacity: 0.82;
+    transform: none;
+  }
+
+  .service-pillar:hover {
+    background: transparent;
+  }
+
+  .service-pillar:hover .service-pillar-icon {
+    opacity: 0.82;
+    transform: none;
+  }
+
+  .service-pillar:hover .service-pillar-title {
+    color: rgba(255, 255, 255, 0.86);
+  }
+
+  .service-pillar--link:hover .service-pillar-link-arrow {
+    opacity: 0.55;
+    transform: none;
+  }
+
+  .service-pillar-link-arrow {
+    opacity: 0.55;
   }
 
   .service-card.is-collapsed {
@@ -1963,6 +2045,20 @@ body.ls-contact-page .form-status[hidden] {
     -webkit-appearance: none;
     background-image: none;
     box-shadow: none;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .service-pillar,
+  .service-pillar-icon,
+  .service-pillar-title,
+  .service-pillar-link-arrow {
+    transition: none;
+  }
+
+  .service-pillar:hover .service-pillar-icon,
+  .service-pillar--link:focus-visible .service-pillar-icon {
     transform: none;
   }
 }
