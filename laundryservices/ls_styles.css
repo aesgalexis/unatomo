@@ -278,7 +278,7 @@ a:hover {
   border-right: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.service-pillar:nth-child(-n + 2) {
+.service-pillar:nth-child(-n + 4) {
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
@@ -1839,7 +1839,7 @@ body.ls-contact-page .form-status[hidden] {
     border-right: none;
   }
 
-  .service-pillar:nth-child(-n + 2) {
+  .service-pillar:nth-child(-n + 4) {
     border-bottom: none;
   }
 
