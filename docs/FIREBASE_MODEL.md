@@ -70,7 +70,7 @@ machine-docs/{ownerUid}/{machineId}/manual/{fileName}
 machine-docs/{ownerUid}/{machineId}/other/{fileName}
 ```
 
-Implemented document types are `plate`, intended for machine plate photos; `manual`, intended for one PDF manual up to 25 MB; and `other`, an array of additional PDFs or images up to 25 MB each. Do not store uploaded files in the repository.
+Implemented document types are `plate`, intended for machine plate photos; `manual`, intended for one PDF manual up to 25 MB; and `other`, an array of additional PDFs or images up to 25 MB each. The General-tab UI limits each `other` selection to 10 files and 100 MB total before uploading. Do not store uploaded files in the repository.
 
 Incident images selected while changing a machine to `fuera_de_servicio` are
 stored as ordinary `machines.documents.other[]` entries. Linked entries may

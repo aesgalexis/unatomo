@@ -316,12 +316,6 @@
   white-space: nowrap;
 }
 
-.mc-doc-actions {
-  justify-content: center;
-  width: 100%;
-  margin: 0.45rem 0 0;
-}
-
 .mc-doc-status {
   margin-top: 0.25rem;
   text-align: center;
@@ -420,14 +414,6 @@
   align-items: center;
 }
 
-.mc-manual-actions {
-  margin-left: auto;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
 .mc-manual-drop {
   border: 1px solid var(--border-subtle);
   border-radius: 0.5rem;
@@ -453,16 +439,6 @@
 .mc-manual-drop.is-file {
   flex: 1 1 220px;
   max-width: 240px;
-}
-
-.mc-manual-btn {
-  border-radius: 0.6rem;
-  border: 1px solid var(--border-subtle);
-  background: color-mix(in srgb, var(--bg) 96%, transparent);
-  color: var(--fg);
-  padding: 0.35rem 0.7rem;
-  font: inherit;
-  cursor: pointer;
 }
 
 @media (max-width: 640px) {

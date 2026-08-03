@@ -9,6 +9,8 @@ import {
 const MAX_ORIGINAL_BYTES = 12 * 1024 * 1024;
 const MAX_MANUAL_BYTES = 25 * 1024 * 1024;
 const MAX_OTHER_BYTES = 25 * 1024 * 1024;
+const MAX_OTHER_SELECTION_FILES = 10;
+const MAX_OTHER_SELECTION_BYTES = 100 * 1024 * 1024;
 const MAX_IMAGE_SIDE = 1800;
 const JPEG_QUALITY = 0.82;
 const ALLOWED_PLATE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
@@ -106,6 +108,22 @@ export const validateOtherDocument = (file) => {
   if (file.size > MAX_OTHER_BYTES) throw new Error("file-too-large");
 };
 
+export const validateOtherDocumentBatch = (files) => {
+  const selectedFiles = Array.from(files || []).filter(Boolean);
+  if (selectedFiles.length > MAX_OTHER_SELECTION_FILES) {
+    throw new Error("batch-too-many");
+  }
+  const totalBytes = selectedFiles.reduce(
+    (total, file) => total + Number(file.size || 0),
+    0
+  );
+  if (totalBytes > MAX_OTHER_SELECTION_BYTES) {
+    throw new Error("batch-too-large");
+  }
+  selectedFiles.forEach(validateOtherDocument);
+  return selectedFiles;
+};
+
 export const uploadPlateDocument = async ({ machine, file, uploadedBy }) => {
   validatePlateImage(file);
   const ownerUid = (machine.tenantId || machine.ownerUid || "").trim();
@@ -153,8 +171,10 @@ export const uploadManualDocument = async ({ machine, file, uploadedBy }) => {
   const machineId = (machine.id || "").trim();
   if (!ownerUid || !machineId || !uploadedBy) throw new Error("missing-context");
 
-  const storagePath = `machine-docs/${ownerUid}/${machineId}/manual/manual.pdf`;
+  const storagePath =
+    `machine-docs/${ownerUid}/${machineId}/manual/${createDocumentId()}-manual.pdf`;
   const storageRef = ref(storage, storagePath);
+  const previousStoragePath = machine.documents?.manual?.storagePath || "";
   const metadata = {
     contentType: "application/pdf",
     customMetadata: {
@@ -166,24 +186,26 @@ export const uploadManualDocument = async ({ machine, file, uploadedBy }) => {
     }
   };
 
-  await uploadBytes(storageRef, file, metadata);
-  const url = await getDownloadURL(storageRef);
-  const previousPath = machine.documents?.manual?.storagePath || "";
-  if (previousPath && previousPath !== storagePath) {
-    await deleteObject(ref(storage, previousPath)).catch(() => {});
-  }
+  try {
+    await uploadBytes(storageRef, file, metadata);
+    const url = await getDownloadURL(storageRef);
 
-  return {
-    kind: "manual",
-    name: file.name || "manual.pdf",
-    contentType: metadata.contentType,
-    size: file.size,
-    originalSize: file.size,
-    storagePath,
-    url,
-    uploadedAt: new Date().toISOString(),
-    uploadedBy
-  };
+    return {
+      kind: "manual",
+      name: file.name || "manual.pdf",
+      contentType: metadata.contentType,
+      size: file.size,
+      originalSize: file.size,
+      storagePath,
+      url,
+      uploadedAt: new Date().toISOString(),
+      uploadedBy,
+      previousStoragePath
+    };
+  } catch (error) {
+    await deleteObject(storageRef).catch(() => {});
+    throw error;
+  }
 };
 
 export const uploadOtherDocument = async ({ machine, file, uploadedBy }) => {

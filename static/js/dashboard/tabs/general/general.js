@@ -1,4 +1,8 @@
 import { t } from "/static/js/dashboard/i18n.js";
+import {
+  validateManualPdf,
+  validateOtherDocumentBatch
+} from "../../documents/machineDocumentsRepo.js";
 
 export const render = (panel, machine, hooks, options = {}) => {
   panel.innerHTML = "";
@@ -252,7 +256,6 @@ export const render = (panel, machine, hooks, options = {}) => {
       canUploadDocuments &&
       ["plate", "manual", "other"].includes(kind);
     const isMultiDocument = kind === "other";
-    const maxBatchFiles = 10;
     let currentUrl = savedDoc?.url || "";
 
     const wrap = document.createElement("div");
@@ -300,18 +303,70 @@ export const render = (panel, machine, hooks, options = {}) => {
     const status = document.createElement("div");
     status.className = "mc-tag-status mc-doc-status";
 
-    const saveBtn = document.createElement("button");
-    saveBtn.type = "button";
-    saveBtn.className = "mc-manual-btn";
-    saveBtn.textContent = t("general.save", "Guardar");
-    saveBtn.hidden = true;
-
     const openFilePicker = () => {
       if (canUpload) fileInput.click();
     };
 
     const openSavedDocument = () => {
       if (currentUrl) window.open(currentUrl, "_blank", "noopener");
+    };
+
+    const getUploadErrorMessage = (code) => {
+      if (code === "manual-multiple") {
+        return t("general.uploadManualSingleError", "Selecciona un solo archivo PDF");
+      }
+      if (code === "batch-too-many") {
+        return t(
+          "general.uploadBatchLimitError",
+          "Puedes subir hasta 10 archivos a la vez"
+        );
+      }
+      if (code === "batch-too-large") {
+        return t(
+          "general.uploadBatchSizeError",
+          "El tama\u00f1o total no puede superar 100 MB"
+        );
+      }
+      if (code === "file-type") {
+        return kind === "manual"
+          ? t("general.uploadPdfTypeError", "Usa un archivo PDF")
+          : kind === "other"
+            ? t("general.uploadDocumentTypeError", "Usa un PDF o una imagen JPG, PNG o WebP")
+            : t("general.uploadTypeError", "Usa una imagen JPG, PNG o WebP");
+      }
+      if (code === "file-too-large") {
+        return kind === "manual"
+          ? t("general.uploadPdfSizeError", "El PDF es demasiado grande")
+          : kind === "other"
+            ? t("general.uploadDocumentSizeError", "El archivo es demasiado grande")
+            : t("general.uploadSizeError", "La imagen es demasiado grande");
+      }
+      if (code === "storage-full") {
+        return t("dashboard.storageFullAction", "Almacenamiento lleno");
+      }
+      return t("general.uploadError", "Error al cargar el archivo");
+    };
+
+    const validateSelection = (selectedFiles) => {
+      try {
+        if (kind === "manual") {
+          if (selectedFiles.length > 1) throw new Error("manual-multiple");
+          validateManualPdf(selectedFiles[0]);
+        } else if (kind === "other") {
+          validateOtherDocumentBatch(selectedFiles);
+        }
+        return true;
+      } catch (error) {
+        status.textContent = getUploadErrorMessage(error?.message || "");
+        status.dataset.state = "error";
+        fileInput.value = "";
+        if (kind === "manual") {
+          fileName.textContent = savedDoc?.name || t("general.upload", "Cargar");
+          tile.classList.toggle("is-file", !!savedDoc);
+        }
+        scheduleContentResize();
+        return false;
+      }
     };
 
     const uploadFile = async (file, options = {}) => {
@@ -323,7 +378,6 @@ export const render = (panel, machine, hooks, options = {}) => {
         return;
       }
 
-      saveBtn.disabled = true;
       tile.classList.add("is-uploading");
       if (!options.silent) {
         status.textContent = t("general.uploading", "Subiendo...");
@@ -338,7 +392,6 @@ export const render = (panel, machine, hooks, options = {}) => {
           : doc?.name || file.name;
         tile.classList.toggle("is-file", !isMultiDocument);
         icon.dataset.symbol = isMultiDocument ? "+" : "✓";
-        saveBtn.hidden = true;
         currentUrl = isMultiDocument ? "" : doc?.url || currentUrl;
         if (kind === "plate" && currentUrl) {
           tile.classList.add("has-preview");
@@ -355,26 +408,15 @@ export const render = (panel, machine, hooks, options = {}) => {
         return doc;
       } catch (err) {
         const code = err?.message || "";
-        status.textContent =
-          code === "file-type"
-            ? kind === "manual"
-              ? t("general.uploadPdfTypeError", "Usa un archivo PDF")
-              : kind === "other"
-                ? t("general.uploadDocumentTypeError", "Usa un PDF o una imagen JPG, PNG o WebP")
-                : t("general.uploadTypeError", "Usa una imagen JPG, PNG o WebP")
-            : code === "file-too-large"
-            ? kind === "manual"
-              ? t("general.uploadPdfSizeError", "El PDF es demasiado grande")
-              : kind === "other"
-                ? t("general.uploadDocumentSizeError", "El archivo es demasiado grande")
-                : t("general.uploadSizeError", "La imagen es demasiado grande")
-            : code === "storage-full"
-            ? t("dashboard.storageFullAction", "Almacenamiento lleno")
-            : t("general.uploadError", "Error al cargar el archivo");
+        status.textContent = getUploadErrorMessage(code);
         status.dataset.state = "error";
+        if (kind === "manual") {
+          fileInput.value = "";
+          fileName.textContent = savedDoc?.name || t("general.upload", "Cargar");
+          tile.classList.toggle("is-file", !!savedDoc);
+        }
         if (options.rethrow) throw err;
       } finally {
-        saveBtn.disabled = false;
         tile.classList.remove("is-uploading");
         scheduleContentResize();
       }
@@ -383,41 +425,48 @@ export const render = (panel, machine, hooks, options = {}) => {
     const uploadFiles = async (files) => {
       const selectedFiles = Array.from(files || []).filter(Boolean);
       if (!selectedFiles.length) return;
+      if (kind !== "plate" && !validateSelection(selectedFiles)) return;
       if (!isMultiDocument) {
         await uploadFile(selectedFiles[0]);
         return;
       }
-      if (selectedFiles.length > maxBatchFiles) {
-        status.textContent = t("general.uploadBatchLimitError", "Puedes subir hasta 10 archivos a la vez");
-        status.dataset.state = "error";
-        saveBtn.hidden = true;
-        fileInput.value = "";
-        scheduleContentResize();
-        return;
-      }
 
-      saveBtn.disabled = true;
       tile.classList.add("is-uploading");
+      let uploadedCount = 0;
+      let failedCount = 0;
       try {
-        const uploadedDocs = [];
         for (let index = 0; index < selectedFiles.length; index += 1) {
           status.textContent = t(
             "general.uploadingMany",
             (current, total) => `Subiendo ${current}/${total}...`
           )(index + 1, selectedFiles.length);
           status.dataset.state = "neutral";
-          const uploadedDoc = await uploadFile(selectedFiles[index], {
-            silent: true,
-            deferRender: true,
-            rethrow: true
-          });
-          if (uploadedDoc) uploadedDocs.push(uploadedDoc);
+          try {
+            const uploadedDoc = await uploadFile(selectedFiles[index], {
+              silent: true,
+              deferRender: true,
+              rethrow: true
+            });
+            if (uploadedDoc) {
+              uploadedCount += 1;
+              appendOtherDocRow(uploadedDoc);
+            }
+          } catch {
+            failedCount += 1;
+          }
         }
-        uploadedDocs.forEach(appendOtherDocRow);
         fileName.textContent = t("general.upload", "Cargar");
-        saveBtn.hidden = true;
         fileInput.value = "";
-        status.textContent = t("general.uploadSaved", "Archivo guardado");
+        if (failedCount) {
+          status.textContent = t(
+            "general.uploadPartial",
+            (uploaded, failed) =>
+              `${uploaded} archivos subidos y ${failed} no pudieron subirse`
+          )(uploadedCount, failedCount);
+          status.dataset.state = "error";
+          return;
+        }
+        status.textContent = t("general.uploadsSaved", "Archivos guardados");
         status.dataset.state = "ok";
         window.setTimeout(() => {
           status.textContent = "";
@@ -428,7 +477,6 @@ export const render = (panel, machine, hooks, options = {}) => {
           scheduleContentResize();
         }, 2200);
       } finally {
-        saveBtn.disabled = false;
         tile.classList.remove("is-uploading");
         scheduleContentResize();
       }
@@ -444,7 +492,6 @@ export const render = (panel, machine, hooks, options = {}) => {
       else tile.removeAttribute("tabindex");
       icon.dataset.symbol = "+";
       fileName.textContent = t("general.upload", "Cargar");
-      saveBtn.hidden = true;
     };
 
     const deleteDocument = async () => {
@@ -490,21 +537,21 @@ export const render = (panel, machine, hooks, options = {}) => {
     });
 
     tile.addEventListener("dragover", (event) => {
-      if (!canUpload || (!isMultiDocument && currentUrl)) return;
+      if (!canUpload || (kind === "plate" && currentUrl)) return;
       event.preventDefault();
       event.stopPropagation();
       tile.classList.add("is-dragover");
     });
 
     tile.addEventListener("dragleave", (event) => {
-      if (!canUpload || (!isMultiDocument && currentUrl)) return;
+      if (!canUpload || (kind === "plate" && currentUrl)) return;
       event.preventDefault();
       event.stopPropagation();
       tile.classList.remove("is-dragover");
     });
 
     tile.addEventListener("drop", async (event) => {
-      if (!canUpload || (!isMultiDocument && currentUrl)) return;
+      if (!canUpload || (kind === "plate" && currentUrl)) return;
       event.preventDefault();
       event.stopPropagation();
       tile.classList.remove("is-dragover");
@@ -525,17 +572,9 @@ export const render = (panel, machine, hooks, options = {}) => {
           ? file.name
           : savedDoc?.name || t("general.upload", "Cargar");
       tile.classList.toggle("is-file", !isMultiDocument && (!!file || !!savedDoc));
-      saveBtn.hidden = !files.length;
       scheduleContentResize();
+      uploadFiles(files);
     });
-
-    saveBtn.addEventListener("click", async (event) => {
-      event.stopPropagation();
-      await uploadFiles(fileInput.files || []);
-    });
-
-    const actions = document.createElement("div");
-    actions.className = "mc-manual-actions mc-doc-actions";
 
     let menu = null;
     if (savedDoc && (canUpload || canDeleteDocuments)) {
@@ -587,13 +626,11 @@ export const render = (panel, machine, hooks, options = {}) => {
       tile.appendChild(menu);
     }
 
-    actions.appendChild(saveBtn);
     tile.appendChild(icon);
     tile.appendChild(label);
     tile.appendChild(fileName);
     wrap.appendChild(tile);
     wrap.appendChild(fileInput);
-    wrap.appendChild(actions);
     wrap.appendChild(status);
     return wrap;
   };

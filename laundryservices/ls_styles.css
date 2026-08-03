@@ -256,6 +256,64 @@ a:hover {
   cursor: grabbing;
 }
 
+.service-pillars {
+  margin-top: 5.4rem;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #07111f;
+  color: #ffffff;
+}
+
+.service-pillars-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.service-pillar {
+  min-height: 280px;
+  padding: 2.35rem 2rem 2.45rem;
+}
+
+.service-pillar:nth-child(odd) {
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.service-pillar:nth-child(-n + 2) {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.service-pillar-icon {
+  width: 104px;
+  height: 104px;
+  margin-bottom: 1.35rem;
+  color: #ffffff;
+}
+
+.service-pillar-icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.service-pillar-title {
+  margin: 0 0 0.65rem;
+  color: #ffffff;
+  font-size: clamp(1.2rem, 2.4vw, 1.55rem);
+  line-height: 1.25;
+}
+
+.page-shell .service-pillars .service-pillar-description,
+.page-shell .service-pillars .service-pillar-description:hover {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.76);
+  line-height: 1.6;
+}
+
 .positioning-block,
 .services-section,
 .signals-section,
@@ -1771,6 +1829,37 @@ body.ls-contact-page .form-status[hidden] {
 
   .page-shell {
     padding: 92px 1.25rem 2.5rem;
+  }
+
+  .service-pillars {
+    margin-top: 4.5rem;
+  }
+
+  .service-pillars-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .service-pillar {
+    min-height: 0;
+    padding: 1.8rem 1.25rem 2rem;
+  }
+
+  .service-pillar:nth-child(odd) {
+    border-right: none;
+  }
+
+  .service-pillar:nth-child(-n + 2) {
+    border-bottom: none;
+  }
+
+  .service-pillar:not(:last-child) {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .service-pillar-icon {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 1.1rem;
   }
 
   .service-card.is-collapsed {

@@ -51,6 +51,8 @@ Current implemented scope:
 
 - `Plate` / `Placa`: accepts JPG, PNG, and WebP images.
 - `Manual`: accepts PDF files up to 25 MB.
+- Manual and other-documentation files start uploading as soon as they are selected or dropped. Other-documentation selections are validated before upload (up to 10 files and 100 MB total), then uploaded sequentially with progress and partial-result status.
+- Replacing a manual uploads the new Storage object before switching the machine metadata, so a failed replacement leaves the previous manual available.
 - `Other documentation` / `Otra documentación`: accepts PDFs and JPG, PNG, or WebP images up to 25 MB each; supports multiple files and lists them below the upload tiles.
 - Plate images are compressed/resized in the browser before upload.
 - Uploads the image to Firebase Storage, not to the repository.

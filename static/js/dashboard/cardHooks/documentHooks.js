@@ -78,8 +78,12 @@ export const installDocumentHooks = (hooks, deps = {}) => {
       file,
       uploadedBy: state.uid
     });
+    const previousManualPath =
+      kind === "manual" ? uploadedDocument.previousStoragePath || "" : "";
+    const { previousStoragePath: _previousStoragePath, ...documentMetadata } =
+      uploadedDocument;
     const uploaded = {
-      ...uploadedDocument,
+      ...documentMetadata,
       ...(options.documentMetadata || {})
     };
     const currentDocuments = current.documents || {};
@@ -106,7 +110,19 @@ export const installDocumentHooks = (hooks, deps = {}) => {
     if (!options.preserveTab) {
       withGeneralTabSelected(state, id, expandedById);
     }
-    await upsertMachine(tenantId, getDraftById(id));
+    try {
+      await upsertMachine(tenantId, getDraftById(id));
+    } catch (error) {
+      if (kind === "manual") {
+        updateMachine(id, { documents: currentDocuments, isNew: false });
+        current.documents = currentDocuments;
+        await deleteMachineDocumentFile(uploaded.storagePath).catch(() => {});
+      }
+      throw error;
+    }
+    if (previousManualPath && previousManualPath !== uploaded.storagePath) {
+      await deleteMachineDocumentFile(previousManualPath).catch(() => {});
+    }
     await refreshStorageFullState(tenantId);
     if (!options.silent) {
       notifyTopbar(t("general.uploadSaved", "Archivo guardado"));
