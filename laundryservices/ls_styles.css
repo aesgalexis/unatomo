@@ -260,10 +260,16 @@ a:hover {
   margin-top: 5.4rem;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.10);
-  background: rgba(0, 0, 0, 0.52);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(7, 17, 31, 0.26);
   color: #ffffff;
+}
+
+:root[data-theme="dark"] .service-pillars {
+  background: rgba(7, 17, 31, 0.26);
+}
+
+:root[data-theme="light"] .service-pillars {
+  background: rgba(7, 17, 31, 0.68);
 }
 
 .service-pillars-grid {
@@ -274,6 +280,9 @@ a:hover {
 .service-pillar {
   min-height: 280px;
   padding: 2.35rem 2rem 2.45rem;
+  background: transparent;
+  box-shadow: none;
+  filter: none;
   transition: background-color 220ms ease;
 }
 
@@ -313,7 +322,7 @@ a:hover {
 }
 
 .service-pillar:hover {
-  background: rgba(255, 255, 255, 0.035);
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .service-pillar:hover .service-pillar-icon,
@@ -343,7 +352,7 @@ a:hover {
 .service-pillar--link:focus-visible {
   outline: 2px solid rgba(255, 255, 255, 0.75);
   outline-offset: -4px;
-  background: rgba(255, 255, 255, 0.035);
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .service-pillar-link-arrow {

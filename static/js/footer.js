@@ -59,9 +59,8 @@
     nav.appendChild(anchor);
   });
 
-  const privacyFooter = legalFooter.nextElementSibling?.classList.contains("footer-link")
-    ? legalFooter.nextElementSibling
-    : null;
+  const privacyFooter = Array.from(legalFooter.parentElement?.children || [])
+    .find((child) => child !== legalFooter && child.classList.contains("footer-link")) || null;
   const privacyLink = privacyFooter?.querySelector("a") || null;
 
   legalFooter.textContent = "";
