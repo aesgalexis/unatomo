@@ -9,6 +9,8 @@ import { getControlPanelPath, isControlPanelUser } from "/nfc/controlpanel/acces
 const btn = document.getElementById("session-menu-btn");
 const menu = document.getElementById("session-menu");
 const label = document.getElementById("session-menu-label");
+const emailLabel = document.getElementById("session-menu-email");
+const initials = document.getElementById("session-menu-initials");
 const profileLink = document.getElementById("session-menu-profile");
 const action = document.getElementById("session-menu-action");
 const registerBtn = document.getElementById("session-menu-register");
@@ -38,6 +40,15 @@ function setMenuLinkContent(link, icon, text) {
   const textEl = document.createElement("span");
   textEl.textContent = text;
   link.replaceChildren(iconEl, textEl);
+}
+
+function getUserInitials(displayName, fallback = "") {
+  const source = (displayName || fallback || "").toString().trim();
+  if (!source) return "";
+  const parts = source.split(/\s+/).filter(Boolean);
+  const first = Array.from(parts[0])[0] || "";
+  const last = Array.from(parts[parts.length - 1])[0] || "";
+  return (parts.length > 1 ? `${first}${last}` : first).toUpperCase();
 }
 
 if (!btn || !menu || !label || !action) {
@@ -113,6 +124,14 @@ if (!btn || !menu || !label || !action) {
     label.hidden = false;
     label.textContent = text.session.guest;
 
+    if (emailLabel) {
+      emailLabel.hidden = true;
+      emailLabel.textContent = "";
+      emailLabel.removeAttribute("href");
+    }
+
+    if (initials) initials.textContent = "";
+
     if (profileLink) {
       profileLink.hidden = true;
       profileLink.replaceChildren();
@@ -150,7 +169,20 @@ if (!btn || !menu || !label || !action) {
     currentUser = user;
 
     label.hidden = false;
-    label.textContent = (user.displayName || user.email || text.session.user).toString();
+    const displayName = (user.displayName || "").toString().trim();
+    const email = (user.email || "").toString().trim();
+    label.textContent = displayName || email || text.session.user;
+
+    if (emailLabel) {
+      emailLabel.hidden = !email;
+      emailLabel.textContent = email;
+      if (email) emailLabel.setAttribute("href", `mailto:${email}`);
+      else emailLabel.removeAttribute("href");
+    }
+
+    if (initials) {
+      initials.textContent = getUserInitials(displayName, email || text.session.user);
+    }
 
     if (profileLink) {
       profileLink.hidden = false;

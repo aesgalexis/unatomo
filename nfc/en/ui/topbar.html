@@ -25,6 +25,7 @@
           aria-expanded="false"
         >
           <svg
+            class="session-menu-guest-icon"
             viewBox="0 0 24 24"
             aria-hidden="true"
             focusable="false"
@@ -65,10 +66,27 @@
             <circle cx="12" cy="8" r="4"></circle>
             <path d="M4 21c1.8-4 5-6 8-6s6.2 2 8 6"></path>
           </svg>
+          <span id="session-menu-initials" class="session-menu-avatar" aria-hidden="true"></span>
+          <svg
+            class="session-menu-chevron"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+            focusable="false"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="m7 9 5 5 5-5"></path>
+          </svg>
         </button>
 
         <div id="session-menu" role="menu" hidden>
-          <div id="session-menu-label">Guest</div>
+          <div id="session-menu-identity">
+            <div id="session-menu-label">Guest</div>
+            <a id="session-menu-email" hidden></a>
+          </div>
           <a
             id="session-menu-profile"
             href="/nfc/en/configuracion.html"

@@ -1455,6 +1455,47 @@ html[data-superadmin="true"][data-superadmin-language-toggle="true"] .topbar-lan
   display:block;
 }
 
+#session-menu-btn .session-menu-avatar,
+#session-menu-btn .session-menu-chevron{
+  display:none;
+}
+
+html[data-auth="user"] #session-menu-btn{
+  width:auto;
+  min-width:0;
+  height:40px;
+  padding:3px 8px 3px 4px;
+  border-radius:999px;
+  gap:6px;
+}
+
+html[data-auth="user"] #session-menu-btn .session-menu-guest-icon{
+  display:none;
+}
+
+html[data-auth="user"] #session-menu-btn .session-menu-avatar{
+  width:32px;
+  height:32px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 32px;
+  border-radius:50%;
+  background:color-mix(in srgb, var(--fg) 12%, var(--bg));
+  color:var(--fg);
+  font-size:0.78rem;
+  font-weight:700;
+  letter-spacing:0.02em;
+  line-height:1;
+}
+
+html[data-auth="user"] #session-menu-btn .session-menu-chevron{
+  width:14px;
+  height:14px;
+  display:block;
+  flex:0 0 14px;
+}
+
 #notif-menu-btn:hover,
 #session-menu-btn:hover{
   opacity:1;
@@ -1472,7 +1513,8 @@ html[data-superadmin="true"][data-superadmin-language-toggle="true"] .topbar-lan
   position:absolute;
   right:0;
   top:calc(100% + 8px);
-  min-width:190px;
+  width:min(280px, calc(100vw - 1.5rem));
+  min-width:min(220px, calc(100vw - 1.5rem));
   background:var(--bg);
   border:1px solid var(--border-subtle);
   border-radius:14px;
@@ -1485,13 +1527,45 @@ html[data-superadmin="true"][data-superadmin-language-toggle="true"] .topbar-lan
   -webkit-backdrop-filter:none;
 }
 
-#session-menu-label{
-  font-size:inherit;
-  opacity:.85;
-  padding:6px 8px 10px 8px;
+#session-menu-identity{
+  min-width:0;
+  padding:6px 8px 10px;
   border-bottom:1px solid var(--border-subtle);
   margin-bottom:10px;
-  word-break:break-word;
+}
+
+#session-menu-label{
+  min-width:0;
+  overflow:hidden;
+  color:var(--fg);
+  font-size:0.9rem;
+  font-weight:650;
+  line-height:1.25;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+#session-menu-email{
+  display:block;
+  min-width:0;
+  overflow:hidden;
+  margin-top:3px;
+  color:color-mix(in srgb, var(--fg) 62%, transparent);
+  font-size:0.76rem;
+  line-height:1.3;
+  text-decoration:none;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+#session-menu-email:hover,
+#session-menu-email:focus-visible{
+  color:var(--fg);
+  text-decoration:underline;
+}
+
+#session-menu-email[hidden]{
+  display:none !important;
 }
 
 #session-menu .session-menu-link{
