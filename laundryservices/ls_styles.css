@@ -1,44 +1,13 @@
 :root {
-  color-scheme: light dark;
+  color-scheme: light;
   --bg: #ffffff;
+  --page-bg: color-mix(in srgb, var(--fg) 8%, var(--bg));
   --fg: #111111;
   --border-subtle: color-mix(in srgb, var(--fg) 12%, transparent);
-  --panel-bg: color-mix(in srgb, var(--bg) 92%, transparent);
+  --panel-bg: #ffffff;
   --accent: #2563eb;
   --accent-strong: #1d4ed8;
   --reading-hover: #111111;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0b0b0c;
-    --fg: #e5e7eb;
-    --border-subtle: color-mix(in srgb, var(--fg) 18%, transparent);
-    --panel-bg: color-mix(in srgb, var(--bg) 80%, transparent);
-    --accent: #60a5fa;
-    --accent-strong: #93c5fd;
-    --reading-hover: #ffffff;
-  }
-}
-
-:root[data-theme="light"] {
-  --bg: #ffffff;
-  --fg: #111111;
-  --border-subtle: color-mix(in srgb, var(--fg) 12%, transparent);
-  --panel-bg: color-mix(in srgb, var(--bg) 92%, transparent);
-  --accent: #2563eb;
-  --accent-strong: #1d4ed8;
-  --reading-hover: #111111;
-}
-
-:root[data-theme="dark"] {
-  --bg: #0b0b0c;
-  --fg: #e5e7eb;
-  --border-subtle: color-mix(in srgb, var(--fg) 18%, transparent);
-  --panel-bg: color-mix(in srgb, var(--bg) 80%, transparent);
-  --accent: #60a5fa;
-  --accent-strong: #93c5fd;
-  --reading-hover: #ffffff;
 }
 
 *,
@@ -60,11 +29,7 @@ body {
   position: relative;
   user-select: none;
   -webkit-user-select: none;
-  background:
-    radial-gradient(ellipse 90% 28rem at 50% 100%, rgba(139, 92, 246, 0.18), rgba(109, 40, 217, 0.08) 38%, transparent 76%),
-    radial-gradient(circle at 85% 10%, color-mix(in srgb, var(--fg) 8%, transparent), transparent 55%),
-    radial-gradient(circle at 10% 15%, color-mix(in srgb, var(--fg) 5%, transparent), transparent 50%),
-    var(--bg);
+  background: var(--page-bg);
   color: color-mix(in srgb, var(--fg) 85%, transparent);
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI",
                Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -150,7 +115,7 @@ a:hover {
   left: 0;
   right: 0;
   height: 75px;
-  background: color-mix(in srgb, var(--bg) 25%, transparent);
+  background: color-mix(in srgb, var(--bg) 78%, transparent);
   border-bottom: 1px solid var(--border-subtle);
   backdrop-filter: blur(12px);
   z-index: 2000;
@@ -259,17 +224,14 @@ a:hover {
 .service-pillars {
   margin-top: 5.4rem;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  background: rgba(7, 17, 31, 0.26);
-  color: #ffffff;
+  border: 1px solid #d6dbe3;
+  background: #ffffff;
+  color: #0f172a;
+  box-shadow: 0 22px 55px rgba(15, 23, 42, 0.08);
 }
 
-:root[data-theme="dark"] .service-pillars {
-  background: rgba(7, 17, 31, 0.26);
-}
-
-:root[data-theme="light"] .service-pillars {
-  background: rgba(7, 17, 31, 0.68);
+html {
+  background: var(--page-bg);
 }
 
 .service-pillars-grid {
@@ -287,11 +249,11 @@ a:hover {
 }
 
 .service-pillar:nth-child(odd) {
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  border-right: 1px solid #e2e8f0;
 }
 
 .service-pillar:nth-child(-n + 4) {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .service-pillar-icon {
@@ -301,14 +263,15 @@ a:hover {
   margin: 0 auto 1.35rem;
   object-fit: contain;
   flex: 0 0 auto;
-  opacity: 0.68;
+  opacity: 0.72;
+  filter: invert(1);
   transform: scale(0.96);
   transition: opacity 220ms ease, transform 220ms ease;
 }
 
 .service-pillar-title {
   margin: 0 0 0.65rem;
-  color: rgba(255, 255, 255, 0.86);
+  color: #0f172a;
   font-size: clamp(1.2rem, 2.4vw, 1.55rem);
   line-height: 1.25;
   transition: color 220ms ease;
@@ -317,12 +280,12 @@ a:hover {
 .page-shell .service-pillars .service-pillar-description,
 .page-shell .service-pillars .service-pillar-description:hover {
   margin: 0;
-  color: rgba(255, 255, 255, 0.76);
+  color: #475569;
   line-height: 1.6;
 }
 
 .service-pillar:hover {
-  background: rgba(255, 255, 255, 0.04);
+  background: #f8fafc;
 }
 
 .service-pillar:hover .service-pillar-icon,
@@ -333,7 +296,7 @@ a:hover {
 
 .service-pillar:hover .service-pillar-title,
 .service-pillar:focus-visible .service-pillar-title {
-  color: #ffffff;
+  color: #020617;
 }
 
 .service-pillar--link {
@@ -350,18 +313,18 @@ a:hover {
 }
 
 .service-pillar--link:focus-visible {
-  outline: 2px solid rgba(255, 255, 255, 0.75);
+  outline: 2px solid #2563eb;
   outline-offset: -4px;
-  background: rgba(255, 255, 255, 0.04);
+  background: #f8fafc;
 }
 
 .service-pillar-link-arrow {
   position: absolute;
   top: 1.2rem;
   right: 1.25rem;
-  color: #ffffff;
+  color: #2563eb;
   font-size: 1rem;
-  opacity: 0.35;
+  opacity: 0.55;
   transform: translate(0, 0);
   transition: opacity 220ms ease, transform 220ms ease;
 }
@@ -980,23 +943,13 @@ button.btn-pill:focus-visible,
 
 .icon-button:hover {
   opacity: 1;
-  border-color: #ffffff;
+  border-color: color-mix(in srgb, var(--fg) 32%, transparent);
 }
 
 .icon-button:active,
 .icon-button[aria-expanded="true"],
-.icon-button[aria-pressed="true"],
 .icon-button.is-active {
-  border-color: #ffffff;
-}
-
-#theme-toggle[aria-pressed="true"] {
-  border-color: var(--border-subtle);
-}
-
-#theme-toggle[aria-pressed="true"]:hover,
-#theme-toggle[aria-pressed="true"]:focus-visible {
-  border-color: #ffffff;
+  border-color: color-mix(in srgb, var(--fg) 32%, transparent);
 }
 
 .icon-button .icon {
@@ -1014,40 +967,12 @@ button.btn-pill:focus-visible,
   fill: currentColor;
 }
 
-body.page .ls-topbar #theme-toggle,
 body.page .ls-topbar #lang-toggle {
   position: static;
   top: auto;
   right: auto;
   left: auto;
   transform: none;
-}
-
-#theme-toggle svg {
-  fill: currentColor;
-  stroke: currentColor;
-}
-
-#theme-toggle [data-icon="moon"] {
-  font-size: 18px;
-  line-height: 18px;
-  transform: translateY(-1px);
-}
-
-#theme-toggle[data-theme="dark"] [data-icon="sun"] {
-  display: none;
-}
-
-#theme-toggle[data-theme="light"] [data-icon="moon"] {
-  display: none;
-}
-
-:root[data-theme="dark"] #theme-toggle [data-icon="sun"] {
-  display: none;
-}
-
-:root[data-theme="light"] #theme-toggle [data-icon="moon"] {
-  display: none;
 }
 
 .lang-picker {
@@ -1123,7 +1048,7 @@ body.page .ls-topbar #lang-toggle {
   min-height: 2.75rem;
   max-height: 2.75rem;
   max-width: calc(100vw - 2rem);
-  border: 1px solid transparent;
+  border: 0;
   border-radius: 1rem;
   display: inline-flex;
   flex-direction: column;
@@ -1135,7 +1060,6 @@ body.page .ls-topbar #lang-toggle {
     max-height 320ms cubic-bezier(0.22, 1, 0.36, 1),
     padding 320ms cubic-bezier(0.22, 1, 0.36, 1),
     background-color 220ms ease,
-    border-color 220ms ease,
     box-shadow 220ms ease;
 }
 
@@ -1143,8 +1067,7 @@ body.page .ls-topbar #lang-toggle {
   width: min(42rem, calc(100vw - 2rem));
   max-height: 30rem;
   padding: 1rem 1.25rem 1.15rem;
-  border-color: var(--border-subtle);
-  background: color-mix(in srgb, var(--bg) 25%, transparent);
+  background: color-mix(in srgb, var(--bg) 96%, var(--fg) 4%);
   box-shadow: 0 16px 38px color-mix(in srgb, #000 10%, transparent);
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
@@ -1394,10 +1317,6 @@ a.ls-footer-disclosure-contact-item:focus-visible {
   -webkit-appearance: none;
   margin: 0;
   min-width: 180px;
-}
-
-[data-theme="dark"] .ls-filter-select {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2.25 4.5 6 8.25 9.75 4.5' stroke='%23dfe7f8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
 }
 
 .ls-filter-select:focus-visible {
@@ -1670,38 +1589,6 @@ body.ls-contact-page .contact-form-card {
   padding-bottom: 0;
 }
 
-:root[data-theme="light"] body {
-  background:
-    radial-gradient(ellipse 90% 28rem at 50% 100%, rgba(139, 92, 246, 0.08), transparent 74%),
-    radial-gradient(circle at 85% 10%, rgba(148, 163, 184, 0.08), transparent 45%),
-    radial-gradient(circle at 12% 18%, rgba(203, 213, 225, 0.12), transparent 40%),
-    linear-gradient(180deg, #ffffff 0%, #f5f7fb 52%, #e5e7eb 100%);
-}
-
-:root[data-theme="light"] body.ls-maquinaria-page {
-  background:
-    radial-gradient(ellipse 90% 28rem at 50% 100%, rgba(139, 92, 246, 0.08), transparent 74%),
-    radial-gradient(circle at 85% 10%, rgba(148, 163, 184, 0.08), transparent 45%),
-    radial-gradient(circle at 12% 18%, rgba(203, 213, 225, 0.12), transparent 40%),
-    linear-gradient(180deg, #ffffff 0%, #f5f7fb 52%, #e5e7eb 100%);
-}
-
-:root[data-theme="dark"] body {
-  background:
-    radial-gradient(ellipse 90% 28rem at 50% 100%, rgba(139, 92, 246, 0.22), rgba(109, 40, 217, 0.09) 38%, transparent 76%),
-    radial-gradient(circle at 85% 10%, rgba(96, 165, 250, 0.12), transparent 45%),
-    radial-gradient(circle at 12% 18%, rgba(56, 189, 248, 0.08), transparent 40%),
-    linear-gradient(180deg, #07111f 0%, #04070d 52%, #000000 100%);
-}
-
-:root[data-theme="dark"] body.ls-maquinaria-page {
-  background:
-    radial-gradient(ellipse 90% 28rem at 50% 100%, rgba(139, 92, 246, 0.22), rgba(109, 40, 217, 0.09) 38%, transparent 76%),
-    radial-gradient(circle at 85% 10%, rgba(96, 165, 250, 0.12), transparent 45%),
-    radial-gradient(circle at 12% 18%, rgba(56, 189, 248, 0.08), transparent 40%),
-    linear-gradient(180deg, #07111f 0%, #04070d 52%, #000000 100%);
-}
-
 body.ls-contact-page .page-shell {
   max-width: 800px;
 }
@@ -1714,13 +1601,6 @@ body.ls-privacy-page {
 body.ls-contact-page .contacto {
   display: grid;
   gap: 1.1rem;
-}
-
-body.ls-privacy-page {
-  background:
-    radial-gradient(circle at 85% 10%, color-mix(in srgb, var(--fg) 8%, transparent), transparent 55%),
-    radial-gradient(circle at 10% 15%, color-mix(in srgb, var(--fg) 5%, transparent), transparent 50%),
-    var(--bg);
 }
 
 body.ls-privacy-page .page-shell.legal-doc {
@@ -1911,7 +1791,7 @@ body.ls-contact-page .form-status[hidden] {
   }
 
   .service-pillar:not(:last-child) {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid #e2e8f0;
   }
 
   .service-pillar-icon {
@@ -1932,7 +1812,7 @@ body.ls-contact-page .form-status[hidden] {
   }
 
   .service-pillar:hover .service-pillar-title {
-    color: rgba(255, 255, 255, 0.86);
+    color: #0f172a;
   }
 
   .service-pillar--link:hover .service-pillar-link-arrow {

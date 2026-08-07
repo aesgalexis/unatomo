@@ -18,15 +18,6 @@
           </span>
         </a>
         <div class="utility-controls" aria-label="Preferencias">
-          <button id="theme-toggle" class="icon-button" type="button" aria-label="Cambiar a modo oscuro">
-            <span class="icon" data-icon="sun" aria-hidden="true">
-              <svg viewBox="0 0 24 24" role="img" focusable="false">
-                <circle cx="12" cy="12" r="4.5" fill="currentColor"></circle>
-                <path d="M12 2.5v3M12 18.5v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2.5 12h3M18.5 12h3M4.9 19.1l2.1-2.1M17 7l2.1-2.1" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"></path>
-              </svg>
-            </span>
-            <span class="icon" data-icon="moon" aria-hidden="true">\u263E</span>
-          </button>
           <div class="lang-picker">
             <button id="lang-toggle" class="icon-button" type="button" aria-expanded="false" aria-controls="lang-menu">
               <span class="icon" aria-hidden="true">

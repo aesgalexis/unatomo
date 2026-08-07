@@ -3,6 +3,7 @@ import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/
 import { requestInviteCodeAndRedirect } from "/static/js/registro/invite-gate.js";
 import { upsertAccountDirectory } from "/static/js/dashboard/admin/accountDirectoryRepo.js";
 import { getCurrentLang, getLocaleText, localizeEsPath } from "/static/js/site/locale.js";
+import { getCurrentTheme, setTheme } from "/static/js/theme/theme-toggle.js";
 import { applySuperadminLanguageTogglePreference } from "/static/js/site/superadmin-preferences.js";
 import { getControlPanelPath, isControlPanelUser } from "/nfc/controlpanel/access.js";
 
@@ -14,6 +15,13 @@ const initials = document.getElementById("session-menu-initials");
 const profileLink = document.getElementById("session-menu-profile");
 const action = document.getElementById("session-menu-action");
 const registerBtn = document.getElementById("session-menu-register");
+const themeToggle = document.getElementById("session-menu-theme-toggle");
+const themeOptions = document.getElementById("session-menu-theme-options");
+const themeLight = document.getElementById("session-menu-theme-light");
+const themeDark = document.getElementById("session-menu-theme-dark");
+const languageWrap = document.getElementById("session-menu-language-wrap");
+const languageToggle = document.getElementById("session-menu-language-toggle");
+const languageOptions = document.getElementById("session-menu-language-options");
 
 const MENU_ICONS = {
   panel: '<rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect>',
@@ -49,6 +57,13 @@ function getUserInitials(displayName, fallback = "") {
   const first = Array.from(parts[0])[0] || "";
   const last = Array.from(parts[parts.length - 1])[0] || "";
   return (parts.length > 1 ? `${first}${last}` : first).toUpperCase();
+}
+
+function setSubmenuState(toggle, options, open) {
+  if (!toggle || !options) return;
+  options.hidden = !open;
+  toggle.setAttribute("aria-expanded", open ? "true" : "false");
+  toggle.classList.toggle("is-expanded", open);
 }
 
 if (!btn || !menu || !label || !action) {
@@ -102,15 +117,78 @@ if (!btn || !menu || !label || !action) {
     btn.style.color = state === "user" ? ACCENT : FG;
   }
 
+  function closeSubmenus() {
+    setSubmenuState(themeToggle, themeOptions, false);
+    setSubmenuState(languageToggle, languageOptions, false);
+  }
+
+  function updateThemeSelection(mode = getCurrentTheme()) {
+    [
+      [themeLight, "light"],
+      [themeDark, "dark"],
+    ].forEach(([option, value]) => {
+      if (!option) return;
+      const selected = mode === value;
+      option.setAttribute("aria-checked", selected ? "true" : "false");
+      option.classList.toggle("is-active", selected);
+    });
+  }
+
+  function toggleSubmenu(toggle, options) {
+    if (!toggle || !options) return;
+    const opening = options.hidden;
+    closeSubmenus();
+    setSubmenuState(toggle, options, opening);
+    if (opening && toggle === themeToggle) updateThemeSelection();
+  }
+
+  themeToggle?.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    toggleSubmenu(themeToggle, themeOptions);
+  });
+
+  languageToggle?.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    toggleSubmenu(languageToggle, languageOptions);
+  });
+
+  themeLight?.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setTheme("light");
+    updateThemeSelection("light");
+  });
+
+  themeDark?.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setTheme("dark");
+    updateThemeSelection("dark");
+  });
+
+  updateThemeSelection();
+
+  window.addEventListener("unatomo:superadmin-language-toggle", (event) => {
+    if (!currentUser || !languageWrap) return;
+    const visible = document.documentElement.dataset.superadmin === "true"
+      && event.detail?.visible === true;
+    languageWrap.hidden = !visible;
+    if (!visible) closeSubmenus();
+  });
+
   function openMenu() {
     window.dispatchEvent(
       new CustomEvent("unatomo:topbar-open", { detail: { id: "session" } })
     );
     menu.hidden = false;
     btn.setAttribute("aria-expanded", "true");
+    updateThemeSelection();
   }
 
   function closeMenu() {
+    closeSubmenus();
     menu.hidden = true;
     btn.setAttribute("aria-expanded", "false");
   }
@@ -127,10 +205,12 @@ if (!btn || !menu || !label || !action) {
     if (emailLabel) {
       emailLabel.hidden = true;
       emailLabel.textContent = "";
-      emailLabel.removeAttribute("href");
     }
 
     if (initials) initials.textContent = "";
+
+    if (languageWrap) languageWrap.hidden = true;
+    closeSubmenus();
 
     if (profileLink) {
       profileLink.hidden = true;
@@ -176,8 +256,6 @@ if (!btn || !menu || !label || !action) {
     if (emailLabel) {
       emailLabel.hidden = !email;
       emailLabel.textContent = email;
-      if (email) emailLabel.setAttribute("href", `mailto:${email}`);
-      else emailLabel.removeAttribute("href");
     }
 
     if (initials) {
@@ -193,8 +271,10 @@ if (!btn || !menu || !label || !action) {
     if (panelLink) {
       const allowed = await isControlPanelUser(user);
       document.documentElement.dataset.superadmin = allowed ? "true" : "false";
-      if (allowed) applySuperadminLanguageTogglePreference();
-      else delete document.documentElement.dataset.superadminLanguageToggle;
+      const languageVisible = allowed && applySuperadminLanguageTogglePreference();
+      if (!allowed) delete document.documentElement.dataset.superadminLanguageToggle;
+      if (languageWrap) languageWrap.hidden = !languageVisible;
+      if (!languageVisible) closeSubmenus();
       panelLink.hidden = !allowed;
       if (allowed) setMenuLinkContent(panelLink, "panel", "Panel");
       else panelLink.replaceChildren();

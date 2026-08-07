@@ -58,17 +58,6 @@
         try {
           localStorage.setItem(THEME_KEY, mode);
         } catch (e) {}
-
-        const btn = document.getElementById("theme-toggle");
-        if (btn) {
-          if (mode === "dark") {
-            btn.textContent = "☼";
-            btn.setAttribute("aria-label", "Cambiar a modo claro");
-          } else {
-            btn.textContent = "☾";
-            btn.setAttribute("aria-label", "Cambiar a modo oscuro");
-          }
-        }
       });
     });
   }

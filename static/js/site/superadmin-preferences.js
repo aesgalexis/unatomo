@@ -21,4 +21,9 @@ export const setSuperadminLanguageToggleVisible = (visible) => {
     // Keep the preference active for the current page when storage is unavailable.
   }
   document.documentElement.dataset.superadminLanguageToggle = visible ? "true" : "false";
+  window.dispatchEvent(
+    new CustomEvent("unatomo:superadmin-language-toggle", {
+      detail: { visible: Boolean(visible) },
+    })
+  );
 };

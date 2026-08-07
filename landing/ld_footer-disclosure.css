@@ -312,3 +312,55 @@
     transition: none;
   }
 }
+
+/* Match the Laundry Services disclosure shell on the Nosotros page. */
+body.landing-about-page
+  .landing-footer-disclosure
+  .footer-disclosure-control {
+  border: 1px solid transparent;
+  transition:
+    width 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    max-height 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    padding 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 220ms ease,
+    border-color 220ms ease,
+    box-shadow 220ms ease;
+}
+
+body.landing-about-page
+  .landing-footer-disclosure
+  .footer-disclosure-control.is-open {
+  width: min(42rem, calc(100vw - 2rem));
+  max-height: 30rem;
+  padding: 1rem 1.25rem 1.15rem;
+  border: 1px solid rgba(229, 231, 235, 0.18);
+  background: color-mix(in srgb, var(--bg) 25%, transparent);
+  box-shadow: 0 16px 38px color-mix(in srgb, #000 10%, transparent);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+body.landing-about-page
+  .landing-footer-disclosure
+  .footer-disclosure-control.is-open
+  .footer-disclosure-toggle {
+  top: 0.75rem;
+  left: 0.75rem;
+}
+
+@media (max-width: 560px) {
+  body.landing-about-page
+    .landing-footer-disclosure
+    .footer-disclosure-control.is-open {
+    max-height: 44rem;
+    padding: 1rem 1.1rem 1.15rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.landing-about-page
+    .landing-footer-disclosure
+    .footer-disclosure-control {
+    transition: none;
+  }
+}

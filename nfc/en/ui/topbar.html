@@ -25,7 +25,6 @@
           aria-expanded="false"
         >
           <svg
-            class="session-menu-guest-icon"
             viewBox="0 0 24 24"
             aria-hidden="true"
             focusable="false"
@@ -53,19 +52,6 @@
           aria-haspopup="menu"
           aria-expanded="false"
         >
-          <svg
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-            focusable="false"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <circle cx="12" cy="8" r="4"></circle>
-            <path d="M4 21c1.8-4 5-6 8-6s6.2 2 8 6"></path>
-          </svg>
           <span id="session-menu-initials" class="session-menu-avatar" aria-hidden="true"></span>
           <svg
             class="session-menu-chevron"
@@ -85,7 +71,7 @@
         <div id="session-menu" role="menu" hidden>
           <div id="session-menu-identity">
             <div id="session-menu-label">Guest</div>
-            <a id="session-menu-email" hidden></a>
+            <div id="session-menu-email" hidden></div>
           </div>
           <a
             id="session-menu-profile"
@@ -96,6 +82,51 @@
           >
             User
           </a>
+          <div id="session-menu-theme-wrap" class="session-menu-submenu-wrap">
+            <button
+              id="session-menu-theme-toggle"
+              class="session-menu-link session-menu-disclosure"
+              type="button"
+              role="menuitem"
+              aria-haspopup="true"
+              aria-expanded="false"
+              aria-controls="session-menu-theme-options"
+            >
+              <svg class="session-menu-link-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3.5"></circle>
+                <path d="M12 2.5v2M12 19.5v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2.5 12h2M19.5 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path>
+              </svg>
+              <span id="session-menu-theme-label">Theme</span>
+              <svg class="session-menu-disclosure-chevron" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"></path></svg>
+            </button>
+            <div id="session-menu-theme-options" class="session-menu-submenu" role="group" hidden>
+              <button id="session-menu-theme-light" class="session-menu-submenu-option" type="button" role="menuitemradio" aria-checked="false">
+                <span>Light</span><span class="session-menu-option-check" aria-hidden="true">&#10003;</span>
+              </button>
+              <button id="session-menu-theme-dark" class="session-menu-submenu-option" type="button" role="menuitemradio" aria-checked="false">
+                <span>Dark</span><span class="session-menu-option-check" aria-hidden="true">&#10003;</span>
+              </button>
+            </div>
+          </div>
+          <div id="session-menu-language-wrap" class="session-menu-submenu-wrap" hidden>
+            <button
+              id="session-menu-language-toggle"
+              class="session-menu-link session-menu-disclosure"
+              type="button"
+              role="menuitem"
+              aria-haspopup="true"
+              aria-expanded="false"
+              aria-controls="session-menu-language-options"
+            >
+              <svg class="session-menu-link-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"></path></svg>
+              <span id="session-menu-language-label">Language</span>
+              <svg class="session-menu-disclosure-chevron" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"></path></svg>
+            </button>
+            <div id="session-menu-language-options" class="session-menu-submenu" role="group" hidden>
+              <a id="lang-link-es" class="session-menu-submenu-option" href="/nfc/es/index.html" lang="es" role="menuitemradio" aria-checked="false"><span>Español</span><span class="session-menu-option-check" aria-hidden="true">&#10003;</span></a>
+              <a id="lang-link-en" class="session-menu-submenu-option" href="/nfc/en/index.html" lang="en" role="menuitemradio" aria-checked="false"><span>English</span><span class="session-menu-option-check" aria-hidden="true">&#10003;</span></a>
+            </div>
+          </div>
           <a
             id="session-menu-action"
             href="/nfc/en/auth/login.html"
@@ -114,30 +145,6 @@
           </a>
         </div>
       </div>
-
-      <div class="topbar-lang-toggle" aria-label="Language">
-        <button id="topbar-lang-button" class="topbar-lang-button" type="button" aria-expanded="false" aria-controls="topbar-lang-menu" aria-label="Language">
-          <span class="topbar-lang-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 2.5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 12 2.5zm7.5 9.5a7.45 7.45 0 0 1-1.2 4h-3.1a18.9 18.9 0 0 0 .6-4 18.9 18.9 0 0 0-.6-4h3.1a7.45 7.45 0 0 1 1.2 4zM12 4.6c.9 1.1 1.7 2.7 2.2 4.4H9.8c.5-1.7 1.3-3.3 2.2-4.4zM4.5 12a7.45 7.45 0 0 1 1.2-4h3.1a18.9 18.9 0 0 0-.6 4 18.9 18.9 0 0 0 .6 4H5.7a7.45 7.45 0 0 1-1.2-4zm5.3 0a16.6 16.6 0 0 1 .7-4h3a16.6 16.6 0 0 1 .7 4 16.6 16.6 0 0 1-.7 4h-3a16.6 16.6 0 0 1-.7-4zm2.2 7.4c-.9-1.1-1.7-2.7-2.2-4.4h4.4c-.5 1.7-1.3 3.3-2.2 4.4z"></path></svg>
-          </span>
-          <span class="topbar-lang-label">EN</span>
-        </button>
-        <div id="topbar-lang-menu" class="topbar-lang-menu" role="menu" hidden>
-          <a id="lang-link-es" class="topbar-lang-link" href="/nfc/es/index.html" lang="es" role="menuitem">Español</a>
-          <a id="lang-link-en" class="topbar-lang-link" href="/nfc/en/index.html" lang="en" role="menuitem">English</a>
-        </div>
-      </div>
-
-      <button id="theme-toggle" type="button" aria-label="Toggle theme">
-        <span class="icon" data-icon="sun" aria-hidden="true">
-          <svg viewBox="0 0 24 24" role="img" focusable="false">
-            <circle cx="12" cy="12" r="4.5" fill="currentColor"></circle>
-            <path d="M12 2.5v3M12 18.5v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2.5 12h3M18.5 12h3M4.9 19.1l2.1-2.1M17 7l2.1-2.1" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"></path>
-          </svg>
-        </span>
-        <span class="icon" data-icon="moon" aria-hidden="true">☾</span>
-      </button>
     </div>
   </div>
 </header>
-

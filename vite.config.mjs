@@ -1,4 +1,6 @@
 const cleanDirectoryRoutes = new Map([
+  ["/laundryservices", "/laundryservices/index.html"],
+  ["/laundryservices/", "/laundryservices/index.html"],
   ["/ssl-simulator", "/ssl-simulator.html"],
   ["/ssl-simulator/", "/ssl-simulator.html"]
 ]);

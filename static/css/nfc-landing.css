@@ -124,14 +124,6 @@ body.nfc-landing {
 .landing-lang-menu button:hover,
 .landing-lang-menu button:focus-visible { background: color-mix(in srgb, var(--fg) 8%, transparent); }
 
-body.nfc-landing #theme-toggle,
-body.nfc-public-page #theme-toggle {
-  position: static;
-  top: auto;
-  left: auto;
-  transform: none;
-}
-
 .nfc-public-page .public-page-title {
   width: 100%;
   max-width: 600px;

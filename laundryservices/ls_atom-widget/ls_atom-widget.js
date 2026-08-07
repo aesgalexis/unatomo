@@ -126,33 +126,12 @@ export function initAtomWidget({
 
   const electronGeo = new THREE.SphereGeometry(0.024, 14, 14);
   const electronMat = new THREE.MeshStandardMaterial({
-    color: 0x22d3ee,
-    emissive: 0x0ea5e9,
-    emissiveIntensity: 0.85,
+    color: 0x2563eb,
+    emissive: 0x1d4ed8,
+    emissiveIntensity: 0.9,
     roughness: 0.18,
     metalness: 0.1,
   });
-
-  const getTheme = () => {
-    const attr = document.documentElement.getAttribute("data-theme");
-    if (attr === "light" || attr === "dark") return attr;
-    if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      return "dark";
-    }
-    return "light";
-  };
-
-  const applyThemeMaterials = () => {
-    if (getTheme() === "light") {
-      electronMat.color.set(0x2563eb);
-      electronMat.emissive.set(0x1d4ed8);
-      electronMat.emissiveIntensity = 0.9;
-    } else {
-      electronMat.color.set(0x22d3ee);
-      electronMat.emissive.set(0x0ea5e9);
-      electronMat.emissiveIntensity = 0.85;
-    }
-  };
 
   const orbitConfigs = [
     { radius: 1.0, periodSec: 5.0 },
@@ -195,7 +174,6 @@ export function initAtomWidget({
     });
   });
 
-  applyThemeMaterials();
 
   let rafId = 0;
   let running = false;
@@ -327,21 +305,6 @@ export function initAtomWidget({
   const onVisibility = () => updateRunningState();
   document.addEventListener("visibilitychange", onVisibility);
 
-  const onThemeChange = () => applyThemeMaterials();
-  const themeMq = window.matchMedia
-    ? window.matchMedia("(prefers-color-scheme: dark)")
-    : null;
-  if (themeMq) {
-    if (themeMq.addEventListener) themeMq.addEventListener("change", onThemeChange);
-    else if (themeMq.addListener) themeMq.addListener(onThemeChange);
-  }
-
-  const themeObserver = new MutationObserver(onThemeChange);
-  themeObserver.observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ["data-theme"],
-  });
-
   const onPointerDown = (event) => {
     if (destroyed) return;
     isDragging = true;
@@ -447,14 +410,9 @@ export function initAtomWidget({
 
     io.disconnect();
     resizeObserver.disconnect();
-    themeObserver.disconnect();
     document.removeEventListener("visibilitychange", onVisibility);
     window.removeEventListener("resize", resize);
     if (isFloating) window.removeEventListener("scroll", resize);
-    if (themeMq) {
-      if (themeMq.removeEventListener) themeMq.removeEventListener("change", onThemeChange);
-      else if (themeMq.removeListener) themeMq.removeListener(onThemeChange);
-    }
 
     inputTarget.removeEventListener("pointerdown", onPointerDown);
     inputTarget.removeEventListener("pointermove", onPointerMove);
