@@ -106,7 +106,7 @@ export const createDashboardTopbarController = (dependencies) => {
       isUsers
         ? t("dashboard.usersAddAria", "Añadir usuario")
         : isGallery
-          ? t("dashboard.galleryUploadAddAria", "Subir archivo a una máquina")
+          ? t("dashboard.galleryUploadAddAria", "Subir archivo a un equipo")
         : isSuggestions
           ? t("dashboard.suggestionsAddAria", "Escribir sugerencia")
           : t("dashboard.addAria", "Añadir")

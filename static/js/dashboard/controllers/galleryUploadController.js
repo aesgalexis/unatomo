@@ -42,7 +42,6 @@ export const createGalleryUploadController = ({
     const openUploadSurface = useModal ? openGalleryUploadModal : openGalleryUploadBox;
     const uploadFlow = openUploadSurface({
       machines: state.draftMachines || [],
-      defaultMachineId: state.selectedTreeMachineId || "",
       ...(useModal ? {} : { container: inlineContainer }),
       onUpload: async ({ machineId, kind, file }) => {
         const uploaded = await documentHooks.onUploadMachineDocument(

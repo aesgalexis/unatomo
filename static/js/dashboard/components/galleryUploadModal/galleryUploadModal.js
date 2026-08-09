@@ -22,7 +22,6 @@ const getUploadError = (error) => {
 
 const openGalleryUploadSurface = ({
   machines = [],
-  defaultMachineId = "",
   inlineContainer = null,
   onUpload
 } = {}) =>
@@ -43,7 +42,7 @@ const openGalleryUploadSurface = ({
     if (!isInline) dialog.setAttribute("aria-modal", "true");
     dialog.setAttribute(
       "aria-label",
-      t("dashboard.galleryUploadTitle", "Subir archivo a una máquina")
+      t("dashboard.galleryUploadTitle", "Subir archivo a un equipo")
     );
 
     const header = document.createElement("div");
@@ -52,7 +51,7 @@ const openGalleryUploadSurface = ({
     heading.className = "status-incident-heading";
     const title = document.createElement("h2");
     title.className = "status-incident-title";
-    title.textContent = t("dashboard.galleryUploadTitle", "Subir archivo a una máquina");
+    title.textContent = t("dashboard.galleryUploadTitle", "Subir archivo a un equipo");
     const subtitle = document.createElement("p");
     subtitle.className = "status-incident-machine";
     subtitle.textContent = t("dashboard.galleryTitle", "Galería");
@@ -75,7 +74,7 @@ const openGalleryUploadSurface = ({
     summary.className = "status-incident-summary gallery-upload-summary";
     summary.textContent = t(
       "dashboard.galleryUploadSummary",
-      "Selecciona la máquina, el tipo de documento y el archivo que quieres subir."
+      "Selecciona el equipo, el tipo de documento y el archivo que quieres subir."
     );
 
     const createSelectField = (labelText, select) => {
@@ -92,19 +91,18 @@ const openGalleryUploadSurface = ({
     machineSelect.className = "status-incident-input gallery-upload-select";
     const machinePlaceholder = document.createElement("option");
     machinePlaceholder.value = "";
-    machinePlaceholder.textContent = t("dashboard.galleryUploadChooseMachine", "Selecciona una máquina");
+    machinePlaceholder.textContent = t("dashboard.galleryUploadChooseMachine", "Selecciona un equipo");
+    machinePlaceholder.selected = true;
     machineSelect.appendChild(machinePlaceholder);
     [...machines]
       .sort((left, right) => String(left.title || "").localeCompare(String(right.title || "")))
       .forEach((machine) => {
         const option = document.createElement("option");
         option.value = machine.id;
-        option.textContent = machine.title || machine.id || t("machine.machine", "Máquina");
+        option.textContent = machine.title || machine.id || t("machine.machine", "Equipo");
         machineSelect.appendChild(option);
       });
-    if (machines.some((machine) => machine.id === defaultMachineId)) {
-      machineSelect.value = defaultMachineId;
-    }
+    machineSelect.value = "";
 
     const typeSelect = document.createElement("select");
     typeSelect.className = "status-incident-input gallery-upload-select";
@@ -213,7 +211,7 @@ const openGalleryUploadSurface = ({
 
     form.appendChild(summary);
     form.appendChild(createSelectField(
-      t("dashboard.galleryUploadMachine", "Máquina"),
+      t("dashboard.galleryUploadMachine", "Equipo"),
       machineSelect
     ));
     form.appendChild(createSelectField(
@@ -296,8 +294,7 @@ const openGalleryUploadSurface = ({
     document.addEventListener("keydown", onKeyDown, true);
     syncFileBox();
     window.requestAnimationFrame(() => {
-      const coarse = window.matchMedia?.("(max-width: 700px), (pointer: coarse)")?.matches;
-      (coarse ? dialog : machineSelect).focus({ preventScroll: true });
+      dialog.focus({ preventScroll: true });
     });
   });
 

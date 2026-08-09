@@ -226,6 +226,18 @@ a:hover {
   mask: url("/static/img/winged-shoe.png") center / contain no-repeat;
 }
 
+:root[data-theme="dark"] .footer-disclosure-icon {
+  -webkit-mask-image: url("/static/img/winged-foot.svg");
+  mask-image: url("/static/img/winged-foot.svg");
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) .footer-disclosure-icon {
+    -webkit-mask-image: url("/static/img/winged-foot.svg");
+    mask-image: url("/static/img/winged-foot.svg");
+  }
+}
+
 /* Legacy footer icon: /static/img/winged-foot.svg; 2.2rem × 1.85rem; collapsed color at 54%. */
 
 .footer-disclosure-toggle:hover,

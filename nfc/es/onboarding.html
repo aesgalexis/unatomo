@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Configura tu espacio · unatomo</title>
+  <meta name="robots" content="noindex, nofollow">
+  <script src="/static/js/theme/theme-init.js"></script>
+  <link rel="icon" href="/static/img/favicon/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/static/css/onboarding.css">
+</head>
+<body class="page onboarding-page" data-lang="es">
+  <main class="onboarding-main">
+    <section class="onboarding-card" aria-labelledby="onboarding-title">
+      <div class="onboarding-card-tools">
+        <img class="onboarding-logo topbar-logo--rotating" src="/static/img/logo-unatomo-round-outline-v1.0.svg" alt="unatomo">
+      </div>
+      <div class="onboarding-intro">
+        <span class="onboarding-eyebrow">Te damos la bienvenida</span>
+        <h1 id="onboarding-title">Prepara tu espacio de trabajo</h1>
+        <p>Cuéntanos lo básico para dejar tu dashboard listo. Podrás cambiar estos datos más adelante.</p>
+      </div>
+
+      <form id="onboarding-form" class="onboarding-form" novalidate>
+        <div class="onboarding-field">
+          <label for="onboarding-name">Tu nombre</label>
+          <input id="onboarding-name" name="name" type="text" value="Alexis" maxlength="120" autocomplete="name" required>
+        </div>
+
+        <div class="onboarding-field">
+          <label for="onboarding-company">Empresa</label>
+          <input id="onboarding-company" name="company" type="text" placeholder="Ej. Lavandería Central" maxlength="60" autocomplete="organization" required>
+        </div>
+
+        <fieldset class="onboarding-field onboarding-ownership">
+          <legend>¿Qué equipos vas a gestionar?</legend>
+          <div class="ownership-options">
+            <label><input type="radio" name="ownership" value="own" checked><span><strong>Mis propios equipos</strong><small>Prepararemos sus fichas en tu dashboard.</small></span></label>
+            <label><input type="radio" name="ownership" value="other"><span><strong>Equipos de otra persona</strong><small>Accederás cuando su propietario te invite.</small></span></label>
+          </div>
+        </fieldset>
+
+        <fieldset class="onboarding-field onboarding-equipment">
+          <legend>¿Cuántos equipos quieres gestionar?</legend>
+          <p class="onboarding-hint">Crearemos las fichas vacías para que puedas completarlas después.</p>
+          <div class="equipment-control">
+            <button type="button" class="equipment-button" data-action="decrease" aria-label="Quitar un equipo">−</button>
+            <label class="equipment-value">
+              <input id="onboarding-equipment" name="equipment" type="number" value="5" min="0" max="50" inputmode="numeric" aria-label="Número de equipos" required>
+              <span>equipos</span>
+            </label>
+            <button type="button" class="equipment-button" data-action="increase" aria-label="Añadir un equipo">+</button>
+          </div>
+          <div class="equipment-range-labels" aria-hidden="true"><span>0</span><span>Máximo 50</span></div>
+          <input class="equipment-range" type="range" min="0" max="50" value="5" aria-label="Seleccionar entre 0 y 50 equipos">
+        </fieldset>
+
+        <p id="onboarding-status" class="onboarding-status" role="status" aria-live="polite"></p>
+        <button class="onboarding-submit" type="submit">
+          <span>Crear mi dashboard</span><span aria-hidden="true">→</span>
+        </button>
+      </form>
+      <div class="onboarding-creating" role="status" aria-live="polite" hidden>
+        <p>Espera un momento, estamos creando tu espacio de trabajo…</p>
+      </div>
+    </section>
+  </main>
+  <script type="module" src="/static/js/onboarding-preview.js"></script>
+</body>
+</html>
