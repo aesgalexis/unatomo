@@ -34,6 +34,12 @@ const USERS_ICON = `
   </svg>
 `;
 
+const DASHBOARD_ICON = `
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path d="M3 3h8v8H3V3Zm10 0h8v8h-8V3ZM3 13h8v8H3v-8Zm10 0h8v8h-8v-8Z"></path>
+  </svg>
+`;
+
 const createIconLink = ({
   href,
   label,
@@ -45,7 +51,7 @@ const createIconLink = ({
   link.className = `dashboard-section-link${extraClass ? ` ${extraClass}` : ""}`;
   link.href = href;
   link.setAttribute("aria-label", label);
-  link.setAttribute("data-tooltip", label);
+  link.dataset.sectionLabel = label;
   const iconEl = document.createElement("span");
   iconEl.className = `dashboard-section-icon${iconClass ? ` ${iconClass}` : ""}`;
   iconEl.innerHTML = icon;
@@ -67,17 +73,18 @@ export const createDashboardSectionNav = ({
   showSuggestions = false,
   showTodo = false,
   todoSuperadmin = false,
-  extraClass = "",
-  attachTooltip = null
+  extraClass = ""
 } = {}) => {
   const sectionNav = document.createElement("nav");
   sectionNav.className = `dashboard-section-nav${extraClass ? ` ${extraClass}` : ""}`;
   sectionNav.setAttribute("aria-label", ariaLabel);
 
-  const dashboardLink = document.createElement("a");
-  dashboardLink.className = "dashboard-section-link";
-  dashboardLink.href = dashboardHref;
-  dashboardLink.textContent = labels.dashboard || "Inicio";
+  const dashboard = createIconLink({
+    href: dashboardHref,
+    label: labels.dashboard || "Dashboard",
+    icon: DASHBOARD_ICON
+  });
+  const dashboardLink = dashboard.link;
 
   const registry = createIconLink({
     href: registryHref,
@@ -143,6 +150,48 @@ export const createDashboardSectionNav = ({
     sugerencias: suggestions.link,
     todo: todo.link
   };
+  const getCurrentHeading = () => document.querySelector(".dashboard-view-header-slot h3");
+  const measureHeadingLabel = (heading, label) => {
+    const probe = document.createElement("span");
+    const styles = window.getComputedStyle(heading);
+    probe.textContent = label;
+    probe.style.cssText = `position:fixed;visibility:hidden;white-space:nowrap;font:${styles.font};letter-spacing:${styles.letterSpacing}`;
+    document.body.appendChild(probe);
+    const width = probe.getBoundingClientRect().width;
+    probe.remove();
+    return Math.ceil(width);
+  };
+  const showPreview = (link) => {
+    const label = link?.dataset.sectionLabel;
+    if (!label || link.classList.contains("is-active")) return;
+    const heading = getCurrentHeading();
+    if (!heading) return;
+    let activeText = heading.querySelector(":scope > .dashboard-section-heading-active");
+    if (!activeText) {
+      activeText = document.createElement("span");
+      activeText.className = "dashboard-section-heading-active";
+      activeText.textContent = heading.textContent;
+      heading.textContent = "";
+      heading.appendChild(activeText);
+    }
+    heading.setAttribute("aria-label", activeText.textContent);
+    heading.dataset.previewLabel = label;
+    const activeWidth = measureHeadingLabel(heading, activeText.textContent);
+    const previewWidth = measureHeadingLabel(heading, label);
+    heading.style.width = `${Math.max(activeWidth, previewWidth)}px`;
+    heading.classList.add("is-section-previewing");
+  };
+  const clearPreview = () => {
+    document.querySelectorAll(".dashboard-view-header-slot h3.is-section-previewing")
+      .forEach((heading) => {
+        heading.classList.remove("is-section-previewing");
+        const activeText = heading.querySelector(":scope > .dashboard-section-heading-active");
+        if (activeText) {
+          heading.style.width = `${measureHeadingLabel(heading, activeText.textContent)}px`;
+        }
+      });
+  };
+
   Object.entries(links).forEach(([key, link]) => {
     const isActive = active === key;
     link.classList.toggle("is-active", isActive);
@@ -157,11 +206,12 @@ export const createDashboardSectionNav = ({
   sectionNav.appendChild(users.link);
   sectionNav.appendChild(qr.link);
 
-  if (attachTooltip) {
-    [todo.link, users.link, gallery.link, qr.link].forEach((link) => {
-      attachTooltip(link, { placement: "bottom" });
-    });
-  }
+  [dashboardLink, registryLink, todo.link, gallery.link, users.link, qr.link].forEach((link) => {
+    link.addEventListener("mouseenter", () => showPreview(link));
+    link.addEventListener("mouseleave", clearPreview);
+    link.addEventListener("focus", () => showPreview(link));
+    link.addEventListener("blur", clearPreview);
+  });
 
   return {
     sectionNav,

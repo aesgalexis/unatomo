@@ -587,25 +587,6 @@ export const renderTodoView = (container, options = {}) => {
   pageControls.appendChild(previous);
   pageControls.appendChild(pageLabel);
   pageControls.appendChild(next);
-  const pageNav = document.createElement("div");
-  pageNav.className = "scroll-top-container todo-page-nav";
-  const back = document.createElement("button");
-  back.type = "button";
-  back.className = "scroll-top-button";
-  back.textContent = t("dashboard.todoBack", "Volver");
-  back.addEventListener("click", () => {
-    if (options.onBack) options.onBack();
-  });
-  const top = document.createElement("button");
-  top.type = "button";
-  top.className = "scroll-top-button";
-  top.textContent = t("dashboard.todoTop", "Arriba");
-  top.addEventListener("click", () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  });
-  pageNav.appendChild(back);
-  pageNav.appendChild(top);
   pagination.appendChild(pageControls);
-  pagination.appendChild(pageNav);
   container.appendChild(pagination);
 };

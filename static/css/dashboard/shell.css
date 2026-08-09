@@ -193,7 +193,12 @@ body.page .topbar {
 }
 
 @media (min-width: 769px) {
+  .dashboard-fixed-menus .add-bar > .dashboard-loading {
+    display: none !important;
+  }
+
   .dashboard-fixed-menus:is(
+    .has-static-dashboard-header,
     .has-static-registry-header,
     .has-static-gallery-header,
     .has-static-tasks-header,
@@ -208,6 +213,7 @@ body.page .topbar {
   }
 
   .dashboard-fixed-menus:is(
+    .has-static-dashboard-header,
     .has-static-registry-header,
     .has-static-gallery-header,
     .has-static-tasks-header,
@@ -218,6 +224,7 @@ body.page .topbar {
   }
 
   .dashboard-fixed-menus:is(
+    .has-static-dashboard-header,
     .has-static-registry-header,
     .has-static-gallery-header,
     .has-static-tasks-header,
@@ -229,6 +236,7 @@ body.page .topbar {
   }
 
   .dashboard-fixed-menus:is(
+    .has-static-dashboard-header,
     .has-static-registry-header,
     .has-static-gallery-header,
     .has-static-tasks-header,
@@ -251,11 +259,13 @@ body.page .topbar {
     display: contents;
   }
 
+  .dashboard-fixed-menus.has-static-dashboard-header .dashboard-home-header,
   .dashboard-fixed-menus.has-static-registry-header .global-registry-header {
     display: contents;
   }
 
   .dashboard-fixed-menus:is(
+    .has-static-dashboard-header,
     .has-static-registry-header,
     .has-static-gallery-header,
     .has-static-tasks-header,
@@ -273,6 +283,7 @@ body.page .topbar {
   }
 
   .dashboard-fixed-menus:is(
+    .has-static-dashboard-header,
     .has-static-registry-header,
     .has-static-gallery-header,
     .has-static-tasks-header,
@@ -291,6 +302,7 @@ body.page .topbar {
   }
 
   .dashboard-fixed-menus:is(
+    .has-static-dashboard-header,
     .has-static-registry-header,
     .has-static-gallery-header,
     .has-static-tasks-header,

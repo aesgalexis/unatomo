@@ -1,44 +1,12 @@
-import { getUiPath } from "/static/js/site/locale.js";
+import { getCurrentLang } from "/static/js/site/locale.js";
+import { mountNfcMinimalPageNav } from "/static/js/nfc/minimalPageNav.js";
 
 const mount = document.getElementById("page-nav-mount");
-if (mount) {
-  if (!mount.children.length) {
-    try {
-      const res = await fetch(getUiPath("page-nav.html"), { cache: "no-store" });
-      if (!res.ok) throw new Error("page-nav fetch failed");
-      mount.innerHTML = await res.text();
-    } catch {
-      mount.innerHTML = "";
-    }
-  }
+if (mount) mount.replaceChildren();
 
-  const topBtn = document.getElementById("scroll-top-button");
-  if (topBtn) {
-    const syncTopButton = () => {
-      topBtn.hidden = window.scrollY < 24;
-    };
-
-    syncTopButton();
-    window.addEventListener("scroll", syncTopButton, { passive: true });
-
-    topBtn.addEventListener("click", () => {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    });
-  }
-
-  const backBtn = document.getElementById("back-button");
-  const backHref = (document.body.dataset.backHref || "").trim();
-  const backMode = (document.body.dataset.backMode || "").trim();
-
-  if (backBtn) {
-    if (backHref) {
-      backBtn.hidden = false;
-      backBtn.addEventListener("click", () => (window.location.href = backHref));
-    } else if (backMode === "history") {
-      backBtn.hidden = false;
-      backBtn.addEventListener("click", () => history.back());
-    } else {
-      backBtn.hidden = true;
-    }
-  }
-}
+const lang = getCurrentLang();
+mountNfcMinimalPageNav({
+  backLabel: lang === "en" ? "Back" : "Volver",
+  topLabel: lang === "en" ? "Top" : "Arriba",
+  backHref: (document.body.dataset.backHref || "").trim()
+});

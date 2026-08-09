@@ -708,14 +708,6 @@
   cursor: default;
 }
 
-.todo-page-nav {
-  grid-column: 1;
-  grid-row: 2;
-  justify-self: center;
-  margin: 0;
-  gap: 0.4rem;
-}
-
 .todo-page-label {
   color: color-mix(in srgb, var(--fg) 70%, transparent);
   font-size: 0.82rem;

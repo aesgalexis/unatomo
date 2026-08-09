@@ -86,6 +86,7 @@ export const createDashboardInternalViewController = ({
     if (dashboardViewHeaderSlot) dashboardViewHeaderSlot.hidden = true;
     dashboardFixedMenus?.classList.remove(
       "has-view-header",
+      "has-static-dashboard-header",
       "has-static-registry-header",
       "has-static-gallery-header",
       "has-static-tasks-header",
@@ -707,6 +708,17 @@ export const createDashboardInternalViewController = ({
     if (view === "usuarios") return renderUsers(machines);
     if (view === "sugerencias") return renderSuggestions();
     if (view === "todo") return renderTodo(viewOptions);
+    const headerContainer = getFixedViewHeaderContainer(true);
+    if (headerContainer) {
+      const header = document.createElement("div");
+      header.className = "global-registry-header dashboard-home-header";
+      const title = document.createElement("h3");
+      title.textContent = "Dashboard";
+      header.appendChild(title);
+      if (loadingEl) header.appendChild(loadingEl);
+      headerContainer.appendChild(header);
+      showFixedViewHeader("dashboard");
+    }
     return false;
   };
 

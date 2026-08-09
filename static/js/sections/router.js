@@ -5,7 +5,6 @@ import { render as renderNovedades } from "./novedades.js";
 
 const dashboardMount = document.getElementById("dashboard-mount");
 const sectionMount = document.getElementById("section-mount");
-const lang = getCurrentLang();
 
 const sectionMap = {
   dashboard: { title: "Dashboard", render: null },
@@ -13,11 +12,6 @@ const sectionMap = {
   contacto: { title: "Unatomo", render: renderSoporte },
   novedades: { title: "Unatomo", render: renderNovedades }
 };
-const navText = {
-  back: lang === "en" ? "Back" : "Volver",
-  top: lang === "en" ? "Top" : "Arriba",
-};
-let syncTopButtonHandler = null;
 
 const getSectionFromHash = () => {
   const hash = window.location.hash
@@ -54,10 +48,6 @@ const renderSection = () => {
   setTitle(sectionId);
 
   if (sectionId === "dashboard") {
-    if (syncTopButtonHandler) {
-      window.removeEventListener("scroll", syncTopButtonHandler);
-      syncTopButtonHandler = null;
-    }
     if (dashboardMount) dashboardMount.hidden = false;
     if (sectionMount) {
       sectionMount.hidden = true;
@@ -76,45 +66,6 @@ const renderSection = () => {
   if (typeof section.render === "function") {
     section.render(sectionMount);
   }
-  renderSectionNav();
-};
-
-const renderSectionNav = () => {
-  if (!sectionMount || sectionMount.hidden) return;
-  if (syncTopButtonHandler) {
-    window.removeEventListener("scroll", syncTopButtonHandler);
-    syncTopButtonHandler = null;
-  }
-
-  const nav = document.createElement("div");
-  nav.className = "scroll-top-container";
-
-  const backBtn = document.createElement("button");
-  backBtn.type = "button";
-  backBtn.className = "scroll-top-button";
-  backBtn.textContent = navText.back;
-  backBtn.addEventListener("click", () => {
-    window.location.hash = "#/dashboard";
-  });
-
-  const topBtn = document.createElement("button");
-  topBtn.type = "button";
-  topBtn.className = "scroll-top-button";
-  topBtn.textContent = navText.top;
-  topBtn.hidden = window.scrollY < 24;
-  topBtn.addEventListener("click", () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  });
-
-  syncTopButtonHandler = () => {
-    topBtn.hidden = window.scrollY < 24;
-  };
-
-  window.addEventListener("scroll", syncTopButtonHandler, { passive: true });
-
-  nav.appendChild(backBtn);
-  nav.appendChild(topBtn);
-  sectionMount.appendChild(nav);
 };
 
 window.addEventListener("hashchange", renderSection);
