@@ -1,0 +1,22 @@
+.topbar-logo--rotating {
+  transform-origin: center;
+  animation: topbarLogoSpin 60s linear infinite;
+  will-change: transform;
+}
+
+@keyframes topbarLogoSpin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .topbar-logo--rotating {
+    animation: none;
+    will-change: auto;
+  }
+}

@@ -9,6 +9,11 @@
   margin-bottom: 0.6rem;
 }
 
+.machine-card.is-recently-created {
+  border-color: color-mix(in srgb, #16a34a 52%, var(--border-subtle));
+  box-shadow: 0 0 0 3px color-mix(in srgb, #16a34a 10%, transparent);
+}
+
 .task-empty {
   font-size: 0.9rem;
   color: color-mix(in srgb, var(--fg) 70%, transparent);
@@ -82,49 +87,6 @@
 
 .machine-card[data-expanded="false"] .mc-header {
   justify-content: center;
-}
-
-.mc-hover-plus {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: transparent;
-  font-size: 1.15rem;
-  font-weight: 600;
-  line-height: 1;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.84s ease, color 0.84s ease;
-}
-
-.machine-card[data-expanded="true"] .mc-hover-plus,
-.machine-card--single .mc-hover-plus {
-  display: none;
-}
-
-.machine-card[data-expanded="false"]:hover:not(
-  :has(
-    .mc-title:hover,
-    .mc-title-input:hover,
-    .mc-location:hover,
-    .mc-location:focus-within,
-    .mc-location-select:focus,
-    .mc-location-input:focus,
-    .mc-pending:hover,
-    .mc-status:hover,
-    .mc-nfc-icon:hover,
-    .mc-share-icon:hover,
-    button:hover,
-    a:hover,
-    input:hover,
-    select:hover,
-    textarea:hover,
-    label:hover
-  )
-) .mc-hover-plus {
-  transition-duration: 2.55s, 2.55s;
-  color: var(--fg);
-  opacity: 1;
 }
 
 .mc-title {

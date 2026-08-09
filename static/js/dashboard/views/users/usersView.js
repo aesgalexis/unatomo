@@ -86,14 +86,17 @@ export const renderUsersView = (container, machines = [], options = {}) => {
   const view = el("section", "dashboard-users-view");
   const head = el("header", "global-registry-header dashboard-users-head");
   head.appendChild(el("h3", "", tx("Usuarios", "Users")));
-  head.appendChild(el("span", "global-registry-count dashboard-users-count", tx(
+  if (options.loadingElement) head.appendChild(options.loadingElement);
+  const userCount = el("span", "global-registry-count dashboard-users-count", tx(
     `${users.length} usuario${users.length === 1 ? "" : "s"} / ${visibleMachineCount} máquina${visibleMachineCount === 1 ? "" : "s"}`,
     `${users.length} user${users.length === 1 ? "" : "s"} / ${visibleMachineCount} machine${visibleMachineCount === 1 ? "" : "s"}`
-  )));
-  view.appendChild(head);
+  ));
+  if (!options.loading) head.appendChild(userCount);
+  const headerContainer = options.headerContainer || view;
+  headerContainer.appendChild(head);
 
   const actions = el("div", "dashboard-users-head-actions");
-  if (showInlineNavigation && contexts.length > 1) {
+  if (showInlineNavigation && !options.loading && contexts.length > 1) {
     const select = el("select", "dashboard-users-context dashboard-users-select");
     select.setAttribute("aria-label", tx("Espacio de acceso", "Access space"));
     const allOption = document.createElement("option");
@@ -113,7 +116,7 @@ export const renderUsersView = (container, machines = [], options = {}) => {
     select.addEventListener("change", () => onContextChange?.(select.value));
     actions.appendChild(select);
   }
-  if (showInlineNavigation) {
+  if (showInlineNavigation && !options.loading) {
     const policyLink = el("a", "dashboard-users-policy-link", tx("Roles", "Roles"));
     policyLink.href = isEn ? "#/users" : "#/usuarios";
     policyLink.setAttribute("aria-expanded", policyOpen ? "true" : "false");
@@ -122,7 +125,20 @@ export const renderUsersView = (container, machines = [], options = {}) => {
       onTogglePolicy?.();
     });
     actions.appendChild(policyLink);
-    view.appendChild(actions);
+    if (options.headerContainer) {
+      const fixedActions = el("div", "dashboard-view-header-actions");
+      const count = head.querySelector(".dashboard-users-count");
+      if (count) fixedActions.appendChild(count);
+      fixedActions.appendChild(actions);
+      head.appendChild(fixedActions);
+    } else {
+      view.appendChild(actions);
+    }
+  }
+
+  if (options.loading) {
+    container.appendChild(view);
+    return;
   }
 
   if (!context) {
@@ -211,6 +227,13 @@ export const renderUsersView = (container, machines = [], options = {}) => {
     cancel.addEventListener("click", () => onCloseCreate?.());
     const submit = el("button", "dashboard-users-primary", tx("Crear", "Create"));
     submit.type = "submit";
+    submit.disabled = true;
+    const syncSubmit = () => {
+      submit.disabled = !(name.value.trim() && pin.value && role.value);
+    };
+    name.addEventListener("input", syncSubmit);
+    pin.addEventListener("input", syncSubmit);
+    role.addEventListener("change", syncSubmit);
     formActions.append(cancel, submit);
     form.append(title, scope, name, pin, role, formActions);
     form.addEventListener("submit", (event) => {

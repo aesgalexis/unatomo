@@ -24,6 +24,7 @@ import {
 import { filterMachines } from "./components/machineSearch/machineFilter.js";
 import { createMachineSearchBar } from "./components/machineSearch/machineSearchBar.js";
 import { createDashboardSectionNav } from "./components/sectionNav.js";
+import { mountDashboardFixedMenusShell } from "./components/dashboardFixedMenusShell.js";
 import { openStatusIncidentModal } from "./components/statusIncidentModal/statusIncidentModal.js";
 import { createDashboardGroupTreeShell } from "./components/groupTree/groupTreeShell.js";
 import { createDashboardLoading } from "./components/loading/dashboardLoading.js";
@@ -93,6 +94,10 @@ import { createDashboardNavigationController } from "./controllers/dashboardNavi
 import { createDashboardLoadController } from "./controllers/dashboardLoadController.js";
 import { createDashboardGroupTreeController } from "./controllers/dashboardGroupTreeController.js";
 import { createDashboardTopbarController } from "./controllers/dashboardTopbarController.js";
+import { createDashboardFixedMenusController } from "./controllers/dashboardFixedMenusController.js";
+import { installDashboardRouteController } from "./controllers/dashboardRouteController.js";
+import { installDashboardAuthController } from "./controllers/dashboardAuthController.js";
+import { createGalleryUploadController } from "./controllers/galleryUploadController.js";
 import { createDashboardViewModeController } from "./controllers/dashboardViewModeController.js";
 import { createDashboardRenderer } from "./rendering/dashboardRenderer.js";
 import { createGroupSectionRenderer } from "./rendering/groupSectionRenderer.js";
@@ -103,7 +108,6 @@ import {
   recalcMachineCardHeight as recalcHeight,
   scheduleMachineCardHeight as scheduleHeightSync
 } from "./rendering/machineCardLayout.js";
-
 const mount = document.getElementById("dashboard-mount");
 const appBasePrefix = getAppBasePrefix();
 const lang = getCurrentLang();
@@ -120,7 +124,6 @@ try {
     window.history.scrollRestoration = "manual";
   }
 } catch {}
-
 if (mount) {
   const state = createDashboardState({
     activeView: getDashboardInternalView(),
@@ -132,12 +135,11 @@ if (mount) {
   const cardRefs = new Map();
   const locallyVisibleEmptyGroupIds = new Set();
   const pendingStatusIncidentMachineIds = new Set();
-  let activeDashboardUid = "";
-  let dashboardInitPromise = null;
-  let dashboardSessionVersion = 0;
+  const dashboardSessionRuntime = { activeUid: "", initPromise: null, version: 0 };
   let groupedDragAndDropReady = false;
   const largeDashboardQuery = window.matchMedia("(min-width: 1280px)");
   const isTreeModeActive = () =>
+    state.activeView === "dashboard" &&
     largeDashboardQuery.matches &&
     state.dashboardLayout?.machineViewMode === "grouped" &&
     state.dashboardLayout?.groupPresentationMode === "tree";
@@ -232,7 +234,7 @@ if (mount) {
     ariaLabel: t("dashboard.sectionNavAria", "Secciones"),
     qrPrintHref, usersHref: lang === "en" ? "#/users" : "#/usuarios", todoHref: lang === "en" ? "#/tasks" : "#/tareas",
     labels: {
-      dashboard: t("dashboard.navDashboard", "Dashboard"),
+      dashboard: t("dashboard.navDashboard", "Inicio"),
       registry: t("dashboard.navRegistry", "Registro"),
       qrPrint: t("dashboard.navQrPrint", "Impresión QR"),
       gallery: t("dashboard.navGallery", "Galería"), users: t("dashboard.navUsers", "Usuarios"),
@@ -285,6 +287,7 @@ if (mount) {
     placeholder: t("dashboard.searchPlaceholder", "Buscar por nombre o ubicación..."),
     onQuery: (value) => {
       state.searchQuery = value || "";
+      if (state.activeView === "dashboard") state.selectedTreeMachineId = "";
       if (state.activeView === "registro") {
         state.registryVisibleCount = GLOBAL_REGISTRY_PAGE_SIZE;
       } else if (state.activeView === "sugerencias") {
@@ -383,11 +386,24 @@ if (mount) {
     list
   });
 
-  addBar.appendChild(loadingEl);
-  mount.appendChild(sectionNav);
-  mount.appendChild(addBar);
-  mount.appendChild(mobileBackBtn);
-  mount.appendChild(dashboardWorkspace);
+  const { dashboardFixedMenus, dashboardFixedMenusSpace, dashboardScrollDivider,
+    dashboardViewHeaderSlot } = mountDashboardFixedMenusShell({
+    addBar, dashboardWorkspace, loadingElement: loadingEl, mobileBackButton: mobileBackBtn,
+    mount, sectionNav
+  });
+
+  const { queueScrollState: queueDashboardMenusScrollState } =
+    createDashboardFixedMenusController({
+      addBar,
+      dashboardFixedMenus,
+      dashboardFixedMenusSpace,
+      dashboardScrollDivider,
+      groupTree,
+      largeDashboardQuery,
+      list,
+      mount,
+      state
+    });
 
   const updateSaveState = (message = "") => {
     setTopbarSaveStatus(message);
@@ -607,6 +623,13 @@ if (mount) {
     moveMachineToGroup: (machineId, groupId) => moveMachineToGroup(machineId, groupId),
     normalizeStatus,
     onCreateGroup: handleAddRootGroup,
+    onScopeChange: () => {
+      if (state.activeView === "registro") {
+        state.registryVisibleCount = GLOBAL_REGISTRY_PAGE_SIZE;
+      } else if (state.activeView === "todo") {
+        state.todoPage = 1;
+      }
+    },
     renderCards: (options) => renderCards(options),
     state,
     t
@@ -625,7 +648,17 @@ if (mount) {
     loadSuggestions,
     loadTodos,
     notifyTopbar,
-    setInlineStatus: setDashboardInlineStatus, mount, groupTree, autoSave, getDraftById, updateMachine,
+    dashboardFixedMenus,
+    dashboardViewHeaderSlot,
+    addBar,
+    loadingEl,
+    setInlineStatus: setDashboardInlineStatus,
+    mount,
+    groupTree,
+    renderGroupTree,
+    autoSave,
+    getDraftById,
+    updateMachine,
     isLargeDashboardViewport: () => largeDashboardQuery.matches
   });
 
@@ -723,6 +756,21 @@ if (mount) {
     validateTag,
     viewMenu,
   });
+  if (["registro", "galeria", "usuarios"].includes(state.activeView)) {
+    renderCards({ preserveScroll: false });
+  }
+  queueDashboardMenusScrollState();
+  const { openGalleryUpload } = createGalleryUploadController({
+    assertStorageAvailable,
+    getDraftById,
+    notifyTopbar,
+    refreshStorageFullState,
+    renderCards,
+    state,
+    t,
+    updateMachine,
+    upsertMachine
+  });
   const dashboardOrdering = createDashboardOrderingController({
     state,
     addBtn,
@@ -732,6 +780,9 @@ if (mount) {
     getNextGroupTitle,
     isTreeSelectionActive: isTreeModeActive,
     normalizeDashboardLayout,
+    openGalleryUpload,
+    openMobileTaskCreate: dashboardInternalViews.openMobileTaskCreate,
+    openMobileUserCreate: dashboardInternalViews.openMobileUserCreate,
     renderCards,
     saveDashboardLayout,
     saveOrderCache,
@@ -807,93 +858,42 @@ if (mount) {
     upsertAccountDirectory,
     upsertDashboardLayout,
     withTimeout,
-    getActiveDashboardUid: () => activeDashboardUid,
-    getDashboardSessionVersion: () => dashboardSessionVersion
+    getActiveDashboardUid: () => dashboardSessionRuntime.activeUid,
+    getDashboardSessionVersion: () => dashboardSessionRuntime.version
   });
 
-  window.addEventListener("hashchange", () => {
-    const nextView = getDashboardInternalView();
-    if (nextView === state.activeView) return;
-    const previousView = state.activeView;
-    state.activeView = nextView;
-    if (previousView === "registro" && nextView !== "registro") {
-      markRegistrySeen();
-    }
-    if (previousView === "sugerencias" && nextView !== "sugerencias") {
-      markSuggestionsSeen();
-    }
-    if (nextView === "registro") {
-      state.registryVisibleCount = GLOBAL_REGISTRY_PAGE_SIZE;
-    }
-    if (nextView === "sugerencias") {
-      state.suggestionsVisibleCount = SUGGESTIONS_PAGE_SIZE;
-      loadSuggestions({ preserveScroll: false });
-      scrollSuggestionsViewToTop();
-    }
-    if (nextView === "todo") {
-      state.todoPage = 1;
-      loadTodos({ preserveScroll: false });
-      if (!state.todoCollaboratorsReady) {
-        loadTodoCollaborators();
-      }
-    }
-    renderCards({ preserveScroll: false });
-    if (nextView === "sugerencias") scrollSuggestionsViewToTop();
+  installDashboardRouteController({
+    getDashboardInternalView,
+    largeDashboardQuery,
+    loadSuggestions,
+    loadTodoCollaborators,
+    loadTodos,
+    markRegistrySeen,
+    markSuggestionsSeen,
+    registryPageSize: GLOBAL_REGISTRY_PAGE_SIZE,
+    renderCards,
+    scrollSuggestionsViewToTop,
+    state,
+    suggestionsPageSize: SUGGESTIONS_PAGE_SIZE
   });
 
-  largeDashboardQuery.addEventListener("change", () => {
-    renderCards({ preserveScroll: true, preserveAnchor: false });
-  });
-
-  onAuthStateChanged(auth, async (user) => {
-    if (!user) {
-      activeDashboardUid = "";
-      dashboardInitPromise = null;
-      dashboardSessionVersion += 1;
-      clearDashboardTimer();
-      cleanupDashboardSubscriptions();
-      if (isPublicSectionHash()) {
-        mount.hidden = true;
-        return;
-      }
-      redirectToEntry();
-      return;
-    }
-    try {
-      const registration = await getUserRegistrationState(user);
-      if (!registration.allowed) {
-        window.location.href = `${appBasePrefix || ""}/?setup=1`;
-        return;
-      }
-      state.canSuggest = true;
-      state.isSuperadmin = await isControlPanelUser(user);
-    } catch {
-      window.location.href = `${appBasePrefix || ""}/?setup=1`;
-      return;
-    }
-    if (activeDashboardUid === user.uid && dashboardInitPromise) return;
-    if (
-      activeDashboardUid === user.uid &&
-      !state.loading &&
-      !state.ownerLoadFailed &&
-      !state.adminLoadFailed
-    ) {
-      return;
-    }
-    activeDashboardUid = user.uid;
-    const sessionVersion = ++dashboardSessionVersion;
-    dashboardInitPromise = initDashboard(user.uid, user, sessionVersion)
-      .then(() => dashboardSessionVersion === sessionVersion && state.activeView === "sugerencias" && scrollSuggestionsViewToTop())
-      .catch(() => {
-        if (dashboardSessionVersion !== sessionVersion) return;
-        markDashboardLoadFailure(state);
-        updateLoading();
-        renderCards({ preserveScroll: false });
-      })
-      .finally(() => {
-        if (dashboardSessionVersion === sessionVersion) {
-          dashboardInitPromise = null;
-        }
-      });
+  installDashboardAuthController({
+    auth,
+    cleanupDashboardSubscriptions,
+    clearDashboardTimer,
+    getUserRegistrationState,
+    initDashboard,
+    isControlPanelUser,
+    isPublicSectionHash,
+    markDashboardLoadFailure,
+    mount,
+    onAuthStateChanged,
+    redirectToEntry,
+    renderCards,
+    runtime: dashboardSessionRuntime,
+    scrollSuggestionsViewToTop,
+    setupUrl: `${appBasePrefix || ""}/?setup=1`,
+    state,
+    updateLoading
   });
 }

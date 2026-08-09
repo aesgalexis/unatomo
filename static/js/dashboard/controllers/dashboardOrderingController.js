@@ -24,6 +24,9 @@ export const createDashboardOrderingController = ({
   getNextGroupTitle,
   isTreeSelectionActive,
   normalizeDashboardLayout,
+  openGalleryUpload,
+  openMobileTaskCreate,
+  openMobileUserCreate,
   renderCards,
   saveDashboardLayout,
   saveOrderCache,
@@ -214,19 +217,58 @@ export const createDashboardOrderingController = ({
     const existing = new Set(
       state.draftMachines.map((m) => (m.title || "").trim().toLowerCase())
     );
-    let idx = 1;
-    let title = t("dashboard.machineDefaultName", (value) => `Machine ${value}`)(idx);
+    let idx = 0;
+    let title = t(
+      "dashboard.machineDefaultName",
+      (value) => value ? `New machine ${value}` : "New machine"
+    )(idx);
     while (existing.has(title.toLowerCase())) {
       idx += 1;
-      title = t("dashboard.machineDefaultName", (value) => `Machine ${value}`)(idx);
+      title = t(
+        "dashboard.machineDefaultName",
+        (value) => value ? `New machine ${value}` : "New machine"
+      )(idx);
     }
     return title;
   };
 
   addBtn.addEventListener("click", () => {
+    if (state.activeView === "galeria") {
+      openGalleryUpload?.();
+      return;
+    }
+    if (state.activeView === "sugerencias") {
+      if (window.scrollY > 0) {
+        state.suggestionsCreateOpen = false;
+        const form = document.querySelector("#machineList .suggestions-form");
+        if (form) form.hidden = true;
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
+      state.suggestionsCreateOpen = true;
+      const form = document.querySelector("#machineList .suggestions-form");
+      if (form) {
+        form.hidden = false;
+        form.querySelector(".suggestions-input")?.focus({preventScroll: true});
+      } else {
+        renderCards({preserveScroll: true});
+      }
+      return;
+    }
     if (state.activeView === "todo") {
-      state.todoCreateOpen = !state.todoCreateOpen;
-      renderCards({ preserveScroll: true });
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        openMobileTaskCreate?.();
+        return;
+      }
+      if (!state.todoCreateOpen) {
+        state.todoCreateOpen = true;
+        renderCards({ preserveScroll: true });
+      }
+      if (window.scrollY > 0) {
+        window.requestAnimationFrame(() => {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+      }
       return;
     }
     if (state.activeView === "usuarios") {
@@ -234,10 +276,25 @@ export const createDashboardOrderingController = ({
       if (state.usersContextOwnerUid === "__all__") {
         state.usersContextOwnerUid = state.uid || "";
       }
-      state.usersCreateOpen = !state.usersCreateOpen;
-      renderCards({ preserveScroll: true });
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        openMobileUserCreate?.();
+        return;
+      }
+      if (!state.usersCreateOpen) {
+        state.usersCreateOpen = true;
+        renderCards({ preserveScroll: true });
+      }
+      if (window.scrollY > 0) {
+        window.requestAnimationFrame(() => {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+      }
       return;
     }
+    state.searchQuery = "";
+    state.selectedTreeMachineId = "";
+    document.querySelector("#dashboard-mount .add-search")?.setQuery?.("");
+    const shouldScrollToTop = window.scrollY > 0;
     const order = computePrevOrder();
     const machine = createDraftMachine(state.draftMachines.length + 1, order);
     const ownerMachines = state.draftMachines.filter(
@@ -272,6 +329,10 @@ export const createDashboardOrderingController = ({
     machine.role = "owner";
     machine.ownerEmail = state.adminEmail || "";
     state.draftMachines = [machine, ...state.draftMachines];
+    state.recentlyCreatedMachineIds = [
+      ...(state.recentlyCreatedMachineIds || []),
+      machine.id
+    ];
     const selectedGroupId = state.selectedTreeGroupId || "";
     const selectedGroupExists = isTreeSelectionActive() &&
       (state.dashboardLayout?.groups || []).some((group) => group.id === selectedGroupId);
@@ -294,6 +355,16 @@ export const createDashboardOrderingController = ({
     }
     saveOrderCache(state.draftMachines);
     renderCards();
+    window.requestAnimationFrame(() => {
+      const card = document.querySelector(
+        `.machine-card[data-machine-id="${CSS.escape(machine.id)}"]`
+      );
+      if (!card) return;
+      card.querySelector(".mc-title")?.click();
+      if (shouldScrollToTop) {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    });
     autoSave.saveNow(machine.id, "create");
   });
 

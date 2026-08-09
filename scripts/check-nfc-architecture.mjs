@@ -211,6 +211,7 @@ const functionsIndex = read("firebase/functions/src/index.ts");
 const dashboardCssManifest = read("static/css/dashboard.css");
 const dashboardCssImports = [
   "/static/css/effects/inactive_sections/inactive.css",
+  "/static/css/effects/topbar_logo_rotation/rotation.css",
   "/static/css/components/dashboard-section-nav.css",
   "/static/css/dashboard/shell.css",
   "/static/css/dashboard/group-tree.css",

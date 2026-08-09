@@ -335,6 +335,11 @@
   padding-right: 1.7rem;
 }
 
+.dashboard-users-create-actions .dashboard-users-primary:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
 .dashboard-users-policy-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

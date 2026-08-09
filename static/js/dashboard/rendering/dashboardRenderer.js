@@ -98,7 +98,11 @@ export const createDashboardRenderer = (dependencies) => {
     viewMenu,
   } = dependencies;
   const renderCards = ({ preserveScroll = false, preserveAnchor = true } = {}) => {
-    state.activeView = getDashboardInternalView();
+    const nextActiveView = getDashboardInternalView();
+    if (nextActiveView !== state.activeView) {
+      state.internalViewChromeExpanded = false;
+    }
+    state.activeView = nextActiveView;
     syncDashboardViewChrome();
     const capturedAnchor = preserveScroll && preserveAnchor ? captureViewportAnchor() : null;
     const prevScrollY = preserveScroll
@@ -145,6 +149,18 @@ export const createDashboardRenderer = (dependencies) => {
     list.className = "";
     const query = (state.searchQuery || "").trim();
     let visibleMachines = filterMachines(machines, query);
+    const treeMachines = visibleMachines;
+    if (state.selectedTreeMachineId) {
+      const selectedMachineExists = machines.some(
+        (machine) => machine.id === state.selectedTreeMachineId
+      );
+      if (!selectedMachineExists) state.selectedTreeMachineId = "";
+      else {
+        visibleMachines = visibleMachines.filter(
+          (machine) => machine.id === state.selectedTreeMachineId
+        );
+      }
+    }
     state.knownUsers = Array.from(
       new Set(
         machines
@@ -195,6 +211,7 @@ export const createDashboardRenderer = (dependencies) => {
           placements: layoutPlacements,
           machines: [],
           selectedGroupId: state.selectedTreeGroupId,
+          selectedMachineId: state.selectedTreeMachineId,
           expandedGroupIds: state.expandedTreeGroupIds,
           hiddenGroupIds: state.hiddenTreeGroupIds || [],
           showIncidentCounts: state.showTreeIncidentCounts !== false,
@@ -260,8 +277,9 @@ export const createDashboardRenderer = (dependencies) => {
       renderGroupTree({
         groups: layoutGroups,
         placements: layoutPlacements,
-        machines: visibleMachines,
+        machines: treeMachines,
         selectedGroupId: state.selectedTreeGroupId,
+        selectedMachineId: state.selectedTreeMachineId,
         expandedGroupIds: state.expandedTreeGroupIds,
         hiddenGroupIds: Array.from(hiddenTreeGroupIds),
         showIncidentCounts: state.showTreeIncidentCounts !== false,
@@ -350,7 +368,7 @@ export const createDashboardRenderer = (dependencies) => {
       ...getGroupPath(groupId).map((group) => group.order ?? 0),
       layoutPlacements[machine.id]?.order ?? machine.order ?? 0
     ];
-    const sortedVisibleMachines = !useTreeMachineSort && (useGroupedLayout || useTreeLayout)
+    let sortedVisibleMachines = !useTreeMachineSort && (useGroupedLayout || useTreeLayout)
       ? visibleMachines.slice().sort((a, b) => {
         const aPlacement = layoutPlacements[a.id] || {};
         const bPlacement = layoutPlacements[b.id] || {};
@@ -386,6 +404,19 @@ export const createDashboardRenderer = (dependencies) => {
         return (a.order ?? 0) - (b.order ?? 0);
       })
       : visibleMachines;
+    const recentMachineIds = state.recentlyCreatedMachineIds || [];
+    if (recentMachineIds.length) {
+      const recentOrder = new Map(recentMachineIds.map((id, index) => [id, index]));
+      sortedVisibleMachines = sortedVisibleMachines.slice().sort((left, right) => {
+        const leftOrder = recentOrder.get(left.id);
+        const rightOrder = recentOrder.get(right.id);
+        const leftIsRecent = Number.isInteger(leftOrder);
+        const rightIsRecent = Number.isInteger(rightOrder);
+        if (leftIsRecent && rightIsRecent) return leftOrder - rightOrder;
+        if (leftIsRecent !== rightIsRecent) return leftIsRecent ? -1 : 1;
+        return 0;
+      });
+    }
     const groupTargets = new Map();
     const renderedGroups = new Set();
     const groupPendingCounts = new Map(layoutGroups.map((group) => [group.id, 0]));

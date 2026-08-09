@@ -40,11 +40,13 @@ export const createDashboardLoadController = (dependencies) => {
     state.pendingTransferInvites = [];
     state.suggestions = [];
     state.suggestionsReady = false;
+    state.suggestionsCreateOpen = true;
     state.suggestionReplyTarget = null;
     state.todos = [];
     state.todosReady = false;
     state.todoPage = 1;
     state.todoShowCompleted = false;
+    state.todoCreateOpen = false;
     state.todoCollaborators = [];
     state.todoCollaboratorsReady = false;
     state.usersContextOwnerUid = "";
@@ -56,6 +58,8 @@ export const createDashboardLoadController = (dependencies) => {
     state.configSubtabById = {};
     state.tagStatusById = {};
     state.selectedTreeGroupId = "";
+    state.selectedTreeMachineId = "";
+    state.recentlyCreatedMachineIds = [];
     state.expandedTreeGroupIds = [];
     state.hiddenTreeGroupIds = loadHiddenTreeGroupIds(uid);
     state.showTreeIncidentCounts = loadShowTreeIncidentCounts(uid);
@@ -70,6 +74,9 @@ export const createDashboardLoadController = (dependencies) => {
     loadingEl.style.display = "";
     resetLoadingProgress();
     syncDashboardViewChrome();
+    if (["registro", "galeria", "todo", "usuarios"].includes(state.activeView)) {
+      renderCards({ preserveScroll: false });
+    }
   };
 
   const updateLoading = () => {

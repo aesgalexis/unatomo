@@ -27,6 +27,9 @@ export {
 
 export const renderRegistryDashboardView = (container, machines = [], options = {}) => {
   renderGlobalRegistryView(container, machines, {
+    headerContainer: options.headerContainer,
+    loadingElement: options.loadingElement,
+    loading: !!options.loading,
     query: options.query || "",
     seenAt: options.seenAt || "",
     visibleCount: options.visibleCount,
@@ -36,6 +39,9 @@ export const renderRegistryDashboardView = (container, machines = [], options = 
 
 export const renderGalleryDashboardView = (container, machines = [], options = {}) => {
   renderGalleryView(container, machines, {
+    headerContainer: options.headerContainer,
+    loadingElement: options.loadingElement,
+    loading: !!options.loading,
     query: options.query || ""
   });
 };
@@ -46,6 +52,9 @@ export const renderUsersDashboardView = (container, machines = [], options = {})
 
 export const renderTodoDashboardView = (container, machines = [], options = {}) => {
   renderMachineTasksView(container, machines, {
+    headerContainer: options.headerContainer,
+    loadingElement: options.loadingElement,
+    loading: !!options.loading,
     query: options.query || "",
     page: options.page,
     createOpen: !!options.createOpen,
@@ -55,6 +64,7 @@ export const renderTodoDashboardView = (container, machines = [], options = {}) 
     onPageChange: options.onPageChange,
     onShowCompletedChange: options.onShowCompletedChange,
     onCreate: options.onCreate,
+    onCloseCreate: options.onCloseCreate,
     onAddTaskNote: options.onAddTaskNote,
     onAddTaskImages: options.onAddTaskImages,
     onCompleteTask: options.onCompleteTask,
@@ -73,12 +83,14 @@ export const renderSuggestionsDashboardView = (container, options = {}) => {
   }
 
   renderSuggestionsView(container, {
+    headerContainer: options.headerContainer,
     items: options.items || [],
     canSuggest: !!options.canSuggest,
     isSuperadmin: !!options.isSuperadmin,
     seenAt: options.seenAt || "",
     query: options.query || "",
     replyTarget: options.replyTarget || null,
+    createOpen: options.createOpen !== false,
     visibleCount: options.visibleCount,
     onLoadMore: options.onLoadMore,
     onSubmit: options.onSubmit,

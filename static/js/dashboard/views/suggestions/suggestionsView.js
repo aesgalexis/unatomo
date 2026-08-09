@@ -66,6 +66,7 @@ export const renderSuggestionsView = (container, options = {}) => {
 
   const form = document.createElement("form");
   form.className = "suggestions-form";
+  form.hidden = options.createOpen === false;
   const input = document.createElement("textarea");
   input.className = "suggestions-input";
   input.maxLength = MAX_SUGGESTION_LENGTH;
@@ -137,7 +138,7 @@ export const renderSuggestionsView = (container, options = {}) => {
   count.textContent = `${Math.min(visibleCount, entries.length)}/${entries.length}`;
   header.appendChild(title);
   header.appendChild(count);
-  container.appendChild(header);
+  (options.headerContainer || container).appendChild(header);
 
   if (!entries.length) {
     const empty = document.createElement("div");

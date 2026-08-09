@@ -30,6 +30,10 @@
   padding-bottom: 0.35rem;
 }
 
+.suggestions-form[hidden] {
+  display: none;
+}
+
 .suggestions-input {
   min-height: 5.6rem;
   resize: vertical;

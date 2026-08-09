@@ -44,6 +44,12 @@ import {
   updateUsersInMachines
 } from "../views/users/usersModel.js";
 import { renderUsersTree } from "../views/users/usersTree.js";
+import { openTaskCreateModal } from "../components/taskCreateModal/taskCreateModal.js";
+import { openUserCreateModal } from "../components/userCreateModal/userCreateModal.js";
+import {
+  getDashboardScopedMachines,
+  TREE_UNGROUPED_ID
+} from "../rendering/groupTreeRenderer.js";
 
 export const createDashboardInternalViewController = ({
   state,
@@ -59,14 +65,45 @@ export const createDashboardInternalViewController = ({
   loadSuggestions,
   loadTodos,
   notifyTopbar,
+  dashboardFixedMenus,
+  dashboardViewHeaderSlot,
+  addBar,
+  loadingEl,
   setInlineStatus,
   mount,
   groupTree,
+  renderGroupTree,
   isLargeDashboardViewport,
   autoSave,
   getDraftById,
   updateMachine
 }) => {
+  const clearFixedViewHeader = () => {
+    if (loadingEl && dashboardViewHeaderSlot?.contains(loadingEl)) {
+      addBar?.prepend(loadingEl);
+    }
+    dashboardViewHeaderSlot?.replaceChildren();
+    if (dashboardViewHeaderSlot) dashboardViewHeaderSlot.hidden = true;
+    dashboardFixedMenus?.classList.remove(
+      "has-view-header",
+      "has-static-registry-header",
+      "has-static-gallery-header",
+      "has-static-tasks-header",
+      "has-static-users-header"
+    );
+  };
+  const getFixedViewHeaderContainer = (always = false) =>
+    window.matchMedia("(min-width: 769px)").matches &&
+      (always || state.internalViewChromeExpanded)
+      ? dashboardViewHeaderSlot
+      : null;
+  const showFixedViewHeader = (staticView = "") => {
+    if (!dashboardViewHeaderSlot?.childElementCount) return;
+    dashboardViewHeaderSlot.hidden = false;
+    dashboardFixedMenus?.classList.add(
+      staticView ? `has-static-${staticView}-header` : "has-view-header"
+    );
+  };
   const getUsersContext = (ownerUid = state.usersContextOwnerUid) => {
     const contexts = buildUserAccessContexts(state.draftMachines, state.uid);
     const context = contexts.find((item) => item.ownerUid === ownerUid) ||
@@ -81,6 +118,70 @@ export const createDashboardInternalViewController = ({
     }
     return context;
   };
+  const createDashboardUser = async ({ username, pin, role }, button) => {
+    const context = getUsersContext();
+    if (!context) return false;
+    const cleanUsername = (username || "").trim().replace(/\s+/g, " ");
+    if (!cleanUsername || !pin) return false;
+    button.disabled = true;
+    setInlineStatus(t("dashboard.usersSaving", "Guardando..."));
+    try {
+      const normalizedUsername = cleanUsername.toLowerCase();
+      if (collectAccessUsers(context.machines).some(
+        (item) => item.normalized === normalizedUsername
+      )) throw new Error("duplicate-user");
+      const saltBase64 = generateSaltBase64();
+      const passwordHashBase64 = await hashPassword(pin, saltBase64);
+      const user = {
+        id: globalThis.crypto?.randomUUID?.() || `user-${Date.now()}`,
+        username: cleanUsername,
+        role,
+        createdAt: new Date().toISOString(),
+        saltBase64,
+        passwordHashBase64,
+        isNew: true
+      };
+      const machineIds = context.machines.map((machine) => machine.id);
+      await saveGlobalLocalUser({
+        ownerUid: context.ownerUid,
+        actorUid: state.uid,
+        machines: context.machines,
+        assignedMachineIds: machineIds,
+        user
+      });
+      state.draftMachines = updateUsersInMachines(
+        state.draftMachines,
+        context,
+        user,
+        machineIds
+      );
+      state.usersCreateOpen = false;
+      setInlineStatus(t("dashboard.usersCreated", "Usuario creado"), "ok");
+      rerender({ preserveScroll: true });
+      return true;
+    } catch (error) {
+      const duplicate = `${error?.message || ""}`.includes("duplicate-user");
+      setInlineStatus(
+        duplicate
+          ? t("dashboard.userExists", "El usuario ya existe")
+          : t("dashboard.usersSaveError", "No se pudo guardar el usuario"),
+        "error"
+      );
+      button.disabled = false;
+      return false;
+    }
+  };
+  const createMachineTask = async (values) => {
+    const current = getDraftById(values.machineId);
+    if (!current) return false;
+    const actor = state.adminLabel || t("dashboard.admin", "Administrador");
+    const { task } = createTask({ ...values, createdBy: actor });
+    updateMachine(current.id, buildAddTaskUpdate(current, task, actor));
+    rerender({ preserveScroll: true });
+    notifyTopbar(t("dashboard.taskCreated", "Tarea creada"));
+    await autoSave.saveNow(current.id, "add-task-global-view");
+    return true;
+  };
   const finish = () => {
     syncMachineAccessListeners(state.draftMachines);
     if (state.loading && state.ownerReady && state.adminReady) updateLoading();
@@ -93,9 +194,59 @@ export const createDashboardInternalViewController = ({
     filterInfo.style.display = "none";
     cardRefs.clear();
   };
+  const getMachineScope = (machines) => {
+    const layout = state.dashboardLayout || {};
+    const groups = layout.groups || [];
+    const placements = layout.placements || {};
+    const validGroupIds = new Set(groups.map((group) => group.id));
+    if (
+      state.selectedTreeGroupId &&
+      state.selectedTreeGroupId !== TREE_UNGROUPED_ID &&
+      !validGroupIds.has(state.selectedTreeGroupId)
+    ) {
+      state.selectedTreeGroupId = "";
+    }
+    if (
+      state.selectedTreeMachineId &&
+      !machines.some((machine) => machine.id === state.selectedTreeMachineId)
+    ) {
+      state.selectedTreeMachineId = "";
+    }
+    return getDashboardScopedMachines({
+      machines,
+      groups,
+      placements,
+      selectedGroupId: state.selectedTreeGroupId,
+      selectedMachineId: state.selectedTreeMachineId
+    });
+  };
+  const renderMachineFilterTree = (machines) => {
+    if (state.loading || !isLargeDashboardViewport?.()) return machines;
+    const layout = state.dashboardLayout || {};
+    mount.classList.add("has-group-tree");
+    groupTree.hidden = false;
+    renderGroupTree({
+      groups: layout.groups || [],
+      placements: layout.placements || {},
+      machines,
+      selectedGroupId: state.selectedTreeGroupId,
+      selectedMachineId: state.selectedTreeMachineId,
+      expandedGroupIds: state.expandedTreeGroupIds,
+      hiddenGroupIds: [],
+      showIncidentCounts: state.showTreeIncidentCounts !== false,
+      showTaskCounts: state.showTreeTaskCounts !== false,
+      filterOnly: true
+    });
+    return getMachineScope(machines);
+  };
   const renderRegistry = (machines) => {
     prepare();
-    renderRegistryDashboardView(list, machines, {
+    const scopedMachines = renderMachineFilterTree(machines);
+    const headerContainer = getFixedViewHeaderContainer(true);
+    renderRegistryDashboardView(list, scopedMachines, {
+      headerContainer,
+      loadingElement: headerContainer ? loadingEl : null,
+      loading: state.loading,
       query: state.searchQuery,
       seenAt: state.dashboardLayout?.registrySeenAt || "",
       visibleCount: state.registryVisibleCount,
@@ -104,19 +255,26 @@ export const createDashboardInternalViewController = ({
         rerender({ preserveScroll: true });
       }
     });
+    showFixedViewHeader("registry");
     return finish();
   };
   const renderGallery = (machines) => {
     prepare();
-    renderGalleryDashboardView(list, machines, {
+    const scopedMachines = renderMachineFilterTree(machines);
+    const headerContainer = getFixedViewHeaderContainer(true);
+    renderGalleryDashboardView(list, scopedMachines, {
+      headerContainer,
+      loadingElement: headerContainer ? loadingEl : null,
+      loading: state.loading,
       query: state.searchQuery
     });
+    showFixedViewHeader("gallery");
     return finish();
   };
   const renderUsers = (machines) => {
     prepare();
     const contexts = buildUserAccessContexts(machines, state.uid);
-    const useSideTree = !!isLargeDashboardViewport?.();
+    const useSideTree = !state.loading && !!isLargeDashboardViewport?.();
     if (useSideTree) {
       if (!state.usersContextOwnerUid) {
         state.usersContextOwnerUid = USERS_ALL_CONTEXT_ID;
@@ -149,12 +307,16 @@ export const createDashboardInternalViewController = ({
         }
       });
     }
+    const headerContainer = getFixedViewHeaderContainer(true);
     renderUsersDashboardView(list, machines, {
+      headerContainer,
+      loadingElement: headerContainer ? loadingEl : null,
+      loading: state.loading,
       currentUid: state.uid,
       query: state.searchQuery,
       contextOwnerUid: state.usersContextOwnerUid,
       expandedUsers: state.expandedUsers,
-      createOpen: state.usersCreateOpen,
+      createOpen: state.usersCreateOpen && window.matchMedia("(min-width: 769px)").matches,
       policyOpen: state.usersPolicyOpen,
       showInlineNavigation: !useSideTree,
       isEn: document.documentElement.lang?.toLowerCase().startsWith("en"),
@@ -174,59 +336,7 @@ export const createDashboardInternalViewController = ({
         state.usersCreateOpen = false;
         rerender({ preserveScroll: true });
       },
-      onCreate: async ({ username, pin, role }, button) => {
-        const context = getUsersContext();
-        if (!context) return;
-        const cleanUsername = (username || "").trim().replace(/\s+/g, " ");
-        if (!cleanUsername || !pin) return;
-        button.disabled = true;
-        setInlineStatus(t("dashboard.usersSaving", "Guardando..."));
-        try {
-          const normalizedUsername = cleanUsername.toLowerCase();
-          if (collectAccessUsers(context.machines).some(
-            (item) => item.normalized === normalizedUsername
-          )) {
-            throw new Error("duplicate-user");
-          }
-          const saltBase64 = generateSaltBase64();
-          const passwordHashBase64 = await hashPassword(pin, saltBase64);
-          const user = {
-            id: globalThis.crypto?.randomUUID?.() || `user-${Date.now()}`,
-            username: cleanUsername,
-            role,
-            createdAt: new Date().toISOString(),
-            saltBase64,
-            passwordHashBase64,
-            isNew: true
-          };
-          const machineIds = context.machines.map((machine) => machine.id);
-          await saveGlobalLocalUser({
-            ownerUid: context.ownerUid,
-            actorUid: state.uid,
-            machines: context.machines,
-            assignedMachineIds: machineIds,
-            user
-          });
-          state.draftMachines = updateUsersInMachines(
-            state.draftMachines,
-            context,
-            user,
-            machineIds
-          );
-          state.usersCreateOpen = false;
-          setInlineStatus(t("dashboard.usersCreated", "Usuario creado"), "ok");
-          rerender({ preserveScroll: true });
-        } catch (error) {
-          const duplicate = `${error?.message || ""}`.includes("duplicate-user");
-          setInlineStatus(
-            duplicate
-              ? t("dashboard.userExists", "El usuario ya existe")
-              : t("dashboard.usersSaveError", "No se pudo guardar el usuario"),
-            "error"
-          );
-          button.disabled = false;
-        }
-      },
+      onCreate: createDashboardUser,
       onSaveUser: async (user, button) => {
         const context = getUsersContext(user.contextOwnerUid);
         if (!context || !user.assignedMachineIds?.length) {
@@ -349,11 +459,13 @@ export const createDashboardInternalViewController = ({
         }
       }
     });
+    showFixedViewHeader("users");
     return finish();
   };
   const renderSuggestions = () => {
     prepare();
     renderSuggestionsDashboardView(list, {
+      headerContainer: getFixedViewHeaderContainer(),
       items: state.suggestions,
       ready: state.suggestionsReady,
       canSuggest: state.canSuggest || state.isSuperadmin,
@@ -361,6 +473,7 @@ export const createDashboardInternalViewController = ({
       seenAt: state.dashboardLayout?.suggestionsSeenAt || "",
       query: state.searchQuery,
       replyTarget: state.suggestionReplyTarget,
+      createOpen: state.suggestionsCreateOpen,
       visibleCount: state.suggestionsVisibleCount,
       onLoadMore: () => {
         state.suggestionsVisibleCount += SUGGESTIONS_PAGE_SIZE;
@@ -368,6 +481,7 @@ export const createDashboardInternalViewController = ({
       },
       onReply: (target) => {
         state.suggestionReplyTarget = target || null;
+        state.suggestionsCreateOpen = true;
         rerender({ preserveScroll: true });
       },
       onCancelReply: () => {
@@ -433,14 +547,24 @@ export const createDashboardInternalViewController = ({
         }
       }
     });
+    showFixedViewHeader();
     return finish();
   };
   const renderTodo = (viewOptions = {}) => {
     prepare();
-    renderTodoDashboardView(list, state.draftMachines || [], {
+    const scopedMachines = renderMachineFilterTree(state.draftMachines || []);
+    const headerContainer = getFixedViewHeaderContainer(true);
+    renderTodoDashboardView(list, scopedMachines, {
+      headerContainer,
+      loadingElement: headerContainer ? loadingEl : null,
+      loading: state.loading,
       query: state.searchQuery,
       page: state.todoPage,
-      createOpen: state.todoCreateOpen,
+      createOpen: state.todoCreateOpen && window.matchMedia("(min-width: 769px)").matches,
+      onCloseCreate: () => {
+        state.todoCreateOpen = false;
+        rerender({ preserveScroll: true });
+      },
       showCompleted: state.todoShowCompleted,
       statusFilter: state.todoStatusFilter,
       sort: state.todoSort,
@@ -455,16 +579,7 @@ export const createDashboardInternalViewController = ({
         state.todoPage = 1;
         rerender({ preserveScroll: true });
       },
-      onCreate: async (values) => {
-        const current = getDraftById(values.machineId);
-        if (!current) return;
-        const actor = state.adminLabel || t("dashboard.admin", "Administrador");
-        const { task } = createTask({ ...values, createdBy: actor });
-        updateMachine(current.id, buildAddTaskUpdate(current, task, actor));
-        rerender({ preserveScroll: true });
-        notifyTopbar(t("dashboard.taskCreated", "Tarea creada"));
-        await autoSave.saveNow(current.id, "add-task-global-view");
-      },
+      onCreate: createMachineTask,
       onAddTaskNote: async (machineId, taskId, text) => {
         const current = getDraftById(machineId);
         if (!current) return;
@@ -577,10 +692,12 @@ export const createDashboardInternalViewController = ({
         }
       }
     });
+    showFixedViewHeader("tasks");
     return finish();
   };
 
   const render = (view, machines, viewOptions = {}) => {
+    clearFixedViewHeader();
     if (view === "sugerencias" && !state.canSuggest && !state.isSuperadmin) {
       window.location.hash = "#/dashboard";
       return true;
@@ -593,5 +710,22 @@ export const createDashboardInternalViewController = ({
     return false;
   };
 
-  return { render };
+  const openMobileTaskCreate = () => openTaskCreateModal({
+    machines: renderMachineFilterTree(state.draftMachines || []),
+    onCreate: createMachineTask
+  });
+  const openMobileUserCreate = () => {
+    const context = getUsersContext();
+    if (!context) return;
+    const contextLabel = context.isOwner
+      ? t("dashboard.usersMyMachines", "Mis máquinas")
+      : context.ownerEmail || t("dashboard.usersManagedMachines", "Máquinas administradas");
+    openUserCreateModal({
+      contextLabel,
+      machineCount: context.machines.length,
+      onCreate: createDashboardUser
+    });
+  };
+
+  return { openMobileTaskCreate, openMobileUserCreate, render };
 };

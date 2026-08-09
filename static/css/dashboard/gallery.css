@@ -70,6 +70,38 @@
   accent-color: var(--fg);
 }
 
+@media (min-width: 769px) {
+  .gallery-header {
+    display: grid;
+    grid-template-columns: 9.4rem minmax(0, 1fr) auto;
+    align-items: center;
+  }
+
+  .gallery-header h3 {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .gallery-header .dashboard-view-header-actions {
+    display: contents;
+  }
+
+  .gallery-header .gallery-size {
+    position: static;
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: start;
+    transform: none;
+  }
+
+  .gallery-header .gallery-count {
+    grid-column: 3;
+    grid-row: 1;
+    justify-self: end;
+    text-align: right;
+  }
+}
+
 .gallery-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(var(--gallery-item-size), 1fr));

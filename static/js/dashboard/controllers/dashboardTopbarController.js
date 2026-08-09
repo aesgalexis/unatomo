@@ -78,7 +78,9 @@ export const createDashboardTopbarController = (dependencies) => {
       usersLink.removeAttribute("aria-current");
     }
     addBar.classList.toggle("is-registry-view", isRegistry || isGallery || isSuggestions || isTodo);
+    addBar.classList.toggle("is-gallery-view", isGallery);
     addBar.classList.toggle("is-todo-view", isTodo);
+    addBar.classList.toggle("is-suggestions-view", isSuggestions);
     searchInput.placeholder = isRegistry
       ? t("dashboard.registrySearchPlaceholder", "Buscar en registro...")
       : isGallery
@@ -90,7 +92,7 @@ export const createDashboardTopbarController = (dependencies) => {
             : isUsers
               ? t("dashboard.usersSearchPlaceholder", "Buscar usuarios...")
             : t("dashboard.searchPlaceholder", "Buscar por nombre o ubicaci\u00f3n...");
-    const addDisabled = state.loading || isRegistry || isGallery || isSuggestions;
+    const addDisabled = state.loading || isRegistry;
     const viewMenuDisabled = state.loading || isRegistry || isGallery || isSuggestions || isUsers;
     const searchDisabled = state.loading;
     addBtn.disabled = addDisabled;
@@ -103,7 +105,11 @@ export const createDashboardTopbarController = (dependencies) => {
       "aria-label",
       isUsers
         ? t("dashboard.usersAddAria", "Añadir usuario")
-        : t("dashboard.addAria", "Añadir")
+        : isGallery
+          ? t("dashboard.galleryUploadAddAria", "Subir archivo a una máquina")
+        : isSuggestions
+          ? t("dashboard.suggestionsAddAria", "Escribir sugerencia")
+          : t("dashboard.addAria", "Añadir")
     );
   };
 

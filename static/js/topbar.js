@@ -56,7 +56,9 @@ if (langEs && langEn) {
 }
 
 await import("/static/js/registro/session-menu.js");
-const { initTopbarNotifications } = await import(
-  "/static/js/notifications/topbar-notifications.js"
-);
-initTopbarNotifications();
+if (document.getElementById("notif-menu-wrap")) {
+  const { initTopbarNotifications } = await import(
+    "/static/js/notifications/topbar-notifications.js"
+  );
+  initTopbarNotifications();
+}

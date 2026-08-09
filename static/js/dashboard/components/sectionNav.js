@@ -4,6 +4,12 @@ const QR_PRINT_ICON = `
   </svg>
 `;
 
+const HISTORY_ICON = `
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path d="M12 2a10 10 0 1 0 10 10A10.01 10.01 0 0 0 12 2Zm1 10.59 3.71 3.7-1.42 1.42L11 13V7h2v5.59Z"></path>
+  </svg>
+`;
+
 const SUGGESTIONS_ICON = `
   <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
     <path d="M13 2 4 14h7l-1 8 10-13h-7l0-7Z"></path>
@@ -71,18 +77,18 @@ export const createDashboardSectionNav = ({
   const dashboardLink = document.createElement("a");
   dashboardLink.className = "dashboard-section-link";
   dashboardLink.href = dashboardHref;
-  dashboardLink.textContent = labels.dashboard || "Dashboard";
+  dashboardLink.textContent = labels.dashboard || "Inicio";
 
-  const registryLink = document.createElement("a");
-  registryLink.className = "dashboard-section-link";
-  registryLink.href = registryHref;
+  const registry = createIconLink({
+    href: registryHref,
+    label: labels.registry || "Registro",
+    icon: HISTORY_ICON
+  });
+  const registryLink = registry.link;
   const registryBadge = document.createElement("span");
   registryBadge.className = "dashboard-section-badge";
   registryBadge.hidden = true;
-  const registryLabel = document.createElement("span");
-  registryLabel.textContent = labels.registry || "Registro";
-  registryLink.appendChild(registryBadge);
-  registryLink.appendChild(registryLabel);
+  registryLink.insertBefore(registryBadge, registry.iconEl);
 
   const qr = createIconLink({
     href: qrPrintHref,
@@ -147,8 +153,8 @@ export const createDashboardSectionNav = ({
   sectionNav.appendChild(dashboardLink);
   sectionNav.appendChild(registryLink);
   sectionNav.appendChild(todo.link);
-  sectionNav.appendChild(users.link);
   sectionNav.appendChild(gallery.link);
+  sectionNav.appendChild(users.link);
   sectionNav.appendChild(qr.link);
 
   if (attachTooltip) {

@@ -187,10 +187,28 @@ export const renderGalleryView = (container, machines = [], options = {}) => {
 
   const toolbar = document.createElement("div");
   toolbar.className = "gallery-toolbar";
-  toolbar.appendChild(createSizeControl(wrap));
+  const sizeControl = createSizeControl(wrap);
+  toolbar.appendChild(sizeControl);
 
-  wrap.appendChild(toolbar);
-  wrap.appendChild(header);
+  if (window.matchMedia("(min-width: 769px)").matches) {
+    header.replaceChildren(title);
+    if (options.loadingElement) header.appendChild(options.loadingElement);
+    if (!options.loading) {
+      const actions = document.createElement("div");
+      actions.className = "dashboard-view-header-actions";
+      actions.append(count, sizeControl);
+      header.appendChild(actions);
+    }
+    (options.headerContainer || wrap).appendChild(header);
+  } else {
+    wrap.appendChild(toolbar);
+    wrap.appendChild(header);
+  }
+
+  if (options.loading) {
+    container.appendChild(wrap);
+    return;
+  }
 
   if (!entries.length) {
     const empty = document.createElement("p");

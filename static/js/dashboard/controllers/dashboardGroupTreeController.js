@@ -20,6 +20,7 @@ export const createDashboardGroupTreeController = ({
   moveMachineToGroup,
   normalizeStatus,
   onCreateGroup,
+  onScopeChange,
   renderCards,
   state,
   t
@@ -31,10 +32,20 @@ export const createDashboardGroupTreeController = ({
     getPendingTaskCount,
     normalizeStatus,
     onCreateGroup,
+    onSelectMachine: (machineId, groupId) => {
+      const selectedGroupId = groupId === "__ungrouped__" ? groupId : groupId || "";
+      state.selectedTreeGroupId = selectedGroupId;
+      state.selectedTreeMachineId = machineId;
+      state.expandedById = [machineId];
+      onScopeChange?.();
+      renderCards({preserveScroll: false});
+    },
     onSelect: (groupId) => {
-      if (state.selectedTreeGroupId === groupId) return;
+      if (state.selectedTreeGroupId === groupId && !state.selectedTreeMachineId) return;
       state.selectedTreeGroupId = groupId;
+      state.selectedTreeMachineId = "";
       state.expandedById = [];
+      onScopeChange?.();
       renderCards({preserveScroll: false});
     },
     onToggle: (groupId) => {
@@ -48,6 +59,8 @@ export const createDashboardGroupTreeController = ({
       );
       if (isCollapsing && branchIds.has(state.selectedTreeGroupId)) {
         state.selectedTreeGroupId = groupId;
+        state.selectedTreeMachineId = "";
+        onScopeChange?.();
       }
       state.expandedTreeGroupIds = Array.from(expandedIds);
       renderCards({preserveScroll: true, preserveAnchor: false});

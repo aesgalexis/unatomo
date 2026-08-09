@@ -275,6 +275,180 @@
   background: linear-gradient(135deg, #16a34a, #15803d);
 }
 
+.gallery-upload-icon {
+  color: #2563eb;
+}
+
+.gallery-upload-summary {
+  border-left-color: #2563eb;
+  background: color-mix(in srgb, #2563eb 7%, transparent);
+}
+
+.gallery-upload-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  min-height: 0;
+  height: auto;
+  border-radius: 8px;
+  background-color: var(--bg);
+  padding: 5px 1.7rem 5px 0.85rem;
+  font-size: 12px;
+  line-height: 1.2;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%239CA3AF' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 7 5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.65rem center;
+  background-size: 0.85rem 0.85rem;
+}
+
+.gallery-upload-file-box.is-disabled {
+  opacity: 0.46;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.gallery-upload-status {
+  min-height: 1.2em;
+  margin: 0;
+  color: color-mix(in srgb, var(--fg) 68%, transparent);
+  font-size: 0.85rem;
+}
+
+.gallery-upload-status[data-state="error"] {
+  color: #dc2626;
+}
+
+.gallery-upload-confirm {
+  border-color: #1d4ed8;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+}
+
+.gallery-upload-confirm:disabled {
+  opacity: 0.58;
+  cursor: wait;
+}
+
+.status-form-modal-content {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.task-create-dialog .status-form-modal-icon,
+.user-create-dialog .status-form-modal-icon {
+  color: #2563eb;
+}
+
+.task-create-dialog .status-form-modal-summary,
+.user-create-dialog .status-form-modal-summary {
+  margin-bottom: 0.8rem;
+  border-left-color: #2563eb;
+  background: color-mix(in srgb, #2563eb 7%, transparent);
+}
+
+.task-create-dialog .status-incident-confirm,
+.user-create-dialog .status-incident-confirm {
+  border-color: #15803d;
+  background: linear-gradient(135deg, #16a34a, #15803d);
+}
+
+.task-create-dialog .status-incident-confirm:disabled,
+.user-create-dialog .status-incident-confirm:disabled {
+  opacity: 0.46;
+  cursor: not-allowed;
+}
+
+@media (min-width: 769px) {
+  .gallery-upload-dialog.is-inline {
+    width: 100%;
+    max-height: none;
+    box-sizing: border-box;
+    margin-bottom: 0.85rem;
+    overflow: visible;
+    border-radius: 1rem;
+    background: color-mix(in srgb, var(--bg) 96%, var(--fg) 4%);
+    box-shadow: none;
+    padding: 1rem;
+  }
+
+  .gallery-upload-dialog.is-inline .status-incident-header {
+    margin-bottom: 0;
+  }
+
+  .gallery-upload-dialog.is-inline .gallery-upload-icon,
+  .gallery-upload-dialog.is-inline .status-incident-machine,
+  .gallery-upload-dialog.is-inline .gallery-upload-summary {
+    display: none;
+  }
+
+  .gallery-upload-dialog.is-inline .status-incident-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+
+  .gallery-upload-dialog.is-inline .status-incident-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.65rem;
+  }
+
+  .gallery-upload-dialog.is-inline .gallery-upload-file-box,
+  .gallery-upload-dialog.is-inline .gallery-upload-status,
+  .gallery-upload-dialog.is-inline .status-incident-actions {
+    grid-column: 1 / -1;
+  }
+
+  .gallery-upload-dialog.is-inline .status-incident-field {
+    gap: 0.3rem;
+    font-size: 0.82rem;
+  }
+
+  .gallery-upload-dialog.is-inline .gallery-upload-select {
+    min-height: 0;
+    border-radius: 8px;
+    background-color: var(--bg);
+    padding: 5px 1.7rem 5px 0.85rem;
+    font-size: 12px;
+    line-height: 1.2;
+  }
+
+  .gallery-upload-dialog.is-inline .gallery-upload-file-box {
+    min-height: 5.6rem;
+    border-radius: 0.75rem;
+    background: var(--bg);
+    padding: 0.65rem;
+  }
+
+  .gallery-upload-dialog.is-inline .status-incident-image-icon {
+    width: 1.75rem;
+    height: 1.75rem;
+    font-size: 1rem;
+  }
+
+  .gallery-upload-dialog.is-inline .status-incident-image-action,
+  .gallery-upload-dialog.is-inline .gallery-upload-status {
+    font-size: 0.82rem;
+  }
+
+  .gallery-upload-dialog.is-inline .status-incident-actions {
+    gap: 0.65rem;
+    margin-top: 0;
+  }
+
+  .gallery-upload-dialog.is-inline .status-incident-cancel,
+  .gallery-upload-dialog.is-inline .gallery-upload-confirm {
+    min-height: 0;
+    border-radius: 8px;
+    padding: 5px 0.85rem;
+    font: inherit;
+    font-size: 12px;
+    line-height: 1.2;
+  }
+
+  .gallery-upload-dialog.is-inline .gallery-upload-confirm {
+    border-color: #16a34a;
+    background: #16a34a;
+  }
+}
+
 @media (max-width: 700px) {
   body.status-incident-open {
     top: 0;

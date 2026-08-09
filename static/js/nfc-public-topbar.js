@@ -8,7 +8,7 @@ if (mount) {
   mount.innerHTML = `
     <header class="landing-header">
       <a class="landing-brand" href="/nfc/" aria-label="UNATOMO NFC">
-        <img src="/static/img/logo-unatomo-v1.6.svg" alt="unatomo">
+        <img src="/static/img/logo-unatomo-round-outline-v1.0.svg" alt="unatomo" class="topbar-logo--rotating">
         <span>UNATOMO/NFC</span>
       </a>
       <div class="landing-header-actions">

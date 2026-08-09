@@ -14,6 +14,10 @@ export const createMachineSearchBar = ({ placeholder, onQuery } = {}) => {
   input.maxLength = 80;
   input.setAttribute("aria-label", t("dashboard.searchAria", "Buscar maquinas"));
   let acceptedValue = "";
+  input.setQuery = (value = "") => {
+    acceptedValue = String(value || "");
+    input.value = acceptedValue;
+  };
   const handleQueryChange = () => {
     if (document.activeElement !== input) {
       input.value = acceptedValue;

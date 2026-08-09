@@ -12,7 +12,7 @@
     <header class="ls-topbar">
       <div class="ls-topbar-inner">
         <a class="ls-topbar-brand" href="${brandHref}">
-          <img src="/static/img/logo-unatomo-v1.6.svg" alt="unatomo" class="ls-topbar-logo" loading="lazy" />
+          <img src="/static/img/logo-unatomo-round-v1.0.svg" alt="unatomo" class="ls-topbar-logo" loading="lazy" />
           <span class="ls-topbar-name">
             <span class="ls-topbar-parent-name">unatomo</span><span class="ls-topbar-divider" aria-hidden="true">/</span><span>Laundry Services</span>
           </span>

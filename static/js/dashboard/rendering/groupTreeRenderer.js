@@ -36,6 +36,34 @@ export const getDashboardGroupBranchIds = (groups = [], groupId = "") => {
   return branchIds;
 };
 
+export const getDashboardScopedMachines = ({
+  machines = [],
+  groups = [],
+  placements = {},
+  selectedGroupId = "",
+  selectedMachineId = ""
+} = {}) => {
+  const source = Array.isArray(machines) ? machines : [];
+  if (selectedMachineId) {
+    return source.filter((machine) => machine.id === selectedMachineId);
+  }
+  if (!selectedGroupId) return source;
+
+  const validGroupIds = new Set(groups.map((group) => group.id));
+  if (selectedGroupId === TREE_UNGROUPED_ID) {
+    return source.filter((machine) => {
+      const groupId = placements[machine.id]?.groupId || "";
+      return !validGroupIds.has(groupId);
+    });
+  }
+  if (!validGroupIds.has(selectedGroupId)) return source;
+
+  const branchIds = getDashboardGroupBranchIds(groups, selectedGroupId);
+  return source.filter((machine) =>
+    branchIds.has(placements[machine.id]?.groupId || "")
+  );
+};
+
 export const createDashboardGroupTreeRenderer = ({
   attachTooltip,
   container,
@@ -43,6 +71,7 @@ export const createDashboardGroupTreeRenderer = ({
   getPendingTaskCount,
   normalizeStatus,
   onCreateGroup,
+  onSelectMachine,
   onSelect,
   onShowAllGroups,
   onToggle,
@@ -112,10 +141,12 @@ export const createDashboardGroupTreeRenderer = ({
     placements = {},
     machines = [],
     selectedGroupId = "",
+    selectedMachineId = "",
     expandedGroupIds = [],
     hiddenGroupIds = [],
     showIncidentCounts = true,
-    showTaskCounts = true
+    showTaskCounts = true,
+    filterOnly = false
   }) => {
     closeMenu();
     container.innerHTML = "";
@@ -175,7 +206,7 @@ export const createDashboardGroupTreeRenderer = ({
     });
     const headerActions = document.createElement("div");
     headerActions.className = "dashboard-group-tree-header-actions";
-    headerActions.appendChild(createButton);
+    if (!filterOnly) headerActions.appendChild(createButton);
     headerActions.appendChild(preferencesButton);
     header.appendChild(title);
     header.appendChild(headerActions);
@@ -222,13 +253,20 @@ export const createDashboardGroupTreeRenderer = ({
     const downCounts = new Map();
     const expandedIds = new Set(expandedGroupIds);
     let ungroupedCount = 0;
+    const machinesByGroup = new Map();
 
     machines.forEach((machine) => {
       const groupId = placements[machine.id]?.groupId || "";
       if (!validGroupIds.has(groupId)) {
         ungroupedCount += 1;
+        if (!machinesByGroup.has(TREE_UNGROUPED_ID)) {
+          machinesByGroup.set(TREE_UNGROUPED_ID, []);
+        }
+        machinesByGroup.get(TREE_UNGROUPED_ID).push(machine);
         return;
       }
+      if (!machinesByGroup.has(groupId)) machinesByGroup.set(groupId, []);
+      machinesByGroup.get(groupId).push(machine);
       addToAncestors(machineCounts, groupById, groupId, 1);
       if (showTaskCounts && !hiddenIds.has(groupId)) {
         addToAncestors(
@@ -262,11 +300,12 @@ export const createDashboardGroupTreeRenderer = ({
       dropType = "",
       visibilityState = "visible"
     }) => {
+      const isNodeSelected = selectedGroupId === id && !selectedMachineId;
       const row = document.createElement("div");
       row.className = "dashboard-group-tree-row";
       row.dataset.depth = String(depth);
       if (dropType) row.dataset.treeDropType = dropType;
-      if (group) {
+      if (group && !filterOnly) {
         row.dataset.groupId = group.id;
         row.draggable = true;
       }
@@ -283,7 +322,7 @@ export const createDashboardGroupTreeRenderer = ({
       );
       row.classList.toggle("is-visibility-hidden", visibilityState === "hidden");
       row.classList.toggle("is-visibility-mixed", visibilityState === "mixed");
-      row.classList.toggle("is-selected", selectedGroupId === id);
+      row.classList.toggle("is-selected", isNodeSelected);
 
       if (hasChildren) {
         const collapsed = !expandedIds.has(id);
@@ -310,11 +349,11 @@ export const createDashboardGroupTreeRenderer = ({
       button.type = "button";
       button.className = "dashboard-group-tree-node";
       button.dataset.groupId = id;
-      if (group) button.draggable = true;
+      if (group && !filterOnly) button.draggable = true;
       button.dataset.depth = String(depth);
       button.setAttribute("role", "treeitem");
       button.setAttribute("aria-level", String(depth + 1));
-      button.setAttribute("aria-selected", selectedGroupId === id ? "true" : "false");
+      button.setAttribute("aria-selected", isNodeSelected ? "true" : "false");
       if (hasChildren) {
         button.setAttribute("aria-expanded", expandedIds.has(id) ? "true" : "false");
       }
@@ -361,7 +400,7 @@ export const createDashboardGroupTreeRenderer = ({
       }
       button.addEventListener("click", () => onSelect(id));
       row.appendChild(button);
-      if (group) {
+      if (group && !filterOnly) {
         const actionSlot = document.createElement("span");
         actionSlot.className = "dashboard-group-tree-action-slot";
         const visibilityToggle = document.createElement("button");
@@ -408,6 +447,83 @@ export const createDashboardGroupTreeRenderer = ({
       tree.appendChild(row);
     };
 
+    const appendMachineNodes = (groupId, depth) => {
+      const groupMachines = [...(machinesByGroup.get(groupId) || [])];
+      groupMachines.sort((left, right) => {
+        const leftOrder = placements[left.id]?.order;
+        const rightOrder = placements[right.id]?.order;
+        if (Number.isFinite(leftOrder) && Number.isFinite(rightOrder)) {
+          return leftOrder - rightOrder;
+        }
+        return String(left.title || left.id || "").localeCompare(
+          String(right.title || right.id || "")
+        );
+      });
+      groupMachines.forEach((machine) => {
+        const row = document.createElement("div");
+        row.className = "dashboard-group-tree-row is-machine";
+        row.dataset.machineId = machine.id;
+        row.dataset.depth = String(depth);
+        row.classList.toggle("is-selected", selectedMachineId === machine.id);
+        row.style.setProperty(
+          "--tree-indent",
+          `${0.05 + Math.max(0, depth - 1) * 0.9}rem`
+        );
+
+        const spacer = document.createElement("span");
+        spacer.className = "dashboard-group-tree-toggle-spacer";
+        row.appendChild(spacer);
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "dashboard-group-tree-node dashboard-group-tree-machine";
+        button.dataset.machineId = machine.id;
+        button.setAttribute("role", "treeitem");
+        button.setAttribute("aria-level", String(depth + 1));
+        button.setAttribute(
+          "aria-selected",
+          selectedMachineId === machine.id ? "true" : "false"
+        );
+        button.setAttribute(
+          "aria-label",
+          t("dashboard.groupTreeOpenMachine", (value) => `Ir a ${value}`)(
+            machine.title || machine.id || t("machine.machine", "M\u00e1quina")
+          )
+        );
+
+        const iconEl = document.createElement("span");
+        iconEl.className = "dashboard-group-tree-icon is-machine";
+        iconEl.setAttribute("aria-hidden", "true");
+        iconEl.innerHTML =
+          '<svg viewBox="0 0 24 24"><rect x="5" y="3.5" width="14" height="17" rx="2"/>' +
+          '<path d="M8.5 7.5h7M8.5 11.5h7M9 16.5h.01M15 16.5h.01"/></svg>';
+        button.appendChild(iconEl);
+
+        const label = document.createElement("span");
+        label.className = "dashboard-group-tree-label";
+        label.textContent = machine.title || machine.id || t("machine.machine", "M\u00e1quina");
+        button.appendChild(label);
+
+        const isDown = normalizeStatus(machine.status) === "fuera_de_servicio";
+        const pending = getPendingTaskCount(machine);
+        if (showIncidentCounts && isDown) {
+          const badge = document.createElement("span");
+          badge.className = "dashboard-group-tree-machine-status is-down";
+          badge.setAttribute("aria-label", t("dashboard.groupTreeMachineDown", "Fuera de servicio"));
+          button.appendChild(badge);
+        }
+        if (showTaskCounts && pending > 0) {
+          const badge = document.createElement("span");
+          badge.className = "dashboard-group-tree-badge is-pending";
+          badge.textContent = String(pending);
+          button.appendChild(badge);
+        }
+        button.addEventListener("click", () => onSelectMachine?.(machine.id, groupId));
+        row.appendChild(button);
+        tree.appendChild(row);
+      });
+    };
+
     createNode({
       id: TREE_ALL_ID,
       label: t("dashboard.groupTreeAll", "Todas las m\u00e1quinas"),
@@ -417,7 +533,7 @@ export const createDashboardGroupTreeRenderer = ({
       dropType: "all"
     });
 
-    if (!groups.length) {
+    if (!groups.length && !ungroupedCount) {
       appendEmptyMessage(
         t(
           "dashboard.groupTreeCreateFirst",
@@ -449,7 +565,9 @@ export const createDashboardGroupTreeRenderer = ({
           count: machineCounts.get(group.id) || 0,
           pending: pendingCounts.get(group.id) || 0,
           down: downCounts.get(group.id) || 0,
-          hasChildren: (childrenByParent.get(group.id) || []).length > 0,
+          hasChildren:
+            (childrenByParent.get(group.id) || []).length > 0 ||
+            (machinesByGroup.get(group.id) || []).length > 0,
           icon: "folder",
           group,
           dropType: "group",
@@ -460,7 +578,10 @@ export const createDashboardGroupTreeRenderer = ({
             return hiddenCount === branchIds.size ? "hidden" : "mixed";
           })()
         });
-        if (expandedIds.has(group.id)) appendChildren(group.id, depth + 1);
+        if (expandedIds.has(group.id)) {
+          appendChildren(group.id, depth + 1);
+          if (!hiddenIds.has(group.id)) appendMachineNodes(group.id, depth + 1);
+        }
       });
     };
     appendChildren();
@@ -469,9 +590,13 @@ export const createDashboardGroupTreeRenderer = ({
       id: TREE_UNGROUPED_ID,
       label: t("dashboard.groupTreeUngrouped", "Sin grupo"),
       count: ungroupedCount,
+      hasChildren: ungroupedCount > 0,
       icon: "ungrouped",
       dropType: "ungrouped"
     });
+    if (expandedIds.has(TREE_UNGROUPED_ID)) {
+      appendMachineNodes(TREE_UNGROUPED_ID, 1);
+    }
   };
 
   return { renderTree };

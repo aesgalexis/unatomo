@@ -19,7 +19,12 @@
   border-bottom: 1px solid var(--border-subtle);
 }
 
-.machine-tasks-header h3 { margin: 0; }
+.machine-tasks-header h3 {
+  margin: 0;
+  color: var(--fg);
+  font-size: 1rem;
+  font-weight: 600;
+}
 .machine-tasks-summary,
 .machine-tasks-meta { color: color-mix(in srgb, var(--fg) 64%, transparent); font-size: 0.84rem; }
 
@@ -81,10 +86,18 @@
   grid-template-columns: minmax(0, 1fr);
   gap: 0.65rem;
   align-items: start;
-  padding-bottom: 0.35rem;
+  padding: 1rem;
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
+  border: 1px solid var(--border-subtle);
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--bg) 96%, var(--fg) 4%);
+}
+.machine-task-create-form[hidden] { display: none; }
+.machine-task-create-title {
+  font-size: 0.95rem;
+  font-weight: 600;
 }
 .machine-task-create-fields {
   display: grid;
@@ -98,15 +111,17 @@
 .machine-task-create-control {
   min-width: 0;
   width: 100%;
-  height: 32px;
+  min-height: 0;
+  height: auto;
   box-sizing: border-box;
   border: 1px solid var(--border-subtle);
-  border-radius: 0.5rem;
+  border-radius: 8px;
   background: var(--bg);
   color: var(--fg);
-  padding: 0 0.55rem;
+  padding: 5px 0.85rem;
   font: inherit;
-  line-height: 30px;
+  font-size: 12px;
+  line-height: 1.2;
   vertical-align: middle;
 }
 .machine-task-create-control:focus { outline: none; border-color: color-mix(in srgb, var(--fg) 48%, transparent); }
@@ -114,8 +129,7 @@
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
-  padding: 0 1.8rem 0 0.55rem;
-  line-height: 30px;
+  padding-right: 1.7rem;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%239CA3AF' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 7 5 5 5-5'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 0.65rem center;
@@ -126,11 +140,17 @@
   align-items: center;
   justify-content: center;
   margin: 0;
-  grid-column: 1 / -1;
-  justify-self: center;
   background: #16a34a;
   border-color: #16a34a;
   color: #fff;
+}
+.machine-task-create-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.65rem;
+}
+.machine-task-create-cancel {
+  min-width: 0;
 }
 .todo-submit.machine-task-create-submit:hover:not(:disabled) { background: #15803d; border-color: #15803d; }
 .todo-submit.machine-task-create-submit:disabled { opacity: 0.42; cursor: not-allowed; }
@@ -201,6 +221,59 @@
 
 @media (max-width: 768px), (hover: none), (pointer: coarse) {
   .machine-task-item-menu .todo-item-menu-toggle { opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  .machine-task-create-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .machine-task-inline-actions {
+    grid-column: 1;
+    width: 100%;
+  }
+
+  .machine-tasks-title-line {
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .machine-tasks-title-line > strong {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .machine-task-inline-form {
+    flex-wrap: wrap;
+  }
+
+  .machine-task-inline-input {
+    flex-basis: 100%;
+  }
+}
+
+.task-create-dialog .machine-task-modal-form {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.task-create-dialog .machine-task-create-control {
+  min-height: 2.55rem;
+  border-radius: 0.65rem;
+  padding: 0.55rem 0.85rem;
+  font-size: 0.94rem;
+  line-height: 1.35;
+}
+
+.task-create-dialog .machine-task-create-control:is(select) {
+  padding-right: 1.8rem;
+}
+
+.task-create-dialog .machine-task-create-submit {
+  min-width: 0;
+  margin: 0;
 }
 
 .todo-form {

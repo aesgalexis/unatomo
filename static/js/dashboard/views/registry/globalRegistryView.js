@@ -194,8 +194,6 @@ export const renderGlobalRegistryView = (container, machines = [], options = {})
   container.className = "global-registry-view";
   container.removeAttribute("data-has-ungrouped");
 
-  const toolbar = document.createElement("div");
-  toolbar.className = "global-registry-toolbar";
   const downloadMenu = createDownloadMenu({
     placement: "bottom",
     className: "global-registry-download",
@@ -209,8 +207,6 @@ export const renderGlobalRegistryView = (container, machines = [], options = {})
     },
   });
   attachTooltip(downloadMenu.toggle);
-  toolbar.appendChild(downloadMenu.wrap);
-  container.appendChild(toolbar);
 
   const header = document.createElement("div");
   header.className = "global-registry-header";
@@ -219,9 +215,15 @@ export const renderGlobalRegistryView = (container, machines = [], options = {})
   const count = document.createElement("span");
   count.className = "global-registry-count";
   count.textContent = `${Math.min(visibleCount, entries.length)}/${entries.length}`;
+  const actions = document.createElement("div");
+  actions.className = "dashboard-view-header-actions";
+  actions.append(count, downloadMenu.wrap);
   header.appendChild(title);
-  header.appendChild(count);
-  container.appendChild(header);
+  if (options.loadingElement) header.appendChild(options.loadingElement);
+  if (!options.loading) header.appendChild(actions);
+  (options.headerContainer || container).appendChild(header);
+
+  if (options.loading) return;
 
   if (!entries.length) {
     const empty = document.createElement("div");

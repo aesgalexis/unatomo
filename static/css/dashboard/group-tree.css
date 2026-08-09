@@ -17,12 +17,13 @@
     display: grid;
   }
 
-  #dashboard-mount.has-group-tree .dashboard-group-tree {
+  #dashboard-mount.has-group-tree .dashboard-group-tree,
+  #qr-print-mount.has-group-tree .dashboard-group-tree {
     position: fixed;
     top: 75px;
     bottom: 0;
     left: 0;
-    z-index: 30;
+    z-index: 50;
     width: clamp(228px, calc((100vw - 800px) / 2 - 12px), 320px);
     max-height: none;
     box-sizing: border-box;
@@ -30,8 +31,28 @@
     overflow-y: auto;
     overscroll-behavior-y: contain;
     padding: 1.5rem 0.75rem 1.5rem 0.3rem;
+    border-right: 1px solid transparent;
     scrollbar-width: thin;
     scrollbar-color: color-mix(in srgb, var(--fg) 28%, transparent) transparent;
+    transition:
+      top 260ms cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 180ms ease;
+  }
+
+  #dashboard-mount.has-group-tree .dashboard-group-tree.is-content-scrolled,
+  #qr-print-mount.has-group-tree .dashboard-group-tree.is-content-scrolled {
+    border-right-color: color-mix(in srgb, var(--fg) 10%, transparent);
+  }
+
+  #dashboard-mount.has-group-tree .dashboard-group-tree.is-scroll-position,
+  #qr-print-mount.has-group-tree .dashboard-group-tree.is-scroll-position {
+    top: var(--dashboard-group-tree-scroll-top, 75px);
+  }
+}
+
+@media (min-width: 1280px) and (prefers-reduced-motion: reduce) {
+  #dashboard-mount.has-group-tree .dashboard-group-tree {
+    transition: none;
   }
 }
 
@@ -436,6 +457,36 @@
 
 .dashboard-group-tree-icon.is-ungrouped {
   color: color-mix(in srgb, var(--fg) 48%, transparent);
+}
+
+.dashboard-group-tree-row.is-machine {
+  min-height: 1.72rem;
+}
+
+.dashboard-group-tree-machine {
+  min-height: 1.72rem;
+  padding-top: 0.18rem;
+  padding-bottom: 0.18rem;
+  color: color-mix(in srgb, var(--fg) 68%, transparent);
+  font-size: 0.78rem;
+}
+
+.dashboard-group-tree-icon.is-machine {
+  flex-basis: 0.95rem;
+  width: 0.95rem;
+  height: 0.95rem;
+  color: color-mix(in srgb, var(--fg) 46%, transparent);
+}
+
+.dashboard-group-tree-machine-status {
+  flex: 0 0 0.46rem;
+  width: 0.46rem;
+  height: 0.46rem;
+  border-radius: 999px;
+}
+
+.dashboard-group-tree-machine-status.is-down {
+  background: #dc2626;
 }
 
 .dashboard-group-tree-count,

@@ -117,6 +117,10 @@ export const renderMachineCards = (dependencies) => {
           locations: state.locations,
           knownUsers: state.knownUsers
         });
+        card.classList.toggle(
+          "is-recently-created",
+          (state.recentlyCreatedMachineIds || []).includes(machine.id)
+        );
         if (isExpanded) {
           card.dataset.expanded = "true";
           card.classList.add("mc-no-anim");
@@ -247,6 +251,11 @@ export const renderMachineCards = (dependencies) => {
           cardWrap.className = "machine-card-wrap";
           cardWrap.appendChild(card);
           target.appendChild(cardWrap);
+        } else if ((state.recentlyCreatedMachineIds || []).includes(machine.id)) {
+          const firstRegularItem = Array.from(list.children).find(
+            (item) => !item.matches(".machine-card.is-recently-created")
+          );
+          list.insertBefore(card, firstRegularItem || null);
         } else {
           target.appendChild(card);
         }

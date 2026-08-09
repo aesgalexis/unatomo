@@ -9,7 +9,23 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 import { auth, db, getUserRegistrationState } from "/static/js/firebase/firebaseApp.js";
 import { getCurrentLang, localizeEsPath } from "/static/js/site/locale.js";
-import { normalizeDashboardTitle } from "/static/js/dashboard/layout/dashboardLayoutModel.mjs";
+import {
+  normalizeDashboardLayout,
+  normalizeDashboardTitle
+} from "/static/js/dashboard/layout/dashboardLayoutModel.mjs";
+import { t as dashboardT } from "/static/js/dashboard/i18n.js";
+import {
+  createDashboardGroupTreeRenderer,
+  getDashboardGroupBranchIds,
+  getDashboardScopedMachines
+} from "/static/js/dashboard/rendering/groupTreeRenderer.js";
+import { normalizeMachineStatus } from "/static/js/dashboard/runtime/dashboardSorting.js";
+import {
+  loadShowTreeIncidentCounts,
+  loadShowTreeTaskCounts,
+  saveShowTreeIncidentCounts,
+  saveShowTreeTaskCounts
+} from "/static/js/dashboard/runtime/dashboardGroupVisibilityStorage.js";
 import { isControlPanelUser } from "/nfc/controlpanel/access.js";
 import { createDashboardSectionNav } from "/static/js/dashboard/components/sectionNav.js";
 import { countUnseenGlobalRegistryEntries } from "/static/js/dashboard/views/registry/globalRegistryModel.js";
@@ -21,10 +37,40 @@ const mount = document.getElementById("qr-print-mount");
 const lang = getCurrentLang();
 const isEn = lang === "en";
 const DASHBOARD_TITLE_CACHE_KEY = "unatomo_dashboard_title_v1";
+try {
+  window.history.scrollRestoration = "manual";
+  window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+} catch {}
+let qrMenuScrollFrame = 0;
+const qrScrollDivider = document.createElement("div");
+qrScrollDivider.className = "qr-print-scroll-divider";
+qrScrollDivider.setAttribute("aria-hidden", "true");
+document.body.appendChild(qrScrollDivider);
+
+const syncQrMenuState = () => {
+  qrMenuScrollFrame = 0;
+  const fixedMenus = document.querySelector(".qr-print-fixed-menus");
+  const fixedMenusSpace = document.querySelector(".qr-print-fixed-menus-space");
+  if (!fixedMenus || !fixedMenusSpace) return;
+  fixedMenusSpace.style.height = `${fixedMenus.offsetHeight}px`;
+  qrScrollDivider.style.top = `${Math.round(fixedMenus.getBoundingClientRect().bottom)}px`;
+  qrScrollDivider.classList.toggle("is-visible", window.scrollY > 0);
+  const groupTree = document.querySelector("#qr-print-mount .dashboard-group-tree");
+  groupTree?.classList.toggle("is-content-scrolled", window.scrollY > 0);
+  qrScrollDivider.style.left = groupTree && !groupTree.hidden
+    ? `${Math.round(groupTree.getBoundingClientRect().right)}px`
+    : "0px";
+};
+
+window.addEventListener("scroll", () => {
+  if (qrMenuScrollFrame) return;
+  qrMenuScrollFrame = window.requestAnimationFrame(syncQrMenuState);
+}, { passive: true });
+window.addEventListener("resize", syncQrMenuState);
 
 const text = {
   title: isEn ? "QR print" : "Impresión QR",
-  loading: isEn ? "Loading QR codes..." : "Cargando QRs...",
+  loading: isEn ? "Loading..." : "Cargando...",
   empty: isEn
     ? "No generated QR codes found."
     : "No hay QRs generados.",
@@ -43,7 +89,7 @@ const text = {
   frame: isEn ? "Frame" : "Marco",
   backNames: isEn ? "Back names" : "Nombres reverso",
   sectionNavAria: isEn ? "Sections" : "Secciones",
-  navDashboard: "Dashboard",
+  navDashboard: isEn ? "Home" : "Inicio",
   navRegistry: isEn ? "Registry" : "Registro",
   navQrPrint: isEn ? "QR print" : "Impresi\u00f3n QR",
   navGallery: isEn ? "Gallery" : "Galer\u00eda",
@@ -92,6 +138,18 @@ let suggestionsBadgeCount = 0;
 let todoBadgeCount = 0;
 let searchQuery = "";
 let hiddenMachineIds = new Set();
+let dashboardLayout = normalizeDashboardLayout();
+let selectedTreeGroupId = "";
+let selectedTreeMachineId = "";
+let expandedTreeGroupIds = [];
+let showTreeIncidentCounts = true;
+let showTreeTaskCounts = true;
+let qrDataReady = false;
+let activeUid = "";
+const qrTreeMedia = window.matchMedia("(min-width: 1280px)");
+const qrGroupTree = document.createElement("aside");
+qrGroupTree.className = "dashboard-group-tree";
+qrGroupTree.hidden = true;
 
 const createIconButton = (className, label, icon) => {
   const btn = document.createElement("button");
@@ -202,6 +260,10 @@ const loadSectionNavCounts = async (uid, sourceMachines = []) => {
     const snap = await getDoc(doc(db, "dashboard_layout", uid));
     layout = snap.exists() ? snap.data() || {} : {};
   } catch {}
+  dashboardLayout = normalizeDashboardLayout(layout, {
+    groupUntitled: dashboardT("dashboard.groupUntitled", "Grupo"),
+    validMachineIds: new Set(sourceMachines.map((machine) => machine.id))
+  });
   registryBadgeCount = countUnseenGlobalRegistryEntries(
     sourceMachines,
     layout.registrySeenAt || ""
@@ -229,7 +291,14 @@ const normalizeSearch = (value) =>
 
 const getVisibleMachines = () => {
   const queryText = normalizeSearch(searchQuery);
-  return allMachines.filter((machine) => {
+  const scopedMachines = getDashboardScopedMachines({
+    machines: allMachines,
+    groups: dashboardLayout.groups,
+    placements: dashboardLayout.placements,
+    selectedGroupId: selectedTreeGroupId,
+    selectedMachineId: selectedTreeMachineId
+  });
+  return scopedMachines.filter((machine) => {
     if (hiddenMachineIds.has(machine.id)) return false;
     if (!queryText) return true;
     return normalizeSearch(machine.title || machine.id).includes(queryText);
@@ -239,6 +308,76 @@ const getVisibleMachines = () => {
 const renderVisibleMachines = (options = {}) => {
   renderQrGrid(getVisibleMachines(), { preserveList: true, ...options });
 };
+
+const getPendingTaskCount = (machine) =>
+  (Array.isArray(machine?.tasks) ? machine.tasks : [])
+    .filter((task) => getTaskTiming(task).pending).length;
+
+const qrTreeRenderer = createDashboardGroupTreeRenderer({
+  container: qrGroupTree,
+  getPendingTaskCount,
+  normalizeStatus: normalizeMachineStatus,
+  onSelect: (groupId) => {
+    selectedTreeGroupId = groupId;
+    selectedTreeMachineId = "";
+    renderVisibleMachines();
+  },
+  onSelectMachine: (machineId, groupId) => {
+    selectedTreeGroupId = groupId === "__ungrouped__" ? groupId : groupId || "";
+    selectedTreeMachineId = machineId;
+    renderVisibleMachines();
+  },
+  onToggle: (groupId) => {
+    const expanded = new Set(expandedTreeGroupIds);
+    const isCollapsing = expanded.has(groupId);
+    if (isCollapsing) expanded.delete(groupId);
+    else expanded.add(groupId);
+    if (
+      isCollapsing &&
+      getDashboardGroupBranchIds(dashboardLayout.groups, groupId).has(selectedTreeGroupId)
+    ) {
+      selectedTreeGroupId = groupId;
+      selectedTreeMachineId = "";
+    }
+    expandedTreeGroupIds = Array.from(expanded);
+    renderVisibleMachines();
+  },
+  onToggleIncidentCounts: () => {
+    showTreeIncidentCounts = !showTreeIncidentCounts;
+    if (activeUid) saveShowTreeIncidentCounts(activeUid, showTreeIncidentCounts);
+    renderVisibleMachines();
+  },
+  onToggleTaskCounts: () => {
+    showTreeTaskCounts = !showTreeTaskCounts;
+    if (activeUid) saveShowTreeTaskCounts(activeUid, showTreeTaskCounts);
+    renderVisibleMachines();
+  },
+  t: dashboardT
+});
+
+const mountQrGroupTree = (wrap) => {
+  const visible = qrTreeMedia.matches;
+  mount.classList.toggle("has-group-tree", visible);
+  qrGroupTree.hidden = !visible;
+  if (!visible) return;
+  qrTreeRenderer.renderTree({
+    groups: dashboardLayout.groups,
+    placements: dashboardLayout.placements,
+    machines: allMachines,
+    selectedGroupId: selectedTreeGroupId,
+    selectedMachineId: selectedTreeMachineId,
+    expandedGroupIds: expandedTreeGroupIds,
+    hiddenGroupIds: [],
+    showIncidentCounts: showTreeIncidentCounts,
+    showTaskCounts: showTreeTaskCounts,
+    filterOnly: true
+  });
+  wrap.appendChild(qrGroupTree);
+};
+
+qrTreeMedia.addEventListener("change", () => {
+  if (qrDataReady) renderVisibleMachines();
+});
 
 const clearPrintMode = () => {
   document.body.classList.remove("qr-print-printing", "qr-print-include-back");
@@ -291,6 +430,9 @@ const setState = (message, state = "") => {
   if (!mount) return;
   clearLoadingProgress();
   mount.innerHTML = "";
+  mount.classList.remove("has-group-tree");
+  qrGroupTree.hidden = true;
+  qrDataReady = false;
   const wrap = document.createElement("section");
   wrap.className = "qr-print";
   const status = document.createElement("p");
@@ -306,6 +448,8 @@ const normalizeMachine = (raw) => ({
   title: (raw.title || raw.nombre || "").toString().trim(),
   tagId: (raw.tagId || "").toString().trim(),
   tagQrUrl: (raw.tagQrUrl || "").toString().trim(),
+  status: raw.status || "",
+  tasks: Array.isArray(raw.tasks) ? raw.tasks : []
 });
 
 const resolveQrUrl = async (machine) => {
@@ -404,7 +548,8 @@ const renderQrGrid = (machines, options = {}) => {
   clearLoadingProgress();
   currentMachines = machines;
   if (!options.preserveList) {
-    allMachines = machines;
+    qrDataReady = true;
+    allMachines = Array.isArray(options.sourceMachines) ? options.sourceMachines : machines;
     hiddenMachineIds = new Set();
     totalMachinesCount = Number.isFinite(options.totalCount)
       ? options.totalCount
@@ -416,7 +561,7 @@ const renderQrGrid = (machines, options = {}) => {
   wrap.className = "qr-print";
   wrap.classList.toggle("qr-print--framed", useFrame);
   setQrSize(wrap, currentSizeIndex);
-  wrap.appendChild(createSectionNav());
+  const sectionNav = createSectionNav();
 
   const toolbar = document.createElement("div");
   toolbar.className = "qr-print-toolbar";
@@ -484,6 +629,8 @@ const renderQrGrid = (machines, options = {}) => {
   reloadBtn.addEventListener("click", () => {
     if (!auth.currentUser?.uid) return;
     searchQuery = "";
+    selectedTreeGroupId = "";
+    selectedTreeMachineId = "";
     setLoadingState();
     fetchQrMachines(auth.currentUser.uid)
       .then((nextMachines) => renderQrGrid(nextMachines))
@@ -524,9 +671,24 @@ const renderQrGrid = (machines, options = {}) => {
   toolbar.appendChild(printBtn);
   toolbar.appendChild(reloadBtn);
   toolbar.appendChild(searchInput);
-  toolbar.appendChild(printOptions);
-  wrap.appendChild(toolbar);
-  wrap.appendChild(header);
+  const desktopMenus = window.matchMedia("(min-width: 769px)").matches;
+  if (desktopMenus) {
+    const headerActions = document.createElement("div");
+    headerActions.className = "qr-print-header-actions";
+    headerActions.append(printOptions, count);
+    header.replaceChildren(heading, headerActions);
+  } else {
+    toolbar.appendChild(printOptions);
+  }
+  const fixedMenus = document.createElement("div");
+  fixedMenus.className = "qr-print-fixed-menus";
+  fixedMenus.append(sectionNav, toolbar);
+  if (desktopMenus) fixedMenus.appendChild(header);
+  const fixedMenusSpace = document.createElement("div");
+  fixedMenusSpace.className = "qr-print-fixed-menus-space";
+  wrap.append(fixedMenus, fixedMenusSpace);
+  mountQrGroupTree(wrap);
+  if (!desktopMenus) wrap.appendChild(header);
 
   if (!machines.length) {
     const empty = document.createElement("p");
@@ -534,6 +696,7 @@ const renderQrGrid = (machines, options = {}) => {
     empty.textContent = text.empty;
     wrap.appendChild(empty);
     mount.appendChild(wrap);
+    window.requestAnimationFrame(syncQrMenuState);
     if (options.restoreSearch) {
       const nextSearch = wrap.querySelector(".qr-print-search");
       nextSearch?.focus();
@@ -610,6 +773,7 @@ const renderQrGrid = (machines, options = {}) => {
   wrap.appendChild(grid);
   wrap.appendChild(backGrid);
   mount.appendChild(wrap);
+  window.requestAnimationFrame(syncQrMenuState);
   if (options.restoreSearch) {
     const nextSearch = wrap.querySelector(".qr-print-search");
     nextSearch?.focus();
@@ -624,7 +788,10 @@ const setLoadingState = () => {
 
   const wrap = document.createElement("section");
   wrap.className = "qr-print";
-  wrap.appendChild(createSectionNav());
+  mount.classList.remove("has-group-tree");
+  qrGroupTree.hidden = true;
+  qrDataReady = false;
+  const sectionNav = createSectionNav();
 
   const toolbar = document.createElement("div");
   toolbar.className = "qr-print-toolbar";
@@ -651,12 +818,22 @@ const setLoadingState = () => {
   loadingText.appendChild(percent);
   loading.appendChild(loadingText);
 
-  toolbar.appendChild(printBtn);
-  toolbar.appendChild(reloadBtn);
-  toolbar.appendChild(searchInput);
-  toolbar.appendChild(loading);
-  wrap.appendChild(toolbar);
+  const header = document.createElement("div");
+  header.className = "qr-print-header";
+  const heading = document.createElement("h3");
+  heading.textContent = text.title;
+  header.append(heading, loading);
+  const desktopMenus = window.matchMedia("(min-width: 769px)").matches;
+  const fixedMenus = document.createElement("div");
+  fixedMenus.className = "qr-print-fixed-menus";
+  fixedMenus.append(sectionNav, toolbar);
+  if (desktopMenus) fixedMenus.appendChild(header);
+  const fixedMenusSpace = document.createElement("div");
+  fixedMenusSpace.className = "qr-print-fixed-menus-space";
+  wrap.append(fixedMenus, fixedMenusSpace);
+  if (!desktopMenus) wrap.appendChild(header);
   mount.appendChild(wrap);
+  window.requestAnimationFrame(syncQrMenuState);
 
   let progress = 0;
   loadingProgressTimer = window.setInterval(() => {
@@ -670,9 +847,13 @@ if (mount) {
   setLoadingState();
   onAuthStateChanged(auth, async (user) => {
     if (!user) {
+      activeUid = "";
       window.location.href = text.login;
       return;
     }
+    activeUid = user.uid;
+    showTreeIncidentCounts = loadShowTreeIncidentCounts(user.uid);
+    showTreeTaskCounts = loadShowTreeTaskCounts(user.uid);
     applyDashboardTopbarTitle(user.uid);
     try {
       const registration = await getUserRegistrationState(user);
@@ -685,10 +866,29 @@ if (mount) {
       await loadSectionNavCounts(user.uid, sourceMachines);
       const machines = await buildQrMachines(sourceMachines);
       const focusedMachineId = getFocusedMachineId();
+      selectedTreeMachineId = machines.some((machine) => machine.id === focusedMachineId)
+        ? focusedMachineId
+        : "";
+      selectedTreeGroupId = selectedTreeMachineId
+        ? dashboardLayout.placements[selectedTreeMachineId]?.groupId || ""
+        : "";
+      if (selectedTreeGroupId) {
+        const groupById = new Map(dashboardLayout.groups.map((group) => [group.id, group]));
+        const expanded = new Set();
+        let currentGroupId = selectedTreeGroupId;
+        while (currentGroupId && groupById.has(currentGroupId)) {
+          expanded.add(currentGroupId);
+          currentGroupId = groupById.get(currentGroupId)?.parentGroupId || "";
+        }
+        expandedTreeGroupIds = Array.from(expanded);
+      }
       const visibleMachines = focusedMachineId
         ? machines.filter((machine) => machine.id === focusedMachineId)
         : machines;
-      renderQrGrid(visibleMachines, { totalCount: machines.length });
+      renderQrGrid(visibleMachines, {
+        sourceMachines: machines,
+        totalCount: machines.length
+      });
     } catch {
       setState(text.error, "error");
     }

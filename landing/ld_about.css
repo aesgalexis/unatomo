@@ -66,6 +66,10 @@ body {
   text-align: left;
 }
 
+body.landing-contact-page {
+  background: color-mix(in srgb, var(--fg) 8%, var(--bg));
+}
+
 a {
   color: var(--accent);
   text-decoration: underline;
@@ -138,6 +142,10 @@ p {
   backdrop-filter: blur(12px);
   z-index: 2000;
   transition: transform 0.24s ease, opacity 0.24s ease;
+}
+
+body.landing-contact-page .landing-topbar {
+  background: color-mix(in srgb, var(--bg) 78%, transparent);
 }
 
 .landing-topbar.is-hidden {

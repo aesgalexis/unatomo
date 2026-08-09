@@ -116,7 +116,10 @@ Current scope:
   the saved preference. Tree mode supports the shared group menu plus
   drag/drop from machine cards into groups or the ungrouped area, nesting
   groups inside other valid groups, and returning groups to the root through
-  `All machines`. Hierarchy depth and cycle rules remain enforced by the
+  `All machines`. Expanded branches also list their directly assigned machines;
+  selecting a machine shows only that card through an internal tree selection,
+  without populating the visible search field or changing group membership.
+  Hierarchy depth and cycle rules remain enforced by the
   shared layout actions. Tree branches start collapsed on each dashboard
   session and keep their expanded state only for that session. Creating a
   machine while a real tree group is selected places the new machine directly
@@ -166,6 +169,16 @@ The main dashboard page has internal hash views:
 - `#/tareas` (Spanish) / `#/tasks` (English): the account-wide machine Tasks
   view for every authenticated account. The legacy `#/todo` route remains
   accepted as an alias.
+- At desktop tree width, `Registro`, `Tareas`, and `Galería` reuse the side
+  group tree as a read-only machine-scope filter. Selecting a group includes
+  its descendant groups; selecting a machine limits the view to that machine.
+  Search is applied within the selected scope. The tree keeps the same resting
+  and scrolled anchors as the main dashboard tree.
+- In `Galería`, the shared add action opens the status-modal shell for a
+  machine document upload. The user selects a visible machine, chooses image,
+  manual, or other documentation, and then uses the native file picker. Image
+  and other-document uploads append to `documents.other`; a manual uses the
+  canonical single `documents.manual` slot and its replacement cleanup flow.
 
 Files:
 
@@ -325,6 +338,10 @@ Behavior:
 - Size selector uses fixed size steps.
 - Optional frame uses `static/img/LOGO unatomo v1.6 baseQR.jpg`.
 - Optional back-name printing adds machine-name reverse pages to the same print job for printer duplex mode.
+- At desktop tree width, reuse the dashboard group tree as a read-only filter
+  for QR machines. It loads only after machine and layout data are ready,
+  supports branch and individual-machine selection, and keeps the shared local
+  incident/task-count preferences.
 
 ## Localization
 

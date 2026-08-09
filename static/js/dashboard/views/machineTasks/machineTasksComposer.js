@@ -40,15 +40,28 @@ const getCommandAssignableUsers = (machine = {}) => {
     .sort((left, right) => left.username.localeCompare(right.username, undefined, { sensitivity: "base" }));
 };
 
-export const renderMachineTaskComposer = (root, machines, onCreate, fieldsOpen = false) => {
+export const renderMachineTaskComposer = (
+  root,
+  machines,
+  onCreate,
+  fieldsOpen = false,
+  onClose = null,
+  options = {}
+) => {
+  const modal = options.modal === true;
   const sortedMachines = machines.slice().sort((left, right) =>
     machineLabel(left).localeCompare(machineLabel(right), undefined, { sensitivity: "base" })
   );
   const form = document.createElement("form");
-  form.className = "machine-task-create-form machine-task-command-form";
+  form.className = modal
+    ? "status-incident-form machine-task-create-form machine-task-command-form machine-task-modal-form"
+    : "machine-task-create-form machine-task-command-form";
+  form.hidden = !fieldsOpen;
+  const heading = document.createElement("strong");
+  heading.className = "machine-task-create-title";
+  heading.textContent = t("dashboard.todoNewTask", "Nueva tarea");
   const fields = document.createElement("div");
   fields.className = "machine-task-create-fields";
-  fields.hidden = !fieldsOpen;
   const createControl = (tag, placeholder = "") => {
     const element = document.createElement(tag);
     element.className = "machine-task-create-control";
@@ -134,9 +147,24 @@ export const renderMachineTaskComposer = (root, machines, onCreate, fieldsOpen =
 
   const submit = document.createElement("button");
   submit.type = "submit";
-  submit.className = "btn-save todo-submit machine-task-create-submit";
+  submit.className = modal
+    ? "status-incident-confirm machine-task-create-submit"
+    : "dashboard-users-primary todo-submit machine-task-create-submit";
   submit.textContent = t("tasks.create", "Crear");
-  form.append(fields, composer, submit);
+  const actions = document.createElement("div");
+  actions.className = modal
+    ? "status-incident-actions machine-task-create-actions"
+    : "dashboard-users-create-actions machine-task-create-actions";
+  const cancel = document.createElement("button");
+  cancel.type = "button";
+  cancel.className = modal
+    ? "status-incident-cancel machine-task-create-cancel"
+    : "dashboard-users-secondary machine-task-create-cancel";
+  cancel.textContent = t("common.cancel", "Cancelar");
+  cancel.addEventListener("click", () => onClose?.());
+  actions.append(cancel, submit);
+  if (!modal) form.appendChild(heading);
+  form.append(fields, composer, actions);
 
   let draft = {
     machineId: "",

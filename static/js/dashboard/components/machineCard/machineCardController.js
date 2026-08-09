@@ -49,7 +49,6 @@ export const createMachineCard = (machine, options = {}) => {
   const statusBtn = card.querySelector(".mc-status");
   const header = card.querySelector(".mc-header");
   const headerToggle = card.querySelector(".mc-header-toggle");
-  const hoverPlus = card.querySelector(".mc-hover-plus");
   const panel = card.querySelector(".mc-panel");
 
   title.textContent = machine.title;
@@ -341,10 +340,6 @@ export const createMachineCard = (machine, options = {}) => {
     header.insertBefore(iconWrap, rightWrap);
   }
 
-  if (header && rightWrap && hoverPlus) {
-    header.insertBefore(hoverPlus, rightWrap);
-  }
-
   if (pendingBtn && statusBtn) {
     statusBtn.insertAdjacentElement("beforebegin", pendingBtn);
   }
@@ -596,7 +591,7 @@ export const createMachineCard = (machine, options = {}) => {
     });
     title.style.display = "none";
     title.parentNode.insertBefore(input, title);
-    input.focus();
+    input.focus({ preventScroll: true });
     input.select();
   };
 

@@ -48,10 +48,19 @@ export const renderMachineTasksView = (container, machines = [], options = {}) =
   attachTooltip(completedToggle);
   completedToggle.addEventListener("click", () => options.onShowCompletedChange?.(!eyeShowsCompleted));
   headerActions.append(summary, completedToggle);
-  header.append(heading, headerActions);
+  header.appendChild(heading);
+  if (options.loadingElement) header.appendChild(options.loadingElement);
+  if (!options.loading) header.appendChild(headerActions);
+  const headerContainer = options.headerContainer || root;
+
+  if (options.loading) {
+    headerContainer.appendChild(header);
+    container.appendChild(root);
+    return;
+  }
 
   if (!machines.length) {
-    root.appendChild(header);
+    headerContainer.appendChild(header);
     const empty = document.createElement("p");
     empty.className = "todo-empty";
     empty.textContent = t("dashboard.machineTasksNoMachines", "No hay máquinas disponibles.");
@@ -60,8 +69,8 @@ export const renderMachineTasksView = (container, machines = [], options = {}) =
     return;
   }
 
-  renderMachineTaskComposer(root, machines, options.onCreate, options.createOpen);
-  root.appendChild(header);
+  renderMachineTaskComposer(root, machines, options.onCreate, options.createOpen, options.onCloseCreate);
+  headerContainer.appendChild(header);
 
   const {
     searchedEntries,

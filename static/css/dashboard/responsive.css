@@ -135,10 +135,6 @@
     flex: 0 0 auto;
   }
 
-  .mc-hover-plus {
-    display: none;
-  }
-
   .mc-right {
     flex: 0 0 auto;
     min-width: max-content;
