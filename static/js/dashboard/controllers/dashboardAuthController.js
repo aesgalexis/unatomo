@@ -9,6 +9,7 @@ export const installDashboardAuthController = ({
   markDashboardLoadFailure,
   mount,
   onAuthStateChanged,
+  onboardingUrl,
   redirectToEntry,
   renderCards,
   runtime,
@@ -35,6 +36,13 @@ export const installDashboardAuthController = ({
       const registration = await getUserRegistrationState(user);
       if (!registration.allowed) {
         window.location.href = setupUrl;
+        return;
+      }
+      if (
+        registration.profile?.onboardingRequired === true &&
+        !registration.profile?.onboardingCompletedAt
+      ) {
+        window.location.replace(onboardingUrl);
         return;
       }
       state.canSuggest = true;

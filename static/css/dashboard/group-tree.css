@@ -437,6 +437,13 @@
   white-space: nowrap;
 }
 
+.dashboard-group-tree-row:not(.is-machine) .dashboard-group-tree-label {
+  height: 1.05rem;
+  display: flex;
+  align-items: center;
+  line-height: 1.05rem;
+}
+
 .dashboard-group-tree-icon {
   flex: 0 0 1.05rem;
   width: 1.05rem;

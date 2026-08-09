@@ -44,6 +44,7 @@ body.onboarding-page { min-height: 100svh; margin: 0; background: color-mix(in s
 .onboarding-status { min-height: 1.2em; margin: -.2rem 0 0; color: #b42318; font-size: .78rem; }
 .onboarding-submit { min-height: 50px; padding: .75rem 1rem; border: 1px solid var(--fg); border-radius: .8rem; display: flex; align-items: center; justify-content: center; gap: .65rem; background: var(--fg); color: var(--bg); font: inherit; font-size: .9rem; font-weight: 680; cursor: pointer; }
 .onboarding-submit:hover { opacity: .88; }
+.onboarding-submit:disabled { opacity: .45; cursor: wait; }
 .onboarding-creating { padding: 0 2rem 2.4rem; text-align: center; }
 .onboarding-creating p { margin: 0; color: var(--onboarding-muted); font-size: .86rem; line-height: 1.5; }
 .onboarding-card.is-creating { min-height: 270px; display: grid; align-content: center; justify-items: center; }

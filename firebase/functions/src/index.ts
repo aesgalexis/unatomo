@@ -10,6 +10,7 @@ export {
   redeemRegistrationCode,
   validateRegistrationCode,
 } from "./accounts/registration";
+export {completeAccountOnboarding} from "./accounts/onboarding";
 export {
   createDashboardSuggestion,
   deleteDashboardSuggestion,

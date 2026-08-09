@@ -1,3 +1,14 @@
+import {
+  auth,
+  functions,
+  getUserRegistrationState
+} from "/static/js/firebase/firebaseApp.js";
+import {
+  onAuthStateChanged,
+  updateProfile
+} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+import { httpsCallable } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-functions.js";
+
 const form = document.querySelector("#onboarding-form");
 const card = document.querySelector(".onboarding-card");
 const nameInput = document.querySelector("#onboarding-name");
@@ -8,10 +19,43 @@ const status = document.querySelector("#onboarding-status");
 const equipmentSection = document.querySelector(".onboarding-equipment");
 const ownershipInputs = document.querySelectorAll('input[name="ownership"]');
 const creatingState = document.querySelector(".onboarding-creating");
+const submitButton = form.querySelector(".onboarding-submit");
 const isEnglish = document.body.dataset.lang === "en";
+const dashboardUrl = isEnglish ? "/nfc/en/index.html#/dashboard" : "/nfc/es/index.html#/dashboard";
+const loginUrl = isEnglish ? "/nfc/en/auth/login.html" : "/nfc/es/auth/login.html";
+const setupUrl = "/nfc/?setup=1";
+const completeOnboarding = httpsCallable(functions, "completeAccountOnboarding");
+let activeUser = null;
 
-const params = new URLSearchParams(window.location.search);
-if (params.get("name")) nameInput.value = params.get("name").trim().slice(0, 120);
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    window.location.replace(loginUrl);
+    return;
+  }
+  try {
+    const registration = await getUserRegistrationState(user);
+    if (!registration.allowed) {
+      window.location.replace(setupUrl);
+      return;
+    }
+    if (
+      registration.profile?.onboardingRequired !== true ||
+      registration.profile?.onboardingCompletedAt
+    ) {
+      window.location.replace(dashboardUrl);
+      return;
+    }
+    activeUser = user;
+    nameInput.value = (user.displayName || registration.profile?.displayName || "").trim();
+    companyInput.value = (registration.profile?.company || "").toString().trim();
+    submitButton.disabled = false;
+    if (!nameInput.value) nameInput.focus();
+  } catch {
+    status.textContent = isEnglish
+      ? "We could not load your account. Check your connection and try again."
+      : "No pudimos cargar tu cuenta. Revisa la conexión e inténtalo de nuevo.";
+  }
+});
 
 const clampEquipment = (value) => Math.min(50, Math.max(0, Number.parseInt(value, 10) || 0));
 const syncEquipment = (value) => {
@@ -34,8 +78,9 @@ ownershipInputs.forEach((input) => input.addEventListener("change", () => {
   equipmentInput.disabled = !managesOwn;
 }));
 
-form.addEventListener("submit", (event) => {
+form.addEventListener("submit", async (event) => {
   event.preventDefault();
+  if (!activeUser || submitButton.disabled) return;
   const name = nameInput.value.trim();
   const company = companyInput.value.trim();
   const ownsEquipment = form.elements.ownership.value === "own";
@@ -46,9 +91,31 @@ form.addEventListener("submit", (event) => {
     (!name ? nameInput : companyInput).focus();
     return;
   }
+  status.textContent = "";
+  submitButton.disabled = true;
   card.classList.add("is-creating");
   creatingState.hidden = false;
-  window.setTimeout(() => {
-    window.location.assign(isEnglish ? "/nfc/en/index.html#/dashboard" : "/nfc/es/index.html#/dashboard");
-  }, 5000);
+  try {
+    await Promise.all([
+      completeOnboarding({
+        displayName: name,
+        company,
+        ownership: ownsEquipment ? "own" : "other",
+        machineCount: count,
+        language: isEnglish ? "en" : "es"
+      }),
+      new Promise((resolve) => window.setTimeout(resolve, 5000))
+    ]);
+    if (activeUser.displayName !== name) {
+      await updateProfile(activeUser, { displayName: name });
+    }
+    window.location.replace(dashboardUrl);
+  } catch {
+    card.classList.remove("is-creating");
+    creatingState.hidden = true;
+    submitButton.disabled = false;
+    status.textContent = isEnglish
+      ? "We could not create your workspace. Please try again."
+      : "No pudimos crear tu espacio de trabajo. Inténtalo de nuevo.";
+  }
 });

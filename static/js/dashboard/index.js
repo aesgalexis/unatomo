@@ -893,6 +893,7 @@ if (mount) {
     markDashboardLoadFailure,
     mount,
     onAuthStateChanged,
+    onboardingUrl: `${appBasePrefix || ""}/${lang}/onboarding.html`,
     redirectToEntry,
     renderCards,
     runtime: dashboardSessionRuntime,

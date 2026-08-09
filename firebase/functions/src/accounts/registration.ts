@@ -59,6 +59,7 @@ export const redeemRegistrationCode = onCall(async (request) => {
       email: cleanProfileText(auth.token.email, 320),
       displayName: cleanProfileText(request.data?.displayName, 120),
       photoURL: cleanProfileText(request.data?.photoURL, 2048),
+      onboardingRequired: true,
       createdAt: now,
       updatedAt: now,
     });

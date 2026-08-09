@@ -45,6 +45,10 @@ Read this before changing data flows, callable functions, machine ownership, adm
   legacy documents only through an explicitly approved production cleanup.
 - `users/{uid}.suggestionsCollaborator`: superadmin-controlled boolean that
   enables `Sugerencias`; it no longer controls the machine Tasks view.
+- New profiles are created with `users/{uid}.onboardingRequired: true`. The
+  authenticated onboarding callable clears it and records the submitted
+  profile fields plus `onboardingCompletedAt`; existing profiles without the
+  flag are not retroactively gated.
 - `registration_codes`: unused, active single-use account registration codes.
   The backend atomically creates `users/{uid}` and deletes the redeemed code.
   User profiles do not retain the code that created them. Browser clients
@@ -110,6 +114,10 @@ frontend wrappers live under `static/js/dashboard/`.
 - `redeemRegistrationCode`: authenticated, transactional registration. It
   creates the user profile without `regCode` and deletes the code in the same
   transaction, so two accounts cannot redeem it.
+- `completeAccountOnboarding`: authenticated, first-login-only completion. It
+  updates the profile and account directory, uses the company as the dashboard
+  title, and creates at most 50 empty owned machine records. Repeated calls do
+  not create duplicate machines.
 - `cleanupControlPanelLegacyRegistrationCodeLinks`: superadmin-only,
   idempotent removal of old `users.regCode` fields. It does not delete or
   disable accounts.

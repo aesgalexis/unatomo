@@ -16,7 +16,11 @@ const createTreeRow = ({label, count = "", selected = false, onSelect}) => {
   const button = el("button", "dashboard-group-tree-node");
   button.type = "button";
   button.setAttribute("aria-selected", selected ? "true" : "false");
-  const text = el("span", "dashboard-users-tree-label", label);
+  const text = el(
+    "span",
+    "dashboard-group-tree-label dashboard-users-tree-label",
+    label
+  );
   button.appendChild(text);
   if (count !== "") {
     button.appendChild(el("span", "dashboard-users-tree-count", count));
