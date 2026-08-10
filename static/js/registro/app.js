@@ -7,7 +7,8 @@ import {
   registerWithEmail,
   completeCurrentUserRegistration,
   getUserRegistrationState,
-  isAccountOnboardingRequired
+  isAccountOnboardingRequired,
+  getUsableCurrentUser
 } from "/static/js/registro/firebase-init.js";
 import {
   requestInviteCodeAndRedirect,
@@ -529,7 +530,8 @@ function initRegisterPage() {
         btnGoogle.disabled = true;
         setStatus(text.connectingGoogle);
 
-        const res = auth.currentUser
+        const currentUser = await getUsableCurrentUser();
+        const res = currentUser
           ? await completeCurrentUserRegistration(code)
           : await registerWithGoogle(code);
         if (!res.ok) return setStatus(text.registerFailed);
@@ -562,7 +564,8 @@ function initRegisterPage() {
         if (btnEmail) btnEmail.disabled = true;
         setStatus(text.creatingAccount);
 
-        const res = auth.currentUser
+        const currentUser = await getUsableCurrentUser();
+        const res = currentUser
           ? await completeCurrentUserRegistration(code)
           : await registerWithEmail(code, email, p1, nombre);
         if (!res.ok) return setStatus(text.registerFailed);

@@ -13,7 +13,8 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   updateProfile,
-  sendPasswordResetEmail
+  sendPasswordResetEmail,
+  signOut
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 import { getStorage } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-storage.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-functions.js";
@@ -141,6 +142,29 @@ export function isAccountOnboardingRequired(registration) {
     !registration.profile?.onboardingCompletedAt;
 }
 
+const staleAuthSessionCodes = new Set([
+  "auth/invalid-user-token",
+  "auth/user-disabled",
+  "auth/user-not-found",
+  "auth/user-token-expired"
+]);
+
+export async function getUsableCurrentUser() {
+  await authPersistenceReady;
+  const user = auth.currentUser;
+  if (!user) return null;
+
+  try {
+    await user.getIdToken(true);
+    return user;
+  } catch (error) {
+    const code = (error?.code || "").toString();
+    if (!staleAuthSessionCodes.has(code)) throw error;
+    try { await signOut(auth); } catch {}
+    return null;
+  }
+}
+
 async function redeemCodeForUser(user, regCode) {
   const response = await redeemCodeCallable({
     code: (regCode || "").toString().trim().toUpperCase(),
@@ -154,6 +178,7 @@ export async function registerWithGoogle(regCode) {
   const code = (regCode || "").toString().trim().toUpperCase();
   if (!code) return { ok: false };
 
+  await authPersistenceReady;
   const provider = new GoogleAuthProvider();
   const result = await signInWithPopup(auth, provider);
 
@@ -178,6 +203,7 @@ export async function registerWithEmail(regCode, email, password, displayName) {
 
   if (!code || !em || !pw) return { ok: false };
 
+  await authPersistenceReady;
   const cred = await createUserWithEmailAndPassword(auth, em, pw);
 
   if (displayName && cred.user) {

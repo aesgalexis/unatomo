@@ -32,6 +32,15 @@ export const redeemRegistrationCode = onCall(async (request) => {
     throw new HttpsError("invalid-argument", "invalid-code");
   }
 
+  try {
+    await admin.auth().getUser(auth.uid);
+  } catch (error) {
+    if ((error as {code?: string})?.code === "auth/user-not-found") {
+      throw new HttpsError("unauthenticated", "auth-account-missing");
+    }
+    throw error;
+  }
+
   const userRef = db.collection("users").doc(auth.uid);
   const codeRef = registrationCodesCol().doc(code);
   const result = await db.runTransaction(async (transaction) => {
