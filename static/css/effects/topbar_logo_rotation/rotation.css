@@ -1,6 +1,9 @@
 .topbar-logo--rotating {
   transform-origin: center;
-  animation: topbarLogoSpin 60s linear infinite;
+}
+
+.topbar-logo--rotating.is-loading {
+  animation: topbarLogoSpin 1s linear infinite;
   will-change: transform;
 }
 
@@ -15,7 +18,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .topbar-logo--rotating {
+  .topbar-logo--rotating.is-loading {
     animation: none;
     will-change: auto;
   }

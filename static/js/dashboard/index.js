@@ -75,6 +75,10 @@ import { createMachineAccessSync } from "./data/machineAccessSync.js";
 import { createDashboardSubscriptions } from "./data/dashboardSubscriptions.js";
 import { isControlPanelUser } from "/nfc/controlpanel/access.js";
 import { setTopbarSaveStatus } from "/static/js/topbar/save-status.js";
+import {
+  observeDashboardLoading,
+  setTopbarLogoLoading
+} from "/static/js/topbar/loading-logo.js";
 import { setTopbarNotifications } from "/static/js/notifications/topbar-notifications.js";
 import { calculateStorageUsage, STORAGE_LIMIT_BYTES } from "/static/js/configuracion/storageUsage.js";
 import { getAppBasePrefix, getCurrentLang, setSavedLang } from "/static/js/site/locale.js";
@@ -129,6 +133,8 @@ try {
   }
 } catch {}
 if (mount) {
+  setTopbarLogoLoading("dashboard", true);
+  observeDashboardLoading();
   mountNfcMinimalPageNav({
     backLabel: lang === "en" ? "Back" : "Volver",
     topLabel: lang === "en" ? "Top" : "Arriba",
@@ -494,6 +500,7 @@ if (mount) {
     resetLoadingProgress,
     searchInput,
     setLoadingProgress,
+    setTopbarLogoLoading,
     state,
     syncDashboardViewChrome,
     t,

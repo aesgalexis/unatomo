@@ -23,6 +23,7 @@ export const createDashboardLoadController = (dependencies) => {
     resetLoadingProgress,
     searchInput,
     setLoadingProgress,
+    setTopbarLogoLoading,
     state,
     syncDashboardViewChrome,
     t,
@@ -66,6 +67,7 @@ export const createDashboardLoadController = (dependencies) => {
     state.showTreeTaskCounts = loadShowTreeTaskCounts(uid);
     clearMobileDetailState();
     resetDashboardLoadState(state);
+    setTopbarLogoLoading("dashboard", true);
     state.initialGroupPriorityOrder = {};
     state.initialGroupPriorityReady = false;
     locallyVisibleEmptyGroupIds.clear();
@@ -84,6 +86,7 @@ export const createDashboardLoadController = (dependencies) => {
     setLoadingProgress(progress.percent);
     if (progress.complete && state.loading) {
       state.loading = false;
+      setTopbarLogoLoading("dashboard", false);
       if (state.loadingGuardTimer) {
         clearTimeout(state.loadingGuardTimer);
         state.loadingGuardTimer = null;

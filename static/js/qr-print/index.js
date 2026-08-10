@@ -1,4 +1,5 @@
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+import { observeDashboardLoading } from "/static/js/topbar/loading-logo.js";
 import {
   collection,
   doc,
@@ -195,6 +196,8 @@ const applyDashboardTopbarTitle = async (uid) => {
     }
   };
   let title = getCachedDashboardTitle() || "Dashboard";
+  const initialTitle = title;
+  setTitle(title);
   try {
     const snap = await getDoc(doc(db, "dashboard_layout", uid));
     const remoteTitle = normalizeDashboardTitle(snap.exists() ? snap.data()?.dashboardTitle : "");
@@ -203,7 +206,7 @@ const applyDashboardTopbarTitle = async (uid) => {
       cacheDashboardTitle(remoteTitle);
     }
   } catch {}
-  setTitle(title);
+  if (title !== initialTitle) setTitle(title);
 };
 
 const clearLoadingProgress = () => {
@@ -849,6 +852,7 @@ const setLoadingState = () => {
 };
 
 if (mount) {
+  observeDashboardLoading();
   setLoadingState();
   onAuthStateChanged(auth, async (user) => {
     if (!user) {

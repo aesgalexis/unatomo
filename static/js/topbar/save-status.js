@@ -1,3 +1,8 @@
+import {
+  isTopbarLoadingMessage,
+  setTopbarLogoLoading
+} from "/static/js/topbar/loading-logo.js";
+
 let statusEl = null;
 let statusTimeout = null;
 
@@ -18,6 +23,7 @@ const ensureStatusEl = () => {
 };
 
 export const setTopbarSaveStatus = (message = "") => {
+  setTopbarLogoLoading("topbar-status", isTopbarLoadingMessage(message));
   const el = ensureStatusEl();
   if (!el) return;
   if (statusTimeout) clearTimeout(statusTimeout);

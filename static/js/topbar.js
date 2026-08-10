@@ -20,7 +20,9 @@ try {
 const titleEl = document.getElementById("topbar-title");
 if (titleEl) {
   let cachedDashboardTitle = "";
-  const isDashboardPage = /^\/nfc\/(?:es|en)\/index\.html$/i.test(window.location.pathname);
+  const isDashboardPage =
+    /^\/nfc\/(?:es|en)\/index\.html$/i.test(window.location.pathname) ||
+    document.body.dataset.useDashboardTitle === "true";
   if (isDashboardPage) {
     try {
       cachedDashboardTitle = (localStorage.getItem("unatomo_dashboard_title_v1") || "").trim();
