@@ -3,6 +3,7 @@ export const installDashboardAuthController = ({
   cleanupDashboardSubscriptions,
   clearDashboardTimer,
   getUserRegistrationState,
+  isAccountOnboardingRequired,
   initDashboard,
   isControlPanelUser,
   isPublicSectionHash,
@@ -38,10 +39,7 @@ export const installDashboardAuthController = ({
         window.location.href = setupUrl;
         return;
       }
-      if (
-        registration.profile?.onboardingRequired === true &&
-        !registration.profile?.onboardingCompletedAt
-      ) {
+      if (isAccountOnboardingRequired(registration)) {
         window.location.replace(onboardingUrl);
         return;
       }

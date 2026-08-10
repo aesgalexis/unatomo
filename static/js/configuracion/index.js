@@ -6,7 +6,12 @@ import {
   serverTimestamp,
   setDoc
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
-import { auth, db, getUserRegistrationState } from "/static/js/firebase/firebaseApp.js";
+import {
+  auth,
+  db,
+  getUserRegistrationState,
+  isAccountOnboardingRequired
+} from "/static/js/firebase/firebaseApp.js";
 import { fetchLinksForAdmin } from "/static/js/dashboard/admin/adminLinksRepo.js";
 import { upsertAccountDirectory } from "/static/js/dashboard/admin/accountDirectoryRepo.js";
 import { fetchDashboardLayout, upsertDashboardLayout } from "/static/js/dashboard/firestoreRepo.js";
@@ -470,6 +475,10 @@ if (mount) {
       const registration = await getUserRegistrationState(user);
       if (!registration.allowed) {
         window.location.href = `${appBasePrefix || ""}/?setup=1`;
+        return;
+      }
+      if (isAccountOnboardingRequired(registration)) {
+        window.location.replace(`${appBasePrefix || ""}/${currentLang}/onboarding.html`);
         return;
       }
       profile = registration.profile || {};

@@ -5,7 +5,8 @@ import {
   app,
   appCheck,
   storage,
-  getUserRegistrationState
+  getUserRegistrationState,
+  isAccountOnboardingRequired
 } from "/static/js/registro/firebase-init.js";
 import { getFunctions } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-functions.js";
 
@@ -18,5 +19,6 @@ export {
   functions,
   appCheck,
   storage,
-  getUserRegistrationState
+  getUserRegistrationState,
+  isAccountOnboardingRequired
 };

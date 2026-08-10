@@ -135,6 +135,12 @@ export function getUserRegistrationState(userOrUid) {
   return pendingRegistrationCheck;
 }
 
+export function isAccountOnboardingRequired(registration) {
+  return registration?.allowed === true &&
+    registration.profile?.onboardingRequired === true &&
+    !registration.profile?.onboardingCompletedAt;
+}
+
 async function redeemCodeForUser(user, regCode) {
   const response = await redeemCodeCallable({
     code: (regCode || "").toString().trim().toUpperCase(),

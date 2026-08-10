@@ -8,7 +8,12 @@ import {
   query,
   where
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
-import { auth, db, getUserRegistrationState } from "/static/js/firebase/firebaseApp.js";
+import {
+  auth,
+  db,
+  getUserRegistrationState,
+  isAccountOnboardingRequired
+} from "/static/js/firebase/firebaseApp.js";
 import { getCurrentLang, localizeEsPath } from "/static/js/site/locale.js";
 import {
   normalizeDashboardLayout,
@@ -99,6 +104,7 @@ const text = {
   count: (visible, total) => `${visible}/${total}`,
   login: localizeEsPath("/es/auth/login.html", lang),
   home: localizeEsPath("/es/index.html", lang),
+  onboarding: localizeEsPath("/es/onboarding.html", lang),
   dashboard: localizeEsPath("/es/index.html", lang),
   qrPrint: localizeEsPath("/es/impresion-qr.html", lang),
 };
@@ -109,9 +115,9 @@ const createMobileHeadingGroup = (heading, loading = null) => {
   if (loading) group.appendChild(loading);
   return group;
 };
-const QR_SIZE_STEPS = [100, 132, 168, 210, 260];
-const PRINT_COLUMNS_BY_STEP = [4, 3, 2, 2, 1];
-const GRID_GAP_BY_STEP = ["0.85rem", "1rem", "1.2rem", "1.45rem", "1.65rem"];
+const QR_SIZE_STEPS = [76, 100, 132, 168, 210, 260];
+const PRINT_COLUMNS_BY_STEP = [5, 4, 3, 2, 2, 1];
+const GRID_GAP_BY_STEP = ["0.7rem", "0.85rem", "1rem", "1.2rem", "1.45rem", "1.65rem"];
 const RELOAD_ICON = `
   <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
     <path d="M20 12a8 8 0 1 1-2.34-5.66"></path>
@@ -136,7 +142,7 @@ const ZOOM_ICON = `
 let currentMachines = [];
 let allMachines = [];
 let totalMachinesCount = 0;
-let currentSizeIndex = 0;
+let currentSizeIndex = 1;
 let useFrame = true;
 let printBackNames = false;
 let loadingProgressTimer = null;
@@ -545,7 +551,7 @@ const setQrSize = (wrap, sizeIndex) => {
   wrap.style.setProperty("--qr-grid-gap", GRID_GAP_BY_STEP[safeIndex]);
 };
 
-const PRINT_ROWS_BY_STEP = [5, 4, 3, 3, 2];
+const PRINT_ROWS_BY_STEP = [6, 5, 4, 3, 3, 2];
 
 const getPrintSheetCapacity = () => {
   const columns = PRINT_COLUMNS_BY_STEP[currentSizeIndex] || PRINT_COLUMNS_BY_STEP[0];
@@ -868,6 +874,10 @@ if (mount) {
       const registration = await getUserRegistrationState(user);
       if (!registration.allowed) {
         window.location.href = text.home;
+        return;
+      }
+      if (isAccountOnboardingRequired(registration)) {
+        window.location.replace(text.onboarding);
         return;
       }
       showSuggestionsNav = await canShowSuggestionsNav(user, registration);

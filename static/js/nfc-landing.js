@@ -1,4 +1,10 @@
-import { auth, db, functions, getUserRegistrationState } from "/static/js/registro/firebase-init.js";
+import {
+  auth,
+  db,
+  functions,
+  getUserRegistrationState,
+  isAccountOnboardingRequired
+} from "/static/js/registro/firebase-init.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 import { initPublicNfcLandingStats } from "/static/js/nfc-landing/publicStats.js";
 
@@ -121,6 +127,7 @@ document.addEventListener("keydown", (event) => {
 const localized = {
   login: lang === "en" ? "/nfc/en/auth/login.html" : "/nfc/es/auth/login.html",
   dashboard: lang === "en" ? "/nfc/en/index.html#/dashboard" : "/nfc/es/index.html#/dashboard",
+  onboarding: lang === "en" ? "/nfc/en/onboarding.html" : "/nfc/es/onboarding.html",
   contact: lang === "en" ? "/nfc/en/contacto.html" : "/nfc/es/contacto.html",
   privacy: lang === "en" ? "/nfc/en/privacidad.html" : "/nfc/es/privacidad.html"
 };
@@ -244,6 +251,10 @@ onAuthStateChanged(auth, async (user) => {
   try {
     const registration = await getUserRegistrationState(user);
     if (!registration.allowed) return;
+    if (isAccountOnboardingRequired(registration)) {
+      window.location.replace(localized.onboarding);
+      return;
+    }
     document.querySelectorAll("[data-session-cta]").forEach((link) => {
       link.href = localized.dashboard;
       link.textContent = text.openDashboard;

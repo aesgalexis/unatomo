@@ -1,7 +1,8 @@
 import {
   auth,
   functions,
-  getUserRegistrationState
+  getUserRegistrationState,
+  isAccountOnboardingRequired
 } from "/static/js/firebase/firebaseApp.js";
 import {
   onAuthStateChanged,
@@ -38,10 +39,7 @@ onAuthStateChanged(auth, async (user) => {
       window.location.replace(setupUrl);
       return;
     }
-    if (
-      registration.profile?.onboardingRequired !== true ||
-      registration.profile?.onboardingCompletedAt
-    ) {
+    if (!isAccountOnboardingRequired(registration)) {
       window.location.replace(dashboardUrl);
       return;
     }

@@ -6,7 +6,8 @@ import {
   registerWithGoogle,
   registerWithEmail,
   completeCurrentUserRegistration,
-  getUserRegistrationState
+  getUserRegistrationState,
+  isAccountOnboardingRequired
 } from "/static/js/registro/firebase-init.js";
 import {
   requestInviteCodeAndRedirect,
@@ -29,6 +30,7 @@ const paths = {
   home: localizeEsPath("/es/index.html", lang),
   login: localizeEsPath("/es/auth/login.html", lang),
   register: localizeEsPath("/es/auth/registro.html", lang),
+  onboarding: localizeEsPath("/es/onboarding.html", lang),
   setup: `${appBasePrefix || ""}/?setup=1`,
 };
 
@@ -150,7 +152,7 @@ const completeAuthenticatedLogin = async (user, setStatus, onSuccess) => {
     }
 
     setStatus(text.loginSuccess);
-    setTimeout(onSuccess, 650);
+    setTimeout(() => onSuccess(isAccountOnboardingRequired(registration)), 650);
     return true;
   } catch (error) {
     reportAuthFailure("profile-check-failed", error);
@@ -202,7 +204,9 @@ function initSetupLogin() {
     await completeAuthenticatedLogin(
       user,
       showStatus,
-      () => (window.location.href = paths.home)
+      (requiresOnboarding) => {
+        window.location.href = requiresOnboarding ? paths.onboarding : paths.home;
+      }
     );
   });
 
@@ -221,7 +225,9 @@ function initSetupLogin() {
       await completeAuthenticatedLogin(
         res.user,
         showStatus,
-        () => (window.location.href = paths.home)
+        (requiresOnboarding) => {
+          window.location.href = requiresOnboarding ? paths.onboarding : paths.home;
+        }
       );
     } catch (error) {
       reportAuthFailure("google-login-failed", error);
@@ -251,7 +257,9 @@ function initSetupLogin() {
       await completeAuthenticatedLogin(
         res.user,
         showStatus,
-        () => (window.location.href = paths.home)
+      (requiresOnboarding) => {
+        window.location.href = requiresOnboarding ? paths.onboarding : paths.home;
+      }
       );
     } catch (e2) {
       const code = String(e2.code || "");
@@ -381,8 +389,8 @@ function initLoginPage() {
     status.hidden = true;
     status.textContent = "";
   }
-  function goHome() {
-    window.location.href = paths.home;
+  function goHome(requiresOnboarding) {
+    window.location.href = requiresOnboarding ? paths.onboarding : paths.home;
   }
   let interactiveLoginInProgress = false;
 
@@ -465,6 +473,17 @@ function initRegisterPage() {
     status.hidden = true;
     status.textContent = "";
   }
+  async function getRegistrationRedirect(result) {
+    try {
+      const registration = await getUserRegistrationState(auth.currentUser);
+      if (!registration.allowed) {
+        return result?.alreadyRegistered === true ? paths.home : paths.onboarding;
+      }
+      return isAccountOnboardingRequired(registration) ? paths.onboarding : paths.home;
+    } catch {
+      return result?.alreadyRegistered === true ? paths.home : paths.onboarding;
+    }
+  }
   function clearStoredRegistrationCode() {
     try { sessionStorage.removeItem("unatomo_access_code"); } catch {}
     try { localStorage.removeItem("unatomo_access_code"); } catch {}
@@ -517,7 +536,8 @@ function initRegisterPage() {
 
         clearStoredRegistrationCode();
         setStatus(text.registerSuccess);
-        setTimeout(() => (window.location.href = paths.home), 650);
+        const destination = await getRegistrationRedirect(res);
+        setTimeout(() => (window.location.href = destination), 650);
       } catch {
         setStatus(text.googleRegisterError);
       } finally {
@@ -549,7 +569,8 @@ function initRegisterPage() {
 
         clearStoredRegistrationCode();
         setStatus(text.registerSuccess);
-        setTimeout(() => (window.location.href = paths.home), 650);
+        const destination = await getRegistrationRedirect(res);
+        setTimeout(() => (window.location.href = destination), 650);
       } catch (e2) {
         const msg = String(e2.code || "");
         if (msg.includes("auth/email-already-in-use")) setStatus(text.emailInUse);
