@@ -5,7 +5,6 @@ export const render = (mount) => {
   const wrap = document.createElement("div");
   wrap.className = "section-block section-contacto";
   wrap.innerHTML = `
-    <h2>${isEn ? "Contact" : "Contacto"}</h2>
     <section class="card" aria-label="${isEn ? "Contact form" : "Formulario de contacto"}">
       <p>${isEn ? "Contact form" : "Formulario de contacto"}</p>
       <form class="contact-form" action="https://formspree.io/f/mkgqlvqj" method="POST" novalidate>

@@ -1,10 +1,13 @@
-.topbar-logo--rotating {
+.topbar .topbar-logo--rotating,
+.landing-header .topbar-logo--rotating {
   transform-origin: center;
+  animation: topbarLogoSpin 60s linear infinite;
+  will-change: transform;
 }
 
-.topbar-logo--rotating.is-loading {
-  animation: topbarLogoSpin 1s linear infinite;
-  will-change: transform;
+.topbar .topbar-logo--rotating.is-loading,
+.landing-header .topbar-logo--rotating.is-loading {
+  animation-duration: 1s;
 }
 
 @keyframes topbarLogoSpin {
@@ -18,7 +21,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .topbar-logo--rotating.is-loading {
+  .topbar .topbar-logo--rotating,
+  .landing-header .topbar-logo--rotating {
     animation: none;
     will-change: auto;
   }

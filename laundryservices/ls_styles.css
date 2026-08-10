@@ -978,6 +978,8 @@ button.btn-pill:focus-visible,
   fill: currentColor;
 }
 
+#lang-toggle svg { fill: none; }
+
 body.page .ls-topbar #lang-toggle {
   position: static;
   top: auto;
@@ -1024,8 +1026,16 @@ body.page .ls-topbar #lang-toggle {
   color: var(--fg);
   text-align: left;
   font: inherit;
+  font-size: 0.95rem;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
 }
+
+.lang-option-check { flex: 0 0 1em; visibility: hidden; font-size: 0.95rem; font-weight: 700; line-height: 1; text-align: center; }
+.lang-option[aria-checked="true"] .lang-option-check { visibility: visible; }
 
 .lang-option:hover {
   background: color-mix(in srgb, var(--fg) 8%, transparent);
@@ -1598,6 +1608,7 @@ body.ls-contact-page .card {
 
 body.ls-contact-page .contact-form-card {
   padding-bottom: 0;
+  border-radius: 0.85rem;
 }
 
 body.ls-contact-page .page-shell {

@@ -144,7 +144,7 @@ body {
 }
 
 .landing-lang-icon svg {
-  fill: currentColor;
+  fill: none;
 }
 
 .landing-lang-label {
@@ -178,9 +178,17 @@ body {
   background: transparent;
   color: var(--fg);
   font: inherit;
+  font-size: 0.95rem;
   text-align: left;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
 }
+
+.landing-lang-check { flex: 0 0 1em; visibility: hidden; font-size: 0.95rem; font-weight: 700; line-height: 1; text-align: center; }
+.landing-lang-option[aria-checked="true"] .landing-lang-check { visibility: visible; }
 
 .landing-lang-option:hover {
   background: color-mix(in srgb, var(--fg) 8%, transparent);

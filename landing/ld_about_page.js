@@ -6,6 +6,12 @@
 
   if (!toggle || !menu || !label) return;
 
+  const syncLanguageSelection = (lang) => {
+    menu.querySelectorAll(".lang-option").forEach((option) => {
+      option.setAttribute("aria-checked", option.dataset.lang === lang ? "true" : "false");
+    });
+  };
+
   const sortLanguageOptions = () => {
     const options = Array.from(menu.querySelectorAll(".lang-option"));
     options
@@ -57,5 +63,9 @@
   });
 
   sortLanguageOptions();
-  document.addEventListener("app:language-change", sortLanguageOptions);
+  syncLanguageSelection(i18n?.getLanguage?.() || document.documentElement.lang || "es");
+  document.addEventListener("app:language-change", (event) => {
+    sortLanguageOptions();
+    syncLanguageSelection(event?.detail?.lang || document.documentElement.lang || "es");
+  });
 })();

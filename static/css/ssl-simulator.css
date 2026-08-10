@@ -210,8 +210,8 @@ input:focus-visible {
   right: 0;
   top: calc(100% + 8px);
   z-index: 110;
-  min-width: 132px;
-  padding: 6px;
+  min-width: 160px;
+  padding: 0.6rem;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #ffffff;
@@ -225,13 +225,20 @@ input:focus-visible {
 .ssl-lang-option {
   width: 100%;
   border: 0;
-  border-radius: 6px;
-  padding: 7px 9px;
+  border-radius: 0.55rem;
+  padding: 0.5rem 0.75rem;
   background: transparent;
   color: var(--ink);
-  font-size: 0.84rem;
+  font-size: 0.95rem;
   text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
 }
+
+.ssl-lang-check { flex: 0 0 1em; visibility: hidden; font-size: 0.95rem; font-weight: 700; line-height: 1; text-align: center; }
+.ssl-lang-option[aria-checked="true"] .ssl-lang-check { visibility: visible; }
 
 .ssl-lang-option:hover,
 .ssl-lang-option.is-active {

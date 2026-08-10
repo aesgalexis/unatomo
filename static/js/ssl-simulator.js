@@ -583,7 +583,9 @@ function renderText() {
   });
   document.querySelector(".ssl-lang-label").textContent = lang.toUpperCase();
   document.querySelectorAll(".ssl-lang-option").forEach((button) => {
-    button.classList.toggle("is-active", button.dataset.lang === lang);
+    const active = button.dataset.lang === lang;
+    button.classList.toggle("is-active", active);
+    button.setAttribute("aria-checked", active ? "true" : "false");
   });
   const costToggleLabel = document.querySelector("#cost-panel-toggle [data-i18n]");
   if (costToggleLabel) {

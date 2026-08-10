@@ -36,6 +36,7 @@ const isEn = currentLang === "en";
 const appBasePrefix = getAppBasePrefix();
 const textMap = {
   settings: isEn ? "Settings" : "Configuraci\u00f3n",
+  settingsTreeAria: isEn ? "Settings navigation" : "Navegaci\u00f3n de configuraci\u00f3n",
   language: isEn ? "Language" : "Idioma",
   spanish: isEn ? "Spanish" : "Espa\u00f1ol",
   english: isEn ? "English" : "Ingl\u00e9s",
@@ -111,6 +112,39 @@ const tabLabels = {
   configuracion: textMap.settingsTab
 };
 
+const sectionDefinitions = [
+  {
+    id: "language",
+    label: textMap.language,
+    icon: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.8 12h16.4M12 3.5c2.1 2.3 3.1 5.1 3.1 8.5S14.1 18.2 12 20.5M12 3.5C9.9 5.8 8.9 8.6 8.9 12s1 6.2 3.1 8.5"/></svg>'
+  },
+  {
+    id: "account",
+    label: textMap.account,
+    icon: '<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.25"/><path d="M5.5 19.5c.7-3.2 3.1-5 6.5-5s5.8 1.8 6.5 5"/></svg>'
+  },
+  {
+    id: "storage",
+    label: textMap.storage,
+    icon: '<svg viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7" ry="2.5"/><path d="M5 6v6c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5V6M5 12v6c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5v-6"/></svg>'
+  },
+  {
+    id: "preferences",
+    label: textMap.preferences,
+    icon: '<svg viewBox="0 0 24 24"><path d="M5 6h14M5 12h14M5 18h14"/><circle cx="9" cy="6" r="1.7"/><circle cx="15" cy="12" r="1.7"/><circle cx="11" cy="18" r="1.7"/></svg>'
+  },
+  {
+    id: "activity",
+    label: textMap.activity,
+    icon: '<svg viewBox="0 0 24 24"><path d="M4 12h3l2-5 3.2 10 2.2-5H20"/></svg>'
+  },
+  {
+    id: "security",
+    label: textMap.security,
+    icon: '<svg viewBox="0 0 24 24"><path d="M12 3.5 19 6v5.2c0 4.2-2.8 7.7-7 9.3-4.2-1.6-7-5.1-7-9.3V6z"/><path d="m9 12 2 2 4-4"/></svg>'
+  }
+];
+
 const normalizeTabOrder = (value) => {
   const seen = new Set();
   const ordered = Array.isArray(value)
@@ -172,7 +206,88 @@ if (mount) {
   wrap.appendChild(preferencesCard);
   wrap.appendChild(activityCard);
   wrap.appendChild(securityCard);
-  mount.appendChild(wrap);
+
+  const sectionCards = new Map([
+    ["language", languageCard],
+    ["account", accountCard],
+    ["storage", storageCard],
+    ["preferences", preferencesCard],
+    ["activity", activityCard],
+    ["security", securityCard]
+  ]);
+  const settingsLayout = document.createElement("div");
+  settingsLayout.className = "profile-settings-layout";
+  const sectionTree = document.createElement("aside");
+  sectionTree.className = "dashboard-group-tree profile-section-tree";
+  sectionTree.setAttribute("aria-label", textMap.settingsTreeAria);
+  const sectionTreeHeader = document.createElement("div");
+  sectionTreeHeader.className = "dashboard-group-tree-header";
+  const sectionTreeTitle = document.createElement("div");
+  sectionTreeTitle.className = "dashboard-group-tree-title";
+  sectionTreeTitle.textContent = textMap.settings;
+  sectionTreeHeader.appendChild(sectionTreeTitle);
+  sectionTree.appendChild(sectionTreeHeader);
+  const sectionTreeList = document.createElement("div");
+  sectionTreeList.className = "dashboard-group-tree-list profile-section-tree-list";
+  sectionTreeList.setAttribute("role", "tree");
+  sectionTree.appendChild(sectionTreeList);
+  settingsLayout.appendChild(sectionTree);
+  settingsLayout.appendChild(wrap);
+  mount.appendChild(settingsLayout);
+
+  const sectionTreeButtons = new Map();
+  let activeSectionId = "language";
+  const selectSection = (sectionId) => {
+    if (!sectionCards.has(sectionId)) return;
+    activeSectionId = sectionId;
+    sectionTreeButtons.forEach((button, id) => {
+      button.setAttribute("aria-selected", id === activeSectionId ? "true" : "false");
+      button.closest(".profile-section-tree-row")?.classList.toggle(
+        "is-selected",
+        id === activeSectionId
+      );
+    });
+    sectionCards.forEach((card, id) => {
+      const isActive = id === activeSectionId;
+      card.classList.toggle("is-active", isActive);
+      card.dataset.expanded = isActive ? "true" : "false";
+      card.querySelector(".profile-card-toggle")?.setAttribute(
+        "aria-expanded",
+        isActive ? "true" : "false"
+      );
+      const cardIcon = card.querySelector(".profile-card-icon");
+      if (cardIcon) cardIcon.textContent = isActive ? "-" : "+";
+      const cardBody = card.querySelector(".profile-card-body");
+      if (cardBody) cardBody.hidden = !isActive;
+    });
+  };
+
+  sectionDefinitions.forEach(({id, label, icon}) => {
+    const row = document.createElement("div");
+    row.className = "dashboard-group-tree-row profile-section-tree-row";
+    row.style.setProperty("--tree-indent", "0.05rem");
+    const spacer = document.createElement("span");
+    spacer.className = "dashboard-group-tree-toggle-spacer";
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "dashboard-group-tree-node profile-section-tree-node";
+    button.setAttribute("role", "treeitem");
+    button.setAttribute("aria-level", "1");
+    button.setAttribute("aria-selected", "false");
+    const iconEl = document.createElement("span");
+    iconEl.className = "dashboard-group-tree-icon profile-section-tree-icon";
+    iconEl.setAttribute("aria-hidden", "true");
+    iconEl.innerHTML = icon;
+    const labelEl = document.createElement("span");
+    labelEl.className = "dashboard-group-tree-label";
+    labelEl.textContent = label;
+    button.append(iconEl, labelEl);
+    button.addEventListener("click", () => selectSection(id));
+    row.append(spacer, button);
+    sectionTreeList.appendChild(row);
+    sectionTreeButtons.set(id, button);
+  });
+  selectSection(activeSectionId);
 
   const languageBody = languageCard.querySelector(".profile-card-body");
   const accountBody = accountCard.querySelector(".profile-card-body");

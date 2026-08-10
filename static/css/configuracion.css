@@ -3,6 +3,37 @@
   gap: 16px;
 }
 
+.profile-settings-layout {
+  width: 100%;
+}
+
+.profile-section-tree {
+  display: none;
+}
+
+.profile-section-tree-row {
+  padding-left: var(--tree-indent, 0.05rem);
+}
+
+.profile-section-tree-node {
+  min-height: 2.15rem;
+}
+
+.profile-section-tree-icon {
+  color: color-mix(in srgb, var(--fg) 58%, transparent);
+}
+
+.profile-section-tree-icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.65;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .profile-card {
   border: 1px solid var(--border-subtle);
   background: var(--panel-bg);
@@ -222,6 +253,60 @@
 
 .profile-link:hover {
   text-decoration: underline;
+}
+
+@media (min-width: 1280px) {
+  .profile-settings-page .page-shell {
+    max-width: 800px;
+  }
+
+  .profile-settings-page .profile-section-tree {
+    display: block;
+    position: fixed;
+    top: 75px;
+    bottom: 0;
+    left: 0;
+    z-index: 50;
+    width: clamp(228px, calc((100vw - 800px) / 2 - 12px), 320px);
+    max-height: none;
+    box-sizing: border-box;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    padding: 1.5rem 0.75rem 1.5rem 0.3rem;
+    border-right: 1px solid transparent;
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--fg) 28%, transparent) transparent;
+  }
+
+  .profile-section-tree .dashboard-group-tree-header {
+    margin-bottom: 0.65rem;
+  }
+
+  .profile-wrap {
+    display: block;
+  }
+
+  .profile-card {
+    display: none;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    overflow: visible;
+  }
+
+  .profile-card.is-active {
+    display: block;
+  }
+
+  .profile-card.is-active .profile-card-toggle {
+    display: none;
+  }
+
+  .profile-card.is-active .profile-card-body {
+    display: block;
+    padding: 0;
+  }
 }
 
 @media (max-width: 700px) {

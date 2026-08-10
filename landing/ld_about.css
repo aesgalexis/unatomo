@@ -243,6 +243,8 @@ body.landing-contact-page .landing-topbar {
   fill: currentColor;
 }
 
+#lang-toggle svg { fill: none; }
+
 .lang-picker {
   position: relative;
 }
@@ -278,9 +280,17 @@ body.landing-contact-page .landing-topbar {
   background: transparent;
   color: var(--fg);
   font: inherit;
+  font-size: 0.95rem;
   text-align: left;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
 }
+
+.lang-option-check { flex: 0 0 1em; visibility: hidden; font-size: 0.95rem; font-weight: 700; line-height: 1; text-align: center; }
+.lang-option[aria-checked="true"] .lang-option-check { visibility: visible; }
 
 .lang-option:hover {
   background: color-mix(in srgb, var(--fg) 8%, transparent);
@@ -439,6 +449,7 @@ body.landing-contact-page .contacto {
 
 body.landing-contact-page .contact-form-card {
   padding-bottom: 0;
+  border-radius: 0.85rem;
 }
 
 .contact-info {

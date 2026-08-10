@@ -87,8 +87,6 @@
   mask: url("/static/img/winged-shoe.png") center / contain no-repeat;
 }
 
-/* Legacy footer icon: /static/img/winged-foot.svg; 2.2rem × 1.85rem; collapsed color at 54%. */
-
 .landing-footer-disclosure .footer-disclosure-toggle:hover,
 .landing-footer-disclosure .footer-disclosure-toggle:focus-visible {
   background: color-mix(in srgb, var(--fg) 6%, transparent);

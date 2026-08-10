@@ -7,6 +7,9 @@ import {
 } from "/static/js/registro/firebase-init.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 import { initPublicNfcLandingStats } from "/static/js/nfc-landing/publicStats.js";
+import { initTopbarLogoMotion } from "/static/js/topbar/loading-logo.js";
+
+initTopbarLogoMotion();
 
 const copy = {
   es: {
@@ -91,6 +94,7 @@ document.querySelectorAll("[data-i18n-alt]").forEach((element) => {
 
 document.querySelectorAll("[data-set-lang]").forEach((button) => {
   const targetLang = button.dataset.setLang;
+  button.setAttribute("aria-checked", targetLang === lang ? "true" : "false");
   button.addEventListener("click", () => {
     if (targetLang !== "es" && targetLang !== "en") return;
     try { localStorage.setItem("unatomo_lang", targetLang); } catch {}

@@ -1,4 +1,5 @@
 import { getCurrentLang, getLocalizedHref, getUiPath, setSavedLang } from "/static/js/site/locale.js";
+import { initTopbarLogoMotion } from "/static/js/topbar/loading-logo.js";
 
 const mount =
   document.getElementById("topbar-mount") ||
@@ -16,6 +17,8 @@ try {
 } catch {
   mount.innerHTML = "";
 }
+
+initTopbarLogoMotion();
 
 const titleEl = document.getElementById("topbar-title");
 if (titleEl) {
