@@ -247,12 +247,6 @@
   font-size: 0.78rem;
 }
 
-.gallery-empty {
-  margin: 0;
-  padding: 1rem 0;
-  color: color-mix(in srgb, var(--fg) 68%, transparent);
-}
-
 @media (max-width: 640px) {
   .gallery-toolbar {
     justify-content: flex-start;

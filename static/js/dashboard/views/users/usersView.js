@@ -147,9 +147,9 @@ export const renderUsersView = (container, machines = [], options = {}) => {
   }
 
   if (!context) {
-    view.appendChild(el("div", "dashboard-users-empty", tx(
-      "Añade una máquina para empezar a gestionar usuarios.",
-      "Add a machine to start managing users."
+    view.appendChild(el("div", "dashboard-empty-state", tx(
+      "No hay máquinas disponibles para gestionar usuarios.",
+      "No machines are available for managing users."
     )));
     container.appendChild(view);
     return;
@@ -249,9 +249,11 @@ export const renderUsersView = (container, machines = [], options = {}) => {
   }
 
   if (!users.length) {
-    const empty = el("div", "dashboard-users-empty", normalizedQuery
+    const empty = el("div", "dashboard-empty-state", normalizedQuery
       ? tx("No hay usuarios para esta búsqueda.", "No users match this search.")
-      : tx("Todavía no hay usuarios locales. Pulsa + para crear el primero.", "No local users yet. Press + to create the first one."));
+      : context?.isOwner
+        ? tx("No hay usuarios locales. Pulsa + para crear el primero.", "No local users. Press + to create the first one.")
+        : tx("No hay usuarios locales.", "No local users."));
     view.appendChild(empty);
     container.appendChild(view);
     return;

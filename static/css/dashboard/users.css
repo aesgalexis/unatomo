@@ -161,8 +161,7 @@
 
 .dashboard-user-card,
 .dashboard-users-policy,
-.dashboard-users-create,
-.dashboard-users-empty {
+.dashboard-users-create {
   border: 1px solid var(--border-subtle);
   border-radius: 1rem;
   background: color-mix(in srgb, var(--bg) 96%, var(--fg) 4%);
@@ -398,12 +397,6 @@
   margin-top: -0.35rem;
   color: color-mix(in srgb, var(--fg) 62%, transparent);
   font-size: 0.82rem;
-}
-
-.dashboard-users-empty {
-  padding: 2rem 1rem;
-  color: color-mix(in srgb, var(--fg) 62%, transparent);
-  text-align: center;
 }
 
 @media (max-width: 768px) {

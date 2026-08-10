@@ -78,8 +78,11 @@ const text = {
   title: isEn ? "QR print" : "Impresión QR",
   loading: isEn ? "Loading..." : "Cargando...",
   empty: isEn
-    ? "No generated QR codes found."
-    : "No hay QRs generados.",
+    ? "No generated QR codes. Generate a Tag ID on a machine to create the first one."
+    : "No hay QRs generados. Genera un Tag ID en una m\u00e1quina para crear el primero.",
+  emptyNoMachines: isEn
+    ? "No machines are available for generating QR codes."
+    : "No hay m\u00e1quinas disponibles para generar QRs.",
   error: isEn
     ? "Unable to load QR codes."
     : "No se han podido cargar los QRs.",
@@ -142,6 +145,7 @@ const ZOOM_ICON = `
 let currentMachines = [];
 let allMachines = [];
 let totalMachinesCount = 0;
+let accessibleMachinesCount = 0;
 let currentSizeIndex = 1;
 let useFrame = true;
 let printBackNames = false;
@@ -511,11 +515,6 @@ const fetchAdminMachines = async (uid) => {
   return machines.filter(Boolean);
 };
 
-const fetchQrMachines = async (uid) => {
-  const sourceMachines = await fetchAccessibleMachines(uid);
-  return buildQrMachines(sourceMachines);
-};
-
 const fetchAccessibleMachines = async (uid) => {
   const [ownerResult, adminResult] = await Promise.allSettled([
     fetchOwnerMachines(uid),
@@ -569,6 +568,9 @@ const renderQrGrid = (machines, options = {}) => {
     hiddenMachineIds = new Set();
     totalMachinesCount = Number.isFinite(options.totalCount)
       ? options.totalCount
+      : machines.length;
+    accessibleMachinesCount = Number.isFinite(options.accessibleMachineCount)
+      ? options.accessibleMachineCount
       : machines.length;
   }
   mount.innerHTML = "";
@@ -648,8 +650,11 @@ const renderQrGrid = (machines, options = {}) => {
     selectedTreeGroupId = "";
     selectedTreeMachineId = "";
     setLoadingState();
-    fetchQrMachines(auth.currentUser.uid)
-      .then((nextMachines) => renderQrGrid(nextMachines))
+    fetchAccessibleMachines(auth.currentUser.uid)
+      .then(async (sourceMachines) => {
+        const nextMachines = await buildQrMachines(sourceMachines);
+        renderQrGrid(nextMachines, { accessibleMachineCount: sourceMachines.length });
+      })
       .catch(() => setState(text.error, "error"));
   });
 
@@ -706,7 +711,7 @@ const renderQrGrid = (machines, options = {}) => {
   if (!machines.length) {
     const empty = document.createElement("p");
     empty.className = "qr-print-state";
-    empty.textContent = text.empty;
+    empty.textContent = accessibleMachinesCount > 0 ? text.empty : text.emptyNoMachines;
     wrap.appendChild(empty);
     mount.appendChild(wrap);
     window.requestAnimationFrame(syncQrMenuState);
@@ -906,7 +911,8 @@ if (mount) {
         : machines;
       renderQrGrid(visibleMachines, {
         sourceMachines: machines,
-        totalCount: machines.length
+        totalCount: machines.length,
+        accessibleMachineCount: sourceMachines.length
       });
     } catch {
       setState(text.error, "error");

@@ -662,8 +662,12 @@ body.page .topbar {
 }
 
 .qr-print-state {
-  margin: 1rem 0 0;
-  color: var(--muted);
+  margin: 0;
+  padding: 1rem 0;
+  color: color-mix(in srgb, var(--fg) 68%, transparent);
+  font-size: 1rem;
+  line-height: normal;
+  text-align: left;
 }
 
 .qr-print-state[data-state="error"] {

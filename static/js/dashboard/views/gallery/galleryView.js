@@ -223,10 +223,12 @@ export const renderGalleryView = (container, machines = [], options = {}) => {
 
   if (!entries.length) {
     const empty = document.createElement("p");
-    empty.className = "gallery-empty";
+    empty.className = "dashboard-empty-state";
     empty.textContent = (options.query || "").trim()
       ? t("dashboard.galleryNoResults", "No hay documentos para esa b\u00fasqueda.")
-      : t("dashboard.galleryEmpty", "No hay documentos subidos.");
+      : machines.length
+        ? t("dashboard.galleryEmpty", "No hay documentos subidos. Pulsa + para subir el primero.")
+        : t("dashboard.galleryNoMachines", "No hay m\u00e1quinas disponibles para subir documentos.");
     wrap.appendChild(empty);
     container.appendChild(wrap);
     return;

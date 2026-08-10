@@ -62,7 +62,7 @@ export const renderMachineTasksView = (container, machines = [], options = {}) =
   if (!machines.length) {
     headerContainer.appendChild(header);
     const empty = document.createElement("p");
-    empty.className = "todo-empty";
+    empty.className = "dashboard-empty-state";
     empty.textContent = t("dashboard.machineTasksNoMachines", "No hay máquinas disponibles.");
     root.appendChild(empty);
     container.appendChild(root);

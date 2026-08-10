@@ -240,7 +240,7 @@ export const renderMachineTaskRows = (list, entries, options) => {
   });
   if (!entries.length) {
     const empty = document.createElement("p");
-    empty.className = "todo-empty";
+    empty.className = "dashboard-empty-state";
     empty.textContent = t("tasks.emptyList", "No hay tareas que mostrar, crea una tarea para comenzar");
     list.appendChild(empty);
   }

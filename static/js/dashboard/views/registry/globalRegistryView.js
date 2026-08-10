@@ -227,7 +227,7 @@ export const renderGlobalRegistryView = (container, machines = [], options = {})
 
   if (!entries.length) {
     const empty = document.createElement("div");
-    empty.className = "global-registry-empty";
+    empty.className = "dashboard-empty-state";
     empty.textContent = query
       ? t("dashboard.noResults", (value) => `No results for "${value}".`)(query)
       : t("dashboard.registryEmpty", "Sin registros.");
