@@ -228,9 +228,11 @@ export async function loginWithEmail(email, password) {
   return buildAuthResult(cred.user);
 }
 
-export async function sendPasswordReset(email) {
+export async function sendPasswordReset(email, languageCode = "es") {
   const em = (email || "").toString().trim();
   if (!em) return { ok: false };
+
+  auth.languageCode = languageCode === "en" ? "en" : "es";
   await sendPasswordResetEmail(auth, em);
   return { ok: true };
 }

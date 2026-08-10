@@ -38,7 +38,7 @@ form.addEventListener("submit", async (event) => {
   try {
     if (submit) submit.disabled = true;
     setStatus(text.sendingLink);
-    await sendPasswordReset(email);
+    await sendPasswordReset(email, isEn ? "en" : "es");
     setStatus(text.resetSent);
     form.reset();
   } catch (error) {
