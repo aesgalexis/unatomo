@@ -206,12 +206,14 @@ export const createDashboardSectionNav = ({
   sectionNav.appendChild(users.link);
   sectionNav.appendChild(qr.link);
 
-  [dashboardLink, registryLink, todo.link, gallery.link, users.link, qr.link].forEach((link) => {
-    link.addEventListener("mouseenter", () => showPreview(link));
-    link.addEventListener("mouseleave", clearPreview);
-    link.addEventListener("focus", () => showPreview(link));
-    link.addEventListener("blur", clearPreview);
-  });
+  if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+    [dashboardLink, registryLink, todo.link, gallery.link, users.link, qr.link].forEach((link) => {
+      link.addEventListener("mouseenter", () => showPreview(link));
+      link.addEventListener("mouseleave", clearPreview);
+      link.addEventListener("focus", () => showPreview(link));
+      link.addEventListener("blur", clearPreview);
+    });
+  }
 
   return {
     sectionNav,

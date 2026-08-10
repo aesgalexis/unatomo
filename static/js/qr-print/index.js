@@ -101,6 +101,13 @@ const text = {
   dashboard: localizeEsPath("/es/index.html", lang),
   qrPrint: localizeEsPath("/es/impresion-qr.html", lang),
 };
+const createMobileHeadingGroup = (heading, loading = null) => {
+  const group = document.createElement("div");
+  group.className = "qr-print-mobile-section-heading";
+  group.appendChild(heading);
+  if (loading) group.appendChild(loading);
+  return group;
+};
 const QR_SIZE_STEPS = [100, 132, 168, 210, 260];
 const PRINT_COLUMNS_BY_STEP = [4, 3, 2, 2, 1];
 const GRID_GAP_BY_STEP = ["0.85rem", "1rem", "1.2rem", "1.45rem", "1.65rem"];
@@ -672,23 +679,20 @@ const renderQrGrid = (machines, options = {}) => {
   toolbar.appendChild(reloadBtn);
   toolbar.appendChild(searchInput);
   const desktopMenus = window.matchMedia("(min-width: 769px)").matches;
-  if (desktopMenus) {
-    const headerActions = document.createElement("div");
-    headerActions.className = "qr-print-header-actions";
-    headerActions.append(printOptions, count);
-    header.replaceChildren(heading, headerActions);
-  } else {
-    toolbar.appendChild(printOptions);
-  }
+  const headerActions = document.createElement("div");
+  headerActions.className = "qr-print-header-actions";
+  headerActions.append(printOptions, count);
+  header.replaceChildren(
+    desktopMenus ? heading : createMobileHeadingGroup(heading),
+    headerActions
+  );
   const fixedMenus = document.createElement("div");
   fixedMenus.className = "qr-print-fixed-menus";
-  fixedMenus.append(sectionNav, toolbar);
-  if (desktopMenus) fixedMenus.appendChild(header);
+  fixedMenus.append(sectionNav, toolbar, header);
   const fixedMenusSpace = document.createElement("div");
   fixedMenusSpace.className = "qr-print-fixed-menus-space";
   wrap.append(fixedMenus, fixedMenusSpace);
   mountQrGroupTree(wrap);
-  if (!desktopMenus) wrap.appendChild(header);
 
   if (!machines.length) {
     const empty = document.createElement("p");
@@ -822,16 +826,17 @@ const setLoadingState = () => {
   header.className = "qr-print-header";
   const heading = document.createElement("h3");
   heading.textContent = text.title;
-  header.append(heading, loading);
   const desktopMenus = window.matchMedia("(min-width: 769px)").matches;
+  header.appendChild(
+    desktopMenus ? heading : createMobileHeadingGroup(heading, loading)
+  );
+  if (desktopMenus) header.appendChild(loading);
   const fixedMenus = document.createElement("div");
   fixedMenus.className = "qr-print-fixed-menus";
-  fixedMenus.append(sectionNav, toolbar);
-  if (desktopMenus) fixedMenus.appendChild(header);
+  fixedMenus.append(sectionNav, toolbar, header);
   const fixedMenusSpace = document.createElement("div");
   fixedMenusSpace.className = "qr-print-fixed-menus-space";
   wrap.append(fixedMenus, fixedMenusSpace);
-  if (!desktopMenus) wrap.appendChild(header);
   mount.appendChild(wrap);
   window.requestAnimationFrame(syncQrMenuState);
 

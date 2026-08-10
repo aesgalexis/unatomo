@@ -80,6 +80,11 @@ export const createDashboardViewModeController = ({
       state.todoPage = 1;
       renderCards({ preserveScroll: true, preserveAnchor: false });
       requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "smooth" }));
+    },
+    onGallerySizeChange: (sizeIndex) => {
+      window.dispatchEvent(new CustomEvent("unatomo:gallery-size", {
+        detail: { sizeIndex }
+      }));
     }
   });
 

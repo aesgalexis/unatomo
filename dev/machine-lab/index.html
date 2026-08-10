@@ -3,70 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Test Machine · vistas por rol</title>
+  <title>Mobile Lab</title>
   <meta name="robots" content="noindex, nofollow">
   <link rel="icon" href="/static/img/favicon/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./machine-lab.css">
 </head>
 <body>
-  <header class="lab-header">
-    <p class="lab-eyebrow">UNATOMO · HERRAMIENTA LOCAL</p>
-    <h1>Test Machine desde QR</h1>
-    <p>
-      La vista real actual, abierta de forma independiente para visitante,
-      operario y técnico.
-    </p>
-  </header>
-
   <main>
-    <p class="lab-notice">
-      Operario y técnico deben iniciar sesión dentro de su móvil con sus
-      credenciales reales. La tercera pantalla se deja sin identificar.
-    </p>
-
-    <section class="phone-grid" aria-label="Comparación de vistas móviles">
-      <article class="phone-column">
-        <div class="phone-label">
-          <strong>Visitante</strong>
-          <span>Sin identificar</span>
-        </div>
-        <div class="phone-shell">
-          <iframe
-            title="Test Machine sin identificar"
-            src="/nfc/es/m.html?tag=G-P76W-ARQL"
-            credentialless
-          ></iframe>
-        </div>
-      </article>
-
-      <article class="phone-column">
-        <div class="phone-label">
-          <strong>Operario</strong>
-          <span>Inicia sesión aquí</span>
-        </div>
-        <div class="phone-shell">
-          <iframe
-            title="Test Machine como operario"
-            src="/nfc/es/m.html?tag=G-P76W-ARQL"
-            credentialless
-          ></iframe>
-        </div>
-      </article>
-
-      <article class="phone-column">
-        <div class="phone-label">
-          <strong>Técnico</strong>
-          <span>Inicia sesión aquí</span>
-        </div>
-        <div class="phone-shell">
-          <iframe
-            title="Test Machine como técnico"
-            src="/nfc/es/m.html?tag=G-P76W-ARQL"
-            credentialless
-          ></iframe>
-        </div>
-      </article>
-    </section>
+    <h1>Mobile Lab</h1>
+    <div class="phone-shell">
+      <div class="phone-address" aria-label="URL actual">
+        <span class="phone-address-lock" aria-hidden="true">●</span>
+        <span class="phone-address-url"></span>
+      </div>
+      <iframe
+        title="Mobile Lab"
+        src="/nfc/es/m.html?tag=G-P76W-ARQL"
+      ></iframe>
+    </div>
   </main>
+  <script type="module" src="./machine-lab.js"></script>
 </body>
 </html>

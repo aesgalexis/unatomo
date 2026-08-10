@@ -3,7 +3,7 @@ import { createMachineCard } from "/static/js/dashboard/machineCardTemplate.js";
 import { installDocumentHooks } from "/static/js/dashboard/cardHooks/documentHooks.js";
 import { upsertMachine } from "/static/js/dashboard/firestoreRepo.js";
 import { generateMachineTagQr } from "/static/js/dashboard/tags/tagAssetsRepo.js";
-import { auth, functions } from "/static/js/firebase/firebaseApp.js";
+import { auth, authPersistenceReady, functions } from "/static/js/firebase/firebaseApp.js";
 import { initAutoSave } from "/static/js/dashboard/autoSave.js";
 import { calculateStorageUsage, STORAGE_LIMIT_BYTES } from "/static/js/configuracion/storageUsage.js";
 import { normalizeTasks } from "/static/js/dashboard/tabs/tasks/tasksModel.js";
@@ -376,6 +376,7 @@ const init = async () => {
   }
   state.tagId = tagId;
 
+  await authPersistenceReady;
   const authUser = await waitForAuthState();
   const initialAccess = await fetchMachineAccess(tagId);
   const machineDoc = initialAccess.machine;

@@ -28,6 +28,8 @@ export const createDashboardTopbarController = (dependencies) => {
     const isSuggestions = state.activeView === "sugerencias";
     const isTodo = state.activeView === "todo";
     const isUsers = state.activeView === "usuarios";
+    const useGallerySizeMenu = isGallery && window.matchMedia("(max-width: 768px)").matches;
+    viewMenu.setGalleryMode(useGallerySizeMenu);
     dashboardLink.classList.toggle("is-active", !isRegistry && !isGallery && !isSuggestions && !isTodo && !isUsers);
     registryLink.classList.toggle("is-active", isRegistry);
     galleryLink.classList.toggle("is-active", isGallery);
@@ -93,7 +95,8 @@ export const createDashboardTopbarController = (dependencies) => {
               ? t("dashboard.usersSearchPlaceholder", "Buscar usuarios...")
             : t("dashboard.searchPlaceholder", "Buscar por nombre o ubicaci\u00f3n...");
     const addDisabled = state.loading || isRegistry;
-    const viewMenuDisabled = state.loading || isRegistry || isGallery || isSuggestions || isUsers;
+    const viewMenuDisabled = state.loading || isRegistry ||
+      (isGallery && !useGallerySizeMenu) || isSuggestions || isUsers;
     const searchDisabled = state.loading;
     addBtn.disabled = addDisabled;
     searchInput.disabled = searchDisabled;

@@ -129,8 +129,13 @@ export const renderUsersView = (container, machines = [], options = {}) => {
       const fixedActions = el("div", "dashboard-view-header-actions");
       const count = head.querySelector(".dashboard-users-count");
       if (count) fixedActions.appendChild(count);
-      fixedActions.appendChild(actions);
       head.appendChild(fixedActions);
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        actions.classList.add("is-mobile-content-actions");
+        view.appendChild(actions);
+      } else {
+        fixedActions.appendChild(actions);
+      }
     } else {
       view.appendChild(actions);
     }

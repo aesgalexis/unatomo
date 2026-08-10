@@ -6,6 +6,8 @@ import {
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 import {
   getAuth,
+  browserLocalPersistence,
+  setPersistence,
   GoogleAuthProvider,
   signInWithPopup,
   createUserWithEmailAndPassword,
@@ -56,6 +58,10 @@ export const appCheck = initializedAppCheck;
 
 export const db = getFirestore(app);
 export const auth = getAuth(app);
+export const authPersistenceReady = setPersistence(auth, browserLocalPersistence)
+  .catch((error) => {
+    console.warn("Firebase local auth persistence unavailable.", error);
+  });
 export const storage = getStorage(app);
 export const functions = getFunctions(app);
 const validateCodeCallable = httpsCallable(functions, "validateRegistrationCode");
@@ -176,12 +182,14 @@ export async function registerWithEmail(regCode, email, password, displayName) {
 }
 
 export async function loginWithGoogle() {
+  await authPersistenceReady;
   const provider = new GoogleAuthProvider();
   const result = await signInWithPopup(auth, provider);
   return buildAuthResult(result.user);
 }
 
 export async function loginWithEmail(email, password) {
+  await authPersistenceReady;
   const em = (email || "").toString().trim();
   const pw = (password || "").toString();
   const cred = await signInWithEmailAndPassword(auth, em, pw);

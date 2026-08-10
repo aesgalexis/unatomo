@@ -26,6 +26,11 @@ const TASK_SORT_MODES = [
   { id: "title-asc", labelKey: "todoSortTitle", fallback: "Título A-Z" }
 ];
 
+const GALLERY_SIZE_MODES = [
+  { id: "1", labelKey: "gallerySizeSmall", fallback: "Pequeñas" },
+  { id: "4", labelKey: "gallerySizeLarge", fallback: "Grandes" }
+];
+
 const normalizeSort = (value) =>
   SORT_MODES.some((item) => item.id === value) ? value : "manual";
 
@@ -37,7 +42,8 @@ export const createDashboardViewMenu = ({
   onChange,
   onSortChange,
   onTaskStatusChange,
-  onTaskSortChange
+  onTaskSortChange,
+  onGallerySizeChange
 } = {}) => {
   const wrap = document.createElement("div");
   wrap.className = "dashboard-view-menu";
@@ -58,6 +64,8 @@ export const createDashboardViewMenu = ({
   menu.setAttribute("role", "menu");
   menu.hidden = true;
   let taskMode = false;
+  let galleryMode = false;
+  let currentGallerySize = "1";
   let currentTaskStatus = "visible";
   let currentTaskSort = "created-desc";
 
@@ -96,8 +104,23 @@ export const createDashboardViewMenu = ({
     menu.innerHTML = "";
     button.setAttribute(
       "aria-label",
-      taskMode ? t("dashboard.todoFilter", "Filtrar y ordenar") : t("dashboard.orderAria", "Ordenar")
+      galleryMode
+        ? t("dashboard.gallerySizeMenu", "Tamaño de imágenes")
+        : taskMode
+          ? t("dashboard.todoFilter", "Filtrar y ordenar")
+          : t("dashboard.orderAria", "Ordenar")
     );
+    if (galleryMode) {
+      GALLERY_SIZE_MODES.forEach((item) => {
+        addItem(item, item.id === currentGallerySize, (id) => {
+          if (id === currentGallerySize) return;
+          currentGallerySize = id;
+          onGallerySizeChange?.(Number(id));
+          render();
+        });
+      });
+      return;
+    }
     if (taskMode) {
       const statusLabel = document.createElement("div");
       statusLabel.className = "dashboard-view-menu-label";
@@ -193,6 +216,15 @@ export const createDashboardViewMenu = ({
       currentTaskSort = TASK_SORT_MODES.some((item) => item.id === sort)
         ? sort
         : "created-desc";
+      render();
+    },
+    setGalleryMode(enabled) {
+      close();
+      const wasGalleryMode = galleryMode;
+      galleryMode = !!enabled;
+      if (galleryMode && !wasGalleryMode) {
+        onGallerySizeChange?.(Number(currentGallerySize));
+      }
       render();
     },
     refresh() {

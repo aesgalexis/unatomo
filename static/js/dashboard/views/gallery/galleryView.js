@@ -35,6 +35,17 @@ const setGallerySize = (wrap, sizeIndex) => {
   wrap.style.setProperty("--gallery-item-size", `${SIZE_STEPS[safeIndex]}px`);
 };
 
+window.addEventListener("unatomo:gallery-size", (event) => {
+  const sizeIndex = Math.max(
+    0,
+    Math.min(SIZE_STEPS.length - 1, Number(event.detail?.sizeIndex) || 0)
+  );
+  currentSizeIndex = sizeIndex;
+  document.querySelectorAll(".gallery-wrap").forEach((wrap) => {
+    setGallerySize(wrap, sizeIndex);
+  });
+});
+
 const createSizeControl = (wrap) => {
   const control = document.createElement("label");
   control.className = "gallery-size";
@@ -190,7 +201,7 @@ export const renderGalleryView = (container, machines = [], options = {}) => {
   const sizeControl = createSizeControl(wrap);
   toolbar.appendChild(sizeControl);
 
-  if (window.matchMedia("(min-width: 769px)").matches) {
+  if (options.headerContainer || window.matchMedia("(min-width: 769px)").matches) {
     header.replaceChildren(title);
     if (options.loadingElement) header.appendChild(options.loadingElement);
     if (!options.loading) {

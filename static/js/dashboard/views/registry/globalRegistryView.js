@@ -211,7 +211,7 @@ export const renderGlobalRegistryView = (container, machines = [], options = {})
   const header = document.createElement("div");
   header.className = "global-registry-header";
   const title = document.createElement("h3");
-  title.textContent = t("dashboard.registryTitle", "Registro global");
+  title.textContent = t("dashboard.registryTitle", "Registro");
   const count = document.createElement("span");
   count.className = "global-registry-count";
   count.textContent = `${Math.min(visibleCount, entries.length)}/${entries.length}`;

@@ -94,12 +94,25 @@ export const createDashboardInternalViewController = ({
     );
   };
   const getFixedViewHeaderContainer = (always = false) =>
-    window.matchMedia("(min-width: 769px)").matches &&
-      (always || state.internalViewChromeExpanded)
+    window.matchMedia("(max-width: 768px)").matches ||
+      always ||
+      state.internalViewChromeExpanded
       ? dashboardViewHeaderSlot
       : null;
+  const normalizeMobileFixedViewHeader = () => {
+    if (!window.matchMedia("(max-width: 768px)").matches) return;
+    const heading = dashboardViewHeaderSlot?.querySelector("h3");
+    if (!heading || heading.closest(".dashboard-mobile-section-heading")) return;
+    const loading = dashboardViewHeaderSlot.querySelector(".dashboard-loading");
+    const headingGroup = document.createElement("div");
+    headingGroup.className = "dashboard-mobile-section-heading";
+    heading.before(headingGroup);
+    headingGroup.appendChild(heading);
+    if (loading) headingGroup.appendChild(loading);
+  };
   const showFixedViewHeader = (staticView = "") => {
     if (!dashboardViewHeaderSlot?.childElementCount) return;
+    normalizeMobileFixedViewHeader();
     dashboardViewHeaderSlot.hidden = false;
     dashboardFixedMenus?.classList.add(
       staticView ? `has-static-${staticView}-header` : "has-view-header"
