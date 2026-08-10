@@ -19,6 +19,9 @@ const createControl = (label, icon) => {
   return button;
 };
 
+export const createNfcMinimalPageBackButton = (label = "Volver") =>
+  createControl(label, BACK_ICON);
+
 export const mountNfcMinimalPageNav = ({
   backLabel = "Volver",
   topLabel = "Arriba",
@@ -32,7 +35,7 @@ export const mountNfcMinimalPageNav = ({
   nav.className = "nfc-minimal-page-nav";
   nav.setAttribute("aria-label", `${backLabel} / ${topLabel}`);
 
-  const backButton = createControl(backLabel, BACK_ICON);
+  const backButton = createNfcMinimalPageBackButton(backLabel);
   const topButton = createControl(topLabel, TOP_ICON);
   topButton.hidden = true;
 

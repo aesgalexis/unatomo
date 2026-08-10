@@ -5,6 +5,10 @@
   scroll-margin-top: 6rem;
 }
 
+.dashboard-mobile-back-control {
+  margin: -0.5rem 0 0.5rem;
+}
+
 .machine-tasks-view {
   display: grid;
   gap: 1rem;
@@ -725,24 +729,4 @@
     width: 100%;
   }
 
-}
-
-.dashboard-mobile-back {
-  display: none;
-  margin: 0 0 0.85rem;
-  border: 1px solid var(--border-subtle);
-  background: color-mix(in srgb, var(--bg) 96%, transparent);
-  color: var(--fg);
-  border-radius: 0.75rem;
-  padding: 0.6rem 0.95rem;
-  font: inherit;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.dashboard-mobile-back::before {
-  content: "<";
-  display: inline-block;
-  margin-right: 0.5rem;
-  font-weight: 700;
 }

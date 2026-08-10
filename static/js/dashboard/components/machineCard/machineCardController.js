@@ -440,7 +440,7 @@ export const createMachineCard = (machine, options = {}) => {
   };
 
   const shouldMaskInteractions = () =>
-    window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
+    window.matchMedia && window.matchMedia("(max-width: 768px)").matches;
 
   const activateFirstTab = () => {
     const firstTab = card.querySelector(".mc-tab");

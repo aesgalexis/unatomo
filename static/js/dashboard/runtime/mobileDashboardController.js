@@ -53,7 +53,7 @@ export const createMobileDashboardController = (dependencies) => {
     state.mobileDetailJustEntered = false;
   };
 
-  mobileBackBtn.addEventListener("click", (event) => {
+  const handleMobileBack = (event) => {
     event.preventDefault();
     event.stopPropagation();
     mobileBackBtn.blur();
@@ -64,7 +64,9 @@ export const createMobileDashboardController = (dependencies) => {
       collapseCard(card, { suppressAnimation: true })
     );
     syncMobileDetailUI();
-  });
+  };
+
+  mobileBackBtn.addEventListener("click", handleMobileBack);
 
   if (window.matchMedia) {
     const mobileMedia = window.matchMedia("(max-width: 768px)");

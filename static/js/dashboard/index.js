@@ -24,7 +24,10 @@ import {
 import { filterMachines } from "./components/machineSearch/machineFilter.js";
 import { createMachineSearchBar } from "./components/machineSearch/machineSearchBar.js";
 import { createDashboardSectionNav } from "./components/sectionNav.js";
-import { mountNfcMinimalPageNav } from "/static/js/nfc/minimalPageNav.js";
+import {
+  createNfcMinimalPageBackButton,
+  mountNfcMinimalPageNav
+} from "/static/js/nfc/minimalPageNav.js";
 import { mountDashboardFixedMenusShell } from "./components/dashboardFixedMenusShell.js";
 import { openStatusIncidentModal } from "./components/statusIncidentModal/statusIncidentModal.js";
 import { createDashboardGroupTreeShell } from "./components/groupTree/groupTreeShell.js";
@@ -373,10 +376,10 @@ if (mount) {
   filterInfo.className = "filter-info";
   filterInfo.style.display = "none";
 
-  const mobileBackBtn = document.createElement("button");
-  mobileBackBtn.type = "button";
-  mobileBackBtn.className = "dashboard-mobile-back";
-  mobileBackBtn.textContent = t("dashboard.mobileBack", "Volver");
+  const mobileBackBtn = createNfcMinimalPageBackButton(
+    t("dashboard.mobileBack", "Volver")
+  );
+  mobileBackBtn.classList.add("dashboard-mobile-back-control");
   mobileBackBtn.hidden = true;
 
   const list = document.createElement("div");
