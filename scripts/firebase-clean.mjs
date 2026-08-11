@@ -9,6 +9,7 @@ if (!args.length) {
 const env = {...process.env};
 delete env.DEBUG;
 delete env.FIREBASE_DEBUG;
+env.FUNCTIONS_DISCOVERY_TIMEOUT ||= "30";
 
 const command = process.platform === "win32" ? "firebase.cmd" : "firebase";
 const result = spawnSync(command, args, {

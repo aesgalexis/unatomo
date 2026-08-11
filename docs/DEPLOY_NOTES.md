@@ -94,7 +94,8 @@ Be careful with production callable functions and data scripts. Temporary script
 Use the project wrappers instead of calling `firebase deploy` directly. They
 remove inherited `DEBUG` and `FIREBASE_DEBUG` variables before starting the CLI,
 preventing verbose internal HTTP traces from flooding terminals and Codex tool
-output.
+output. The wrapper also defaults `FUNCTIONS_DISCOVERY_TIMEOUT` to 30 seconds so
+the complete Functions codebase can be discovered on slower local startups.
 
 ```powershell
 npm.cmd run deploy:nfc:firestore

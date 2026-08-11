@@ -837,12 +837,14 @@ export const setMachineQrAccessEnabled = onCall(async (request) => {
   });
 
   if (!enabled) {
-    while (true) {
+    let hasSessions = true;
+    while (hasSessions) {
       const sessions = await db.collection("machine_access_sessions")
         .where("tagId", "==", tagId)
         .limit(MACHINE_SESSION_CLEANUP_LIMIT)
         .get();
-      if (sessions.empty) break;
+      hasSessions = !sessions.empty;
+      if (!hasSessions) break;
       const batch = db.batch();
       sessions.docs.forEach((docSnap) => batch.delete(docSnap.ref));
       await batch.commit();
