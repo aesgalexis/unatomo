@@ -196,6 +196,13 @@ export const createDashboardRenderer = (dependencies) => {
         list.innerHTML = "";
         return;
       }
+      const hasMachinesPendingRebuild =
+        (state.ownerMachines || []).length > 0 ||
+        (state.adminMachines || []).length > 0;
+      if (hasMachinesPendingRebuild) {
+        list.innerHTML = "";
+        return;
+      }
       if (hasDashboardLoadError(state)) {
         renderLoadErrorPlaceholder();
         if (preserveScroll) {
