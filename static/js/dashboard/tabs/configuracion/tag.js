@@ -29,6 +29,9 @@ export const render = (container, machine, hooks, options = {}) => {
   const tagRow = document.createElement("div");
   tagRow.className = "mc-config-row mc-config-row-tag";
 
+  const tagGroup = document.createElement("section");
+  tagGroup.className = "mc-config-group mc-config-group-tag";
+
   const tagLabel = document.createElement("span");
   tagLabel.className = "mc-config-label";
   tagLabel.textContent = t("config.tagId", "Tag ID");
@@ -171,6 +174,9 @@ export const render = (container, machine, hooks, options = {}) => {
   const qrRow = document.createElement("div");
   qrRow.className = "mc-config-row mc-config-row-qr";
 
+  const qrGroup = document.createElement("section");
+  qrGroup.className = "mc-config-group mc-config-group-qr";
+
   const qrLabel = document.createElement("span");
   qrLabel.className = "mc-config-label";
   qrLabel.textContent = t("config.qr", "QR");
@@ -287,10 +293,13 @@ export const render = (container, machine, hooks, options = {}) => {
   tagControls.appendChild(tagInput);
   tagControls.appendChild(tagBtn);
 
-  container.appendChild(tagRow);
-  container.appendChild(tagStatus);
-  container.appendChild(accessRow);
-  container.appendChild(qrRow);
-  container.appendChild(qrAccessRow);
-  container.appendChild(qrStatus);
+  tagGroup.appendChild(tagRow);
+  tagGroup.appendChild(tagStatus);
+  tagGroup.appendChild(accessRow);
+  qrGroup.appendChild(qrRow);
+  qrGroup.appendChild(qrAccessRow);
+  qrGroup.appendChild(qrStatus);
+
+  container.appendChild(tagGroup);
+  container.appendChild(qrGroup);
 };

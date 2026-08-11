@@ -122,6 +122,24 @@
   margin-bottom: 0.75rem;
 }
 
+.mc-config-group {
+  max-width: 720px;
+  padding: 0.85rem 1rem;
+  margin-bottom: 0.75rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--bg) 97%, var(--fg) 3%);
+}
+
+.mc-config-group .mc-config-row:last-of-type,
+.mc-config-group .mc-tag-status:last-child {
+  margin-bottom: 0;
+}
+
+.mc-config-group .mc-tag-status {
+  margin-left: 102px;
+}
+
 .mc-config-row-users {
   align-items: center;
 }
@@ -138,20 +156,20 @@
 }
 
 .mc-config-row-tag .mc-config-controls {
-  flex: 1 1 auto;
+  flex: 0 1 auto;
 }
 
 .mc-config-row-tag .mc-tag-connect {
-  margin-left: auto;
+  margin-left: 0;
 }
 
 .mc-config-row-url .mc-url-copy {
-  margin-left: auto;
+  margin-left: 0;
 }
 
 .mc-config-row-url .mc-config-controls,
 .mc-config-row-qr .mc-config-controls {
-  flex: 1 1 auto;
+  flex: 0 1 auto;
 }
 
 
@@ -189,6 +207,44 @@
   background: color-mix(in srgb, var(--bg) 96%, transparent);
   color: var(--fg);
   font: inherit;
+}
+
+.mc-config-row-tag .mc-tag-input {
+  flex: 0 1 220px;
+  width: 220px;
+  min-width: 140px;
+}
+
+.mc-config-row-url .mc-url-input {
+  flex: 0 1 320px;
+  width: 320px;
+  min-width: 180px;
+}
+
+@media (max-width: 620px) {
+  .mc-config-group {
+    padding: 0.75rem;
+  }
+
+  .mc-config-group .mc-config-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .mc-config-group .mc-config-controls {
+    width: 100%;
+  }
+
+  .mc-config-group .mc-tag-status {
+    margin-left: 0;
+  }
+
+  .mc-config-row-tag .mc-tag-input,
+  .mc-config-row-url .mc-url-input {
+    flex: 1 1 160px;
+    width: auto;
+  }
 }
 
 .mc-user-username {
