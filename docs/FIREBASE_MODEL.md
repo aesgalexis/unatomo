@@ -49,6 +49,11 @@ Read this before changing data flows, callable functions, machine ownership, adm
   authenticated onboarding callable clears it and records the submitted
   profile fields plus `onboardingCompletedAt`; existing profiles without the
   flag are not retroactively gated.
+- Accounts may own at most 64 canonical `machines` documents. Machines visible
+  through accepted administrator access do not count. The existing control-panel
+  `superadmin` account is exempt. Browser clients cannot create machine documents
+  directly; `createOwnedMachine` enforces the limit transactionally. Onboarding
+  applies the same policy before creating its initial machine records.
 - `registration_codes`: unused, active single-use account registration codes.
   The backend atomically creates `users/{uid}` and deletes the redeemed code.
   User profiles do not retain the code that created them. Browser clients
@@ -106,7 +111,8 @@ frontend wrappers live under `static/js/dashboard/`.
 - `disconnectMachineTag`: disconnects Tag ID data and deletes the associated QR file/path. Preserve this cleanup behavior.
 - `deleteMachine`: owner-only machine deletion. It removes the canonical and
   legacy machine documents plus associated Tags, access records, administrator
-  links, invitations, transfer invitations, document files, and Tag QR files.
+  links, invitations, transfer invitations, access sessions, dashboard
+  placements, document files, and every associated Tag QR path.
   Do not restore direct client-side machine deletion.
 - `setControlPanelUserCollaborator`: superadmin-only toggle for suggestion collaborators.
 - `validateRegistrationCode`: checks an exact code without exposing the
@@ -118,6 +124,10 @@ frontend wrappers live under `static/js/dashboard/`.
   updates the profile and account directory, uses the company as the dashboard
   title, and creates at most 50 empty owned machine records. Repeated calls do
   not create duplicate machines.
+- `createOwnedMachine`: authenticated owner-machine creation. It transactionally
+  enforces the 64-owned-machine limit, with the control-panel `superadmin`
+  exemption. The `provisionMachineTagOnCreate` Firestore trigger then assigns a
+  generated Tag ID, creates `machine_access`, and stores the corresponding QR.
 - `cleanupControlPanelLegacyRegistrationCodeLinks`: superadmin-only,
   idempotent removal of old `users.regCode` fields. It does not delete or
   disable accounts.
@@ -186,6 +196,10 @@ preserved.
 ## Tag ID And QR Rules
 
 - Creating or connecting a Tag ID should result in a QR automatically.
+- Every newly created canonical machine is automatically provisioned with one
+  generated Tag ID, its localized access URL, `machine_access`, and a stored QR.
+  Provisioning is backend-owned and idempotent so retries cannot allocate a
+  second Tag ID to the same machine.
 - Manual `Generate QR` / `Regenerate QR` controls should not be required in the dashboard.
 - The machine config QR action should take the user to QR print focused on that machine.
 - If a Tag ID is disconnected, the QR must be removed as part of the disconnect flow.

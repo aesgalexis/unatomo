@@ -158,12 +158,6 @@ const showLogin = (machine, tagId, { onSuccess, onContinueAsGuest }) => {
   const publicDetails = document.createElement("p");
   publicDetails.className = "machine-login-public-details";
   publicDetails.textContent = [machine.brand, machine.model].filter(Boolean).join(" · ");
-  const plateUrl = machine.documents?.plate?.url || "";
-  const plate = document.createElement("img");
-  plate.className = "machine-login-public-plate";
-  plate.alt = t("general.plate", "Placa");
-  plate.src = plateUrl;
-  plate.hidden = !plateUrl;
 
   const userInput = document.createElement("input");
   userInput.type = "text";
@@ -236,7 +230,6 @@ const showLogin = (machine, tagId, { onSuccess, onContinueAsGuest }) => {
 
   panel.appendChild(title);
   if (publicDetails.textContent) panel.appendChild(publicDetails);
-  if (plateUrl) panel.appendChild(plate);
   panel.appendChild(userInput);
   panel.appendChild(passInput);
   panel.appendChild(error);

@@ -28,6 +28,7 @@ body.page .topbar {
 
 .qr-print-fixed-menus-space {
   display: none;
+  margin-bottom: 2.1875rem;
 }
 
 @media (min-width: 769px) {

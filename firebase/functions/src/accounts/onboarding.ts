@@ -1,5 +1,7 @@
 import {HttpsError, onCall} from "firebase-functions/v2/https";
 import {admin, db, machinesCol} from "../core/firebase";
+import {isControlPanelAuth} from "../core/auth";
+import {canCreateOwnedMachines} from "../machines/machinePolicy";
 
 const cleanText = (value: unknown, maxLength: number) =>
   (value || "").toString().trim().replace(/\s+/g, " ").slice(0, maxLength);
@@ -49,7 +51,10 @@ export const completeAccountOnboarding = onCall(async (request) => {
   );
 
   const result = await db.runTransaction(async (transaction) => {
-    const profileSnap = await transaction.get(userRef);
+    const [profileSnap, ownedMachinesSnap] = await Promise.all([
+      transaction.get(userRef),
+      transaction.get(machinesCol().where("ownerUid", "==", auth.uid)),
+    ]);
     if (!profileSnap.exists) {
       throw new HttpsError("failed-precondition", "profile-missing");
     }
@@ -59,6 +64,15 @@ export const completeAccountOnboarding = onCall(async (request) => {
     }
     if (profile.onboardingRequired !== true) {
       throw new HttpsError("failed-precondition", "onboarding-not-required");
+    }
+    if (
+      !canCreateOwnedMachines(
+        ownedMachinesSnap.size,
+        machineCount,
+        isControlPanelAuth(auth),
+      )
+    ) {
+      throw new HttpsError("resource-exhausted", "owned-machine-limit");
     }
 
     const now = admin.firestore.FieldValue.serverTimestamp();
@@ -106,6 +120,7 @@ export const completeAccountOnboarding = onCall(async (request) => {
         tagQrUrl: "",
         tagQrPath: "",
         tagQrSize: 0,
+        tagLanguage: language,
         documents: {},
         logs: [],
         tasks: [],

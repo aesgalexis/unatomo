@@ -296,11 +296,18 @@ export const createDashboardOrderingController = ({
     document.querySelector("#dashboard-mount .add-search")?.setQuery?.("");
     const shouldScrollToTop = window.scrollY > 0;
     const order = computePrevOrder();
-    const machine = createDraftMachine(state.draftMachines.length + 1, order);
     const ownerMachines = state.draftMachines.filter(
       (item) => (item.tenantId || item.ownerUid || state.uid) === state.uid &&
         (item.role || "owner") !== "admin"
     );
+    if (!state.isSuperadmin && ownerMachines.length >= 64) {
+      window.alert(t(
+        "dashboard.ownedMachineLimit",
+        "Has alcanzado el límite de 64 máquinas propias."
+      ));
+      return;
+    }
+    const machine = createDraftMachine(state.draftMachines.length + 1, order);
     if (ownerMachines.length) {
       const inheritedAccessPolicy = ownerMachines.find(
         (item) => item.accessRolePermissions

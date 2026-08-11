@@ -116,6 +116,8 @@ body.nfc-landing {
 }
 
 .landing-lang-picker { position: relative; }
+.landing-header-login[hidden],
+.landing-lang-picker[hidden] { display: none; }
 .landing-lang-button { width: auto; min-width: 66px; padding: 0 0.65rem; justify-content: space-between; gap: 0.5rem; }
 .landing-control-icon { width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; }
 .landing-control-icon svg { width: 18px; height: 18px; display: block; }

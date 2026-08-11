@@ -1,4 +1,5 @@
 import {HttpsError, onCall} from "firebase-functions/v2/https";
+import * as admin from "firebase-admin";
 import {
   db,
   invitesCol,
@@ -73,14 +74,17 @@ export const deleteMachine = onCall(async (request) => {
   const declaredTagId = (machine.tagId || "").toString().trim();
   const [
     tagsSnap,
+    reservedTagsSnap,
     accessSnap,
     linksSnap,
     invitesSnap,
     transfersSnap,
     declaredTagSnap,
     declaredAccessSnap,
+    sessionsSnap,
   ] = await Promise.all([
     tagsCol().where("machineId", "==", machineId).get(),
+    tagsCol().where("reservedForMachineId", "==", machineId).get(),
     machineAccessCol().where("machineId", "==", machineId).get(),
     linksCol().where("machineId", "==", machineId).get(),
     invitesCol().where("machineId", "==", machineId).get(),
@@ -89,6 +93,9 @@ export const deleteMachine = onCall(async (request) => {
     declaredTagId ?
       machineAccessCol().doc(declaredTagId).get() :
       Promise.resolve(null),
+    db.collection("machine_access_sessions")
+      .where("machineId", "==", machineId)
+      .get(),
   ]);
 
   const refs = new Map<string, FirebaseFirestore.DocumentReference>();
@@ -100,13 +107,18 @@ export const deleteMachine = onCall(async (request) => {
     machineRef,
     legacyMachineRef,
     ...tagsSnap.docs.map((docSnap) => docSnap.ref),
+    ...reservedTagsSnap.docs.map((docSnap) => docSnap.ref),
     ...accessSnap.docs.map((docSnap) => docSnap.ref),
     ...linksSnap.docs.map((docSnap) => docSnap.ref),
     ...invitesSnap.docs.map((docSnap) => docSnap.ref),
     ...transfersSnap.docs.map((docSnap) => docSnap.ref),
+    ...sessionsSnap.docs.map((docSnap) => docSnap.ref),
   ]);
 
-  const associatedTagIds = new Set(tagsSnap.docs.map((docSnap) => docSnap.id));
+  const associatedTagIds = new Set([
+    ...tagsSnap.docs.map((docSnap) => docSnap.id),
+    ...reservedTagsSnap.docs.map((docSnap) => docSnap.id),
+  ]);
   associatedTagIds.forEach((tagId) => {
     const ref = machineAccessCol().doc(tagId);
     refs.set(ref.path, ref);
@@ -133,9 +145,37 @@ export const deleteMachine = onCall(async (request) => {
   const storagePaths = new Set<string>();
   const documentPrefix = `machine-docs/${ownerUid}/${machineId}/`;
   collectDocumentStoragePaths(machine.documents, documentPrefix, storagePaths);
+  const declaredQrPath = (machine.tagQrPath || "").toString().trim();
+  if (declaredQrPath.startsWith("tag-qrs/")) storagePaths.add(declaredQrPath);
+  tagsSnap.docs.forEach((docSnap) => {
+    const qrPath = (docSnap.data()?.qrPath || "").toString().trim();
+    if (qrPath.startsWith("tag-qrs/")) storagePaths.add(qrPath);
+  });
+  reservedTagsSnap.docs.forEach((docSnap) => {
+    const qrPath = (docSnap.data()?.qrPath || "").toString().trim();
+    if (qrPath.startsWith("tag-qrs/")) storagePaths.add(qrPath);
+  });
+  if (declaredTagSnap?.exists) {
+    const qrPath = (declaredTagSnap.data()?.qrPath || "").toString().trim();
+    if (qrPath.startsWith("tag-qrs/")) storagePaths.add(qrPath);
+  }
   associatedTagIds.forEach((tagId) => storagePaths.add(`tag-qrs/${tagId}.png`));
 
   await deleteRefsInBatches(refs);
+  const layoutUids = new Set<string>([ownerUid]);
+  linksSnap.docs.forEach((docSnap) => {
+    const adminUid = (docSnap.data()?.adminUid || "").toString().trim();
+    if (adminUid) layoutUids.add(adminUid);
+  });
+  await Promise.all(Array.from(layoutUids).map((uid) =>
+    db.collection("dashboard_layout").doc(uid).set({
+      placements: {
+        [machineId]: admin.firestore.FieldValue.delete(),
+      },
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      updatedBy: auth.uid,
+    }, {merge: true}),
+  ));
   await Promise.all(
     Array.from(storagePaths).map((path) => deleteStorageFileIfExists(path)),
   );

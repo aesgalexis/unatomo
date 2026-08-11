@@ -312,13 +312,15 @@ When creating task-related logs, include `taskId` whenever possible. This keeps 
 
 ## Current Tag/QR Flow
 
-1. User generates or connects a Tag ID from machine config.
-2. The dashboard validates/connects the Tag ID.
-3. The dashboard automatically generates the QR through the existing QR callable.
-4. The QR action is `View QR` / `Ver QR`.
-5. `View QR` opens the QR print page with `?machineId=<id>` so only that QR is shown initially.
-6. The QR print reload button fetches and shows the full QR list again.
-7. Disconnecting the Tag ID must keep deleting associated QR metadata/storage.
+1. Creating an owned machine automatically provisions a generated Tag ID,
+   localized access URL, `machine_access`, and QR in the backend.
+2. Machine config can still connect an existing Tag ID when needed.
+3. The dashboard validates/connects the Tag ID.
+4. The dashboard automatically generates the QR through the existing QR callable.
+5. The QR action is `View QR` / `Ver QR`.
+6. `View QR` opens the QR print page with `?machineId=<id>` so only that QR is shown initially.
+7. The QR print reload button fetches and shows the full QR list again.
+8. Disconnecting the Tag ID must keep deleting associated QR metadata/storage.
 
 ## QR Print
 

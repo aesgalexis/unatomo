@@ -33,6 +33,7 @@ const saveDashboardGroupLayoutCallable = httpsCallable(
   "saveDashboardGroupLayout"
 );
 const deleteMachineCallable = httpsCallable(functions, "deleteMachine");
+const createOwnedMachineCallable = httpsCallable(functions, "createOwnedMachine");
 const saveGlobalLocalUserAccessCallable = httpsCallable(
   functions,
   "saveGlobalLocalUserAccess"
@@ -245,6 +246,24 @@ export const upsertMachine = async (uid, machine) => {
 export const deleteMachine = async (uid, machineId) => {
   void uid;
   await deleteMachineCallable({ machineId });
+};
+
+export const createOwnedMachine = async (machine) => {
+  try {
+    const response = await createOwnedMachineCallable({
+      machineId: machine.id,
+      machine,
+      language: document.documentElement.lang === "en" ? "en" : "es"
+    });
+    return response?.data || { ok: false };
+  } catch (error) {
+    const code = (error?.code || "").toString();
+    const message = (error?.message || "").toString();
+    if (code.includes("resource-exhausted") || message.includes("owned-machine-limit")) {
+      throw new Error("owned-machine-limit");
+    }
+    throw error;
+  }
 };
 
 export const addUserWithRegistry = async (uid, machineId, user, options = {}) => {

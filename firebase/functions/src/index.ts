@@ -55,7 +55,9 @@ export {
   disconnectMachineTag,
   generateMachineTagQr,
   listControlPanelTags,
+  provisionMachineTagOnCreate,
 } from "./machines/tags";
+export {createOwnedMachine} from "./machines/createMachine";
 export {deleteMachine} from "./machines/deleteMachine";
 export {
   deleteGlobalLocalUserAccess,

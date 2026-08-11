@@ -35,6 +35,21 @@ const paths = {
   setup: `${appBasePrefix || ""}/?setup=1`,
 };
 
+const getLoginReturnTarget = () => {
+  const value = new URLSearchParams(window.location.search).get("returnTo") || "";
+  if (!/^\/nfc\/(?:es|en)\/m\.html(?:\?|#|$)/.test(value)) return "";
+  try {
+    const target = new URL(value, window.location.origin);
+    if (target.origin !== window.location.origin) return "";
+    if (!/^\/nfc\/(?:es|en)\/m\.html$/.test(target.pathname)) return "";
+    return `${target.pathname}${target.search}${target.hash}`;
+  } catch {
+    return "";
+  }
+};
+
+const loginReturnTarget = getLoginReturnTarget();
+
 const text = {
   connectingGoogle: isEn ? "Connecting to Google..." : "Conectando con Google...",
   googleTakingLonger: isEn
@@ -391,7 +406,9 @@ function initLoginPage() {
     status.textContent = "";
   }
   function goHome(requiresOnboarding) {
-    window.location.href = requiresOnboarding ? paths.onboarding : paths.home;
+    window.location.href = requiresOnboarding
+      ? paths.onboarding
+      : (loginReturnTarget || paths.home);
   }
   let interactiveLoginInProgress = false;
 

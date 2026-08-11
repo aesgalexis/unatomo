@@ -3,19 +3,25 @@ import { initTopbarLogoMotion } from "/static/js/topbar/loading-logo.js";
 const mount = document.getElementById("topbar-mount");
 const lang = document.documentElement.lang.toLowerCase().startsWith("en") ? "en" : "es";
 const isLoginPage = /^\/nfc\/(?:es|en)\/auth\/login\.html$/.test(window.location.pathname);
+const isMachinePage = /^\/nfc\/(?:es|en)\/m\.html$/.test(window.location.pathname);
 const loginPath = `/nfc/${lang}/auth/login.html`;
 const loginLabel = lang === "en" ? "Sign in" : "Iniciar sesión";
+const dashboardPath = `/nfc/${lang}/index.html#/dashboard`;
+const dashboardLabel = lang === "en" ? "Open dashboard" : "Abrir dashboard";
+const machineLoginPath = isMachinePage
+  ? `${loginPath}?returnTo=${encodeURIComponent(`${window.location.pathname}${window.location.search}${window.location.hash}`)}`
+  : loginPath;
 
 if (mount) {
   mount.innerHTML = `
     <header class="landing-header">
       <a class="landing-brand" href="/nfc/" aria-label="UNATOMO NFC">
         <img src="/static/img/logo-unatomo-round-outline-v1.0.svg" alt="unatomo" class="topbar-logo--rotating">
-        <span>UNATOMO/NFC</span>
+        <span>${isMachinePage ? "/NFC" : "UNATOMO/NFC"}</span>
       </a>
       <div class="landing-header-actions">
-        ${isLoginPage ? "" : `<a class="landing-header-login" href="${loginPath}">${loginLabel}</a>`}
-        <div class="landing-lang-picker">
+        ${isLoginPage ? "" : `<a id="public-session-cta" class="landing-header-login" href="${machineLoginPath}"${isMachinePage ? " hidden" : ""}>${loginLabel}</a>`}
+        <div class="landing-lang-picker"${isMachinePage ? " hidden" : ""}>
           <button id="lang-toggle" class="landing-control landing-lang-button" type="button" aria-expanded="false" aria-controls="lang-menu" aria-label="${lang === "en" ? "Language" : "Idioma"}">
             <span class="landing-control-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"></path></svg>
@@ -36,6 +42,51 @@ initTopbarLogoMotion();
 
 const langToggle = document.getElementById("lang-toggle");
 const langMenu = document.getElementById("lang-menu");
+const sessionCta = document.getElementById("public-session-cta");
+const langPicker = document.querySelector(".landing-lang-picker");
+
+if (isMachinePage && sessionCta && langPicker) {
+  const showGuestActions = () => {
+    sessionCta.href = machineLoginPath;
+    sessionCta.textContent = loginLabel;
+    sessionCta.hidden = false;
+    langPicker.hidden = false;
+  };
+
+  const showAccountActions = () => {
+    sessionCta.href = dashboardPath;
+    sessionCta.textContent = dashboardLabel;
+    sessionCta.hidden = false;
+    langPicker.hidden = true;
+    if (langMenu) langMenu.hidden = true;
+    if (langToggle) langToggle.setAttribute("aria-expanded", "false");
+  };
+
+  try {
+    const { auth, authPersistenceReady, getUserRegistrationState } = await import(
+      "/static/js/registro/firebase-init.js"
+    );
+    const { onAuthStateChanged } = await import(
+      "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js"
+    );
+    await authPersistenceReady;
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        showGuestActions();
+        return;
+      }
+      try {
+        const registration = await getUserRegistrationState(user);
+        if (registration.allowed) showAccountActions();
+        else showGuestActions();
+      } catch {
+        showGuestActions();
+      }
+    });
+  } catch {
+    showGuestActions();
+  }
+}
 
 const closeLangMenu = () => {
   if (!langToggle || !langMenu) return;

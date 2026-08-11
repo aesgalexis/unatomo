@@ -177,8 +177,7 @@ service cloud.firestore {
         && resource.data.ownerUid is string
         && (resource.data.ownerUid == request.auth.uid
           || isAcceptedAdminOfMachine(resource.data.ownerUid, machineId));
-      allow create: if isSignedIn()
-        && request.resource.data.ownerUid == request.auth.uid;
+      allow create: if false;
       allow update: if isSignedIn()
         && resource.data.ownerUid is string
         && (resource.data.ownerUid == request.auth.uid

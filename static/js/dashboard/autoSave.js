@@ -22,8 +22,11 @@ export const initAutoSave = ({
         await saveFn(machineId, reason);
       }
       if (notify) notify(t("dashboard.saved", "Guardado"));
-    } catch {
-      if (notify) notify(t("dashboard.saveError", "Error al guardar"));
+    } catch (error) {
+      const message = (error?.message || "").toString();
+      if (notify) notify(message.includes("owned-machine-limit")
+        ? t("dashboard.ownedMachineLimit", "Has alcanzado el límite de 64 máquinas propias.")
+        : t("dashboard.saveError", "Error al guardar"));
     }
   };
 

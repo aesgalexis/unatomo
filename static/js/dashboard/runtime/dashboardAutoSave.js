@@ -1,6 +1,6 @@
 import { initAutoSave } from "../autoSave.js";
 import { assignTag, validateTag } from "../tagRepo.js";
-import { upsertMachine } from "../firestoreRepo.js";
+import { createOwnedMachine, upsertMachine } from "../firestoreRepo.js";
 import { upsertMachineAccessFromMachine } from "../machineAccessRepo.js";
 
 export const createDashboardAutoSave = ({
@@ -38,7 +38,8 @@ export const createDashboardAutoSave = ({
         throw new Error("tag-assigned");
       }
     }
-    await upsertMachine(tenantId, machine);
+    if (machine.isNew) await createOwnedMachine(machine);
+    else await upsertMachine(tenantId, machine);
     machine.isNew = false;
     if (machine.tagId && !skipTagSync) {
       try {

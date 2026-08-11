@@ -1,4 +1,5 @@
 import {HttpsError, onCall} from "firebase-functions/v2/https";
+import {onDocumentCreated} from "firebase-functions/v2/firestore";
 import * as admin from "firebase-admin";
 import {randomUUID} from "node:crypto";
 import QRCode from "qrcode";
@@ -38,6 +39,158 @@ const buildMachineTagUrl = (tagId: string, lang = "es") =>
     lang,
   )}/m.html?tag=${encodeURIComponent(tagId)}`;
 
+const ensureGeneratedMachineTag = async (machineId: string) => {
+  for (let tries = 0; tries < 10; tries += 1) {
+    const candidate = generateTagId();
+    const machineRef = machinesCol().doc(machineId);
+    const tagRef = tagsCol().doc(candidate);
+    const result = await db.runTransaction(async (transaction) => {
+      const [machineSnap, tagSnap] = await Promise.all([
+        transaction.get(machineRef),
+        transaction.get(tagRef),
+      ]);
+      if (!machineSnap.exists) return {missing: true, tagId: ""};
+      const machine = machineSnap.data() || {};
+      const currentTagId = (machine.tagId || "").toString().trim();
+      if (currentTagId) return {missing: false, tagId: currentTagId};
+      if (tagSnap.exists) return {collision: true, missing: false, tagId: ""};
+
+      const ownerUid = (machine.ownerUid || "").toString().trim();
+      if (!ownerUid) throw new Error("machine-owner-missing");
+      const now = admin.firestore.FieldValue.serverTimestamp();
+      const tagUrl = buildMachineTagUrl(
+        candidate,
+        machine.tagLanguage === "en" ? "en" : "es",
+      );
+      transaction.create(tagRef, {
+        state: "assigned",
+        tenantId: ownerUid,
+        ownerUid,
+        machineId,
+        url: tagUrl,
+        createdAt: now,
+        createdBy: ownerUid,
+        assignedAt: now,
+        assignedBy: ownerUid,
+        updatedAt: now,
+        updatedBy: ownerUid,
+      });
+      transaction.set(machineAccessCol().doc(candidate), {
+        tenantId: ownerUid,
+        machineId,
+        title: machine.title || "",
+        brand: machine.brand || "",
+        model: machine.model || "",
+        serial: machine.serial || "",
+        year: machine.year ?? null,
+        location: machine.location || "",
+        status: machine.status || "operativa",
+        logs: Array.isArray(machine.logs) ? machine.logs : [],
+        tasks: Array.isArray(machine.tasks) ? machine.tasks : [],
+        updatedAt: now,
+        updatedBy: ownerUid,
+      });
+      transaction.update(machineRef, {
+        tagId: candidate,
+        tagUrl,
+        tagQrUrl: "",
+        tagQrPath: "",
+        tagQrSize: 0,
+        updatedAt: now,
+        updatedBy: ownerUid,
+      });
+      return {missing: false, tagId: candidate};
+    });
+    if (result.missing) return "";
+    if (result.tagId) return result.tagId;
+  }
+  throw new Error("tag-generate-failed");
+};
+
+const ensureGeneratedMachineQr = async (machineId: string) => {
+  const machineRef = machinesCol().doc(machineId);
+  const machineSnap = await machineRef.get();
+  if (!machineSnap.exists) return;
+  const machine = machineSnap.data() || {};
+  const tagId = (machine.tagId || "").toString().trim();
+  const ownerUid = (machine.ownerUid || "").toString().trim();
+  if (!tagId || !ownerUid || machine.tagQrUrl) return;
+
+  const tagRef = tagsCol().doc(tagId);
+  const tagSnap = await tagRef.get();
+  if (!tagSnap.exists || tagSnap.data()?.machineId !== machineId) {
+    throw new Error("tag-machine-mismatch");
+  }
+  const tagUrl = (
+    machine.tagUrl || buildMachineTagUrl(
+      tagId,
+      machine.tagLanguage === "en" ? "en" : "es",
+    )
+  ).toString();
+  const qrPng = await QRCode.toBuffer(tagUrl, {
+    type: "png",
+    width: QR_CANVAS_SIZE,
+    margin: 2,
+    errorCorrectionLevel: "H",
+    color: {dark: "#0f172a", light: "#ffffff"},
+  });
+  await assertAccountStorageAvailable(ownerUid, qrPng.length);
+  const qrPath = `tag-qrs/${tagId}.png`;
+  const downloadToken = randomUUID();
+  await storageBucket.file(qrPath).save(qrPng, {
+    resumable: false,
+    contentType: "image/png",
+    metadata: {
+      cacheControl: "private, max-age=31536000",
+      contentDisposition: `attachment; filename="${tagId}.png"`,
+      metadata: {firebaseStorageDownloadTokens: downloadToken},
+    },
+  });
+  const qrUrl = buildStorageDownloadUrl(qrPath, downloadToken);
+  const now = admin.firestore.FieldValue.serverTimestamp();
+  const committed = await db.runTransaction(async (transaction) => {
+    const [freshMachineSnap, freshTagSnap] = await Promise.all([
+      transaction.get(machineRef),
+      transaction.get(tagRef),
+    ]);
+    if (
+      !freshMachineSnap.exists ||
+      !freshTagSnap.exists ||
+      (freshMachineSnap.data()?.tagId || "").toString() !== tagId ||
+      (freshTagSnap.data()?.machineId || "").toString() !== machineId
+    ) {
+      return false;
+    }
+    transaction.set(machineRef, {
+      tagUrl,
+      tagQrUrl: qrUrl,
+      tagQrPath: qrPath,
+      tagQrSize: qrPng.length,
+      updatedAt: now,
+      updatedBy: ownerUid,
+    }, {merge: true});
+    transaction.set(tagRef, {
+      qrUrl,
+      qrPath,
+      qrSize: qrPng.length,
+      updatedAt: now,
+      updatedBy: ownerUid,
+    }, {merge: true});
+    return true;
+  });
+  if (!committed) await deleteStorageFileIfExists(qrPath);
+};
+
+export const provisionMachineTagOnCreate = onDocumentCreated(
+  {document: "machines/{machineId}", retry: true},
+  async (event) => {
+    const machineId = event.params.machineId;
+    const tagId = await ensureGeneratedMachineTag(machineId);
+    if (!tagId) return;
+    await ensureGeneratedMachineQr(machineId);
+  },
+);
+
 export const createMachineTagToken = onCall(async (request) => {
   const auth = request.auth;
   await assertRegisteredAccount(auth);
@@ -63,6 +216,7 @@ export const createMachineTagToken = onCall(async (request) => {
     state: "available",
     tenantId: ownerUid,
     machineId: null,
+    reservedForMachineId: machineId,
     createdAt: now,
     createdBy: auth?.uid || ownerUid,
   });
@@ -117,6 +271,7 @@ export const assignMachineTag = onCall(async (request) => {
         state: "assigned",
         tenantId: ownerUid,
         machineId,
+        reservedForMachineId: admin.firestore.FieldValue.delete(),
         url: tagUrl,
         assignedAt: now,
         assignedBy: auth?.uid || ownerUid,
