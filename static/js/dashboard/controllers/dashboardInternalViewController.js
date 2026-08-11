@@ -5,6 +5,7 @@ import {
   SUGGESTIONS_PAGE_SIZE,
   renderRegistryDashboardView,
   renderGalleryDashboardView,
+  renderStatisticsDashboardView,
   renderSuggestionsDashboardView,
   renderTodoDashboardView,
   renderUsersDashboardView
@@ -208,7 +209,7 @@ export const createDashboardInternalViewController = ({
     filterInfo.style.display = "none";
     cardRefs.clear();
   };
-  const getMachineScope = (machines) => {
+  const getMachineScope = (machines, { includeHidden = false } = {}) => {
     const layout = state.dashboardLayout || {};
     const groups = layout.groups || [];
     const placements = layout.placements || {};
@@ -227,10 +228,12 @@ export const createDashboardInternalViewController = ({
       state.selectedTreeMachineId = "";
     }
     const hiddenGroupIds = new Set(state.hiddenTreeGroupIds || []);
-    const visibleMachines = machines.filter((machine) => {
-      const groupId = placements[machine.id]?.groupId || "";
-      return !hiddenGroupIds.has(groupId);
-    });
+    const visibleMachines = includeHidden
+      ? machines
+      : machines.filter((machine) => {
+          const groupId = placements[machine.id]?.groupId || "";
+          return !hiddenGroupIds.has(groupId);
+        });
     return getDashboardScopedMachines({
       machines: visibleMachines,
       groups,
@@ -239,7 +242,7 @@ export const createDashboardInternalViewController = ({
       selectedMachineId: state.selectedTreeMachineId
     });
   };
-  const renderMachineFilterTree = (machines) => {
+  const renderMachineFilterTree = (machines, options = {}) => {
     if (state.loading || !isLargeDashboardViewport?.()) return machines;
     const layout = state.dashboardLayout || {};
     mount.classList.add("has-group-tree");
@@ -256,7 +259,7 @@ export const createDashboardInternalViewController = ({
       showTaskCounts: state.showTreeTaskCounts !== false,
       filterOnly: false
     });
-    return getMachineScope(machines);
+    return getMachineScope(machines, options);
   };
   const renderRegistry = (machines) => {
     prepare();
@@ -288,6 +291,34 @@ export const createDashboardInternalViewController = ({
       query: state.searchQuery
     });
     showFixedViewHeader("gallery");
+    return finish();
+  };
+  const renderStatistics = (machines) => {
+    prepare();
+    const scopedMachines = renderMachineFilterTree(machines, { includeHidden: true });
+    const headerContainer = getFixedViewHeaderContainer(true);
+    renderStatisticsDashboardView(list, scopedMachines, {
+      headerContainer,
+      loadingElement: headerContainer ? loadingEl : null,
+      loading: state.loading,
+      query: state.searchQuery,
+      period: state.statisticsPeriod,
+      totalMachineCount: machines.length,
+      hasTreeScope: !!(state.selectedTreeGroupId || state.selectedTreeMachineId),
+      onClearScope: () => {
+        state.selectedTreeGroupId = "";
+        state.selectedTreeMachineId = "";
+        rerender({ preserveScroll: false });
+      },
+      onSelectMachine: isLargeDashboardViewport?.()
+        ? (machineId) => {
+            state.selectedTreeGroupId = "";
+            state.selectedTreeMachineId = machineId;
+            rerender({ preserveScroll: false });
+          }
+        : null
+    });
+    showFixedViewHeader("tasks");
     return finish();
   };
   const renderUsers = (machines) => {
@@ -723,6 +754,7 @@ export const createDashboardInternalViewController = ({
     }
     if (view === "registro") return renderRegistry(machines);
     if (view === "galeria") return renderGallery(machines);
+    if (view === "estadisticas") return renderStatistics(machines);
     if (view === "usuarios") return renderUsers(machines);
     if (view === "sugerencias") return renderSuggestions();
     if (view === "todo") return renderTodo(viewOptions);

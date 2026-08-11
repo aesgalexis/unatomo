@@ -169,6 +169,9 @@ The main dashboard page has internal hash views:
 - `#/tareas` (Spanish) / `#/tasks` (English): the account-wide machine Tasks
   view for every authenticated account. The legacy `#/todo` route remains
   accepted as an alias.
+- `#/estadisticas` (Spanish) / `#/statistics` (English): account-wide machine
+  statistics with current fleet status, period performance, attention items,
+  and a machine comparison table.
 - At desktop tree width, `Registro`, `Tareas`, and `Galería` reuse the side
   group tree in its complete form, including group creation, contextual group actions,
   visibility controls, counters, and machine-scope filtering. Selecting a group

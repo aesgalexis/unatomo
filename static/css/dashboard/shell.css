@@ -501,7 +501,7 @@ body.page .topbar {
     grid-row: 2;
   }
 
-  .dashboard-fixed-menus .add-bar.is-gallery-view .btn-order:not(:disabled) {
+  .dashboard-fixed-menus .add-bar:is(.is-gallery-view, .is-statistics-view) .btn-order:not(:disabled) {
     opacity: 1;
     filter: none;
     cursor: pointer;
@@ -625,7 +625,7 @@ body.page .topbar {
 }
 
 .add-bar.is-registry-view .btn-add,
-.add-bar.is-registry-view:not(.is-todo-view):not(.is-suggestions-view):not(.is-gallery-view) .btn-order {
+.add-bar.is-registry-view:not(.is-todo-view):not(.is-suggestions-view):not(.is-gallery-view):not(.is-statistics-view) .btn-order {
   opacity: 0.42;
   filter: grayscale(0.4);
   cursor: not-allowed;

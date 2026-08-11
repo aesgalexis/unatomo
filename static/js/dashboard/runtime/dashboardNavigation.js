@@ -15,8 +15,9 @@ export const getDashboardInternalView = () => {
     suggestions: "sugerencias",
     tareas: "todo",
     tasks: "todo",
+    statistics: "estadisticas",
   }[section] || section;
-  return ["registro", "galeria", "usuarios", "sugerencias", "todo"].includes(normalizedSection)
+  return ["registro", "galeria", "estadisticas", "usuarios", "sugerencias", "todo"].includes(normalizedSection)
     ? normalizedSection
     : "dashboard";
 };

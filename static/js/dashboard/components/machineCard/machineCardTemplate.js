@@ -20,6 +20,10 @@
               <path fill="currentColor" d="M12 6a1 1 0 0 1 1 1v4.59l2.3 2.3a1 1 0 0 1-1.4 1.42l-2.6-2.6A1 1 0 0 1 11 12V7a1 1 0 0 1 1-1z"/>
               <path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20m0 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16"/>
             </svg></button>
+          <button class="mc-tab" data-tab="estadisticas" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path fill="currentColor" d="M4 19h16v2H2V3h2zm3-2H5v-6h2zm4 0H9V7h2zm4 0h-2V9h2zm4 0h-2V4h2z"/>
+            </svg></button>
           <button class="mc-tab" data-tab="general" type="button">
             <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path fill="currentColor" d="M11 7h2v2h-2zm0 4h2v6h-2z"/>

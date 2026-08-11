@@ -3,7 +3,12 @@ import { t } from "../../i18n.js";
 const DOWNLOAD_ICON =
   '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 3a1 1 0 0 1 1 1v8.59l2.3-2.3a1 1 0 1 1 1.4 1.42l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 0 1 1.4-1.42l2.3 2.3V4a1 1 0 0 1 1-1Zm-7 14a1 1 0 0 1 1 1v2h12v-2a1 1 0 1 1 2 0v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1Z"/></svg>';
 
-export const createDownloadMenu = ({ onSelect, placement = "top", className = "" } = {}) => {
+export const createDownloadMenu = ({
+  onSelect,
+  placement = "top",
+  className = "",
+  formats = null
+} = {}) => {
   const wrap = document.createElement("div");
   wrap.className = `history-download-menu ${className}`.trim();
   wrap.dataset.placement = placement;
@@ -56,8 +61,15 @@ export const createDownloadMenu = ({ onSelect, placement = "top", className = ""
     panel.appendChild(option);
   };
 
-  addOption("csv", t("history.downloadExcel", "Excel (.csv)"), "CSV");
-  addOption("txt", t("history.downloadText", "Texto (.txt)"), "TXT");
+  const availableFormats = Array.isArray(formats) && formats.length
+    ? formats
+    : [
+        { id: "csv", label: t("history.downloadExcel", "Excel (.csv)"), extension: "CSV" },
+        { id: "txt", label: t("history.downloadText", "Texto (.txt)"), extension: "TXT" }
+      ];
+  availableFormats.forEach((format) => {
+    addOption(format.id, format.label, format.extension || format.id.toUpperCase());
+  });
 
   toggle.addEventListener("click", (event) => {
     event.preventDefault();

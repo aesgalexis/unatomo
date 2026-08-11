@@ -43,6 +43,8 @@
   width: 100%;
   height: 100%;
   fill: currentColor;
+  transform: scale(1.055);
+  transform-origin: center;
 }
 
 .dashboard-section-icon-todo {
@@ -51,12 +53,12 @@
 }
 
 .dashboard-section-icon-todo svg {
-  transform: translateY(1px) scale(1.055);
+  transform: scale(1.055);
   transform-origin: center;
 }
 
 .dashboard-section-icon-gallery svg {
-  transform: translateY(1px) scale(1.04);
+  transform: scale(1.055);
   transform-origin: center;
 }
 

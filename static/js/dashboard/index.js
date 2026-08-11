@@ -11,7 +11,7 @@ import { fetchLinksForAdmin } from "./admin/adminLinksRepo.js";
 import { createAdminInvite, leaveAdminRole, revokeAdminInvite, ensureAdminLink, createMachineTransferInvite, cancelMachineTransferInvite } from "./admin/adminFunctionsRepo.js";
 import { validateTag, assignTag } from "./tagRepo.js";
 import { createTagToken } from "/static/js/tokens/tagTokens.js";
-import { upsertMachineAccessFromMachine, fetchMachineAccess, setMachineQrAccessEnabled } from "./machineAccessRepo.js";
+import { upsertMachineAccessFromMachine, fetchMachineAccess } from "./machineAccessRepo.js";
 import { buildMachineTagUrl, generateMachineTagQr, disconnectMachineTag } from "./tags/tagAssetsRepo.js";
 import { createMachineCard } from "./machineCardTemplate.js";
 import { initGroupedDragAndDrop } from "./dragAndDrop.js";
@@ -244,7 +244,7 @@ if (mount) {
     dashboardLink,
     registryLink,
     registryBadge,
-    galleryLink, usersLink,
+    galleryLink, statisticsLink, usersLink,
     suggestionsLink,
     suggestionsBadge,
     todoLink,
@@ -252,13 +252,15 @@ if (mount) {
   } = createDashboardSectionNav({
     ariaLabel: t("dashboard.sectionNavAria", "Secciones"),
     qrPrintHref, usersHref: lang === "en" ? "#/users" : "#/usuarios", todoHref: lang === "en" ? "#/tasks" : "#/tareas",
+    statisticsHref: lang === "en" ? "#/statistics" : "#/estadisticas",
     labels: {
       dashboard: "Dashboard",
       registry: t("dashboard.navRegistry", "Registro"),
       qrPrint: t("dashboard.navQrPrint", "Impresión QR"),
       gallery: t("dashboard.navGallery", "Galería"), users: t("dashboard.navUsers", "Usuarios"),
       suggestions: t("dashboard.navSuggestions", "Sugerencias"),
-      todo: t("dashboard.navTodo", "Tareas")
+      todo: t("dashboard.navTodo", "Tareas"),
+      statistics: t("dashboard.navStatistics", "Estadísticas")
     },
     active: "dashboard", showTodo: true
   });
@@ -437,6 +439,7 @@ if (mount) {
     calculateStorageUsage,
     dashboardLink,
     galleryLink,
+    statisticsLink,
     getStorageFullText: () => getStorageFullText(),
     handleInviteDecision: (...args) => handleInviteDecision(...args),
     handleTransferDecision: (...args) => handleTransferDecision(...args),
@@ -636,7 +639,7 @@ if (mount) {
     container: groupTree,
     getGroupMenuActions,
     getPendingTaskCount,
-    isTreeActive: () => largeDashboardQuery.matches && (isTreeModeActive() || ["registro", "todo", "galeria"].includes(state.activeView)),
+    isTreeActive: () => largeDashboardQuery.matches && (isTreeModeActive() || ["registro", "todo", "estadisticas", "galeria"].includes(state.activeView)),
     moveGroupToGroup: (draggedId, targetId) => moveGroupToTargetGroup(draggedId, targetId),
     moveGroupToRoot: (draggedGroupId) => moveGroupToRootLevel(draggedGroupId),
     moveMachineToGroup: (machineId, groupId) => moveMachineToGroup(machineId, groupId),
@@ -756,7 +759,6 @@ if (mount) {
     restoreViewport,
     revokeAdminInvite,
     scheduleHeightSync,
-    setMachineQrAccessEnabled,
     sortFlatMachines,
     state,
     groupTree,
@@ -776,7 +778,7 @@ if (mount) {
     validateTag,
     viewMenu,
   });
-  if (["registro", "galeria", "usuarios"].includes(state.activeView)) {
+  if (["registro", "galeria", "estadisticas", "usuarios"].includes(state.activeView)) {
     renderCards({ preserveScroll: false });
   }
   queueDashboardMenusScrollState();

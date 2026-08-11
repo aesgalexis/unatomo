@@ -328,6 +328,16 @@
   margin: 0.25rem 0 0;
 }
 
+.mc-info-footer-sep {
+  width: auto;
+  margin: 0.25rem -1.25rem 0.75rem;
+}
+
+.mc-info-last-modified {
+  color: color-mix(in srgb, var(--fg) 58%, transparent);
+  font-size: 0.85rem;
+}
+
 .mc-other-doc-list {
   display: grid;
   gap: 0.35rem;

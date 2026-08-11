@@ -3,6 +3,7 @@ import { STATUS_LABELS } from "./machineCardTypes.js";
 import { render as renderQuehaceres } from "../../tabs/tasks/tareas.js";
 import { render as renderGeneral } from "../../tabs/general/general.js";
 import { render as renderHistorial } from "../../tabs/historial.js";
+import { render as renderEstadisticas } from "../../tabs/estadisticas.js";
 import { render as renderConfiguracion } from "../../tabs/configuracion/index.js";
 import { getTaskTiming } from "../../tabs/tasks/tasksTime.js";
 import { t } from "../../i18n.js";
@@ -11,9 +12,10 @@ const TAB_RENDER = {
   quehaceres: renderQuehaceres,
   general: renderGeneral,
   historial: renderHistorial,
+  estadisticas: renderEstadisticas,
   configuracion: renderConfiguracion
 };
-const DEFAULT_TAB_ORDER = ["quehaceres", "historial", "general", "configuracion"];
+const DEFAULT_TAB_ORDER = ["quehaceres", "historial", "estadisticas", "general", "configuracion"];
 
 const normalizeTabOrder = (value) => {
   const seen = new Set();
@@ -304,8 +306,13 @@ export const createMachineCard = (machine, options = {}) => {
       if (String(machine.tagId).startsWith("G-")) {
         nfc.classList.add("is-generated");
       }
-      nfc.setAttribute("aria-label", t("card.nfcLinked", "Tag NFC enlazado"));
-      nfc.setAttribute("data-tooltip", t("card.nfcLinked", "Tag NFC enlazado"));
+      const isNfcActive = machine.qrAccessEnabled !== false;
+      if (!isNfcActive) nfc.classList.add("is-disabled");
+      const nfcLabel = isNfcActive
+        ? t("card.nfcActive", "Tag NFC activo")
+        : t("card.nfcDisabled", "Tag NFC desactivado");
+      nfc.setAttribute("aria-label", nfcLabel);
+      nfc.setAttribute("data-tooltip", nfcLabel);
       nfc.innerHTML =
         '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">' +
         '<path fill="currentColor" d="M8 5a1 1 0 0 1 1 1v12a1 1 0 1 1-2 0V6a1 1 0 0 1 1-1zm6 1a6 6 0 0 1 6 6v.9a1 1 0 1 1-2 0V12a4 4 0 0 0-4-4 1 1 0 1 1 0-2zm0 4a2 2 0 0 1 2 2v.7a1 1 0 1 1-2 0V12a1 1 0 0 0-1-1 1 1 0 1 1 0-2z"/>' +
@@ -512,8 +519,8 @@ export const createMachineCard = (machine, options = {}) => {
     pendingBtn.addEventListener("click", (event) => {
       event.stopPropagation();
       if (card.dataset.expanded !== "true" && hooks.onToggleExpand) {
-        hooks.onToggleExpand(card);
         if (!card.querySelector(".mc-tab.is-active")) activateFirstTab();
+        hooks.onToggleExpand(card);
       }
     });
   }
@@ -532,8 +539,8 @@ export const createMachineCard = (machine, options = {}) => {
       ) {
         event.preventDefault();
         event.stopPropagation();
-        if (hooks.onToggleExpand) hooks.onToggleExpand(card);
         if (!card.querySelector(".mc-tab.is-active")) activateFirstTab();
+        if (hooks.onToggleExpand) hooks.onToggleExpand(card);
       }
     },
     true
@@ -616,10 +623,9 @@ export const createMachineCard = (machine, options = {}) => {
     tab.addEventListener("click", (event) => {
       event.stopPropagation();
       const key = tab.dataset.tab;
-      if (card.dataset.expanded !== "true" && hooks.onToggleExpand) {
-        hooks.onToggleExpand(card);
-      }
+      const shouldExpand = card.dataset.expanded !== "true" && hooks.onToggleExpand;
       hooks.setActiveTab(key, { notify: true });
+      if (shouldExpand) hooks.onToggleExpand(card);
     });
   });
 

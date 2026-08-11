@@ -1,3 +1,5 @@
+import { setMachineQrAccessEnabled } from "../../machineAccessRepo.js";
+
 export const installMachineCardTagHooks = (dependencies) => {
   const {
     assertStorageAvailable,
@@ -19,7 +21,6 @@ export const installMachineCardTagHooks = (dependencies) => {
     refreshStorageFullState,
     renderCards,
     scheduleHeightSync,
-    setMachineQrAccessEnabled,
     state,
     t,
     updateMachine,

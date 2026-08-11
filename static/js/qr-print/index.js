@@ -254,6 +254,7 @@ const createSectionNav = () => {
     galleryHref: `${text.dashboard}#/galeria`,
     suggestionsHref: `${text.dashboard}#/sugerencias`,
     todoHref: `${text.dashboard}#/${isEn ? "tasks" : "tareas"}`,
+    statisticsHref: `${text.dashboard}#/${isEn ? "statistics" : "estadisticas"}`,
     labels: {
       dashboard: text.navDashboard,
       users: isEn ? "Users" : "Usuarios",
@@ -261,7 +262,8 @@ const createSectionNav = () => {
       qrPrint: text.navQrPrint,
       gallery: text.navGallery,
       suggestions: text.navSuggestions,
-      todo: text.navTodo
+      todo: text.navTodo,
+      statistics: isEn ? "Statistics" : "Estadísticas"
     },
     active: "qrPrint",
     showSuggestions: showSuggestionsNav,
@@ -446,7 +448,7 @@ const qrTreeRenderer = createDashboardGroupTreeRenderer({
     state: machine.qrAccessEnabled === false ? "qr-disabled" : "has-qr",
     label: machine.qrAccessEnabled === false
       ? (lang === "en" ? "QR access disabled" : "Acceso QR deshabilitado")
-      : text.qrGenerated,
+      : (lang === "en" ? "QR access enabled" : "Acceso QR habilitado"),
     text: "QR"
   }) : null,
   getPendingTaskCount: () => 0,

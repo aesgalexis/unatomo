@@ -124,20 +124,26 @@
 
 .mc-config-group {
   max-width: 720px;
-  padding: 0.85rem 1rem;
-  margin-bottom: 0.75rem;
-  border: 1px solid var(--border-subtle);
-  border-radius: 0.75rem;
-  background: color-mix(in srgb, var(--bg) 97%, var(--fg) 3%);
+  margin-bottom: 1rem;
+}
+
+.mc-config-group .mc-config-row {
+  align-items: center;
+  flex-direction: row;
+  gap: 0.75rem;
+}
+
+.mc-config-group .mc-tag-status {
+  margin: -0.25rem 0 0.75rem 102px;
+}
+
+.mc-config-group .mc-config-controls {
+  width: auto;
 }
 
 .mc-config-group .mc-config-row:last-of-type,
 .mc-config-group .mc-tag-status:last-child {
   margin-bottom: 0;
-}
-
-.mc-config-group .mc-tag-status {
-  margin-left: 102px;
 }
 
 .mc-config-row-users {
@@ -222,10 +228,6 @@
 }
 
 @media (max-width: 620px) {
-  .mc-config-group {
-    padding: 0.75rem;
-  }
-
   .mc-config-group .mc-config-row {
     align-items: flex-start;
     flex-direction: column;
@@ -307,8 +309,13 @@
   cursor: not-allowed;
 }
 
-.mc-tag-status {
+.mc-tag-status,
+.mc-qr-access-state,
+.mc-admin-status {
   font-size: 0.85rem;
+}
+
+.mc-tag-status {
   color: color-mix(in srgb, var(--fg) 70%, transparent);
   margin: 0.1rem 0 0.6rem;
 }
@@ -358,7 +365,6 @@
 
 .mc-qr-access-state {
   color: color-mix(in srgb, var(--fg) 62%, transparent);
-  font-size: 0.75rem;
 }
 
 .mc-qr-access-switch {
@@ -474,7 +480,6 @@
 
 .mc-admin-status {
   color: #f97316;
-  font-size: 0.85rem;
   min-height: 1.15rem;
   margin-top: -0.05rem;
 }
@@ -620,9 +625,16 @@
 
 .mc-user-row {
   display: grid;
-  grid-template-columns: 1fr auto auto auto auto;
+  grid-template-columns: 1fr auto;
   gap: 0.75rem;
   align-items: center;
+}
+
+.mc-user-identity {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  min-width: 0;
 }
 
 .mc-user-row .mc-user-pin-actions {
@@ -636,7 +648,7 @@
 
 .mc-user-role-label {
   font-size: 0.85rem;
-  color: color-mix(in srgb, var(--fg) 70%, transparent);
+  color: color-mix(in srgb, var(--fg) 58%, transparent);
 }
 
 .mc-user-role {

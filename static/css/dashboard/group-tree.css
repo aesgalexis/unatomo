@@ -522,9 +522,15 @@
 }
 
 .dashboard-group-tree-machine-indicator.is-qr-disabled {
-  border-color: color-mix(in srgb, var(--fg) 24%, transparent);
-  background: color-mix(in srgb, var(--fg) 10%, transparent);
-  color: color-mix(in srgb, var(--fg) 58%, transparent);
+  border-color: rgb(107 114 128 / 35%);
+  background: rgb(107 114 128 / 12%);
+  color: #6b7280;
+}
+
+:root[data-theme="dark"] .dashboard-group-tree-machine-indicator.is-qr-disabled {
+  border-color: rgb(156 163 175 / 38%);
+  background: rgb(156 163 175 / 14%);
+  color: #9ca3af;
 }
 
 .dashboard-group-tree-count,

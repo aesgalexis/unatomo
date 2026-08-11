@@ -6,6 +6,7 @@ export const createDashboardTopbarController = (dependencies) => {
     calculateStorageUsage,
     dashboardLink,
     galleryLink,
+    statisticsLink,
     getStorageFullText,
     handleInviteDecision,
     handleTransferDecision,
@@ -25,14 +26,17 @@ export const createDashboardTopbarController = (dependencies) => {
     applyDashboardTitle();
     const isRegistry = state.activeView === "registro";
     const isGallery = state.activeView === "galeria";
+    const isStatistics = state.activeView === "estadisticas";
     const isSuggestions = state.activeView === "sugerencias";
     const isTodo = state.activeView === "todo";
     const isUsers = state.activeView === "usuarios";
     const useGallerySizeMenu = isGallery && window.matchMedia("(max-width: 768px)").matches;
     viewMenu.setGalleryMode(useGallerySizeMenu);
-    dashboardLink.classList.toggle("is-active", !isRegistry && !isGallery && !isSuggestions && !isTodo && !isUsers);
+    viewMenu.setStatisticsMode(isStatistics, { period: state.statisticsPeriod });
+    dashboardLink.classList.toggle("is-active", !isRegistry && !isGallery && !isStatistics && !isSuggestions && !isTodo && !isUsers);
     registryLink.classList.toggle("is-active", isRegistry);
     galleryLink.classList.toggle("is-active", isGallery);
+    statisticsLink.classList.toggle("is-active", isStatistics);
     suggestionsLink.classList.toggle("is-active", isSuggestions);
     todoLink.classList.toggle("is-active", isTodo);
     usersLink.classList.toggle("is-active", isUsers);
@@ -40,6 +44,7 @@ export const createDashboardTopbarController = (dependencies) => {
       dashboardLink.removeAttribute("aria-current");
       registryLink.setAttribute("aria-current", "page");
       galleryLink.removeAttribute("aria-current");
+      statisticsLink.removeAttribute("aria-current");
       suggestionsLink.removeAttribute("aria-current");
       todoLink.removeAttribute("aria-current");
       usersLink.removeAttribute("aria-current");
@@ -47,6 +52,15 @@ export const createDashboardTopbarController = (dependencies) => {
       dashboardLink.removeAttribute("aria-current");
       registryLink.removeAttribute("aria-current");
       galleryLink.setAttribute("aria-current", "page");
+      statisticsLink.removeAttribute("aria-current");
+      suggestionsLink.removeAttribute("aria-current");
+      todoLink.removeAttribute("aria-current");
+      usersLink.removeAttribute("aria-current");
+    } else if (isStatistics) {
+      dashboardLink.removeAttribute("aria-current");
+      registryLink.removeAttribute("aria-current");
+      galleryLink.removeAttribute("aria-current");
+      statisticsLink.setAttribute("aria-current", "page");
       suggestionsLink.removeAttribute("aria-current");
       todoLink.removeAttribute("aria-current");
       usersLink.removeAttribute("aria-current");
@@ -54,6 +68,7 @@ export const createDashboardTopbarController = (dependencies) => {
       dashboardLink.removeAttribute("aria-current");
       registryLink.removeAttribute("aria-current");
       galleryLink.removeAttribute("aria-current");
+      statisticsLink.removeAttribute("aria-current");
       suggestionsLink.setAttribute("aria-current", "page");
       todoLink.removeAttribute("aria-current");
       usersLink.removeAttribute("aria-current");
@@ -61,6 +76,7 @@ export const createDashboardTopbarController = (dependencies) => {
       dashboardLink.removeAttribute("aria-current");
       registryLink.removeAttribute("aria-current");
       galleryLink.removeAttribute("aria-current");
+      statisticsLink.removeAttribute("aria-current");
       suggestionsLink.removeAttribute("aria-current");
       todoLink.setAttribute("aria-current", "page");
       usersLink.removeAttribute("aria-current");
@@ -68,6 +84,7 @@ export const createDashboardTopbarController = (dependencies) => {
       dashboardLink.removeAttribute("aria-current");
       registryLink.removeAttribute("aria-current");
       galleryLink.removeAttribute("aria-current");
+      statisticsLink.removeAttribute("aria-current");
       suggestionsLink.removeAttribute("aria-current");
       todoLink.removeAttribute("aria-current");
       usersLink.setAttribute("aria-current", "page");
@@ -75,18 +92,22 @@ export const createDashboardTopbarController = (dependencies) => {
       dashboardLink.setAttribute("aria-current", "page");
       registryLink.removeAttribute("aria-current");
       galleryLink.removeAttribute("aria-current");
+      statisticsLink.removeAttribute("aria-current");
       suggestionsLink.removeAttribute("aria-current");
       todoLink.removeAttribute("aria-current");
       usersLink.removeAttribute("aria-current");
     }
-    addBar.classList.toggle("is-registry-view", isRegistry || isGallery || isSuggestions || isTodo);
+    addBar.classList.toggle("is-registry-view", isRegistry || isGallery || isStatistics || isSuggestions || isTodo);
     addBar.classList.toggle("is-gallery-view", isGallery);
+    addBar.classList.toggle("is-statistics-view", isStatistics);
     addBar.classList.toggle("is-todo-view", isTodo);
     addBar.classList.toggle("is-suggestions-view", isSuggestions);
     searchInput.placeholder = isRegistry
       ? t("dashboard.registrySearchPlaceholder", "Buscar en registro...")
       : isGallery
         ? t("dashboard.gallerySearchPlaceholder", "Buscar en galer\u00eda...")
+        : isStatistics
+          ? t("dashboard.statisticsSearchPlaceholder", "Buscar en estadísticas...")
         : isSuggestions
           ? t("dashboard.suggestionsSearchPlaceholder", "Buscar sugerencias...")
           : isTodo
@@ -94,7 +115,7 @@ export const createDashboardTopbarController = (dependencies) => {
             : isUsers
               ? t("dashboard.usersSearchPlaceholder", "Buscar usuarios...")
             : t("dashboard.searchPlaceholder", "Buscar por nombre o ubicaci\u00f3n...");
-    const addDisabled = state.loading || isRegistry;
+    const addDisabled = state.loading || isRegistry || isStatistics;
     const viewMenuDisabled = state.loading || isRegistry ||
       (isGallery && !useGallerySizeMenu) || isSuggestions || isUsers;
     const searchDisabled = state.loading;

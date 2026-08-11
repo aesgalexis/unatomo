@@ -34,6 +34,7 @@ export const createDashboardState = ({
   todoStatusFilter: "visible",
   todoSort: "created-desc",
   todoCreateOpen: false,
+  statisticsPeriod: "1y",
   suggestions: [],
   suggestionsReady: false,
   suggestionsCreateOpen: true,

@@ -15,6 +15,7 @@ import {
 } from "./machineTasks/machineTasksView.js";
 import { MAX_TODO_LENGTH, TODO_PAGE_SIZE } from "./todo/todoView.js";
 import { renderUsersView } from "./users/usersView.js";
+import { renderGlobalStatisticsView } from "./statistics/globalStatisticsView.js";
 
 export {
   GLOBAL_REGISTRY_PAGE_SIZE,
@@ -44,6 +45,10 @@ export const renderGalleryDashboardView = (container, machines = [], options = {
     loading: !!options.loading,
     query: options.query || ""
   });
+};
+
+export const renderStatisticsDashboardView = (container, machines = [], options = {}) => {
+  renderGlobalStatisticsView(container, machines, options);
 };
 
 export const renderUsersDashboardView = (container, machines = [], options = {}) => {

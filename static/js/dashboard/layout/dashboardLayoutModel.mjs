@@ -4,6 +4,7 @@ export const MAX_DASHBOARD_GROUP_DEPTH = 2;
 export const DEFAULT_TAB_ORDER = [
   "quehaceres",
   "historial",
+  "estadisticas",
   "general",
   "configuracion"
 ];

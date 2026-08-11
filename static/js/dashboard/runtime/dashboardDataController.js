@@ -89,7 +89,11 @@ export const createDashboardDataController = (dependencies) => {
     }
 
     const activeTab = state.selectedTabById?.[machineId] || card.querySelector(".mc-panel")?.dataset?.panel;
-    if (hooks && hooks.setActiveTab && (activeTab === "quehaceres" || activeTab === "historial")) {
+    if (
+      hooks &&
+      hooks.setActiveTab &&
+      (activeTab === "quehaceres" || activeTab === "historial" || activeTab === "estadisticas")
+    ) {
       hooks.setActiveTab(activeTab, { notify: false });
       if (card.dataset.expanded === "true") {
         scheduleHeightSync(machineId, () => recalcHeight(card));

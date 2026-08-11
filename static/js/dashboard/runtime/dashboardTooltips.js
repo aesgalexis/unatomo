@@ -3,11 +3,11 @@ export const createDashboardTooltips = () => {
     document.querySelectorAll(".mc-tooltip").forEach((node) => node.remove());
   };
 
-  const attach = (target, { align = "center", placement = "top" } = {}) => {
+  const attach = (target, { align = "center", placement = "top", followPointer = false } = {}) => {
     if (window.matchMedia &&
         !window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
     let tipEl = null;
-    const show = () => {
+    const show = (event) => {
       const label = target.getAttribute("data-tooltip");
       if (!label) return;
       clear();
@@ -15,6 +15,11 @@ export const createDashboardTooltips = () => {
       tipEl.className = "mc-tooltip";
       tipEl.textContent = label;
       document.body.appendChild(tipEl);
+      if (followPointer && Number.isFinite(event?.clientX) && Number.isFinite(event?.clientY)) {
+        tipEl.style.top = `${Math.max(8, event.clientY - tipEl.offsetHeight - 10)}px`;
+        tipEl.style.left = `${Math.max(8, event.clientX + 12)}px`;
+        return;
+      }
       const rect = target.getBoundingClientRect();
       const sidePlacement = placement === "left" || placement === "right";
       const left = placement === "right"

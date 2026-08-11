@@ -6,5 +6,5 @@ export const STATUS_LABELS = {
   desconectada: t("status.desconectada", "Desconectada")
 };
 
-export const TAB_KEYS = ["quehaceres", "historial", "general", "configuracion"];
+export const TAB_KEYS = ["quehaceres", "historial", "estadisticas", "general", "configuracion"];
 export const CONFIG_SUBTABS = ["tag", "usuarios", "notificaciones"];

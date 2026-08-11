@@ -24,10 +24,15 @@ export const getCollapsedHeightPx = () => {
 export const recalcMachineCardHeight = (card) => {
   const header = card.querySelector(".mc-header");
   const expand = card.querySelector(".mc-expand");
-  const target = Math.max(
+  const measuredTarget = Math.max(
     getCollapsedHeightPx() * EXPAND_FACTOR,
     header.offsetHeight + expand.scrollHeight
   );
+  const currentTarget = Number.parseFloat(card.style.maxHeight);
+  const target = card.classList.contains("is-expanding") &&
+      Number.isFinite(currentTarget)
+    ? Math.max(currentTarget, measuredTarget)
+    : measuredTarget;
   card.style.maxHeight = `${target}px`;
 };
 

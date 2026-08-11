@@ -3,6 +3,7 @@ import {
   validateManualPdf,
   validateOtherDocumentBatch
 } from "../../documents/machineDocumentsRepo.js";
+import { renderLastModified } from "./lastModified.js";
 
 export const render = (panel, machine, hooks, options = {}) => {
   panel.innerHTML = "";
@@ -650,8 +651,7 @@ export const render = (panel, machine, hooks, options = {}) => {
 
   const otherDocs = Array.isArray(machine.documents?.other) ? machine.documents.other : [];
   const otherDocsSep = document.createElement("hr");
-  otherDocsSep.className = "mc-doc-list-sep";
-  if (canViewDocuments) manualWrap.appendChild(otherDocsSep);
+  otherDocsSep.className = "mc-doc-list-sep mc-info-footer-sep";
 
   otherDocsList = document.createElement("div");
   otherDocsList.className = "mc-other-doc-list";
@@ -659,6 +659,8 @@ export const render = (panel, machine, hooks, options = {}) => {
     otherDocs.forEach(appendOtherDocRow);
   }
   if (canViewDocuments) manualWrap.appendChild(otherDocsList);
+  manualWrap.appendChild(otherDocsSep);
 
   panel.appendChild(manualWrap);
+  panel.appendChild(renderLastModified(machine));
 };

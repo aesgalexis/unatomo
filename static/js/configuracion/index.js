@@ -88,6 +88,7 @@ const textMap = {
   moveUp: isEn ? "Up" : "Subir",
   moveDown: isEn ? "Down" : "Bajar",
   tasksTab: isEn ? "Tasks" : "Tareas",
+  statsTab: isEn ? "Statistics" : "Estad\u00edsticas",
   generalTab: isEn ? "General" : "General",
   historyTab: isEn ? "History" : "Historial",
   settingsTab: isEn ? "Settings" : "Configuraci\u00f3n",
@@ -112,11 +113,12 @@ const textMap = {
 };
 
 const mount = document.getElementById("profile-mount");
-const DEFAULT_TAB_ORDER = ["quehaceres", "historial", "general", "configuracion"];
+const DEFAULT_TAB_ORDER = ["quehaceres", "historial", "estadisticas", "general", "configuracion"];
 const tabLabels = {
   quehaceres: textMap.tasksTab,
   general: textMap.generalTab,
   historial: textMap.historyTab,
+  estadisticas: textMap.statsTab,
   configuracion: textMap.settingsTab
 };
 

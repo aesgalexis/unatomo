@@ -219,7 +219,7 @@ export const render = (container, machine, hooks, options = {}) => {
     name.textContent = user.username;
 
     const role = document.createElement("span");
-    role.className = "mc-user-role";
+    role.className = "mc-user-role-label";
     const normalizedRole = user.role === "tecnico" || user.role === "technician"
       ? "technician"
       : "operator";
@@ -360,8 +360,12 @@ export const render = (container, machine, hooks, options = {}) => {
       remove.style.opacity = "0.6";
     }
 
-    row.appendChild(name);
-    row.appendChild(role);
+    const identity = document.createElement("div");
+    identity.className = "mc-user-identity";
+    identity.appendChild(name);
+    identity.appendChild(role);
+
+    row.appendChild(identity);
     row.appendChild(remove);
     list.appendChild(row);
   });

@@ -31,6 +31,13 @@ const GALLERY_SIZE_MODES = [
   { id: "4", labelKey: "gallerySizeLarge", fallback: "Grandes" }
 ];
 
+const STATISTICS_PERIOD_MODES = [
+  { id: "30d", labelKey: "statisticsPeriod30", fallback: "30 d\u00edas" },
+  { id: "90d", labelKey: "statisticsPeriod90", fallback: "90 d\u00edas" },
+  { id: "1y", labelKey: "statisticsPeriodYear", fallback: "1 a\u00f1o" },
+  { id: "all", labelKey: "statisticsPeriodAll", fallback: "Desde el inicio" }
+];
+
 const normalizeSort = (value) =>
   SORT_MODES.some((item) => item.id === value) ? value : "manual";
 
@@ -43,7 +50,8 @@ export const createDashboardViewMenu = ({
   onSortChange,
   onTaskStatusChange,
   onTaskSortChange,
-  onGallerySizeChange
+  onGallerySizeChange,
+  onStatisticsPeriodChange
 } = {}) => {
   const wrap = document.createElement("div");
   wrap.className = "dashboard-view-menu";
@@ -65,9 +73,11 @@ export const createDashboardViewMenu = ({
   menu.hidden = true;
   let taskMode = false;
   let galleryMode = false;
+  let statisticsMode = false;
   let currentGallerySize = "1";
   let currentTaskStatus = "visible";
   let currentTaskSort = "created-desc";
+  let currentStatisticsPeriod = "1y";
 
   const close = () => {
     menu.hidden = true;
@@ -106,6 +116,8 @@ export const createDashboardViewMenu = ({
       "aria-label",
       galleryMode
         ? t("dashboard.gallerySizeMenu", "Tamaño de imágenes")
+        : statisticsMode
+          ? t("stats.periodLabel", "Periodo")
         : taskMode
           ? t("dashboard.todoFilter", "Filtrar y ordenar")
           : t("dashboard.orderAria", "Ordenar")
@@ -117,6 +129,14 @@ export const createDashboardViewMenu = ({
           currentGallerySize = id;
           onGallerySizeChange?.(Number(id));
           render();
+        });
+      });
+      return;
+    }
+    if (statisticsMode) {
+      STATISTICS_PERIOD_MODES.forEach((item) => {
+        addItem(item, item.id === currentStatisticsPeriod, (id) => {
+          if (id !== currentStatisticsPeriod) onStatisticsPeriodChange?.(id);
         });
       });
       return;
@@ -225,6 +245,14 @@ export const createDashboardViewMenu = ({
       if (galleryMode && !wasGalleryMode) {
         onGallerySizeChange?.(Number(currentGallerySize));
       }
+      render();
+    },
+    setStatisticsMode(enabled, { period = "1y" } = {}) {
+      close();
+      statisticsMode = !!enabled;
+      currentStatisticsPeriod = STATISTICS_PERIOD_MODES.some((item) => item.id === period)
+        ? period
+        : "1y";
       render();
     },
     refresh() {

@@ -296,6 +296,14 @@
   color: #2563eb;
 }
 
+.mc-nfc-icon.is-disabled {
+  color: #6b7280;
+}
+
+:root[data-theme="dark"] .mc-nfc-icon.is-disabled {
+  color: #9ca3af;
+}
+
 .mc-icon-wrap {
   display: inline-flex;
   align-items: center;
@@ -562,9 +570,15 @@
   margin-bottom: 0.4rem;
 }
 
-.mc-log-footer {
+.mc-log-footer,
+.mc-config-footer,
+.mc-info-last-modified {
   display: flex;
   align-items: center;
+  min-height: 32px;
+}
+
+.mc-log-footer {
   gap: 0.75rem;
 }
 

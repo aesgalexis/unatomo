@@ -28,6 +28,12 @@ const TODO_ICON = `
   </svg>
 `;
 
+const STATISTICS_ICON = `
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path d="M4 19h16v2H2V3h2v16Zm3-2H5v-6h2v6Zm4 0H9V7h2v10Zm4 0h-2V9h2v8Zm4 0h-2V4h2v13Z"></path>
+  </svg>
+`;
+
 const USERS_ICON = `
   <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
     <path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm6.5 1a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7ZM2 20a7 7 0 0 1 14 0v1H2v-1Zm13.2 1H22v-1a6 6 0 0 0-7.4-5.8A8.9 8.9 0 0 1 17 20v1h-1.8Z"></path>
@@ -68,6 +74,7 @@ export const createDashboardSectionNav = ({
   usersHref = "#/usuarios",
   suggestionsHref = "#/sugerencias",
   todoHref = "#/tareas",
+  statisticsHref = "#/estadisticas",
   labels = {},
   active = "dashboard",
   showSuggestions = false,
@@ -141,6 +148,13 @@ export const createDashboardSectionNav = ({
   todoBadge.hidden = true;
   todo.link.insertBefore(todoBadge, todo.iconEl);
 
+  const statistics = createIconLink({
+    href: statisticsHref,
+    label: labels.statistics || "Estad\u00edsticas",
+    icon: STATISTICS_ICON,
+    iconClass: "dashboard-section-icon-statistics"
+  });
+
   const links = {
     dashboard: dashboardLink,
     registro: registryLink,
@@ -148,7 +162,8 @@ export const createDashboardSectionNav = ({
     galeria: gallery.link,
     usuarios: users.link,
     sugerencias: suggestions.link,
-    todo: todo.link
+    todo: todo.link,
+    estadisticas: statistics.link
   };
   const getCurrentHeading = () => document.querySelector(".dashboard-view-header-slot h3");
   const measureHeadingLabel = (heading, label) => {
@@ -202,12 +217,13 @@ export const createDashboardSectionNav = ({
   sectionNav.appendChild(dashboardLink);
   sectionNav.appendChild(registryLink);
   sectionNav.appendChild(todo.link);
+  sectionNav.appendChild(statistics.link);
   sectionNav.appendChild(gallery.link);
   sectionNav.appendChild(users.link);
   sectionNav.appendChild(qr.link);
 
   if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
-    [dashboardLink, registryLink, todo.link, gallery.link, users.link, qr.link].forEach((link) => {
+    [dashboardLink, registryLink, todo.link, statistics.link, gallery.link, users.link, qr.link].forEach((link) => {
       link.addEventListener("mouseenter", () => showPreview(link));
       link.addEventListener("mouseleave", clearPreview);
       link.addEventListener("focus", () => showPreview(link));
@@ -226,6 +242,7 @@ export const createDashboardSectionNav = ({
     suggestionsLink: suggestions.link,
     suggestionsBadge,
     todoLink: todo.link,
-    todoBadge
+    todoBadge,
+    statisticsLink: statistics.link
   };
 };

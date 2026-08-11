@@ -31,7 +31,6 @@ export const render = (panel, machine, hooks, options = {}) => {
   const currentStatus = (machine.adminStatus || "").trim();
 
   const renderAdminForm = () => {
-    adminRow.innerHTML = "";
     btnPlaceholder.innerHTML = "";
     const input = document.createElement("input");
     input.type = "email";
@@ -81,7 +80,6 @@ export const render = (panel, machine, hooks, options = {}) => {
     cancelBtn.textContent = t("card.cancel", "Cancelar");
     cancelBtn.addEventListener("click", (event) => {
       event.stopPropagation();
-      adminRow.innerHTML = "";
       btnPlaceholder.innerHTML = "";
       renderAdminButton();
     });
@@ -222,7 +220,6 @@ export const render = (panel, machine, hooks, options = {}) => {
     };
 
     const renderTransferForm = () => {
-      transferRow.innerHTML = "";
       transferPlaceholder.innerHTML = "";
       const input = document.createElement("input");
       input.type = "email";
@@ -255,7 +252,6 @@ export const render = (panel, machine, hooks, options = {}) => {
       cancelBtn.textContent = t("card.cancel", "Cancelar");
       cancelBtn.addEventListener("click", (event) => {
         event.stopPropagation();
-        transferRow.innerHTML = "";
         renderTransferButton();
       });
 

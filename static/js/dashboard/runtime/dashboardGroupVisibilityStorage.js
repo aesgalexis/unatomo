@@ -1,6 +1,8 @@
 const STORAGE_KEY = "unatomo.dashboard.hiddenTreeGroups.v1";
 const INCIDENT_COUNTS_STORAGE_KEY = "unatomo.dashboard.treeIncidentCounts.v1";
 const TASK_COUNTS_STORAGE_KEY = "unatomo.dashboard.treeTaskCounts.v1";
+const STATISTICS_PERIOD_STORAGE_KEY = "unatomo.dashboard.statisticsPeriod.v1";
+const STATISTICS_PERIODS = new Set(["30d", "90d", "1y", "all"]);
 
 const readStoredMap = (storageKey = STORAGE_KEY) => {
   try {
@@ -58,5 +60,21 @@ export const saveHiddenTreeGroupIds = (uid = "", groupIds = []) => {
     if (normalizedIds.length) storedMap[uid] = normalizedIds;
     else delete storedMap[uid];
     localStorage.setItem(STORAGE_KEY, JSON.stringify(storedMap));
+  } catch {}
+};
+
+export const loadStatisticsPeriod = (uid = "") => {
+  if (!uid) return "1y";
+  const value = readStoredMap(STATISTICS_PERIOD_STORAGE_KEY)[uid];
+  return STATISTICS_PERIODS.has(value) ? value : "1y";
+};
+
+export const saveStatisticsPeriod = (uid = "", period = "1y") => {
+  if (!uid || !STATISTICS_PERIODS.has(period)) return;
+  try {
+    const storedMap = readStoredMap(STATISTICS_PERIOD_STORAGE_KEY);
+    if (period === "1y") delete storedMap[uid];
+    else storedMap[uid] = period;
+    localStorage.setItem(STATISTICS_PERIOD_STORAGE_KEY, JSON.stringify(storedMap));
   } catch {}
 };

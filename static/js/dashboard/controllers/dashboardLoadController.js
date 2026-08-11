@@ -1,7 +1,8 @@
 import {
   loadHiddenTreeGroupIds,
   loadShowTreeIncidentCounts,
-  loadShowTreeTaskCounts
+  loadShowTreeTaskCounts,
+  loadStatisticsPeriod
 } from "../runtime/dashboardGroupVisibilityStorage.js";
 
 export const createDashboardLoadController = (dependencies) => {
@@ -65,6 +66,7 @@ export const createDashboardLoadController = (dependencies) => {
     state.hiddenTreeGroupIds = loadHiddenTreeGroupIds(uid);
     state.showTreeIncidentCounts = loadShowTreeIncidentCounts(uid);
     state.showTreeTaskCounts = loadShowTreeTaskCounts(uid);
+    state.statisticsPeriod = loadStatisticsPeriod(uid);
     clearMobileDetailState();
     resetDashboardLoadState(state);
     setTopbarLogoLoading("dashboard", true);
@@ -76,7 +78,7 @@ export const createDashboardLoadController = (dependencies) => {
     loadingEl.style.display = "";
     resetLoadingProgress();
     syncDashboardViewChrome();
-    if (["dashboard", "registro", "galeria", "todo", "usuarios"].includes(state.activeView)) {
+    if (["dashboard", "registro", "galeria", "estadisticas", "todo", "usuarios"].includes(state.activeView)) {
       renderCards({ preserveScroll: false });
     }
   };

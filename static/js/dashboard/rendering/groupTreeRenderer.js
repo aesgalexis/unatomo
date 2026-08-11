@@ -513,7 +513,8 @@ export const createDashboardGroupTreeRenderer = ({
           if (indicator.state) indicatorEl.classList.add(`is-${indicator.state}`);
           indicatorEl.textContent = indicator.text || indicator.label;
           indicatorEl.setAttribute("aria-label", indicator.label);
-          indicatorEl.title = indicator.label;
+          indicatorEl.setAttribute("data-tooltip", indicator.label);
+          attachTooltip?.(indicatorEl, { followPointer: true });
           button.appendChild(indicatorEl);
         }
 

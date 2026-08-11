@@ -1,4 +1,5 @@
 import { createDashboardViewMenu } from "../components/viewMenu/viewMenu.js";
+import { saveStatisticsPeriod } from "../runtime/dashboardGroupVisibilityStorage.js";
 
 export const createDashboardViewModeController = ({
   getAutoSave,
@@ -85,6 +86,12 @@ export const createDashboardViewModeController = ({
       window.dispatchEvent(new CustomEvent("unatomo:gallery-size", {
         detail: { sizeIndex }
       }));
+    },
+    onStatisticsPeriodChange: (period) => {
+      state.statisticsPeriod = period;
+      saveStatisticsPeriod(state.uid, period);
+      viewMenu.setStatisticsMode(true, { period });
+      renderCards({ preserveScroll: true, preserveAnchor: false });
     }
   });
 

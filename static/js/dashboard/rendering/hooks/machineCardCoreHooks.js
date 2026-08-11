@@ -61,7 +61,9 @@ export const installMachineCardCoreHooks = (dependencies) => {
           if (!state.selectedTabById) state.selectedTabById = {};
           state.selectedTabById[machine.id] = tabId || "quehaceres";
           if (node.dataset.expanded === "true") {
-            scheduleHeightSync(machine.id, () => recalcHeight(node));
+            node.classList.add("mc-no-anim");
+            recalcHeight(node);
+            scheduleHeightSync(machine.id, () => node.classList.remove("mc-no-anim"));
           }
         };
 

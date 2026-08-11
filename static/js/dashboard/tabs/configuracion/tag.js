@@ -261,8 +261,12 @@ export const render = (container, machine, hooks, options = {}) => {
       qrAccessText.textContent = nextEnabled
         ? t("config.qrAccessEnabled", "Habilitado")
         : t("config.qrAccessDisabled", "Deshabilitado");
-    } catch {
-      qrAccessText.textContent = t("config.qrAccessUpdateError", "No se pudo cambiar el acceso");
+    } catch (error) {
+      console.error("[QR access] update failed", error);
+      const errorCode = (error?.code || "").toString().replace(/^functions\//, "");
+      qrAccessText.textContent = errorCode
+        ? `${t("config.qrAccessUpdateError", "No se pudo cambiar el acceso")} (${errorCode})`
+        : t("config.qrAccessUpdateError", "No se pudo cambiar el acceso");
     } finally {
       qrAccessControl.disabled = !canEditConfig || !machine.tagId;
     }
@@ -270,8 +274,8 @@ export const render = (container, machine, hooks, options = {}) => {
 
   const qrAccessControls = document.createElement("div");
   qrAccessControls.className = "mc-config-controls mc-qr-access-controls";
-  qrAccessControls.appendChild(qrAccessText);
   qrAccessControls.appendChild(qrAccessControl);
+  qrAccessControls.appendChild(qrAccessText);
   qrAccessRow.appendChild(qrAccessLabel);
   qrAccessRow.appendChild(qrAccessControls);
 
@@ -289,8 +293,8 @@ export const render = (container, machine, hooks, options = {}) => {
     qrAccessControl.disabled = true;
   }
 
-  tagControls.appendChild(accessGenerate);
   tagControls.appendChild(tagInput);
+  tagControls.appendChild(accessGenerate);
   tagControls.appendChild(tagBtn);
 
   tagGroup.appendChild(tagRow);

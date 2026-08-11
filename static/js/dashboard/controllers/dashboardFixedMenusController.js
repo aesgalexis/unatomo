@@ -2,6 +2,7 @@ const STABLE_MENU_VIEWS = new Set([
   "dashboard",
   "registro",
   "todo",
+  "estadisticas",
   "galeria",
   "usuarios"
 ]);

@@ -84,6 +84,8 @@ const requiredFiles = [
   "static/css/dashboard/machine-documents.css",
   "static/css/dashboard/machine-config.css",
   "static/css/dashboard/machine-tasks.css",
+  "static/css/dashboard/machine-stats.css",
+  "static/css/dashboard/global-statistics.css",
   "static/css/dashboard/machine-login.css",
   "static/css/dashboard/responsive.css"
 ];
@@ -226,6 +228,8 @@ const dashboardCssImports = [
   "/static/css/dashboard/machine-documents.css",
   "/static/css/dashboard/machine-config.css",
   "/static/css/dashboard/machine-tasks.css",
+  "/static/css/dashboard/machine-stats.css",
+  "/static/css/dashboard/global-statistics.css",
   "/static/css/dashboard/machine-login.css",
   "/static/css/dashboard/responsive.css"
 ];
