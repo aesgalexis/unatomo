@@ -125,7 +125,36 @@ export const createMachineCard = (machine, options = {}) => {
 
     const select = document.createElement("select");
     select.className = "mc-location-select";
-    select.addEventListener("click", (event) => event.stopPropagation());
+    select.classList.toggle("has-location", !!current);
+    let locationTip = null;
+    const hideLocationTip = () => {
+      locationTip?.remove();
+      locationTip = null;
+    };
+    select.addEventListener("mouseenter", (event) => {
+      const location = normalizeLocation(select.value);
+      if (!location || select.classList.contains("is-open")) return;
+      hideLocationTip();
+      locationTip = document.createElement("div");
+      locationTip.className = "mc-tooltip";
+      locationTip.textContent = location;
+      document.body.appendChild(locationTip);
+      locationTip.style.top = `${Math.max(8, event.clientY - locationTip.offsetHeight - 10)}px`;
+      locationTip.style.left = `${Math.max(8, event.clientX + 12)}px`;
+    });
+    select.addEventListener("mouseleave", hideLocationTip);
+    select.addEventListener("pointerdown", () => {
+      hideLocationTip();
+      select.classList.add("is-open");
+    });
+    select.addEventListener("blur", () => {
+      hideLocationTip();
+      select.classList.remove("is-open");
+    });
+    select.addEventListener("click", (event) => {
+      event.stopPropagation();
+      select.classList.add("is-open");
+    });
     select.addEventListener("change", (event) => {
       event.stopPropagation();
       const value = select.value;
@@ -133,13 +162,15 @@ export const createMachineCard = (machine, options = {}) => {
         showAddInput();
         return;
       }
+      select.classList.toggle("has-location", !!normalizeLocation(value));
+      select.classList.remove("is-open");
       if (hooks.onUpdateLocation) hooks.onUpdateLocation(machine.id, value);
     });
 
     const addOption = (value, label) => {
       const opt = document.createElement("option");
       opt.value = value;
-      opt.textContent = label;
+      opt.textContent = `\u00a0${label}`;
       return opt;
     };
 
@@ -174,6 +205,8 @@ export const createMachineCard = (machine, options = {}) => {
         wrap.innerHTML = "";
         wrap.appendChild(select);
         select.value = value || "";
+        select.classList.toggle("has-location", !!normalizeLocation(value));
+        select.classList.remove("is-open");
         if (hooks.onContentResize) {
           requestAnimationFrame(() => hooks.onContentResize());
         }
