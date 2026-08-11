@@ -12,6 +12,12 @@
   gap: 0.85rem;
 }
 
+.dashboard-fixed-menus.has-static-tasks-header
+  .global-statistics-header
+  .global-statistics-header-actions {
+  bottom: 6px;
+}
+
 .global-statistics-clear-scope-wrap {
   display: flex;
   justify-content: center;
@@ -186,6 +192,12 @@ button.global-statistics-attention-item { cursor: pointer; }
 }
 
 @media (max-width: 768px) {
+  .dashboard-fixed-menus.has-static-tasks-header
+    .global-statistics-header
+    .global-statistics-header-actions {
+    bottom: 7px;
+  }
+
   .global-statistics-header {
     align-items: flex-start;
   }

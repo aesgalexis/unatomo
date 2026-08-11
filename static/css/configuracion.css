@@ -185,6 +185,10 @@
   text-align: left;
 }
 
+.profile-handle-status:empty {
+  display: none;
+}
+
 .profile-card-body > .profile-row:nth-child(4) {
   margin-top: 0.4rem;
   padding-top: 1.25rem;
