@@ -68,6 +68,7 @@ export const createDashboardGroupTreeRenderer = ({
   attachTooltip,
   container,
   getGroupMenuActions,
+  getMachineIndicator,
   getPendingTaskCount,
   normalizeStatus,
   onCreateGroup,
@@ -146,6 +147,7 @@ export const createDashboardGroupTreeRenderer = ({
     hiddenGroupIds = [],
     showIncidentCounts = true,
     showTaskCounts = true,
+    showPreferences = true,
     filterOnly = false
   }) => {
     closeMenu();
@@ -207,7 +209,7 @@ export const createDashboardGroupTreeRenderer = ({
     const headerActions = document.createElement("div");
     headerActions.className = "dashboard-group-tree-header-actions";
     if (!filterOnly) headerActions.appendChild(createButton);
-    headerActions.appendChild(preferencesButton);
+    if (showPreferences) headerActions.appendChild(preferencesButton);
     header.appendChild(title);
     header.appendChild(headerActions);
     container.appendChild(header);
@@ -503,6 +505,17 @@ export const createDashboardGroupTreeRenderer = ({
         label.className = "dashboard-group-tree-label";
         label.textContent = machine.title || machine.id || t("machine.machine", "M\u00e1quina");
         button.appendChild(label);
+
+        const indicator = getMachineIndicator?.(machine);
+        if (indicator?.label) {
+          const indicatorEl = document.createElement("span");
+          indicatorEl.className = "dashboard-group-tree-machine-indicator";
+          if (indicator.state) indicatorEl.classList.add(`is-${indicator.state}`);
+          indicatorEl.textContent = indicator.text || indicator.label;
+          indicatorEl.setAttribute("aria-label", indicator.label);
+          indicatorEl.title = indicator.label;
+          button.appendChild(indicatorEl);
+        }
 
         const isDown = normalizeStatus(machine.status) === "fuera_de_servicio";
         const pending = getPendingTaskCount(machine);

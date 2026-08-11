@@ -288,6 +288,9 @@ export const uploadMachineAccessDocument = onRequest(
       ) {
         throw new HttpsError("permission-denied", "tag-machine-mismatch");
       }
+      if (machine.qrAccessEnabled === false) {
+        throw new HttpsError("failed-precondition", "qr-access-disabled");
+      }
       assertLocalUploadAllowed(
         machine,
         username,
@@ -375,6 +378,9 @@ export const uploadMachineAccessDocument = onRequest(
           (current.tagId || "").toString() !== tagId
         ) {
           throw new HttpsError("permission-denied", "tag-machine-mismatch");
+        }
+        if (current.qrAccessEnabled === false) {
+          throw new HttpsError("failed-precondition", "qr-access-disabled");
         }
         const currentUser = assertLocalUploadAllowed(
           current,

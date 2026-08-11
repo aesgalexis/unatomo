@@ -67,6 +67,7 @@ export {
 export {
   cleanupMachineAccessSessions,
   getMachineAccessPublic,
+  setMachineQrAccessEnabled,
   updateMachineAccessOperational,
   verifyMachineAccessUser,
 } from "./machines/access";

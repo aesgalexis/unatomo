@@ -16,28 +16,42 @@ import {
 } from "/static/js/firebase/firebaseApp.js";
 import { getCurrentLang, localizeEsPath } from "/static/js/site/locale.js";
 import {
+  canDashboardGroupHaveChildren,
+  MAX_DASHBOARD_GROUP_DEPTH,
   normalizeDashboardLayout,
   normalizeDashboardTitle
 } from "/static/js/dashboard/layout/dashboardLayoutModel.mjs";
+import {
+  canMoveGroupIntoGroup,
+  canWrapGroupWithParent,
+  createChildGroup,
+  createDashboardGroupId,
+  createParentGroup,
+  createRootGroup,
+  deleteGroup,
+  getNextDashboardGroupTitle,
+  moveGroupToGroup,
+  moveGroupToRoot,
+  renameGroup
+} from "/static/js/dashboard/layout/dashboardLayoutActions.js";
+import { upsertDashboardLayout } from "/static/js/dashboard/firestoreRepo.js";
 import { t as dashboardT } from "/static/js/dashboard/i18n.js";
 import {
   createDashboardGroupTreeRenderer,
   getDashboardGroupBranchIds,
   getDashboardScopedMachines
 } from "/static/js/dashboard/rendering/groupTreeRenderer.js";
-import { normalizeMachineStatus } from "/static/js/dashboard/runtime/dashboardSorting.js";
-import {
-  loadShowTreeIncidentCounts,
-  loadShowTreeTaskCounts,
-  saveShowTreeIncidentCounts,
-  saveShowTreeTaskCounts
-} from "/static/js/dashboard/runtime/dashboardGroupVisibilityStorage.js";
 import { isControlPanelUser } from "/nfc/controlpanel/access.js";
 import { createDashboardSectionNav } from "/static/js/dashboard/components/sectionNav.js";
 import { countUnseenGlobalRegistryEntries } from "/static/js/dashboard/views/registry/globalRegistryModel.js";
 import { fetchDashboardSuggestions } from "/static/js/dashboard/views/suggestions/suggestionsRepo.js";
 import { countUnseenSuggestions } from "/static/js/dashboard/views/suggestions/suggestionsView.js";
 import { getTaskTiming } from "/static/js/dashboard/tabs/tasks/tasksTime.js";
+import { createDashboardTooltips } from "/static/js/dashboard/runtime/dashboardTooltips.js";
+import {
+  loadHiddenTreeGroupIds,
+  saveHiddenTreeGroupIds
+} from "/static/js/dashboard/runtime/dashboardGroupVisibilityStorage.js";
 
 const mount = document.getElementById("qr-print-mount");
 const lang = getCurrentLang();
@@ -83,6 +97,10 @@ const text = {
   emptyNoMachines: isEn
     ? "No machines are available for generating QR codes."
     : "No hay m\u00e1quinas disponibles para generar QRs.",
+  emptySelectedWithoutQr: isEn
+    ? "This machine does not have a generated QR code yet."
+    : "Esta m\u00e1quina todav\u00eda no tiene un QR generado.",
+  qrGenerated: isEn ? "QR generated" : "QR generado",
   error: isEn
     ? "Unable to load QR codes."
     : "No se han podido cargar los QRs.",
@@ -160,14 +178,15 @@ let dashboardLayout = normalizeDashboardLayout();
 let selectedTreeGroupId = "";
 let selectedTreeMachineId = "";
 let expandedTreeGroupIds = [];
-let showTreeIncidentCounts = true;
-let showTreeTaskCounts = true;
+let hiddenTreeGroupIds = [];
 let qrDataReady = false;
 let activeUid = "";
 const qrTreeMedia = window.matchMedia("(min-width: 1280px)");
 const qrGroupTree = document.createElement("aside");
 qrGroupTree.className = "dashboard-group-tree";
 qrGroupTree.hidden = true;
+const qrTooltips = createDashboardTooltips();
+qrTooltips.installGlobalCleanup();
 
 const createIconButton = (className, label, icon) => {
   const btn = document.createElement("button");
@@ -319,6 +338,9 @@ const getVisibleMachines = () => {
     selectedMachineId: selectedTreeMachineId
   });
   return scopedMachines.filter((machine) => {
+    const groupId = dashboardLayout.placements[machine.id]?.groupId || "";
+    if (hiddenTreeGroupIds.includes(groupId)) return false;
+    if (!machine.tagQrUrl) return false;
     if (hiddenMachineIds.has(machine.id)) return false;
     if (!queryText) return true;
     return normalizeSearch(machine.title || machine.id).includes(queryText);
@@ -329,14 +351,107 @@ const renderVisibleMachines = (options = {}) => {
   renderQrGrid(getVisibleMachines(), { preserveList: true, ...options });
 };
 
-const getPendingTaskCount = (machine) =>
-  (Array.isArray(machine?.tasks) ? machine.tasks : [])
-    .filter((task) => getTaskTiming(task).pending).length;
+const saveQrDashboardLayout = async () => {
+  if (!activeUid) return;
+  try {
+    await upsertDashboardLayout(activeUid, {
+      groups: dashboardLayout.groups || [],
+      placements: dashboardLayout.placements || {}
+    });
+  } catch {
+    window.alert(isEn ? "Unable to save the group layout." : "No se ha podido guardar la organizaci\u00f3n de grupos.");
+  }
+};
+
+const mutateQrDashboardLayout = (mutation) => {
+  dashboardLayout = normalizeDashboardLayout(mutation(dashboardLayout).layout, {
+    groupUntitled: dashboardT("dashboard.groupUntitled", "Grupo"),
+    validMachineIds: new Set(allMachines.map((machine) => machine.id))
+  });
+  renderVisibleMachines();
+  saveQrDashboardLayout();
+};
+
+const promptQrGroupTitle = () => {
+  const suggested = getNextDashboardGroupTitle(
+    dashboardLayout,
+    dashboardT("dashboard.groupUntitled", "Grupo")
+  );
+  const value = window.prompt(dashboardT("dashboard.addGroupPrompt", "Nombre del grupo"), suggested);
+  if (value === null) return null;
+  return value.trim() || suggested;
+};
+
+const addQrRootGroup = () => {
+  const title = promptQrGroupTitle();
+  if (!title) return;
+  mutateQrDashboardLayout((layout) => createRootGroup(layout, {
+    id: createDashboardGroupId(),
+    title
+  }));
+};
+
+const getQrGroupMenuActions = (group, depth = 0) => {
+  const actions = [];
+  if (canWrapGroupWithParent(dashboardLayout, group.id)) {
+    actions.push({
+      label: dashboardT("dashboard.groupAddParent", "A\u00f1adir grupo superior"),
+      onClick: () => {
+        const title = promptQrGroupTitle();
+        if (!title) return;
+        mutateQrDashboardLayout((layout) => createParentGroup(layout, group.id, {
+          id: createDashboardGroupId(),
+          title
+        }));
+      }
+    });
+  }
+  if (depth < MAX_DASHBOARD_GROUP_DEPTH && canDashboardGroupHaveChildren(dashboardLayout.groups, group.id)) {
+    actions.push({
+      label: dashboardT("dashboard.groupAddChild", "A\u00f1adir grupo"),
+      onClick: () => {
+        const title = promptQrGroupTitle();
+        if (!title) return;
+        mutateQrDashboardLayout((layout) => createChildGroup(layout, group.id, {
+          id: createDashboardGroupId(),
+          title
+        }));
+      }
+    });
+  }
+  actions.push({
+    label: dashboardT("dashboard.groupRename", "Renombrar"),
+    onClick: () => {
+      const currentTitle = group.title || dashboardT("dashboard.groupUntitled", "Grupo");
+      const title = window.prompt(dashboardT("dashboard.groupRenamePrompt", "Nombre del grupo"), currentTitle);
+      if (title === null || !title.trim() || title.trim() === currentTitle) return;
+      mutateQrDashboardLayout((layout) => renameGroup(layout, group.id, title));
+    }
+  }, {
+    label: dashboardT("dashboard.groupDelete", "Eliminar"),
+    onClick: () => {
+      const title = group.title || dashboardT("dashboard.groupUntitled", "Grupo");
+      if (!window.confirm(dashboardT("dashboard.groupDeleteConfirm", (value) => `\u00bfEliminar el grupo "${value}"? Las m\u00e1quinas no se eliminar\u00e1n.`)(title))) return;
+      mutateQrDashboardLayout((layout) => deleteGroup(layout, group.id));
+    }
+  });
+  return actions;
+};
 
 const qrTreeRenderer = createDashboardGroupTreeRenderer({
+  attachTooltip: qrTooltips.attach,
   container: qrGroupTree,
-  getPendingTaskCount,
-  normalizeStatus: normalizeMachineStatus,
+  getGroupMenuActions: getQrGroupMenuActions,
+  getMachineIndicator: (machine) => machine.tagQrUrl ? ({
+    state: machine.qrAccessEnabled === false ? "qr-disabled" : "has-qr",
+    label: machine.qrAccessEnabled === false
+      ? (lang === "en" ? "QR access disabled" : "Acceso QR deshabilitado")
+      : text.qrGenerated,
+    text: "QR"
+  }) : null,
+  getPendingTaskCount: () => 0,
+  normalizeStatus: () => "",
+  onCreateGroup: addQrRootGroup,
   onSelect: (groupId) => {
     selectedTreeGroupId = groupId;
     selectedTreeMachineId = "";
@@ -362,17 +477,74 @@ const qrTreeRenderer = createDashboardGroupTreeRenderer({
     expandedTreeGroupIds = Array.from(expanded);
     renderVisibleMachines();
   },
-  onToggleIncidentCounts: () => {
-    showTreeIncidentCounts = !showTreeIncidentCounts;
-    if (activeUid) saveShowTreeIncidentCounts(activeUid, showTreeIncidentCounts);
+  onToggleVisibility: (groupId) => {
+    const branchIds = getDashboardGroupBranchIds(dashboardLayout.groups, groupId);
+    const hiddenIds = new Set(hiddenTreeGroupIds);
+    const hideBranch = !Array.from(branchIds).every((id) => hiddenIds.has(id));
+    branchIds.forEach((id) => hideBranch ? hiddenIds.add(id) : hiddenIds.delete(id));
+    if (hideBranch && branchIds.has(selectedTreeGroupId)) {
+      selectedTreeGroupId = "";
+      selectedTreeMachineId = "";
+    }
+    hiddenTreeGroupIds = Array.from(hiddenIds);
+    if (activeUid) saveHiddenTreeGroupIds(activeUid, hiddenTreeGroupIds);
     renderVisibleMachines();
   },
-  onToggleTaskCounts: () => {
-    showTreeTaskCounts = !showTreeTaskCounts;
-    if (activeUid) saveShowTreeTaskCounts(activeUid, showTreeTaskCounts);
+  onShowAllGroups: () => {
+    hiddenTreeGroupIds = [];
+    if (activeUid) saveHiddenTreeGroupIds(activeUid, []);
     renderVisibleMachines();
   },
   t: dashboardT
+});
+
+let draggedQrGroupId = "";
+qrGroupTree.addEventListener("dragstart", (event) => {
+  const row = event.target.closest?.(".dashboard-group-tree-row[data-group-id]");
+  if (!row || !qrGroupTree.contains(row)) return;
+  if (event.target.closest(
+    ".dashboard-group-tree-toggle, .dashboard-group-tree-visibility-toggle, .dashboard-group-tree-menu-toggle"
+  )) {
+    event.preventDefault();
+    return;
+  }
+  draggedQrGroupId = row.dataset.groupId || "";
+  if (!draggedQrGroupId) return;
+  event.dataTransfer?.setData("application/x-unatomo-dashboard-group", draggedQrGroupId);
+  if (event.dataTransfer) event.dataTransfer.effectAllowed = "move";
+});
+qrGroupTree.addEventListener("dragover", (event) => {
+  if (!draggedQrGroupId) return;
+  const row = event.target.closest?.(".dashboard-group-tree-row[data-tree-drop-type]");
+  const type = row?.dataset.treeDropType || "";
+  const targetId = row?.dataset.groupId || "";
+  const allowed = type === "all" || (
+    type === "group" && canMoveGroupIntoGroup(dashboardLayout, draggedQrGroupId, targetId)
+  );
+  if (!allowed) return;
+  event.preventDefault();
+  if (event.dataTransfer) event.dataTransfer.dropEffect = "move";
+});
+qrGroupTree.addEventListener("drop", (event) => {
+  if (!draggedQrGroupId) return;
+  const row = event.target.closest?.(".dashboard-group-tree-row[data-tree-drop-type]");
+  const type = row?.dataset.treeDropType || "";
+  const targetId = row?.dataset.groupId || "";
+  if (type === "group" && canMoveGroupIntoGroup(dashboardLayout, draggedQrGroupId, targetId)) {
+    event.preventDefault();
+    expandedTreeGroupIds = Array.from(new Set([...expandedTreeGroupIds, targetId]));
+    const sourceId = draggedQrGroupId;
+    draggedQrGroupId = "";
+    mutateQrDashboardLayout((layout) => moveGroupToGroup(layout, sourceId, targetId));
+  } else if (type === "all") {
+    event.preventDefault();
+    const sourceId = draggedQrGroupId;
+    draggedQrGroupId = "";
+    mutateQrDashboardLayout((layout) => moveGroupToRoot(layout, sourceId));
+  }
+});
+qrGroupTree.addEventListener("dragend", () => {
+  draggedQrGroupId = "";
 });
 
 const mountQrGroupTree = (wrap) => {
@@ -387,10 +559,11 @@ const mountQrGroupTree = (wrap) => {
     selectedGroupId: selectedTreeGroupId,
     selectedMachineId: selectedTreeMachineId,
     expandedGroupIds: expandedTreeGroupIds,
-    hiddenGroupIds: [],
-    showIncidentCounts: showTreeIncidentCounts,
-    showTaskCounts: showTreeTaskCounts,
-    filterOnly: true
+    hiddenGroupIds: hiddenTreeGroupIds,
+    showIncidentCounts: false,
+    showTaskCounts: false,
+    showPreferences: false,
+    filterOnly: false
   });
   wrap.appendChild(qrGroupTree);
 };
@@ -468,6 +641,7 @@ const normalizeMachine = (raw) => ({
   title: (raw.title || raw.nombre || "").toString().trim(),
   tagId: (raw.tagId || "").toString().trim(),
   tagQrUrl: (raw.tagQrUrl || "").toString().trim(),
+  qrAccessEnabled: raw.qrAccessEnabled !== false,
   status: raw.status || "",
   tasks: Array.isArray(raw.tasks) ? raw.tasks : []
 });
@@ -528,13 +702,13 @@ const fetchAccessibleMachines = async (uid) => {
   return [...ownerMachines, ...adminMachines];
 };
 
-const buildQrMachines = async (machines = []) => {
+const buildMachinesWithQrState = async (machines = []) => {
   const map = new Map();
   const normalizedMachines = machines.map(normalizeMachine);
   const qrUrls = await Promise.all(normalizedMachines.map(resolveQrUrl));
   normalizedMachines.forEach((normalized, index) => {
     normalized.tagQrUrl = qrUrls[index] || "";
-    if (!normalized.id || !normalized.tagQrUrl) return;
+    if (!normalized.id) return;
     map.set(normalized.id, normalized);
   });
   return Array.from(map.values()).sort((a, b) =>
@@ -652,8 +826,13 @@ const renderQrGrid = (machines, options = {}) => {
     setLoadingState();
     fetchAccessibleMachines(auth.currentUser.uid)
       .then(async (sourceMachines) => {
-        const nextMachines = await buildQrMachines(sourceMachines);
-        renderQrGrid(nextMachines, { accessibleMachineCount: sourceMachines.length });
+        const nextSourceMachines = await buildMachinesWithQrState(sourceMachines);
+        const nextQrMachines = nextSourceMachines.filter((machine) => machine.tagQrUrl);
+        renderQrGrid(nextQrMachines, {
+          sourceMachines: nextSourceMachines,
+          totalCount: nextQrMachines.length,
+          accessibleMachineCount: nextSourceMachines.length
+        });
       })
       .catch(() => setState(text.error, "error"));
   });
@@ -711,7 +890,12 @@ const renderQrGrid = (machines, options = {}) => {
   if (!machines.length) {
     const empty = document.createElement("p");
     empty.className = "qr-print-state";
-    empty.textContent = accessibleMachinesCount > 0 ? text.empty : text.emptyNoMachines;
+    const selectedMachine = selectedTreeMachineId
+      ? allMachines.find((machine) => machine.id === selectedTreeMachineId)
+      : null;
+    empty.textContent = selectedMachine && !selectedMachine.tagQrUrl
+      ? text.emptySelectedWithoutQr
+      : accessibleMachinesCount > 0 ? text.empty : text.emptyNoMachines;
     wrap.appendChild(empty);
     mount.appendChild(wrap);
     window.requestAnimationFrame(syncQrMenuState);
@@ -745,8 +929,11 @@ const renderQrGrid = (machines, options = {}) => {
     removeBtn.type = "button";
     removeBtn.className = "qr-print-remove";
     removeBtn.setAttribute("aria-label", text.remove);
-    removeBtn.title = text.remove;
-    removeBtn.textContent = "×";
+    removeBtn.setAttribute("data-tooltip", text.remove);
+    qrTooltips.attach(removeBtn);
+    removeBtn.innerHTML =
+      '<svg viewBox="0 0 12 12" aria-hidden="true" focusable="false">' +
+      '<path d="M2.25 2.25 9.75 9.75M9.75 2.25 2.25 9.75"/></svg>';
     removeBtn.addEventListener("click", () => {
       hiddenMachineIds.add(machine.id);
       renderVisibleMachines();
@@ -872,8 +1059,7 @@ if (mount) {
       return;
     }
     activeUid = user.uid;
-    showTreeIncidentCounts = loadShowTreeIncidentCounts(user.uid);
-    showTreeTaskCounts = loadShowTreeTaskCounts(user.uid);
+    hiddenTreeGroupIds = loadHiddenTreeGroupIds(user.uid);
     applyDashboardTopbarTitle(user.uid);
     try {
       const registration = await getUserRegistrationState(user);
@@ -888,7 +1074,8 @@ if (mount) {
       showSuggestionsNav = await canShowSuggestionsNav(user, registration);
       const sourceMachines = await fetchAccessibleMachines(user.uid);
       await loadSectionNavCounts(user.uid, sourceMachines);
-      const machines = await buildQrMachines(sourceMachines);
+      const machines = await buildMachinesWithQrState(sourceMachines);
+      const qrMachines = machines.filter((machine) => machine.tagQrUrl);
       const focusedMachineId = getFocusedMachineId();
       selectedTreeMachineId = machines.some((machine) => machine.id === focusedMachineId)
         ? focusedMachineId
@@ -907,12 +1094,12 @@ if (mount) {
         expandedTreeGroupIds = Array.from(expanded);
       }
       const visibleMachines = focusedMachineId
-        ? machines.filter((machine) => machine.id === focusedMachineId)
-        : machines;
+        ? qrMachines.filter((machine) => machine.id === focusedMachineId)
+        : qrMachines;
       renderQrGrid(visibleMachines, {
         sourceMachines: machines,
-        totalCount: machines.length,
-        accessibleMachineCount: sourceMachines.length
+        totalCount: qrMachines.length,
+        accessibleMachineCount: machines.length
       });
     } catch {
       setState(text.error, "error");

@@ -16,6 +16,10 @@ import { fetchLinksForAdmin } from "/static/js/dashboard/admin/adminLinksRepo.js
 import { upsertAccountDirectory } from "/static/js/dashboard/admin/accountDirectoryRepo.js";
 import { fetchDashboardLayout, upsertDashboardLayout } from "/static/js/dashboard/firestoreRepo.js";
 import { setTopbarNotifications } from "/static/js/notifications/topbar-notifications.js";
+import {
+  setTopbarLogoLoading
+} from "/static/js/topbar/loading-logo.js";
+import { setTopbarSaveStatus } from "/static/js/topbar/save-status.js";
 import { calculateStorageUsage, formatBytes, STORAGE_LIMIT_BYTES } from "./storageUsage.js";
 import {
   checkAccountHandleAvailability,
@@ -51,6 +55,10 @@ const textMap = {
   accountHandleChange: isEn ? "Change" : "Cambiar",
   accountHandleSave: isEn ? "Save" : "Guardar",
   accountHandleCancel: isEn ? "Cancel" : "Cancelar",
+  save: isEn ? "Save" : "Guardar",
+  saved: isEn ? "Changes saved" : "Cambios guardados",
+  saveError: isEn ? "Unable to save the changes." : "No se han podido guardar los cambios.",
+  saving: isEn ? "Saving..." : "Guardando...",
   accountHandleAvailable: isEn ? "Available" : "Disponible",
   accountHandleTaken: isEn ? "Not available" : "No disponible",
   accountHandleInvalid: isEn
@@ -114,24 +122,19 @@ const tabLabels = {
 
 const sectionDefinitions = [
   {
-    id: "language",
-    label: textMap.language,
-    icon: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.8 12h16.4M12 3.5c2.1 2.3 3.1 5.1 3.1 8.5S14.1 18.2 12 20.5M12 3.5C9.9 5.8 8.9 8.6 8.9 12s1 6.2 3.1 8.5"/></svg>'
-  },
-  {
     id: "account",
     label: textMap.account,
     icon: '<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.25"/><path d="M5.5 19.5c.7-3.2 3.1-5 6.5-5s5.8 1.8 6.5 5"/></svg>'
   },
   {
-    id: "storage",
-    label: textMap.storage,
-    icon: '<svg viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7" ry="2.5"/><path d="M5 6v6c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5V6M5 12v6c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5v-6"/></svg>'
-  },
-  {
     id: "preferences",
     label: textMap.preferences,
     icon: '<svg viewBox="0 0 24 24"><path d="M5 6h14M5 12h14M5 18h14"/><circle cx="9" cy="6" r="1.7"/><circle cx="15" cy="12" r="1.7"/><circle cx="11" cy="18" r="1.7"/></svg>'
+  },
+  {
+    id: "storage",
+    label: textMap.storage,
+    icon: '<svg viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7" ry="2.5"/><path d="M5 6v6c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5V6M5 12v6c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5v-6"/></svg>'
   },
   {
     id: "activity",
@@ -160,13 +163,16 @@ const normalizeTabOrder = (value) => {
   return ordered;
 };
 
-const createCard = (title) => {
+const createCard = (title, icon = "") => {
   const card = document.createElement("div");
   card.className = "profile-card";
   card.dataset.expanded = "false";
   card.innerHTML = `
     <button type="button" class="profile-card-toggle" aria-expanded="false">
-      <span class="profile-card-title">${title}</span>
+      <span class="profile-card-heading">
+        <span class="profile-card-section-icon" aria-hidden="true">${icon}</span>
+        <span class="profile-card-title">${title}</span>
+      </span>
       <span class="profile-card-icon">+</span>
     </button>
     <div class="profile-card-body" hidden></div>
@@ -186,32 +192,33 @@ const toggleCard = (card) => {
 };
 
 if (mount) {
+  setTopbarLogoLoading("settings", true);
   const topbarTitle = document.getElementById("topbar-title");
   if (topbarTitle) topbarTitle.textContent = textMap.settings;
   document.title = `${textMap.settings} | unatomo`;
 
   const wrap = document.createElement("div");
   wrap.className = "profile-wrap";
+  const sectionIconById = new Map(
+    sectionDefinitions.map(({ id, icon }) => [id, icon])
+  );
 
-  const languageCard = createCard(textMap.language);
-  const accountCard = createCard(textMap.account);
-  const storageCard = createCard(textMap.storage);
-  const preferencesCard = createCard(textMap.preferences);
-  const activityCard = createCard(textMap.activity);
-  const securityCard = createCard(textMap.security);
+  const accountCard = createCard(textMap.account, sectionIconById.get("account"));
+  const preferencesCard = createCard(textMap.preferences, sectionIconById.get("preferences"));
+  const storageCard = createCard(textMap.storage, sectionIconById.get("storage"));
+  const activityCard = createCard(textMap.activity, sectionIconById.get("activity"));
+  const securityCard = createCard(textMap.security, sectionIconById.get("security"));
 
-  wrap.appendChild(languageCard);
   wrap.appendChild(accountCard);
-  wrap.appendChild(storageCard);
   wrap.appendChild(preferencesCard);
+  wrap.appendChild(storageCard);
   wrap.appendChild(activityCard);
   wrap.appendChild(securityCard);
 
   const sectionCards = new Map([
-    ["language", languageCard],
     ["account", accountCard],
-    ["storage", storageCard],
     ["preferences", preferencesCard],
+    ["storage", storageCard],
     ["activity", activityCard],
     ["security", securityCard]
   ]);
@@ -236,7 +243,7 @@ if (mount) {
   mount.appendChild(settingsLayout);
 
   const sectionTreeButtons = new Map();
-  let activeSectionId = "language";
+  let activeSectionId = "account";
   const selectSection = (sectionId) => {
     if (!sectionCards.has(sectionId)) return;
     activeSectionId = sectionId;
@@ -289,30 +296,11 @@ if (mount) {
   });
   selectSection(activeSectionId);
 
-  const languageBody = languageCard.querySelector(".profile-card-body");
   const accountBody = accountCard.querySelector(".profile-card-body");
   const storageBody = storageCard.querySelector(".profile-card-body");
   const prefsBody = preferencesCard.querySelector(".profile-card-body");
   const activityBody = activityCard.querySelector(".profile-card-body");
   const securityBody = securityCard.querySelector(".profile-card-body");
-
-  if (languageBody) {
-    languageBody.innerHTML = `
-      <div class="profile-row">
-        <span class="profile-label">${textMap.language}</span>
-        <div class="profile-theme-options" role="radiogroup" aria-label="${textMap.language}">
-          <label class="profile-theme-option">
-            <input type="radio" name="profile-language" value="es" />
-            <span>${textMap.spanish}</span>
-          </label>
-          <label class="profile-theme-option">
-            <input type="radio" name="profile-language" value="en" />
-            <span>${textMap.english}</span>
-          </label>
-        </div>
-      </div>
-    `;
-  }
 
   if (accountBody) {
     accountBody.innerHTML = `
@@ -325,9 +313,6 @@ if (mount) {
         <div class="profile-handle-control">
           <span class="profile-handle-prefix">@</span>
           <input class="profile-input profile-handle-input" id="profile-handle" type="text" maxlength="30" autocomplete="off" spellcheck="false" />
-          <button class="profile-mini-btn profile-handle-claim" id="profile-handle-claim" type="button">${textMap.accountHandleClaim}</button>
-          <button class="profile-mini-btn" id="profile-handle-edit" type="button" hidden>${textMap.accountHandleChange}</button>
-          <button class="profile-mini-btn" id="profile-handle-cancel" type="button" hidden>${textMap.accountHandleCancel}</button>
         </div>
         <span class="profile-handle-status" id="profile-handle-status" aria-live="polite"></span>
       </div>
@@ -346,6 +331,10 @@ if (mount) {
       <div class="profile-row">
         <span class="profile-label">UID</span>
         <span class="profile-value" id="profile-uid">-</span>
+      </div>
+      <div class="profile-form-actions">
+        <button class="profile-save-btn" id="profile-account-save" type="button">${textMap.save}</button>
+        <span class="profile-save-status" id="profile-account-save-status" aria-live="polite"></span>
       </div>
     `;
   }
@@ -382,6 +371,19 @@ if (mount) {
   if (prefsBody) {
     prefsBody.innerHTML = `
       <div class="profile-row">
+        <span class="profile-label">${textMap.language}</span>
+        <div class="profile-theme-options" role="radiogroup" aria-label="${textMap.language}">
+          <label class="profile-theme-option">
+            <input type="radio" name="profile-language" value="es" />
+            <span>${textMap.spanish}</span>
+          </label>
+          <label class="profile-theme-option">
+            <input type="radio" name="profile-language" value="en" />
+            <span>${textMap.english}</span>
+          </label>
+        </div>
+      </div>
+      <div class="profile-row">
         <span class="profile-label">${textMap.theme}</span>
         <div class="profile-theme-options" role="radiogroup" aria-label="${textMap.theme}">
           <label class="profile-theme-option">
@@ -397,6 +399,10 @@ if (mount) {
       <div class="profile-row profile-row-stack">
         <span class="profile-label">${textMap.tabOrder}</span>
         <div class="profile-tab-order" id="profile-tab-order"></div>
+      </div>
+      <div class="profile-form-actions">
+        <button class="profile-save-btn" id="profile-preferences-save" type="button">${textMap.save}</button>
+        <span class="profile-save-status" id="profile-preferences-save-status" aria-live="polite"></span>
       </div>
     `;
   }
@@ -431,10 +437,9 @@ if (mount) {
 
   const nameInput = accountBody?.querySelector("#profile-name");
   const handleInput = accountBody?.querySelector("#profile-handle");
-  const handleClaim = accountBody?.querySelector("#profile-handle-claim");
-  const handleEdit = accountBody?.querySelector("#profile-handle-edit");
-  const handleCancel = accountBody?.querySelector("#profile-handle-cancel");
   const handleStatus = accountBody?.querySelector("#profile-handle-status");
+  const accountSave = accountBody?.querySelector("#profile-account-save");
+  const accountSaveStatus = accountBody?.querySelector("#profile-account-save-status");
   const companyInput = accountBody?.querySelector("#profile-company");
   const emailEl = accountBody?.querySelector("#profile-email");
   const createdEl = accountBody?.querySelector("#profile-created");
@@ -449,18 +454,15 @@ if (mount) {
   const storageNoteEl = storageBody?.querySelector("#profile-storage-note");
   const logoutLink = securityBody?.querySelector("#profile-logout");
   const tabOrderEl = prefsBody?.querySelector("#profile-tab-order");
-  const languageInputs = languageBody?.querySelectorAll(
+  const preferencesSave = prefsBody?.querySelector("#profile-preferences-save");
+  const preferencesSaveStatus = prefsBody?.querySelector("#profile-preferences-save-status");
+  const languageInputs = prefsBody?.querySelectorAll(
     "input[name=\"profile-language\"]"
   );
 
   if (languageInputs && languageInputs.length) {
     languageInputs.forEach((input) => {
       input.checked = input.value === currentLang;
-      input.addEventListener("change", () => {
-        if (!input.checked || input.value === currentLang) return;
-        setSavedLang(input.value);
-        window.location.href = getLocalizedHref(input.value);
-      });
     });
   }
 
@@ -470,6 +472,7 @@ if (mount) {
   };
 
   const loadCounts = async (uid) => {
+    setTopbarLogoLoading("settings-counts", true);
     try {
       const snap = await getDocs(collection(db, `tenants/${uid}/machines`));
       setText(ownerCountEl, String(snap.size));
@@ -482,11 +485,14 @@ if (mount) {
       setText(adminCountEl, String(links.length));
     } catch {
       setText(adminCountEl, "0");
+    } finally {
+      setTopbarLogoLoading("settings-counts", false);
     }
   };
 
   const loadStorageUsage = async (uid) => {
     if (!storageBody) return;
+    setTopbarLogoLoading("settings-storage", true);
     setText(storageTotalEl, textMap.storageLoading);
     setText(storageDocumentsEl, "-");
     setText(storageQrEl, "-");
@@ -510,9 +516,12 @@ if (mount) {
     } catch {
       setText(storageTotalEl, textMap.storageError);
       if (storageNoteEl) storageNoteEl.dataset.state = "error";
+    } finally {
+      setTopbarLogoLoading("settings-storage", false);
     }
   };
 
+  let saveTabOrderPreference = async () => {};
   const initTabOrderPreferences = async (uid) => {
     if (!tabOrderEl) return;
     let layout = null;
@@ -525,6 +534,7 @@ if (mount) {
       };
       await upsertDashboardLayout(uid, layout);
     };
+    saveTabOrderPreference = saveTabOrder;
 
     const renderTabOrder = () => {
       tabOrderEl.innerHTML = "";
@@ -543,11 +553,10 @@ if (mount) {
         up.className = "profile-mini-btn";
         up.textContent = textMap.moveUp;
         up.disabled = index === 0;
-        up.addEventListener("click", async () => {
+        up.addEventListener("click", () => {
           if (index === 0) return;
           [tabOrder[index - 1], tabOrder[index]] = [tabOrder[index], tabOrder[index - 1]];
           renderTabOrder();
-          await saveTabOrder();
         });
 
         const down = document.createElement("button");
@@ -555,11 +564,10 @@ if (mount) {
         down.className = "profile-mini-btn";
         down.textContent = textMap.moveDown;
         down.disabled = index === tabOrder.length - 1;
-        down.addEventListener("click", async () => {
+        down.addEventListener("click", () => {
           if (index >= tabOrder.length - 1) return;
           [tabOrder[index + 1], tabOrder[index]] = [tabOrder[index], tabOrder[index + 1]];
           renderTabOrder();
-          await saveTabOrder();
         });
 
         actions.appendChild(up);
@@ -626,44 +634,19 @@ if (mount) {
       else handleStatus.removeAttribute("data-state");
     };
     let savedHandle = normalizeAccountHandle(profile.accountHandle);
-    if (handleInput && handleClaim && handleEdit && handleCancel) {
+    if (handleInput && accountSave) {
       const suggestedHandle = normalizeAccountHandle(
         (user.email || "").split("@")[0]
       );
       let checkTimer = 0;
       let checkedHandle = "";
       let isAvailable = false;
-      const lockHandle = (handle) => {
-        savedHandle = handle;
-        handleInput.value = handle;
-        handleInput.disabled = true;
-        handleClaim.hidden = true;
-        handleCancel.hidden = true;
-        handleEdit.hidden = false;
-        setHandleStatus("");
-      };
-      const startEditing = () => {
-        handleInput.disabled = false;
-        handleInput.value = savedHandle || suggestedHandle;
-        handleClaim.textContent = savedHandle
-          ? textMap.accountHandleSave
-          : textMap.accountHandleClaim;
-        handleClaim.hidden = false;
-        handleClaim.disabled = true;
-        handleCancel.hidden = !savedHandle;
-        handleEdit.hidden = true;
-        checkedHandle = "";
-        isAvailable = false;
-        setHandleStatus("");
-        handleInput.focus();
-        handleInput.select();
-      };
+      handleInput.value = savedHandle || suggestedHandle;
       const renderAvailability = async () => {
         const handle = normalizeAccountHandle(handleInput.value);
         handleInput.value = handle;
         checkedHandle = "";
         isAvailable = false;
-        handleClaim.disabled = true;
         if (!handle || handle === savedHandle) {
           setHandleStatus("");
           return;
@@ -675,7 +658,6 @@ if (mount) {
           if (normalizeAccountHandle(handleInput.value) !== requestedHandle) return;
           checkedHandle = requestedHandle;
           isAvailable = result.valid === true && result.available === true;
-          handleClaim.disabled = !isAvailable;
           if (isAvailable) {
             setHandleStatus(textMap.accountHandleAvailable, "ok");
           } else if (result.reason === "handle-reserved") {
@@ -696,30 +678,53 @@ if (mount) {
         window.clearTimeout(checkTimer);
         checkTimer = window.setTimeout(renderAvailability, 280);
       });
-      handleEdit.addEventListener("click", startEditing);
-      handleCancel.addEventListener("click", () => lockHandle(savedHandle));
-      handleClaim.addEventListener("click", async () => {
+      accountSave.addEventListener("click", async () => {
+        const nextName = nameInput?.value.trim() || "";
+        const nextCompany = companyInput?.value.trim().replace(/\s+/g, " ").slice(0, 60) || "";
+        const previousCompany = (profile.company || profile.companyName || "").toString().trim();
         const handle = normalizeAccountHandle(handleInput.value);
-        if (!isAvailable || checkedHandle !== handle) {
-          await renderAvailability();
+        if (!nextName) {
+          nameInput?.focus();
           return;
         }
-        const confirmation = savedHandle
-          ? textMap.accountHandleChangeConfirm(handle)
-          : textMap.accountHandleConfirm(handle);
-        if (!window.confirm(confirmation)) return;
-        handleInput.disabled = true;
-        handleClaim.disabled = true;
-        setHandleStatus(textMap.accountHandleSaving);
+        if (handle !== savedHandle && (!isAvailable || checkedHandle !== handle)) {
+          await renderAvailability();
+          if (!isAvailable || checkedHandle !== handle) return;
+        }
+        if (handle !== savedHandle) {
+          const confirmation = savedHandle
+            ? textMap.accountHandleChangeConfirm(handle)
+            : textMap.accountHandleConfirm(handle);
+          if (!window.confirm(confirmation)) return;
+        }
+        accountSave.disabled = true;
+        setTopbarSaveStatus(textMap.saving);
+        if (accountSaveStatus) accountSaveStatus.textContent = "";
         try {
-          const result = savedHandle
-            ? await changeAccountHandle(handle)
-            : await claimAccountHandle(handle);
-          const confirmedHandle = normalizeAccountHandle(result.handle || handle);
-          profile = {...profile, accountHandle: confirmedHandle};
-          lockHandle(confirmedHandle);
+          if (nextName !== user.displayName) {
+            await updateProfile(user, { displayName: nextName });
+          }
+          if (nextCompany !== previousCompany) {
+            await setDoc(
+              doc(db, "users", user.uid),
+              { company: nextCompany, updatedAt: serverTimestamp() },
+              { merge: true }
+            );
+            profile = { ...profile, company: nextCompany };
+          }
+          if (handle !== savedHandle) {
+            setHandleStatus(textMap.accountHandleSaving);
+            const result = savedHandle
+              ? await changeAccountHandle(handle)
+              : await claimAccountHandle(handle);
+            savedHandle = normalizeAccountHandle(result.handle || handle);
+            profile = { ...profile, accountHandle: savedHandle };
+            handleInput.value = savedHandle;
+            setHandleStatus("");
+          }
+          await upsertAccountDirectory({ ...user, company: nextCompany });
+          if (accountSaveStatus) accountSaveStatus.textContent = textMap.saved;
         } catch (error) {
-          handleInput.disabled = false;
           const message = (error?.message || "").toString();
           if (message.includes("handle-taken")) {
             setHandleStatus(textMap.accountHandleTaken, "error");
@@ -728,58 +733,25 @@ if (mount) {
           } else if (message.includes("handle-change-cooldown")) {
             setHandleStatus(textMap.accountHandleCooldown, "error");
           } else {
-            setHandleStatus(textMap.accountHandleError, "error");
+            if (accountSaveStatus) accountSaveStatus.textContent = textMap.saveError;
           }
           isAvailable = false;
           checkedHandle = "";
+        } finally {
+          accountSave.disabled = false;
+          setTopbarSaveStatus("");
         }
       });
-      if (savedHandle) lockHandle(savedHandle);
-      else startEditing();
       if (!savedHandle) renderAvailability();
     }
 
-    loadCounts(user.uid);
-    loadStorageUsage(user.uid);
-    initTabOrderPreferences(user.uid);
+    await Promise.all([
+      loadCounts(user.uid),
+      loadStorageUsage(user.uid),
+      initTabOrderPreferences(user.uid)
+    ]);
+    setTopbarLogoLoading("settings", false);
     upsertAccountDirectory(user).catch(() => {});
-
-    if (nameInput) {
-      nameInput.addEventListener("blur", async () => {
-        const next = nameInput.value.trim();
-        if (!next || next === user.displayName) return;
-        try {
-          await updateProfile(user, { displayName: next });
-          await upsertAccountDirectory(user);
-        } catch {
-          nameInput.value = user.displayName || user.email || textMap.user;
-        }
-      });
-    }
-
-    if (companyInput) {
-      companyInput.addEventListener("blur", async () => {
-        const next = companyInput.value.trim().replace(/\s+/g, " ").slice(0, 60);
-        const previous = (profile.company || profile.companyName || "").toString().trim();
-        companyInput.value = next;
-        if (next === previous) return;
-        try {
-          await setDoc(
-            doc(db, "users", user.uid),
-            {
-              company: next,
-              updatedAt: serverTimestamp()
-            },
-            { merge: true }
-          );
-          profile = { ...profile, company: next };
-        } catch {
-          companyInput.value = previous;
-          return;
-        }
-        upsertAccountDirectory({ ...user, company: next }).catch(() => {});
-      });
-    }
 
     const themeInputs = prefsBody?.querySelectorAll(
       "input[name=\"profile-theme\"]"
@@ -802,10 +774,40 @@ if (mount) {
         input.addEventListener("change", () => {
           if (!input.checked) return;
           root.setAttribute("data-theme", input.value);
-          try {
-            localStorage.setItem("theme", input.value);
-          } catch {}
         });
+      });
+    }
+
+    if (preferencesSave) {
+      preferencesSave.addEventListener("click", async () => {
+        preferencesSave.disabled = true;
+        setTopbarSaveStatus(textMap.saving);
+        if (preferencesSaveStatus) preferencesSaveStatus.textContent = "";
+        try {
+          await saveTabOrderPreference();
+          const selectedTheme = prefsBody?.querySelector(
+            'input[name="profile-theme"]:checked'
+          )?.value;
+          if (selectedTheme) {
+            try {
+              localStorage.setItem("theme", selectedTheme);
+            } catch {}
+          }
+          const selectedLanguage = prefsBody?.querySelector(
+            'input[name="profile-language"]:checked'
+          )?.value;
+          if (selectedLanguage && selectedLanguage !== currentLang) {
+            setSavedLang(selectedLanguage);
+            window.location.href = getLocalizedHref(selectedLanguage);
+            return;
+          }
+          if (preferencesSaveStatus) preferencesSaveStatus.textContent = textMap.saved;
+        } catch {
+          if (preferencesSaveStatus) preferencesSaveStatus.textContent = textMap.saveError;
+        } finally {
+          preferencesSave.disabled = false;
+          setTopbarSaveStatus("");
+        }
       });
     }
 

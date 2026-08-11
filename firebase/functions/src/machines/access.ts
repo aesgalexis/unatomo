@@ -505,6 +505,9 @@ export const getMachineAccessPublic = onCall(
         },
       };
     }
+    if (machine.qrAccessEnabled === false || access.qrAccessEnabled === false) {
+      throw new HttpsError("failed-precondition", "qr-access-disabled");
+    }
     const session = await getValidMachineSession(
       tagId,
       (request.data?.sessionId || "").toString().trim(),
@@ -584,6 +587,9 @@ export const verifyMachineAccessUser = onCall(
     const machineTagId = (machine.tagId || "").toString().trim();
     if (ownerUid !== tenantId || machineTagId !== tagId) {
       throw new HttpsError("permission-denied", "tag-machine-mismatch");
+    }
+    if (machine.qrAccessEnabled === false || access.qrAccessEnabled === false) {
+      throw new HttpsError("failed-precondition", "qr-access-disabled");
     }
 
     const normalizedUsername = normalizeMachineUsername(username);
@@ -707,6 +713,9 @@ export const updateMachineAccessOperational = onCall(
     }
     const machine = machineSnap.data() || {};
     const ownerUid = (machine.ownerUid || machine.tenantId || "").toString();
+    if (machine.qrAccessEnabled === false || access.qrAccessEnabled === false) {
+      throw new HttpsError("failed-precondition", "qr-access-disabled");
+    }
     if (
       (session.machineId || "").toString() !== machineId ||
       (session.tenantId || "").toString() !== ownerUid
@@ -798,6 +807,49 @@ export const updateMachineAccessOperational = onCall(
     return {ok: true};
   },
 );
+
+export const setMachineQrAccessEnabled = onCall(async (request) => {
+  const auth = request.auth;
+  const machineId = (request.data?.machineId || "").toString().trim();
+  const enabled = request.data?.enabled;
+  if (typeof enabled !== "boolean") {
+    throw new HttpsError("invalid-argument", "enabled-required");
+  }
+  const {machineRef, machine} = await getManagedMachineForAuth(auth, machineId);
+  const tagId = (machine.tagId || "").toString().trim();
+  if (!tagId) throw new HttpsError("failed-precondition", "tag-required");
+
+  const accessRef = machineAccessCol().doc(tagId);
+  await db.runTransaction(async (transaction) => {
+    const accessSnap = await transaction.get(accessRef);
+    if (!accessSnap.exists) {
+      throw new HttpsError("not-found", "tag-not-found");
+    }
+    transaction.set(machineRef, {
+      qrAccessEnabled: enabled,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    }, {merge: true});
+    transaction.set(accessRef, {
+      qrAccessEnabled: enabled,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      updatedBy: auth?.uid || "",
+    }, {merge: true});
+  });
+
+  if (!enabled) {
+    while (true) {
+      const sessions = await db.collection("machine_access_sessions")
+        .where("tagId", "==", tagId)
+        .limit(MACHINE_SESSION_CLEANUP_LIMIT)
+        .get();
+      if (sessions.empty) break;
+      const batch = db.batch();
+      sessions.docs.forEach((docSnap) => batch.delete(docSnap.ref));
+      await batch.commit();
+    }
+  }
+  return {ok: true, machineId, tagId, enabled};
+});
 
 export const cleanupMachineAccessSessions = onSchedule(
   "every 24 hours",

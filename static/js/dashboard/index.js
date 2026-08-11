@@ -11,7 +11,7 @@ import { fetchLinksForAdmin } from "./admin/adminLinksRepo.js";
 import { createAdminInvite, leaveAdminRole, revokeAdminInvite, ensureAdminLink, createMachineTransferInvite, cancelMachineTransferInvite } from "./admin/adminFunctionsRepo.js";
 import { validateTag, assignTag } from "./tagRepo.js";
 import { createTagToken } from "/static/js/tokens/tagTokens.js";
-import { upsertMachineAccessFromMachine, fetchMachineAccess } from "./machineAccessRepo.js";
+import { upsertMachineAccessFromMachine, fetchMachineAccess, setMachineQrAccessEnabled } from "./machineAccessRepo.js";
 import { buildMachineTagUrl, generateMachineTagQr, disconnectMachineTag } from "./tags/tagAssetsRepo.js";
 import { createMachineCard } from "./machineCardTemplate.js";
 import { initGroupedDragAndDrop } from "./dragAndDrop.js";
@@ -636,7 +636,7 @@ if (mount) {
     container: groupTree,
     getGroupMenuActions,
     getPendingTaskCount,
-    isTreeActive: isTreeModeActive,
+    isTreeActive: () => largeDashboardQuery.matches && (isTreeModeActive() || ["registro", "todo", "galeria"].includes(state.activeView)),
     moveGroupToGroup: (draggedId, targetId) => moveGroupToTargetGroup(draggedId, targetId),
     moveGroupToRoot: (draggedGroupId) => moveGroupToRootLevel(draggedGroupId),
     moveMachineToGroup: (machineId, groupId) => moveMachineToGroup(machineId, groupId),
@@ -756,6 +756,7 @@ if (mount) {
     restoreViewport,
     revokeAdminInvite,
     scheduleHeightSync,
+    setMachineQrAccessEnabled,
     sortFlatMachines,
     state,
     groupTree,

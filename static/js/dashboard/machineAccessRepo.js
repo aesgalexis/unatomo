@@ -7,6 +7,7 @@ import {
 import { httpsCallable } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-functions.js";
 
 const getMachineAccessPublicCallable = httpsCallable(functions, "getMachineAccessPublic");
+const setMachineQrAccessEnabledCallable = httpsCallable(functions, "setMachineQrAccessEnabled");
 
 export const upsertMachineAccessFromMachine = async (tenantId, machine, updatedBy) => {
   if (!machine.tagId) return;
@@ -24,6 +25,7 @@ export const upsertMachineAccessFromMachine = async (tenantId, machine, updatedB
       year: machine.year ?? null,
       location: machine.location || "",
       status: machine.status,
+      qrAccessEnabled: machine.qrAccessEnabled !== false,
       logs: machine.logs || [],
       tasks: machine.tasks || [],
       updatedAt: serverTimestamp(),
@@ -44,6 +46,11 @@ export const fetchMachineAccess = async (tagId, session = null) => {
     permissions: response?.data?.permissions || null,
     role: response?.data?.role || ""
   };
+};
+
+export const setMachineQrAccessEnabled = async (machineId, enabled) => {
+  const response = await setMachineQrAccessEnabledCallable({ machineId, enabled });
+  return response?.data || { ok: true, machineId, enabled };
 };
 
 export const updateMachineAccess = async (tagId, patch, updatedBy) => {

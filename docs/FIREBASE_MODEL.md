@@ -30,7 +30,8 @@ Read this before changing data flows, callable functions, machine ownership, adm
   - `qrSize`
 - `machine_access`: operational access data keyed by Tag ID. Unauthenticated
   clients receive only a server-sanitized public projection; the document
-  itself is not public Firestore data.
+  itself is not public Firestore data. `qrAccessEnabled` defaults to enabled
+  when absent and can suspend QR/NFC access without disconnecting the Tag ID.
 - `machine_access_sessions`: short-lived QR/machine sessions created by
   callable functions after a machine-local user login. Browser clients must not
   read or write this collection directly.
@@ -109,6 +110,7 @@ frontend wrappers live under `static/js/dashboard/`.
 - `assignMachineTag`: assigns an existing Tag ID to a machine and updates access data.
 - `generateMachineTagQr`: generates/stores a QR PNG and writes `tagQrUrl`, `tagQrPath`, `tagQrSize`, `qrUrl`, `qrPath`, and `qrSize` metadata.
 - `disconnectMachineTag`: disconnects Tag ID data and deletes the associated QR file/path. Preserve this cleanup behavior.
+- `setMachineQrAccessEnabled`: enables or suspends QR/NFC access while preserving the Tag ID, URL, and stored QR; disabling also revokes active machine-access sessions.
 - `deleteMachine`: owner-only machine deletion. It removes the canonical and
   legacy machine documents plus associated Tags, access records, administrator
   links, invitations, transfer invitations, access sessions, dashboard

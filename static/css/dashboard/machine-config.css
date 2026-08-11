@@ -295,6 +295,52 @@
   display: none;
 }
 
+.mc-qr-access-controls {
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.mc-qr-access-state {
+  color: color-mix(in srgb, var(--fg) 62%, transparent);
+  font-size: 0.75rem;
+}
+
+.mc-qr-access-switch {
+  width: 2.45rem;
+  height: 1.35rem;
+  box-sizing: border-box;
+  border: 1px solid color-mix(in srgb, var(--fg) 22%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--fg) 12%, transparent);
+  padding: 0.12rem;
+  cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease;
+}
+
+.mc-qr-access-switch[aria-checked="true"] {
+  border-color: #15803d;
+  background: #16a34a;
+}
+
+.mc-qr-access-switch-knob {
+  display: block;
+  width: 0.98rem;
+  height: 0.98rem;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 28%);
+  transition: transform 160ms ease;
+}
+
+.mc-qr-access-switch[aria-checked="true"] .mc-qr-access-switch-knob {
+  transform: translateX(1.05rem);
+}
+
+.mc-qr-access-switch:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
 .mc-config-title {
   font-weight: 600;
   margin-bottom: 0.4rem;

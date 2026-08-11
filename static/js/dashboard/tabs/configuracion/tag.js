@@ -219,6 +219,56 @@ export const render = (container, machine, hooks, options = {}) => {
   qrRow.appendChild(qrLabel);
   qrRow.appendChild(qrControls);
 
+  const qrAccessRow = document.createElement("div");
+  qrAccessRow.className = "mc-config-row mc-config-row-qr-access";
+
+  const qrAccessLabel = document.createElement("span");
+  qrAccessLabel.className = "mc-config-label";
+  qrAccessLabel.textContent = t("config.qrAccess", "Acceso QR/NFC");
+
+  const qrAccessControl = document.createElement("button");
+  qrAccessControl.type = "button";
+  qrAccessControl.className = "mc-qr-access-switch";
+  qrAccessControl.setAttribute("role", "switch");
+  const qrAccessEnabled = machine.qrAccessEnabled !== false;
+  qrAccessControl.setAttribute("aria-checked", qrAccessEnabled ? "true" : "false");
+  qrAccessControl.setAttribute(
+    "aria-label",
+    t("config.qrAccess", "Acceso QR/NFC")
+  );
+  qrAccessControl.innerHTML = '<span class="mc-qr-access-switch-knob" aria-hidden="true"></span>';
+
+  const qrAccessText = document.createElement("span");
+  qrAccessText.className = "mc-qr-access-state";
+  qrAccessText.textContent = qrAccessEnabled
+    ? t("config.qrAccessEnabled", "Habilitado")
+    : t("config.qrAccessDisabled", "Deshabilitado");
+
+  qrAccessControl.addEventListener("click", async (event) => {
+    event.stopPropagation();
+    if (!machine.tagId || !hooks.onSetQrAccessEnabled) return;
+    const nextEnabled = qrAccessControl.getAttribute("aria-checked") !== "true";
+    qrAccessControl.disabled = true;
+    try {
+      await hooks.onSetQrAccessEnabled(machine.id, nextEnabled);
+      qrAccessControl.setAttribute("aria-checked", nextEnabled ? "true" : "false");
+      qrAccessText.textContent = nextEnabled
+        ? t("config.qrAccessEnabled", "Habilitado")
+        : t("config.qrAccessDisabled", "Deshabilitado");
+    } catch {
+      qrAccessText.textContent = t("config.qrAccessUpdateError", "No se pudo cambiar el acceso");
+    } finally {
+      qrAccessControl.disabled = !canEditConfig || !machine.tagId;
+    }
+  });
+
+  const qrAccessControls = document.createElement("div");
+  qrAccessControls.className = "mc-config-controls mc-qr-access-controls";
+  qrAccessControls.appendChild(qrAccessText);
+  qrAccessControls.appendChild(qrAccessControl);
+  qrAccessRow.appendChild(qrAccessLabel);
+  qrAccessRow.appendChild(qrAccessControls);
+
   qrStatus = document.createElement("div");
   qrStatus.className = "mc-tag-status";
 
@@ -227,8 +277,10 @@ export const render = (container, machine, hooks, options = {}) => {
     tagBtn.disabled = true;
     accessGenerate.disabled = true;
     accessCopy.disabled = true;
+    qrAccessControl.disabled = true;
   } else if (!machine.tagId) {
     accessCopy.disabled = true;
+    qrAccessControl.disabled = true;
   }
 
   tagControls.appendChild(accessGenerate);
@@ -239,5 +291,6 @@ export const render = (container, machine, hooks, options = {}) => {
   container.appendChild(tagStatus);
   container.appendChild(accessRow);
   container.appendChild(qrRow);
+  container.appendChild(qrAccessRow);
   container.appendChild(qrStatus);
 };

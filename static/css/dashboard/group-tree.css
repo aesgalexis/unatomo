@@ -496,6 +496,37 @@
   background: #dc2626;
 }
 
+.dashboard-group-tree-machine-indicator {
+  flex: 0 0 auto;
+  min-width: 2rem;
+  height: 1.15rem;
+  box-sizing: border-box;
+  border: 1px solid color-mix(in srgb, var(--fg) 18%, transparent);
+  border-radius: 999px;
+  display: inline-grid;
+  place-items: center;
+  padding: 0 0.32rem;
+  color: color-mix(in srgb, var(--fg) 52%, transparent);
+  font-size: 0.61rem;
+  font-weight: 600;
+  line-height: 1;
+  text-align: center;
+  transform: translateY(-1px);
+  white-space: nowrap;
+}
+
+.dashboard-group-tree-machine-indicator.is-has-qr {
+  border-color: color-mix(in srgb, #15803d 35%, transparent);
+  background: color-mix(in srgb, #16a34a 10%, transparent);
+  color: color-mix(in srgb, #15803d 82%, var(--fg));
+}
+
+.dashboard-group-tree-machine-indicator.is-qr-disabled {
+  border-color: color-mix(in srgb, var(--fg) 24%, transparent);
+  background: color-mix(in srgb, var(--fg) 10%, transparent);
+  color: color-mix(in srgb, var(--fg) 58%, transparent);
+}
+
 .dashboard-group-tree-count,
 .dashboard-group-tree-badge {
   flex: 0 0 auto;

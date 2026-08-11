@@ -826,4 +826,16 @@ const renderMachine = () => {
   }
 };
 
-init();
+init().catch((error) => {
+  const code = (error?.code || "").toString();
+  const message = (error?.message || "").toString();
+  if (code.includes("failed-precondition") && message.includes("qr-access-disabled")) {
+    saveMachineSession(state.tagId, null, { remember: false });
+    renderMessage(t(
+      "machine.qrAccessDisabled",
+      "El acceso QR/NFC a esta máquina está deshabilitado."
+    ));
+    return;
+  }
+  renderMessage(t("machine.tagNotFound", "Tag no encontrado."));
+});

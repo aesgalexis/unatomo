@@ -19,6 +19,7 @@ export const installMachineCardTagHooks = (dependencies) => {
     refreshStorageFullState,
     renderCards,
     scheduleHeightSync,
+    setMachineQrAccessEnabled,
     state,
     t,
     updateMachine,
@@ -26,6 +27,17 @@ export const installMachineCardTagHooks = (dependencies) => {
     upsertMachineAccessFromMachine,
     validateTag,
   } = dependencies;
+        hooks.onSetQrAccessEnabled = async (id, enabled) => {
+          const current = getDraftById(id);
+          if (!current?.tagId) throw new Error("tag-missing");
+          await setMachineQrAccessEnabled(id, enabled);
+          markLocalWrite(id);
+          updateMachine(id, { qrAccessEnabled: enabled });
+          renderCards({ preserveScroll: true });
+          notifyTopbar(enabled
+            ? t("config.qrAccessEnabledNotice", "Acceso QR/NFC habilitado")
+            : t("config.qrAccessDisabledNotice", "Acceso QR/NFC deshabilitado"));
+        };
         hooks.onConnectTag = async (id, tagInput, statusEl) => {
           const tagId = tagInput.value.trim();
           if (!tagId) return false;

@@ -170,10 +170,14 @@ The main dashboard page has internal hash views:
   view for every authenticated account. The legacy `#/todo` route remains
   accepted as an alias.
 - At desktop tree width, `Registro`, `Tareas`, and `Galería` reuse the side
-  group tree as a read-only machine-scope filter. Selecting a group includes
+  group tree in its complete form, including group creation, contextual group actions,
+  visibility controls, counters, and machine-scope filtering. Selecting a group
+  includes
   its descendant groups; selecting a machine limits the view to that machine.
-  Search is applied within the selected scope. The tree keeps the same resting
-  and scrolled anchors as the main dashboard tree.
+  Search is applied within the selected scope. Tree selection, expanded
+  branches, and locally hidden groups remain shared while navigating between
+  these views and the main dashboard. The tree keeps the same resting and
+  scrolled anchors as the main dashboard tree.
 - In `Galería`, the shared add action opens the status-modal shell for a
   machine document upload. The user selects a visible machine, chooses image,
   manual, or other documentation, and then uses the native file picker. Image
@@ -321,6 +325,7 @@ When creating task-related logs, include `taskId` whenever possible. This keeps 
 6. `View QR` opens the QR print page with `?machineId=<id>` so only that QR is shown initially.
 7. The QR print reload button fetches and shows the full QR list again.
 8. Disconnecting the Tag ID must keep deleting associated QR metadata/storage.
+9. Machine configuration exposes a reversible QR/NFC access switch. Disabling it preserves the Tag ID and generated QR but blocks public access and active local-user sessions.
 
 ## QR Print
 
@@ -340,10 +345,15 @@ Behavior:
 - Size selector uses fixed size steps.
 - Optional frame uses `static/img/LOGO unatomo v1.6 baseQR.jpg`.
 - Optional back-name printing adds machine-name reverse pages to the same print job for printer duplex mode.
-- At desktop tree width, reuse the dashboard group tree as a read-only filter
-  for QR machines. It loads only after machine and layout data are ready,
-  supports branch and individual-machine selection, and keeps the shared local
-  incident/task-count preferences.
+- At desktop tree width, reuse the complete dashboard group tree for all
+  accessible machines, including machines without a generated QR. Group
+  creation, contextual actions, nesting, and the shared local visibility state
+  remain available.
+  Machine rows with a generated QR show a compact `QR` indicator; rows without
+  one have no status indicator. The tree loads only after
+  machine and layout data are ready and supports branch and individual-machine
+  selection. Operational incident and pending-task indicators and their
+  preferences are intentionally omitted from the QR section.
 
 ## Localization
 

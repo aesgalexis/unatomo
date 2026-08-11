@@ -226,8 +226,13 @@ export const createDashboardInternalViewController = ({
     ) {
       state.selectedTreeMachineId = "";
     }
+    const hiddenGroupIds = new Set(state.hiddenTreeGroupIds || []);
+    const visibleMachines = machines.filter((machine) => {
+      const groupId = placements[machine.id]?.groupId || "";
+      return !hiddenGroupIds.has(groupId);
+    });
     return getDashboardScopedMachines({
-      machines,
+      machines: visibleMachines,
       groups,
       placements,
       selectedGroupId: state.selectedTreeGroupId,
@@ -246,10 +251,10 @@ export const createDashboardInternalViewController = ({
       selectedGroupId: state.selectedTreeGroupId,
       selectedMachineId: state.selectedTreeMachineId,
       expandedGroupIds: state.expandedTreeGroupIds,
-      hiddenGroupIds: [],
+      hiddenGroupIds: state.hiddenTreeGroupIds || [],
       showIncidentCounts: state.showTreeIncidentCounts !== false,
       showTaskCounts: state.showTreeTaskCounts !== false,
-      filterOnly: true
+      filterOnly: false
     });
     return getMachineScope(machines);
   };
