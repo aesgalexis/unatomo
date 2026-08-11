@@ -336,7 +336,14 @@ Files:
 
 - `nfc/es/impresion-qr.html`
 - `nfc/en/qr-print.html`
-- `static/js/qr-print/index.js`
+- `static/js/qr-print/index.js`: section composition, tree state, and rendering.
+- `static/js/qr-print/qrPrintData.js`: machine queries, QR fallback resolution,
+  sorting, and dashboard-title loading.
+- `static/js/qr-print/qrPrintNavigation.js`: shared section navigation,
+  permissions, badges, and layout loading.
+- `static/js/qr-print/qrPrintService.js`: print lifecycle and focused-machine URL.
+- `static/js/qr-print/qrPrintShell.js`: fixed-menu and scroll shell behavior.
+- `static/js/qr-print/qrPrintUi.js`: localized text, icons, and print-size constants.
 - `static/css/qr-print.css`
 
 Behavior:

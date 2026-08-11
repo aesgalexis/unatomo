@@ -1,25 +1,15 @@
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 import { observeDashboardLoading } from "/static/js/topbar/loading-logo.js";
 import {
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  query,
-  where
-} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
-import {
   auth,
-  db,
   getUserRegistrationState,
   isAccountOnboardingRequired
 } from "/static/js/firebase/firebaseApp.js";
-import { getCurrentLang, localizeEsPath } from "/static/js/site/locale.js";
+import { getCurrentLang } from "/static/js/site/locale.js";
 import {
   canDashboardGroupHaveChildren,
   MAX_DASHBOARD_GROUP_DEPTH,
-  normalizeDashboardLayout,
-  normalizeDashboardTitle
+  normalizeDashboardLayout
 } from "/static/js/dashboard/layout/dashboardLayoutModel.mjs";
 import {
   canMoveGroupIntoGroup,
@@ -41,125 +31,38 @@ import {
   getDashboardGroupBranchIds,
   getDashboardScopedMachines
 } from "/static/js/dashboard/rendering/groupTreeRenderer.js";
-import { isControlPanelUser } from "/nfc/controlpanel/access.js";
-import { createDashboardSectionNav } from "/static/js/dashboard/components/sectionNav.js";
-import { countUnseenGlobalRegistryEntries } from "/static/js/dashboard/views/registry/globalRegistryModel.js";
-import { fetchDashboardSuggestions } from "/static/js/dashboard/views/suggestions/suggestionsRepo.js";
-import { countUnseenSuggestions } from "/static/js/dashboard/views/suggestions/suggestionsView.js";
-import { getTaskTiming } from "/static/js/dashboard/tabs/tasks/tasksTime.js";
 import { createDashboardTooltips } from "/static/js/dashboard/runtime/dashboardTooltips.js";
 import {
   loadHiddenTreeGroupIds,
   saveHiddenTreeGroupIds
 } from "/static/js/dashboard/runtime/dashboardGroupVisibilityStorage.js";
+import {
+  applyQrDashboardTopbarTitle,
+  buildQrMachineState,
+  fetchQrAccessibleMachines
+} from "./qrPrintData.js";
+import {
+  createMobileHeadingGroup,
+  createQrIconButton,
+  createQrPrintText,
+  GRID_GAP_BY_STEP,
+  PRINT_COLUMNS_BY_STEP,
+  PRINT_ICON,
+  PRINT_ROWS_BY_STEP,
+  QR_SIZE_STEPS,
+  RELOAD_ICON,
+  ZOOM_ICON
+} from "./qrPrintUi.js";
+import { getFocusedQrMachineId, requestQrPrint } from "./qrPrintService.js";
+import { createQrSectionNav, loadQrSectionNavigation } from "./qrPrintNavigation.js";
+import { installQrPrintShell } from "./qrPrintShell.js";
 
 const mount = document.getElementById("qr-print-mount");
 const lang = getCurrentLang();
 const isEn = lang === "en";
-const DASHBOARD_TITLE_CACHE_KEY = "unatomo_dashboard_title_v1";
-try {
-  window.history.scrollRestoration = "manual";
-  window.scrollTo({ top: 0, left: 0, behavior: "auto" });
-} catch {}
-let qrMenuScrollFrame = 0;
-const qrScrollDivider = document.createElement("div");
-qrScrollDivider.className = "qr-print-scroll-divider";
-qrScrollDivider.setAttribute("aria-hidden", "true");
-document.body.appendChild(qrScrollDivider);
+const { sync: syncQrMenuState } = installQrPrintShell();
 
-const syncQrMenuState = () => {
-  qrMenuScrollFrame = 0;
-  const fixedMenus = document.querySelector(".qr-print-fixed-menus");
-  const fixedMenusSpace = document.querySelector(".qr-print-fixed-menus-space");
-  if (!fixedMenus || !fixedMenusSpace) return;
-  fixedMenusSpace.style.height = `${fixedMenus.offsetHeight}px`;
-  qrScrollDivider.style.top = `${Math.round(fixedMenus.getBoundingClientRect().bottom)}px`;
-  qrScrollDivider.classList.toggle("is-visible", window.scrollY > 0);
-  const groupTree = document.querySelector("#qr-print-mount .dashboard-group-tree");
-  groupTree?.classList.toggle("is-content-scrolled", window.scrollY > 0);
-  qrScrollDivider.style.left = groupTree && !groupTree.hidden
-    ? `${Math.round(groupTree.getBoundingClientRect().right)}px`
-    : "0px";
-};
-
-window.addEventListener("scroll", () => {
-  if (qrMenuScrollFrame) return;
-  qrMenuScrollFrame = window.requestAnimationFrame(syncQrMenuState);
-}, { passive: true });
-window.addEventListener("resize", syncQrMenuState);
-
-const text = {
-  title: isEn ? "QR print" : "Impresión QR",
-  loading: isEn ? "Loading..." : "Cargando...",
-  empty: isEn
-    ? "No generated QR codes. Generate a Tag ID on a machine to create the first one."
-    : "No hay QRs generados. Genera un Tag ID en una m\u00e1quina para crear el primero.",
-  emptyNoMachines: isEn
-    ? "No machines are available for generating QR codes."
-    : "No hay m\u00e1quinas disponibles para generar QRs.",
-  emptySelectedWithoutQr: isEn
-    ? "This machine does not have a generated QR code yet."
-    : "Esta m\u00e1quina todav\u00eda no tiene un QR generado.",
-  qrGenerated: isEn ? "QR generated" : "QR generado",
-  error: isEn
-    ? "Unable to load QR codes."
-    : "No se han podido cargar los QRs.",
-  print: isEn ? "Print" : "Imprimir",
-  printBack: isEn
-    ? "Print back side with machine names?"
-    : "¿Imprimir el reverso con los nombres de las máquinas?",
-  reload: isEn ? "Reload QR codes" : "Recargar QRs",
-  search: isEn ? "Search QR by machine title" : "Buscar QR por titulo de maquina",
-  searchPlaceholder: isEn ? "Search by title..." : "Buscar por titulo...",
-  remove: isEn ? "Remove from print sheet" : "Quitar de la hoja",
-  size: isEn ? "QR size" : "Tamaño QR",
-  frame: isEn ? "Frame" : "Marco",
-  backNames: isEn ? "Back names" : "Nombres reverso",
-  sectionNavAria: isEn ? "Sections" : "Secciones",
-  navDashboard: isEn ? "Home" : "Inicio",
-  navRegistry: isEn ? "Registry" : "Registro",
-  navQrPrint: isEn ? "QR print" : "Impresi\u00f3n QR",
-  navGallery: isEn ? "Gallery" : "Galer\u00eda",
-  navSuggestions: isEn ? "Suggestions" : "Sugerencias",
-  navTodo: isEn ? "Tasks" : "Tareas",
-  count: (visible, total) => `${visible}/${total}`,
-  login: localizeEsPath("/es/auth/login.html", lang),
-  home: localizeEsPath("/es/index.html", lang),
-  onboarding: localizeEsPath("/es/onboarding.html", lang),
-  dashboard: localizeEsPath("/es/index.html", lang),
-  qrPrint: localizeEsPath("/es/impresion-qr.html", lang),
-};
-const createMobileHeadingGroup = (heading, loading = null) => {
-  const group = document.createElement("div");
-  group.className = "qr-print-mobile-section-heading";
-  group.appendChild(heading);
-  if (loading) group.appendChild(loading);
-  return group;
-};
-const QR_SIZE_STEPS = [76, 100, 132, 168, 210, 260];
-const PRINT_COLUMNS_BY_STEP = [5, 4, 3, 2, 2, 1];
-const GRID_GAP_BY_STEP = ["0.7rem", "0.85rem", "1rem", "1.2rem", "1.45rem", "1.65rem"];
-const RELOAD_ICON = `
-  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-    <path d="M20 12a8 8 0 1 1-2.34-5.66"></path>
-    <path d="M20 4v5h-5"></path>
-  </svg>
-`;
-const PRINT_ICON = `
-  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-    <path d="M6 9V3h12v6"></path>
-    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
-    <path d="M6 14h12v7H6z"></path>
-  </svg>
-`;
-const ZOOM_ICON = `
-  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-    <circle cx="10.5" cy="10.5" r="6.5"></circle>
-    <path d="m16 16 4.5 4.5"></path>
-    <path d="M10.5 8v5"></path>
-    <path d="M8 10.5h5"></path>
-  </svg>
-`;
+const text = createQrPrintText(lang);
 let currentMachines = [];
 let allMachines = [];
 let totalMachinesCount = 0;
@@ -168,10 +71,12 @@ let currentSizeIndex = 1;
 let useFrame = true;
 let printBackNames = false;
 let loadingProgressTimer = null;
-let showSuggestionsNav = false;
-let registryBadgeCount = 0;
-let suggestionsBadgeCount = 0;
-let todoBadgeCount = 0;
+let sectionNavigation = {
+  registry: 0,
+  showSuggestions: false,
+  suggestions: 0,
+  todo: 0
+};
 let searchQuery = "";
 let hiddenMachineIds = new Set();
 let dashboardLayout = normalizeDashboardLayout();
@@ -188,55 +93,7 @@ qrGroupTree.hidden = true;
 const qrTooltips = createDashboardTooltips();
 qrTooltips.installGlobalCleanup();
 
-const createIconButton = (className, label, icon) => {
-  const btn = document.createElement("button");
-  btn.type = "button";
-  btn.className = `qr-print-icon-button ${className}`;
-  btn.setAttribute("aria-label", label);
-  btn.title = label;
-  btn.innerHTML = icon;
-  return btn;
-};
 
-const getCachedDashboardTitle = () => {
-  try {
-    return normalizeDashboardTitle(localStorage.getItem(DASHBOARD_TITLE_CACHE_KEY) || "");
-  } catch {
-    return "";
-  }
-};
-
-const cacheDashboardTitle = (title) => {
-  try {
-    const normalized = normalizeDashboardTitle(title);
-    if (normalized) localStorage.setItem(DASHBOARD_TITLE_CACHE_KEY, normalized);
-  } catch {}
-};
-
-const applyDashboardTopbarTitle = async (uid) => {
-  const setTitle = (value, attempts = 0) => {
-    const titleEl = document.getElementById("topbar-title");
-    if (titleEl) {
-      titleEl.textContent = value;
-      return;
-    }
-    if (attempts < 20) {
-      window.setTimeout(() => setTitle(value, attempts + 1), 50);
-    }
-  };
-  let title = getCachedDashboardTitle() || "Dashboard";
-  const initialTitle = title;
-  setTitle(title);
-  try {
-    const snap = await getDoc(doc(db, "dashboard_layout", uid));
-    const remoteTitle = normalizeDashboardTitle(snap.exists() ? snap.data()?.dashboardTitle : "");
-    if (remoteTitle) {
-      title = remoteTitle;
-      cacheDashboardTitle(remoteTitle);
-    }
-  } catch {}
-  if (title !== initialTitle) setTitle(title);
-};
 
 const clearLoadingProgress = () => {
   if (!loadingProgressTimer) return;
@@ -245,83 +102,7 @@ const clearLoadingProgress = () => {
 };
 
 const createSectionNav = () => {
-  const refs = createDashboardSectionNav({
-    ariaLabel: text.sectionNavAria,
-    dashboardHref: `${text.dashboard}#/dashboard`,
-    registryHref: `${text.dashboard}#/registro`,
-    usersHref: `${text.dashboard}#/${isEn ? "users" : "usuarios"}`,
-    qrPrintHref: text.qrPrint,
-    galleryHref: `${text.dashboard}#/galeria`,
-    suggestionsHref: `${text.dashboard}#/sugerencias`,
-    todoHref: `${text.dashboard}#/${isEn ? "tasks" : "tareas"}`,
-    statisticsHref: `${text.dashboard}#/${isEn ? "statistics" : "estadisticas"}`,
-    labels: {
-      dashboard: text.navDashboard,
-      users: isEn ? "Users" : "Usuarios",
-      registry: text.navRegistry,
-      qrPrint: text.navQrPrint,
-      gallery: text.navGallery,
-      suggestions: text.navSuggestions,
-      todo: text.navTodo,
-      statistics: isEn ? "Statistics" : "Estadísticas"
-    },
-    active: "qrPrint",
-    showSuggestions: showSuggestionsNav,
-    showTodo: true,
-    todoSuperadmin: false,
-    extraClass: "qr-print-section-nav"
-  });
-  refs.registryBadge.hidden = registryBadgeCount <= 0;
-  refs.registryBadge.textContent = registryBadgeCount > 99 ? "99+" : String(registryBadgeCount);
-  refs.suggestionsBadge.hidden = suggestionsBadgeCount <= 0;
-  refs.suggestionsBadge.textContent = suggestionsBadgeCount > 99 ? "99+" : String(suggestionsBadgeCount);
-  refs.todoBadge.hidden = todoBadgeCount <= 0;
-  refs.todoBadge.textContent = todoBadgeCount > 99 ? "99+" : String(todoBadgeCount);
-  refs.registryLink.classList.toggle("has-unseen", registryBadgeCount > 0);
-  refs.suggestionsLink.classList.toggle("has-unseen", suggestionsBadgeCount > 0);
-  refs.todoLink.classList.toggle("has-unseen", todoBadgeCount > 0);
-  return refs.sectionNav;
-};
-
-const canShowSuggestionsNav = async (user, registration) => {
-  if (registration?.profile?.suggestionsCollaborator === true) return true;
-  try {
-    return await isControlPanelUser(user);
-  } catch {
-    return false;
-  }
-};
-
-const loadSectionNavCounts = async (uid, sourceMachines = []) => {
-  registryBadgeCount = 0;
-  suggestionsBadgeCount = 0;
-  todoBadgeCount = 0;
-  let layout = {};
-  try {
-    const snap = await getDoc(doc(db, "dashboard_layout", uid));
-    layout = snap.exists() ? snap.data() || {} : {};
-  } catch {}
-  dashboardLayout = normalizeDashboardLayout(layout, {
-    groupUntitled: dashboardT("dashboard.groupUntitled", "Grupo"),
-    validMachineIds: new Set(sourceMachines.map((machine) => machine.id))
-  });
-  registryBadgeCount = countUnseenGlobalRegistryEntries(
-    sourceMachines,
-    layout.registrySeenAt || ""
-  );
-  if (showSuggestionsNav) {
-    try {
-      const result = await fetchDashboardSuggestions(500);
-      suggestionsBadgeCount = result.isSuperadmin
-        ? countUnseenSuggestions(result.items || [], result.suggestionsSeenAt || "")
-        : 0;
-    } catch {}
-  }
-  todoBadgeCount = sourceMachines.reduce(
-    (total, machine) => total + (Array.isArray(machine?.tasks) ? machine.tasks : [])
-      .filter((task) => !task?.lastCompletedAt || getTaskTiming(task).pending).length,
-    0
-  );
+  return createQrSectionNav({ isEn, navigation: sectionNavigation, text });
 };
 
 const normalizeSearch = (value) =>
@@ -574,53 +355,6 @@ qrTreeMedia.addEventListener("change", () => {
   if (qrDataReady) renderVisibleMachines();
 });
 
-const clearPrintMode = () => {
-  document.body.classList.remove("qr-print-printing", "qr-print-include-back");
-};
-
-const printDocument = () =>
-  new Promise((resolve) => {
-    clearPrintMode();
-    document.body.classList.add("qr-print-printing");
-    if (printBackNames) document.body.classList.add("qr-print-include-back");
-    let done = false;
-    const cleanup = () => {
-      if (done) return;
-      done = true;
-      window.removeEventListener("afterprint", cleanup);
-      clearPrintMode();
-      resolve();
-    };
-    window.addEventListener("afterprint", cleanup);
-    window.setTimeout(() => {
-      if (typeof window.print === "function") {
-        window.print();
-      } else if (typeof globalThis.print === "function") {
-        globalThis.print();
-      }
-      window.setTimeout(cleanup, 1000);
-    }, 0);
-  });
-
-const requestPrint = async () => {
-  try {
-    if (document.activeElement && typeof document.activeElement.blur === "function") {
-      document.activeElement.blur();
-    }
-  } catch {
-    // ignore focus cleanup failures
-  }
-  await printDocument();
-};
-
-const getFocusedMachineId = () => {
-  try {
-    return new URLSearchParams(window.location.search).get("machineId") || "";
-  } catch {
-    return "";
-  }
-};
-
 const setState = (message, state = "") => {
   if (!mount) return;
   clearLoadingProgress();
@@ -638,85 +372,6 @@ const setState = (message, state = "") => {
   mount.appendChild(wrap);
 };
 
-const normalizeMachine = (raw) => ({
-  id: raw.id || "",
-  title: (raw.title || raw.nombre || "").toString().trim(),
-  tagId: (raw.tagId || "").toString().trim(),
-  tagQrUrl: (raw.tagQrUrl || "").toString().trim(),
-  qrAccessEnabled: raw.qrAccessEnabled !== false,
-  status: raw.status || "",
-  tasks: Array.isArray(raw.tasks) ? raw.tasks : []
-});
-
-const resolveQrUrl = async (machine) => {
-  if (machine.tagQrUrl) return machine.tagQrUrl;
-  if (!machine.tagId) return "";
-  try {
-    const snap = await getDoc(doc(db, "tags", machine.tagId));
-    if (!snap.exists()) return "";
-    return (snap.data()?.qrUrl || "").toString().trim();
-  } catch {
-    return "";
-  }
-};
-
-const fetchOwnerMachines = async (uid) => {
-  const q = query(collection(db, "machines"), where("ownerUid", "==", uid));
-  const snap = await getDocs(q);
-  return snap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
-};
-
-const fetchAdminMachines = async (uid) => {
-  const linksQuery = query(
-    collection(db, "admin_machine_links"),
-    where("adminUid", "==", uid)
-  );
-  const linksSnap = await getDocs(linksQuery);
-  const links = linksSnap.docs
-    .map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }))
-    .filter((link) => link.status === "accepted" && link.machineId);
-
-  const machines = await Promise.all(
-    links.map(async (link) => {
-      try {
-        const snap = await getDoc(doc(db, "machines", link.machineId));
-        if (!snap.exists()) return null;
-        return { id: snap.id, ...snap.data() };
-      } catch {
-        return null;
-      }
-    })
-  );
-
-  return machines.filter(Boolean);
-};
-
-const fetchAccessibleMachines = async (uid) => {
-  const [ownerResult, adminResult] = await Promise.allSettled([
-    fetchOwnerMachines(uid),
-    fetchAdminMachines(uid),
-  ]);
-  if (ownerResult.status === "rejected" && adminResult.status === "rejected") {
-    throw ownerResult.reason || adminResult.reason;
-  }
-  const ownerMachines = ownerResult.status === "fulfilled" ? ownerResult.value : [];
-  const adminMachines = adminResult.status === "fulfilled" ? adminResult.value : [];
-  return [...ownerMachines, ...adminMachines];
-};
-
-const buildMachinesWithQrState = async (machines = []) => {
-  const map = new Map();
-  const normalizedMachines = machines.map(normalizeMachine);
-  const qrUrls = await Promise.all(normalizedMachines.map(resolveQrUrl));
-  normalizedMachines.forEach((normalized, index) => {
-    normalized.tagQrUrl = qrUrls[index] || "";
-    if (!normalized.id) return;
-    map.set(normalized.id, normalized);
-  });
-  return Array.from(map.values()).sort((a, b) =>
-    a.title.localeCompare(b.title, isEn ? "en" : "es", { sensitivity: "base" })
-  );
-};
 
 const setQrSize = (wrap, sizeIndex) => {
   const safeIndex = Math.max(0, Math.min(QR_SIZE_STEPS.length - 1, Number(sizeIndex) || 0));
@@ -725,8 +380,6 @@ const setQrSize = (wrap, sizeIndex) => {
   wrap.style.setProperty("--qr-print-columns", PRINT_COLUMNS_BY_STEP[safeIndex]);
   wrap.style.setProperty("--qr-grid-gap", GRID_GAP_BY_STEP[safeIndex]);
 };
-
-const PRINT_ROWS_BY_STEP = [6, 5, 4, 3, 3, 2];
 
 const getPrintSheetCapacity = () => {
   const columns = PRINT_COLUMNS_BY_STEP[currentSizeIndex] || PRINT_COLUMNS_BY_STEP[0];
@@ -737,7 +390,6 @@ const getPrintSheetCapacity = () => {
 const renderQrGrid = (machines, options = {}) => {
   if (!mount) return;
   clearLoadingProgress();
-  currentMachines = machines;
   if (!options.preserveList) {
     qrDataReady = true;
     allMachines = Array.isArray(options.sourceMachines) ? options.sourceMachines : machines;
@@ -748,7 +400,9 @@ const renderQrGrid = (machines, options = {}) => {
     accessibleMachinesCount = Number.isFinite(options.accessibleMachineCount)
       ? options.accessibleMachineCount
       : machines.length;
+    machines = getVisibleMachines();
   }
+  currentMachines = machines;
   mount.innerHTML = "";
 
   const wrap = document.createElement("section");
@@ -819,16 +473,16 @@ const renderQrGrid = (machines, options = {}) => {
   backControl.appendChild(backInput);
   backControl.appendChild(backLabel);
 
-  const reloadBtn = createIconButton("qr-print-icon-button--reload", text.reload, RELOAD_ICON);
+  const reloadBtn = createQrIconButton("qr-print-icon-button--reload", text.reload, RELOAD_ICON);
   reloadBtn.addEventListener("click", () => {
     if (!auth.currentUser?.uid) return;
     searchQuery = "";
     selectedTreeGroupId = "";
     selectedTreeMachineId = "";
     setLoadingState();
-    fetchAccessibleMachines(auth.currentUser.uid)
+    fetchQrAccessibleMachines(auth.currentUser.uid)
       .then(async (sourceMachines) => {
-        const nextSourceMachines = await buildMachinesWithQrState(sourceMachines);
+        const nextSourceMachines = await buildQrMachineState(sourceMachines, lang);
         const nextQrMachines = nextSourceMachines.filter((machine) => machine.tagQrUrl);
         renderQrGrid(nextQrMachines, {
           sourceMachines: nextSourceMachines,
@@ -839,11 +493,11 @@ const renderQrGrid = (machines, options = {}) => {
       .catch(() => setState(text.error, "error"));
   });
 
-  const printBtn = createIconButton("qr-print-icon-button--print", text.print, PRINT_ICON);
+  const printBtn = createQrIconButton("qr-print-icon-button--print", text.print, PRINT_ICON);
   printBtn.addEventListener("click", (event) => {
     event.preventDefault();
     event.stopPropagation();
-    requestPrint();
+    requestQrPrint(printBackNames);
   });
 
   printBtn.disabled = machines.length === 0;
@@ -1003,7 +657,7 @@ const setLoadingState = () => {
   const toolbar = document.createElement("div");
   toolbar.className = "qr-print-toolbar";
 
-  const printBtn = createIconButton("qr-print-icon-button--print", text.print, PRINT_ICON);
+  const printBtn = createQrIconButton("qr-print-icon-button--print", text.print, PRINT_ICON);
   printBtn.disabled = true;
   const searchInput = document.createElement("input");
   searchInput.type = "search";
@@ -1011,7 +665,7 @@ const setLoadingState = () => {
   searchInput.placeholder = text.searchPlaceholder;
   searchInput.setAttribute("aria-label", text.search);
   searchInput.disabled = true;
-  const reloadBtn = createIconButton("qr-print-icon-button--reload", text.reload, RELOAD_ICON);
+  const reloadBtn = createQrIconButton("qr-print-icon-button--reload", text.reload, RELOAD_ICON);
   reloadBtn.disabled = true;
 
   const loading = document.createElement("div");
@@ -1062,7 +716,7 @@ if (mount) {
     }
     activeUid = user.uid;
     hiddenTreeGroupIds = loadHiddenTreeGroupIds(user.uid);
-    applyDashboardTopbarTitle(user.uid);
+    applyQrDashboardTopbarTitle(user.uid);
     try {
       const registration = await getUserRegistrationState(user);
       if (!registration.allowed) {
@@ -1073,12 +727,17 @@ if (mount) {
         window.location.replace(text.onboarding);
         return;
       }
-      showSuggestionsNav = await canShowSuggestionsNav(user, registration);
-      const sourceMachines = await fetchAccessibleMachines(user.uid);
-      await loadSectionNavCounts(user.uid, sourceMachines);
-      const machines = await buildMachinesWithQrState(sourceMachines);
+      const sourceMachines = await fetchQrAccessibleMachines(user.uid);
+      sectionNavigation = await loadQrSectionNavigation({
+        uid: user.uid,
+        user,
+        registration,
+        machines: sourceMachines
+      });
+      dashboardLayout = sectionNavigation.dashboardLayout;
+      const machines = await buildQrMachineState(sourceMachines, lang);
       const qrMachines = machines.filter((machine) => machine.tagQrUrl);
-      const focusedMachineId = getFocusedMachineId();
+      const focusedMachineId = getFocusedQrMachineId();
       selectedTreeMachineId = machines.some((machine) => machine.id === focusedMachineId)
         ? focusedMachineId
         : "";
@@ -1095,10 +754,7 @@ if (mount) {
         }
         expandedTreeGroupIds = Array.from(expanded);
       }
-      const visibleMachines = focusedMachineId
-        ? qrMachines.filter((machine) => machine.id === focusedMachineId)
-        : qrMachines;
-      renderQrGrid(visibleMachines, {
+      renderQrGrid(qrMachines, {
         sourceMachines: machines,
         totalCount: qrMachines.length,
         accessibleMachineCount: machines.length

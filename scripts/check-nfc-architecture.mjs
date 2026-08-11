@@ -63,6 +63,11 @@ const requiredFiles = [
   "static/js/dashboard/runtime/dashboardDataController.js",
   "static/js/dashboard/runtime/dashboardSession.js",
   "static/js/dashboard/runtime/dashboardState.js",
+  "static/js/qr-print/qrPrintData.js",
+  "static/js/qr-print/qrPrintNavigation.js",
+  "static/js/qr-print/qrPrintService.js",
+  "static/js/qr-print/qrPrintShell.js",
+  "static/js/qr-print/qrPrintUi.js",
   "nfc/controlpanel/panel.js",
   "nfc/controlpanel/panelCallables.js",
   "nfc/controlpanel/panelCodes.js",
@@ -156,6 +161,33 @@ addCheck(
   "control panel ES module graph resolves with valid imports"
 );
 
+let qrPrintModuleGraphOk = true;
+try {
+  await build({
+    entryPoints: [path.join(ROOT, "static/js/qr-print/index.js")],
+    bundle: true,
+    format: "esm",
+    platform: "browser",
+    write: false,
+    logLevel: "silent",
+    plugins: [{
+      name: "qr-print-root-imports",
+      setup(buildApi) {
+        buildApi.onResolve({ filter: /^\// }, (args) => ({
+          path: resolveRootImport(args.path)
+        }));
+        buildApi.onResolve({ filter: /^https:\/\// }, (args) => ({
+          path: args.path,
+          external: true
+        }));
+      }
+    }]
+  });
+} catch {
+  qrPrintModuleGraphOk = false;
+}
+addCheck(qrPrintModuleGraphOk, "QR print ES module graph resolves with valid imports");
+
 let dashboardCssGraphOk = true;
 try {
   await build({
@@ -183,6 +215,7 @@ requiredFiles.forEach((relativePath) => {
 });
 
 const indexJs = read("static/js/dashboard/index.js");
+const qrPrintIndex = read("static/js/qr-print/index.js");
 const nfcLanding = read("static/js/nfc-landing.js");
 const registrationClient = read("static/js/registro/firebase-init.js");
 const registrationBackend = read(
@@ -213,7 +246,6 @@ const functionsIndex = read("firebase/functions/src/index.ts");
 const dashboardCssManifest = read("static/css/dashboard.css");
 const dashboardCssImports = [
   "/static/css/effects/inactive_sections/inactive.css",
-  "/static/css/effects/topbar_logo_rotation/rotation.css",
   "/static/css/components/dashboard-section-nav.css",
   "/static/css/dashboard/shell.css",
   "/static/css/dashboard/group-tree.css",
@@ -290,6 +322,27 @@ addCheck(
   indexJs.split(/\r?\n/).length <= 900,
   "dashboard index.js remains below 900 lines"
 );
+addCheck(
+  qrPrintIndex.split(/\r?\n/).length <= 800,
+  "QR print index.js remains below 800 lines"
+);
+addCheck(
+  qrPrintIndex.includes("machines = getVisibleMachines();"),
+  "QR print initial render applies the shared tree visibility selector"
+);
+[
+  "collection(",
+  "getDoc(",
+  "getDocs(",
+  "query(",
+  "where(",
+  "window.print("
+].forEach((needle) => {
+  addCheck(
+    !qrPrintIndex.includes(needle),
+    `QR print index.js does not own extracted primitive: ${needle}`
+  );
+});
 addCheck(
   indexJs.includes(
     "renderCards({ preserveScroll: true, preserveAnchor: false })"
@@ -403,8 +456,8 @@ const callableExports = Array.from(
   .map((name) => name.trim())
   .filter(Boolean);
 addCheck(
-  callableExports.length === 53 && new Set(callableExports).size === 53,
-  "Functions index.ts preserves 53 unique function exports"
+  callableExports.length === 54 && new Set(callableExports).size === 54,
+  "Functions index.ts preserves 54 unique function exports"
 );
 
 [

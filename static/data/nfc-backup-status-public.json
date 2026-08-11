@@ -2,26 +2,26 @@
   "kind": "unatomo-nfc-backup-status",
   "overall": {
     "status": "ok",
-    "completedAt": "2026-07-21T17:52:46.763Z",
+    "completedAt": "2026-08-11T14:10:18.176Z",
     "firestoreCollectionCount": 15,
     "storagePrefixCount": 2,
     "firebaseAuth": true
   },
   "firestore": {
     "status": "ok",
-    "completedAt": "2026-07-21T17:51:57.870Z",
+    "completedAt": "2026-08-11T14:13:23.011Z",
     "collectionCount": 15,
-    "documentCount": 333
+    "documentCount": 336
   },
   "storage": {
     "status": "ok",
-    "completedAt": "2026-07-21T17:52:45.781Z",
-    "fileCount": 74,
-    "totalBytes": 56574013
+    "completedAt": "2026-08-11T14:10:17.252Z",
+    "fileCount": 83,
+    "totalBytes": 71684614
   },
   "auth": {
     "status": "ok",
-    "completedAt": "2026-07-21T17:52:46.719Z",
+    "completedAt": "2026-08-11T14:10:18.100Z",
     "userCount": 9,
     "size": 8876
   }

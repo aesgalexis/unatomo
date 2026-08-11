@@ -41,12 +41,18 @@ diagnose dependency or Node-version problems.
 Choose checks proportionally to the change:
 
 ```powershell
+npm.cmd test
 node scripts\syntax-scan.mjs static\js
 npm.cmd run build
 npm.cmd run lint:links
 npm.cmd run scan:secrets
 npm.cmd run check:nfc:architecture
 ```
+
+`npm.cmd test` runs the NFC architecture and behavior checks, the Firebase
+Functions lint and policy tests, link validation, and the secret scan. The
+layout-backup integrity check remains a separate production-data diagnostic:
+`npm.cmd run check:nfc:layout`.
 
 `npm.cmd run build` does not update the tracked code statistics. Run
 `npm.cmd run stats:code` only when those statistics should be refreshed.

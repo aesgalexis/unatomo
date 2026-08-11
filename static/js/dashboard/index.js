@@ -99,6 +99,7 @@ import { createDashboardSession } from "./runtime/dashboardSession.js";
 import { createDashboardDataController } from "./runtime/dashboardDataController.js";
 import { createDashboardMachineState } from "./runtime/dashboardMachineState.js";
 import { createDashboardAutoSave } from "./runtime/dashboardAutoSave.js";
+import { createDashboardPage, createDashboardStatusLabels, withDashboardTimeout } from "./runtime/dashboardPage.js";
 import { createDashboardInternalViewController } from "./controllers/dashboardInternalViewController.js";
 import { createDashboardOrderingController } from "./controllers/dashboardOrderingController.js";
 import { createMachineAccessController } from "./controllers/machineAccessController.js";
@@ -120,22 +121,8 @@ import {
   recalcMachineCardHeight as recalcHeight,
   scheduleMachineCardHeight as scheduleHeightSync
 } from "./rendering/machineCardLayout.js";
-const mount = document.getElementById("dashboard-mount");
-const appBasePrefix = getAppBasePrefix();
-const lang = getCurrentLang();
-const qrPrintHref =
-  lang === "en"
-    ? `${appBasePrefix || ""}/en/qr-print.html`
-    : `${appBasePrefix || ""}/es/impresion-qr.html`;
-const redirectToEntry = () => {
-  setSavedLang(lang);
-  window.location.href = `${appBasePrefix || ""}/`;
-};
-try {
-  if ("scrollRestoration" in window.history) {
-    window.history.scrollRestoration = "manual";
-  }
-} catch {}
+const { appBasePrefix, lang, mount, qrPrintHref, redirectToEntry } =
+  createDashboardPage({ getAppBasePrefix, getCurrentLang, setSavedLang });
 if (mount) {
   setTopbarLogoLoading("dashboard", true);
   observeDashboardLoading();
@@ -167,20 +154,7 @@ if (mount) {
   const clearDashboardTooltips = dashboardTooltips.clear;
   const attachDashboardTooltip = dashboardTooltips.attach;
   dashboardTooltips.installGlobalCleanup();
-  const statusLabels = {
-    operativa: t("dashboard.statusByValue.operativa", "Operativo"),
-    fuera_de_servicio: t("dashboard.statusByValue.fuera_de_servicio", "Fuera de servicio"),
-    desconectada: t("dashboard.statusByValue.desconectada", "Desconectada")
-  };
-  const withTimeout = (promise, ms = 6000) =>
-    new Promise((resolve, reject) => {
-      const timer = setTimeout(() => reject(new Error("timeout")), ms);
-      promise
-        .then(resolve)
-        .catch(reject)
-        .finally(() => clearTimeout(timer));
-    });
-
+  const statusLabels = createDashboardStatusLabels(t);
   const dashboardTitleController = createDashboardTitleController({
     state,
     t,
@@ -879,7 +853,7 @@ if (mount) {
     updateLoading,
     upsertAccountDirectory,
     upsertDashboardLayout,
-    withTimeout,
+    withTimeout: withDashboardTimeout,
     getActiveDashboardUid: () => dashboardSessionRuntime.activeUid,
     getDashboardSessionVersion: () => dashboardSessionRuntime.version
   });
