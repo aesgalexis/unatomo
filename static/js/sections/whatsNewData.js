@@ -1,5 +1,10 @@
 export const whatsNewEntries = [
   {
+    date: "2026-08-11",
+    es: "La nueva secci\u00f3n de estad\u00edsticas muestra el estado y rendimiento de los equipos, con comparativas descargables por periodo.",
+    en: "The new statistics section shows equipment status and performance, with downloadable comparisons by period.",
+  },
+  {
     date: "2026-07-21",
     es: "El \u00e1rbol lateral permite mostrar u ocultar grupos completos y personalizar sus contadores de incidencias y tareas.",
     en: "The side tree can show or hide entire groups and customize their incident and task counters.",

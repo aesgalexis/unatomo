@@ -133,11 +133,11 @@ export const createMachineCard = (machine, options = {}) => {
     };
     select.addEventListener("mouseenter", (event) => {
       const location = normalizeLocation(select.value);
-      if (!location || select.classList.contains("is-open")) return;
+      if (select.classList.contains("is-open")) return;
       hideLocationTip();
       locationTip = document.createElement("div");
       locationTip.className = "mc-tooltip";
-      locationTip.textContent = location;
+      locationTip.textContent = location || t("card.assignLocation", "Asignar ubicación");
       document.body.appendChild(locationTip);
       locationTip.style.top = `${Math.max(8, event.clientY - locationTip.offsetHeight - 10)}px`;
       locationTip.style.left = `${Math.max(8, event.clientX + 12)}px`;
