@@ -116,7 +116,7 @@ export const createDashboardLoadController = (dependencies) => {
       markDashboardLoadTimeout(state);
       updateLoading();
       renderCards({ preserveScroll: false });
-    }, 8000);
+    }, 15000);
   };
 
   addBtn.disabled = true;
@@ -136,8 +136,12 @@ export const createDashboardLoadController = (dependencies) => {
       list,
       t(
         "dashboard.machinesLoadError",
-        "No se pudieron cargar las máquinas. Recarga el dashboard."
-      )
+        "No se pudieron cargar las máquinas."
+      ),
+      {
+        actionLabel: t("dashboard.retryLoad", "Reintentar"),
+        onAction: () => window.location.reload()
+      }
     );
   };
   return {

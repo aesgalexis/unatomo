@@ -503,6 +503,8 @@ const TEXT = {
       groupDeleteConfirm: (value) => `¿Eliminar el grupo "${value}"? Las máquinas no se eliminarán.`,
       loading: "Cargando... ",
       noMachines: "Todav\u00eda no hay m\u00e1quinas. Pulsa 'A\u00f1adir' para crear la primera.",
+      machinesLoadError: "No se pudieron cargar las m\u00e1quinas.",
+      retryLoad: "Reintentar",
       noResults: (query) => `No hay resultados para "${query}".`,
       showingResults: (visible, total) => `Mostrando ${visible}/${total} Equipos`,
       inviteManage: (ownerLabel, count) =>
@@ -1081,6 +1083,8 @@ const TEXT = {
       groupDeleteConfirm: (value) => `Delete group "${value}"? Machines will not be deleted.`,
       loading: "Loading... ",
       noMachines: "There are no machines yet. Press 'Add' to create the first one.",
+      machinesLoadError: "Machines could not be loaded.",
+      retryLoad: "Retry",
       noResults: (query) => `No results for "${query}".`,
       showingResults: (visible, total) => `Showing ${visible}/${total} machines`,
       inviteManage: (ownerLabel, count) =>

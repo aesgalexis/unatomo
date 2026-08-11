@@ -48,15 +48,29 @@ export const createDashboardSession = (dependencies) => {
     resetInitialMobileScroll();
     refreshStorageFullState(uid);
     armLoadingGuard();
-    try {
-      await upsertAccountDirectory(user);
-    } catch {
-      // ignore directory write errors
-    }
+
+    const emailLower = normalizeEmail(user.email || "");
+    const subscriptions = getDashboardSubscriptions();
+    subscriptions.subscribeOwnerMachines(uid);
+    subscriptions.subscribeAdminLinks(uid);
+    subscriptions.subscribePendingInvites(emailLower);
+    subscriptions.subscribePendingTransferInvites(uid);
+
+    const machinesBootstrapPromise = Promise.allSettled([
+      withTimeout(fetchMachines(uid)),
+      withTimeout(fetchAdminMachines(uid, emailLower))
+    ]);
+    upsertAccountDirectory(user).catch((error) => {
+      console.warn("Dashboard account directory sync failed", error);
+    });
+
     if (!isActiveSession()) return;
     try {
-      state.dashboardLayout = normalizeDashboardLayout(await fetchDashboardLayout(uid));
-    } catch {
+      state.dashboardLayout = normalizeDashboardLayout(
+        await withTimeout(fetchDashboardLayout(uid))
+      );
+    } catch (error) {
+      console.warn("Dashboard layout bootstrap failed", error);
       state.dashboardLayout = {
         groups: [],
         placements: {},
@@ -90,8 +104,9 @@ export const createDashboardSession = (dependencies) => {
 
     let ownerFetchResolved = false;
     let ownerBootstrap = [];
-    try {
-      const remote = await withTimeout(fetchMachines(uid));
+    const [ownerResult, adminResult] = await machinesBootstrapPromise;
+    if (ownerResult.status === "fulfilled") {
+      const remote = ownerResult.value;
       markOwnerLoadSuccess(state);
       ownerFetchResolved = true;
       ownerBootstrap = remote
@@ -104,39 +119,43 @@ export const createDashboardSession = (dependencies) => {
           ownerEmail: state.adminEmail || ""
       }));
       if (!remote.length) {
-        const legacy = await withTimeout(fetchLegacyMachines(uid));
-        if (legacy.length) {
-          await withTimeout(migrateLegacyMachines(uid, legacy));
+        try {
+          const legacy = await withTimeout(fetchLegacyMachines(uid));
+          if (legacy.length) {
+            await withTimeout(migrateLegacyMachines(uid, legacy));
+          }
+        } catch (error) {
+          console.warn("Dashboard legacy machines migration check failed", error);
         }
       }
-    } catch {
-      markOwnerLoadFailure(state);
-      updateLoading();
+    } else {
+      console.warn("Dashboard owner machines bootstrap failed", ownerResult.reason);
+      if (!state.ownerReady) {
+        markOwnerLoadFailure(state);
+        updateLoading();
+      }
     }
     if (!isActiveSession()) return;
 
-    const emailLower = normalizeEmail(user.email || "");
     if (ownerFetchResolved) {
       state.ownerMachines = ownerBootstrap;
       markOwnerLoadSuccess(state);
       updateLoading();
     }
-    try {
-      const adminBootstrap = await withTimeout(fetchAdminMachines(uid, emailLower));
+    if (adminResult.status === "fulfilled") {
+      const adminBootstrap = adminResult.value;
       markAdminLoadSuccess(state);
       state.adminMachines = adminBootstrap;
       updateLoading();
-    } catch {
-      markAdminLoadFailure(state);
-      updateLoading();
+    } else {
+      console.warn("Dashboard admin machines bootstrap failed", adminResult.reason);
+      if (!state.adminReady) {
+        markAdminLoadFailure(state);
+        updateLoading();
+      }
     }
     if (!isActiveSession()) return;
     scheduleRebuild({ preserveScroll: false });
-    const subscriptions = getDashboardSubscriptions();
-    subscriptions.subscribeOwnerMachines(uid);
-    subscriptions.subscribeAdminLinks(uid);
-    subscriptions.subscribePendingInvites(emailLower);
-    subscriptions.subscribePendingTransferInvites(uid);
     try {
       const acceptedInvites = await fetchInvitesForAdmin(emailLower, "accepted");
       await Promise.all(

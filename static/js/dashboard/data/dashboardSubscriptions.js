@@ -69,7 +69,8 @@ export const createDashboardSubscriptions = ({
         state.ownerMachines = normalized;
         scheduleRebuild({ preserveScroll: true });
       },
-      () => {
+      (error) => {
+        console.error("Dashboard owner machines subscription failed", error);
         markOwnerLoadFailure(state);
         updateLoading();
         renderCards({ preserveScroll: true });
@@ -106,7 +107,8 @@ export const createDashboardSubscriptions = ({
           state.adminMachines = [normalized, ...state.adminMachines];
           scheduleRebuild({ preserveScroll: true });
         },
-        () => {
+        (error) => {
+          console.error("Dashboard admin machine subscription failed", error);
           const currentUnsub = adminMachineUnsubs.get(link.machineId);
           if (currentUnsub) currentUnsub();
           adminMachineUnsubs.delete(link.machineId);
@@ -146,7 +148,8 @@ export const createDashboardSubscriptions = ({
         syncAdminMachineListeners(activeLinks);
         scheduleRebuild({ preserveScroll: true });
       },
-      () => {
+      (error) => {
+        console.error("Dashboard admin links subscription failed", error);
         markAdminLoadFailure(state);
         updateLoading();
         renderCards({ preserveScroll: true });
@@ -175,7 +178,8 @@ export const createDashboardSubscriptions = ({
         }));
         renderInviteBanner();
       },
-      () => {
+      (error) => {
+        console.warn("Dashboard pending invites subscription failed", error);
         state.pendingInvites = [];
         renderInviteBanner();
       }
@@ -203,7 +207,8 @@ export const createDashboardSubscriptions = ({
         }));
         renderTopbarNotifications();
       },
-      () => {
+      (error) => {
+        console.warn("Dashboard transfer invites subscription failed", error);
         state.pendingTransferInvites = [];
         renderTopbarNotifications();
       }
