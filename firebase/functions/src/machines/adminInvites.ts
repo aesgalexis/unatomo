@@ -4,7 +4,7 @@ import {
   getAccountHandleValidationError,
   normalizeAccountHandle,
 } from "../core/accountHandles";
-import {normalizeEmail} from "../core/auth";
+import {assertVerifiedEmail, normalizeEmail} from "../core/auth";
 import {
   accountDirectoryCol,
   accountHandlesCol,
@@ -61,6 +61,7 @@ const resolveInviteeIdentity = async (value: string) => {
 export const createAdminInvite = onCall(async (request) => {
   const auth = request.auth;
   if (!auth) throw new HttpsError("unauthenticated", "auth-required");
+  assertVerifiedEmail(auth);
   const machineId = (request.data?.machineId || "").toString().trim();
   const adminEmailRaw = (request.data?.adminEmail || "").toString();
   const invitee = await resolveInviteeIdentity(adminEmailRaw);

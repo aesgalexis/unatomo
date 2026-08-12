@@ -24,3 +24,11 @@ export const assertControlPanelAccess = (auth: {
     throw new HttpsError("permission-denied", "not-allowed");
   }
 };
+
+export const assertVerifiedEmail = (auth: {
+  token?: {email_verified?: boolean};
+} | null | undefined) => {
+  if (auth?.token?.email_verified !== true) {
+    throw new HttpsError("failed-precondition", "email-verification-required");
+  }
+};

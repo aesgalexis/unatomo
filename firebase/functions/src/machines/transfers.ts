@@ -1,6 +1,6 @@
 import {HttpsError, onCall} from "firebase-functions/v2/https";
 import * as admin from "firebase-admin";
-import {normalizeEmail} from "../core/auth";
+import {assertVerifiedEmail, normalizeEmail} from "../core/auth";
 import {
   accountDirectoryCol,
   db,
@@ -26,6 +26,7 @@ import {dashboardUrl, getEmailRecipient} from "../email/recipients";
 export const createMachineTransferInvite = onCall(async (request) => {
   const auth = request.auth;
   if (!auth) throw new HttpsError("unauthenticated", "auth-required");
+  assertVerifiedEmail(auth);
   const machineId = (request.data?.machineId || "").toString().trim();
   const toEmailRaw = (request.data?.toEmail || "").toString().trim();
   const toEmailLower = normalizeEmail(toEmailRaw);
@@ -110,6 +111,7 @@ export const createMachineTransferInvite = onCall(async (request) => {
 export const respondMachineTransferInvite = onCall(async (request) => {
   const auth = request.auth;
   if (!auth) throw new HttpsError("unauthenticated", "auth-required");
+  assertVerifiedEmail(auth);
   const decision = (request.data?.decision || "").toString();
   if (!["accepted", "rejected"].includes(decision)) {
     throw new HttpsError("invalid-argument", "decision-invalid");
@@ -380,6 +382,7 @@ export const respondMachineTransferInvite = onCall(async (request) => {
 export const cancelMachineTransferInvite = onCall(async (request) => {
   const auth = request.auth;
   if (!auth) throw new HttpsError("unauthenticated", "auth-required");
+  assertVerifiedEmail(auth);
   const machineId = (request.data?.machineId || "").toString().trim();
   if (!machineId) {
     throw new HttpsError("invalid-argument", "machineId-required");

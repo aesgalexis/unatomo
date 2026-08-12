@@ -130,6 +130,7 @@ const textMap = {
   emailChangeSent: isEn ? "Check the new address to complete the change." : "Revisa la nueva dirección para completar el cambio.",
   emailChangeCompleted: isEn ? "Email change completed." : "Cambio de correo completado.",
   securityActionError: isEn ? "Unable to complete the security action." : "No se ha podido completar la acción de seguridad.",
+  verificationRequired: isEn ? "Verify your email from the dashboard before changing account credentials." : "Verifica tu correo desde el dashboard antes de cambiar las credenciales de la cuenta.",
   logout: isEn ? "Sign out" : "Cerrar sesi\u00f3n",
   user: isEn ? "User" : "Usuario",
   createdLocale: isEn ? "en-GB" : "es-ES",
@@ -830,6 +831,10 @@ if (mount) {
     } catch {}
 
     changePasswordButton?.addEventListener("click", async () => {
+      if (!user.emailVerified) {
+        setSecurityStatus(textMap.verificationRequired, "error");
+        return;
+      }
       const password = newPasswordInput?.value || "";
       const confirmation = confirmPasswordInput?.value || "";
       if (password.length < 8) {
@@ -860,6 +865,10 @@ if (mount) {
     });
 
     changeEmailButton?.addEventListener("click", async () => {
+      if (!user.emailVerified) {
+        setSecurityStatus(textMap.verificationRequired, "error");
+        return;
+      }
       const newEmail = newEmailInput?.value.trim().toLowerCase() || "";
       if (!newEmailInput?.checkValidity() || !newEmail) {
         newEmailInput?.focus();

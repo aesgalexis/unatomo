@@ -15,6 +15,7 @@ export {requestAccountPasswordReset} from "./accounts/passwordReset";
 export {
   changeAccountPassword,
   finalizeAccountEmailChange,
+  resendAccountEmailVerification,
   requestAccountEmailChange,
 } from "./accounts/security";
 export {

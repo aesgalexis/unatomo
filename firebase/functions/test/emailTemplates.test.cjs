@@ -23,7 +23,7 @@ const english = renderWelcomeEmail({
   language: "en",
 });
 assert.equal(english.subject, "Welcome to UNATOMO/NFC");
-assert.match(english.html, /Open my dashboard/);
+assert.match(english.html, /Verify my email/);
 assert.match(english.text, /https:\/\/unatomo\.com\/nfc/);
 
 const approvedSpanish = renderEmailTemplate("registration_code_approved", {

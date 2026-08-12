@@ -762,6 +762,7 @@ if (mount) {
     notifyTopbar,
     refreshStorageFullState,
     renderCards,
+    renderInviteBanner,
     state,
     t,
     updateMachine,

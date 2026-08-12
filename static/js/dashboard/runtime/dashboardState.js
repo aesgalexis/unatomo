@@ -6,6 +6,7 @@ export const createDashboardState = ({
   uid: null,
   adminLabel: "",
   adminEmail: "",
+  emailVerified: true,
   remoteMachines: [],
   ownerMachines: [],
   adminMachines: [],

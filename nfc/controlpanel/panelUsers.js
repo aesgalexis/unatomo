@@ -46,7 +46,8 @@ export const createUsersRenderer = ({ text }) => {
       meta.textContent = [
         item.accountHandle ? `@${item.accountHandle}` : "",
         item.email || text.noEmail,
-        item.company || ""
+        item.company || "",
+        item.emailVerified ? text.emailVerified : text.emailVerificationPending
       ].filter(Boolean).join(" · ");
 
       identity.appendChild(name);

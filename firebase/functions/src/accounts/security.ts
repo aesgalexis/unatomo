@@ -1,5 +1,5 @@
 import {HttpsError, onCall} from "firebase-functions/v2/https";
-import {normalizeEmail} from "../core/auth";
+import {assertVerifiedEmail, normalizeEmail} from "../core/auth";
 import {admin, accountDirectoryCol, db, emailOutboxCol} from "../core/firebase";
 import {buildEmailOutbox} from "../email/outbox";
 import {getEmailRecipient} from "../email/recipients";
@@ -7,6 +7,7 @@ import {EmailLanguage} from "../email/templates";
 
 const RECENT_AUTH_SECONDS = 5 * 60;
 const EMAIL_CHANGE_TTL_MS = 60 * 60 * 1000;
+const VERIFICATION_RESEND_COOLDOWN_MS = 60 * 1000;
 
 const requireRecentAccountAuth = (request: {auth?: {
   uid: string;
@@ -31,8 +32,51 @@ const maskEmail = (email: string) => {
   return `${local.slice(0, 2)}${local.length > 2 ? "***" : "*"}@${domain}`;
 };
 
+export const resendAccountEmailVerification = onCall(async (request) => {
+  const auth = request.auth;
+  if (!auth) throw new HttpsError("unauthenticated", "auth-required");
+  const user = await admin.auth().getUser(auth.uid);
+  if (user.emailVerified) return {ok: true, alreadyVerified: true};
+  const email = normalizeEmail(user.email || "");
+  if (!email) throw new HttpsError("failed-precondition", "email-required");
+  const recipient = await getEmailRecipient(email, auth.uid);
+  const language = recipient.language;
+  const stateRef = db.collection("email_verification_requests").doc(auth.uid);
+  const stateSnap = await stateRef.get();
+  const lastSentAt = stateSnap.data()?.lastSentAt?.toMillis?.() || 0;
+  if (Date.now() - lastSentAt < VERIFICATION_RESEND_COOLDOWN_MS) {
+    return {ok: true, throttled: true};
+  }
+  const generatedActionUrl = await admin.auth()
+    .generateEmailVerificationLink(email);
+  const localizedActionUrl = new URL(generatedActionUrl);
+  localizedActionUrl.searchParams.set("lang", language);
+  const eventId = Date.now().toString(36);
+  const batch = db.batch();
+  batch.set(stateRef, {
+    lastSentAt: admin.firestore.FieldValue.serverTimestamp(),
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+  }, {merge: true});
+  batch.set(emailOutboxCol().doc(
+    `email_verification_${auth.uid}_${eventId}`,
+  ), buildEmailOutbox({
+    type: "email_verification",
+    to: email,
+    language,
+    data: {
+      displayName: recipient.displayName || user.displayName || "",
+      actionUrl: localizedActionUrl.toString(),
+      expiresText: language === "en" ? "24 hours" : "24 horas",
+    },
+    idempotencyKey: `email-verification/${auth.uid}/${eventId}`,
+  }));
+  await batch.commit();
+  return {ok: true, sent: true};
+});
+
 export const changeAccountPassword = onCall(async (request) => {
   const auth = requireRecentAccountAuth(request);
+  assertVerifiedEmail(auth);
   const password = (request.data?.password || "").toString();
   if (password.length < 8 || password.length > 128) {
     throw new HttpsError("invalid-argument", "invalid-password");
@@ -59,6 +103,7 @@ export const changeAccountPassword = onCall(async (request) => {
 
 export const requestAccountEmailChange = onCall(async (request) => {
   const auth = requireRecentAccountAuth(request);
+  assertVerifiedEmail(auth);
   const newEmail = normalizeEmail(request.data?.newEmail || "");
   if (!newEmail || newEmail.length > 320 || !newEmail.includes("@")) {
     throw new HttpsError("invalid-argument", "invalid-email");

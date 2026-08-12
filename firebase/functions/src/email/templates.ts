@@ -119,7 +119,7 @@ export const renderEmailTemplate = (
   }
   case "account_welcome": {
     const subject = en ? "Welcome to UNATOMO/NFC" : "Te damos la bienvenida a UNATOMO/NFC";
-    return build(subject, shell({title: en ? "Your UNATOMO/NFC account is ready" : "Tu cuenta de UNATOMO/NFC está lista", preheader: subject, paragraphs: [en ? "You can now organise your equipment, assign NFC identification and access its information from one place." : "Ya puedes organizar tus equipos, asignarles identificación NFC y acceder a su información desde un mismo lugar.", en ? "Open your dashboard to start setting everything up." : "Entra en tu dashboard para empezar a configurarlo todo."], button: {label: en ? "Open my dashboard" : "Abrir mi dashboard", url}}), `${greeting}\n\n${subject}\n\n${url}\n\nUnatomo`);
+    return build(subject, shell({title: en ? "Your UNATOMO/NFC account is ready" : "Tu cuenta de UNATOMO/NFC está lista", preheader: subject, paragraphs: [en ? "You can now organise your equipment, assign NFC identification and access its information from one place." : "Ya puedes organizar tus equipos, asignarles identificación NFC y acceder a su información desde un mismo lugar.", en ? "Verify your email to protect your account and enable security actions." : "Verifica tu correo para proteger tu cuenta y habilitar las acciones de seguridad."], button: {label: en ? "Verify my email" : "Verificar mi correo", url}}), `${greeting}\n\n${subject}\n\n${url}\n\nUnatomo`);
   }
   case "password_reset": {
     const subject = en ? "Reset your Unatomo password" : "Restablece tu contraseña de Unatomo";

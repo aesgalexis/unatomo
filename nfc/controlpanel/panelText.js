@@ -279,6 +279,8 @@ export const createPanelText = (isEn) => {
       ? "Accounts detected through Unatomo sign-in flows."
       : "Cuentas detectadas a través de los flujos de acceso de Unatomo.",
     userCollaborator: isEn ? "Collaborator" : "Colaborador",
+    emailVerified: isEn ? "Verified email" : "Correo verificado",
+    emailVerificationPending: isEn ? "Verification pending" : "Verificación pendiente",
     userCollaboratorSaved: isEn
       ? "Collaborator access updated."
       : "Acceso de colaborador actualizado.",

@@ -45,6 +45,7 @@ export const createDashboardSession = (dependencies) => {
     state.uid = uid;
     state.adminLabel = user.displayName || user.email || t("dashboard.admin", "Administrador");
     state.adminEmail = user.email || "";
+    state.emailVerified = user.emailVerified === true;
     resetInitialMobileScroll();
     refreshStorageFullState(uid);
     armLoadingGuard();
@@ -55,6 +56,7 @@ export const createDashboardSession = (dependencies) => {
     subscriptions.subscribeAdminLinks(uid);
     subscriptions.subscribePendingInvites(emailLower);
     subscriptions.subscribePendingTransferInvites(uid);
+    dependencies.renderInviteBanner();
 
     const machinesBootstrapPromise = Promise.allSettled([
       withTimeout(fetchMachines(uid)),

@@ -456,8 +456,8 @@ const callableExports = Array.from(
   .map((name) => name.trim())
   .filter(Boolean);
 addCheck(
-  callableExports.length === 65 && new Set(callableExports).size === 65,
-  "Functions index.ts preserves 65 unique function exports"
+  callableExports.length === 66 && new Set(callableExports).size === 66,
+  "Functions index.ts preserves 66 unique function exports"
 );
 
 [
@@ -540,6 +540,12 @@ const accountSecurity = read("firebase/functions/src/accounts/security.ts");
 const accountSettings = read("static/js/configuracion/index.js");
 const accessRequests = read("firebase/functions/src/accounts/accessRequests.ts");
 const registration = read("firebase/functions/src/accounts/registration.ts");
+const onboarding = read("firebase/functions/src/accounts/onboarding.ts");
+const onboardingCss = read("static/css/onboarding.css");
+const machineTransfers = read("firebase/functions/src/machines/transfers.ts");
+const machineInvites = read("firebase/functions/src/machines/adminInvites.ts");
+const dashboardAccess = read("static/js/dashboard/controllers/machineAccessController.js");
+const controlPanelUsers = read("nfc/controlpanel/panelUsers.js");
 const deleteUser = read("firebase/functions/src/controlPanel/deleteUser.ts");
 const coreStorage = read("firebase/functions/src/core/storage.ts");
 const registrationUi = read("static/js/registro/app.js");
@@ -599,6 +605,11 @@ addCheck(
   "access requests reject existing accounts and bind codes to approved email"
 );
 addCheck(
+  accessRequests.includes("`access_approved_${requestId}_${code}`") &&
+    accessRequests.includes("`access-approved/${requestId}/${code}`"),
+  "repeat access-request approvals create a distinct idempotent email delivery"
+);
+addCheck(
   registration.includes('reason: "existing_account"') &&
     registrationUi.includes("codeApplied") &&
     registrationUi.includes("approvedEmail.readOnly = true"),
@@ -610,6 +621,21 @@ addCheck(
     deleteUser.includes('db.collection("dashboard_layout").doc(uid)') &&
     coreStorage.includes("await Promise.all(\n    Array.from(refs.values())"),
   "account deletion fails closed and fresh registration cannot reuse stale profile data"
+);
+addCheck(
+  onboarding.includes("verificationUrl") &&
+    onboardingCss.includes("width: min(100%, 420px)") &&
+    onboardingCss.includes("padding: 1rem 1.25rem"),
+  "onboarding loading state stays narrow on mobile and welcome includes verification"
+);
+addCheck(
+  accountSecurity.includes("resendAccountEmailVerification") &&
+    accountSecurity.includes("assertVerifiedEmail(auth)") &&
+    machineTransfers.includes("assertVerifiedEmail(auth)") &&
+    machineInvites.includes("assertVerifiedEmail(auth)") &&
+    dashboardAccess.includes("resendAccountEmailVerification") &&
+    controlPanelUsers.includes("emailVerificationPending"),
+  "unverified accounts get a resend notice and sensitive actions remain protected"
 );
 addCheck(
   nfcLandingHtml.includes('id="registration-choice"') &&

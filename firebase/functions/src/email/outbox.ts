@@ -12,16 +12,18 @@ export const buildWelcomeEmailOutbox = ({
   email,
   displayName,
   language,
+  verificationUrl,
 }: {
   uid: string;
   email: string;
   displayName: string;
   language: EmailLanguage;
+  verificationUrl?: string;
 }) => ({
   type: "account_welcome",
   to: email,
   language,
-  data: {displayName},
+  data: {displayName, actionUrl: verificationUrl || ""},
   status: "pending",
   attemptCount: 0,
   idempotencyKey: `account-welcome/${uid}`,

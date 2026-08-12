@@ -3,7 +3,6 @@ import {admin, db, emailOutboxCol, machinesCol} from "../core/firebase";
 import {isControlPanelAuth} from "../core/auth";
 import {canCreateOwnedMachines} from "../machines/machinePolicy";
 import {
-  buildEmailOutbox,
   buildWelcomeEmailOutbox,
   welcomeEmailOutboxId,
 } from "../email/outbox";
@@ -57,6 +56,14 @@ export const completeAccountOnboarding = onCall(async (request) => {
   const welcomeEmailRef = emailOutboxCol().doc(
     welcomeEmailOutboxId(auth.uid),
   );
+  let verificationUrl = "";
+  if (email && auth.token.email_verified !== true) {
+    const generatedActionUrl = await admin.auth()
+      .generateEmailVerificationLink(email);
+    const localizedActionUrl = new URL(generatedActionUrl);
+    localizedActionUrl.searchParams.set("lang", language);
+    verificationUrl = localizedActionUrl.toString();
+  }
 
   const result = await db.runTransaction(async (transaction) => {
     const [profileSnap, ownedMachinesSnap] = await Promise.all([
@@ -155,35 +162,12 @@ export const completeAccountOnboarding = onCall(async (request) => {
         email,
         displayName,
         language,
+        verificationUrl,
       }));
     }
     return {alreadyCompleted: false, machineCount};
   });
 
   await admin.auth().updateUser(auth.uid, {displayName});
-  if (
-    !result.alreadyCompleted &&
-    email &&
-    auth.token.email_verified !== true
-  ) {
-    try {
-      const actionUrl = await admin.auth().generateEmailVerificationLink(email);
-      await emailOutboxCol().doc(`email_verification_${auth.uid}`).set(
-        buildEmailOutbox({
-          type: "email_verification",
-          to: email,
-          language,
-          data: {
-            displayName,
-            actionUrl,
-            expiresText: language === "en" ? "24 hours" : "24 horas",
-          },
-          idempotencyKey: `email-verification/${auth.uid}`,
-        }),
-      );
-    } catch {
-      // Verification is encouraged but must not block successful onboarding.
-    }
-  }
   return {ok: true, ...result};
 });

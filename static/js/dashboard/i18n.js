@@ -509,6 +509,11 @@ const TEXT = {
       showingResults: (visible, total) => `Mostrando ${visible}/${total} Equipos`,
       inviteManage: (ownerLabel, count) =>
         `${ownerLabel} quiere que administres ${count} ${count === 1 ? "Equipo" : "Equipos"}`,
+      verifyEmailNotice: "Verifica tu correo para proteger tu cuenta y habilitar las acciones de seguridad.",
+      resendVerification: "Reenviar correo",
+      emailAlreadyVerified: "El correo ya está verificado",
+      verificationResent: "Correo de verificación enviado",
+      verificationResendError: "No se pudo reenviar el correo",
       anonymousUser: "Un usuario",
       machineDefaultName: (idx) => idx ? `Nuevo equipo ${idx}` : "Nuevo equipo",
       duplicateName: "Nombre duplicado",
@@ -1089,6 +1094,11 @@ const TEXT = {
       showingResults: (visible, total) => `Showing ${visible}/${total} machines`,
       inviteManage: (ownerLabel, count) =>
         `${ownerLabel} wants you to manage ${count} ${count === 1 ? "machine" : "machines"}`,
+      verifyEmailNotice: "Verify your email to protect your account and enable security actions.",
+      resendVerification: "Resend email",
+      emailAlreadyVerified: "The email is already verified",
+      verificationResent: "Verification email sent",
+      verificationResendError: "The verification email could not be resent",
       anonymousUser: "A user",
       machineDefaultName: (idx) => idx ? `New machine ${idx}` : "New machine",
       duplicateName: "Duplicate name",

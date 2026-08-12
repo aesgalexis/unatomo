@@ -344,6 +344,7 @@ export const listControlPanelUsers = onCall(async (request) => {
       uid: string;
       email: string;
       displayName: string;
+      emailVerified: boolean;
     }> = [];
     let pageToken: string | undefined;
     do {
@@ -353,6 +354,7 @@ export const listControlPanelUsers = onCall(async (request) => {
           uid: user.uid,
           email: user.email || "",
           displayName: user.displayName || "",
+          emailVerified: user.emailVerified,
         });
       });
       pageToken = page.pageToken;
@@ -379,6 +381,7 @@ export const listControlPanelUsers = onCall(async (request) => {
     company: string;
     accountHandle: string;
     suggestionsCollaborator: boolean;
+    emailVerified: boolean;
   }>();
 
   const upsertItem = (
@@ -389,6 +392,7 @@ export const listControlPanelUsers = onCall(async (request) => {
       company?: unknown;
       accountHandle?: unknown;
       suggestionsCollaborator?: unknown;
+      emailVerified?: unknown;
     },
   ) => {
     const uid = (raw.uid || "").toString().trim();
@@ -409,6 +413,9 @@ export const listControlPanelUsers = onCall(async (request) => {
         typeof raw.suggestionsCollaborator === "boolean" ?
           raw.suggestionsCollaborator :
           !!current?.suggestionsCollaborator,
+      emailVerified:
+        typeof raw.emailVerified === "boolean" ?
+          raw.emailVerified : !!current?.emailVerified,
     });
   };
 

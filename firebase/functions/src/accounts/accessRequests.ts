@@ -162,7 +162,8 @@ export const reviewControlPanelAccessRequest = onCall(async (request) => {
           reviewedBy: auth?.uid || "",
           updatedAt: now,
         });
-        transaction.create(emailOutboxCol().doc(`access_approved_${requestId}`),
+        transaction.create(
+          emailOutboxCol().doc(`access_approved_${requestId}_${code}`),
           buildEmailOutbox({
             type: "registration_code_approved",
             to: data.email,
@@ -175,8 +176,9 @@ export const reviewControlPanelAccessRequest = onCall(async (request) => {
                 data.language === "en" ? "en" : "es"
               }/auth/registro.html?code=${encodeURIComponent(code)}`,
             },
-            idempotencyKey: `access-approved/${requestId}`,
-          }));
+            idempotencyKey: `access-approved/${requestId}/${code}`,
+          }),
+        );
       });
       return {ok: true, status: "approved", code};
     } catch (error) {
