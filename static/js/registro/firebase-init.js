@@ -91,7 +91,9 @@ export async function validateRegistrationCode(code) {
   return {
     valid: result.valid === true,
     reason: (result.reason || "").toString(),
-    code: (result.code || normalized).toString()
+    code: (result.code || normalized).toString(),
+    email: (result.email || "").toString(),
+    displayName: (result.displayName || "").toString()
   };
 }
 

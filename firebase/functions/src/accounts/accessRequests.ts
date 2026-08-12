@@ -24,6 +24,9 @@ export const requestAccountAccess = onCall(async (request) => {
   if (!email || email.length > 320 || !displayName) {
     throw new HttpsError("invalid-argument", "name-email-required");
   }
+  const existingUser = await admin.auth().getUserByEmail(email)
+    .catch(() => null);
+  if (existingUser) return {ok: true, accepted: false, alreadyRegistered: true};
   const requestRef = requestsCol().doc(requestIdForEmail(email));
   const ipHash = createHash("sha256")
     .update((request.rawRequest.ip || "unknown").toString())
@@ -133,6 +136,13 @@ export const reviewControlPanelAccessRequest = onCall(async (request) => {
           throw new HttpsError("failed-precondition", "request-not-pending");
         }
         if (codeSnap.exists) throw new Error("code-collision");
+        const requestedEmail = normalizeEmail(data.email || "");
+        const existingUser = requestedEmail ?
+          await admin.auth().getUserByEmail(requestedEmail)
+            .catch(() => null) : null;
+        if (existingUser) {
+          throw new HttpsError("failed-precondition", "account-already-exists");
+        }
         const now = admin.firestore.FieldValue.serverTimestamp();
         const expiresAt = admin.firestore.Timestamp.fromMillis(
           Date.now() + CODE_LIFETIME_MS,
@@ -140,6 +150,7 @@ export const reviewControlPanelAccessRequest = onCall(async (request) => {
         transaction.set(codeRef, {
           active: true,
           accessRequestId: requestId,
+          emailLower: requestedEmail,
           expiresAt,
           createdAt: now,
           updatedAt: now,

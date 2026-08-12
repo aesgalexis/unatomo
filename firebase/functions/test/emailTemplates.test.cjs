@@ -26,6 +26,15 @@ assert.equal(english.subject, "Welcome to UNATOMO/NFC");
 assert.match(english.html, /Open my dashboard/);
 assert.match(english.text, /https:\/\/unatomo\.com\/nfc/);
 
+const approvedSpanish = renderEmailTemplate("registration_code_approved", {
+  displayName: "Mónica",
+  actionUrl: "https://unatomo.com/nfc/es/auth/registro.html?code=ABC123",
+  code: "ABC123",
+  expiresText: "7 días",
+}, "es");
+assert.match(approvedSpanish.html, /los próximos 7 días/);
+assert.doesNotMatch(approvedSpanish.html, /las próximas 7 días/);
+
 assert.equal(EMAIL_TEMPLATE_DEFINITIONS.length, 11);
 assert.equal(
   EMAIL_TEMPLATE_DEFINITIONS.filter((item) => item.integration === "active").length,

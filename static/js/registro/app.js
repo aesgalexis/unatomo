@@ -103,9 +103,11 @@ const text = {
   requestAccessSend: isEn ? "Send request" : "Enviar solicitud",
   requestAccessSending: isEn ? "Sending request..." : "Enviando solicitud...",
   requestAccessSent: isEn ? "Request received. We will email you after reviewing it." : "Solicitud recibida. Te enviaremos un correo después de revisarla.",
+  requestAccessExisting: isEn ? "This email already has an account. Redirecting to sign in..." : "Este correo ya tiene una cuenta. Te llevamos al inicio de sesión...",
   requestAccessError: isEn ? "Unable to send the request." : "No se ha podido enviar la solicitud.",
   registerFailed: isEn ? "Could not complete registration." : "No se pudo completar el registro.",
   registerSuccess: isEn ? "Registration completed. Redirecting..." : "Registro completado. Redirigiendo...",
+  codeApplied: isEn ? "Access code validated. Create the account with the approved email." : "Código de acceso validado. Crea la cuenta con el correo aprobado.",
   googleRegisterError: isEn ? "Error registering with Google." : "Error en el registro con Google.",
   passwordMin: isEn ? "Password must be at least 8 characters." : "La contraseña debe tener al menos 8 caracteres.",
   passwordMismatch: isEn ? "Passwords do not match." : "Las contraseñas no coinciden.",
@@ -367,12 +369,17 @@ function initSetupRegisterCode() {
       requestSubmit.disabled = true;
       requestStatus.textContent = text.requestAccessSending;
       try {
-        await requestAccountAccess({
+        const result = await requestAccountAccess({
           displayName: requestName.value,
           email: requestEmail.value,
           reason: requestReason.value,
           language: lang
         });
+        if (result.alreadyRegistered) {
+          requestStatus.textContent = text.requestAccessExisting;
+          setTimeout(() => (window.location.href = paths.login), 900);
+          return;
+        }
         requestStatus.textContent = text.requestAccessSent;
         requestForm.reset();
       } catch {
@@ -590,10 +597,21 @@ function initRegisterPage() {
     const check = await validateRegistrationCode(code);
     if (!check.valid) {
       clearStoredRegistrationCode();
+      if (check.reason === "existing_account") {
+        return window.location.replace(paths.login);
+      }
       return window.location.replace(paths.setup);
     }
 
     document.documentElement.style.visibility = "visible";
+    const approvedEmail = document.getElementById("email");
+    const approvedName = document.getElementById("nombre");
+    if (approvedEmail && check.email) {
+      approvedEmail.value = check.email;
+      approvedEmail.readOnly = true;
+    }
+    if (approvedName && check.displayName) approvedName.value = check.displayName;
+    setStatus(text.codeApplied);
 
     btnGoogle.addEventListener("click", async () => {
       clearStatus();

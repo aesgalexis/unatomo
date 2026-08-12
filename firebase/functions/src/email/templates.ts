@@ -115,7 +115,7 @@ export const renderEmailTemplate = (
   case "registration_code_approved": {
     const code = escapeHtml(clean(input.code, "UNATOMO-2026"));
     const subject = en ? "Your UNATOMO/NFC access code" : "Tu código de acceso a UNATOMO/NFC";
-    return build(subject, shell({title: en ? "Your access request was approved" : "Tu solicitud de acceso ha sido aprobada", preheader: subject, paragraphs: [en ? `Use this personal, single-use code within ${expires} to create your account.` : `Utiliza este código personal y de un solo uso durante las próximas ${expires} para crear tu cuenta.`, en ? "Do not share it with anyone." : "No lo compartas con nadie."], callout: code, button: {label: en ? "Create my account" : "Crear mi cuenta", url}}), `${greeting}\n\n${subject}: ${clean(input.code, "UNATOMO-2026")}\n${url}`);
+    return build(subject, shell({title: en ? "Your access request was approved" : "Tu solicitud de acceso ha sido aprobada", preheader: subject, paragraphs: [en ? `Use this personal, single-use code within ${expires} to create your account.` : `Utiliza este código personal y de un solo uso durante los próximos ${expires} para crear tu cuenta.`, en ? "Do not share it with anyone." : "No lo compartas con nadie."], callout: code, button: {label: en ? "Create my account" : "Crear mi cuenta", url}}), `${greeting}\n\n${subject}: ${clean(input.code, "UNATOMO-2026")}\n${url}`);
   }
   case "account_welcome": {
     const subject = en ? "Welcome to UNATOMO/NFC" : "Te damos la bienvenida a UNATOMO/NFC";

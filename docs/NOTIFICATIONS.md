@@ -64,6 +64,12 @@ in an outbox record.
 
 ## Existing event behavior
 
+- Access requests reject addresses already present in Firebase Authentication.
+  Approved codes are bound to the requested email. The email button carries the
+  code into registration, where it is validated automatically and the approved
+  email is prefilled and locked. Legacy approved codes resolve the email through
+  their access-request record, so they also reject an already registered account.
+
 - Administrator invite mail goes to the invited address and links to its
   localized dashboard. Recipient name/language are resolved from
   `account_directory` and `users` when available.

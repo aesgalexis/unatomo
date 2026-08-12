@@ -210,6 +210,11 @@ frontend wrappers live under `static/js/dashboard/`.
   limits by a SHA-256 email key, generates Firebase's signed reset link only for
   an existing account, and queues the branded Resend email without revealing
   whether the account exists.
+- `requestAccountAccess`: rejects an email already present in Authentication;
+  no request or registration code is created for an existing account.
+- Approved registration codes carry the normalized requested email. Validation
+  also resolves legacy codes through `accessRequestId`, and redemption requires
+  the authenticated account email to match the approved address.
 - `changeAccountPassword`: authenticated account callable requiring an
   `auth_time` within five minutes. It updates Auth server-side and queues the
   password-change confirmation without storing the submitted password.

@@ -24,7 +24,29 @@ export const validateRegistrationCode = onCall(async (request) => {
     return {valid: false, reason: "expired", code};
   }
 
-  return {valid: true, code};
+  const codeData = codeSnap.data() || {};
+  const requestSnap = codeData.accessRequestId ?
+    await db.collection("access_requests").doc(codeData.accessRequestId).get() :
+    null;
+  const requestedEmail = cleanProfileText(
+    codeData.emailLower || requestSnap?.data()?.emailLower ||
+      requestSnap?.data()?.email,
+    320,
+  ).toLowerCase();
+  if (requestedEmail) {
+    const existingUser = await admin.auth().getUserByEmail(requestedEmail)
+      .catch(() => null);
+    if (existingUser) {
+      return {valid: false, reason: "existing_account", code};
+    }
+  }
+
+  return {
+    valid: true,
+    code,
+    email: requestedEmail,
+    displayName: cleanProfileText(requestSnap?.data()?.displayName, 120),
+  };
 });
 
 export const redeemRegistrationCode = onCall(async (request) => {
@@ -36,8 +58,9 @@ export const redeemRegistrationCode = onCall(async (request) => {
     throw new HttpsError("invalid-argument", "invalid-code");
   }
 
+  let authUser: admin.auth.UserRecord;
   try {
-    await admin.auth().getUser(auth.uid);
+    authUser = await admin.auth().getUser(auth.uid);
   } catch (error) {
     if ((error as {code?: string})?.code === "auth/user-not-found") {
       throw new HttpsError("unauthenticated", "auth-account-missing");
@@ -68,10 +91,29 @@ export const redeemRegistrationCode = onCall(async (request) => {
       );
     }
 
+    const codeData = codeSnap.data() || {};
+    const requestSnap = codeData.accessRequestId ?
+      await transaction.get(
+        db.collection("access_requests").doc(codeData.accessRequestId),
+      ) : null;
+    const requestedEmail = cleanProfileText(
+      codeData.emailLower || requestSnap?.data()?.emailLower ||
+        requestSnap?.data()?.email,
+      320,
+    ).toLowerCase();
+    const authenticatedEmail = cleanProfileText(authUser.email, 320)
+      .toLowerCase();
+    if (requestedEmail && authenticatedEmail !== requestedEmail) {
+      throw new HttpsError(
+        "permission-denied",
+        "registration-email-mismatch",
+      );
+    }
+
     const now = admin.firestore.FieldValue.serverTimestamp();
     transaction.create(userRef, {
       uid: auth.uid,
-      email: cleanProfileText(auth.token.email, 320),
+      email: authenticatedEmail,
       displayName: cleanProfileText(request.data?.displayName, 120),
       photoURL: cleanProfileText(request.data?.photoURL, 2048),
       onboardingRequired: true,
