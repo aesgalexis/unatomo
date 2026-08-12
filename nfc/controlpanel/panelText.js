@@ -211,6 +211,32 @@ export const createPanelText = (isEn) => {
       },
     ],
     preferencesTitle: isEn ? "Superadmin preferences" : "Preferencias de superadmin",
+    emailTemplatesTitle: isEn ? "Transactional emails" : "Correos transaccionales",
+    emailTemplatesLoading: isEn ? "Loading templates..." : "Cargando plantillas...",
+    emailTemplatesError: isEn ? "Unable to load templates." : "No se han podido cargar las plantillas.",
+    emailTemplatesHint: isEn
+      ? "Authoritative catalogue rendered by the same backend used for delivery. Active means connected to a production event; Ready means the template is complete but its event is pending."
+      : "Catálogo autoritativo renderizado por el mismo backend que realiza los envíos. Activa significa conectada a un evento de producción; Lista significa que la plantilla está terminada pero su evento está pendiente.",
+    emailTemplatesLanguage: isEn ? "Preview language" : "Idioma de previsualización",
+    emailTemplatesName: isEn ? "Template" : "Plantilla",
+    emailTemplatesCategory: isEn ? "Category" : "Categoría",
+    emailTemplatesSubject: isEn ? "Subject" : "Asunto",
+    emailTemplatesStatus: isEn ? "Status" : "Estado",
+    emailTemplatesActions: isEn ? "Actions" : "Acciones",
+    emailTemplatesActive: isEn ? "Active" : "Activa",
+    emailTemplatesReady: isEn ? "Ready · event pending" : "Lista · evento pendiente",
+    emailTemplatesPreview: isEn ? "Preview" : "Previsualizar",
+    emailTemplatesClose: isEn ? "Close" : "Cerrar",
+    emailTemplatesPlainText: isEn ? "Plain text" : "Texto plano",
+    emailTemplatesPreviewTitle: isEn
+      ? (name) => `Preview of ${name}`
+      : (name) => `Previsualización de ${name}`,
+    emailTemplateCategories: {
+      access: isEn ? "Access" : "Acceso",
+      account: isEn ? "Account" : "Cuenta",
+      security: isEn ? "Security" : "Seguridad",
+      invitation: isEn ? "Invitation" : "Invitación",
+    },
     preferencesHint: isEn
       ? "Personal interface options stored only in this browser."
       : "Opciones personales de interfaz guardadas solo en este navegador.",

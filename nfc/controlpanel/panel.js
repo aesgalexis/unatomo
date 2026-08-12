@@ -4,6 +4,7 @@ import { getCurrentLang } from "/static/js/site/locale.js";
 import { isControlPanelUser } from "/nfc/controlpanel/access.js";
 import { createControlPanelCallables } from "./panelCallables.js";
 import { createCodesRenderer } from "./panelCodes.js";
+import { createEmailTemplatesRenderer } from "./panelEmailTemplates.js";
 import { createLocalCardsRenderer } from "./panelLocalCards.js";
 import {
   createCard,
@@ -32,6 +33,7 @@ const { renderWhatsNewControl, renderSuperadminPreferences, renderAgentCard } =
   createLocalCardsRenderer({ text });
 const { renderUsers } = createUsersRenderer({ text });
 const { renderCodes } = createCodesRenderer({ text });
+const { renderEmailTemplates } = createEmailTemplatesRenderer({ text });
 const { renderTags } = createTagsRenderer({ text, isEn });
 
 if (mount) {
@@ -46,6 +48,7 @@ if (mount) {
   const whatsNewCard = createCard(text.whatsNewTitle);
   const usersCard = createCard(text.usersTitle);
   const codesCard = createCard(text.codesTitle);
+  const emailTemplatesCard = createCard(text.emailTemplatesTitle);
   const tagsCard = createCard(text.tagsTitle);
   wrap.appendChild(codeStatsCard);
   wrap.appendChild(systemStatusCard);
@@ -56,6 +59,7 @@ if (mount) {
   wrap.appendChild(whatsNewCard);
   wrap.appendChild(usersCard);
   wrap.appendChild(codesCard);
+  wrap.appendChild(emailTemplatesCard);
   wrap.appendChild(tagsCard);
   mount.appendChild(wrap);
 
@@ -86,6 +90,9 @@ if (mount) {
   codesCard
     .querySelector(".controlpanel-toggle")
     ?.addEventListener("click", () => toggleCard(codesCard));
+  emailTemplatesCard
+    .querySelector(".controlpanel-toggle")
+    ?.addEventListener("click", () => toggleCard(emailTemplatesCard));
   tagsCard
     .querySelector(".controlpanel-toggle")
     ?.addEventListener("click", () => toggleCard(tagsCard));
@@ -99,6 +106,7 @@ if (mount) {
   const whatsNewBody = whatsNewCard.querySelector(".controlpanel-body");
   const usersBody = usersCard.querySelector(".controlpanel-body");
   const codesBody = codesCard.querySelector(".controlpanel-body");
+  const emailTemplatesBody = emailTemplatesCard.querySelector(".controlpanel-body");
   const tagsBody = tagsCard.querySelector(".controlpanel-body");
   let updateCodesStatus = () => {};
   let addCodeButton = null;
@@ -206,6 +214,31 @@ if (mount) {
     }
   };
 
+  const loadEmailTemplates = async (language = isEn ? "en" : "es") => {
+    if (!emailTemplatesBody) return;
+    renderState(
+      emailTemplatesBody,
+      text.emailTemplatesHint,
+      text.emailTemplatesLoading
+    );
+    try {
+      const response = await callables.listEmailTemplates({ language });
+      const items = Array.isArray(response?.data?.items)
+        ? response.data.items
+        : [];
+      renderEmailTemplates(emailTemplatesBody, items, language, {
+        onLanguageChange: loadEmailTemplates,
+      });
+    } catch {
+      renderState(
+        emailTemplatesBody,
+        text.emailTemplatesHint,
+        text.emailTemplatesError,
+        "error"
+      );
+    }
+  };
+
   const loadTags = async () => {
     if (!tagsBody) return;
     renderState(tagsBody, text.tagsHint, text.tagsLoading);
@@ -276,6 +309,13 @@ if (mount) {
   if (whatsNewBody) renderState(whatsNewBody, text.whatsNewHint, text.whatsNewLoading);
   if (usersBody) renderState(usersBody, text.usersHint, text.usersLoading);
   if (codesBody) renderState(codesBody, text.codesHint, text.codesLoading);
+  if (emailTemplatesBody) {
+    renderState(
+      emailTemplatesBody,
+      text.emailTemplatesHint,
+      text.emailTemplatesLoading
+    );
+  }
   if (tagsBody) renderState(tagsBody, text.tagsHint, text.tagsLoading);
 
   onAuthStateChanged(auth, async (user) => {
@@ -300,6 +340,7 @@ if (mount) {
       !whatsNewBody ||
       !usersBody ||
       !codesBody ||
+      !emailTemplatesBody ||
       !tagsBody
     ) return;
     await loadSystemStatus();
@@ -358,6 +399,7 @@ if (mount) {
 
     await loadUsers();
     await loadCodes();
+    await loadEmailTemplates();
     await loadTags();
   });
 }

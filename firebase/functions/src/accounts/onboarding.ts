@@ -1,7 +1,11 @@
 import {HttpsError, onCall} from "firebase-functions/v2/https";
-import {admin, db, machinesCol} from "../core/firebase";
+import {admin, db, emailOutboxCol, machinesCol} from "../core/firebase";
 import {isControlPanelAuth} from "../core/auth";
 import {canCreateOwnedMachines} from "../machines/machinePolicy";
+import {
+  buildWelcomeEmailOutbox,
+  welcomeEmailOutboxId,
+} from "../email/outbox";
 
 const cleanText = (value: unknown, maxLength: number) =>
   (value || "").toString().trim().replace(/\s+/g, " ").slice(0, maxLength);
@@ -48,6 +52,9 @@ export const completeAccountOnboarding = onCall(async (request) => {
   const machineRefs = Array.from(
     {length: machineCount},
     () => machinesCol().doc(),
+  );
+  const welcomeEmailRef = emailOutboxCol().doc(
+    welcomeEmailOutboxId(auth.uid),
   );
 
   const result = await db.runTransaction(async (transaction) => {
@@ -139,6 +146,14 @@ export const completeAccountOnboarding = onCall(async (request) => {
         updatedBy: auth.uid,
       });
     });
+    if (email) {
+      transaction.set(welcomeEmailRef, buildWelcomeEmailOutbox({
+        uid: auth.uid,
+        email,
+        displayName,
+        language,
+      }));
+    }
     return {alreadyCompleted: false, machineCount};
   });
 

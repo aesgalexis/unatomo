@@ -50,6 +50,12 @@ firebase/functions/src/
   global Functions options, Firestore, Storage, and shared collection refs.
 - `core/auth.ts` owns shared email normalization and the existing control-panel
   user authorization check.
+- `email/` owns private outbox payloads, versioned application templates, and
+  provider delivery. Account flows enqueue mail transactionally and never call
+  the provider directly.
+- `controlPanel/emailTemplates.ts` exposes read-only, superadmin-authorized
+  previews of that same catalogue so the control panel cannot drift from the
+  production renderer.
 - Domain modules own callable implementations and feature-specific helpers.
 - `core/storage.ts` owns shared Storage copy/delete primitives, while
   `core/storageQuota.ts` owns the account quota calculation.
@@ -62,6 +68,7 @@ controlPanel/   superadmin users, status, registration codes, and tag inventory
 dashboard/      layout, suggestions, and dashboard Tasks
 publicSite/     public, aggregate-only data used by unauthenticated pages
 machines/       administrator links/invites, ownership transfers, and Tag ID/QR
+email/          transactional email outbox, templates, and provider adapter
 core/           Firebase initialization and genuinely cross-domain primitives
 ```
 

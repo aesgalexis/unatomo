@@ -16,6 +16,14 @@ npm.cmd run deploy:nfc:backend
 npm.cmd run firebase:clean -- deploy --only "functions:functionName"
 ```
 
+Transactional email delivery uses the Firebase secret `RESEND_API_KEY`. The
+owner must set or rotate it interactively before deploying `deliverEmailOutbox`:
+
+```powershell
+npm.cmd run firebase:clean -- functions:secrets:set RESEND_API_KEY
+npm.cmd run firebase:clean -- deploy --only "firestore:rules,functions:completeAccountOnboarding,functions:deliverEmailOutbox"
+```
+
 Every implementation handoff must end with one of the following:
 
 - The exact commands the owner must copy and run, listed in execution order.

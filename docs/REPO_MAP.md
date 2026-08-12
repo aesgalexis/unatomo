@@ -25,8 +25,9 @@ relevant sections instead of loading the complete file by default.
   entry/composition layer; `panelText.js`, `panelShared.js`,
   `panelSystemIntegrity.js`, `panelStatsBackup.js`, `panelLocalCards.js`,
   `panelUsers.js`, `panelCodes.js`, `panelTags.js`, and `panelCallables.js`
-  contain the localized text, shared primitives, card renderers, and callable
-  wrappers by responsibility.
+  `panelEmailTemplates.js` contain the localized text, shared primitives, card
+  renderers, transactional-email previews, and callable wrappers by
+  responsibility.
 
 ## Frontend Source
 

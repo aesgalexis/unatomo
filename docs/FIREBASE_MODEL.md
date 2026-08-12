@@ -186,6 +186,16 @@ frontend wrappers live under `static/js/dashboard/`.
   aggregate does not exist yet. It creates that aggregate once and returns the
   same three counts, so a newly deployed landing does not wait for its first
   scheduled refresh. It follows the existing optional App Check enforcement.
+- `deliverEmailOutbox`: private Firestore trigger for `email_outbox`. Account
+  flows enqueue deterministic messages in the same transaction as their domain
+  change; the trigger renders repository-owned bilingual templates and sends
+  them through Resend with an idempotency key. Browser access to the outbox is
+  denied. The first event is the welcome email created by successful onboarding.
+- `listControlPanelEmailTemplates`: superadmin-only catalogue of the account,
+  security, access, invitation, and transfer templates. It returns ES/EN sample
+  renders from the same versioned renderer used for delivery; it does not expose
+  secrets or send messages. Only `account_welcome` is connected to a production
+  event in the first phase, while the remaining templates are integration-ready.
 
 ## Integrity Cleanup Log
 

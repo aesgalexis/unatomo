@@ -11,6 +11,8 @@ export {
   validateRegistrationCode,
 } from "./accounts/registration";
 export {completeAccountOnboarding} from "./accounts/onboarding";
+export {deliverEmailOutbox} from "./email/resend";
+export {listControlPanelEmailTemplates} from "./controlPanel/emailTemplates";
 export {
   createDashboardSuggestion,
   deleteDashboardSuggestion,
