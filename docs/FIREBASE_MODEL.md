@@ -187,15 +187,20 @@ frontend wrappers live under `static/js/dashboard/`.
   same three counts, so a newly deployed landing does not wait for its first
   scheduled refresh. It follows the existing optional App Check enforcement.
 - `deliverEmailOutbox`: private Firestore trigger for `email_outbox`. Account
-  flows enqueue deterministic messages in the same transaction as their domain
-  change; the trigger renders repository-owned bilingual templates and sends
+  flows enqueue event-addressed messages from server code; the trigger renders
+  repository-owned bilingual templates and sends
   them through Resend with an idempotency key. Browser access to the outbox is
-  denied. The first event is the welcome email created by successful onboarding.
+  denied. Welcome, verification, password reset, administrator invitation and
+  ownership-transfer events are connected.
 - `listControlPanelEmailTemplates`: superadmin-only catalogue of the account,
   security, access, invitation, and transfer templates. It returns ES/EN sample
   renders from the same versioned renderer used for delivery; it does not expose
-  secrets or send messages. Only `account_welcome` is connected to a production
-  event in the first phase, while the remaining templates are integration-ready.
+  secrets or send messages. Its status comes from the authoritative template
+  catalogue, not from browser-maintained metadata.
+- `requestAccountPasswordReset`: public neutral-response callable. It rate
+  limits by a SHA-256 email key, generates Firebase's signed reset link only for
+  an existing account, and queues the branded Resend email without revealing
+  whether the account exists.
 
 ## Integrity Cleanup Log
 

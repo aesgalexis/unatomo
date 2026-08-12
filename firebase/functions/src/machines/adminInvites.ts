@@ -8,10 +8,13 @@ import {normalizeEmail} from "../core/auth";
 import {
   accountDirectoryCol,
   accountHandlesCol,
+  emailOutboxCol,
   invitesCol,
   linksCol,
   machinesCol,
 } from "../core/firebase";
+import {buildEmailOutbox} from "../email/outbox";
+import {dashboardUrl, getEmailRecipient} from "../email/recipients";
 
 const resolveInviteeIdentity = async (value: string) => {
   const raw = (value || "").toString().trim();
@@ -113,6 +116,26 @@ export const createAdminInvite = onCall(async (request) => {
       adminStatus: "Pendiente aceptación",
     },
     {merge: true},
+  );
+
+  const recipient = await getEmailRecipient(
+    invitee.adminEmail,
+    invitee.adminUid,
+  );
+  const notificationId = Date.now().toString(36);
+  await emailOutboxCol().doc(`admin_invite_${inviteId}_${notificationId}`).set(
+    buildEmailOutbox({
+      type: "admin_invite",
+      to: recipient.email,
+      language: recipient.language,
+      data: {
+        displayName: recipient.displayName,
+        actorName: (auth.token.name || ownerEmail).toString(),
+        machineName: (machine.title || "").toString(),
+        actionUrl: dashboardUrl(recipient.language),
+      },
+      idempotencyKey: `admin-invite/${inviteId}/${notificationId}`,
+    }),
   );
 
   return {ok: true, inviteId};

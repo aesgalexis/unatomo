@@ -13,7 +13,6 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   updateProfile,
-  sendPasswordResetEmail,
   signOut
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 import { getStorage } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-storage.js";
@@ -67,6 +66,10 @@ export const storage = getStorage(app);
 export const functions = getFunctions(app);
 const validateCodeCallable = httpsCallable(functions, "validateRegistrationCode");
 const redeemCodeCallable = httpsCallable(functions, "redeemRegistrationCode");
+const passwordResetCallable = httpsCallable(
+  functions,
+  "requestAccountPasswordReset"
+);
 
 const buildAuthResult = (user) => ({
   ok: !!user,
@@ -232,7 +235,9 @@ export async function sendPasswordReset(email, languageCode = "es") {
   const em = (email || "").toString().trim();
   if (!em) return { ok: false };
 
-  auth.languageCode = languageCode === "en" ? "en" : "es";
-  await sendPasswordResetEmail(auth, em);
-  return { ok: true };
+  const response = await passwordResetCallable({
+    email: em,
+    language: languageCode === "en" ? "en" : "es"
+  });
+  return response?.data || { ok: true };
 }

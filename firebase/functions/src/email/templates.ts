@@ -50,14 +50,14 @@ const BRAND_GREEN = "#16a34a";
 export const EMAIL_TEMPLATE_DEFINITIONS: EmailTemplateDefinition[] = [
   {id: "registration_code_approved", category: "access", hasButton: true, integration: "pending", labels: {es: {name: "Código de acceso aprobado", description: "Entrega el código personal después de aprobar una solicitud."}, en: {name: "Access code approved", description: "Delivers the personal code after an access request is approved."}}},
   {id: "account_welcome", category: "account", hasButton: true, integration: "active", labels: {es: {name: "Bienvenida", description: "Confirma que la cuenta y el dashboard están preparados."}, en: {name: "Welcome", description: "Confirms that the account and dashboard are ready."}}},
-  {id: "password_reset", category: "security", hasButton: true, integration: "pending", labels: {es: {name: "Restablecer contraseña", description: "Permite elegir una contraseña nueva mediante un enlace seguro."}, en: {name: "Reset password", description: "Lets the user choose a new password through a secure link."}}},
+  {id: "password_reset", category: "security", hasButton: true, integration: "active", labels: {es: {name: "Restablecer contraseña", description: "Permite elegir una contraseña nueva mediante un enlace seguro."}, en: {name: "Reset password", description: "Lets the user choose a new password through a secure link."}}},
   {id: "password_changed", category: "security", hasButton: false, integration: "pending", labels: {es: {name: "Contraseña modificada", description: "Confirma un cambio de contraseña y alerta si no fue reconocido."}, en: {name: "Password changed", description: "Confirms a password change and warns if it was not recognised."}}},
-  {id: "email_verification", category: "security", hasButton: true, integration: "pending", labels: {es: {name: "Verificar correo", description: "Verifica que la dirección pertenece al titular de la cuenta."}, en: {name: "Verify email", description: "Verifies that the address belongs to the account holder."}}},
+  {id: "email_verification", category: "security", hasButton: true, integration: "active", labels: {es: {name: "Verificar correo", description: "Verifica que la dirección pertenece al titular de la cuenta."}, en: {name: "Verify email", description: "Verifies that the address belongs to the account holder."}}},
   {id: "email_change_old", category: "security", hasButton: true, integration: "pending", labels: {es: {name: "Aviso al correo anterior", description: "Avisa al correo anterior y ofrece una vía de recuperación."}, en: {name: "Previous email notice", description: "Warns the previous address and provides a recovery path."}}},
   {id: "email_change_new", category: "security", hasButton: true, integration: "pending", labels: {es: {name: "Verificar correo nuevo", description: "Confirma la nueva dirección antes de completar el cambio."}, en: {name: "Verify new email", description: "Confirms the new address before completing the change."}}},
-  {id: "admin_invite", category: "invitation", hasButton: true, integration: "pending", labels: {es: {name: "Invitación de administrador", description: "Invita a administrar una máquina desde una pantalla de revisión."}, en: {name: "Administrator invitation", description: "Invites someone to manage a machine from a review screen."}}},
-  {id: "machine_transfer_requested", category: "invitation", hasButton: true, integration: "pending", labels: {es: {name: "Transferencia solicitada", description: "Solicita revisar una transferencia de propiedad."}, en: {name: "Transfer requested", description: "Requests review of an ownership transfer."}}},
-  {id: "machine_transfer_completed", category: "account", hasButton: true, integration: "pending", labels: {es: {name: "Transferencia completada", description: "Confirma que la propiedad de una máquina ha cambiado."}, en: {name: "Transfer completed", description: "Confirms that machine ownership has changed."}}},
+  {id: "admin_invite", category: "invitation", hasButton: true, integration: "active", labels: {es: {name: "Invitación de administrador", description: "Invita a administrar una máquina desde una pantalla de revisión."}, en: {name: "Administrator invitation", description: "Invites someone to manage a machine from a review screen."}}},
+  {id: "machine_transfer_requested", category: "invitation", hasButton: true, integration: "active", labels: {es: {name: "Transferencia solicitada", description: "Solicita revisar una transferencia de propiedad."}, en: {name: "Transfer requested", description: "Requests review of an ownership transfer."}}},
+  {id: "machine_transfer_completed", category: "account", hasButton: true, integration: "active", labels: {es: {name: "Transferencia completada", description: "Confirma que la propiedad de una máquina ha cambiado."}, en: {name: "Transfer completed", description: "Confirms that machine ownership has changed."}}},
   {id: "account_activity", category: "security", hasButton: true, integration: "pending", labels: {es: {name: "Actividad importante", description: "Plantilla común para cambios importantes de cuenta."}, en: {name: "Important activity", description: "Shared template for important account changes."}}},
 ];
 
@@ -100,7 +100,9 @@ export const renderEmailTemplate = (
 ): RenderedEmail => {
   const en = language === "en";
   const name = escapeHtml(clean(input.displayName, en ? "there" : ""));
-  const greeting = en ? `Hello ${name},` : `Hola ${name},`;
+  const greeting = name ?
+    (en ? `Hello ${name},` : `Hola ${name},`) :
+    (en ? "Hello," : "Hola,");
   const url = escapeHtml(clean(input.actionUrl, APP_URL));
   const machine = escapeHtml(clean(input.machineName, en ? "Machine 01" : "Máquina 01"));
   const actor = escapeHtml(clean(input.actorName, "Alexis"));

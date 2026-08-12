@@ -4,6 +4,7 @@ import {normalizeEmail} from "../core/auth";
 import {
   accountDirectoryCol,
   db,
+  emailOutboxCol,
   linksCol,
   machineAccessCol,
   machinesCol,
@@ -19,6 +20,8 @@ import {
   getMachineDocumentsStorageBytes,
   getMachineQrStorageBytes,
 } from "../core/storageQuota";
+import {buildEmailOutbox} from "../email/outbox";
+import {dashboardUrl, getEmailRecipient} from "../email/recipients";
 
 export const createMachineTransferInvite = onCall(async (request) => {
   const auth = request.auth;
@@ -82,6 +85,24 @@ export const createMachineTransferInvite = onCall(async (request) => {
     },
     {merge: true},
   );
+
+  const recipient = await getEmailRecipient(toOwnerEmail, toOwnerUid);
+  const notificationId = Date.now().toString(36);
+  await emailOutboxCol()
+    .doc(`machine_transfer_requested_${inviteId}_${notificationId}`)
+    .set(buildEmailOutbox({
+      type: "machine_transfer_requested",
+      to: recipient.email,
+      language: recipient.language,
+      data: {
+        displayName: recipient.displayName,
+        actorName: (auth.token.name || ownerEmail).toString(),
+        machineName: (machine.title || "").toString(),
+        actionUrl: dashboardUrl(recipient.language),
+      },
+      idempotencyKey:
+        `machine-transfer-requested/${inviteId}/${notificationId}`,
+    }));
 
   return {ok: true, inviteId};
 });
@@ -191,6 +212,12 @@ export const respondMachineTransferInvite = onCall(async (request) => {
   };
 
   const previousOwnerLinkId = `${machineId}_${fromOwnerUid}`;
+  const [previousRecipient, newRecipient] = await Promise.all([
+    getEmailRecipient(fromOwnerEmail, fromOwnerUid),
+    getEmailRecipient(toOwnerEmail, toOwnerUid),
+  ]);
+  const transferredMachineName =
+    (machine.title || invite.machineTitle || "").toString();
   const writes: Array<Promise<unknown>> = [
     machineRef.set(
       {
@@ -233,6 +260,30 @@ export const respondMachineTransferInvite = onCall(async (request) => {
       },
       {merge: true},
     ),
+    emailOutboxCol().doc(`machine_transfer_completed_${inviteId}_previous`)
+      .set(buildEmailOutbox({
+        type: "machine_transfer_completed",
+        to: previousRecipient.email,
+        language: previousRecipient.language,
+        data: {
+          displayName: previousRecipient.displayName,
+          machineName: transferredMachineName,
+          actionUrl: dashboardUrl(previousRecipient.language),
+        },
+        idempotencyKey: `machine-transfer-completed/${inviteId}/previous`,
+      })),
+    emailOutboxCol().doc(`machine_transfer_completed_${inviteId}_new`)
+      .set(buildEmailOutbox({
+        type: "machine_transfer_completed",
+        to: newRecipient.email,
+        language: newRecipient.language,
+        data: {
+          displayName: newRecipient.displayName,
+          machineName: transferredMachineName,
+          actionUrl: dashboardUrl(newRecipient.language),
+        },
+        idempotencyKey: `machine-transfer-completed/${inviteId}/new`,
+      })),
   ];
 
   const tagId = (machine.tagId || "").toString().trim();

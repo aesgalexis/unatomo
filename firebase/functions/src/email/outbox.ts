@@ -1,5 +1,9 @@
 import {admin} from "../core/firebase";
-import {EmailLanguage} from "./templates";
+import {
+  EmailLanguage,
+  EmailTemplateId,
+  EmailTemplateInput,
+} from "./templates";
 
 export const welcomeEmailOutboxId = (uid: string) => `welcome_${uid}`;
 
@@ -21,6 +25,30 @@ export const buildWelcomeEmailOutbox = ({
   status: "pending",
   attemptCount: 0,
   idempotencyKey: `account-welcome/${uid}`,
+  createdAt: admin.firestore.FieldValue.serverTimestamp(),
+  updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+});
+
+export const buildEmailOutbox = ({
+  type,
+  to,
+  language,
+  data,
+  idempotencyKey,
+}: {
+  type: EmailTemplateId;
+  to: string;
+  language: EmailLanguage;
+  data: EmailTemplateInput;
+  idempotencyKey: string;
+}) => ({
+  type,
+  to,
+  language,
+  data,
+  status: "pending",
+  attemptCount: 0,
+  idempotencyKey,
   createdAt: admin.firestore.FieldValue.serverTimestamp(),
   updatedAt: admin.firestore.FieldValue.serverTimestamp(),
 });

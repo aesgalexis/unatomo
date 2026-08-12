@@ -67,6 +67,9 @@ links, Tag ID, QR cleanup, callable Functions, or data permissions.
 
 ## Documentation Routing
 
+- `docs/NOTIFICATIONS.md`: transactional email, Resend, template integration,
+  notification policy, current status, and continuation plan.
+
 - `docs/CHATGPT_CODEX_HANDOFF.md`: guide for turning owner conversations into
   grounded, actionable implementation prompts for Codex.
 - `docs/SUBAGENTS.md`: optional delegation playbook; read only when delegation

@@ -1,7 +1,13 @@
 import {defineSecret} from "firebase-functions/params";
 import {onDocumentCreated} from "firebase-functions/v2/firestore";
 import {admin} from "../core/firebase";
-import {EmailLanguage, renderWelcomeEmail} from "./templates";
+import {
+  EMAIL_TEMPLATE_DEFINITIONS,
+  EmailLanguage,
+  EmailTemplateId,
+  EmailTemplateInput,
+  renderEmailTemplate,
+} from "./templates";
 
 export const resendApiKey = defineSecret("RESEND_API_KEY");
 
@@ -9,7 +15,7 @@ type OutboxMessage = {
   type?: unknown;
   to?: unknown;
   language?: unknown;
-  data?: {displayName?: unknown};
+  data?: Record<string, unknown>;
   status?: unknown;
   attemptCount?: unknown;
   idempotencyKey?: unknown;
@@ -19,13 +25,16 @@ const cleanString = (value: unknown, maxLength: number) =>
   (value || "").toString().trim().slice(0, maxLength);
 
 const renderMessage = (message: OutboxMessage) => {
-  if (message.type !== "account_welcome") {
+  const type = cleanString(message.type, 80) as EmailTemplateId;
+  if (!EMAIL_TEMPLATE_DEFINITIONS.some((item) => item.id === type)) {
     throw new Error("unsupported-email-type");
   }
   const displayName = cleanString(message.data?.displayName, 120);
-  if (!displayName) throw new Error("missing-display-name");
   const language: EmailLanguage = message.language === "en" ? "en" : "es";
-  return renderWelcomeEmail({displayName, language});
+  return renderEmailTemplate(type, {
+    ...(message.data || {}),
+    displayName,
+  } as EmailTemplateInput, language);
 };
 
 export const deliverEmailOutbox = onDocumentCreated({
@@ -85,7 +94,7 @@ export const deliverEmailOutbox = onDocumentCreated({
         subject: rendered.subject,
         html: rendered.html,
         text: rendered.text,
-        tags: [{name: "category", value: "account_welcome"}],
+        tags: [{name: "category", value: cleanString(message.type, 80)}],
       }),
     });
   } catch (error) {

@@ -3,6 +3,7 @@ import {admin, db, emailOutboxCol, machinesCol} from "../core/firebase";
 import {isControlPanelAuth} from "../core/auth";
 import {canCreateOwnedMachines} from "../machines/machinePolicy";
 import {
+  buildEmailOutbox,
   buildWelcomeEmailOutbox,
   welcomeEmailOutboxId,
 } from "../email/outbox";
@@ -86,6 +87,7 @@ export const completeAccountOnboarding = onCall(async (request) => {
     transaction.update(userRef, {
       displayName,
       company,
+      language,
       onboardingRequired: false,
       onboardingOwnership: ownership,
       onboardingMachineCount: machineCount,
@@ -104,6 +106,7 @@ export const completeAccountOnboarding = onCall(async (request) => {
         emailLower,
         displayName,
         company,
+        language,
         updatedAt: now,
       }, {merge: true});
     }
@@ -158,5 +161,29 @@ export const completeAccountOnboarding = onCall(async (request) => {
   });
 
   await admin.auth().updateUser(auth.uid, {displayName});
+  if (
+    !result.alreadyCompleted &&
+    email &&
+    auth.token.email_verified !== true
+  ) {
+    try {
+      const actionUrl = await admin.auth().generateEmailVerificationLink(email);
+      await emailOutboxCol().doc(`email_verification_${auth.uid}`).set(
+        buildEmailOutbox({
+          type: "email_verification",
+          to: email,
+          language,
+          data: {
+            displayName,
+            actionUrl,
+            expiresText: language === "en" ? "24 hours" : "24 horas",
+          },
+          idempotencyKey: `email-verification/${auth.uid}`,
+        }),
+      );
+    } catch {
+      // Verification is encouraged but must not block successful onboarding.
+    }
+  }
   return {ok: true, ...result};
 });
