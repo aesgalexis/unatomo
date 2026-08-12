@@ -27,3 +27,4 @@ export const accountHandlesCol = () => db.collection("account_handles");
 export const accountHandleHistoryCol = () =>
   db.collection("account_handle_history");
 export const emailOutboxCol = () => db.collection("email_outbox");
+export const accessRequestsCol = () => db.collection("access_requests");

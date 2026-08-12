@@ -48,7 +48,7 @@ const LOGO_URL =
 const BRAND_GREEN = "#16a34a";
 
 export const EMAIL_TEMPLATE_DEFINITIONS: EmailTemplateDefinition[] = [
-  {id: "registration_code_approved", category: "access", hasButton: true, integration: "pending", labels: {es: {name: "Código de acceso aprobado", description: "Entrega el código personal después de aprobar una solicitud."}, en: {name: "Access code approved", description: "Delivers the personal code after an access request is approved."}}},
+  {id: "registration_code_approved", category: "access", hasButton: true, integration: "active", labels: {es: {name: "Código de acceso aprobado", description: "Entrega el código personal después de aprobar una solicitud."}, en: {name: "Access code approved", description: "Delivers the personal code after an access request is approved."}}},
   {id: "account_welcome", category: "account", hasButton: true, integration: "active", labels: {es: {name: "Bienvenida", description: "Confirma que la cuenta y el dashboard están preparados."}, en: {name: "Welcome", description: "Confirms that the account and dashboard are ready."}}},
   {id: "password_reset", category: "security", hasButton: true, integration: "active", labels: {es: {name: "Restablecer contraseña", description: "Permite elegir una contraseña nueva mediante un enlace seguro."}, en: {name: "Reset password", description: "Lets the user choose a new password through a secure link."}}},
   {id: "password_changed", category: "security", hasButton: false, integration: "pending", labels: {es: {name: "Contraseña modificada", description: "Confirma un cambio de contraseña y alerta si no fue reconocido."}, en: {name: "Password changed", description: "Confirms a password change and warns if it was not recognised."}}},

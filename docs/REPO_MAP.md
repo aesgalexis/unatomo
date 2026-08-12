@@ -36,6 +36,8 @@ relevant sections instead of loading the complete file by default.
 - `static/js/firebase/`: Firebase client initialization.
 - `static/js/qr-print/`: QR print page logic.
 - `static/js/registro/`: registration, login, reset, and session menu logic.
+- `nfc/controlpanel/panelAccessRequests.js`: superadmin review of public access
+  requests, including approval and rejection actions.
 - `static/js/site/`: locale and site-level preferences.
 - `static/css/dashboard.css`: dashboard stylesheet manifest.
 - `static/css/dashboard/`: split dashboard styles by feature.

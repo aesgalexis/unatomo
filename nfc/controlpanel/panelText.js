@@ -271,6 +271,15 @@ export const createPanelText = (isEn) => {
       ? (label) => `Delete account ${label}? This will permanently remove the account and all related data, including machines, Tag IDs and QR files. This action cannot be undone.`
       : (label) => `¿Eliminar la cuenta ${label}? Esto eliminará de forma permanente la cuenta y todos sus datos relacionados, incluidas máquinas, Tag ID y archivos QR. Este cambio no se puede deshacer.`,
     codesTitle: isEn ? "Registration codes" : "C\u00f3digos de registro",
+    accessRequestsTitle: isEn ? "Access requests" : "Solicitudes de acceso",
+    accessRequestsHint: isEn ? "Review requests. Approval creates a personal seven-day code and emails it to the applicant." : "Revisa las solicitudes. Al aprobar se crea un código personal válido durante siete días y se envía por correo.",
+    accessRequestsLoading: isEn ? "Loading access requests..." : "Cargando solicitudes de acceso...",
+    accessRequestsEmpty: isEn ? "No access requests yet." : "Todavía no hay solicitudes de acceso.",
+    accessRequestsError: isEn ? "Unable to load access requests." : "No se han podido cargar las solicitudes.",
+    accessRequestApprove: isEn ? "Approve and send" : "Aprobar y enviar",
+    accessRequestReject: isEn ? "Reject" : "Rechazar",
+    accessRequestCode: isEn ? "Code" : "Código",
+    accessRequestStatus: (status) => ({ pending: isEn ? "Pending" : "Pendiente", approved: isEn ? "Approved" : "Aprobada", rejected: isEn ? "Rejected" : "Rechazada" }[status] || status),
     codesLoading: isEn
       ? "Loading active registration codes..."
       : "Cargando c\u00f3digos de registro activos...",

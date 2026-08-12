@@ -8,6 +8,8 @@ export const createControlPanelCallables = (functions) => ({
     "listControlPanelEmailTemplates"
   ),
   listCodes: httpsCallable(functions, "listControlPanelRegistrationCodes"),
+  listAccessRequests: httpsCallable(functions, "listControlPanelAccessRequests"),
+  reviewAccessRequest: httpsCallable(functions, "reviewControlPanelAccessRequest"),
   createCode: httpsCallable(functions, "createControlPanelRegistrationCode"),
   deleteCode: httpsCallable(functions, "deleteControlPanelRegistrationCode"),
   cleanupLegacyCodeLinks: httpsCallable(

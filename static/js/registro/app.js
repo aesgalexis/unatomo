@@ -3,6 +3,7 @@ import {
   loginWithGoogle,
   loginWithEmail,
   validateRegistrationCode,
+  requestAccountAccess,
   registerWithGoogle,
   registerWithEmail,
   completeCurrentUserRegistration,
@@ -95,6 +96,14 @@ const text = {
   invalidCode: isEn ? "Invalid code." : "Código no válido.",
   validCode: isEn ? "Valid code. Redirecting..." : "Código correcto. Redirigiendo...",
   validateCodeError: isEn ? "Error validating code." : "Error validando el código.",
+  requestAccessTitle: isEn ? "Request access" : "Solicitar acceso",
+  requestAccessName: isEn ? "Name" : "Nombre",
+  requestAccessEmail: isEn ? "Email" : "Correo electrónico",
+  requestAccessReason: isEn ? "How would you use UNATOMO/NFC? (optional)" : "¿Cómo usarías UNATOMO/NFC? (opcional)",
+  requestAccessSend: isEn ? "Send request" : "Enviar solicitud",
+  requestAccessSending: isEn ? "Sending request..." : "Enviando solicitud...",
+  requestAccessSent: isEn ? "Request received. We will email you after reviewing it." : "Solicitud recibida. Te enviaremos un correo después de revisarla.",
+  requestAccessError: isEn ? "Unable to send the request." : "No se ha podido enviar la solicitud.",
   registerFailed: isEn ? "Could not complete registration." : "No se pudo completar el registro.",
   registerSuccess: isEn ? "Registration completed. Redirecting..." : "Registro completado. Redirigiendo...",
   googleRegisterError: isEn ? "Error registering with Google." : "Error en el registro con Google.",
@@ -302,6 +311,13 @@ function initSetupRegisterCode() {
   const status = document.getElementById("register-code-status");
   const showCodeBtn = document.getElementById("show-code-entry");
   const codeEntry = document.getElementById("register-code-entry");
+  const requestBtn = document.getElementById("request-code-link");
+  const requestForm = document.getElementById("access-request-form");
+  const requestName = document.getElementById("access-request-name");
+  const requestEmail = document.getElementById("access-request-email");
+  const requestReason = document.getElementById("access-request-reason");
+  const requestSubmit = document.getElementById("access-request-submit");
+  const requestStatus = document.getElementById("access-request-status");
 
   if (!registerBtn || !box || !input || !submit || !status) return;
 
@@ -328,6 +344,44 @@ function initSetupRegisterCode() {
     clearStatus();
     input.focus();
   });
+
+  if (requestForm && requestName && requestEmail && requestReason &&
+      requestSubmit && requestStatus) {
+    requestForm.querySelector("h5").textContent = text.requestAccessTitle;
+    requestName.placeholder = text.requestAccessName;
+    requestEmail.placeholder = text.requestAccessEmail;
+    requestReason.placeholder = text.requestAccessReason;
+    requestSubmit.textContent = text.requestAccessSend;
+    requestBtn?.addEventListener("click", () => {
+      requestForm.hidden = false;
+      if (codeEntry) codeEntry.hidden = true;
+      requestName.focus();
+    });
+    requestForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      requestStatus.hidden = false;
+      if (!requestName.value.trim() || !requestEmail.value.trim()) {
+        requestStatus.textContent = text.requiredFields;
+        return;
+      }
+      requestSubmit.disabled = true;
+      requestStatus.textContent = text.requestAccessSending;
+      try {
+        await requestAccountAccess({
+          displayName: requestName.value,
+          email: requestEmail.value,
+          reason: requestReason.value,
+          language: lang
+        });
+        requestStatus.textContent = text.requestAccessSent;
+        requestForm.reset();
+      } catch {
+        requestStatus.textContent = text.requestAccessError;
+      } finally {
+        requestSubmit.disabled = false;
+      }
+    });
+  }
 
   registerBtn.addEventListener("click", () => {
     if (!box.hidden) {

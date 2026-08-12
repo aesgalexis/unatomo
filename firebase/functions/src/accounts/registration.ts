@@ -19,6 +19,10 @@ export const validateRegistrationCode = onCall(async (request) => {
   if (codeSnap.data()?.active === false) {
     return {valid: false, reason: "inactive", code};
   }
+  const expiresAt = codeSnap.data()?.expiresAt?.toMillis?.() || 0;
+  if (expiresAt && expiresAt <= Date.now()) {
+    return {valid: false, reason: "expired", code};
+  }
 
   return {valid: true, code};
 });
@@ -55,7 +59,9 @@ export const redeemRegistrationCode = onCall(async (request) => {
     }
 
     const codeSnap = await transaction.get(codeRef);
-    if (!codeSnap.exists || codeSnap.data()?.active === false) {
+    const expiresAt = codeSnap.data()?.expiresAt?.toMillis?.() || 0;
+    if (!codeSnap.exists || codeSnap.data()?.active === false ||
+        (expiresAt && expiresAt <= Date.now())) {
       throw new HttpsError(
         "failed-precondition",
         "registration-code-unavailable",

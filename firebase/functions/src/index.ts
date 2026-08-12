@@ -12,6 +12,11 @@ export {
 } from "./accounts/registration";
 export {completeAccountOnboarding} from "./accounts/onboarding";
 export {requestAccountPasswordReset} from "./accounts/passwordReset";
+export {
+  listControlPanelAccessRequests,
+  requestAccountAccess,
+  reviewControlPanelAccessRequest,
+} from "./accounts/accessRequests";
 export {deliverEmailOutbox} from "./email/resend";
 export {listControlPanelEmailTemplates} from "./controlPanel/emailTemplates";
 export {

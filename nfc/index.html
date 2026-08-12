@@ -103,7 +103,7 @@
             <p data-i18n="registerPrompt">¿Tienes un código de acceso?</p>
             <div class="registration-options">
               <button id="show-code-entry" type="button" class="registration-option" data-i18n="haveCode">Sí, tengo un código</button>
-              <a id="request-code-link" class="registration-option" href="/nfc/es/contacto.html?subject=registration" data-i18n="noCode">No, solicitar uno</a>
+              <button id="request-code-link" type="button" class="registration-option" data-i18n="noCode">No, solicitar uno</button>
             </div>
             <div id="register-code-entry" hidden>
               <p id="register-copy" data-i18n="accessCopy">Introduce el código para crear tu cuenta.</p>
@@ -113,6 +113,14 @@
               </div>
               <p id="register-code-status" class="form-status" role="status" aria-live="polite" hidden></p>
             </div>
+            <form id="access-request-form" hidden>
+              <h5>Solicitar acceso</h5>
+              <input id="access-request-name" class="field" type="text" maxlength="120" autocomplete="name" required placeholder="Nombre">
+              <input id="access-request-email" class="field" type="email" maxlength="320" autocomplete="email" required placeholder="Correo electrónico">
+              <textarea id="access-request-reason" class="field" maxlength="500" rows="3" placeholder="¿Cómo usarías UNATOMO/NFC? (opcional)"></textarea>
+              <button id="access-request-submit" type="submit" class="landing-button landing-button-primary">Enviar solicitud</button>
+              <p id="access-request-status" class="form-status" role="status" aria-live="polite" hidden></p>
+            </form>
           </section>
         </aside>
       </div>

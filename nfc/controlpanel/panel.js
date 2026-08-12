@@ -4,6 +4,7 @@ import { getCurrentLang } from "/static/js/site/locale.js";
 import { isControlPanelUser } from "/nfc/controlpanel/access.js";
 import { createControlPanelCallables } from "./panelCallables.js";
 import { createCodesRenderer } from "./panelCodes.js";
+import { createAccessRequestsRenderer } from "./panelAccessRequests.js";
 import { createEmailTemplatesRenderer } from "./panelEmailTemplates.js";
 import { createLocalCardsRenderer } from "./panelLocalCards.js";
 import {
@@ -33,6 +34,7 @@ const { renderWhatsNewControl, renderSuperadminPreferences, renderAgentCard } =
   createLocalCardsRenderer({ text });
 const { renderUsers } = createUsersRenderer({ text });
 const { renderCodes } = createCodesRenderer({ text });
+const { renderAccessRequests } = createAccessRequestsRenderer({ text });
 const { renderEmailTemplates } = createEmailTemplatesRenderer({ text });
 const { renderTags } = createTagsRenderer({ text, isEn });
 
@@ -48,6 +50,7 @@ if (mount) {
   const whatsNewCard = createCard(text.whatsNewTitle);
   const usersCard = createCard(text.usersTitle);
   const codesCard = createCard(text.codesTitle);
+  const accessRequestsCard = createCard(text.accessRequestsTitle);
   const emailTemplatesCard = createCard(text.emailTemplatesTitle);
   const tagsCard = createCard(text.tagsTitle);
   wrap.appendChild(codeStatsCard);
@@ -59,6 +62,7 @@ if (mount) {
   wrap.appendChild(whatsNewCard);
   wrap.appendChild(usersCard);
   wrap.appendChild(codesCard);
+  wrap.appendChild(accessRequestsCard);
   wrap.appendChild(emailTemplatesCard);
   wrap.appendChild(tagsCard);
   mount.appendChild(wrap);
@@ -90,6 +94,9 @@ if (mount) {
   codesCard
     .querySelector(".controlpanel-toggle")
     ?.addEventListener("click", () => toggleCard(codesCard));
+  accessRequestsCard
+    .querySelector(".controlpanel-toggle")
+    ?.addEventListener("click", () => toggleCard(accessRequestsCard));
   emailTemplatesCard
     .querySelector(".controlpanel-toggle")
     ?.addEventListener("click", () => toggleCard(emailTemplatesCard));
@@ -106,6 +113,7 @@ if (mount) {
   const whatsNewBody = whatsNewCard.querySelector(".controlpanel-body");
   const usersBody = usersCard.querySelector(".controlpanel-body");
   const codesBody = codesCard.querySelector(".controlpanel-body");
+  const accessRequestsBody = accessRequestsCard.querySelector(".controlpanel-body");
   const emailTemplatesBody = emailTemplatesCard.querySelector(".controlpanel-body");
   const tagsBody = tagsCard.querySelector(".controlpanel-body");
   let updateCodesStatus = () => {};
@@ -214,6 +222,24 @@ if (mount) {
     }
   };
 
+  const loadAccessRequests = async () => {
+    if (!accessRequestsBody) return;
+    renderState(accessRequestsBody, text.accessRequestsHint, text.accessRequestsLoading);
+    try {
+      const response = await callables.listAccessRequests();
+      const items = Array.isArray(response?.data?.items) ? response.data.items : [];
+      renderAccessRequests(accessRequestsBody, items, {
+        onReview: async (item, decision) => {
+          if (decision === "rejected" && !window.confirm(text.accessRequestReject)) return;
+          await callables.reviewAccessRequest({ requestId: item.id, decision });
+          await Promise.all([loadAccessRequests(), loadCodes(), loadEmailTemplates()]);
+        }
+      });
+    } catch {
+      renderState(accessRequestsBody, text.accessRequestsHint, text.accessRequestsError, "error");
+    }
+  };
+
   const loadEmailTemplates = async (language = isEn ? "en" : "es") => {
     if (!emailTemplatesBody) return;
     renderState(
@@ -309,6 +335,7 @@ if (mount) {
   if (whatsNewBody) renderState(whatsNewBody, text.whatsNewHint, text.whatsNewLoading);
   if (usersBody) renderState(usersBody, text.usersHint, text.usersLoading);
   if (codesBody) renderState(codesBody, text.codesHint, text.codesLoading);
+  if (accessRequestsBody) renderState(accessRequestsBody, text.accessRequestsHint, text.accessRequestsLoading);
   if (emailTemplatesBody) {
     renderState(
       emailTemplatesBody,
@@ -340,6 +367,7 @@ if (mount) {
       !whatsNewBody ||
       !usersBody ||
       !codesBody ||
+      !accessRequestsBody ||
       !emailTemplatesBody ||
       !tagsBody
     ) return;
@@ -399,6 +427,7 @@ if (mount) {
 
     await loadUsers();
     await loadCodes();
+    await loadAccessRequests();
     await loadEmailTemplates();
     await loadTags();
   });

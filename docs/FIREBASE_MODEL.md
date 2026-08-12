@@ -56,6 +56,8 @@ Read this before changing data flows, callable functions, machine ownership, adm
   directly; `createOwnedMachine` enforces the limit transactionally. Onboarding
   applies the same policy before creating its initial machine records.
 - `registration_codes`: unused, active single-use account registration codes.
+- `access_requests`: private access applications keyed by a SHA-256 email hash;
+  server-only review state and generated-code audit metadata.
   The backend atomically creates `users/{uid}` and deletes the redeemed code.
   User profiles do not retain the code that created them. Browser clients
   cannot read or write this collection directly.

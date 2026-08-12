@@ -70,6 +70,7 @@ const passwordResetCallable = httpsCallable(
   functions,
   "requestAccountPasswordReset"
 );
+const requestAccessCallable = httpsCallable(functions, "requestAccountAccess");
 
 const buildAuthResult = (user) => ({
   ok: !!user,
@@ -92,6 +93,11 @@ export async function validateRegistrationCode(code) {
     reason: (result.reason || "").toString(),
     code: (result.code || normalized).toString()
   };
+}
+
+export async function requestAccountAccess(data) {
+  const response = await requestAccessCallable(data || {});
+  return response?.data || { ok: true };
 }
 
 

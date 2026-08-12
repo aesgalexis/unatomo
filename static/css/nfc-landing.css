@@ -301,6 +301,10 @@ body.nfc-landing {
 .access-code-card .inline-field-row { width: 100%; max-width: 100%; margin-top: 1rem; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.55rem; }
 .access-code-card .field { min-width: 0; }
 .access-code-card .form-status { justify-content: flex-start; font-size: 0.85rem; }
+#access-request-form { margin-top: 1rem; display: grid; gap: 0.65rem; }
+#access-request-form[hidden] { display: none; }
+#access-request-form h5 { margin: 0; font-size: 0.95rem; }
+#access-request-form textarea { resize: vertical; min-height: 5rem; }
 
 .landing-footer { padding: 1.5rem 0 2.5rem; }
 .landing-footer .legal-footer { margin-top: 0; }

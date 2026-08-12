@@ -31,6 +31,14 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    match /access_requests/{requestId} {
+      allow read, write: if false;
+    }
+
+    match /email_request_limits/{limitId} {
+      allow read, write: if false;
+    }
+
     match /public_metrics/{metricId} {
       allow get: if metricId == "nfc";
       allow list, write: if false;

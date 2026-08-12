@@ -54,7 +54,7 @@ in an outbox record.
 | `machine_transfer_completed` | Active | Accepted transfer; sent to previous and new owner |
 | `password_reset` | Active | Neutral, rate-limited callable generates a Firebase Admin action link and queues Resend |
 | `email_verification` | Active | Unverified email/password account finishing onboarding; non-blocking Firebase Admin action link |
-| `registration_code_approved` | Blocked by product flow | Requires a request record with recipient, language and approve/reject action |
+| `registration_code_approved` | Active | Public access request reviewed in the superadmin panel; approval atomically creates a seven-day single-use code and queues email |
 | `password_changed` | Blocked by product flow | Route password changes through an authenticated, recently reauthenticated app flow, then queue confirmation |
 | `email_change_old` | Blocked by product flow | Requires secure email-change flow and notification to old address |
 | `email_change_new` | Blocked by product flow | Requires Firebase verification-before-update link to new address |
@@ -76,10 +76,7 @@ in an outbox record.
 1. Extend the control panel with delivery totals/status, filtered recent
    outbox events and safe retry for failed messages. Never expose action URLs
    or sensitive template data in the browser.
-2. Build `access_requests` with email, display name, language, timestamps and
-   pending/approved/rejected status. Approval atomically creates a single-use
-   registration code and queues `registration_code_approved`.
-3. Build reauthenticated password/email-change flows and their security mail.
+2. Build reauthenticated password/email-change flows and their security mail.
 
 ## Verification checklist
 

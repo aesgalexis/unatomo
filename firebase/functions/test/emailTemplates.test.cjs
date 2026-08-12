@@ -29,7 +29,7 @@ assert.match(english.text, /https:\/\/unatomo\.com\/nfc/);
 assert.equal(EMAIL_TEMPLATE_DEFINITIONS.length, 11);
 assert.equal(
   EMAIL_TEMPLATE_DEFINITIONS.filter((item) => item.integration === "active").length,
-  6,
+  7,
 );
 EMAIL_TEMPLATE_DEFINITIONS.forEach((definition) => {
   ["es", "en"].forEach((language) => {
