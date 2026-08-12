@@ -312,6 +312,7 @@ function initSetupRegisterCode() {
   const submit = document.getElementById("register-code-submit");
   const status = document.getElementById("register-code-status");
   const showCodeBtn = document.getElementById("show-code-entry");
+  const registrationChoice = document.getElementById("registration-choice");
   const codeEntry = document.getElementById("register-code-entry");
   const requestBtn = document.getElementById("request-code-link");
   const requestForm = document.getElementById("access-request-form");
@@ -336,13 +337,20 @@ function initSetupRegisterCode() {
     clearStatus();
     if (!box.hidden) {
       showCodeBtn?.focus();
-    } else if (codeEntry) {
-      codeEntry.hidden = true;
+    } else {
+      if (registrationChoice) registrationChoice.hidden = false;
+      if (codeEntry) codeEntry.hidden = true;
+      if (requestForm) {
+        requestForm.hidden = true;
+        requestForm.classList.remove("is-submitted");
+      }
     }
   }
 
   showCodeBtn?.addEventListener("click", () => {
+    if (registrationChoice) registrationChoice.hidden = true;
     if (codeEntry) codeEntry.hidden = false;
+    if (requestForm) requestForm.hidden = true;
     clearStatus();
     input.focus();
   });
@@ -355,6 +363,7 @@ function initSetupRegisterCode() {
     requestReason.placeholder = text.requestAccessReason;
     requestSubmit.textContent = text.requestAccessSend;
     requestBtn?.addEventListener("click", () => {
+      if (registrationChoice) registrationChoice.hidden = true;
       requestForm.hidden = false;
       if (codeEntry) codeEntry.hidden = true;
       requestName.focus();
@@ -382,6 +391,7 @@ function initSetupRegisterCode() {
         }
         requestStatus.textContent = text.requestAccessSent;
         requestForm.reset();
+        requestForm.classList.add("is-submitted");
       } catch {
         requestStatus.textContent = text.requestAccessError;
       } finally {

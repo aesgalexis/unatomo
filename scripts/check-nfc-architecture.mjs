@@ -543,6 +543,8 @@ const registration = read("firebase/functions/src/accounts/registration.ts");
 const deleteUser = read("firebase/functions/src/controlPanel/deleteUser.ts");
 const coreStorage = read("firebase/functions/src/core/storage.ts");
 const registrationUi = read("static/js/registro/app.js");
+const nfcLandingHtml = read("nfc/index.html");
+const nfcLandingCss = read("static/css/nfc-landing.css");
 const emailDeliveryCallables = read("nfc/controlpanel/panelCallables.js");
 addCheck(
   emailDeliveryBackend.includes("assertControlPanelAccess") &&
@@ -608,6 +610,13 @@ addCheck(
     deleteUser.includes('db.collection("dashboard_layout").doc(uid)') &&
     coreStorage.includes("await Promise.all(\n    Array.from(refs.values())"),
   "account deletion fails closed and fresh registration cannot reuse stale profile data"
+);
+addCheck(
+  nfcLandingHtml.includes('id="registration-choice"') &&
+    registrationUi.includes("registrationChoice.hidden = true") &&
+    registrationUi.includes('requestForm.classList.add("is-submitted")') &&
+    nfcLandingCss.includes("#access-request-form.is-submitted"),
+  "landing registration progressively reveals one path and collapses submitted requests"
 );
 
 const failed = checks.filter((check) => !check.ok);

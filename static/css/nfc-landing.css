@@ -291,7 +291,8 @@ body.nfc-landing {
 .registration-callout > .landing-button { margin-top: 1rem; }
 .registration-callout .access-code-card { width: 100%; margin: 1.25rem 0 0; padding: 1rem; border: 1px solid var(--border-subtle); border-radius: 1rem; background: var(--bg); }
 .access-code-card h4 { margin: 0 0 0.5rem; color: var(--fg); font-size: 1rem; }
-.access-code-card > p { color: var(--landing-muted); font-size: 0.95rem; line-height: 1.5; }
+.access-code-card > p,
+#registration-choice > p { color: var(--landing-muted); font-size: 0.95rem; line-height: 1.5; }
 .registration-options { margin-top: 1rem; display: grid; gap: 0.55rem; }
 .registration-option { width: 100%; min-height: 38px; padding: 0.55rem 0.7rem; border: 1px solid var(--border-subtle); border-radius: 0.65rem; display: flex; align-items: center; background: transparent; color: var(--fg); font: inherit; font-size: 0.85rem; text-align: left; text-decoration: none; cursor: pointer; }
 .registration-option:hover,
@@ -303,6 +304,7 @@ body.nfc-landing {
 .access-code-card .form-status { justify-content: flex-start; font-size: 0.85rem; }
 #access-request-form { margin-top: 1rem; display: grid; gap: 0.65rem; }
 #access-request-form[hidden] { display: none; }
+#access-request-form.is-submitted > :not(.form-status) { display: none; }
 #access-request-form h5 { margin: 0; font-size: 0.95rem; }
 #access-request-form textarea { resize: vertical; min-height: 5rem; }
 

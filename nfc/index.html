@@ -100,10 +100,12 @@
 
           <section id="register-code-box" class="access-code-card" hidden aria-labelledby="register-title">
             <h4 id="register-title" data-i18n="registerTitle">Registro</h4>
-            <p data-i18n="registerPrompt">¿Tienes un código de acceso?</p>
-            <div class="registration-options">
-              <button id="show-code-entry" type="button" class="registration-option" data-i18n="haveCode">Sí, tengo un código</button>
-              <button id="request-code-link" type="button" class="registration-option" data-i18n="noCode">No, solicitar uno</button>
+            <div id="registration-choice">
+              <p data-i18n="registerPrompt">¿Tienes un código de acceso?</p>
+              <div class="registration-options">
+                <button id="show-code-entry" type="button" class="registration-option" data-i18n="haveCode">Sí, tengo un código</button>
+                <button id="request-code-link" type="button" class="registration-option" data-i18n="noCode">No, solicitar uno</button>
+              </div>
             </div>
             <div id="register-code-entry" hidden>
               <p id="register-copy" data-i18n="accessCopy">Introduce el código para crear tu cuenta.</p>
