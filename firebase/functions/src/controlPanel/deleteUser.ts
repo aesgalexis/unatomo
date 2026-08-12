@@ -5,6 +5,8 @@ import {
   accountDirectoryCol,
   accountHandleHistoryCol,
   accountHandlesCol,
+  dashboardSuggestionsCol,
+  dashboardTodosCol,
   db,
   emailOutboxCol,
   invitesCol,
@@ -12,6 +14,7 @@ import {
   machineAccessCol,
   machinesCol,
   tagsCol,
+  transferInvitesCol,
 } from "../core/firebase";
 import {
   collectUniqueDocRefs,
@@ -49,6 +52,10 @@ export const deleteControlPanelUser = onCall(async (request) => {
     adminLinksSnap,
     ownerInvitesSnap,
     adminInvitesSnap,
+    sentTransferInvitesSnap,
+    receivedTransferInvitesSnap,
+    ownedTodosSnap,
+    authoredSuggestionsSnap,
     legacyMachinesSnap,
   ] = await Promise.all([
     accountDirectoryCol().where("uid", "==", uid).get(),
@@ -64,6 +71,10 @@ export const deleteControlPanelUser = onCall(async (request) => {
     emailLower ?
       invitesCol().where("adminEmailLower", "==", emailLower).get() :
       Promise.resolve(null),
+    transferInvitesCol().where("fromOwnerUid", "==", uid).get(),
+    transferInvitesCol().where("toOwnerUid", "==", uid).get(),
+    dashboardTodosCol().where("ownerUid", "==", uid).get(),
+    dashboardSuggestionsCol().where("authorUid", "==", uid).get(),
     db.collection("tenants").doc(uid).collection("machines").get(),
   ]);
 
@@ -123,6 +134,25 @@ export const deleteControlPanelUser = onCall(async (request) => {
     refsToDelete,
     (adminInvitesSnap?.docs || []).map((docSnap) => docSnap.ref),
   );
+  collectUniqueDocRefs(
+    refsToDelete,
+    sentTransferInvitesSnap.docs.map((docSnap) => docSnap.ref),
+  );
+  collectUniqueDocRefs(
+    refsToDelete,
+    receivedTransferInvitesSnap.docs.map((docSnap) => docSnap.ref),
+  );
+  collectUniqueDocRefs(
+    refsToDelete,
+    ownedTodosSnap.docs.map((docSnap) => docSnap.ref),
+  );
+  collectUniqueDocRefs(
+    refsToDelete,
+    authoredSuggestionsSnap.docs.map((docSnap) => docSnap.ref),
+  );
+  collectUniqueDocRefs(refsToDelete, [
+    db.collection("dashboard_layout").doc(uid),
+  ]);
 
   ownerMachinesSnap.forEach((docSnap) => {
     const data = docSnap.data() || {};
@@ -169,7 +199,7 @@ export const deleteControlPanelUser = onCall(async (request) => {
     ),
   );
 
-  await Promise.allSettled(
+  await Promise.all(
     Array.from(machineIdsToClearAdmin.values()).map((machineId) =>
       machinesCol().doc(machineId).set(
         {
@@ -185,8 +215,14 @@ export const deleteControlPanelUser = onCall(async (request) => {
   );
 
   await deleteCollectedDocRefs(refsToDelete);
-  await db.collection("tenants").doc(uid).delete().catch(() => undefined);
-  await admin.auth().deleteUser(uid).catch(() => undefined);
+  await db.collection("tenants").doc(uid).delete();
+  try {
+    await admin.auth().deleteUser(uid);
+  } catch (error) {
+    if ((error as {code?: string})?.code !== "auth/user-not-found") {
+      throw error;
+    }
+  }
 
   if (emailLower) {
     const language = userData.language === "en" ? "en" : "es";

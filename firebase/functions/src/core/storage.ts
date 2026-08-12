@@ -129,8 +129,7 @@ export const collectUniqueDocRefs = (
 export const deleteCollectedDocRefs = async (
   refs: Map<string, FirebaseFirestore.DocumentReference>,
 ) => {
-  await Promise.allSettled(
+  await Promise.all(
     Array.from(refs.values()).map((ref) => ref.delete()),
   );
 };
-

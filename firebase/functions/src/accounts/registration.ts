@@ -71,23 +71,22 @@ export const redeemRegistrationCode = onCall(async (request) => {
   const userRef = db.collection("users").doc(auth.uid);
   const codeRef = registrationCodesCol().doc(code);
   const result = await db.runTransaction(async (transaction) => {
-    const userSnap = await transaction.get(userRef);
-    if (userSnap.exists) {
-      if (userSnap.data()?.regCode !== undefined) {
-        transaction.update(userRef, {
-          regCode: admin.firestore.FieldValue.delete(),
-        });
-      }
-      return {alreadyRegistered: true};
-    }
-
-    const codeSnap = await transaction.get(codeRef);
+    const [userSnap, codeSnap] = await Promise.all([
+      transaction.get(userRef),
+      transaction.get(codeRef),
+    ]);
     const expiresAt = codeSnap.data()?.expiresAt?.toMillis?.() || 0;
     if (!codeSnap.exists || codeSnap.data()?.active === false ||
         (expiresAt && expiresAt <= Date.now())) {
       throw new HttpsError(
         "failed-precondition",
         "registration-code-unavailable",
+      );
+    }
+    if (userSnap.exists) {
+      throw new HttpsError(
+        "failed-precondition",
+        "registration-profile-already-exists",
       );
     }
 

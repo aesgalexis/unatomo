@@ -540,6 +540,8 @@ const accountSecurity = read("firebase/functions/src/accounts/security.ts");
 const accountSettings = read("static/js/configuracion/index.js");
 const accessRequests = read("firebase/functions/src/accounts/accessRequests.ts");
 const registration = read("firebase/functions/src/accounts/registration.ts");
+const deleteUser = read("firebase/functions/src/controlPanel/deleteUser.ts");
+const coreStorage = read("firebase/functions/src/core/storage.ts");
 const registrationUi = read("static/js/registro/app.js");
 const emailDeliveryCallables = read("nfc/controlpanel/panelCallables.js");
 addCheck(
@@ -599,6 +601,13 @@ addCheck(
     registrationUi.includes("codeApplied") &&
     registrationUi.includes("approvedEmail.readOnly = true"),
   "registration links explain automatic code validation and route existing accounts"
+);
+addCheck(
+  registration.includes("registration-profile-already-exists") &&
+    !registration.includes("return {alreadyRegistered: true}") &&
+    deleteUser.includes('db.collection("dashboard_layout").doc(uid)') &&
+    coreStorage.includes("await Promise.all(\n    Array.from(refs.values())"),
+  "account deletion fails closed and fresh registration cannot reuse stale profile data"
 );
 
 const failed = checks.filter((check) => !check.ok);
