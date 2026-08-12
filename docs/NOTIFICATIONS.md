@@ -37,6 +37,8 @@ email actions, notification preferences, or the control-panel email view.
 - `firebase/functions/src/controlPanel/emailTemplates.ts`: superadmin preview
   catalog, rendered from the same production templates.
 - `nfc/controlpanel/panelEmailTemplates.js`: list and ES/EN preview UI.
+- `firebase/functions/src/controlPanel/emailDelivery.ts`: superadmin-only,
+  sanitized delivery totals/history and transactional failed-message retry.
 
 Outbox records contain `type`, `to`, `language`, sanitized template `data`,
 `status`, `attemptCount`, `idempotencyKey` and timestamps. Delivery adds
@@ -55,10 +57,10 @@ in an outbox record.
 | `password_reset` | Active | Neutral, rate-limited callable generates a Firebase Admin action link and queues Resend |
 | `email_verification` | Active | Unverified email/password account finishing onboarding; non-blocking Firebase Admin action link |
 | `registration_code_approved` | Active | Public access request reviewed in the superadmin panel; approval atomically creates a seven-day single-use code and queues email |
-| `password_changed` | Blocked by product flow | Route password changes through an authenticated, recently reauthenticated app flow, then queue confirmation |
-| `email_change_old` | Blocked by product flow | Requires secure email-change flow and notification to old address |
-| `email_change_new` | Blocked by product flow | Requires Firebase verification-before-update link to new address |
-| `account_activity` | Pending policy/events | Use for account deletion or security events without a dedicated template |
+| `password_changed` | Active | Recently reauthenticated settings flow changes the password server-side and queues confirmation |
+| `email_change_old` | Active | Sent to the previous address after Firebase confirms the verified change |
+| `email_change_new` | Active | Firebase verify-before-update link sent to the requested new address |
+| `account_activity` | Active | Initially connected to superadmin account deletion; reserved for sensitive administrative events |
 
 ## Existing event behavior
 
@@ -71,12 +73,23 @@ in an outbox record.
   directory. Existing accounts without it receive Spanish until they update
   their preference or a migration is explicitly approved.
 
-## Next implementation order
+## Account security flow
 
-1. Extend the control panel with delivery totals/status, filtered recent
-   outbox events and safe retry for failed messages. Never expose action URLs
-   or sensitive template data in the browser.
-2. Build reauthenticated password/email-change flows and their security mail.
+- Settings reauthenticates with the account provider before password or email
+  changes. Callables also reject authentication older than five minutes.
+- Password changes happen in Admin Auth; plaintext passwords are never stored.
+- Email changes remain pending in `account_email_changes` until Admin Auth shows
+  the verified new address. Finalization migrates `account_directory` and sends
+  the previous-address notice exactly once.
+- `account_activity` is not used for ordinary profile or preference changes.
+
+The control panel delivery console is active in source: it returns aggregate
+status totals, up to 50 filtered events from the 100 most recent outbox records,
+masked recipients and safe error metadata. It never returns template `data`,
+action URLs, full recipient addresses or idempotency keys. A manual retry is
+available only for `failed` records; it transactionally creates one new pending
+record, retains the original provider idempotency key and marks the failed
+record so the same failure cannot be retried twice.
 
 ## Verification checklist
 

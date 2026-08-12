@@ -456,8 +456,8 @@ const callableExports = Array.from(
   .map((name) => name.trim())
   .filter(Boolean);
 addCheck(
-  callableExports.length === 60 && new Set(callableExports).size === 60,
-  "Functions index.ts preserves 60 unique function exports"
+  callableExports.length === 65 && new Set(callableExports).size === 65,
+  "Functions index.ts preserves 65 unique function exports"
 );
 
 [
@@ -530,6 +530,61 @@ addCheck(
     `dashboardSubscriptions.js uses load-state marker: ${needle}`
   );
 });
+
+const emailDeliveryBackend = read("firebase/functions/src/controlPanel/emailDelivery.ts");
+const emailDeliveryUi = read("nfc/controlpanel/panelEmailTemplates.js");
+const emailDeliveryController = read("nfc/controlpanel/panel.js");
+const controlPanelHtml = read("nfc/controlpanel/index.html");
+const controlPanelCss = read("nfc/controlpanel/panel.css");
+const accountSecurity = read("firebase/functions/src/accounts/security.ts");
+const accountSettings = read("static/js/configuracion/index.js");
+const emailDeliveryCallables = read("nfc/controlpanel/panelCallables.js");
+addCheck(
+  emailDeliveryBackend.includes("assertControlPanelAccess") &&
+    emailDeliveryBackend.includes("maskEmail") &&
+    !emailDeliveryBackend.includes("data: item.data"),
+  "email delivery operations remain superadmin-only and sanitize browser output"
+);
+addCheck(
+  emailDeliveryBackend.includes("idempotencyKey: message.idempotencyKey") &&
+    emailDeliveryBackend.includes("message.retryMessageId"),
+  "email retry preserves idempotency and prevents duplicate manual retries"
+);
+addCheck(
+  emailDeliveryController.includes("emailDeliveryRetryConfirm") &&
+    emailDeliveryUi.includes("handlers.onRetry") &&
+    emailDeliveryCallables.includes("retryControlPanelEmailDelivery"),
+  "control panel confirms and routes failed email retries through the callable"
+);
+addCheck(
+  emailDeliveryController.includes(".catch(() => null)") &&
+    emailDeliveryUi.includes("deliveries.unavailable"),
+  "email templates remain visible when delivery operations are unavailable"
+);
+addCheck(
+  controlPanelHtml.includes("/static/css/dashboard/group-tree.css") &&
+    emailDeliveryController.includes("controlpanel-section-tree") &&
+    emailDeliveryController.includes('role", "treeitem"'),
+  "control panel reuses the accessible settings tree pattern"
+);
+addCheck(
+  controlPanelCss.includes("@media (min-width: 1280px)") &&
+    controlPanelCss.includes(".controlpanel-section-tree {\n  display: none;") &&
+    controlPanelCss.includes(".controlpanel-card.is-active"),
+  "control panel keeps collapsible cards below the desktop tree breakpoint"
+);
+addCheck(
+  accountSecurity.includes("RECENT_AUTH_SECONDS") &&
+    accountSecurity.includes("generateVerifyAndChangeEmailLink") &&
+    accountSecurity.includes('status: "completed"'),
+  "account password and email changes require recent auth and verified finalization"
+);
+addCheck(
+  accountSettings.includes("reauthenticateWithCredential") &&
+    accountSettings.includes("reauthenticateWithPopup") &&
+    accountSettings.includes("finalizeAccountEmailChange"),
+  "settings reauthenticates provider accounts and finalizes verified email changes"
+);
 
 const failed = checks.filter((check) => !check.ok);
 if (failed.length) {

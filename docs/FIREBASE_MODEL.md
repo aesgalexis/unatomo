@@ -199,10 +199,26 @@ frontend wrappers live under `static/js/dashboard/`.
   renders from the same versioned renderer used for delivery; it does not expose
   secrets or send messages. Its status comes from the authoritative template
   catalogue, not from browser-maintained metadata.
+- `listControlPanelEmailDeliveries`: superadmin-only delivery totals and recent
+  outbox status. It masks recipient addresses and does not return template
+  data, action URLs or provider idempotency keys.
+- `retryControlPanelEmailDelivery`: superadmin-only transactional retry for a
+  failed outbox record. It creates one pending successor with the same
+  idempotency key and marks the source record to prevent duplicate manual
+  retries.
 - `requestAccountPasswordReset`: public neutral-response callable. It rate
   limits by a SHA-256 email key, generates Firebase's signed reset link only for
   an existing account, and queues the branded Resend email without revealing
   whether the account exists.
+- `changeAccountPassword`: authenticated account callable requiring an
+  `auth_time` within five minutes. It updates Auth server-side and queues the
+  password-change confirmation without storing the submitted password.
+- `requestAccountEmailChange`: recently reauthenticated callable that stores a
+  one-hour pending request and queues Firebase's verify-before-update link to
+  the new address.
+- `finalizeAccountEmailChange`: authenticated idempotent finalizer. It acts only
+  after Admin Auth reports the requested new address, migrates the account
+  directory mapping and queues the completed-change notice to the old address.
 
 ## Integrity Cleanup Log
 

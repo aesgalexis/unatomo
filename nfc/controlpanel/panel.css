@@ -3,6 +3,63 @@
   gap: 16px;
 }
 
+.controlpanel-section-tree {
+  display: none;
+}
+
+.controlpanel-section-tree-icon svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+@media (min-width: 1280px) {
+  .controlpanel-page .controlpanel-section-tree {
+    display: block;
+    position: fixed;
+    top: 75px;
+    bottom: 0;
+    left: 0;
+    z-index: 50;
+    width: clamp(228px, calc((100vw - 800px) / 2 - 12px), 320px);
+    box-sizing: border-box;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    padding: 1.5rem 0.75rem 1.5rem 0.3rem;
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--fg) 28%, transparent) transparent;
+  }
+
+  .controlpanel-wrap {
+    display: block;
+  }
+
+  .controlpanel-page .controlpanel-card {
+    display: none;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    overflow: visible;
+  }
+
+  .controlpanel-page .controlpanel-card.is-active {
+    display: block;
+  }
+
+  .controlpanel-page .controlpanel-card.is-active .controlpanel-toggle {
+    display: none;
+  }
+
+  .controlpanel-page .controlpanel-card.is-active .controlpanel-body {
+    display: block;
+    padding: 0;
+  }
+}
+
 .controlpanel-card {
   border: 1px solid var(--border-subtle);
   background: var(--panel-bg);
@@ -629,6 +686,43 @@
   margin: 0 0 14px;
 }
 
+.controlpanel-email-deliveries {
+  margin: 18px 0 24px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid color-mix(in srgb, var(--fg) 10%, transparent);
+}
+
+.controlpanel-email-deliveries h3 { margin: 0 0 4px; font-size: 15px; }
+
+.controlpanel-email-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(110px, 1fr));
+  gap: 8px;
+  margin: 14px 0;
+}
+
+.controlpanel-email-total {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, var(--fg) 12%, transparent);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--fg);
+  text-align: left;
+  cursor: pointer;
+}
+
+.controlpanel-email-total.is-active {
+  border-color: #16a34a;
+  background: color-mix(in srgb, #16a34a 8%, var(--panel-bg));
+}
+
+.controlpanel-email-total strong { font-size: 18px; }
+.controlpanel-email-total span { color: color-mix(in srgb, var(--fg) 65%, transparent); font-size: 12px; }
+.controlpanel-delivery-table { min-width: 880px; }
+
 .controlpanel-email-toolbar > span {
   margin-right: auto;
   color: color-mix(in srgb, var(--fg) 72%, transparent);
@@ -694,6 +788,20 @@
 .controlpanel-email-badge[data-state="pending"] {
   color: #9a5b00;
   background: color-mix(in srgb, #d68a16 16%, transparent);
+}
+
+.controlpanel-email-badge[data-state="sent"] {
+  color: #0f7a3e;
+  background: color-mix(in srgb, #16a34a 16%, transparent);
+}
+
+.controlpanel-email-badge[data-state="failed"] {
+  color: #b42318;
+  background: color-mix(in srgb, #dc2626 12%, transparent);
+}
+
+@media (max-width: 680px) {
+  .controlpanel-email-summary { grid-template-columns: repeat(2, minmax(110px, 1fr)); }
 }
 
 .controlpanel-email-dialog {

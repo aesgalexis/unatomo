@@ -29,8 +29,21 @@ assert.match(english.text, /https:\/\/unatomo\.com\/nfc/);
 assert.equal(EMAIL_TEMPLATE_DEFINITIONS.length, 11);
 assert.equal(
   EMAIL_TEMPLATE_DEFINITIONS.filter((item) => item.integration === "active").length,
-  7,
+  11,
 );
+const previousEmailNotice = renderEmailTemplate("email_change_old", {
+  displayName: "Alex",
+  newEmail: "ne***@example.com",
+}, "en");
+assert.match(previousEmailNotice.text, /ne\*\*\*@example\.com/);
+assert.doesNotMatch(previousEmailNotice.html, /Secure my account/);
+const accountDeleted = renderEmailTemplate("account_activity", {
+  displayName: "Alex",
+  activityTitle: "Account deleted",
+  activityDetail: "Your account was deleted.",
+}, "en");
+assert.match(accountDeleted.text, /Your account was deleted/);
+assert.doesNotMatch(accountDeleted.html, /Review my account/);
 EMAIL_TEMPLATE_DEFINITIONS.forEach((definition) => {
   ["es", "en"].forEach((language) => {
     const rendered = renderEmailTemplate(definition.id, {

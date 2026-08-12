@@ -45,7 +45,11 @@ export const deliverEmailOutbox = onDocumentCreated({
   const snapshot = event.data;
   if (!snapshot) return;
 
-  const message = snapshot.data() as OutboxMessage;
+  // Retry invocations carry the original event snapshot. Read the current
+  // document so a completed delivery is not repeated and attempt counts grow.
+  const current = await snapshot.ref.get();
+  if (!current.exists) return;
+  const message = current.data() as OutboxMessage;
   if (message.status === "sent" || message.status === "failed") return;
 
   const to = cleanString(message.to, 320);

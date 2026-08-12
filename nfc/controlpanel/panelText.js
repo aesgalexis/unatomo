@@ -2,6 +2,8 @@ import { localizeEsPath } from "/static/js/site/locale.js";
 
 export const createPanelText = (isEn) => {
   const text = {
+    panelTitle: isEn ? "Control panel" : "Panel de control",
+    panelTreeAria: isEn ? "Control panel navigation" : "Navegación del panel de control",
     systemTitle: isEn ? "System status" : "Estado del sistema",
     systemLoading: isEn ? "Checking system..." : "Comprobando sistema...",
     systemError: isEn
@@ -231,11 +233,35 @@ export const createPanelText = (isEn) => {
     emailTemplatesPreviewTitle: isEn
       ? (name) => `Preview of ${name}`
       : (name) => `Previsualización de ${name}`,
+    emailDeliveryTitle: isEn ? "Delivery activity" : "Actividad de envíos",
+    emailDeliveryHint: isEn
+      ? "Recipients are masked and action links or template data are never returned to the browser."
+      : "Los destinatarios están ocultos y nunca se devuelven al navegador enlaces de acción ni datos de plantilla.",
+    emailDeliveryAll: isEn ? "All" : "Todos",
+    emailDeliveryPending: isEn ? "Pending" : "Pendientes",
+    emailDeliverySent: isEn ? "Sent" : "Enviados",
+    emailDeliveryFailed: isEn ? "Failed" : "Fallidos",
+    emailDeliveryEmpty: isEn ? "No deliveries match this filter." : "No hay envíos para este filtro.",
+    emailDeliveryUnavailable: isEn
+      ? "Delivery activity is temporarily unavailable. The template catalogue remains available."
+      : "La actividad de envíos no está disponible temporalmente. El catálogo de plantillas sigue disponible.",
+    emailDeliveryType: isEn ? "Event" : "Evento",
+    emailDeliveryRecipient: isEn ? "Recipient" : "Destinatario",
+    emailDeliveryAttempts: isEn ? "Attempts" : "Intentos",
+    emailDeliveryDate: isEn ? "Date" : "Fecha",
+    emailDeliveryRetry: isEn ? "Retry" : "Reintentar",
+    emailDeliveryRetryConfirm: isEn
+      ? "Retry this failed delivery using the original idempotency key?"
+      : "¿Reintentar este envío fallido usando la clave de idempotencia original?",
+    emailDeliveryRetrying: isEn ? "Retrying..." : "Reintentando...",
+    emailDeliveryRetryDone: isEn ? "Retry queued." : "Reintento encolado.",
+    emailDeliveryRetryError: isEn ? "Unable to queue the retry." : "No se ha podido encolar el reintento.",
     emailTemplateCategories: {
       access: isEn ? "Access" : "Acceso",
       account: isEn ? "Account" : "Cuenta",
       security: isEn ? "Security" : "Seguridad",
       invitation: isEn ? "Invitation" : "Invitación",
+      transfer: isEn ? "Transfer" : "Transferencia",
     },
     preferencesHint: isEn
       ? "Personal interface options stored only in this browser."

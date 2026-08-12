@@ -13,12 +13,21 @@ export {
 export {completeAccountOnboarding} from "./accounts/onboarding";
 export {requestAccountPasswordReset} from "./accounts/passwordReset";
 export {
+  changeAccountPassword,
+  finalizeAccountEmailChange,
+  requestAccountEmailChange,
+} from "./accounts/security";
+export {
   listControlPanelAccessRequests,
   requestAccountAccess,
   reviewControlPanelAccessRequest,
 } from "./accounts/accessRequests";
 export {deliverEmailOutbox} from "./email/resend";
 export {listControlPanelEmailTemplates} from "./controlPanel/emailTemplates";
+export {
+  listControlPanelEmailDeliveries,
+  retryControlPanelEmailDelivery,
+} from "./controlPanel/emailDelivery";
 export {
   createDashboardSuggestion,
   deleteDashboardSuggestion,

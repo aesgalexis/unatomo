@@ -38,6 +38,8 @@ const { renderAccessRequests } = createAccessRequestsRenderer({ text });
 const { renderEmailTemplates } = createEmailTemplatesRenderer({ text });
 const { renderTags } = createTagsRenderer({ text, isEn });
 
+const sectionIcon = (path) => `<svg viewBox="0 0 24 24" aria-hidden="true">${path}</svg>`;
+
 if (mount) {
   const wrap = document.createElement("div");
   wrap.className = "controlpanel-wrap";
@@ -53,19 +55,83 @@ if (mount) {
   const accessRequestsCard = createCard(text.accessRequestsTitle);
   const emailTemplatesCard = createCard(text.emailTemplatesTitle);
   const tagsCard = createCard(text.tagsTitle);
-  wrap.appendChild(codeStatsCard);
-  wrap.appendChild(systemStatusCard);
-  wrap.appendChild(integrityCard);
-  wrap.appendChild(backupCard);
-  wrap.appendChild(agentCard);
-  wrap.appendChild(preferencesCard);
-  wrap.appendChild(whatsNewCard);
-  wrap.appendChild(usersCard);
-  wrap.appendChild(codesCard);
-  wrap.appendChild(accessRequestsCard);
-  wrap.appendChild(emailTemplatesCard);
-  wrap.appendChild(tagsCard);
-  mount.appendChild(wrap);
+  const panelSections = [
+    {id: "code", label: text.codeStatsTitle, card: codeStatsCard, icon: sectionIcon('<path d="M8 9 4 12l4 3M16 9l4 3-4 3M14 5l-4 14"/>')},
+    {id: "system", label: text.systemTitle, card: systemStatusCard, icon: sectionIcon('<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>')},
+    {id: "integrity", label: text.integrityTitle, card: integrityCard, icon: sectionIcon('<path d="M12 3.5 19 6v5.2c0 4.2-2.8 7.7-7 9.3-4.2-1.6-7-5.1-7-9.3V6z"/><path d="m9 12 2 2 4-4"/>')},
+    {id: "backup", label: text.backupTitle, card: backupCard, icon: sectionIcon('<ellipse cx="12" cy="6" rx="7" ry="2.5"/><path d="M5 6v6c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5V6M5 12v6c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5v-6"/>')},
+    {id: "agent", label: text.agentCardTitle, card: agentCard, icon: sectionIcon('<path d="M8 8h8v8H8zM12 3v3M12 18v3M3 12h3M18 12h3"/>')},
+    {id: "preferences", label: text.preferencesTitle, card: preferencesCard, icon: sectionIcon('<path d="M5 6h14M5 12h14M5 18h14"/><circle cx="9" cy="6" r="1.7"/><circle cx="15" cy="12" r="1.7"/><circle cx="11" cy="18" r="1.7"/>')},
+    {id: "whats-new", label: text.whatsNewTitle, card: whatsNewCard, icon: sectionIcon('<path d="M12 3v3M12 18v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M3 12h3M18 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/><circle cx="12" cy="12" r="4"/>')},
+    {id: "users", label: text.usersTitle, card: usersCard, icon: sectionIcon('<circle cx="9" cy="8" r="3"/><path d="M3.5 19c.6-3.2 2.5-5 5.5-5s4.9 1.8 5.5 5M16 7.5a2.5 2.5 0 0 1 0 5M16 14c2.5.2 4 1.8 4.5 4.5"/>')},
+    {id: "codes", label: text.codesTitle, card: codesCard, icon: sectionIcon('<path d="M8 7h8M8 12h8M8 17h5"/><rect x="4" y="3" width="16" height="18" rx="2"/>')},
+    {id: "access", label: text.accessRequestsTitle, card: accessRequestsCard, icon: sectionIcon('<path d="M4 12h11M12 8l4 4-4 4M18 5h2v14h-2"/>')},
+    {id: "email", label: text.emailTemplatesTitle, card: emailTemplatesCard, icon: sectionIcon('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/>')},
+    {id: "tags", label: text.tagsTitle, card: tagsCard, icon: sectionIcon('<path d="M4 4h8l8 8-8 8-8-8z"/><circle cx="9" cy="9" r="1.5"/>')},
+  ];
+  panelSections.forEach(({card}) => wrap.appendChild(card));
+
+  const panelLayout = document.createElement("div");
+  panelLayout.className = "controlpanel-layout";
+  const sectionTree = document.createElement("aside");
+  sectionTree.className = "dashboard-group-tree controlpanel-section-tree";
+  sectionTree.setAttribute("aria-label", text.panelTreeAria);
+  sectionTree.innerHTML = `
+    <div class="dashboard-group-tree-header">
+      <div class="dashboard-group-tree-title">${text.panelTitle}</div>
+    </div>
+    <div class="dashboard-group-tree-list controlpanel-section-tree-list" role="tree"></div>
+  `;
+  const sectionTreeList = sectionTree.querySelector(".controlpanel-section-tree-list");
+  const sectionTreeButtons = new Map();
+  let activeSectionId = "code";
+  const selectSection = (sectionId) => {
+    if (!panelSections.some(({id}) => id === sectionId)) return;
+    activeSectionId = sectionId;
+    sectionTreeButtons.forEach((button, id) => {
+      const selected = id === activeSectionId;
+      button.setAttribute("aria-selected", String(selected));
+      button.closest(".controlpanel-section-tree-row")?.classList.toggle("is-selected", selected);
+    });
+    panelSections.forEach(({id, card}) => {
+      const active = id === activeSectionId;
+      card.classList.toggle("is-active", active);
+      card.dataset.expanded = active ? "true" : "false";
+      card.querySelector(".controlpanel-toggle")?.setAttribute("aria-expanded", String(active));
+      const body = card.querySelector(".controlpanel-body");
+      const icon = card.querySelector(".controlpanel-icon");
+      if (body) body.hidden = !active;
+      if (icon) icon.textContent = active ? "-" : "+";
+    });
+  };
+  panelSections.forEach(({id, label, icon}) => {
+    const row = document.createElement("div");
+    row.className = "dashboard-group-tree-row controlpanel-section-tree-row";
+    row.style.setProperty("--tree-indent", "0.05rem");
+    const spacer = document.createElement("span");
+    spacer.className = "dashboard-group-tree-toggle-spacer";
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "dashboard-group-tree-node controlpanel-section-tree-node";
+    button.setAttribute("role", "treeitem");
+    button.setAttribute("aria-level", "1");
+    button.setAttribute("aria-selected", "false");
+    const iconElement = document.createElement("span");
+    iconElement.className = "dashboard-group-tree-icon controlpanel-section-tree-icon";
+    iconElement.setAttribute("aria-hidden", "true");
+    iconElement.innerHTML = icon;
+    const labelElement = document.createElement("span");
+    labelElement.className = "dashboard-group-tree-label";
+    labelElement.textContent = label;
+    button.append(iconElement, labelElement);
+    button.addEventListener("click", () => selectSection(id));
+    row.append(spacer, button);
+    sectionTreeList?.appendChild(row);
+    sectionTreeButtons.set(id, button);
+  });
+  panelLayout.append(sectionTree, wrap);
+  mount.appendChild(panelLayout);
+  selectSection(activeSectionId);
 
   systemStatusCard
     .querySelector(".controlpanel-toggle")
@@ -120,6 +186,9 @@ if (mount) {
   let addCodeButton = null;
   let addCodeInput = null;
   let cleanupLegacyCodeLinksButton = null;
+  let emailLanguage = isEn ? "en" : "es";
+  let emailDeliveryStatus = "";
+  let updateEmailDeliveryStatus = () => {};
 
   const loadSystemStatus = async () => {
     if (!systemStatusBody || !integrityBody) return;
@@ -240,20 +309,45 @@ if (mount) {
     }
   };
 
-  const loadEmailTemplates = async (language = isEn ? "en" : "es") => {
+  const loadEmailTemplates = async (language = emailLanguage, status = emailDeliveryStatus) => {
     if (!emailTemplatesBody) return;
+    emailLanguage = language;
+    emailDeliveryStatus = status;
     renderState(
       emailTemplatesBody,
       text.emailTemplatesHint,
       text.emailTemplatesLoading
     );
     try {
-      const response = await callables.listEmailTemplates({ language });
-      const items = Array.isArray(response?.data?.items)
-        ? response.data.items
+      const templatesResponse = await callables.listEmailTemplates({ language });
+      const deliveriesResponse = await callables.listEmailDeliveries({ status })
+        .catch(() => null);
+      const items = Array.isArray(templatesResponse?.data?.items)
+        ? templatesResponse.data.items
         : [];
+      const deliveries = deliveriesResponse?.data || {unavailable: true};
       renderEmailTemplates(emailTemplatesBody, items, language, {
-        onLanguageChange: loadEmailTemplates,
+        ...deliveries,
+        status,
+      }, {
+        onLanguageChange: (nextLanguage) => loadEmailTemplates(nextLanguage, status),
+        onDeliveryFilter: (nextStatus) => loadEmailTemplates(language, nextStatus),
+        setDeliveryStatusRef: (setStatus) => {
+          updateEmailDeliveryStatus = setStatus;
+        },
+        onRetry: async (item, button) => {
+          if (!window.confirm(text.emailDeliveryRetryConfirm)) return;
+          button.disabled = true;
+          updateEmailDeliveryStatus(text.emailDeliveryRetrying);
+          try {
+            await callables.retryEmailDelivery({ messageId: item.id });
+            await loadEmailTemplates(language, status);
+            updateEmailDeliveryStatus(text.emailDeliveryRetryDone);
+          } catch {
+            button.disabled = false;
+            updateEmailDeliveryStatus(text.emailDeliveryRetryError, "error");
+          }
+        },
       });
     } catch {
       renderState(
@@ -321,7 +415,6 @@ if (mount) {
     }
   };
 
-  toggleCard(codeStatsCard);
   if (systemStatusBody) {
     renderState(systemStatusBody, text.systemHint, text.systemLoading);
   }

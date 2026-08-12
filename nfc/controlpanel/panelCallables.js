@@ -7,6 +7,14 @@ export const createControlPanelCallables = (functions) => ({
     functions,
     "listControlPanelEmailTemplates"
   ),
+  listEmailDeliveries: httpsCallable(
+    functions,
+    "listControlPanelEmailDeliveries"
+  ),
+  retryEmailDelivery: httpsCallable(
+    functions,
+    "retryControlPanelEmailDelivery"
+  ),
   listCodes: httpsCallable(functions, "listControlPanelRegistrationCodes"),
   listAccessRequests: httpsCallable(functions, "listControlPanelAccessRequests"),
   reviewAccessRequest: httpsCallable(functions, "reviewControlPanelAccessRequest"),

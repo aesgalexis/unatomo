@@ -77,12 +77,126 @@ const openPreview = (item, text) => {
 };
 
 export const createEmailTemplatesRenderer = ({text}) => {
-  const renderEmailTemplates = (body, items, language, handlers = {}) => {
+  const renderEmailTemplates = (body, items, language, deliveries = {}, handlers = {}) => {
     body.innerHTML = "";
     const note = document.createElement("p");
     note.className = "controlpanel-note controlpanel-note-superadmin";
     note.textContent = text.emailTemplatesHint;
     body.appendChild(note);
+
+    const deliverySection = document.createElement("section");
+    deliverySection.className = "controlpanel-email-deliveries";
+    const deliveryTitle = document.createElement("h3");
+    deliveryTitle.textContent = text.emailDeliveryTitle;
+    deliverySection.appendChild(deliveryTitle);
+    const deliveryHint = document.createElement("p");
+    deliveryHint.className = "controlpanel-email-description";
+    deliveryHint.textContent = text.emailDeliveryHint;
+    deliverySection.appendChild(deliveryHint);
+    if (deliveries.unavailable) {
+      const unavailable = document.createElement("p");
+      unavailable.className = "controlpanel-state";
+      unavailable.dataset.state = "error";
+      unavailable.textContent = text.emailDeliveryUnavailable;
+      deliverySection.appendChild(unavailable);
+      body.appendChild(deliverySection);
+    }
+    const totals = deliveries.totals || {};
+    const summary = document.createElement("div");
+    summary.className = "controlpanel-email-summary";
+    summary.hidden = deliveries.unavailable === true;
+    [[text.emailDeliveryAll, totals.all || 0, "all"],
+      [text.emailDeliveryPending, totals.pending || 0, "pending"],
+      [text.emailDeliverySent, totals.sent || 0, "sent"],
+      [text.emailDeliveryFailed, totals.failed || 0, "failed"]]
+      .forEach(([label, count, state]) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "controlpanel-email-total";
+        button.classList.toggle("is-active", (deliveries.status || "") === (state === "all" ? "" : state));
+        button.dataset.state = state;
+        const number = document.createElement("strong");
+        number.textContent = count;
+        const caption = document.createElement("span");
+        caption.textContent = label;
+        button.appendChild(number);
+        button.appendChild(caption);
+        button.addEventListener("click", () => handlers.onDeliveryFilter?.(state === "all" ? "" : state));
+        summary.appendChild(button);
+      });
+    deliverySection.appendChild(summary);
+    const deliveryItems = Array.isArray(deliveries.items) ? deliveries.items : [];
+    if (!deliveryItems.length && !deliveries.unavailable) {
+      const empty = document.createElement("p");
+      empty.className = "controlpanel-note";
+      empty.textContent = text.emailDeliveryEmpty;
+      deliverySection.appendChild(empty);
+    } else {
+      const deliveryWrap = document.createElement("div");
+      deliveryWrap.className = "controlpanel-table-wrap";
+      const deliveryTable = document.createElement("table");
+      deliveryTable.className = "controlpanel-table controlpanel-delivery-table";
+      const deliveryHead = document.createElement("thead");
+      const deliveryHeadRow = document.createElement("tr");
+      [text.emailDeliveryType, text.emailDeliveryRecipient, text.emailTemplatesStatus,
+        text.emailDeliveryAttempts, text.emailDeliveryDate, text.emailTemplatesActions]
+        .forEach((label) => {
+          const cell = document.createElement("th");
+          cell.textContent = label;
+          deliveryHeadRow.appendChild(cell);
+        });
+      deliveryHead.appendChild(deliveryHeadRow);
+      deliveryTable.appendChild(deliveryHead);
+      const deliveryBody = document.createElement("tbody");
+      deliveryItems.forEach((item) => {
+        const row = document.createElement("tr");
+        const date = item.createdAt ? new Intl.DateTimeFormat(language === "en" ? "en-GB" : "es-ES", {
+          dateStyle: "short", timeStyle: "short"
+        }).format(new Date(item.createdAt)) : "-";
+        [item.type, item.recipient, null, item.attemptCount, date].forEach((value, index) => {
+          const cell = document.createElement("td");
+          if (index === 2) {
+            const label = item.status === "sent" ? text.emailDeliverySent :
+              item.status === "failed" ? text.emailDeliveryFailed : text.emailDeliveryPending;
+            cell.appendChild(createBadge(label, item.status));
+            if (item.lastError) {
+              const error = document.createElement("span");
+              error.className = "controlpanel-email-description";
+              error.textContent = item.lastError;
+              cell.appendChild(error);
+            }
+          } else {
+            cell.textContent = value ?? "-";
+          }
+          row.appendChild(cell);
+        });
+        const actions = document.createElement("td");
+        if (item.status === "failed") {
+          const retry = document.createElement("button");
+          retry.type = "button";
+          retry.className = "controlpanel-btn";
+          retry.textContent = text.emailDeliveryRetry;
+          retry.addEventListener("click", () => handlers.onRetry?.(item, retry));
+          actions.appendChild(retry);
+        } else {
+          actions.textContent = "-";
+        }
+        row.appendChild(actions);
+        deliveryBody.appendChild(row);
+      });
+      deliveryTable.appendChild(deliveryBody);
+      deliveryWrap.appendChild(deliveryTable);
+      deliverySection.appendChild(deliveryWrap);
+    }
+    const deliveryStatus = document.createElement("p");
+    deliveryStatus.className = "controlpanel-status";
+    deliveryStatus.setAttribute("aria-live", "polite");
+    deliverySection.appendChild(deliveryStatus);
+    handlers.setDeliveryStatusRef?.((message, state = "") => {
+      deliveryStatus.textContent = message;
+      deliveryStatus.dataset.state = state;
+    });
+    if (!deliveries.unavailable) body.appendChild(deliverySection);
 
     const toolbar = document.createElement("div");
     toolbar.className = "controlpanel-email-toolbar";

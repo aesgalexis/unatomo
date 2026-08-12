@@ -1,4 +1,11 @@
-import { onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+import {
+  EmailAuthProvider,
+  GoogleAuthProvider,
+  onAuthStateChanged,
+  reauthenticateWithCredential,
+  reauthenticateWithPopup,
+  updateProfile
+} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 import {
   collection,
   doc,
@@ -27,6 +34,11 @@ import {
   claimAccountHandle,
   normalizeAccountHandle
 } from "./accountHandleRepo.js";
+import {
+  changeAccountPassword,
+  finalizeAccountEmailChange,
+  requestAccountEmailChange
+} from "./accountSecurityRepo.js";
 import {
   getAppBasePrefix,
   getCurrentLang,
@@ -107,6 +119,17 @@ const textMap = {
     ? "Storage is full. Free up space before uploading documents or generating new Tag IDs/QR codes."
     : "Almacenamiento lleno. Libera espacio para subir documentos o generar nuevos Tag ID/QR.",
   changePassword: isEn ? "Change password" : "Cambiar contrase\u00f1a",
+  currentPassword: isEn ? "Current password" : "Contraseña actual",
+  newPassword: isEn ? "New password" : "Nueva contraseña",
+  confirmPassword: isEn ? "Confirm new password" : "Confirmar nueva contraseña",
+  passwordChanged: isEn ? "Password changed. A confirmation email was sent." : "Contraseña modificada. Te hemos enviado un correo de confirmación.",
+  passwordMismatch: isEn ? "The passwords do not match." : "Las contraseñas no coinciden.",
+  passwordRequirements: isEn ? "Use at least 8 characters." : "Usa al menos 8 caracteres.",
+  changeEmail: isEn ? "Change email" : "Cambiar correo",
+  newEmail: isEn ? "New email" : "Nuevo correo",
+  emailChangeSent: isEn ? "Check the new address to complete the change." : "Revisa la nueva dirección para completar el cambio.",
+  emailChangeCompleted: isEn ? "Email change completed." : "Cambio de correo completado.",
+  securityActionError: isEn ? "Unable to complete the security action." : "No se ha podido completar la acción de seguridad.",
   logout: isEn ? "Sign out" : "Cerrar sesi\u00f3n",
   user: isEn ? "User" : "Usuario",
   createdLocale: isEn ? "en-GB" : "es-ES",
@@ -424,9 +447,19 @@ if (mount) {
 
   if (securityBody) {
     securityBody.innerHTML = `
-      <div class="profile-row">
-        <a class="profile-link" id="profile-reset" href="${localizeEsPath("/es/auth/reset.html")}">${textMap.changePassword}</a>
+      <div class="profile-row profile-row-stack">
+        <span class="profile-label">${textMap.changePassword}</span>
+        <input class="profile-input" id="profile-current-password" type="password" autocomplete="current-password" placeholder="${textMap.currentPassword}" />
+        <input class="profile-input" id="profile-new-password" type="password" minlength="8" maxlength="128" autocomplete="new-password" placeholder="${textMap.newPassword}" />
+        <input class="profile-input" id="profile-confirm-password" type="password" minlength="8" maxlength="128" autocomplete="new-password" placeholder="${textMap.confirmPassword}" />
+        <div class="profile-form-actions"><button class="profile-save-btn" id="profile-change-password" type="button">${textMap.changePassword}</button></div>
       </div>
+      <div class="profile-row profile-row-stack">
+        <span class="profile-label">${textMap.changeEmail}</span>
+        <input class="profile-input" id="profile-new-email" type="email" maxlength="320" autocomplete="email" placeholder="${textMap.newEmail}" />
+        <div class="profile-form-actions"><button class="profile-save-btn" id="profile-change-email" type="button">${textMap.changeEmail}</button></div>
+      </div>
+      <span class="profile-save-status" id="profile-security-status" aria-live="polite"></span>
       <div class="profile-row">
         <a class="profile-link" id="profile-logout" href="#">${textMap.logout}</a>
       </div>
@@ -455,6 +488,13 @@ if (mount) {
   const storageQrEl = storageBody?.querySelector("#profile-storage-qr");
   const storageNoteEl = storageBody?.querySelector("#profile-storage-note");
   const logoutLink = securityBody?.querySelector("#profile-logout");
+  const currentPasswordInput = securityBody?.querySelector("#profile-current-password");
+  const newPasswordInput = securityBody?.querySelector("#profile-new-password");
+  const confirmPasswordInput = securityBody?.querySelector("#profile-confirm-password");
+  const changePasswordButton = securityBody?.querySelector("#profile-change-password");
+  const newEmailInput = securityBody?.querySelector("#profile-new-email");
+  const changeEmailButton = securityBody?.querySelector("#profile-change-email");
+  const securityStatus = securityBody?.querySelector("#profile-security-status");
   const tabOrderEl = prefsBody?.querySelector("#profile-tab-order");
   const preferencesSave = prefsBody?.querySelector("#profile-preferences-save");
   const preferencesSaveStatus = prefsBody?.querySelector("#profile-preferences-save-status");
@@ -754,6 +794,91 @@ if (mount) {
     ]);
     setTopbarLogoLoading("settings", false);
     upsertAccountDirectory(user).catch(() => {});
+
+    const setSecurityStatus = (message = "", state = "") => {
+      if (!securityStatus) return;
+      securityStatus.textContent = message;
+      if (state) securityStatus.dataset.state = state;
+      else securityStatus.removeAttribute("data-state");
+    };
+    const reauthenticateAccount = async () => {
+      const usesGoogle = user.providerData.some(
+        (provider) => provider.providerId === "google.com"
+      );
+      if (usesGoogle) {
+        await reauthenticateWithPopup(user, new GoogleAuthProvider());
+        return;
+      }
+      const currentPassword = currentPasswordInput?.value || "";
+      if (!user.email || !currentPassword) {
+        currentPasswordInput?.focus();
+        throw new Error("current-password-required");
+      }
+      await reauthenticateWithCredential(
+        user,
+        EmailAuthProvider.credential(user.email, currentPassword)
+      );
+    };
+
+    try {
+      await user.getIdToken(true);
+      const finalized = await finalizeAccountEmailChange();
+      if (finalized.completed) {
+        setText(emailEl, finalized.email || user.email || "-");
+        setSecurityStatus(textMap.emailChangeCompleted, "ok");
+      }
+    } catch {}
+
+    changePasswordButton?.addEventListener("click", async () => {
+      const password = newPasswordInput?.value || "";
+      const confirmation = confirmPasswordInput?.value || "";
+      if (password.length < 8) {
+        setSecurityStatus(textMap.passwordRequirements, "error");
+        newPasswordInput?.focus();
+        return;
+      }
+      if (password !== confirmation) {
+        setSecurityStatus(textMap.passwordMismatch, "error");
+        confirmPasswordInput?.focus();
+        return;
+      }
+      changePasswordButton.disabled = true;
+      setSecurityStatus(textMap.saving);
+      try {
+        await reauthenticateAccount();
+        await user.getIdToken(true);
+        await changeAccountPassword(password);
+        if (currentPasswordInput) currentPasswordInput.value = "";
+        if (newPasswordInput) newPasswordInput.value = "";
+        if (confirmPasswordInput) confirmPasswordInput.value = "";
+        setSecurityStatus(textMap.passwordChanged, "ok");
+      } catch {
+        setSecurityStatus(textMap.securityActionError, "error");
+      } finally {
+        changePasswordButton.disabled = false;
+      }
+    });
+
+    changeEmailButton?.addEventListener("click", async () => {
+      const newEmail = newEmailInput?.value.trim().toLowerCase() || "";
+      if (!newEmailInput?.checkValidity() || !newEmail) {
+        newEmailInput?.focus();
+        return;
+      }
+      changeEmailButton.disabled = true;
+      setSecurityStatus(textMap.saving);
+      try {
+        await reauthenticateAccount();
+        await user.getIdToken(true);
+        await requestAccountEmailChange(newEmail);
+        if (newEmailInput) newEmailInput.value = "";
+        setSecurityStatus(textMap.emailChangeSent, "ok");
+      } catch {
+        setSecurityStatus(textMap.securityActionError, "error");
+      } finally {
+        changeEmailButton.disabled = false;
+      }
+    });
 
     const themeInputs = prefsBody?.querySelectorAll(
       "input[name=\"profile-theme\"]"

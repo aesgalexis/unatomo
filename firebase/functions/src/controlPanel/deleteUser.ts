@@ -6,6 +6,7 @@ import {
   accountHandleHistoryCol,
   accountHandlesCol,
   db,
+  emailOutboxCol,
   invitesCol,
   linksCol,
   machineAccessCol,
@@ -17,6 +18,7 @@ import {
   deleteCollectedDocRefs,
   deleteStorageFileIfExists,
 } from "../core/storage";
+import {buildEmailOutbox} from "../email/outbox";
 
 export const deleteControlPanelUser = onCall(async (request) => {
   const auth = request.auth;
@@ -185,6 +187,36 @@ export const deleteControlPanelUser = onCall(async (request) => {
   await deleteCollectedDocRefs(refsToDelete);
   await db.collection("tenants").doc(uid).delete().catch(() => undefined);
   await admin.auth().deleteUser(uid).catch(() => undefined);
+
+  if (emailLower) {
+    const language = userData.language === "en" ? "en" : "es";
+    const eventId = Date.now().toString(36);
+    await emailOutboxCol().doc(`account_deleted_${uid}_${eventId}`).set(
+      buildEmailOutbox({
+        type: "account_activity",
+        to: emailLower,
+        language,
+        data: {
+          displayName: (userData.displayName || userRecord?.displayName || "")
+            .toString(),
+          activityTitle: language === "en" ?
+            "Account deleted" : "Cuenta eliminada",
+          activityDetail: language === "en" ?
+            "Your Unatomo account was deleted by an administrator." :
+            "Un administrador ha eliminado tu cuenta de Unatomo.",
+          occurredAt: new Intl.DateTimeFormat(
+            language === "en" ? "en-GB" : "es-ES",
+            {
+              dateStyle: "medium",
+              timeStyle: "short",
+              timeZone: "Europe/Madrid",
+            },
+          ).format(new Date()),
+        },
+        idempotencyKey: `account-deleted/${uid}/${eventId}`,
+      }),
+    ).catch(() => undefined);
+  }
 
   return {ok: true, uid};
 });
