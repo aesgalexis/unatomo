@@ -11,6 +11,51 @@ import {
 } from "./tasksModel.js";
 import { getTaskTiming } from "./tasksTime.js";
 
+const TASK_COMPLETION_FEEDBACK_MS = 3000;
+const ONE_OFF_COMPLETION_ANIMATION_MS = 420;
+const animatedTaskCompletions = new Set();
+
+const waitForOneOffCompletionAnimation = () => {
+  if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+    return Promise.resolve();
+  }
+  return new Promise((resolve) => window.setTimeout(resolve, ONE_OFF_COMPLETION_ANIMATION_MS));
+};
+
+const getRecentRecurringCompletionRemaining = (task) => {
+  if (!task?.lastCompletedAt || task.frequency === "puntual") return 0;
+  const completedAt = new Date(task.lastCompletedAt).getTime();
+  if (!Number.isFinite(completedAt)) return 0;
+  return Math.max(0, TASK_COMPLETION_FEEDBACK_MS - (Date.now() - completedAt));
+};
+
+const attachTaskTooltip = (target) => {
+  let tooltip = null;
+  const hide = () => {
+    tooltip?.remove();
+    tooltip = null;
+  };
+  const show = () => {
+    hide();
+    const label = target.getAttribute("data-tooltip");
+    if (!label) return;
+    document.querySelectorAll(".mc-tooltip").forEach((node) => node.remove());
+    tooltip = document.createElement("div");
+    tooltip.className = "mc-tooltip";
+    tooltip.textContent = label;
+    document.body.appendChild(tooltip);
+    const rect = target.getBoundingClientRect();
+    tooltip.style.top = `${Math.max(8, rect.top - tooltip.offsetHeight - 8)}px`;
+    const centeredLeft = rect.left + rect.width / 2 - tooltip.offsetWidth / 2;
+    tooltip.style.left = `${Math.max(8, Math.min(centeredLeft, window.innerWidth - tooltip.offsetWidth - 8))}px`;
+  };
+  target.addEventListener("mouseenter", show);
+  target.addEventListener("mouseleave", hide);
+  target.addEventListener("focus", show);
+  target.addEventListener("blur", hide);
+  target.addEventListener("click", hide);
+};
+
 const frequencyLabel = (key) =>
   ({
     puntual: t("tasks.oneOff", "Tarea puntual"),
@@ -425,9 +470,12 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
       }
 
       const timing = getTaskTiming(task);
+      const completionFeedbackRemaining = getRecentRecurringCompletionRemaining(task);
       const remaining = document.createElement("span");
       remaining.className = "task-remaining";
-      remaining.textContent = timing.label;
+      remaining.textContent = completionFeedbackRemaining
+        ? t("tasks.completedNow", "Completada ahora")
+        : timing.label;
       meta.appendChild(remaining);
 
       if (timing.pending) {
@@ -445,13 +493,50 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
         const completeBtn = document.createElement("button");
         completeBtn.type = "button";
         completeBtn.className = "task-complete-btn";
-        const completeText = document.createElement("span");
-        completeText.className = "task-complete-text";
-        completeText.textContent = t("tasks.completed", "Completada");
-        completeBtn.appendChild(completeText);
-        completeBtn.addEventListener("click", (event) => {
+        completeBtn.setAttribute("role", "checkbox");
+        completeBtn.setAttribute("aria-checked", "false");
+        const isRestoreTask = task.source === RESTORE_OPERATION_TASK_SOURCE;
+        const actionLabel = isRestoreTask
+          ? t("tasks.markIncidentResolved", "Marcar incidencia como resuelta")
+          : t("tasks.markCompleted", "Marcar como completada");
+        completeBtn.setAttribute("aria-label", actionLabel);
+        completeBtn.setAttribute("data-tooltip", actionLabel);
+        completeBtn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9" pathLength="1"/><path d="m8.5 12 2.25 2.25L15.5 9.5"/></svg>';
+        if (completionFeedbackRemaining) {
+          completeBtn.classList.add("is-completion-feedback");
+          const completionKey = `${machine.id}:${task.id}:${task.lastCompletedAt}`;
+          if (!animatedTaskCompletions.has(completionKey)) {
+            animatedTaskCompletions.add(completionKey);
+            completeBtn.classList.add("is-completion-feedback-animated");
+            window.setTimeout(() => animatedTaskCompletions.delete(completionKey), 10000);
+          }
+          window.setTimeout(() => {
+            completeBtn.classList.remove("is-completion-feedback");
+            completeBtn.classList.remove("is-completion-feedback-animated");
+            remaining.textContent = timing.label;
+          }, completionFeedbackRemaining);
+        }
+        attachTaskTooltip(completeBtn);
+        completeBtn.addEventListener("click", async (event) => {
           event.stopPropagation();
-          if (hooks.onCompleteTask) hooks.onCompleteTask(machine.id, task.id, context);
+          if (!hooks.onCompleteTask || completeBtn.disabled) return;
+          completeBtn.disabled = true;
+          const animateBeforeRemoval =
+            task.frequency === "puntual" && task.source !== RESTORE_OPERATION_TASK_SOURCE;
+          if (animateBeforeRemoval) {
+            completeBtn.classList.add("is-completing");
+            completeBtn.classList.add("is-one-off-completing");
+          }
+          try {
+            if (animateBeforeRemoval) await waitForOneOffCompletionAnimation();
+            await hooks.onCompleteTask(machine.id, task.id, context);
+          } finally {
+            if (completeBtn.isConnected) {
+              completeBtn.disabled = false;
+              completeBtn.classList.remove("is-completing");
+              completeBtn.classList.remove("is-one-off-completing");
+            }
+          }
         });
         meta.appendChild(completeBtn);
       }
@@ -552,8 +637,9 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
         }
       };
 
-      const actions = document.createElement("div");
-      actions.className = "task-actions-left";
+      const titleWrap = document.createElement("div");
+      titleWrap.className = "task-title-wrap";
+      titleWrap.appendChild(title);
       if (canAddTaskNotes || canUploadTaskImages || canEditTasks || canDeleteTasks) {
         const openImagePicker = () => {
           const input = document.createElement("input");
@@ -571,7 +657,7 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
           document.body.appendChild(input);
           input.click();
         };
-        actions.appendChild(createTaskMenu({
+        titleWrap.appendChild(createTaskMenu({
           machine,
           task,
           hooks,
@@ -588,11 +674,8 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
       const side = document.createElement("div");
       side.className = "task-side";
       side.appendChild(meta);
-      line1.appendChild(title);
+      line1.appendChild(titleWrap);
       line1.appendChild(side);
-      if (canAddTaskNotes || canUploadTaskImages || canEditTasks || canDeleteTasks) {
-        body.appendChild(actions);
-      }
       body.appendChild(line1);
 
       const line2 = document.createElement("div");

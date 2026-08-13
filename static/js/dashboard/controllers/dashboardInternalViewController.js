@@ -46,6 +46,7 @@ import {
 } from "../views/users/usersModel.js";
 import { renderUsersTree } from "../views/users/usersTree.js";
 import { openTaskCreateModal } from "../components/taskCreateModal/taskCreateModal.js";
+import { openOperationalReturnModal } from "../components/operationalReturnModal/operationalReturnModal.js";
 import { openUserCreateModal } from "../components/userCreateModal/userCreateModal.js";
 import {
   getDashboardScopedMachines,
@@ -696,7 +697,54 @@ export const createDashboardInternalViewController = ({
         const current = getDraftById(machineId);
         if (!current) return;
         const actor = state.adminLabel || t("dashboard.admin", "Administrador");
-        const updates = buildCompleteTaskUpdate(machineId, current, taskId, actor);
+        const task = current.tasks?.find((item) => item.id === taskId);
+        if (!task) return;
+        const isRestoreTask = task.source === "status-out-of-service";
+        const details = isRestoreTask
+          ? await openOperationalReturnModal({
+              machineTitle: current.title || "",
+              completesTask: true,
+              changesStatus: current.status !== "operativa"
+            })
+          : null;
+        if (isRestoreTask && !details) return;
+        if (isRestoreTask && details.note?.trim()) {
+          const noteUpdate = buildAddTaskNoteUpdate(current, taskId, details.note.trim(), actor);
+          if (noteUpdate) updateMachine(machineId, noteUpdate);
+        }
+        if (isRestoreTask && details.images?.length && viewOptions.uploadMachineDocument) {
+          const uploaded = [];
+          for (const file of details.images.slice(0, 10)) {
+            try {
+              const attachment = await viewOptions.uploadMachineDocument(
+                machineId,
+                "other",
+                file,
+                null,
+                {
+                  silent: true,
+                  deferRender: true,
+                  rethrow: true,
+                  preserveTab: true,
+                  documentMetadata: {
+                    context: "task-attachment",
+                    linkedTaskId: task.id,
+                    linkedStatusCycleId: task.statusCycleId || ""
+                  }
+                }
+              );
+              if (attachment) uploaded.push(attachment);
+            } catch {
+              notifyTopbar(t("dashboard.incidentImageUploadError", "Alguna imagen no se pudo subir"));
+            }
+          }
+          const attachmentUpdate = buildAddTaskAttachmentsUpdate(
+            getDraftById(machineId), taskId, uploaded, actor
+          );
+          if (attachmentUpdate) updateMachine(machineId, attachmentUpdate);
+        }
+        const latest = getDraftById(machineId);
+        const updates = buildCompleteTaskUpdate(machineId, latest, taskId, actor);
         if (!updates) return;
         updateMachine(machineId, updates);
         state.todoPage = 1;

@@ -9,12 +9,14 @@ import { calculateStorageUsage, STORAGE_LIMIT_BYTES } from "/static/js/configura
 import { normalizeTasks } from "/static/js/dashboard/tabs/tasks/tasksModel.js";
 import {
   buildAddTaskNoteUpdate,
+  buildAddTaskAttachmentsUpdate,
   buildAddTaskUpdate,
   buildCompleteTaskUpdate,
   buildEditTaskUpdate,
   buildRemoveTaskUpdate,
   buildStatusToggleUpdate
 } from "/static/js/dashboard/tabs/tasks/taskActions.js";
+import { openOperationalReturnModal } from "/static/js/dashboard/components/operationalReturnModal/operationalReturnModal.js";
 import { uploadMachineAccessDocument } from "./machineDocumentUploads.js";
 import { setTopbarSaveStatus } from "/static/js/topbar/save-status.js";
 import { t } from "/static/js/dashboard/i18n.js";
@@ -625,11 +627,52 @@ const renderMachine = () => {
     autoSave.saveNow(state.tagId, "task-edit");
   };
 
-  hooks.onCompleteTask = (id, taskId) => {
+  hooks.onCompleteTask = async (id, taskId) => {
     if (!canUseCapability(role, "completeTasks", configuredPermissions)) return;
+    const task = machineDoc.tasks?.find((item) => item.id === taskId);
+    if (!task) return;
+    const isRestoreTask = task.source === "status-out-of-service";
+    const details = isRestoreTask
+      ? await openOperationalReturnModal({
+          machineTitle: machineDoc.title || "",
+          completesTask: true,
+          changesStatus: normalizeStatus(machineDoc.status) !== "operativa"
+        })
+      : null;
+    if (isRestoreTask && !details) return;
+    let current = machineDoc;
+    if (isRestoreTask && details.note?.trim()) {
+      const noteUpdate = buildAddTaskNoteUpdate(current, taskId, details.note.trim(), getActorLabel());
+      if (noteUpdate) current = { ...current, ...noteUpdate };
+    }
+    if (isRestoreTask && details.images?.length && hooks.onUploadMachineDocument) {
+      state.draft = current;
+      const uploaded = [];
+      for (const file of details.images.slice(0, 10)) {
+        try {
+          const attachment = await hooks.onUploadMachineDocument(id, "other", file, null, {
+            silent: true,
+            deferRender: true,
+            rethrow: true,
+            preserveTab: true,
+            documentMetadata: {
+              context: "task-attachment",
+              linkedTaskId: task.id,
+              linkedStatusCycleId: task.statusCycleId || ""
+            }
+          });
+          if (attachment) uploaded.push(attachment);
+        } catch {
+          notifyTopbar(t("dashboard.incidentImageUploadError", "Alguna imagen no se pudo subir"));
+        }
+      }
+      current = state.draft;
+      const attachmentUpdate = buildAddTaskAttachmentsUpdate(current, taskId, uploaded, getActorLabel());
+      if (attachmentUpdate) current = { ...current, ...attachmentUpdate };
+    }
     const updates = buildCompleteTaskUpdate(
       machineDoc.id,
-      machineDoc,
+      current,
       taskId,
       getActorLabel(),
       { normalizeStatus }

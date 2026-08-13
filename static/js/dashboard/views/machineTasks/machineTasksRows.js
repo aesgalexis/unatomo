@@ -5,6 +5,14 @@ import {
 } from "./machineTasksData.js";
 
 const getLocale = () => (document.documentElement.lang === "en" ? "en-GB" : "es-ES");
+const ONE_OFF_COMPLETION_ANIMATION_MS = 420;
+
+const waitForOneOffCompletionAnimation = () => {
+  if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+    return Promise.resolve();
+  }
+  return new Promise((resolve) => window.setTimeout(resolve, ONE_OFF_COMPLETION_ANIMATION_MS));
+};
 
 export const formatDate = (value) => {
   const date = value ? new Date(value) : null;
@@ -36,6 +44,45 @@ export const attachTooltip = (target) => {
   target.addEventListener("focus", show);
   target.addEventListener("blur", hide);
   target.addEventListener("click", hide);
+};
+
+export const createTaskCompletionControl = ({ machine, task, onCompleteTask }) => {
+  const control = document.createElement("button");
+  control.type = "button";
+  control.className = "task-complete-btn";
+  control.setAttribute("role", "checkbox");
+  control.setAttribute("aria-checked", "false");
+  const isRestoreTask = task.source === "status-out-of-service";
+  const label = isRestoreTask
+    ? t("tasks.markIncidentResolved", "Marcar incidencia como resuelta")
+    : t("tasks.markCompleted", "Marcar como completada");
+  control.setAttribute("aria-label", label);
+  control.setAttribute("data-tooltip", label);
+  control.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9" pathLength="1"/><path d="m8.5 12 2.25 2.25L15.5 9.5"/></svg>';
+  control.addEventListener("click", async (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!onCompleteTask || control.disabled) return;
+    control.disabled = true;
+    const animateBeforeRemoval =
+      task.frequency === "puntual" && task.source !== "status-out-of-service";
+    if (animateBeforeRemoval) {
+      control.classList.add("is-completing");
+      control.classList.add("is-one-off-completing");
+    }
+    try {
+      if (animateBeforeRemoval) await waitForOneOffCompletionAnimation();
+      await onCompleteTask(machine.id, task.id);
+    } finally {
+      if (control.isConnected) {
+        control.disabled = false;
+        control.classList.remove("is-completing");
+        control.classList.remove("is-one-off-completing");
+      }
+    }
+  });
+  attachTooltip(control);
+  return control;
 };
 
 export const createTaskActionsMenu = ({ machine, task, forms, options }) => {
@@ -134,9 +181,6 @@ export const createTaskActionsMenu = ({ machine, task, forms, options }) => {
     document.body.appendChild(input);
     input.click();
   });
-  action(t("tasks.markCompleted", "Marcar como completada"), () => {
-    options.onCompleteTask?.(machine.id, task.id);
-  });
   action(t("tasks.deleteTask", "Eliminar tarea"), () => {
     options.onRemoveTask?.(machine.id, task.id);
   }, "todo-item-delete");
@@ -217,6 +261,13 @@ export const renderMachineTaskRows = (list, entries, options) => {
       : t("tasks.pending", "Pendiente");
     const titleActions = document.createElement("span");
     titleActions.className = "machine-tasks-title-actions";
+    if (!completed) {
+      titleActions.appendChild(createTaskCompletionControl({
+        machine,
+        task,
+        onCompleteTask: options.onCompleteTask
+      }));
+    }
     titleActions.appendChild(status);
     const forms = document.createElement("div");
     forms.className = "machine-task-inline-actions";

@@ -3,6 +3,10 @@
   gap: 0.22rem;
 }
 
+.mc-panel[data-panel="quehaceres"] {
+  padding-top: 0;
+}
+
 .task-empty {
   color: color-mix(in srgb, var(--fg) 70%, transparent);
   align-items: center;
@@ -38,7 +42,7 @@
 }
 
 .task-item:not(:first-child) {
-  padding-top: 1.05rem;
+  padding-top: 0.55rem;
 }
 
 .task-item:last-child {
@@ -75,6 +79,19 @@
 .task-title {
   color: var(--fg);
   font-weight: 600;
+}
+
+.task-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.task-title-wrap .task-title {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .task-desc {
@@ -122,22 +139,74 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 32px;
-  border-radius: 0.5rem;
-  border: 1px solid var(--border-subtle);
-  background: color-mix(in srgb, var(--bg) 96%, transparent);
-  color: var(--fg);
-  padding: 0 0.6rem;
-  font: inherit;
-  line-height: 1;
+  width: 2.75rem;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0.55rem;
+  background: transparent;
+  color: color-mix(in srgb, var(--fg) 52%, transparent);
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.task-complete-text {
-  display: inline-flex;
-  align-items: center;
-  line-height: 1;
-  transform: translateY(-0.04em);
+.task-complete-btn svg {
+  width: 1.35rem;
+  height: 1.35rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.task-complete-btn svg path {
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.task-complete-btn.is-completing,
+.task-complete-btn.is-completion-feedback {
+  color: #16a34a;
+}
+
+.task-complete-btn.is-one-off-completing svg circle,
+.task-complete-btn.is-completion-feedback-animated svg circle {
+  stroke-dasharray: 1;
+  animation: task-completion-ring 360ms ease-out both;
+}
+
+.task-complete-btn.is-completing svg path,
+.task-complete-btn.is-completion-feedback svg path {
+  opacity: 1;
+}
+
+.task-complete-btn:hover {
+  color: #16a34a;
+}
+
+.task-complete-btn:hover svg path,
+.task-complete-btn:focus-visible svg path {
+  opacity: 1;
+}
+
+.task-complete-btn:focus-visible {
+  outline: none;
+  background: transparent;
+  color: #16a34a;
+}
+
+@keyframes task-completion-ring {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .task-complete-btn.is-one-off-completing svg circle,
+  .task-complete-btn.is-completion-feedback-animated svg circle {
+    animation: none;
+  }
 }
 
 .task-remove-link {
@@ -164,40 +233,7 @@
   display: inline-flex;
   align-items: center;
   margin-left: 0;
-  transform: translateY(-0.1rem);
-}
-
-.task-actions-left {
-  display: flex;
-  align-items: flex-start;
-  justify-content: flex-start;
-  width: 100%;
-  height: 0;
-  margin-bottom: 0.22rem;
-  position: relative;
-  z-index: 1;
-}
-
-.task-actions-left .task-menu {
-  transform: translateY(-0.95rem);
-}
-
-@media (max-width: 768px) {
-  .task-item {
-    padding-top: 0.55rem;
-  }
-
-  .task-item:not(:first-child) {
-    padding-top: 1.45rem;
-  }
-
-  .task-actions-left {
-    margin-bottom: 0.45rem;
-  }
-
-  .task-actions-left .task-menu {
-    transform: translateY(-1.28rem);
-  }
+  flex: none;
 }
 
 .task-menu-toggle {
