@@ -25,6 +25,11 @@ email actions, notification preferences, or the control-panel email view.
   sign-in. It may later be required for sensitive operations.
 - Important-activity email is reserved for security-relevant events; do not
   duplicate a more specific notification.
+- Operational notification preferences are separate from account/security email.
+  They live in `user_notification_preferences/{uid}` and currently control
+  only the global email channel. Missing preferences keep operational email
+  disabled, while preserving the two explicit lifecycle event defaults for a
+  later opt-in.
 
 ## Architecture
 
@@ -61,6 +66,8 @@ in an outbox record.
 | `email_change_old` | Active | Sent to the previous address after Firebase confirms the verified change |
 | `email_change_new` | Active | Firebase verify-before-update link sent to the requested new address |
 | `account_activity` | Active | Initially connected to superadmin account deletion; reserved for sensitive administrative events |
+| `machine_out_of_service` | Active | Operational opt-in: a machine moves from `operativa` to `fuera_de_servicio` |
+| `machine_operational_again` | Active | Operational opt-in: a machine moves from `fuera_de_servicio` to `operativa` |
 
 ## Existing event behavior
 
@@ -78,6 +85,15 @@ in an outbox record.
 - New onboarding writes `language` to both the private user profile and account
   directory. Existing accounts without it receive Spanish until they update
   their preference or a migration is explicitly approved.
+- Settings save `user_notification_preferences/{uid}` with the extensible
+  shape `email.enabled` and `email.events`. Turning off the channel retains
+  the individual event choices, disables them in the UI, and prevents all
+  operational email delivery. The current events are deliberately explicit:
+  `machineOutOfService` and `machineOperationalAgain`; there is no generic
+  `statusChanged` notification and `desconectada` is not mailed.
+- Machine configuration no longer stores or edits recipient addresses or
+  notification events. A future machine override must layer on these global
+  preferences without changing account/security email behavior.
 
 ## Account security flow
 

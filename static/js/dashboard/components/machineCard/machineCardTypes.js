@@ -7,4 +7,4 @@ export const STATUS_LABELS = {
 };
 
 export const TAB_KEYS = ["quehaceres", "historial", "estadisticas", "general", "configuracion"];
-export const CONFIG_SUBTABS = ["tag", "usuarios", "notificaciones"];
+export const CONFIG_SUBTABS = ["tag", "usuarios"];

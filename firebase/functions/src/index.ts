@@ -24,6 +24,7 @@ export {
   reviewControlPanelAccessRequest,
 } from "./accounts/accessRequests";
 export {deliverEmailOutbox} from "./email/resend";
+export {notifyMachineStatusTransition} from "./notifications/machineStatus";
 export {listControlPanelEmailTemplates} from "./controlPanel/emailTemplates";
 export {
   listControlPanelEmailDeliveries,

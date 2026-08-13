@@ -63,19 +63,6 @@ export const normalizeMachine = (raw, index = 0) => {
           : "",
     role: typeof raw.role === "string" ? raw.role : "owner",
     ownerEmail: typeof raw.ownerEmail === "string" ? raw.ownerEmail : "",
-    notifications:
-      typeof raw.notifications === "object" && raw.notifications
-        ? raw.notifications
-        : {
-          enabled: false,
-          email: "",
-          events: {
-            statusChanged: false,
-            taskOverdue: false,
-            taskLateCompleted: false,
-            tagDisconnected: false
-          }
-        },
     order: typeof raw.order === "number" ? raw.order : index,
     isNew: !!raw.isNew
   };
@@ -113,16 +100,6 @@ export const createDraftMachine = (count, order) => {
     tenantId: "",
     role: "owner",
     ownerEmail: "",
-    notifications: {
-      enabled: false,
-      email: "",
-      events: {
-        statusChanged: false,
-        taskOverdue: false,
-        taskLateCompleted: false,
-        tagDisconnected: false
-      }
-    },
     order,
     isNew: true
   };

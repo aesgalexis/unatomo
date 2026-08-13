@@ -12,6 +12,7 @@ const menu = document.getElementById("session-menu");
 const label = document.getElementById("session-menu-label");
 const emailLabel = document.getElementById("session-menu-email");
 const initials = document.getElementById("session-menu-initials");
+const dashboardLink = document.getElementById("session-menu-dashboard");
 const profileLink = document.getElementById("session-menu-profile");
 const action = document.getElementById("session-menu-action");
 const registerBtn = document.getElementById("session-menu-register");
@@ -24,6 +25,7 @@ const languageToggle = document.getElementById("session-menu-language-toggle");
 const languageOptions = document.getElementById("session-menu-language-options");
 
 const MENU_ICONS = {
+  dashboard: '<rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect>',
   panel: '<rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect>',
   settings: '<circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.56V21h-4v-.08A1.7 1.7 0 0 0 8.94 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.57 15 1.7 1.7 0 0 0 3 14H3v-4h.08A1.7 1.7 0 0 0 4.6 8.94a1.7 1.7 0 0 0-.34-1.88L4.2 7l2.83-2.83.06.06A1.7 1.7 0 0 0 9 4.57 1.7 1.7 0 0 0 10 3h4v.08A1.7 1.7 0 0 0 15.06 4.6a1.7 1.7 0 0 0 1.88-.34L17 4.2 19.83 7l-.06.06A1.7 1.7 0 0 0 19.43 9 1.7 1.7 0 0 0 21 10v4h-.08A1.7 1.7 0 0 0 19.4 15Z"></path>',
   login: '<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><path d="m10 17 5-5-5-5"></path><path d="M15 12H3"></path>',
@@ -76,6 +78,7 @@ if (!btn || !menu || !label || !action) {
   const paths = {
     login: localizeEsPath("/es/auth/login.html", lang),
     register: localizeEsPath("/es/auth/registro.html", lang),
+    dashboard: `${localizeEsPath("/es/index.html", lang)}#/dashboard`,
     settings: localizeEsPath("/es/configuracion.html", lang),
     home: localizeEsPath("/es/index.html", lang),
     panel: getControlPanelPath(),
@@ -100,7 +103,7 @@ if (!btn || !menu || !label || !action) {
   const syncSessionMenuOrder = () => {
     const parent = profileLink?.parentNode || action?.parentNode || null;
     if (!parent || !profileLink) return;
-    if (panelLink) parent.insertBefore(panelLink, profileLink);
+    if (panelLink) parent.insertBefore(panelLink, dashboardLink || profileLink);
   };
   syncSessionMenuOrder();
 
@@ -217,6 +220,11 @@ if (!btn || !menu || !label || !action) {
       profileLink.replaceChildren();
     }
 
+    if (dashboardLink) {
+      dashboardLink.hidden = true;
+      dashboardLink.replaceChildren();
+    }
+
     if (panelLink) {
       panelLink.hidden = true;
       panelLink.replaceChildren();
@@ -280,6 +288,12 @@ if (!btn || !menu || !label || !action) {
       profileLink.setAttribute("href", paths.settings);
     }
 
+    if (dashboardLink) {
+      dashboardLink.hidden = false;
+      setMenuLinkContent(dashboardLink, "dashboard", text.session.dashboard);
+      dashboardLink.setAttribute("href", paths.dashboard);
+    }
+
     if (panelLink) {
       const allowed = await isControlPanelUser(user);
       document.documentElement.dataset.superadmin = allowed ? "true" : "false";
@@ -322,6 +336,14 @@ if (!btn || !menu || !label || !action) {
 
   if (profileLink) {
     profileLink.addEventListener("click", (event) => {
+      if (!currentUser) return;
+      event.stopPropagation();
+      closeMenu();
+    });
+  }
+
+  if (dashboardLink) {
+    dashboardLink.addEventListener("click", (event) => {
       if (!currentUser) return;
       event.stopPropagation();
       closeMenu();

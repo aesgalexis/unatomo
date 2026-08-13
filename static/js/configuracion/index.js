@@ -31,6 +31,10 @@ import { upsertAccountDirectory } from "/static/js/dashboard/admin/accountDirect
 import { fetchDashboardLayout, upsertDashboardLayout } from "/static/js/dashboard/firestoreRepo.js";
 import { setTopbarNotifications } from "/static/js/notifications/topbar-notifications.js";
 import {
+  fetchNotificationPreferences,
+  saveNotificationPreferences
+} from "./notificationPreferencesRepo.js";
+import {
   setTopbarLogoLoading
 } from "/static/js/topbar/loading-logo.js";
 import { setTopbarSaveStatus } from "/static/js/topbar/save-status.js";
@@ -66,6 +70,7 @@ const textMap = {
   account: isEn ? "Account" : "Cuenta",
   storage: isEn ? "Storage" : "Almacenamiento",
   preferences: isEn ? "Preferences" : "Preferencias",
+  notifications: isEn ? "Notifications" : "Notificaciones",
   activity: isEn ? "Activity" : "Actividad",
   security: isEn ? "Security" : "Seguridad",
   name: isEn ? "Name" : "Nombre",
@@ -81,7 +86,7 @@ const textMap = {
   profilePhoto: isEn ? "Profile picture" : "Imagen de perfil",
   changeProfilePhoto: isEn ? "Choose image" : "Elegir imagen",
   removeProfilePhoto: isEn ? "Remove" : "Eliminar",
-  profilePhotoHint: isEn ? "JPG, PNG or WebP. It will be adjusted to a square image." : "JPG, PNG o WebP. Se ajustará a una imagen cuadrada.",
+  profilePhotoHint: isEn ? "JPG, PNG or WebP." : "JPG, PNG o WebP.",
   profilePhotoError: isEn ? "Choose a JPG, PNG or WebP image up to 12 MB." : "Elige una imagen JPG, PNG o WebP de hasta 12 MB.",
   profilePhotoSaveError: isEn ? "Unable to update the profile picture." : "No se ha podido actualizar la imagen de perfil.",
   accountHandleAvailable: isEn ? "Available" : "Disponible",
@@ -109,6 +114,18 @@ const textMap = {
   email: isEn ? "Email" : "Correo electr\u00f3nico",
   createdAt: isEn ? "Created at" : "Fecha de creaci\u00f3n",
   theme: isEn ? "Theme" : "Tema",
+  emailNotifications: isEn ? "Email notifications" : "Notificaciones por correo",
+  emailNotificationsHint: isEn
+    ? "Turn on email notifications to receive operational equipment alerts."
+    : "Activa las notificaciones por correo para recibir avisos operativos de tus equipos.",
+  machineOutOfService: isEn ? "Equipment out of service" : "Equipo fuera de servicio",
+  machineOutOfServiceHint: isEn
+    ? "Receive an email when equipment changes from operational to out of service."
+    : "Recibe un correo cuando un equipo pase de operativo a fuera de servicio.",
+  machineOperationalAgain: isEn ? "Equipment operational" : "Equipo operativo",
+  machineOperationalAgainHint: isEn
+    ? "Receive an email when equipment returns from out of service to operational."
+    : "Recibe un correo cuando un equipo vuelva de fuera de servicio a operativo.",
   tabOrder: isEn ? "Machine tab order" : "Orden de pesta\u00f1as",
   moveUp: isEn ? "Up" : "Subir",
   moveDown: isEn ? "Down" : "Bajar",
@@ -198,6 +215,11 @@ const sectionDefinitions = [
     icon: '<svg viewBox="0 0 24 24"><path d="M5 6h14M5 12h14M5 18h14"/><circle cx="9" cy="6" r="1.7"/><circle cx="15" cy="12" r="1.7"/><circle cx="11" cy="18" r="1.7"/></svg>'
   },
   {
+    id: "notifications",
+    label: textMap.notifications,
+    icon: '<svg viewBox="0 0 24 24"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>'
+  },
+  {
     id: "storage",
     label: textMap.storage,
     icon: '<svg viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7" ry="2.5"/><path d="M5 6v6c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5V6M5 12v6c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5v-6"/></svg>'
@@ -271,12 +293,14 @@ if (mount) {
 
   const accountCard = createCard(textMap.account, sectionIconById.get("account"));
   const preferencesCard = createCard(textMap.preferences, sectionIconById.get("preferences"));
+  const notificationsCard = createCard(textMap.notifications, sectionIconById.get("notifications"));
   const storageCard = createCard(textMap.storage, sectionIconById.get("storage"));
   const activityCard = createCard(textMap.activity, sectionIconById.get("activity"));
   const securityCard = createCard(textMap.security, sectionIconById.get("security"));
 
   wrap.appendChild(accountCard);
   wrap.appendChild(preferencesCard);
+  wrap.appendChild(notificationsCard);
   wrap.appendChild(storageCard);
   wrap.appendChild(activityCard);
   wrap.appendChild(securityCard);
@@ -284,6 +308,7 @@ if (mount) {
   const sectionCards = new Map([
     ["account", accountCard],
     ["preferences", preferencesCard],
+    ["notifications", notificationsCard],
     ["storage", storageCard],
     ["activity", activityCard],
     ["security", securityCard]
@@ -365,6 +390,7 @@ if (mount) {
   const accountBody = accountCard.querySelector(".profile-card-body");
   const storageBody = storageCard.querySelector(".profile-card-body");
   const prefsBody = preferencesCard.querySelector(".profile-card-body");
+  const notificationsBody = notificationsCard.querySelector(".profile-card-body");
   const activityBody = activityCard.querySelector(".profile-card-body");
   const securityBody = securityCard.querySelector(".profile-card-body");
 
@@ -411,7 +437,7 @@ if (mount) {
         <span class="profile-value" id="profile-uid">-</span>
       </div>
       <div class="profile-form-actions">
-        <button class="profile-save-btn" id="profile-account-save" type="button">${textMap.save}</button>
+        <button class="profile-save-btn" id="profile-account-save" type="button" disabled>${textMap.save}</button>
         <span class="profile-save-status" id="profile-account-save-status" aria-live="polite"></span>
       </div>
     `;
@@ -479,8 +505,47 @@ if (mount) {
         <div class="profile-tab-order" id="profile-tab-order"></div>
       </div>
       <div class="profile-form-actions">
-        <button class="profile-save-btn" id="profile-preferences-save" type="button">${textMap.save}</button>
+        <button class="profile-save-btn" id="profile-preferences-save" type="button" disabled>${textMap.save}</button>
         <span class="profile-save-status" id="profile-preferences-save-status" aria-live="polite"></span>
+      </div>
+    `;
+  }
+
+  if (notificationsBody) {
+    notificationsBody.innerHTML = `
+      <div class="profile-row profile-notification-row">
+        <div>
+          <span class="profile-label">${textMap.emailNotifications}</span>
+          <span class="profile-notification-hint">${textMap.emailNotificationsHint}</span>
+        </div>
+        <label class="profile-toggle" for="profile-notification-email-enabled">
+          <input id="profile-notification-email-enabled" type="checkbox" role="switch" />
+          <span aria-hidden="true"></span>
+        </label>
+      </div>
+      <div class="profile-row profile-notification-row" data-email-notification-event>
+        <div>
+          <span class="profile-label">${textMap.machineOutOfService}</span>
+          <span class="profile-notification-hint">${textMap.machineOutOfServiceHint}</span>
+        </div>
+        <label class="profile-toggle" for="profile-notification-machine-out-of-service">
+          <input id="profile-notification-machine-out-of-service" type="checkbox" role="switch" />
+          <span aria-hidden="true"></span>
+        </label>
+      </div>
+      <div class="profile-row profile-notification-row" data-email-notification-event>
+        <div>
+          <span class="profile-label">${textMap.machineOperationalAgain}</span>
+          <span class="profile-notification-hint">${textMap.machineOperationalAgainHint}</span>
+        </div>
+        <label class="profile-toggle" for="profile-notification-machine-operational-again">
+          <input id="profile-notification-machine-operational-again" type="checkbox" role="switch" />
+          <span aria-hidden="true"></span>
+        </label>
+      </div>
+      <div class="profile-form-actions">
+        <button class="profile-save-btn" id="profile-notifications-save" type="button" disabled>${textMap.save}</button>
+        <span class="profile-save-status" id="profile-notifications-save-status" aria-live="polite"></span>
       </div>
     `;
   }
@@ -552,15 +617,69 @@ if (mount) {
   const changeEmailButton = securityBody?.querySelector("#profile-change-email");
   const securityStatus = securityBody?.querySelector("#profile-security-status");
   const tabOrderEl = prefsBody?.querySelector("#profile-tab-order");
+  const notificationEmailEnabled = notificationsBody?.querySelector("#profile-notification-email-enabled");
+  const notificationMachineOutOfService = notificationsBody?.querySelector("#profile-notification-machine-out-of-service");
+  const notificationMachineOperationalAgain = notificationsBody?.querySelector("#profile-notification-machine-operational-again");
+  const notificationEventRows = notificationsBody?.querySelectorAll("[data-email-notification-event]");
+  const notificationsSave = notificationsBody?.querySelector("#profile-notifications-save");
+  const notificationsSaveStatus = notificationsBody?.querySelector("#profile-notifications-save-status");
   const preferencesSave = prefsBody?.querySelector("#profile-preferences-save");
   const preferencesSaveStatus = prefsBody?.querySelector("#profile-preferences-save-status");
   const languageInputs = prefsBody?.querySelectorAll(
     "input[name=\"profile-language\"]"
   );
 
+  let hasTabOrderChanges = () => false;
+  let markTabOrderSaved = () => {};
+  let savedPreferenceTheme = "";
+  let preferencesReady = false;
+  let notificationPreferences = null;
+  let savedNotificationPreferences = null;
+  const readNotificationPreferences = () => ({
+    email: {
+      enabled: !!notificationEmailEnabled?.checked,
+      events: {
+        machineOutOfService: !!notificationMachineOutOfService?.checked,
+        machineOperationalAgain: !!notificationMachineOperationalAgain?.checked
+      }
+    }
+  });
+  const notificationPreferencesChanged = () =>
+    JSON.stringify(readNotificationPreferences()) !== JSON.stringify(savedNotificationPreferences);
+  const refreshNotificationsSave = () => {
+    if (!notificationsSave || !notificationPreferences) return;
+    notificationsSave.disabled = !notificationPreferencesChanged();
+  };
+  const updateNotificationEventAvailability = () => {
+    const enabled = !!notificationEmailEnabled?.checked;
+    [notificationMachineOutOfService, notificationMachineOperationalAgain].forEach((input) => {
+      if (input) input.disabled = !enabled;
+    });
+    notificationEventRows?.forEach((row) => row.classList.toggle("is-disabled", !enabled));
+  };
+  const refreshPreferencesSave = () => {
+    if (!preferencesSave) return;
+    if (!preferencesReady) {
+      preferencesSave.disabled = true;
+      return;
+    }
+    const selectedTheme = prefsBody?.querySelector(
+      'input[name="profile-theme"]:checked'
+    )?.value || "";
+    const selectedLanguage = prefsBody?.querySelector(
+      'input[name="profile-language"]:checked'
+    )?.value || currentLang;
+    preferencesSave.disabled = !(
+      hasTabOrderChanges() ||
+      selectedTheme !== savedPreferenceTheme ||
+      selectedLanguage !== currentLang
+    );
+  };
+
   if (languageInputs && languageInputs.length) {
     languageInputs.forEach((input) => {
       input.checked = input.value === currentLang;
+      input.addEventListener("change", refreshPreferencesSave);
     });
   }
 
@@ -624,6 +743,12 @@ if (mount) {
     if (!tabOrderEl) return;
     let layout = null;
     let tabOrder = normalizeTabOrder();
+    let savedTabOrder = [...tabOrder];
+    hasTabOrderChanges = () =>
+      tabOrder.join(",") !== savedTabOrder.join(",");
+    markTabOrderSaved = () => {
+      savedTabOrder = [...tabOrder];
+    };
 
     const saveTabOrder = async () => {
       layout = {
@@ -655,6 +780,7 @@ if (mount) {
           if (index === 0) return;
           [tabOrder[index - 1], tabOrder[index]] = [tabOrder[index], tabOrder[index - 1]];
           renderTabOrder();
+          refreshPreferencesSave();
         });
 
         const down = document.createElement("button");
@@ -666,6 +792,7 @@ if (mount) {
           if (index >= tabOrder.length - 1) return;
           [tabOrder[index + 1], tabOrder[index]] = [tabOrder[index], tabOrder[index + 1]];
           renderTabOrder();
+          refreshPreferencesSave();
         });
 
         actions.appendChild(up);
@@ -683,7 +810,9 @@ if (mount) {
       layout = null;
       tabOrder = normalizeTabOrder();
     }
+    savedTabOrder = [...tabOrder];
     renderTabOrder();
+    refreshPreferencesSave();
   };
 
   onAuthStateChanged(auth, async (user) => {
@@ -800,6 +929,9 @@ if (mount) {
       }
     });
 
+    let savedName = (user.displayName || "").trim();
+    let savedCompany = (profile.company || profile.companyName || "").toString().trim();
+    let handleTouched = false;
     const setHandleStatus = (message = "", state = "") => {
       setText(handleStatus, message);
       if (!handleStatus) return;
@@ -815,6 +947,18 @@ if (mount) {
       let checkedHandle = "";
       let isAvailable = false;
       handleInput.value = savedHandle || suggestedHandle;
+      const refreshAccountSave = () => {
+        const nextName = nameInput?.value.trim() || "";
+        const nextCompany = companyInput?.value.trim().replace(/\s+/g, " ").slice(0, 60) || "";
+        const handle = normalizeAccountHandle(handleInput.value);
+        const handleChanged = handleTouched && handle !== savedHandle;
+        const handleReady = !handleChanged || (isAvailable && checkedHandle === handle);
+        accountSave.disabled = !(nextName && handleReady && (
+          nextName !== savedName ||
+          nextCompany !== savedCompany ||
+          handleChanged
+        ));
+      };
       const renderAvailability = async () => {
         const handle = normalizeAccountHandle(handleInput.value);
         handleInput.value = handle;
@@ -822,6 +966,7 @@ if (mount) {
         isAvailable = false;
         if (!handle || handle === savedHandle) {
           setHandleStatus("");
+          refreshAccountSave();
           return;
         }
         setHandleStatus(textMap.accountHandleChecking);
@@ -843,28 +988,34 @@ if (mount) {
         } catch {
           setHandleStatus(textMap.accountHandleError, "error");
         }
+        refreshAccountSave();
       };
       handleInput.addEventListener("input", () => {
+        handleTouched = true;
         handleInput.value = normalizeAccountHandle(handleInput.value)
           .replace(/[^a-z0-9._-]/g, "")
           .slice(0, 30);
         window.clearTimeout(checkTimer);
+        refreshAccountSave();
         checkTimer = window.setTimeout(renderAvailability, 280);
       });
+      nameInput?.addEventListener("input", refreshAccountSave);
+      companyInput?.addEventListener("input", refreshAccountSave);
       accountSave.addEventListener("click", async () => {
         const nextName = nameInput?.value.trim() || "";
         const nextCompany = companyInput?.value.trim().replace(/\s+/g, " ").slice(0, 60) || "";
-        const previousCompany = (profile.company || profile.companyName || "").toString().trim();
+        const previousCompany = savedCompany;
         const handle = normalizeAccountHandle(handleInput.value);
         if (!nextName) {
           nameInput?.focus();
           return;
         }
-        if (handle !== savedHandle && (!isAvailable || checkedHandle !== handle)) {
+        const handleChanged = handleTouched && handle !== savedHandle;
+        if (handleChanged && (!isAvailable || checkedHandle !== handle)) {
           await renderAvailability();
           if (!isAvailable || checkedHandle !== handle) return;
         }
-        if (handle !== savedHandle) {
+        if (handleChanged) {
           const confirmation = savedHandle
             ? textMap.accountHandleChangeConfirm(handle)
             : textMap.accountHandleConfirm(handle);
@@ -874,8 +1025,9 @@ if (mount) {
         setTopbarSaveStatus(textMap.saving);
         if (accountSaveStatus) accountSaveStatus.textContent = "";
         try {
-          if (nextName !== user.displayName) {
+          if (nextName !== savedName) {
             await updateProfile(user, { displayName: nextName });
+            savedName = nextName;
           }
           if (nextCompany !== previousCompany) {
             await setDoc(
@@ -884,8 +1036,9 @@ if (mount) {
               { merge: true }
             );
             profile = { ...profile, company: nextCompany };
+            savedCompany = nextCompany;
           }
-          if (handle !== savedHandle) {
+          if (handleChanged) {
             setHandleStatus(textMap.accountHandleSaving);
             const result = savedHandle
               ? await changeAccountHandle(handle)
@@ -893,6 +1046,7 @@ if (mount) {
             savedHandle = normalizeAccountHandle(result.handle || handle);
             profile = { ...profile, accountHandle: savedHandle };
             handleInput.value = savedHandle;
+            handleTouched = false;
             setHandleStatus("");
           }
           await upsertAccountDirectory({ ...user, company: nextCompany });
@@ -911,17 +1065,27 @@ if (mount) {
           isAvailable = false;
           checkedHandle = "";
         } finally {
-          accountSave.disabled = false;
+          refreshAccountSave();
           setTopbarSaveStatus("");
         }
       });
       if (!savedHandle) renderAvailability();
+      refreshAccountSave();
     }
 
     await Promise.all([
       loadCounts(user.uid),
       loadStorageUsage(user.uid),
-      initTabOrderPreferences(user.uid)
+      initTabOrderPreferences(user.uid),
+      (async () => {
+        notificationPreferences = await fetchNotificationPreferences(user.uid);
+        savedNotificationPreferences = notificationPreferences;
+        if (notificationEmailEnabled) notificationEmailEnabled.checked = notificationPreferences.email.enabled;
+        if (notificationMachineOutOfService) notificationMachineOutOfService.checked = notificationPreferences.email.events.machineOutOfService;
+        if (notificationMachineOperationalAgain) notificationMachineOperationalAgain.checked = notificationPreferences.email.events.machineOperationalAgain;
+        updateNotificationEventAvailability();
+        refreshNotificationsSave();
+      })()
     ]);
     setTopbarLogoLoading("settings", false);
     upsertAccountDirectory(user).catch(() => {});
@@ -1040,8 +1204,12 @@ if (mount) {
         input.addEventListener("change", () => {
           if (!input.checked) return;
           root.setAttribute("data-theme", input.value);
+          refreshPreferencesSave();
         });
       });
+      savedPreferenceTheme = current;
+      preferencesReady = true;
+      refreshPreferencesSave();
     }
 
     if (preferencesSave) {
@@ -1051,6 +1219,7 @@ if (mount) {
         if (preferencesSaveStatus) preferencesSaveStatus.textContent = "";
         try {
           await saveTabOrderPreference();
+          markTabOrderSaved();
           const selectedTheme = prefsBody?.querySelector(
             'input[name="profile-theme"]:checked'
           )?.value;
@@ -1058,6 +1227,7 @@ if (mount) {
             try {
               localStorage.setItem("theme", selectedTheme);
             } catch {}
+            savedPreferenceTheme = selectedTheme;
           }
           const selectedLanguage = prefsBody?.querySelector(
             'input[name="profile-language"]:checked'
@@ -1071,11 +1241,35 @@ if (mount) {
         } catch {
           if (preferencesSaveStatus) preferencesSaveStatus.textContent = textMap.saveError;
         } finally {
-          preferencesSave.disabled = false;
+          refreshPreferencesSave();
           setTopbarSaveStatus("");
         }
       });
     }
+
+    [notificationEmailEnabled, notificationMachineOutOfService, notificationMachineOperationalAgain]
+      .filter(Boolean)
+      .forEach((input) => input.addEventListener("change", () => {
+        updateNotificationEventAvailability();
+        refreshNotificationsSave();
+      }));
+    notificationsSave?.addEventListener("click", async () => {
+      notificationsSave.disabled = true;
+      setTopbarSaveStatus(textMap.saving);
+      if (notificationsSaveStatus) notificationsSaveStatus.textContent = "";
+      try {
+        const next = readNotificationPreferences();
+        await saveNotificationPreferences(user.uid, next);
+        notificationPreferences = next;
+        savedNotificationPreferences = next;
+        if (notificationsSaveStatus) notificationsSaveStatus.textContent = textMap.saved;
+      } catch {
+        if (notificationsSaveStatus) notificationsSaveStatus.textContent = textMap.saveError;
+      } finally {
+        refreshNotificationsSave();
+        setTopbarSaveStatus("");
+      }
+    });
 
     if (logoutLink) {
       logoutLink.addEventListener("click", async (e) => {

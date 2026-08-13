@@ -22,6 +22,7 @@ const TEXT = {
       login: "Iniciar sesi\u00f3n",
       logout: "Cerrar sesi\u00f3n",
       register: "Registrarse",
+      dashboard: "Dashboard",
       settings: "Configuraci\u00f3n",
     },
     footer: {
@@ -35,6 +36,7 @@ const TEXT = {
       login: "Sign in",
       logout: "Sign out",
       register: "Register",
+      dashboard: "Dashboard",
       settings: "Settings",
     },
     footer: {

@@ -74,6 +74,26 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    match /user_notification_preferences/{uid} {
+      allow get: if isSignedIn() && request.auth.uid == uid;
+      allow list, delete: if false;
+      allow create, update: if isSignedIn()
+        && request.auth.uid == uid
+        && request.resource.data.keys()
+          .hasOnly(["email", "schemaVersion", "updatedAt"])
+        && request.resource.data.schemaVersion == 1
+        && request.resource.data.updatedAt is timestamp
+        && request.resource.data.email is map
+        && request.resource.data.email.keys().hasOnly(["enabled", "events"])
+        && request.resource.data.email.enabled is bool
+        && request.resource.data.email.events is map
+        && request.resource.data.email.events.keys().hasOnly([
+          "machineOutOfService", "machineOperationalAgain"
+        ])
+        && request.resource.data.email.events.machineOutOfService is bool
+        && request.resource.data.email.events.machineOperationalAgain is bool;
+    }
+
     match /tags/{tagId} {
       allow get, list: if isSignedIn();
 

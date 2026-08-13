@@ -93,7 +93,6 @@ export const createMachineCard = (machine, options = {}) => {
     onAddTask: null,
     onRemoveTask: null,
     onCompleteTask: null,
-    onUpdateNotifications: null,
     onTestNotification: null,
     onUpdateAdmin: null,
     onRemoveAdmin: null,

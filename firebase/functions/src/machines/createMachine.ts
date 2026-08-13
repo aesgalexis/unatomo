@@ -72,7 +72,6 @@ export const createOwnedMachine = onCall(async (request) => {
       ownershipTransferEmail: "",
       ownershipTransferStatus: "",
       activeStatusCycleId: "",
-      notifications: safeObject(input.notifications),
       createdAt: now,
       updatedAt: now,
       updatedBy: auth.uid,

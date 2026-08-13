@@ -39,6 +39,7 @@ Read this before changing data flows, callable functions, machine ownership, adm
 - `admin_invites`: pending/accepted admin invitations.
 - `machine_transfer_invites`: pending/accepted/rejected machine ownership transfer requests.
 - `dashboard_layout/{uid}`: per-user dashboard grouping/layout preferences. Groups may include `parentGroupId` for one-level subgroups; `dashboardTitle` stores the user's editable dashboard topbar title; `registrySeenAt` stores the last time the user left the global registry view after seeing current activity; `machineViewMode` and `machineSortMode` store dashboard display preferences.
+- `user_notification_preferences/{uid}`: account-wide operational notification preferences. Version 1 stores the `email` channel and its explicit `machineOutOfService` and `machineOperationalAgain` events. It is owned and writable only by that user; it never stores a recipient address, because delivery resolves the authenticated account address server-side. Machine-level overrides are intentionally not implemented yet.
 - `dashboard_suggestions`: collaborator suggestions submitted from `#/sugerencias`. Normal collaborators see their own suggestions; `superadmin` sees all through callable functions.
 - `dashboard_todos`: legacy personal/shared task documents. The dashboard no
   longer reads this collection; account-wide Tasks are derived from the
@@ -200,6 +201,12 @@ frontend wrappers live under `static/js/dashboard/`.
   them through Resend with an idempotency key. Browser access to the outbox is
   denied. Welcome, verification, password reset, administrator invitation and
   ownership-transfer events are connected.
+- `notifyMachineStatusTransition`: private Firestore update trigger for
+  `machines`. It enqueues an operational email only for `operativa` →
+  `fuera_de_servicio` and `fuera_de_servicio` → `operativa`, after reading the
+  owner's `user_notification_preferences/{uid}`. It never sends for
+  `desconectada` or generic status changes, and uses an event-addressed outbox
+  document for idempotency.
 - `listControlPanelEmailTemplates`: superadmin-only catalogue of the account,
   security, access, invitation, and transfer templates. It returns ES/EN sample
   renders from the same versioned renderer used for delivery; it does not expose

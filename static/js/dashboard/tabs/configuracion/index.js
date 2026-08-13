@@ -1,6 +1,5 @@
 import { render as renderTag } from "./tag.js";
 import { render as renderUsuarios } from "./usuarios.js";
-import { render as renderNotificaciones } from "./notificaciones.js";
 import { t } from "../../i18n.js";
 
 export const render = (panel, machine, hooks, options = {}) => {
@@ -351,13 +350,6 @@ export const render = (panel, machine, hooks, options = {}) => {
   const sepAdmin = document.createElement("hr");
   sepAdmin.className = "mc-sep";
 
-  const sep2 = document.createElement("hr");
-  sep2.className = "mc-sep";
-
-  const notifsPanel = document.createElement("div");
-  notifsPanel.className = "mc-config-panel";
-  renderNotificaciones(notifsPanel, machine, hooks, options);
-
   const sep3 = document.createElement("hr");
   sep3.className = "mc-sep mc-config-footer-sep";
 
@@ -384,8 +376,6 @@ export const render = (panel, machine, hooks, options = {}) => {
   panel.appendChild(usersPanel);
   panel.appendChild(sepAdmin);
   panel.appendChild(adminPanel);
-  panel.appendChild(sep2);
-  panel.appendChild(notifsPanel);
   panel.appendChild(sep3);
   panel.appendChild(removeRow);
 };

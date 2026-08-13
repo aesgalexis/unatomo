@@ -10,17 +10,6 @@ import {
 const cleanText = (value: unknown, maxLength: number) =>
   (value || "").toString().trim().replace(/\s+/g, " ").slice(0, maxLength);
 
-const emptyNotifications = {
-  enabled: false,
-  email: "",
-  events: {
-    statusChanged: false,
-    taskOverdue: false,
-    taskLateCompleted: false,
-    tagDisconnected: false,
-  },
-};
-
 export const completeAccountOnboarding = onCall(async (request) => {
   const auth = request.auth;
   if (!auth) throw new HttpsError("unauthenticated", "auth-required");
@@ -150,7 +139,6 @@ export const completeAccountOnboarding = onCall(async (request) => {
         ownershipTransferEmail: "",
         ownershipTransferStatus: "",
         activeStatusCycleId: "",
-        notifications: emptyNotifications,
         createdAt: now,
         updatedAt: now,
         updatedBy: auth.uid,

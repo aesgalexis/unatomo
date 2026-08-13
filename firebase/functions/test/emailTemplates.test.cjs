@@ -35,10 +35,10 @@ const approvedSpanish = renderEmailTemplate("registration_code_approved", {
 assert.match(approvedSpanish.html, /los próximos 7 días/);
 assert.doesNotMatch(approvedSpanish.html, /las próximas 7 días/);
 
-assert.equal(EMAIL_TEMPLATE_DEFINITIONS.length, 11);
+assert.equal(EMAIL_TEMPLATE_DEFINITIONS.length, 13);
 assert.equal(
   EMAIL_TEMPLATE_DEFINITIONS.filter((item) => item.integration === "active").length,
-  11,
+  13,
 );
 const previousEmailNotice = renderEmailTemplate("email_change_old", {
   displayName: "Alex",

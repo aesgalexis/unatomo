@@ -234,7 +234,6 @@ export const upsertMachine = async (uid, machine) => {
     ownershipTransferEmail: machine.ownershipTransferEmail || "",
     ownershipTransferStatus: machine.ownershipTransferStatus || "",
     activeStatusCycleId: machine.activeStatusCycleId || "",
-    notifications: machine.notifications || null,
     updatedAt: serverTimestamp(),
     updatedBy: uid
   };

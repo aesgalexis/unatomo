@@ -1322,6 +1322,7 @@ body.nfc-public-page .contact-form-card .form-status[hidden] {
   font-weight:700;
   letter-spacing:0.02em;
   line-height:1;
+  overflow:hidden;
 }
 
 #session-menu-btn .session-menu-chevron{
@@ -1480,7 +1481,6 @@ body.nfc-public-page .contact-form-card .form-status[hidden] {
   flex-basis:1em;
   font-size:0.95rem;
   line-height:1;
-  overflow:hidden;
 }
 
 #session-menu-btn .session-menu-avatar img{
@@ -1488,6 +1488,7 @@ body.nfc-public-page .contact-form-card .form-status[hidden] {
   height:100%;
   display:block;
   object-fit:cover;
+  border-radius:50%;
 }
 
 #session-menu .session-menu-submenu-option > span:first-child{

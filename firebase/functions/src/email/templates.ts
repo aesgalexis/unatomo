@@ -18,7 +18,9 @@ export type EmailTemplateId =
   | "admin_invite"
   | "machine_transfer_requested"
   | "machine_transfer_completed"
-  | "account_activity";
+  | "account_activity"
+  | "machine_out_of_service"
+  | "machine_operational_again";
 
 export type EmailTemplateInput = {
   displayName: string;
@@ -36,7 +38,7 @@ export type EmailTemplateInput = {
 
 export type EmailTemplateDefinition = {
   id: EmailTemplateId;
-  category: "access" | "account" | "security" | "invitation";
+  category: "access" | "account" | "security" | "invitation" | "operational";
   hasButton: boolean;
   integration: "active" | "pending";
   labels: Record<EmailLanguage, {name: string; description: string}>;
@@ -59,6 +61,8 @@ export const EMAIL_TEMPLATE_DEFINITIONS: EmailTemplateDefinition[] = [
   {id: "machine_transfer_requested", category: "invitation", hasButton: true, integration: "active", labels: {es: {name: "Transferencia solicitada", description: "Solicita revisar una transferencia de propiedad."}, en: {name: "Transfer requested", description: "Requests review of an ownership transfer."}}},
   {id: "machine_transfer_completed", category: "account", hasButton: true, integration: "active", labels: {es: {name: "Transferencia completada", description: "Confirma que la propiedad de una máquina ha cambiado."}, en: {name: "Transfer completed", description: "Confirms that machine ownership has changed."}}},
   {id: "account_activity", category: "security", hasButton: false, integration: "active", labels: {es: {name: "Actividad importante", description: "Avisa de eliminaciones o intervenciones administrativas sensibles."}, en: {name: "Important activity", description: "Warns about deletion or sensitive administrative intervention."}}},
+  {id: "machine_out_of_service", category: "operational", hasButton: true, integration: "active", labels: {es: {name: "Equipo fuera de servicio", description: "Avisa de una transición operativa a fuera de servicio."}, en: {name: "Equipment out of service", description: "Alerts when equipment moves from operational to out of service."}}},
+  {id: "machine_operational_again", category: "operational", hasButton: true, integration: "active", labels: {es: {name: "Equipo operativo", description: "Avisa del retorno desde fuera de servicio a operativa."}, en: {name: "Equipment operational", description: "Alerts when equipment returns from out of service to operational."}}},
 ];
 
 const escapeHtml = (value: string) => value
@@ -159,6 +163,14 @@ export const renderEmailTemplate = (
     const detail = escapeHtml(clean(input.activityDetail, en ? "Your public username was changed." : "Se ha cambiado tu nombre de usuario público."));
     const subject = en ? `Important activity: ${activity}` : `Actividad importante: ${activity}`;
     return build(subject, shell({title: activity, preheader: subject, paragraphs: [detail, en ? `Recorded on ${escapeHtml(clean(input.occurredAt, "12 Aug 2026, 10:30"))}.` : `Registrado el ${escapeHtml(clean(input.occurredAt, "12 ago 2026, 10:30"))}.`, en ? "If you do not recognise this action, contact info@unatomo.com." : "Si no reconoces esta acción, contacta con info@unatomo.com."]}), `${greeting}\n\n${subject}\n${detail}`);
+  }
+  case "machine_out_of_service": {
+    const subject = en ? `${machine} is out of service` : `${machine} está fuera de servicio`;
+    return build(subject, shell({title: en ? "Equipment out of service" : "Equipo fuera de servicio", preheader: subject, paragraphs: [en ? `${machine} has changed from operational to out of service.` : `${machine} ha pasado de operativa a fuera de servicio.`, en ? "Open the dashboard to review the incident and the restoration task." : "Abre el dashboard para revisar la incidencia y la tarea de reactivación."], button: {label: en ? "Open dashboard" : "Abrir dashboard", url}}), `${greeting}\n\n${subject}\n${url}`);
+  }
+  case "machine_operational_again": {
+    const subject = en ? `${machine} is operational again` : `${machine} está operativa de nuevo`;
+    return build(subject, shell({title: en ? "Equipment operational" : "Equipo operativo", preheader: subject, paragraphs: [en ? `${machine} has returned from out of service to operational.` : `${machine} ha vuelto de fuera de servicio a operativa.`, en ? "Open the dashboard to review the completed work." : "Abre el dashboard para revisar el trabajo completado."], button: {label: en ? "Open dashboard" : "Abrir dashboard", url}}), `${greeting}\n\n${subject}\n${url}`);
   }
   }
 };

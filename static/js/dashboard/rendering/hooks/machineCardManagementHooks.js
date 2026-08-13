@@ -90,15 +90,6 @@ export const installMachineCardManagementHooks = (dependencies) => {
           updateMachine
         });
 
-        hooks.onUpdateNotifications = (id, next) => {
-          updateMachine(id, { notifications: next });
-          if (!state.selectedTabById) state.selectedTabById = {};
-          state.selectedTabById[id] = "configuracion";
-          state.expandedById = Array.from(expandedById);
-          renderCards({ preserveScroll: true });
-          autoSave.scheduleSave(id, "notifications");
-        };
-
         hooks.onUpdateAdmin = async (id, email) => {
           const current = getDraftById(id);
           if (!current) return false;
