@@ -1,6 +1,7 @@
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 import { auth, functions } from "/static/js/firebase/firebaseApp.js";
 import { getCurrentLang } from "/static/js/site/locale.js";
+import { setTopbarLogoLoading } from "/static/js/topbar/loading-logo.js";
 import { isControlPanelUser } from "/nfc/controlpanel/access.js";
 import { createControlPanelCallables } from "./panelCallables.js";
 import { createCodesRenderer } from "./panelCodes.js";
@@ -21,7 +22,24 @@ import { createPanelText } from "./panelText.js";
 const mount = document.getElementById("controlpanel-mount");
 const isEn = getCurrentLang() === "en";
 const text = createPanelText(isEn);
-const callables = createControlPanelCallables(functions);
+let pendingPanelOperations = 0;
+const trackPanelOperation = async (operation) => {
+  pendingPanelOperations += 1;
+  setTopbarLogoLoading("control-panel", true);
+  try {
+    return await operation();
+  } finally {
+    pendingPanelOperations = Math.max(0, pendingPanelOperations - 1);
+    setTopbarLogoLoading("control-panel", pendingPanelOperations > 0);
+  }
+};
+const rawCallables = createControlPanelCallables(functions);
+const callables = Object.fromEntries(
+  Object.entries(rawCallables).map(([name, callable]) => [
+    name,
+    (...args) => trackPanelOperation(() => callable(...args))
+  ])
+);
 const { renderSystemStatus, renderIntegrityStatus } = createSystemIntegrityRenderer({
   text,
   isEn
@@ -375,9 +393,9 @@ if (mount) {
     if (!codeStatsBody) return;
     renderState(codeStatsBody, text.codeStatsHint, text.codeStatsLoading);
     try {
-      const response = await fetch(`/static/data/code-stats.json?ts=${Date.now()}`, {
-        cache: "no-store"
-      });
+      const response = await trackPanelOperation(() =>
+        fetch(`/static/data/code-stats.json?ts=${Date.now()}`, { cache: "no-store" })
+      );
       if (!response.ok) throw new Error("code-stats-unavailable");
       const stats = await response.json();
       renderCodeStats(codeStatsBody, stats);
@@ -390,9 +408,9 @@ if (mount) {
     if (!backupBody) return;
     renderState(backupBody, text.backupHint, text.backupLoading);
     try {
-      const response = await fetch(`/static/data/nfc-backup-status-public.json?ts=${Date.now()}`, {
-        cache: "no-store"
-      });
+      const response = await trackPanelOperation(() =>
+        fetch(`/static/data/nfc-backup-status-public.json?ts=${Date.now()}`, { cache: "no-store" })
+      );
       if (!response.ok) throw new Error("backup-status-unavailable");
       const status = await response.json();
       renderBackupStatus(backupBody, status);
@@ -405,9 +423,9 @@ if (mount) {
     if (!whatsNewBody) return;
     renderState(whatsNewBody, text.whatsNewHint, text.whatsNewLoading);
     try {
-      const response = await fetch(`/static/data/codex-flags.json?ts=${Date.now()}`, {
-        cache: "no-store"
-      });
+      const response = await trackPanelOperation(() =>
+        fetch(`/static/data/codex-flags.json?ts=${Date.now()}`, { cache: "no-store" })
+      );
       const flags = response.ok ? await response.json() : {};
       renderWhatsNewControl(whatsNewBody, flags);
     } catch {

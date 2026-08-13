@@ -8,6 +8,8 @@ export const createUsersRenderer = ({ text }) => {
 
     const status = document.createElement("p");
     status.className = "controlpanel-state";
+    status.setAttribute("role", "status");
+    status.setAttribute("aria-live", "polite");
     status.hidden = true;
     body.appendChild(status);
 

@@ -49,7 +49,7 @@ body.onboarding-page { min-height: 100svh; margin: 0; background: color-mix(in s
 .onboarding-card.is-creating .onboarding-intro,
 .onboarding-card.is-creating .onboarding-form { display: none; }
 .onboarding-card.is-creating .onboarding-card-tools { padding: 2.4rem 2rem 1.25rem; justify-content: center; }
-.onboarding-card.is-creating .onboarding-logo { width: 72px; height: 72px; animation: topbarLogoSpin 1s linear infinite; }
+.onboarding-card.is-creating .onboarding-logo { width: 72px; height: 72px; }
 .onboarding-card.is-creating .onboarding-creating { display: block; }
 @media (max-width: 520px) { .onboarding-main { padding: 1rem 1.25rem; } .onboarding-card { border-radius: 1rem; } .ownership-options { grid-template-columns: 1fr; } }
 @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }

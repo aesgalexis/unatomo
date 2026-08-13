@@ -117,3 +117,6 @@ form.addEventListener("submit", async (event) => {
       : "No pudimos crear tu espacio de trabajo. Inténtalo de nuevo.";
   }
 });
+import { initTopbarLogoMotion } from "/static/js/topbar/loading-logo.js";
+
+initTopbarLogoMotion();

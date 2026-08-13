@@ -1,9 +1,23 @@
 const activeSources = new Set();
+const NORMAL_PLAYBACK_RATE = 1;
+const LOADING_PLAYBACK_RATE = 60;
+
+const syncPlaybackRate = (logo, loading) => {
+  const animation = logo
+    .getAnimations()
+    .find((item) => item.animationName === "topbarLogoSpin");
+  if (!animation) return;
+  animation.updatePlaybackRate(
+    loading ? LOADING_PLAYBACK_RATE : NORMAL_PLAYBACK_RATE
+  );
+};
 
 const render = () => {
   const logo = document.querySelector(".topbar-logo--rotating");
   if (!logo) return;
-  logo.classList.toggle("is-loading", activeSources.size > 0);
+  const loading = activeSources.size > 0;
+  logo.classList.toggle("is-loading", loading);
+  syncPlaybackRate(logo, loading);
 };
 
 export const setTopbarLogoLoading = (source, loading) => {
@@ -22,6 +36,7 @@ const activitySelector = [
   "[aria-busy='true']",
   ".dashboard-loading",
   ".is-loading",
+  ".is-creating",
   ".is-uploading",
   ".is-downloading"
 ].join(",");

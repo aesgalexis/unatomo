@@ -230,13 +230,18 @@ export const createDashboardDataController = (dependencies) => {
         ? { ...m, order: orderCache[m.id] }
         : m
     );
-    const merged = await mergeOperationalFromTag(withOrder);
     if (token !== rebuildToken) return;
     if (!state.initialGroupPriorityReady) {
-      buildInitialGroupPriorityOrder(merged);
+      buildInitialGroupPriorityOrder(withOrder);
     }
-    setRemote(merged);
+    setRemote(withOrder);
     renderCards({ preserveScroll });
+
+    if (!withOrder.some((machine) => machine.tagId)) return;
+    const merged = await mergeOperationalFromTag(withOrder);
+    if (token !== rebuildToken) return;
+    setRemote(merged);
+    renderCards({ preserveScroll: true });
   };
 
   const scheduleRebuild = (options = {}) => {
