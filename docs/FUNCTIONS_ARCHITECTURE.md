@@ -57,6 +57,9 @@ firebase/functions/src/
   previews of that same catalogue so the control panel cannot drift from the
   production renderer.
 - Domain modules own callable implementations and feature-specific helpers.
+- `machines/statusTransitions.ts` owns the pure machine-status domain model;
+  `machines/status.ts` exposes the owner/admin transactional callable, while
+  local QR/NFC operations reuse the same model from `machines/access.ts`.
 - `core/storage.ts` owns shared Storage copy/delete primitives, while
   `core/storageQuota.ts` owns the account quota calculation.
 
@@ -147,3 +150,13 @@ must not be used as source files.
   deletes the redeemed code atomically.
 - Added a superadmin cleanup callable for legacy `users.regCode` fields.
 - The public callable boundary now contains 46 exports.
+
+### 2026-08-13 - Canonical machine lifecycle events
+
+- Added the transactional `transitionMachineStatus` callable and shared status
+  transition model.
+- Dashboard and QR/NFC transitions now update `machines`, `machine_access`,
+  restoration tasks and history through that backend-owned definition.
+- Added server-only `machine_domain_events`; operational email consumes those
+  events instead of deriving meaning independently from machine updates.
+- The public Functions boundary contains 68 exports.

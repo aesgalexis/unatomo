@@ -78,6 +78,7 @@ export {
 } from "./machines/tags";
 export {createOwnedMachine} from "./machines/createMachine";
 export {deleteMachine} from "./machines/deleteMachine";
+export {transitionMachineStatus} from "./machines/status";
 export {
   deleteGlobalLocalUserAccess,
   saveGlobalLocalUserAccess,

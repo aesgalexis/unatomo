@@ -38,6 +38,7 @@ import {
   setTopbarLogoLoading
 } from "/static/js/topbar/loading-logo.js";
 import { setTopbarSaveStatus } from "/static/js/topbar/save-status.js";
+import { isControlPanelUser } from "/nfc/controlpanel/access.js";
 import { calculateStorageUsage, formatBytes, STORAGE_LIMIT_BYTES } from "./storageUsage.js";
 import {
   checkAccountHandleAvailability,
@@ -565,17 +566,17 @@ if (mount) {
 
   if (securityBody) {
     securityBody.innerHTML = `
-      <div class="profile-row profile-row-stack">
+      <div class="profile-row profile-row-stack profile-password-row" id="profile-password-row" hidden>
         <span class="profile-label">${textMap.changePassword}</span>
         <input class="profile-input" id="profile-current-password" type="password" autocomplete="current-password" placeholder="${textMap.currentPassword}" />
         <input class="profile-input" id="profile-new-password" type="password" minlength="8" maxlength="128" autocomplete="new-password" placeholder="${textMap.newPassword}" />
         <input class="profile-input" id="profile-confirm-password" type="password" minlength="8" maxlength="128" autocomplete="new-password" placeholder="${textMap.confirmPassword}" />
-        <div class="profile-form-actions"><button class="profile-save-btn" id="profile-change-password" type="button">${textMap.changePassword}</button></div>
+        <div class="profile-form-actions"><button class="profile-save-btn" id="profile-change-password" type="button" disabled>${textMap.changePassword}</button></div>
       </div>
       <div class="profile-row profile-row-stack">
         <span class="profile-label">${textMap.changeEmail}</span>
         <input class="profile-input" id="profile-new-email" type="email" maxlength="320" autocomplete="email" placeholder="${textMap.newEmail}" />
-        <div class="profile-form-actions"><button class="profile-save-btn" id="profile-change-email" type="button">${textMap.changeEmail}</button></div>
+        <div class="profile-form-actions"><button class="profile-save-btn" id="profile-change-email" type="button" disabled>${textMap.changeEmail}</button></div>
       </div>
       <span class="profile-save-status" id="profile-security-status" aria-live="polite"></span>
       <div class="profile-row">
@@ -610,6 +611,7 @@ if (mount) {
   const storageNoteEl = storageBody?.querySelector("#profile-storage-note");
   const logoutLink = securityBody?.querySelector("#profile-logout");
   const currentPasswordInput = securityBody?.querySelector("#profile-current-password");
+  const passwordRow = securityBody?.querySelector("#profile-password-row");
   const newPasswordInput = securityBody?.querySelector("#profile-new-password");
   const confirmPasswordInput = securityBody?.querySelector("#profile-confirm-password");
   const changePasswordButton = securityBody?.querySelector("#profile-change-password");
@@ -1096,10 +1098,55 @@ if (mount) {
       if (state) securityStatus.dataset.state = state;
       else securityStatus.removeAttribute("data-state");
     };
-    const reauthenticateAccount = async () => {
-      const usesGoogle = user.providerData.some(
-        (provider) => provider.providerId === "google.com"
+    const tokenResult = await user.getIdTokenResult();
+    const signInProvider = tokenResult.signInProvider || "";
+    const usesGoogle = signInProvider === "google.com";
+    const signedInWithPassword = signInProvider === "password";
+    const isSuperadmin = await isControlPanelUser(user);
+    const showPasswordRow = signedInWithPassword || isSuperadmin;
+    if (passwordRow) {
+      passwordRow.hidden = !showPasswordRow;
+      passwordRow.classList.toggle(
+        "is-superadmin-preview",
+        isSuperadmin && !signedInWithPassword
       );
+    }
+    [currentPasswordInput, newPasswordInput, confirmPasswordInput]
+      .forEach((input) => {
+        if (input) input.disabled = !signedInWithPassword;
+      });
+    let securityActionPending = false;
+    const hasReauthenticationInput = () =>
+      usesGoogle || !!currentPasswordInput?.value;
+    const refreshSecurityActions = () => {
+      const password = newPasswordInput?.value || "";
+      const confirmation = confirmPasswordInput?.value || "";
+      const newEmail = newEmailInput?.value.trim().toLowerCase() || "";
+      const currentEmail = (user.email || "").trim().toLowerCase();
+      const canChangeCredentials = user.emailVerified && !securityActionPending;
+      if (changePasswordButton) {
+        changePasswordButton.disabled = !(
+          canChangeCredentials &&
+          signedInWithPassword &&
+          hasReauthenticationInput() &&
+          password.length >= 8 &&
+          password === confirmation
+        );
+      }
+      if (changeEmailButton) {
+        changeEmailButton.disabled = !(
+          canChangeCredentials &&
+          hasReauthenticationInput() &&
+          !!newEmail &&
+          newEmail !== currentEmail &&
+          newEmailInput?.checkValidity()
+        );
+      }
+    };
+    [currentPasswordInput, newPasswordInput, confirmPasswordInput, newEmailInput]
+      .forEach((input) => input?.addEventListener("input", refreshSecurityActions));
+    refreshSecurityActions();
+    const reauthenticateAccount = async () => {
       if (usesGoogle) {
         await reauthenticateWithPopup(user, new GoogleAuthProvider());
         return;
@@ -1141,7 +1188,8 @@ if (mount) {
         confirmPasswordInput?.focus();
         return;
       }
-      changePasswordButton.disabled = true;
+      securityActionPending = true;
+      refreshSecurityActions();
       setSecurityStatus(textMap.saving);
       try {
         await reauthenticateAccount();
@@ -1154,7 +1202,8 @@ if (mount) {
       } catch {
         setSecurityStatus(textMap.securityActionError, "error");
       } finally {
-        changePasswordButton.disabled = false;
+        securityActionPending = false;
+        refreshSecurityActions();
       }
     });
 
@@ -1168,7 +1217,8 @@ if (mount) {
         newEmailInput?.focus();
         return;
       }
-      changeEmailButton.disabled = true;
+      securityActionPending = true;
+      refreshSecurityActions();
       setSecurityStatus(textMap.saving);
       try {
         await reauthenticateAccount();
@@ -1179,7 +1229,8 @@ if (mount) {
       } catch {
         setSecurityStatus(textMap.securityActionError, "error");
       } finally {
-        changeEmailButton.disabled = false;
+        securityActionPending = false;
+        refreshSecurityActions();
       }
     });
 

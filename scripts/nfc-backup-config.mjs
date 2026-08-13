@@ -2,6 +2,7 @@ export const NFC_FIRESTORE_COLLECTIONS = [
   "machines",
   "dashboard_layout",
   "machine_access",
+  "machine_domain_events",
   "tags",
   "admin_machine_links",
   "admin_machine_invites",

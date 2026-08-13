@@ -1,11 +1,14 @@
 import { openOperationalReturnModal } from "../../components/operationalReturnModal/operationalReturnModal.js";
+import {
+  machineStatusResultPatch,
+  transitionMachineStatus
+} from "../../machineStatusRepo.js";
 
 export const installMachineCardCoreHooks = (dependencies) => {
   const {
     assertStorageAvailable,
     autoSave,
     buildAddTaskAttachmentsUpdate,
-    buildStatusToggleUpdate,
     clearMobileDetailState,
     collapseCard,
     expandCard,
@@ -127,28 +130,23 @@ export const installMachineCardCoreHooks = (dependencies) => {
           const targetStatus = incidentDetails?.disconnected
             ? "desconectada"
             : nextStatus;
-          const statusUpdate = buildStatusToggleUpdate(
-            machine.id,
-            current,
-            targetStatus,
-            user,
-            {
-              normalizeStatus,
-              restoreTitle: (incidentDetails?.title || "").trim() || defaultRestoreTitle,
-              restoreDescription: (incidentDetails?.description || "").trim(),
-              restoreNote: (incidentDetails?.note || "").trim()
-            }
-          );
-          const operationalNote = (operationalDetails?.note || "").trim();
-          if (operationalNote) {
-            statusUpdate.logs.push({
-              ts: new Date().toISOString(),
-              type: "intervencion",
-              message: operationalNote.slice(0, 512),
+          let statusResult;
+          try {
+            statusResult = await transitionMachineStatus(
+              machine.id,
+              targetStatus,
               user,
-              source: "status-return"
-            });
+              {
+                restoreTitle: (incidentDetails?.title || "").trim() || defaultRestoreTitle,
+                restoreDescription: (incidentDetails?.description || "").trim(),
+                note: (incidentDetails?.note || operationalDetails?.note || "").trim()
+              }
+            );
+          } catch {
+            notifyTopbar(t("dashboard.saveError", "Error al guardar"));
+            return;
           }
+          const statusUpdate = machineStatusResultPatch(statusResult);
           replaceMachine(machine.id, {
             ...current,
             ...statusUpdate
@@ -160,9 +158,7 @@ export const installMachineCardCoreHooks = (dependencies) => {
               ? operationalDetails.images
               : [];
           const restoreTask = statusUpdate.tasks?.find(
-            (task) =>
-              task.source === RESTORE_OPERATION_TASK_SOURCE &&
-              task.statusCycleId === statusUpdate.activeStatusCycleId
+            (task) => task.id === statusResult.restoreTaskId
           );
           const uploadedAttachments = [];
           let failedUploads = 0;
@@ -202,11 +198,13 @@ export const installMachineCardCoreHooks = (dependencies) => {
                 uploadedAttachments,
                 user
               );
-              if (attachmentUpdate) updateMachine(machine.id, attachmentUpdate);
+              if (attachmentUpdate) {
+                updateMachine(machine.id, attachmentUpdate);
+                autoSave.saveNow(machine.id, "status-images");
+              }
             }
           }
           renderCards({ preserveScroll: true });
-          autoSave.saveNow(machine.id, "status");
           if (failedUploads) {
             notifyTopbar(
               t(

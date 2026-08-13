@@ -10,6 +10,7 @@ import {
   admin,
   db,
   linksCol,
+  machineDomainEventsCol,
   machineAccessCol,
   machinesCol,
 } from "../core/firebase";
@@ -22,6 +23,11 @@ import {
   filterTaskDataForUser,
   getTaskAssignee,
 } from "./taskVisibility";
+import {
+  buildMachineStatusTransition,
+  MachineStatus,
+  normalizeMachineStatus,
+} from "./statusTransitions";
 
 const MACHINE_SESSION_TTL_MS = 8 * 60 * 60 * 1000;
 const MACHINE_SESSION_CLEANUP_LIMIT = 400;
@@ -223,7 +229,7 @@ const normalizeTaskAssignments = (
   const users = (Array.isArray(usersValue) ? usersValue : [])
     .filter((raw) => raw && typeof raw === "object")
     .map((raw) => raw as Record<string, unknown>);
-  return tasks.map((task) => {
+  return tasks.map((task): Record<string, unknown> => {
     if (!task.assignedTo) return {...task, assignedTo: null};
     const assignee = getTaskAssignee(task);
     if (!assignee) {
@@ -688,6 +694,9 @@ export const updateMachineAccessOperational = onCall(
     }
 
     const status = (patch.status || "operativa").toString();
+    const statusTransition =
+      patch.statusTransition && typeof patch.statusTransition === "object" ?
+        patch.statusTransition as Record<string, unknown> : {};
     const logs = Array.isArray(patch.logs) ? patch.logs : null;
     const tasks = Array.isArray(patch.tasks) ? patch.tasks : null;
     if (
@@ -796,15 +805,124 @@ export const updateMachineAccessOperational = onCall(
     );
     const mergedLogs = [...currentLogs, ...appendedLogs];
 
-    await accessRef.update({
-      status,
-      logs: mergedLogs,
-      tasks: mergedTasks,
-      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-      updatedBy: (session.username || "machine").toString(),
-    });
+    const previousStatus = normalizeMachineStatus(access.status);
+    let appliedTransitionPatch: Record<string, unknown> | null = null;
+    if (previousStatus !== status) {
+      const operationId = randomBytes(16).toString("hex");
+      const occurredAt = new Date().toISOString();
+      const actor = (session.username || "machine").toString();
+      const proposedRestoreTask = nextVisibleTasks.find((task) =>
+        task.source === "status-out-of-service",
+      );
+      const proposedNotes = Array.isArray(proposedRestoreTask?.notes) ?
+        proposedRestoreTask.notes as Array<Record<string, unknown>> : [];
+      const appendedNote = [...appendedLogs].reverse().find((log) =>
+        log.type === "task_note_added" &&
+        log.source === "status-out-of-service",
+      );
+      const attachments = appendedLogs
+        .filter((log) =>
+          log.type === "task_attachment_added" &&
+          log.source === "status-out-of-service",
+        )
+        .map((log) => ({
+          id: log.attachmentId,
+          documentId: log.documentId,
+          name: log.attachmentName,
+          url: log.attachmentUrl,
+          storagePath: log.storagePath,
+          contentType: log.contentType,
+          uploadedAt: log.ts,
+          uploadedBy: actor,
+        }));
+      const transition = buildMachineStatusTransition({
+        machineId,
+        machine: {
+          ...machine,
+          status: previousStatus,
+          tasks: currentTasks,
+          logs: currentLogs,
+          activeStatusCycleId:
+            access.activeStatusCycleId || machine.activeStatusCycleId,
+        },
+        targetStatus: status as MachineStatus,
+        actor,
+        operationId,
+        occurredAt,
+        language: statusTransition.language === "en" ? "en" : "es",
+        restoreTaskId: (proposedRestoreTask?.id || "").toString(),
+        restoreTitle: (
+          statusTransition.restoreTitle || proposedRestoreTask?.title || ""
+        ).toString(),
+        restoreDescription:
+          (proposedRestoreTask?.description || "").toString(),
+        note: (
+          appendedNote?.note ||
+          proposedNotes[proposedNotes.length - 1]?.text ||
+          ""
+        ).toString(),
+        attachments,
+      });
+      const eventId = transition.eventType ?
+        `machine-status-${machineId}-${operationId}` : "";
+      appliedTransitionPatch = transition.patch;
+      await db.runTransaction(async (transaction) => {
+        const [latestAccessSnap, latestMachineSnap] = await Promise.all([
+          transaction.get(accessRef),
+          transaction.get(machinesCol().doc(machineId)),
+        ]);
+        if (
+          normalizeMachineStatus(latestAccessSnap.data()?.status) !==
+            previousStatus ||
+          normalizeMachineStatus(latestMachineSnap.data()?.status) !==
+            normalizeMachineStatus(machine.status)
+        ) {
+          throw new HttpsError("aborted", "status-changed-concurrently");
+        }
+        const operationalPatch = {
+          ...transition.patch,
+          lastStatusOperationId: operationId,
+          lastStatusRestoreTaskId: transition.restoreTaskId,
+          lastStatusEventId: eventId,
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+          updatedBy: actor,
+        };
+        transaction.update(accessRef, operationalPatch);
+        transaction.update(machinesCol().doc(machineId), operationalPatch);
+        if (transition.eventType) {
+          transaction.create(machineDomainEventsCol().doc(eventId), {
+            id: eventId,
+            type: transition.eventType,
+            machineId,
+            ownerUid,
+            actor: {
+              uid: (session.userId || "").toString(),
+              label: actor,
+              source: "machine_access",
+            },
+            occurredAt,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            schemaVersion: 1,
+            data: {
+              previousStatus: transition.previousStatus,
+              currentStatus: transition.currentStatus,
+              statusCycleId: transition.statusCycleId,
+              restoreTaskId: transition.restoreTaskId,
+            },
+          });
+        }
+      });
+    } else {
+      await accessRef.update({
+        status,
+        logs: mergedLogs,
+        tasks: mergedTasks,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        updatedBy: (session.username || "machine").toString(),
+      });
+    }
 
-    return {ok: true};
+    return {ok: true, operationalPatch: appliedTransitionPatch};
   },
 );
 

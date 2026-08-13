@@ -39,6 +39,10 @@ email actions, notification preferences, or the control-panel email view.
 - `firebase/functions/src/email/recipients.ts`: recipient language/name lookup
   and localized dashboard URLs.
 - `firebase/functions/src/email/resend.ts`: Firestore trigger and Resend API.
+- `firebase/functions/src/machines/statusTransitions.ts`: canonical machine
+  lifecycle transitions, restoration tasks and status history.
+- `firebase/functions/src/notifications/machineStatus.ts`: operational email
+  consumer for server-only `machine_domain_events`.
 - `firebase/functions/src/controlPanel/emailTemplates.ts`: superadmin preview
   catalog, rendered from the same production templates.
 - `nfc/controlpanel/panelEmailTemplates.js`: list and ES/EN preview UI.
@@ -94,6 +98,10 @@ in an outbox record.
 - Machine configuration no longer stores or edits recipient addresses or
   notification events. A future machine override must layer on these global
   preferences without changing account/security email behavior.
+- Dashboard and QR/NFC status changes use the same backend transition model.
+  The transition atomically updates the machine and operational projection and
+  writes one canonical event. Email delivery consumes that event; it does not
+  infer lifecycle meaning independently from before/after status fields.
 
 ## Account security flow
 

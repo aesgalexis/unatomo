@@ -224,9 +224,20 @@ service cloud.firestore {
       allow update: if isSignedIn()
         && resource.data.ownerUid is string
         && (resource.data.ownerUid == request.auth.uid
-          || isAcceptedAdminOfMachine(resource.data.ownerUid, machineId));
+          || isAcceptedAdminOfMachine(resource.data.ownerUid, machineId))
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+          'status',
+          'activeStatusCycleId',
+          'lastStatusOperationId',
+          'lastStatusRestoreTaskId',
+          'lastStatusEventId'
+        ]);
       allow delete: if isSignedIn()
         && resource.data.ownerUid == request.auth.uid;
+    }
+
+    match /machine_domain_events/{eventId} {
+      allow read, write: if false;
     }
 
     match /usernames/{docId} {

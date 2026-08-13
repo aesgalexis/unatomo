@@ -7,6 +7,10 @@ import {
   buildRemoveTaskUpdate
 } from "/static/js/dashboard/tabs/tasks/taskActions.js";
 import { openOperationalReturnModal } from "/static/js/dashboard/components/operationalReturnModal/operationalReturnModal.js";
+import {
+  machineStatusResultPatch,
+  transitionMachineStatus
+} from "/static/js/dashboard/machineStatusRepo.js";
 
 const RESTORE_OPERATION_TASK_SOURCE = "status-out-of-service";
 
@@ -145,7 +149,7 @@ export const installTaskHooks = (hooks, deps = {}) => {
 
       const user = getUserLabel();
       const noteText = isRestoreTask ? (details?.note || "").trim() : "";
-      if (noteText) {
+      if (noteText && !isRestoreTask) {
         const current = getDraftById(id);
         const noteUpdate = buildAddTaskNoteUpdate(current, taskId, noteText, user);
         if (noteUpdate) updateMachine(id, noteUpdate);
@@ -181,6 +185,33 @@ export const installTaskHooks = (hooks, deps = {}) => {
           } catch {
             failedUploads += 1;
           }
+        }
+      }
+      if (isRestoreTask) {
+        try {
+          const result = await transitionMachineStatus(
+            id,
+            "operativa",
+            user,
+            {
+              restoreTaskId: taskId,
+              note: noteText,
+              attachments: uploadedAttachments
+            }
+          );
+          updateMachine(id, machineStatusResultPatch(result));
+          showTaskTab(id);
+          renderCards({ preserveScroll: true });
+          notifyTopbar(t("dashboard.taskCompleted", "Tarea completada"));
+          if (failedUploads) {
+            notifyTopbar(t("dashboard.incidentImageUploadError", "Alguna imagen no se pudo subir"));
+          } else if (uploadedAttachments.length) {
+            notifyTopbar(t("dashboard.incidentImagesUploaded", "Imágenes guardadas"));
+          }
+          return true;
+        } catch {
+          notifyTopbar(t("dashboard.saveError", "Error al guardar"));
+          return false;
         }
       }
       if (uploadedAttachments.length) {

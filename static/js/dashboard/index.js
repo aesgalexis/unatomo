@@ -22,8 +22,7 @@ import { generateSaltBase64, hashPassword } from "/static/js/utils/crypto.js";
 import { getTaskTiming } from "/static/js/dashboard/tabs/tasks/tasksTime.js";
 import {
   RESTORE_OPERATION_TASK_SOURCE,
-  buildAddTaskAttachmentsUpdate,
-  buildStatusToggleUpdate
+  buildAddTaskAttachmentsUpdate
 } from "/static/js/dashboard/tabs/tasks/taskActions.js";
 import { filterMachines } from "./components/machineSearch/machineFilter.js";
 import { createMachineSearchBar } from "./components/machineSearch/machineSearchBar.js";
@@ -668,7 +667,6 @@ if (mount) {
     autoSave,
     buildAddTaskAttachmentsUpdate,
     buildMachineTagUrl,
-    buildStatusToggleUpdate,
     cancelMachineTransferInvite,
     captureViewportAnchor,
     cardRefs,

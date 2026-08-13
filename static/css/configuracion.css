@@ -108,6 +108,10 @@
   border-bottom: 1px solid color-mix(in srgb, var(--fg) 8%, transparent);
 }
 
+.profile-row[hidden] {
+  display: none;
+}
+
 .profile-row:last-child {
   border-bottom: none;
 }
@@ -122,6 +126,10 @@
 .profile-label {
   color: color-mix(in srgb, var(--fg) 70%, transparent);
   font-size: 13px;
+}
+
+.profile-password-row.is-superadmin-preview > .profile-label {
+  color: #7c3aed;
 }
 
 .profile-value {

@@ -456,8 +456,8 @@ const callableExports = Array.from(
   .map((name) => name.trim())
   .filter(Boolean);
 addCheck(
-  callableExports.length === 67 && new Set(callableExports).size === 67,
-  "Functions index.ts preserves 67 unique function exports"
+  callableExports.length === 68 && new Set(callableExports).size === 68,
+  "Functions index.ts preserves 68 unique function exports"
 );
 
 [
@@ -513,8 +513,7 @@ addCheck(
   "buildRemoveTaskUpdate",
   "buildAddTaskNoteUpdate",
   "buildEditTaskUpdate",
-  "buildCompleteTaskUpdate",
-  "buildStatusToggleUpdate"
+  "buildCompleteTaskUpdate"
 ].forEach((needle) => {
   addCheck(taskActions.includes(`export const ${needle}`), `taskActions.js exports ${needle}`);
 });

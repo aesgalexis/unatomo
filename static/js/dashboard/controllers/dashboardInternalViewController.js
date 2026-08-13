@@ -24,6 +24,10 @@ import {
 } from "../tabs/tasks/taskActions.js";
 import { createTask } from "../tabs/tasks/tasksModel.js";
 import {
+  machineStatusResultPatch,
+  transitionMachineStatus
+} from "../machineStatusRepo.js";
+import {
   createDashboardTodo,
   deleteDashboardTodo,
   updateDashboardTodo
@@ -708,12 +712,12 @@ export const createDashboardInternalViewController = ({
             })
           : null;
         if (isRestoreTask && !details) return;
-        if (isRestoreTask && details.note?.trim()) {
+        if (!isRestoreTask && details?.note?.trim()) {
           const noteUpdate = buildAddTaskNoteUpdate(current, taskId, details.note.trim(), actor);
           if (noteUpdate) updateMachine(machineId, noteUpdate);
         }
+        const uploaded = [];
         if (isRestoreTask && details.images?.length && viewOptions.uploadMachineDocument) {
-          const uploaded = [];
           for (const file of details.images.slice(0, 10)) {
             try {
               const attachment = await viewOptions.uploadMachineDocument(
@@ -738,6 +742,28 @@ export const createDashboardInternalViewController = ({
               notifyTopbar(t("dashboard.incidentImageUploadError", "Alguna imagen no se pudo subir"));
             }
           }
+        }
+        if (isRestoreTask) {
+          try {
+            const result = await transitionMachineStatus(
+              machineId,
+              "operativa",
+              actor,
+              {
+                restoreTaskId: taskId,
+                note: details.note?.trim() || "",
+                attachments: uploaded
+              }
+            );
+            updateMachine(machineId, machineStatusResultPatch(result));
+            state.todoPage = 1;
+            rerender({ preserveScroll: true });
+          } catch {
+            notifyTopbar(t("dashboard.saveError", "Error al guardar"));
+          }
+          return;
+        }
+        if (uploaded.length) {
           const attachmentUpdate = buildAddTaskAttachmentsUpdate(
             getDraftById(machineId), taskId, uploaded, actor
           );

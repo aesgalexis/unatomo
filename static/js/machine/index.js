@@ -6,6 +6,10 @@ import { generateMachineTagQr } from "/static/js/dashboard/tags/tagAssetsRepo.js
 import { auth, authPersistenceReady, functions } from "/static/js/firebase/firebaseApp.js";
 import { initAutoSave } from "/static/js/dashboard/autoSave.js";
 import { calculateStorageUsage, STORAGE_LIMIT_BYTES } from "/static/js/configuracion/storageUsage.js";
+import {
+  machineStatusResultPatch,
+  transitionMachineStatus
+} from "/static/js/dashboard/machineStatusRepo.js";
 import { normalizeTasks } from "/static/js/dashboard/tabs/tasks/tasksModel.js";
 import {
   buildAddTaskNoteUpdate,
@@ -13,8 +17,7 @@ import {
   buildAddTaskUpdate,
   buildCompleteTaskUpdate,
   buildEditTaskUpdate,
-  buildRemoveTaskUpdate,
-  buildStatusToggleUpdate
+  buildRemoveTaskUpdate
 } from "/static/js/dashboard/tabs/tasks/taskActions.js";
 import { openOperationalReturnModal } from "/static/js/dashboard/components/operationalReturnModal/operationalReturnModal.js";
 import { uploadMachineAccessDocument } from "./machineDocumentUploads.js";
@@ -313,6 +316,7 @@ const buildOperationalAccessPatch = (machine) => ({
   status: machine.status || "operativa",
   logs: machine.logs || [],
   tasks: machine.tasks || [],
+  statusTransition: machine.statusTransition || null
 });
 
 const state = {
@@ -337,12 +341,19 @@ const persistDraft = async () => {
   const updatedBy = state.session?.uid || state.session?.username || "machine";
   const isDashboardSession = state.session?.source === "dashboard";
   if (!isDashboardSession) {
-    await updateMachineAccessOperationalCallable({
+    const response = await updateMachineAccessOperationalCallable({
       tagId: state.tagId,
       sessionId: state.session?.sessionId || "",
       sessionToken: state.session?.sessionToken || "",
       patch: buildOperationalAccessPatch(state.draft),
     });
+    if (response?.data?.operationalPatch) {
+      state.draft = {
+        ...state.draft,
+        ...response.data.operationalPatch
+      };
+      renderMachine();
+    }
   } else {
     await updateMachineAccess(
       state.tagId,
@@ -529,19 +540,41 @@ const renderMachine = () => {
     recalcHeight();
   };
 
-  hooks.onStatusToggle = () => {
+  hooks.onStatusToggle = async () => {
     if (!canUseCapability(role, "changeStatus", configuredPermissions)) return;
     const statusOrder = ["operativa", "fuera_de_servicio"];
     const currentStatus = normalizeStatus(machineDoc.status);
     const idx = statusOrder.indexOf(currentStatus);
     const nextStatus = statusOrder[(idx + 1) % statusOrder.length];
     const user = getActorLabel();
+    if (state.session?.source === "dashboard") {
+      try {
+        const result = await transitionMachineStatus(
+          machineDoc.id,
+          nextStatus,
+          user,
+          {
+            restoreTitle: t("tasks.restoreOperation", "Volver a poner la máquina en operatividad")
+          }
+        );
+        state.draft = {
+          ...machineDoc,
+          ...machineStatusResultPatch(result)
+        };
+        renderMachine();
+        notifyTopbar(t("machine.statusUpdated", "Estado actualizado"));
+      } catch {
+        notifyTopbar(t("dashboard.saveError", "Error al guardar"));
+      }
+      return;
+    }
     state.draft = {
       ...machineDoc,
-      ...buildStatusToggleUpdate(machineDoc.id, machineDoc, nextStatus, user, {
-        normalizeStatus,
+      status: nextStatus,
+      statusTransition: {
+        language: document.documentElement.lang === "en" ? "en" : "es",
         restoreTitle: t("tasks.restoreOperation", "Volver a poner la máquina en operatividad")
-      })
+      }
     };
     renderMachine();
     notifyTopbar(t("machine.statusUpdated", "Estado actualizado"));
@@ -641,13 +674,17 @@ const renderMachine = () => {
       : null;
     if (isRestoreTask && !details) return;
     let current = machineDoc;
-    if (isRestoreTask && details.note?.trim()) {
+    if (
+      isRestoreTask &&
+      state.session?.source !== "dashboard" &&
+      details.note?.trim()
+    ) {
       const noteUpdate = buildAddTaskNoteUpdate(current, taskId, details.note.trim(), getActorLabel());
       if (noteUpdate) current = { ...current, ...noteUpdate };
     }
+    const uploaded = [];
     if (isRestoreTask && details.images?.length && hooks.onUploadMachineDocument) {
       state.draft = current;
-      const uploaded = [];
       for (const file of details.images.slice(0, 10)) {
         try {
           const attachment = await hooks.onUploadMachineDocument(id, "other", file, null, {
@@ -668,7 +705,33 @@ const renderMachine = () => {
       }
       current = state.draft;
       const attachmentUpdate = buildAddTaskAttachmentsUpdate(current, taskId, uploaded, getActorLabel());
-      if (attachmentUpdate) current = { ...current, ...attachmentUpdate };
+      if (
+        attachmentUpdate &&
+        state.session?.source !== "dashboard"
+      ) current = { ...current, ...attachmentUpdate };
+    }
+    if (isRestoreTask && state.session?.source === "dashboard") {
+      try {
+        const result = await transitionMachineStatus(
+          machineDoc.id,
+          "operativa",
+          getActorLabel(),
+          {
+            restoreTaskId: taskId,
+            note: details.note?.trim() || "",
+            attachments: uploaded
+          }
+        );
+        state.draft = {
+          ...state.draft,
+          ...machineStatusResultPatch(result)
+        };
+        renderMachine();
+        notifyTopbar(t("machine.taskCompleted", "Tarea completada"));
+      } catch {
+        notifyTopbar(t("dashboard.saveError", "Error al guardar"));
+      }
+      return;
     }
     const updates = buildCompleteTaskUpdate(
       machineDoc.id,
