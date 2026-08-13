@@ -18,9 +18,20 @@ export const createDashboardLoading = () => {
   let displayed = 0;
   let target = 0;
   let frame = null;
+  let progressWaiters = [];
+
+  const resolveReachedProgress = () => {
+    const pending = [];
+    progressWaiters.forEach((waiter) => {
+      if (displayed >= waiter.value) waiter.resolve(true);
+      else pending.push(waiter);
+    });
+    progressWaiters = pending;
+  };
 
   const paint = () => {
     percent.textContent = `${Math.round(displayed)}%`;
+    resolveReachedProgress();
   };
 
   const animate = () => {
@@ -40,12 +51,22 @@ export const createDashboardLoading = () => {
   const setProgress = (value) => {
     const safe = Number.isFinite(value) ? Math.max(0, Math.min(100, value)) : 0;
     target = Math.max(target, safe);
-    if (!frame) frame = window.requestAnimationFrame(animate);
+    const reached = new Promise((resolve) => {
+      if (displayed >= safe) {
+        resolve(true);
+        return;
+      }
+      progressWaiters.push({ value: safe, resolve });
+    });
+    if (!frame && displayed < target) frame = window.requestAnimationFrame(animate);
+    return reached;
   };
 
   const resetProgress = () => {
     if (frame) window.cancelAnimationFrame(frame);
     frame = null;
+    progressWaiters.forEach((waiter) => waiter.resolve(false));
+    progressWaiters = [];
     displayed = 0;
     target = 0;
     paint();

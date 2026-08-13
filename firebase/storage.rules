@@ -54,6 +54,19 @@ service firebase.storage {
         );
     }
 
+    function isProfileAvatar() {
+      return request.resource != null
+        && request.resource.size <= 1024 * 1024
+        && request.resource.contentType == 'image/webp';
+    }
+
+    match /profile-avatars/{uid}/avatar.webp {
+      allow read, delete: if isSignedIn() && request.auth.uid == uid;
+      allow create, update: if isSignedIn()
+        && request.auth.uid == uid
+        && isProfileAvatar();
+    }
+
     match /machine-docs/{ownerUid}/{machineId}/plate/{fileName} {
       allow read: if canManageMachine(ownerUid, machineId);
       allow create, update: if canManageMachine(ownerUid, machineId) && isPlateImage();

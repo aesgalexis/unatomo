@@ -51,13 +51,6 @@ export const createDashboardSession = (dependencies) => {
     armLoadingGuard();
 
     const emailLower = normalizeEmail(user.email || "");
-    const subscriptions = getDashboardSubscriptions();
-    subscriptions.subscribeOwnerMachines(uid);
-    subscriptions.subscribeAdminLinks(uid);
-    subscriptions.subscribePendingInvites(emailLower);
-    subscriptions.subscribePendingTransferInvites(uid);
-    dependencies.renderInviteBanner();
-
     const machinesBootstrapPromise = Promise.allSettled([
       withTimeout(fetchMachines(uid)),
       withTimeout(fetchAdminMachines(uid, emailLower))
@@ -98,6 +91,12 @@ export const createDashboardSession = (dependencies) => {
         suggestionsSeenAt: state.dashboardLayout.suggestionsSeenAt
       }).catch(() => {});
     }
+    const subscriptions = getDashboardSubscriptions();
+    subscriptions.subscribeOwnerMachines(uid);
+    subscriptions.subscribeAdminLinks(uid);
+    subscriptions.subscribePendingInvites(emailLower);
+    subscriptions.subscribePendingTransferInvites(uid);
+    dependencies.renderInviteBanner();
     applyDashboardTitle();
     initDashboardTitleEditor();
     loadSuggestions({ preserveScroll: false });

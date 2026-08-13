@@ -82,6 +82,12 @@ machine-docs/{ownerUid}/{machineId}/manual/{fileName}
 machine-docs/{ownerUid}/{machineId}/other/{fileName}
 ```
 
+Profile avatars live separately at `profile-avatars/{uid}/avatar.webp`. The
+owner may read, create, replace, or delete only this fixed object. The browser
+converts uploaded JPEG/PNG/WebP images to a 512 px WebP before upload; Storage
+enforces a 1 MB maximum. The avatar URL is kept in Firebase Auth and
+`users/{uid}.photoURL`; it is intentionally not copied to `account_directory`.
+
 Implemented document types are `plate`, intended for machine plate photos; `manual`, intended for one PDF manual up to 25 MB; and `other`, an array of additional PDFs or images up to 25 MB each. The General-tab UI limits each `other` selection to 10 files and 100 MB total before uploading. Do not store uploaded files in the repository.
 
 Incident images selected while changing a machine to `fuera_de_servicio` are

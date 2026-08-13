@@ -259,7 +259,19 @@ if (!btn || !menu || !label || !action) {
     }
 
     if (initials) {
-      initials.textContent = getUserInitials(displayName, email || text.session.user);
+      initials.replaceChildren();
+      if (user.photoURL) {
+        const image = document.createElement("img");
+        image.src = user.photoURL;
+        image.alt = "";
+        image.addEventListener("error", () => {
+          initials.replaceChildren();
+          initials.textContent = getUserInitials(displayName, email || text.session.user);
+        }, {once: true});
+        initials.appendChild(image);
+      } else {
+        initials.textContent = getUserInitials(displayName, email || text.session.user);
+      }
     }
 
     if (profileLink) {
@@ -326,6 +338,10 @@ if (!btn || !menu || !label || !action) {
 
   window.addEventListener("unatomo:topbar-open", (event) => {
     if (event.detail && event.detail.id !== "session") closeMenu();
+  });
+
+  window.addEventListener("unatomo:profile-photo-updated", () => {
+    if (currentUser) setUser(auth.currentUser || currentUser);
   });
 
   document.addEventListener("click", (event) => {

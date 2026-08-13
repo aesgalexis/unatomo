@@ -30,7 +30,12 @@ export const createDashboardLoadController = (dependencies) => {
     t,
     viewMenu,
   } = dependencies;
+  let loadingCycle = 0;
+  let completingLoadingCycle = null;
+
   const resetDashboardRuntime = (uid) => {
+    loadingCycle += 1;
+    completingLoadingCycle = null;
     clearDashboardTimer();
     cleanupDashboardSubscriptions();
     state.uid = uid;
@@ -85,8 +90,14 @@ export const createDashboardLoadController = (dependencies) => {
 
   const updateLoading = () => {
     const progress = getDashboardLoadProgress(state);
-    setLoadingProgress(progress.percent);
-    if (progress.complete && state.loading) {
+    const displayedProgress = setLoadingProgress(progress.percent);
+    if (!progress.complete || !state.loading || completingLoadingCycle === loadingCycle) return;
+
+    const completedCycle = loadingCycle;
+    completingLoadingCycle = completedCycle;
+    displayedProgress.then(() => {
+      if (loadingCycle !== completedCycle || !state.loading) return;
+      if (!getDashboardLoadProgress(state).complete) return;
       state.loading = false;
       setTopbarLogoLoading("dashboard", false);
       if (state.loadingGuardTimer) {
@@ -94,10 +105,17 @@ export const createDashboardLoadController = (dependencies) => {
         state.loadingGuardTimer = null;
       }
       syncDashboardViewChrome();
+      renderCards({ preserveScroll: false });
       setTimeout(() => {
-        loadingEl.style.display = "none";
+        if (loadingCycle === completedCycle && !state.loading) {
+          loadingEl.style.display = "none";
+        }
       }, 2000);
-    }
+    }).finally(() => {
+      if (completingLoadingCycle === completedCycle) {
+        completingLoadingCycle = null;
+      }
+    });
   };
 
   if (window.__unatomoStylesReady) {

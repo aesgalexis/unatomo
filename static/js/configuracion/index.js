@@ -14,8 +14,15 @@ import {
   setDoc
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 import {
+  deleteObject,
+  getDownloadURL,
+  ref,
+  uploadBytes
+} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-storage.js";
+import {
   auth,
   db,
+  storage,
   getUserRegistrationState,
   isAccountOnboardingRequired
 } from "/static/js/firebase/firebaseApp.js";
@@ -71,6 +78,12 @@ const textMap = {
   saved: isEn ? "Changes saved" : "Cambios guardados",
   saveError: isEn ? "Unable to save the changes." : "No se han podido guardar los cambios.",
   saving: isEn ? "Saving..." : "Guardando...",
+  profilePhoto: isEn ? "Profile picture" : "Imagen de perfil",
+  changeProfilePhoto: isEn ? "Choose image" : "Elegir imagen",
+  removeProfilePhoto: isEn ? "Remove" : "Eliminar",
+  profilePhotoHint: isEn ? "JPG, PNG or WebP. It will be adjusted to a square image." : "JPG, PNG o WebP. Se ajustará a una imagen cuadrada.",
+  profilePhotoError: isEn ? "Choose a JPG, PNG or WebP image up to 12 MB." : "Elige una imagen JPG, PNG o WebP de hasta 12 MB.",
+  profilePhotoSaveError: isEn ? "Unable to update the profile picture." : "No se ha podido actualizar la imagen de perfil.",
   accountHandleAvailable: isEn ? "Available" : "Disponible",
   accountHandleTaken: isEn ? "Not available" : "No disponible",
   accountHandleInvalid: isEn
@@ -137,6 +150,33 @@ const textMap = {
 };
 
 const mount = document.getElementById("profile-mount");
+const PROFILE_AVATAR_MAX_INPUT_BYTES = 12 * 1024 * 1024;
+const PROFILE_AVATAR_SIZE = 512;
+const PROFILE_AVATAR_PATH = (uid) => `profile-avatars/${uid}/avatar.webp`;
+const PROFILE_AVATAR_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
+
+const profileInitials = (name = "", fallback = "") => {
+  const source = (name || fallback || "").toString().trim();
+  const parts = source.split(/\s+/).filter(Boolean);
+  return (parts.length > 1 ? `${parts[0][0]}${parts.at(-1)[0]}` : source.slice(0, 2))
+    .toUpperCase();
+};
+
+const createProfileAvatarBlob = async (file) => {
+  const bitmap = await createImageBitmap(file);
+  const sourceSize = Math.min(bitmap.width, bitmap.height);
+  const offsetX = Math.floor((bitmap.width - sourceSize) / 2);
+  const offsetY = Math.floor((bitmap.height - sourceSize) / 2);
+  const canvas = document.createElement("canvas");
+  canvas.width = PROFILE_AVATAR_SIZE;
+  canvas.height = PROFILE_AVATAR_SIZE;
+  const context = canvas.getContext("2d");
+  context.drawImage(bitmap, offsetX, offsetY, sourceSize, sourceSize, 0, 0, PROFILE_AVATAR_SIZE, PROFILE_AVATAR_SIZE);
+  bitmap.close();
+  const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/webp", 0.86));
+  if (!blob) throw new Error("profile-avatar-conversion-failed");
+  return blob;
+};
 const DEFAULT_TAB_ORDER = ["quehaceres", "historial", "estadisticas", "general", "configuracion"];
 const tabLabels = {
   quehaceres: textMap.tasksTab,
@@ -330,6 +370,18 @@ if (mount) {
 
   if (accountBody) {
     accountBody.innerHTML = `
+      <div class="profile-row profile-avatar-row">
+        <span class="profile-label">${textMap.profilePhoto}</span>
+        <div class="profile-avatar-control">
+          <span class="profile-avatar-preview" id="profile-avatar-preview" aria-hidden="true"></span>
+          <div class="profile-avatar-actions">
+            <label class="profile-avatar-upload" for="profile-avatar-input">${textMap.changeProfilePhoto}</label>
+            <button class="profile-avatar-remove" id="profile-avatar-remove" type="button" hidden>${textMap.removeProfilePhoto}</button>
+            <input id="profile-avatar-input" type="file" accept="image/jpeg,image/png,image/webp" hidden />
+            <span class="profile-avatar-hint">${textMap.profilePhotoHint}</span>
+          </div>
+        </div>
+      </div>
       <div class="profile-row">
         <span class="profile-label">${textMap.name}</span>
         <input class="profile-input" id="profile-name" type="text" maxlength="40" />
@@ -472,6 +524,9 @@ if (mount) {
   });
 
   const nameInput = accountBody?.querySelector("#profile-name");
+  const avatarPreview = accountBody?.querySelector("#profile-avatar-preview");
+  const avatarInput = accountBody?.querySelector("#profile-avatar-input");
+  const avatarRemove = accountBody?.querySelector("#profile-avatar-remove");
   const handleInput = accountBody?.querySelector("#profile-handle");
   const handleStatus = accountBody?.querySelector("#profile-handle-status");
   const accountSave = accountBody?.querySelector("#profile-account-save");
@@ -669,6 +724,81 @@ if (mount) {
       );
     }
     setText(uidEl, user.uid || "-");
+
+    const renderAvatar = (photoURL = user.photoURL || "") => {
+      if (!avatarPreview) return;
+      avatarPreview.replaceChildren();
+      if (photoURL) {
+        const image = document.createElement("img");
+        image.src = photoURL;
+        image.alt = "";
+        image.addEventListener("error", () => renderAvatar(""), { once: true });
+        avatarPreview.appendChild(image);
+      } else {
+        avatarPreview.textContent = profileInitials(user.displayName, user.email || textMap.user);
+      }
+      if (avatarRemove) avatarRemove.hidden = !photoURL;
+    };
+    renderAvatar();
+
+    const setAvatarBusy = (busy) => {
+      if (avatarInput) avatarInput.disabled = busy;
+      if (avatarRemove) avatarRemove.disabled = busy;
+    };
+    const saveAvatarUrl = async (photoURL) => {
+      await updateProfile(user, { photoURL });
+      await setDoc(doc(db, "users", user.uid), {
+        photoURL,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+    };
+    avatarInput?.addEventListener("change", async () => {
+      const file = avatarInput.files?.[0];
+      avatarInput.value = "";
+      if (!file) return;
+      if (!PROFILE_AVATAR_TYPES.has(file.type) || file.size > PROFILE_AVATAR_MAX_INPUT_BYTES) {
+        if (accountSaveStatus) accountSaveStatus.textContent = textMap.profilePhotoError;
+        return;
+      }
+      setAvatarBusy(true);
+      setTopbarSaveStatus(textMap.saving);
+      if (accountSaveStatus) accountSaveStatus.textContent = "";
+      try {
+        const blob = await createProfileAvatarBlob(file);
+        const avatarRef = ref(storage, PROFILE_AVATAR_PATH(user.uid));
+        await uploadBytes(avatarRef, blob, { contentType: "image/webp" });
+        const downloadURL = await getDownloadURL(avatarRef);
+        const photoURL = `${downloadURL}&v=${Date.now()}`;
+        await saveAvatarUrl(photoURL);
+        renderAvatar(photoURL);
+        window.dispatchEvent(new CustomEvent("unatomo:profile-photo-updated"));
+        if (accountSaveStatus) accountSaveStatus.textContent = textMap.saved;
+      } catch {
+        if (accountSaveStatus) accountSaveStatus.textContent = textMap.profilePhotoSaveError;
+      } finally {
+        setAvatarBusy(false);
+        setTopbarSaveStatus("");
+      }
+    });
+    avatarRemove?.addEventListener("click", async () => {
+      setAvatarBusy(true);
+      setTopbarSaveStatus(textMap.saving);
+      if (accountSaveStatus) accountSaveStatus.textContent = "";
+      try {
+        await deleteObject(ref(storage, PROFILE_AVATAR_PATH(user.uid))).catch((error) => {
+          if (error?.code !== "storage/object-not-found") throw error;
+        });
+        await saveAvatarUrl(null);
+        renderAvatar("");
+        window.dispatchEvent(new CustomEvent("unatomo:profile-photo-updated"));
+        if (accountSaveStatus) accountSaveStatus.textContent = textMap.saved;
+      } catch {
+        if (accountSaveStatus) accountSaveStatus.textContent = textMap.profilePhotoSaveError;
+      } finally {
+        setAvatarBusy(false);
+        setTopbarSaveStatus("");
+      }
+    });
 
     const setHandleStatus = (message = "", state = "") => {
       setText(handleStatus, message);

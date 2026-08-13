@@ -58,9 +58,16 @@ service cloud.firestore {
                     && (
                       (
                         request.resource.data.diff(resource.data).affectedKeys()
-                          .hasOnly(["company", "updatedAt"])
-                        && request.resource.data.company is string
-                        && request.resource.data.company.size() <= 60
+                          .hasOnly(["company", "photoURL", "updatedAt"])
+                        && (!request.resource.data.diff(resource.data).affectedKeys()
+                          .hasAny(["company"])
+                          || (request.resource.data.company is string
+                            && request.resource.data.company.size() <= 60))
+                        && (!request.resource.data.diff(resource.data).affectedKeys()
+                          .hasAny(["photoURL"])
+                          || request.resource.data.photoURL == null
+                          || (request.resource.data.photoURL is string
+                            && request.resource.data.photoURL.size() <= 2048))
                       )
                     );
 
