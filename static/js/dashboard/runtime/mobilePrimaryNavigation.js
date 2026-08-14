@@ -115,7 +115,16 @@ export const initMobilePrimaryNavigation = ({ sectionNav } = {}) => {
     setOpen(false);
   };
   const onDocumentKeydown = (event) => {
-    if (event.key === "Escape") setOpen(false);
+    if (event.key === "Escape") {
+      setOpen(false);
+      return;
+    }
+    if (!open || !["ArrowLeft", "ArrowRight"].includes(event.key)) return;
+    event.preventDefault();
+    arcScroller.scrollTo({
+      left: arcScroller.scrollLeft + (event.key === "ArrowRight" ? arcSlotWidth : -arcSlotWidth),
+      behavior: "smooth"
+    });
   };
   const onScroll = () => {
     if (!media.matches || open) return;
@@ -148,7 +157,7 @@ export const initMobilePrimaryNavigation = ({ sectionNav } = {}) => {
       arcScroller.scrollTo({ left: targetLeft, behavior: "smooth" });
     }, 110);
   };
-  const onArcWheel = (event) => {
+  const onDocumentWheel = (event) => {
     if (!open || !media.matches) return;
     const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY)
       ? event.deltaX
@@ -163,10 +172,10 @@ export const initMobilePrimaryNavigation = ({ sectionNav } = {}) => {
   sectionNav.addEventListener("click", onSectionClick);
   document.addEventListener("click", onDocumentClick);
   document.addEventListener("keydown", onDocumentKeydown);
+  document.addEventListener("wheel", onDocumentWheel, { passive: false });
   window.addEventListener("scroll", onScroll, { passive: true });
   window.addEventListener("resize", onResize, { passive: true });
   arcScroller.addEventListener("scroll", onArcScroll, { passive: true });
-  sectionNav.addEventListener("wheel", onArcWheel, { passive: false });
   media.addEventListener("change", syncLayout);
   syncLayout();
 
@@ -176,10 +185,10 @@ export const initMobilePrimaryNavigation = ({ sectionNav } = {}) => {
     sectionNav.removeEventListener("click", onSectionClick);
     document.removeEventListener("click", onDocumentClick);
     document.removeEventListener("keydown", onDocumentKeydown);
+    document.removeEventListener("wheel", onDocumentWheel);
     window.removeEventListener("scroll", onScroll);
     window.removeEventListener("resize", onResize);
     arcScroller.removeEventListener("scroll", onArcScroll);
-    sectionNav.removeEventListener("wheel", onArcWheel);
     if (arcSnapTimer) window.clearTimeout(arcSnapTimer);
     if (arcUpdateFrame) window.cancelAnimationFrame(arcUpdateFrame);
     document.documentElement.classList.remove(

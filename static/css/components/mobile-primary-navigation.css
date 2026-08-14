@@ -12,6 +12,12 @@
     backdrop-filter: blur(2px);
   }
 
+  html.mobile-primary-nav-open,
+  html.mobile-primary-nav-open body {
+    overflow: hidden !important;
+    overscroll-behavior: none;
+  }
+
   html.nfc-dashboard-page .topbar {
     height: 58px;
     background: color-mix(in srgb, var(--bg) 82%, transparent);
@@ -47,7 +53,7 @@
     border: 1px solid color-mix(in srgb, var(--fg) 18%, transparent);
     border-radius: 50%;
     background: color-mix(in srgb, var(--bg) 94%, transparent);
-    box-shadow: 0 0.7rem 1.8rem color-mix(in srgb, #000 20%, transparent);
+    box-shadow: none;
     cursor: pointer;
     transform: translateX(-50%);
     transition: transform 180ms ease, background-color 180ms ease;
@@ -119,6 +125,7 @@
     overscroll-behavior-x: contain;
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
+    touch-action: pan-x;
   }
 
   html.has-mobile-primary-nav .mobile-primary-nav-scroller::-webkit-scrollbar {
