@@ -50,6 +50,7 @@ import {
   updateUsersInMachines
 } from "../views/users/usersModel.js";
 import { renderUsersTree } from "../views/users/usersTree.js";
+import { renderPrivacyDashboardView } from "../views/privacy/privacyView.js";
 import { openTaskCreateModal } from "../components/taskCreateModal/taskCreateModal.js";
 import { openOperationalReturnModal } from "../components/operationalReturnModal/operationalReturnModal.js";
 import { openUserCreateModal } from "../components/userCreateModal/userCreateModal.js";
@@ -97,7 +98,8 @@ export const createDashboardInternalViewController = ({
       "has-static-registry-header",
       "has-static-gallery-header",
       "has-static-tasks-header",
-      "has-static-users-header"
+      "has-static-users-header",
+      "has-static-privacy-header"
     );
   };
   const getFixedViewHeaderContainer = (always = false) =>
@@ -830,6 +832,18 @@ export const createDashboardInternalViewController = ({
     return finish();
   };
 
+  const renderPrivacy = () => {
+    prepare();
+    const headerContainer = getFixedViewHeaderContainer(true);
+    renderPrivacyDashboardView(list, {
+      headerContainer,
+      loadingElement: headerContainer ? loadingEl : null,
+      isEnglish: document.documentElement.lang?.toLowerCase().startsWith("en")
+    });
+    showFixedViewHeader();
+    return finish();
+  };
+
   const render = (view, machines, viewOptions = {}) => {
     clearFixedViewHeader();
     if (view === "sugerencias" && !state.canSuggest && !state.isSuperadmin) {
@@ -842,6 +856,7 @@ export const createDashboardInternalViewController = ({
     if (view === "usuarios") return renderUsers(machines);
     if (view === "sugerencias") return renderSuggestions();
     if (view === "todo") return renderTodo(viewOptions);
+    if (view === "privacidad") return renderPrivacy();
     const headerContainer = getFixedViewHeaderContainer(true);
     if (headerContainer) {
       const header = document.createElement("div");

@@ -13,11 +13,13 @@ const syncPlaybackRate = (logo, loading) => {
 };
 
 const render = () => {
-  const logo = document.querySelector(".topbar-logo--rotating");
-  if (!logo) return;
+  const logos = document.querySelectorAll(".topbar-logo--rotating");
+  if (!logos.length) return;
   const loading = activeSources.size > 0;
-  logo.classList.toggle("is-loading", loading);
-  syncPlaybackRate(logo, loading);
+  logos.forEach((logo) => {
+    logo.classList.toggle("is-loading", loading);
+    syncPlaybackRate(logo, loading);
+  });
 };
 
 export const setTopbarLogoLoading = (source, loading) => {

@@ -172,6 +172,9 @@ The main dashboard page has internal hash views:
 - `#/estadisticas` (Spanish) / `#/statistics` (English): account-wide machine
   statistics with current fleet status, period performance, attention items,
   and a machine comparison table.
+- `#/privacidad` (Spanish) / `#/privacy` (English): authenticated dashboard
+  presentation of the localized canonical privacy policy. It reuses the legal
+  sections from `nfc/{lang}/privacidad.html` instead of duplicating their text.
 - At desktop tree width, `Registro`, `Tareas`, and `Galería` reuse the side
   group tree in its complete form, including group creation, contextual group actions,
   visibility controls, counters, and machine-scope filtering. Selecting a group
@@ -191,6 +194,7 @@ Files:
 
 - `static/js/dashboard/index.js`: owns the view switch, section nav, disabled control state, and hash routing.
 - `static/js/dashboard/views/dashboardInternalViews.js`: coordinates rendering for dashboard-level internal views such as `Registro` and `Sugerencias`.
+- `static/js/dashboard/views/privacy/privacyView.js`: loads the canonical localized privacy document and renders only its legal sections inside dashboard chrome.
 - `static/js/dashboard/components/loading/dashboardLoadState.js`: centralizes owner/admin load-ready flags, load failures, init failure, and timeout behavior.
 - `static/js/dashboard/components/loading/dashboardPlaceholders.js`: renders empty, load-error, and no-results dashboard placeholders.
 - `static/js/dashboard/history/historyEventFormatter.js`: shared formatter and grouping helpers for machine history events. It preserves known legacy event text and falls back to `summary`, `message`, `messageKey`, or `type` for future events.

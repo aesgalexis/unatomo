@@ -30,10 +30,11 @@ export const createDashboardTopbarController = (dependencies) => {
     const isSuggestions = state.activeView === "sugerencias";
     const isTodo = state.activeView === "todo";
     const isUsers = state.activeView === "usuarios";
+    const isPrivacy = state.activeView === "privacidad";
     const useGallerySizeMenu = isGallery && window.matchMedia("(max-width: 768px)").matches;
     viewMenu.setGalleryMode(useGallerySizeMenu);
     viewMenu.setStatisticsMode(isStatistics, { period: state.statisticsPeriod });
-    dashboardLink.classList.toggle("is-active", !isRegistry && !isGallery && !isStatistics && !isSuggestions && !isTodo && !isUsers);
+    dashboardLink.classList.toggle("is-active", !isRegistry && !isGallery && !isStatistics && !isSuggestions && !isTodo && !isUsers && !isPrivacy);
     registryLink.classList.toggle("is-active", isRegistry);
     galleryLink.classList.toggle("is-active", isGallery);
     statisticsLink.classList.toggle("is-active", isStatistics);
@@ -88,6 +89,14 @@ export const createDashboardTopbarController = (dependencies) => {
       suggestionsLink.removeAttribute("aria-current");
       todoLink.removeAttribute("aria-current");
       usersLink.setAttribute("aria-current", "page");
+    } else if (isPrivacy) {
+      dashboardLink.removeAttribute("aria-current");
+      registryLink.removeAttribute("aria-current");
+      galleryLink.removeAttribute("aria-current");
+      statisticsLink.removeAttribute("aria-current");
+      suggestionsLink.removeAttribute("aria-current");
+      todoLink.removeAttribute("aria-current");
+      usersLink.removeAttribute("aria-current");
     } else {
       dashboardLink.setAttribute("aria-current", "page");
       registryLink.removeAttribute("aria-current");
@@ -102,6 +111,7 @@ export const createDashboardTopbarController = (dependencies) => {
     addBar.classList.toggle("is-statistics-view", isStatistics);
     addBar.classList.toggle("is-todo-view", isTodo);
     addBar.classList.toggle("is-suggestions-view", isSuggestions);
+    addBar.classList.toggle("is-privacy-view", isPrivacy);
     searchInput.placeholder = isRegistry
       ? t("dashboard.registrySearchPlaceholder", "Buscar en registro...")
       : isGallery
@@ -115,10 +125,10 @@ export const createDashboardTopbarController = (dependencies) => {
             : isUsers
               ? t("dashboard.usersSearchPlaceholder", "Buscar usuarios...")
             : t("dashboard.searchPlaceholder", "Buscar por nombre o ubicaci\u00f3n...");
-    const addDisabled = state.loading || isRegistry || isStatistics;
+    const addDisabled = state.loading || isRegistry || isStatistics || isPrivacy;
     const viewMenuDisabled = state.loading || isRegistry ||
-      (isGallery && !useGallerySizeMenu) || isSuggestions || isUsers;
-    const searchDisabled = state.loading;
+      (isGallery && !useGallerySizeMenu) || isSuggestions || isUsers || isPrivacy;
+    const searchDisabled = state.loading || isPrivacy;
     addBtn.disabled = addDisabled;
     searchInput.disabled = searchDisabled;
     viewMenu.button.disabled = viewMenuDisabled;

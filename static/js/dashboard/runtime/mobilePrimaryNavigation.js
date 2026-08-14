@@ -37,6 +37,7 @@ export const initMobilePrimaryNavigation = ({ sectionNav, suggestionsLink } = {}
   const isEnglish = document.documentElement.lang === "en";
   const lang = isEnglish ? "en" : "es";
   const basePath = `/nfc/${lang}`;
+  const originalSectionLinks = [...sectionNav.querySelectorAll(":scope > .dashboard-section-link")];
   const suggestionsOriginalParent = suggestionsLink?.parentNode || null;
   const suggestionsOriginalNextSibling = suggestionsLink?.nextSibling || null;
   suggestionsLink?.classList.add(
@@ -114,7 +115,7 @@ export const initMobilePrimaryNavigation = ({ sectionNav, suggestionsLink } = {}
   const privacyLink = createMobileMenuItem({
     label: isEnglish ? "Privacy" : "Privacidad",
     icon: MOBILE_MENU_ICONS.privacy,
-    href: `${basePath}/privacidad.html`,
+    href: `${basePath}/index.html#/privacidad`,
     className: "mobile-primary-nav-secondary-link mobile-primary-nav-mobile-only"
   });
   const creditsButton = createMobileMenuItem({
@@ -122,9 +123,59 @@ export const initMobilePrimaryNavigation = ({ sectionNav, suggestionsLink } = {}
     icon: MOBILE_MENU_ICONS.credits,
     className: "mobile-primary-nav-secondary-link mobile-primary-nav-menu-button mobile-primary-nav-mobile-only"
   });
-  sectionNav.append(scanButton, moreButton, backButton, newsLink);
-  if (suggestionsLink) sectionNav.appendChild(suggestionsLink);
-  sectionNav.append(tagsLink, contactLink, privacyLink, creditsButton);
+  const creditsPanel = document.createElement("div");
+  creditsPanel.className = "mobile-primary-nav-credits-panel mobile-primary-nav-mobile-only";
+  creditsPanel.innerHTML = `
+    <div class="mobile-primary-nav-credits-header">
+      <button type="button" class="mobile-primary-nav-credits-back" aria-label="${isEnglish ? "Back to More" : "Volver a Más"}">
+        <span class="dashboard-section-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" focusable="false">${MOBILE_MENU_ICONS.back}</svg>
+        </span>
+        <span>${isEnglish ? "Back" : "Volver"}</span>
+      </button>
+      <strong>${isEnglish ? "Credits" : "Créditos"}</strong>
+    </div>
+    <div class="mobile-primary-nav-credits-body">
+      <strong class="mobile-primary-nav-credits-brand">UNATOMO/NFC</strong>
+      <p>${isEnglish
+        ? "We connect people, machines, and processes."
+        : "Conectamos personas, máquinas y procesos."}</p>
+      <div class="mobile-primary-nav-credits-section">
+        <span>${isEnglish ? "Technology" : "Tecnología"}</span>
+        <div class="mobile-primary-nav-credits-links">
+          <a href="https://openai.com/" target="_blank" rel="noopener">OpenAI</a>
+          <a href="https://openai.com/codex/" target="_blank" rel="noopener">Codex</a>
+          <a href="https://firebase.google.com/" target="_blank" rel="noopener">Firebase</a>
+          <a href="https://github.com/" target="_blank" rel="noopener">GitHub</a>
+        </div>
+      </div>
+      <p class="mobile-primary-nav-credits-note">${isEnglish
+        ? "Developed using OpenAI Codex tools. Authentication, data, and storage on Google Firebase; code and publishing with GitHub."
+        : "Desarrollado con herramientas de OpenAI Codex. Autenticación, datos y almacenamiento sobre Firebase de Google; código y publicación con GitHub."}</p>
+      <p class="mobile-primary-nav-credits-powered">Powered by <a href="/landing/nosotros/">people who like machines</a>.</p>
+      <small>© ${new Date().getFullYear()} UNATOMO CORE SL · ${isEnglish ? "All rights reserved." : "Todos los derechos reservados."}</small>
+    </div>
+  `;
+  const creditsBackButton = creditsPanel.querySelector(".mobile-primary-nav-credits-back");
+  const pagesWindow = document.createElement("div");
+  pagesWindow.className = "mobile-primary-nav-pages-window";
+  const pagesTrack = document.createElement("div");
+  pagesTrack.className = "mobile-primary-nav-pages-track";
+  const primaryPage = document.createElement("div");
+  primaryPage.className = "mobile-primary-nav-page mobile-primary-nav-page--primary";
+  originalSectionLinks.forEach((link) => primaryPage.appendChild(link));
+  primaryPage.append(scanButton, moreButton);
+  const morePage = document.createElement("div");
+  morePage.className = "mobile-primary-nav-page mobile-primary-nav-page--more";
+  morePage.append(backButton, newsLink);
+  if (suggestionsLink) morePage.appendChild(suggestionsLink);
+  morePage.append(tagsLink, contactLink, privacyLink, creditsButton);
+  const creditsPage = document.createElement("div");
+  creditsPage.className = "mobile-primary-nav-page mobile-primary-nav-page--credits";
+  creditsPage.appendChild(creditsPanel);
+  pagesTrack.append(primaryPage, morePage, creditsPage);
+  pagesWindow.appendChild(pagesTrack);
+  sectionNav.replaceChildren(handle, pagesWindow);
 
   let open = false;
   let lockedScrollY = 0;
@@ -189,7 +240,7 @@ export const initMobilePrimaryNavigation = ({ sectionNav, suggestionsLink } = {}
     backdrop.classList.toggle("is-visible", open);
     if (open && !wasOpen) lockPage();
     if (!open && wasOpen) unlockPage();
-    if (!open) sectionNav.classList.remove("is-more-page");
+    if (!open) sectionNav.classList.remove("is-more-page", "is-credits-page");
   };
 
   const syncLayout = () => {
@@ -215,13 +266,12 @@ export const initMobilePrimaryNavigation = ({ sectionNav, suggestionsLink } = {}
     setOpen(false);
   };
   const openCredits = () => {
-    setOpen(false);
-    window.requestAnimationFrame(() => {
-      const footer = document.getElementById("legal-footer");
-      const footerToggle = footer?.querySelector(".footer-disclosure-toggle");
-      if (footerToggle?.getAttribute("aria-expanded") !== "true") footerToggle?.click();
-      footer?.scrollIntoView({ behavior: "smooth", block: "end" });
-    });
+    sectionNav.classList.add("is-credits-page");
+    creditsButton.blur();
+  };
+  const closeCredits = () => {
+    sectionNav.classList.remove("is-credits-page");
+    creditsBackButton.blur();
   };
   const onDocumentKeydown = (event) => {
     if (event.key !== "Escape" || !open) return;
@@ -270,6 +320,7 @@ export const initMobilePrimaryNavigation = ({ sectionNav, suggestionsLink } = {}
     backButton.blur();
   });
   creditsButton.addEventListener("click", openCredits);
+  creditsBackButton.addEventListener("click", closeCredits);
   handle.addEventListener("pointerdown", onHandlePointerDown);
   handle.addEventListener("pointermove", onHandlePointerMove);
   handle.addEventListener("pointerup", finishHandleDrag);
@@ -286,6 +337,7 @@ export const initMobilePrimaryNavigation = ({ sectionNav, suggestionsLink } = {}
     backdrop.removeEventListener("click", onBackdropClick);
     scanButton.removeEventListener("click", qrScanner.open);
     creditsButton.removeEventListener("click", openCredits);
+    creditsBackButton.removeEventListener("click", closeCredits);
     handle.removeEventListener("pointerdown", onHandlePointerDown);
     handle.removeEventListener("pointermove", onHandlePointerMove);
     handle.removeEventListener("pointerup", finishHandleDrag);
@@ -295,8 +347,8 @@ export const initMobilePrimaryNavigation = ({ sectionNav, suggestionsLink } = {}
       "has-mobile-primary-nav",
       "mobile-primary-nav-open"
     );
+    sectionNav.replaceChildren(...originalSectionLinks);
     placeholder.parentNode?.insertBefore(sectionNav, placeholder.nextSibling);
-    handle.remove();
     suggestionsLink?.classList.remove(
       "mobile-primary-nav-secondary-link",
       "mobile-primary-nav-mobile-only"
@@ -306,7 +358,7 @@ export const initMobilePrimaryNavigation = ({ sectionNav, suggestionsLink } = {}
     } else {
       suggestionsLink?.remove();
     }
-    [scanButton, moreButton, backButton, newsLink, tagsLink, contactLink, privacyLink, creditsButton]
+    [scanButton, moreButton, backButton, newsLink, tagsLink, contactLink, privacyLink, creditsButton, creditsPanel]
       .forEach((item) => item.remove());
     qrScanner.destroy();
     backdrop.remove();

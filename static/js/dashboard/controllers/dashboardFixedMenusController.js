@@ -4,7 +4,8 @@ const STABLE_MENU_VIEWS = new Set([
   "todo",
   "estadisticas",
   "galeria",
-  "usuarios"
+  "usuarios",
+  "privacidad"
 ]);
 
 export const createDashboardFixedMenusController = ({

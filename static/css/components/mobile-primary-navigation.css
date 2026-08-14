@@ -105,11 +105,9 @@
     bottom: 0;
     left: 50%;
     z-index: 2201;
-    display: grid;
+    display: block;
     width: 100%;
     min-height: 0;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.45rem;
     box-sizing: border-box;
     margin: 0;
     padding: 1.8rem 1rem calc(5.85rem + env(safe-area-inset-bottom));
@@ -170,6 +168,72 @@
     cursor: grabbing;
   }
 
+  html.has-mobile-primary-nav .mobile-primary-nav-pages-window {
+    width: 100%;
+    height: 14.85rem;
+    overflow: hidden;
+    transition: height 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  html.has-mobile-primary-nav .dashboard-section-nav.is-credits-page
+    .mobile-primary-nav-pages-window {
+    height: 17.5rem;
+  }
+
+  html.has-mobile-primary-nav .mobile-primary-nav-pages-track {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    transform: translateX(0);
+    transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform;
+  }
+
+  html.has-mobile-primary-nav .dashboard-section-nav.is-more-page
+    .mobile-primary-nav-pages-track {
+    transform: translateX(-100%);
+  }
+
+  html.has-mobile-primary-nav .dashboard-section-nav.is-credits-page
+    .mobile-primary-nav-pages-track {
+    transform: translateX(-200%);
+  }
+
+  html.has-mobile-primary-nav .mobile-primary-nav-page {
+    display: grid;
+    width: 100%;
+    height: 14.85rem;
+    flex: 0 0 100%;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-auto-rows: 4.65rem;
+    align-content: start;
+    gap: 0.45rem;
+  }
+
+  html.has-mobile-primary-nav .mobile-primary-nav-page--credits {
+    height: 17.5rem;
+  }
+
+  html.has-mobile-primary-nav .mobile-primary-nav-page--primary
+    > .mobile-primary-nav-primary-action,
+  html.has-mobile-primary-nav .mobile-primary-nav-page--more
+    > .mobile-primary-nav-secondary-link:not([hidden]) {
+    display: flex !important;
+  }
+
+  html.has-mobile-primary-nav .mobile-primary-nav-page--credits
+    > .mobile-primary-nav-credits-panel {
+    display: block !important;
+    grid-column: 1 / -1;
+    width: 100%;
+    height: 17.5rem;
+    min-height: 17.5rem;
+    box-sizing: border-box;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    scrollbar-width: none;
+  }
+
   html.has-mobile-primary-nav .dashboard-section-link {
     position: relative;
     display: flex;
@@ -213,6 +277,135 @@
     > .mobile-primary-nav-secondary-link:not([hidden]) {
     display: flex !important;
     animation: mobile-primary-nav-page-in 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  html.has-mobile-primary-nav .mobile-primary-nav-credits-panel {
+    display: none !important;
+  }
+
+  html.has-mobile-primary-nav .dashboard-section-nav.is-credits-page
+    > .dashboard-section-link {
+    display: none !important;
+  }
+
+  html.has-mobile-primary-nav .dashboard-section-nav.is-credits-page
+    > .mobile-primary-nav-credits-panel {
+    display: block !important;
+    grid-column: 1 / -1;
+    width: 100%;
+    height: 14.85rem;
+    min-height: 14.85rem;
+    box-sizing: border-box;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+    animation: mobile-primary-nav-page-in 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  html.has-mobile-primary-nav .mobile-primary-nav-credits-panel::-webkit-scrollbar {
+    display: none;
+  }
+
+  html.has-mobile-primary-nav .mobile-primary-nav-credits-header {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    min-height: 2.5rem;
+    margin-bottom: 0.8rem;
+  }
+
+  html.has-mobile-primary-nav .mobile-primary-nav-credits-header > strong {
+    grid-column: 2;
+    font-size: 0.86rem;
+  }
+
+  html.has-mobile-primary-nav .mobile-primary-nav-credits-back {
+    display: inline-flex;
+    width: fit-content;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.35rem 0.45rem;
+    border: 0;
+    border-radius: 0.6rem;
+    background: transparent;
+    color: var(--fg);
+    font: inherit;
+    font-size: 0.72rem;
+  }
+
+  html.has-mobile-primary-nav .mobile-primary-nav-credits-back .dashboard-section-icon {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+
+  html.has-mobile-primary-nav .mobile-primary-nav-credits-back:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--fg) 42%, transparent);
+  }
+
+  html.has-mobile-primary-nav .mobile-primary-nav-credits-body {
+    text-align: center;
+  }
+
+  html.has-mobile-primary-nav .mobile-primary-nav-credits-brand {
+    display: block;
+    margin-bottom: 0.3rem;
+    font-size: 1rem;
+    letter-spacing: 0.04em;
+  }
+
+  html.has-mobile-primary-nav .mobile-primary-nav-credits-body p {
+    margin: 0.35rem auto;
+    max-width: 31rem;
+    color: color-mix(in srgb, var(--fg) 68%, transparent);
+    font-size: 0.72rem;
+    line-height: 1.45;
+  }
+
+  html.has-mobile-primary-nav .mobile-primary-nav-credits-body
+    > p:first-of-type,
+  html.has-mobile-primary-nav .mobile-primary-nav-credits-powered {
+    text-align: center;
+  }
+
+  html.has-mobile-primary-nav .mobile-primary-nav-credits-section {
+    margin: 1rem 0 0.75rem;
+  }
+
+  html.has-mobile-primary-nav .mobile-primary-nav-credits-section > span {
+    display: block;
+    margin-bottom: 0.45rem;
+    color: color-mix(in srgb, var(--fg) 52%, transparent);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  html.has-mobile-primary-nav .mobile-primary-nav-credits-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.4rem 0.9rem;
+  }
+
+  html.has-mobile-primary-nav .mobile-primary-nav-credits-links a,
+  html.has-mobile-primary-nav .mobile-primary-nav-credits-powered a {
+    color: var(--fg);
+    font-size: 0.73rem;
+    font-weight: 650;
+    text-decoration: none;
+  }
+
+  html.has-mobile-primary-nav .mobile-primary-nav-credits-note {
+    max-width: 20rem !important;
+  }
+
+  html.has-mobile-primary-nav .mobile-primary-nav-credits-body small {
+    display: block;
+    margin-top: 0.8rem;
+    color: color-mix(in srgb, var(--fg) 48%, transparent);
+    font-size: 0.62rem;
   }
 
   @keyframes mobile-primary-nav-page-in {
