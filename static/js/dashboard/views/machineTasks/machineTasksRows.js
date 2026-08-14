@@ -247,6 +247,8 @@ export const renderMachineTaskRows = (list, entries, options) => {
     body.className = "global-registry-message machine-tasks-body";
     const titleLine = document.createElement("div");
     titleLine.className = "machine-tasks-title-line";
+    const titleWrap = document.createElement("span");
+    titleWrap.className = "machine-tasks-title-wrap";
     const title = document.createElement("strong");
     title.textContent = task.title || t("tasks.task", "Tarea");
     const status = document.createElement("span");
@@ -261,20 +263,20 @@ export const renderMachineTaskRows = (list, entries, options) => {
       : t("tasks.pending", "Pendiente");
     const titleActions = document.createElement("span");
     titleActions.className = "machine-tasks-title-actions";
+    titleActions.appendChild(status);
+    const forms = document.createElement("div");
+    forms.className = "machine-task-inline-actions";
     if (!completed) {
+      titleWrap.append(title, createTaskActionsMenu({ machine, task, forms, options }));
       titleActions.appendChild(createTaskCompletionControl({
         machine,
         task,
         onCompleteTask: options.onCompleteTask
       }));
+    } else {
+      titleWrap.appendChild(title);
     }
-    titleActions.appendChild(status);
-    const forms = document.createElement("div");
-    forms.className = "machine-task-inline-actions";
-    if (!completed) {
-      titleActions.appendChild(createTaskActionsMenu({ machine, task, forms, options }));
-    }
-    titleLine.append(title, titleActions);
+    titleLine.append(titleWrap, titleActions);
     const taskMeta = document.createElement("div");
     taskMeta.className = "machine-tasks-meta";
     taskMeta.textContent = [task.assignedTo?.username, completed ? "" : timing.label]
@@ -292,7 +294,12 @@ export const renderMachineTaskRows = (list, entries, options) => {
   if (!entries.length) {
     const empty = document.createElement("p");
     empty.className = "dashboard-empty-state";
-    empty.textContent = t("tasks.emptyList", "No hay tareas que mostrar, crea una tarea para comenzar");
+    empty.textContent = options.hasTasksOutsideSidebarScope
+      ? t(
+          "tasks.sidebarFilterEmpty",
+          "No hay tareas en las máquinas visibles. Muestra más máquinas en la barra lateral para ver sus tareas."
+        )
+      : t("tasks.emptyList", "No hay tareas que mostrar, crea una tarea para comenzar");
     list.appendChild(empty);
   }
 };

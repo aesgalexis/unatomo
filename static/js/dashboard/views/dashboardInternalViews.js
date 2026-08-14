@@ -57,6 +57,7 @@ export const renderUsersDashboardView = (container, machines = [], options = {})
 
 export const renderTodoDashboardView = (container, machines = [], options = {}) => {
   renderMachineTasksView(container, machines, {
+    unscopedMachines: options.unscopedMachines,
     headerContainer: options.headerContainer,
     loadingElement: options.loadingElement,
     loading: !!options.loading,

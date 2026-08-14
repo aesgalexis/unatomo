@@ -36,6 +36,8 @@
 .machine-tasks-body { display: grid; gap: 0.25rem; min-width: 0; }
 .machine-tasks-body p { margin: 0.2rem 0 0; color: color-mix(in srgb, var(--fg) 82%, transparent); white-space: pre-wrap; }
 .machine-tasks-title-line { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
+.machine-tasks-title-wrap { display: inline-flex; align-items: baseline; gap: 0.2rem; min-width: 0; }
+.machine-tasks-title-wrap > strong { min-width: 0; overflow-wrap: anywhere; }
 .machine-tasks-title-actions { display: inline-flex; align-items: center; gap: 0.2rem; flex: none; }
 .machine-task-item-menu { align-self: center; transform: none; }
 .machine-task-item-menu .todo-item-menu-toggle {
@@ -240,11 +242,6 @@
   .machine-tasks-title-line {
     align-items: flex-start;
     gap: 0.5rem;
-  }
-
-  .machine-tasks-title-line > strong {
-    min-width: 0;
-    overflow-wrap: anywhere;
   }
 
   .machine-task-inline-form {

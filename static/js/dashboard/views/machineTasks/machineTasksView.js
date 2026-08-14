@@ -85,6 +85,19 @@ export const renderMachineTasksView = (container, machines = [], options = {}) =
     sort: options.sort,
     page: options.page
   });
+  const unscopedMachines = Array.isArray(options.unscopedMachines)
+    ? options.unscopedMachines
+    : machines;
+  const hasTasksOutsideSidebarScope =
+    visible.length === 0 &&
+    unscopedMachines.length > machines.length &&
+    prepareMachineTaskEntries(unscopedMachines, {
+      query: options.query,
+      statusFilter,
+      showCompleted,
+      sort: options.sort,
+      page: 1
+    }).entries.length > 0;
   summary.textContent = `${entries.length}/${searchedEntries.length}`;
 
   const downloadMenu = createDownloadMenu({
@@ -130,7 +143,10 @@ export const renderMachineTasksView = (container, machines = [], options = {}) =
 
   const list = document.createElement("div");
   list.className = "global-registry-list machine-tasks-list";
-  renderMachineTaskRows(list, visible, options);
+  renderMachineTaskRows(list, visible, {
+    ...options,
+    hasTasksOutsideSidebarScope
+  });
   root.appendChild(list);
 
   if (pageCount > 1) {

@@ -32,6 +32,8 @@ export const installDashboardRouteController = ({
     if (nextView === "todo") {
       state.todoPage = 1;
       state.todoCreateOpen = false;
+      state.todoStatusFilter = "visible";
+      state.todoShowCompleted = false;
       loadTodos({ preserveScroll: false });
       if (!state.todoCollaboratorsReady) loadTodoCollaborators();
     }

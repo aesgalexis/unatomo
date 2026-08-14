@@ -7,6 +7,7 @@ import {
   buildRemoveTaskUpdate
 } from "/static/js/dashboard/tabs/tasks/taskActions.js";
 import { openOperationalReturnModal } from "/static/js/dashboard/components/operationalReturnModal/operationalReturnModal.js";
+import { openTaskCompletionModal } from "/static/js/dashboard/components/taskCompletionModal/taskCompletionModal.js";
 import {
   machineStatusResultPatch,
   transitionMachineStatus
@@ -138,6 +139,14 @@ export const installTaskHooks = (hooks, deps = {}) => {
     pendingCompletionTaskIds.add(pendingKey);
     try {
       let details = completionDetails;
+      if (
+        initialTask.frequency === "puntual" &&
+        !isRestoreTask &&
+        !(await openTaskCompletionModal({
+          machineTitle: initial.title || "",
+          taskTitle: initialTask.title || ""
+        }))
+      ) return false;
       if (isRestoreTask && details === undefined) {
         details = await openOperationalReturnModal({
           machineTitle: initial.title || "",

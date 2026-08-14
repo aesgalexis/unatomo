@@ -23,6 +23,7 @@ import {
   buildRemoveTaskUpdate
 } from "../tabs/tasks/taskActions.js";
 import { createTask } from "../tabs/tasks/tasksModel.js";
+import { openTaskCompletionModal } from "../components/taskCompletionModal/taskCompletionModal.js";
 import {
   machineStatusResultPatch,
   transitionMachineStatus
@@ -610,6 +611,7 @@ export const createDashboardInternalViewController = ({
     const scopedMachines = renderMachineFilterTree(state.draftMachines || []);
     const headerContainer = getFixedViewHeaderContainer(true);
     renderTodoDashboardView(list, scopedMachines, {
+      unscopedMachines: state.draftMachines || [],
       headerContainer,
       loadingElement: headerContainer ? loadingEl : null,
       loading: state.loading,
@@ -704,6 +706,14 @@ export const createDashboardInternalViewController = ({
         const task = current.tasks?.find((item) => item.id === taskId);
         if (!task) return;
         const isRestoreTask = task.source === "status-out-of-service";
+        if (
+          task.frequency === "puntual" &&
+          !isRestoreTask &&
+          !(await openTaskCompletionModal({
+            machineTitle: current.title || "",
+            taskTitle: task.title || ""
+          }))
+        ) return;
         const details = isRestoreTask
           ? await openOperationalReturnModal({
               machineTitle: current.title || "",
