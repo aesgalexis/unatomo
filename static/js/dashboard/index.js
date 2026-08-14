@@ -27,6 +27,7 @@ import {
 import { filterMachines } from "./components/machineSearch/machineFilter.js";
 import { createMachineSearchBar } from "./components/machineSearch/machineSearchBar.js";
 import { createDashboardSectionNav } from "./components/sectionNav.js";
+import { initMobilePrimaryNavigation } from "./runtime/mobilePrimaryNavigation.js";
 import {
   createNfcMinimalPageBackButton,
   mountNfcMinimalPageNav
@@ -384,6 +385,7 @@ if (mount) {
     addBar, dashboardWorkspace, loadingElement: loadingEl, mobileBackButton: mobileBackBtn,
     mount, sectionNav
   });
+  initMobilePrimaryNavigation({ sectionNav });
 
   const { queueScrollState: queueDashboardMenusScrollState } =
     createDashboardFixedMenusController({

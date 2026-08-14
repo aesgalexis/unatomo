@@ -32,6 +32,7 @@ import {
   getDashboardScopedMachines
 } from "/static/js/dashboard/rendering/groupTreeRenderer.js";
 import { createDashboardTooltips } from "/static/js/dashboard/runtime/dashboardTooltips.js";
+import { initMobilePrimaryNavigation } from "/static/js/dashboard/runtime/mobilePrimaryNavigation.js";
 import {
   loadHiddenTreeGroupIds,
   saveHiddenTreeGroupIds
@@ -86,6 +87,7 @@ let expandedTreeGroupIds = [];
 let hiddenTreeGroupIds = [];
 let qrDataReady = false;
 let activeUid = "";
+let cleanupMobilePrimaryNavigation = () => {};
 const qrTreeMedia = window.matchMedia("(min-width: 1280px)");
 const qrGroupTree = document.createElement("aside");
 qrGroupTree.className = "dashboard-group-tree";
@@ -103,6 +105,15 @@ const clearLoadingProgress = () => {
 
 const createSectionNav = () => {
   return createQrSectionNav({ isEn, navigation: sectionNavigation, text });
+};
+
+const resetMobilePrimaryNavigation = () => {
+  cleanupMobilePrimaryNavigation();
+  cleanupMobilePrimaryNavigation = () => {};
+};
+
+const mountMobilePrimaryNavigation = (sectionNav) => {
+  cleanupMobilePrimaryNavigation = initMobilePrimaryNavigation({ sectionNav });
 };
 
 const normalizeSearch = (value) =>
@@ -358,6 +369,7 @@ qrTreeMedia.addEventListener("change", () => {
 const setState = (message, state = "") => {
   if (!mount) return;
   clearLoadingProgress();
+  resetMobilePrimaryNavigation();
   mount.innerHTML = "";
   mount.classList.remove("has-group-tree");
   qrGroupTree.hidden = true;
@@ -390,6 +402,7 @@ const getPrintSheetCapacity = () => {
 const renderQrGrid = (machines, options = {}) => {
   if (!mount) return;
   clearLoadingProgress();
+  resetMobilePrimaryNavigation();
   if (!options.preserveList) {
     qrDataReady = true;
     allMachines = Array.isArray(options.sourceMachines) ? options.sourceMachines : machines;
@@ -554,6 +567,7 @@ const renderQrGrid = (machines, options = {}) => {
       : accessibleMachinesCount > 0 ? text.empty : text.emptyNoMachines;
     wrap.appendChild(empty);
     mount.appendChild(wrap);
+    mountMobilePrimaryNavigation(sectionNav);
     window.requestAnimationFrame(syncQrMenuState);
     if (options.restoreSearch) {
       const nextSearch = wrap.querySelector(".qr-print-search");
@@ -634,6 +648,7 @@ const renderQrGrid = (machines, options = {}) => {
   wrap.appendChild(grid);
   wrap.appendChild(backGrid);
   mount.appendChild(wrap);
+  mountMobilePrimaryNavigation(sectionNav);
   window.requestAnimationFrame(syncQrMenuState);
   if (options.restoreSearch) {
     const nextSearch = wrap.querySelector(".qr-print-search");
@@ -645,6 +660,7 @@ const renderQrGrid = (machines, options = {}) => {
 const setLoadingState = () => {
   if (!mount) return;
   clearLoadingProgress();
+  resetMobilePrimaryNavigation();
   mount.innerHTML = "";
 
   const wrap = document.createElement("section");
@@ -695,6 +711,7 @@ const setLoadingState = () => {
   fixedMenusSpace.className = "qr-print-fixed-menus-space";
   wrap.append(fixedMenus, fixedMenusSpace);
   mount.appendChild(wrap);
+  mountMobilePrimaryNavigation(sectionNav);
   window.requestAnimationFrame(syncQrMenuState);
 
   let progress = 0;
