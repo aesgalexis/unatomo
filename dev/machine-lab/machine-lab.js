@@ -1,9 +1,6 @@
 const STORAGE_KEY = "unatomo_mobile_lab_url";
 const DEFAULT_PATH = "/nfc/es/m.html?tag=G-P76W-ARQL";
 
-const frame = document.querySelector("iframe");
-const address = document.querySelector(".phone-address-url");
-
 const getSafeLabUrl = (value) => {
   try {
     const url = new URL(value || DEFAULT_PATH, window.location.origin);
@@ -16,7 +13,7 @@ const getSafeLabUrl = (value) => {
   }
 };
 
-const showUrl = (url) => {
+const showUrl = (address, url) => {
   if (!address) return;
   address.textContent = `${url.pathname}${url.search}${url.hash}`;
   address.title = url.href;
@@ -29,9 +26,13 @@ try {
   // The lab still works when browser storage is unavailable.
 }
 
-if (frame) {
+document.querySelectorAll(".phone-shell").forEach((shell) => {
+  const frame = shell.querySelector("iframe");
+  const address = shell.querySelector(".phone-address-url");
+  if (!frame) return;
+
   frame.src = `${initialUrl.pathname}${initialUrl.search}${initialUrl.hash}`;
-  showUrl(initialUrl);
+  showUrl(address, initialUrl);
 
   const syncFrameUrl = () => {
     let currentUrl = getSafeLabUrl(frame.src);
@@ -40,7 +41,7 @@ if (frame) {
     } catch {
       // Firebase popups may briefly prevent access; keep the last safe URL.
     }
-    showUrl(currentUrl);
+    showUrl(address, currentUrl);
     try {
       localStorage.setItem(STORAGE_KEY, currentUrl.href);
     } catch {
@@ -57,4 +58,4 @@ if (frame) {
       // Only same-origin lab pages expose their navigation events.
     }
   });
-}
+});

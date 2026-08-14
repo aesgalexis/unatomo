@@ -11,15 +11,27 @@
 <body>
   <main>
     <h1>Mobile Lab</h1>
-    <div class="phone-shell">
-      <div class="phone-address" aria-label="URL actual">
-        <span class="phone-address-lock" aria-hidden="true">●</span>
-        <span class="phone-address-url"></span>
-      </div>
-      <iframe
-        title="Mobile Lab"
-        src="/nfc/es/m.html?tag=G-P76W-ARQL"
-      ></iframe>
+    <div class="lab-devices">
+      <section class="lab-device" aria-labelledby="lab-device-current">
+        <h2 id="lab-device-current">Móvil actual</h2>
+        <div class="phone-shell">
+          <div class="phone-address" aria-label="URL actual">
+            <span class="phone-address-lock" aria-hidden="true">●</span>
+            <span class="phone-address-url"></span>
+          </div>
+          <iframe title="Mobile Lab" src="/nfc/es/m.html?tag=G-P76W-ARQL"></iframe>
+        </div>
+      </section>
+      <section class="lab-device" aria-labelledby="lab-device-android">
+        <h2 id="lab-device-android">Android · 412 px</h2>
+        <div class="phone-shell phone-shell--android">
+          <div class="phone-address" aria-label="URL actual en Android">
+            <span class="phone-address-lock" aria-hidden="true">●</span>
+            <span class="phone-address-url"></span>
+          </div>
+          <iframe title="Mobile Lab Android" src="/nfc/es/m.html?tag=G-P76W-ARQL"></iframe>
+        </div>
+      </section>
     </div>
   </main>
   <script type="module" src="./machine-lab.js"></script>

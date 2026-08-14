@@ -14,8 +14,11 @@ const html = await readFile(path.join(LAB, "index.html"), "utf8");
 const iframeCount = (html.match(/<iframe\b/g) || []).length;
 const machineUrlCount = html.split(TEST_MACHINE_URL).length - 1;
 
-if (iframeCount !== 1 || machineUrlCount !== 1) {
-  throw new Error("El laboratorio debe mostrar exactamente una vista de Test Machine.");
+if (iframeCount !== 2 || machineUrlCount !== 2) {
+  throw new Error("El laboratorio debe mostrar las vistas móvil actual y Android de Test Machine.");
+}
+if (!html.includes("phone-shell--android") || !html.includes("Mobile Lab Android")) {
+  throw new Error("El laboratorio debe identificar su vista Android.");
 }
 if (/\bcredentialless\b/.test(html)) {
   throw new Error("La vista debe permitir el inicio de sesión de Firebase.");
