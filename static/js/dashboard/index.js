@@ -385,7 +385,7 @@ if (mount) {
     addBar, dashboardWorkspace, loadingElement: loadingEl, mobileBackButton: mobileBackBtn,
     mount, sectionNav
   });
-  initMobilePrimaryNavigation({ sectionNav });
+  initMobilePrimaryNavigation({ sectionNav, suggestionsLink });
 
   const { queueScrollState: queueDashboardMenusScrollState } =
     createDashboardFixedMenusController({

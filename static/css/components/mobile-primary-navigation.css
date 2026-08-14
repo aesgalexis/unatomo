@@ -1,16 +1,34 @@
+.mobile-primary-nav-mobile-only {
+  display: none !important;
+}
+
 @media (max-width: 768px) {
   html.has-mobile-primary-nav body.page {
     padding-bottom: calc(5.75rem + env(safe-area-inset-bottom));
   }
 
-  html.has-mobile-primary-nav.mobile-primary-nav-open::before {
-    content: "";
+  html.has-mobile-primary-nav .mobile-primary-nav-backdrop {
     position: fixed;
     inset: 0;
     z-index: 2199;
+    display: block;
+    border: 0;
     background: color-mix(in srgb, #000 26%, transparent);
-    opacity: 1;
+    opacity: 0;
+    visibility: hidden;
     pointer-events: none;
+    transition: opacity 160ms ease, visibility 0s linear 160ms;
+  }
+
+  html.has-mobile-primary-nav .mobile-primary-nav-backdrop.is-visible {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition-delay: 0s;
+  }
+
+  html.has-mobile-primary-nav .mobile-primary-nav-backdrop[hidden] {
+    display: none;
   }
 
   html.nfc-dashboard-page .topbar {
@@ -42,7 +60,7 @@
     border: 1px solid color-mix(in srgb, var(--fg) 18%, transparent);
     border-radius: 50%;
     background: color-mix(in srgb, var(--bg) 96%, transparent);
-    box-shadow: 0 0.65rem 1.8rem color-mix(in srgb, #000 20%, transparent);
+    box-shadow: none;
     cursor: pointer;
     transform: translateX(-50%);
     transition: transform 180ms ease, border-color 180ms ease, background-color 180ms ease;
@@ -113,15 +131,24 @@
       visibility 0s linear 200ms;
   }
 
-  html.has-mobile-primary-nav .dashboard-section-nav::before {
+  html.has-mobile-primary-nav .mobile-primary-nav-handle {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 5rem;
+    height: 1.5rem;
+    transform: translateX(-50%);
+    cursor: grab;
+    touch-action: none;
+  }
+
+  html.has-mobile-primary-nav .mobile-primary-nav-handle::before {
     content: "";
     position: absolute;
     top: 0.62rem;
-    bottom: auto;
     left: 50%;
     width: 2.4rem;
     height: 0.25rem;
-    border: 0;
     border-radius: 999px;
     background: color-mix(in srgb, var(--fg) 22%, transparent);
     transform: translateX(-50%);
@@ -131,8 +158,16 @@
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
-    transform: translate(-50%, 0);
+    transform: translate(-50%, var(--mobile-nav-drag-y, 0));
     transition-delay: 0s;
+  }
+
+  html.has-mobile-primary-nav .dashboard-section-nav.is-dragging {
+    transition: none;
+  }
+
+  html.has-mobile-primary-nav .dashboard-section-nav.is-dragging .mobile-primary-nav-handle {
+    cursor: grabbing;
   }
 
   html.has-mobile-primary-nav .dashboard-section-link {
@@ -154,6 +189,43 @@
     transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
   }
 
+  html.has-mobile-primary-nav .mobile-primary-nav-menu-button {
+    appearance: none;
+    width: 100%;
+    background: transparent;
+    font: inherit;
+  }
+
+  html.has-mobile-primary-nav .mobile-primary-nav-primary-action {
+    display: flex !important;
+  }
+
+  html.has-mobile-primary-nav .mobile-primary-nav-secondary-link {
+    display: none;
+  }
+
+  html.has-mobile-primary-nav .dashboard-section-nav.is-more-page
+    > .dashboard-section-link:not(.mobile-primary-nav-secondary-link) {
+    display: none !important;
+  }
+
+  html.has-mobile-primary-nav .dashboard-section-nav.is-more-page
+    > .mobile-primary-nav-secondary-link:not([hidden]) {
+    display: flex !important;
+    animation: mobile-primary-nav-page-in 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  @keyframes mobile-primary-nav-page-in {
+    from {
+      opacity: 0;
+      transform: translateX(0.75rem);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
   html.has-mobile-primary-nav .dashboard-section-link::after {
     content: attr(data-section-label);
     overflow: hidden;
@@ -165,13 +237,29 @@
     white-space: nowrap;
   }
 
-  html.has-mobile-primary-nav .dashboard-section-link:hover,
-  html.has-mobile-primary-nav .dashboard-section-link:focus-visible,
   html.has-mobile-primary-nav .dashboard-section-link.is-active {
     border-color: color-mix(in srgb, var(--fg) 10%, transparent);
     background: color-mix(in srgb, var(--fg) 8%, var(--bg));
     color: var(--fg);
     outline: none;
+  }
+
+  html.has-mobile-primary-nav .mobile-primary-nav-menu-button:not(.is-active),
+  html.has-mobile-primary-nav .mobile-primary-nav-menu-button:not(.is-active):hover,
+  html.has-mobile-primary-nav .mobile-primary-nav-menu-button:not(.is-active):focus,
+  html.has-mobile-primary-nav .mobile-primary-nav-menu-button:not(.is-active):focus-visible {
+    background: transparent;
+  }
+
+  html.has-mobile-primary-nav .dashboard-section-link:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--fg) 42%, transparent);
+    outline-offset: -2px;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    html.has-mobile-primary-nav .dashboard-section-link:hover {
+      background: color-mix(in srgb, var(--fg) 5%, var(--bg));
+    }
   }
 
   html.has-mobile-primary-nav .dashboard-section-link-superadmin,
@@ -202,5 +290,71 @@
     html.has-mobile-primary-nav .mobile-primary-nav-toggle {
       transition: none;
     }
+  }
+}
+
+@media (max-width: 768px) {
+  .mobile-qr-scanner {
+    position: fixed;
+    inset: 0;
+    z-index: 2300;
+    overflow: hidden;
+    background: #000;
+  }
+
+  .mobile-qr-scanner[hidden] {
+    display: none;
+  }
+
+  .mobile-qr-scanner-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .mobile-qr-scanner-shade {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .mobile-qr-scanner-frame {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: min(17rem, 72vw);
+    aspect-ratio: 1;
+    border: 2px solid #fff;
+    border-radius: 1.2rem;
+    box-shadow: 0 0 0 100vmax color-mix(in srgb, #000 42%, transparent);
+    transform: translate(-50%, -56%);
+  }
+
+  .mobile-qr-scanner-close {
+    position: absolute;
+    top: max(1rem, env(safe-area-inset-top));
+    right: 1rem;
+    display: grid;
+    width: 2.75rem;
+    height: 2.75rem;
+    place-items: center;
+    border: 1px solid rgb(255 255 255 / 35%);
+    border-radius: 50%;
+    background: rgb(0 0 0 / 48%);
+    color: #fff;
+    font: 400 1.75rem/1 system-ui;
+  }
+
+  .mobile-qr-scanner-status {
+    position: absolute;
+    right: 1.5rem;
+    bottom: calc(2rem + env(safe-area-inset-bottom));
+    left: 1.5rem;
+    margin: 0;
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-align: center;
+    text-shadow: 0 1px 4px #000;
   }
 }

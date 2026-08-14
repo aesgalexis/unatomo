@@ -3,15 +3,6 @@
     padding-bottom: calc(5.75rem + env(safe-area-inset-bottom));
   }
 
-  html.has-mobile-primary-nav.mobile-primary-nav-open::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: 2200;
-    background: color-mix(in srgb, #000 24%, transparent);
-    backdrop-filter: blur(2px);
-  }
-
   html.nfc-dashboard-page .topbar {
     height: 58px;
     background: color-mix(in srgb, var(--bg) 82%, transparent);
