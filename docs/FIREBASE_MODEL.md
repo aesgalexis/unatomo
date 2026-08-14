@@ -136,9 +136,9 @@ frontend wrappers live under `static/js/dashboard/`.
   creates the user profile without `regCode` and deletes the code in the same
   transaction, so two accounts cannot redeem it.
 - `completeAccountOnboarding`: authenticated, first-login-only completion. It
-  updates the profile and account directory, uses the company as the dashboard
-  title, and creates at most 50 empty owned machine records. Repeated calls do
-  not create duplicate machines.
+  updates the profile and account directory, uses the optional company or the
+  display name as the dashboard title, and creates at most 50 empty owned
+  machine records. Repeated calls do not create duplicate machines.
 - `createOwnedMachine`: authenticated owner-machine creation. It transactionally
   enforces the 64-owned-machine limit, with the control-panel `superadmin`
   exemption. The `provisionMachineTagOnCreate` Firestore trigger then assigns a

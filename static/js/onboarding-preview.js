@@ -84,9 +84,9 @@ form.addEventListener("submit", async (event) => {
   const ownsEquipment = form.elements.ownership.value === "own";
   const count = ownsEquipment ? clampEquipment(equipmentInput.value) : 0;
   syncEquipment(count);
-  if (!name || !company) {
-    status.textContent = isEnglish ? "Complete your name and company to continue." : "Completa tu nombre y empresa para continuar.";
-    (!name ? nameInput : companyInput).focus();
+  if (!name) {
+    status.textContent = isEnglish ? "Complete your name to continue." : "Completa tu nombre para continuar.";
+    nameInput.focus();
     return;
   }
   status.textContent = "";

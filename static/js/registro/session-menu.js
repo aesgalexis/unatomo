@@ -270,6 +270,10 @@ if (!btn || !menu || !label || !action) {
       initials.replaceChildren();
       if (user.photoURL) {
         const image = document.createElement("img");
+        image.className = "session-menu-avatar-image";
+        image.width = 26;
+        image.height = 26;
+        image.decoding = "async";
         image.src = user.photoURL;
         image.alt = "";
         image.addEventListener("error", () => {

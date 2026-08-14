@@ -26,12 +26,12 @@
       <form id="onboarding-form" class="onboarding-form" novalidate>
         <div class="onboarding-field">
           <label for="onboarding-name">Tu nombre</label>
-          <input id="onboarding-name" name="name" type="text" value="Alexis" maxlength="120" autocomplete="name" required>
+          <input id="onboarding-name" name="name" type="text" maxlength="120" autocomplete="name" required>
         </div>
 
         <div class="onboarding-field">
-          <label for="onboarding-company">Empresa</label>
-          <input id="onboarding-company" name="company" type="text" placeholder="Ej. Lavandería Central" maxlength="60" autocomplete="organization" required>
+          <label for="onboarding-company">Empresa <span class="onboarding-optional">(opcional)</span></label>
+          <input id="onboarding-company" name="company" type="text" placeholder="Ej. Lavandería Central" maxlength="60" autocomplete="organization">
         </div>
 
         <fieldset class="onboarding-field onboarding-ownership">

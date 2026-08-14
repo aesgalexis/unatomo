@@ -14,6 +14,7 @@ body.onboarding-page { min-height: 100svh; margin: 0; background: color-mix(in s
 .onboarding-form { padding: 1.75rem clamp(1.4rem, 5vw, 2.5rem) clamp(1.5rem, 5vw, 2.25rem); display: grid; gap: 1.35rem; }
 .onboarding-field { min-width: 0; margin: 0; padding: 0; border: 0; }
 .onboarding-field > label, .onboarding-field > legend { display: block; margin-bottom: .55rem; font-size: .83rem; font-weight: 650; }
+.onboarding-optional { color: var(--onboarding-muted); font-weight: 450; }
 .onboarding-field > input { width: 100%; height: 40px; padding: 0 .8rem; box-sizing: border-box; border: 1px solid var(--border-subtle); border-radius: .65rem; background: color-mix(in srgb, var(--bg) 97%, var(--fg) 3%); color: var(--fg); font: inherit; outline: none; }
 .onboarding-field > input:focus { border-color: color-mix(in srgb, var(--fg) 55%, transparent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--fg) 8%, transparent); }
 .onboarding-hint { margin: .45rem 0 0; color: var(--onboarding-muted); font-size: .74rem; line-height: 1.45; }

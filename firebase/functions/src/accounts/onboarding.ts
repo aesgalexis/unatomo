@@ -24,7 +24,7 @@ export const completeAccountOnboarding = onCall(async (request) => {
       0;
   const language = request.data?.language === "en" ? "en" : "es";
 
-  if (!displayName || !company) {
+  if (!displayName) {
     throw new HttpsError("invalid-argument", "profile-fields-required");
   }
   if (machineCount < 0 || machineCount > 50) {
@@ -91,7 +91,7 @@ export const completeAccountOnboarding = onCall(async (request) => {
       updatedAt: now,
     });
     transaction.set(layoutRef, {
-      dashboardTitle: company,
+      dashboardTitle: company || displayName,
       updatedAt: now,
       updatedBy: auth.uid,
     }, {merge: true});

@@ -20,6 +20,7 @@ import {
   buildRemoveTaskUpdate
 } from "/static/js/dashboard/tabs/tasks/taskActions.js";
 import { openOperationalReturnModal } from "/static/js/dashboard/components/operationalReturnModal/operationalReturnModal.js";
+import { openTaskCompletionModal } from "/static/js/dashboard/components/taskCompletionModal/taskCompletionModal.js";
 import { uploadMachineAccessDocument } from "./machineDocumentUploads.js";
 import { setTopbarSaveStatus } from "/static/js/topbar/save-status.js";
 import { t } from "/static/js/dashboard/i18n.js";
@@ -665,6 +666,15 @@ const renderMachine = () => {
     const task = machineDoc.tasks?.find((item) => item.id === taskId);
     if (!task) return;
     const isRestoreTask = task.source === "status-out-of-service";
+    const needsCompletionConfirmation =
+      task.frequency === "puntual" && !isRestoreTask;
+    if (
+      needsCompletionConfirmation &&
+      !(await openTaskCompletionModal({
+        machineTitle: machineDoc.title || "",
+        taskTitle: task.title || ""
+      }))
+    ) return;
     const details = isRestoreTask
       ? await openOperationalReturnModal({
           machineTitle: machineDoc.title || "",
