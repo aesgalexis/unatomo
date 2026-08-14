@@ -4,18 +4,7 @@
   }
 
   html.has-mobile-primary-nav.mobile-primary-nav-open::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: 2200;
-    background: color-mix(in srgb, #000 24%, transparent);
-    backdrop-filter: blur(2px);
-  }
-
-  html.mobile-primary-nav-open,
-  html.mobile-primary-nav-open body {
-    overflow: hidden !important;
-    overscroll-behavior: none;
+    content: none !important;
   }
 
   html.nfc-dashboard-page .topbar {
@@ -35,6 +24,35 @@
 
   html.nfc-dashboard-page .topbar-logo-link {
     display: none;
+  }
+
+  html.has-mobile-primary-nav .mobile-primary-nav-halo {
+    position: fixed;
+    bottom: calc(2.825rem + env(safe-area-inset-bottom) - min(9.25rem, 46vw));
+    left: 50%;
+    z-index: 2200;
+    display: block;
+    width: min(18.5rem, 92vw);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle at center,
+      var(--bg) 0 62%,
+      color-mix(in srgb, var(--bg) 88%, transparent) 67%,
+      color-mix(in srgb, var(--bg) 48%, transparent) 74%,
+      transparent 82%
+    );
+    clip-path: circle(50% at 50% 50%);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateX(-50%);
+    transition: opacity 160ms ease;
+  }
+
+  html.has-mobile-primary-nav.mobile-primary-nav-open .mobile-primary-nav-halo {
+    opacity: 1;
+    visibility: visible;
   }
 
   html.has-mobile-primary-nav .mobile-primary-nav-toggle {
@@ -81,7 +99,7 @@
   }
 
   html.nfc-dashboard-page .topbar-title {
-    overflow: hidden;
+    overflow: visible;
     font-size: 1.05rem;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -109,11 +127,17 @@
     border-radius: 0;
     background: transparent;
     box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
     overflow: hidden;
-    opacity: 0;
+    opacity: 1;
+    visibility: hidden;
     pointer-events: none;
-    transform: translateY(2rem);
-    transition: opacity 160ms ease, transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+    transform: none;
+    transition: none;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
   }
 
   html.has-mobile-primary-nav .mobile-primary-nav-scroller {
@@ -125,7 +149,8 @@
     overscroll-behavior-x: contain;
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
-    touch-action: pan-x;
+    cursor: inherit;
+    touch-action: none;
   }
 
   html.has-mobile-primary-nav .mobile-primary-nav-scroller::-webkit-scrollbar {
@@ -140,19 +165,22 @@
   }
 
   html.has-mobile-primary-nav .dashboard-section-nav.is-mobile-open {
-    opacity: 1;
+    visibility: visible;
     pointer-events: auto;
-    transform: translateY(0);
+  }
+
+  html.has-mobile-primary-nav .dashboard-section-nav.is-dragging {
+    cursor: grabbing;
   }
 
   html.has-mobile-primary-nav .dashboard-section-link {
     position: absolute;
     z-index: 1;
     flex: none;
-    width: 2.9rem;
-    min-width: 2.9rem;
-    height: 2.9rem;
-    min-height: 2.9rem;
+    width: 3.35rem;
+    min-width: 3.35rem;
+    height: 3.35rem;
+    min-height: 3.35rem;
     justify-content: center;
     border: 1px solid color-mix(in srgb, var(--fg) 18%, transparent);
     border-radius: 50%;
@@ -161,11 +189,21 @@
     text-align: center;
     transform: translate(-50%, 50%);
     transition:
-      left 140ms cubic-bezier(0.22, 1, 0.36, 1),
-      bottom 140ms cubic-bezier(0.22, 1, 0.36, 1),
+      left 140ms cubic-bezier(0.22, 1, 0.36, 1) var(--mobile-arc-delay, 0ms),
+      bottom 140ms cubic-bezier(0.22, 1, 0.36, 1) var(--mobile-arc-delay, 0ms),
       background-color 160ms ease,
       color 160ms ease;
     will-change: left, bottom;
+    cursor: inherit;
+    touch-action: none;
+  }
+
+  html.has-mobile-primary-nav .dashboard-section-nav.is-arc-entering .dashboard-section-link {
+    transition-duration: 260ms, 260ms, 160ms, 160ms;
+  }
+
+  html.has-mobile-primary-nav .dashboard-section-nav.is-arc-preparing .dashboard-section-link {
+    transition: none !important;
   }
 
   html.has-mobile-primary-nav .dashboard-section-link::after {
@@ -180,8 +218,8 @@
   }
 
   html.has-mobile-primary-nav .dashboard-section-icon {
-    width: 1.18rem;
-    height: 1.18rem;
+    width: 1.3rem;
+    height: 1.3rem;
     margin-left: 0;
   }
 

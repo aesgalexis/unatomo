@@ -36,6 +36,12 @@ export const initMobilePrimaryNavigation = ({ sectionNav } = {}) => {
   `;
   document.body.appendChild(toggle);
 
+  const halo = document.createElement("span");
+  halo.className = "mobile-primary-nav-halo";
+  halo.setAttribute("aria-hidden", "true");
+  halo.hidden = true;
+  document.body.appendChild(halo);
+
   let open = false;
   let lastScrollY = window.scrollY;
   let scrollAnchorY = lastScrollY;
@@ -43,6 +49,15 @@ export const initMobilePrimaryNavigation = ({ sectionNav } = {}) => {
   let arcSlotWidth = 0;
   let arcSnapTimer = null;
   let arcUpdateFrame = null;
+  let dragPointerId = null;
+  let dragStartX = 0;
+  let dragStartScrollLeft = 0;
+  let dragMoved = false;
+  let suppressNextClick = false;
+  let lockedPageScrollY = 0;
+  let arcEntryTimer = null;
+  let arcEntryFrame = null;
+  let arcEntryDeployFrame = null;
 
   const updateArcPositions = () => {
     if (!media.matches) return;
@@ -81,19 +96,64 @@ export const initMobilePrimaryNavigation = ({ sectionNav } = {}) => {
     });
   };
 
+  const clearArcEntry = () => {
+    if (arcEntryTimer) window.clearTimeout(arcEntryTimer);
+    if (arcEntryFrame) window.cancelAnimationFrame(arcEntryFrame);
+    if (arcEntryDeployFrame) window.cancelAnimationFrame(arcEntryDeployFrame);
+    arcEntryTimer = null;
+    arcEntryFrame = null;
+    arcEntryDeployFrame = null;
+    sectionNav.classList.remove("is-arc-preparing", "is-arc-entering");
+    sectionNav.querySelectorAll(":scope > .dashboard-section-link")
+      .forEach((link) => link.style.removeProperty("--mobile-arc-delay"));
+  };
+
+  const startArcEntry = () => {
+    clearArcEntry();
+    const toggleRect = toggle.getBoundingClientRect();
+    const centerX = toggleRect.left + toggleRect.width / 2;
+    const centerBottom = window.innerHeight - (toggleRect.top + toggleRect.height / 2);
+    const links = [...sectionNav.querySelectorAll(":scope > .dashboard-section-link:not([hidden])")];
+    sectionNav.classList.add("is-arc-preparing");
+    links.forEach((link, index) => {
+      link.style.setProperty("--mobile-arc-delay", `${index * 28}ms`);
+      link.style.left = `${centerX}px`;
+      link.style.bottom = `${centerBottom}px`;
+    });
+    sectionNav.getBoundingClientRect();
+    arcEntryFrame = window.requestAnimationFrame(() => {
+      arcEntryFrame = null;
+      sectionNav.classList.remove("is-arc-preparing");
+      sectionNav.classList.add("is-arc-entering");
+      arcEntryDeployFrame = window.requestAnimationFrame(() => {
+        arcEntryDeployFrame = null;
+        updateArcPositions();
+      });
+    });
+    arcEntryTimer = window.setTimeout(clearArcEntry, 460);
+  };
+
   const setOpen = (nextOpen) => {
+    const wasOpen = open;
     open = media.matches && nextOpen;
+    if (open && !wasOpen) {
+      lockedPageScrollY = window.scrollY;
+    }
     document.documentElement.classList.toggle("mobile-primary-nav-open", open);
     sectionNav.classList.toggle("is-mobile-open", open);
     toggle.setAttribute("aria-expanded", String(open));
     if (open) {
       arcScroller.scrollLeft = 0;
-      scheduleArcUpdate();
+      startArcEntry();
+    } else if (wasOpen) {
+      clearArcEntry();
+      window.requestAnimationFrame(() => window.scrollTo(0, lockedPageScrollY));
     }
   };
 
   const syncLayout = () => {
     toggle.hidden = !media.matches;
+    halo.hidden = !media.matches;
     if (media.matches) {
       document.body.appendChild(sectionNav);
       document.documentElement.classList.add("has-mobile-primary-nav");
@@ -108,10 +168,28 @@ export const initMobilePrimaryNavigation = ({ sectionNav } = {}) => {
 
   const onToggleClick = () => setOpen(!open);
   const onSectionClick = (event) => {
-    if (event.target.closest("a")) setOpen(false);
+    if (suppressNextClick) {
+      event.preventDefault();
+      event.stopPropagation();
+      suppressNextClick = false;
+      return;
+    }
+    if (event.target.closest("a")) {
+      setOpen(false);
+      return;
+    }
+    if (!open || arcSlotWidth <= 0) return;
+    const toggleRect = toggle.getBoundingClientRect();
+    const direction = event.clientX < toggleRect.left + toggleRect.width / 2 ? -1 : 1;
+    arcScroller.scrollTo({
+      left: arcScroller.scrollLeft + direction * arcSlotWidth,
+      behavior: "smooth"
+    });
   };
   const onDocumentClick = (event) => {
     if (!open || sectionNav.contains(event.target) || toggle.contains(event.target)) return;
+    event.preventDefault();
+    event.stopPropagation();
     setOpen(false);
   };
   const onDocumentKeydown = (event) => {
@@ -119,7 +197,12 @@ export const initMobilePrimaryNavigation = ({ sectionNav } = {}) => {
       setOpen(false);
       return;
     }
-    if (!open || !["ArrowLeft", "ArrowRight"].includes(event.key)) return;
+    if (!open) return;
+    if (["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End", " "].includes(event.key)) {
+      event.preventDefault();
+      return;
+    }
+    if (!["ArrowLeft", "ArrowRight"].includes(event.key)) return;
     event.preventDefault();
     arcScroller.scrollTo({
       left: arcScroller.scrollLeft + (event.key === "ArrowRight" ? arcSlotWidth : -arcSlotWidth),
@@ -127,7 +210,13 @@ export const initMobilePrimaryNavigation = ({ sectionNav } = {}) => {
     });
   };
   const onScroll = () => {
-    if (!media.matches || open) return;
+    if (!media.matches) return;
+    if (open) {
+      if (Math.abs(window.scrollY - lockedPageScrollY) > 1) {
+        window.requestAnimationFrame(() => window.scrollTo(0, lockedPageScrollY));
+      }
+      return;
+    }
     const nextScrollY = Math.max(0, window.scrollY);
     const direction = nextScrollY > lastScrollY ? "down" : "up";
     if (direction !== lastDirection) {
@@ -166,13 +255,55 @@ export const initMobilePrimaryNavigation = ({ sectionNav } = {}) => {
     event.preventDefault();
     arcScroller.scrollLeft += delta * 0.48;
   };
+  const onDocumentTouchMove = (event) => {
+    if (!open || sectionNav.contains(event.target)) return;
+    event.preventDefault();
+  };
+  const onArcPointerDown = (event) => {
+    if (!open || !media.matches || event.button !== 0) return;
+    dragPointerId = event.pointerId;
+    dragStartX = event.clientX;
+    dragStartScrollLeft = arcScroller.scrollLeft;
+    dragMoved = false;
+  };
+  const onArcPointerMove = (event) => {
+    if (event.pointerId !== dragPointerId) return;
+    const delta = event.clientX - dragStartX;
+    if (Math.abs(delta) >= 5 && !dragMoved) {
+      dragMoved = true;
+      sectionNav.setPointerCapture?.(event.pointerId);
+      sectionNav.classList.add("is-dragging");
+    }
+    if (!dragMoved) return;
+    event.preventDefault();
+    arcScroller.scrollLeft = dragStartScrollLeft - delta;
+  };
+  const finishArcPointer = (event) => {
+    if (event.pointerId !== dragPointerId) return;
+    if (dragMoved) {
+      suppressNextClick = true;
+      window.setTimeout(() => { suppressNextClick = false; }, 240);
+      const targetLeft = Math.round(arcScroller.scrollLeft / arcSlotWidth) * arcSlotWidth;
+      arcScroller.scrollTo({ left: targetLeft, behavior: "smooth" });
+    }
+    if (sectionNav.hasPointerCapture?.(event.pointerId)) {
+      sectionNav.releasePointerCapture(event.pointerId);
+    }
+    sectionNav.classList.remove("is-dragging");
+    dragPointerId = null;
+  };
   const onResize = scheduleArcUpdate;
 
   toggle.addEventListener("click", onToggleClick);
   sectionNav.addEventListener("click", onSectionClick);
-  document.addEventListener("click", onDocumentClick);
+  sectionNav.addEventListener("pointerdown", onArcPointerDown);
+  sectionNav.addEventListener("pointermove", onArcPointerMove);
+  sectionNav.addEventListener("pointerup", finishArcPointer);
+  sectionNav.addEventListener("pointercancel", finishArcPointer);
+  document.addEventListener("click", onDocumentClick, true);
   document.addEventListener("keydown", onDocumentKeydown);
   document.addEventListener("wheel", onDocumentWheel, { passive: false });
+  document.addEventListener("touchmove", onDocumentTouchMove, { passive: false });
   window.addEventListener("scroll", onScroll, { passive: true });
   window.addEventListener("resize", onResize, { passive: true });
   arcScroller.addEventListener("scroll", onArcScroll, { passive: true });
@@ -183,14 +314,20 @@ export const initMobilePrimaryNavigation = ({ sectionNav } = {}) => {
     media.removeEventListener("change", syncLayout);
     toggle.removeEventListener("click", onToggleClick);
     sectionNav.removeEventListener("click", onSectionClick);
-    document.removeEventListener("click", onDocumentClick);
+    sectionNav.removeEventListener("pointerdown", onArcPointerDown);
+    sectionNav.removeEventListener("pointermove", onArcPointerMove);
+    sectionNav.removeEventListener("pointerup", finishArcPointer);
+    sectionNav.removeEventListener("pointercancel", finishArcPointer);
+    document.removeEventListener("click", onDocumentClick, true);
     document.removeEventListener("keydown", onDocumentKeydown);
     document.removeEventListener("wheel", onDocumentWheel);
+    document.removeEventListener("touchmove", onDocumentTouchMove);
     window.removeEventListener("scroll", onScroll);
     window.removeEventListener("resize", onResize);
     arcScroller.removeEventListener("scroll", onArcScroll);
     if (arcSnapTimer) window.clearTimeout(arcSnapTimer);
     if (arcUpdateFrame) window.cancelAnimationFrame(arcUpdateFrame);
+    clearArcEntry();
     document.documentElement.classList.remove(
       "has-mobile-primary-nav",
       "mobile-primary-nav-open",
@@ -198,6 +335,7 @@ export const initMobilePrimaryNavigation = ({ sectionNav } = {}) => {
     );
     placeholder.parentNode?.insertBefore(sectionNav, placeholder.nextSibling);
     arcScroller.remove();
+    halo.remove();
     toggle.remove();
   };
 };
