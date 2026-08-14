@@ -157,11 +157,6 @@ body.page .topbar {
     align-items: center;
     padding-bottom: calc(0.55rem + 8px);
     isolation: isolate;
-    transition: top 220ms cubic-bezier(0.22, 1, 0.36, 1);
-  }
-
-  html.mobile-topbar-hidden .qr-print-fixed-menus {
-    top: calc(47px - 1.38rem);
   }
 
   .qr-print-fixed-menus::before {

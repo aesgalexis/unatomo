@@ -43,9 +43,6 @@ export const initMobilePrimaryNavigation = ({ sectionNav } = {}) => {
   document.body.appendChild(halo);
 
   let open = false;
-  let lastScrollY = window.scrollY;
-  let scrollAnchorY = lastScrollY;
-  let lastDirection = "up";
   let arcSlotWidth = 0;
   let arcSnapTimer = null;
   let arcUpdateFrame = null;
@@ -210,31 +207,10 @@ export const initMobilePrimaryNavigation = ({ sectionNav } = {}) => {
     });
   };
   const onScroll = () => {
-    if (!media.matches) return;
-    if (open) {
-      if (Math.abs(window.scrollY - lockedPageScrollY) > 1) {
-        window.requestAnimationFrame(() => window.scrollTo(0, lockedPageScrollY));
-      }
-      return;
+    if (!media.matches || !open) return;
+    if (Math.abs(window.scrollY - lockedPageScrollY) > 1) {
+      window.requestAnimationFrame(() => window.scrollTo(0, lockedPageScrollY));
     }
-    const nextScrollY = Math.max(0, window.scrollY);
-    const direction = nextScrollY > lastScrollY ? "down" : "up";
-    if (direction !== lastDirection) {
-      scrollAnchorY = lastScrollY;
-      lastDirection = direction;
-    }
-    if (direction === "down" && nextScrollY - scrollAnchorY >= 12 && nextScrollY > 72) {
-      document.documentElement.classList.add("mobile-topbar-hidden");
-      scrollAnchorY = nextScrollY;
-    } else if (direction === "up" && scrollAnchorY - nextScrollY >= 8) {
-      document.documentElement.classList.remove("mobile-topbar-hidden");
-      scrollAnchorY = nextScrollY;
-    }
-    if (nextScrollY <= 12) {
-      document.documentElement.classList.remove("mobile-topbar-hidden");
-      scrollAnchorY = nextScrollY;
-    }
-    lastScrollY = nextScrollY;
   };
   const onArcScroll = () => {
     scheduleArcUpdate();
@@ -330,8 +306,7 @@ export const initMobilePrimaryNavigation = ({ sectionNav } = {}) => {
     clearArcEntry();
     document.documentElement.classList.remove(
       "has-mobile-primary-nav",
-      "mobile-primary-nav-open",
-      "mobile-topbar-hidden"
+      "mobile-primary-nav-open"
     );
     placeholder.parentNode?.insertBefore(sectionNav, placeholder.nextSibling);
     arcScroller.remove();

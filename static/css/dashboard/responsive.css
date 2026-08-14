@@ -79,14 +79,6 @@
   html.nfc-dashboard-page .dashboard-fixed-menus,
   html.nfc-dashboard-page #dashboard-mount.has-stable-dashboard-menus .dashboard-fixed-menus {
     top: 79px;
-    transition: top 220ms cubic-bezier(0.22, 1, 0.36, 1);
-  }
-
-  html.nfc-dashboard-page.mobile-topbar-hidden .dashboard-fixed-menus,
-  html.nfc-dashboard-page.mobile-topbar-hidden
-    #dashboard-mount.has-stable-dashboard-menus
-    .dashboard-fixed-menus {
-    top: 21px;
   }
 
   html.has-mobile-primary-nav .dashboard-section-nav {

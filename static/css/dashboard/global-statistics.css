@@ -15,7 +15,7 @@
 .dashboard-fixed-menus.has-static-tasks-header
   .global-statistics-header
   .global-statistics-header-actions {
-  bottom: 6px;
+  bottom: 7px;
 }
 
 .global-statistics-clear-scope-wrap {
@@ -203,9 +203,9 @@ button.global-statistics-attention-item { cursor: pointer; }
   }
 
   .global-statistics-header-actions {
-    align-items: flex-end;
-    flex-direction: column;
-    gap: 0.45rem;
+    align-items: center;
+    flex-direction: row;
+    gap: 0.7rem;
   }
 
   .global-statistics-periods {
