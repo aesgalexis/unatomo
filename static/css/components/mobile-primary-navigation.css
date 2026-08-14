@@ -7,6 +7,19 @@
     padding-bottom: calc(5.75rem + env(safe-area-inset-bottom));
   }
 
+  html.has-mobile-primary-nav.mobile-primary-nav-information-view body.page {
+    padding-bottom: calc(3.75rem + env(safe-area-inset-bottom));
+  }
+
+  html.nfc-dashboard-page.has-mobile-primary-nav
+    .page-shell
+    > .legal-footer,
+  html.nfc-dashboard-page.has-mobile-primary-nav
+    .page-shell
+    > .footer-link {
+    display: none !important;
+  }
+
   html.has-mobile-primary-nav .mobile-primary-nav-backdrop {
     position: fixed;
     inset: 0;
@@ -64,6 +77,11 @@
     cursor: pointer;
     transform: translateX(-50%);
     transition: transform 180ms ease, border-color 180ms ease, background-color 180ms ease;
+  }
+
+  html.has-mobile-primary-nav .mobile-primary-nav-toggle[hidden],
+  html.mobile-primary-nav-information-view .mobile-primary-nav-toggle {
+    display: none !important;
   }
 
   html.has-mobile-primary-nav .mobile-primary-nav-toggle[aria-expanded="true"] {

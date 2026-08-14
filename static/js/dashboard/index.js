@@ -28,10 +28,7 @@ import { filterMachines } from "./components/machineSearch/machineFilter.js";
 import { createMachineSearchBar } from "./components/machineSearch/machineSearchBar.js";
 import { createDashboardSectionNav } from "./components/sectionNav.js";
 import { initMobilePrimaryNavigation } from "./runtime/mobilePrimaryNavigation.js";
-import {
-  createNfcMinimalPageBackButton,
-  mountNfcMinimalPageNav
-} from "/static/js/nfc/minimalPageNav.js";
+import { createNfcMinimalPageBackButton } from "/static/js/nfc/minimalPageNav.js";
 import { mountDashboardFixedMenusShell } from "./components/dashboardFixedMenusShell.js";
 import { openStatusIncidentModal } from "./components/statusIncidentModal/statusIncidentModal.js";
 import { createDashboardGroupTreeShell } from "./components/groupTree/groupTreeShell.js";
@@ -126,11 +123,6 @@ const { appBasePrefix, lang, mount, qrPrintHref, redirectToEntry } =
 if (mount) {
   setTopbarLogoLoading("dashboard", true);
   observeDashboardLoading();
-  mountNfcMinimalPageNav({
-    backLabel: lang === "en" ? "Back" : "Volver",
-    topLabel: lang === "en" ? "Top" : "Arriba",
-    hideBackOnDashboard: true
-  });
   const state = createDashboardState({
     activeView: getDashboardInternalView(),
     registryPageSize: GLOBAL_REGISTRY_PAGE_SIZE,

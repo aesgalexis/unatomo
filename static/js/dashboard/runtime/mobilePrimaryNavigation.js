@@ -1,12 +1,25 @@
 import { createMobileQrScanner } from "./mobileQrScanner.js";
 
 const MOBILE_NAV_QUERY = "(max-width: 768px)";
+const MOBILE_INFORMATION_SECTIONS = new Set([
+  "novedades",
+  "tags",
+  "contacto",
+  "privacidad",
+  "privacy"
+]);
+
+const getHashSection = () => (window.location.hash || "")
+  .replace(/^#/, "")
+  .replace(/^\/+/, "")
+  .trim()
+  .toLowerCase();
 
 const MOBILE_MENU_ICONS = {
   more: '<path d="M5 5h5v5H5V5Zm9 0h5v5h-5V5ZM5 14h5v5H5v-5Zm9 0h5v5h-5v-5Z"></path>',
   scan: '<path d="M3 3h7v2H5v5H3V3Zm11 0h7v7h-2V5h-5V3ZM3 14h2v5h5v2H3v-7Zm16 0h2v7h-7v-2h5v-5ZM8 8h8v8H8V8Zm2 2v4h4v-4h-4Z"></path>',
   back: '<path d="m14.7 5.3-1.4-1.4L5.2 12l8.1 8.1 1.4-1.4L9 13h10v-2H9l5.7-5.7Z"></path>',
-  news: '<path d="M4 3h13a2 2 0 0 1 2 2v2h1a2 2 0 0 1 2 2v9a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3V5a2 2 0 0 1 2-2Zm15 6v9a1 1 0 0 0 2 0V9h-2ZM5 7h9V5H5v2Zm0 4h9V9H5v2Zm0 6h5v-4H5v4Zm7 0h2v-4h-2v4Z"></path>',
+  news: '<path d="M12 2c.8 5.8 4.2 9.2 10 10-5.8.8-9.2 4.2-10 10-.8-5.8-4.2-9.2-10-10 5.8-.8 9.2-4.2 10-10Z"></path>',
   tags: '<path d="M3 4a1 1 0 0 1 1-1h7.6a2 2 0 0 1 1.4.6l7.4 7.4a2 2 0 0 1 0 2.8l-6.6 6.6a2 2 0 0 1-2.8 0L3.6 13A2 2 0 0 1 3 11.6V4Zm4 2.25A1.75 1.75 0 1 0 7 9.75a1.75 1.75 0 0 0 0-3.5Z"></path>',
   contact: '<path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm8 9L4 7v11h16V7l-8 6Zm0-2.5L18 6H6l6 4.5Z"></path>',
   privacy: '<path d="M12 2 4 5v6c0 5.1 3.4 9.8 8 11 4.6-1.2 8-5.9 8-11V5l-8-3Zm0 5a3 3 0 0 1 3 3v1h1v6H8v-6h1v-1a3 3 0 0 1 3-3Zm0 2a1 1 0 0 0-1 1v1h2v-1a1 1 0 0 0-1-1Z"></path>',
@@ -244,7 +257,12 @@ export const initMobilePrimaryNavigation = ({ sectionNav, suggestionsLink } = {}
   };
 
   const syncLayout = () => {
-    toggle.hidden = !media.matches;
+    const isInformationSection = MOBILE_INFORMATION_SECTIONS.has(getHashSection());
+    toggle.hidden = !media.matches || isInformationSection;
+    document.documentElement.classList.toggle(
+      "mobile-primary-nav-information-view",
+      media.matches && isInformationSection
+    );
     if (media.matches) {
       document.body.appendChild(sectionNav);
       document.documentElement.classList.add("has-mobile-primary-nav");
@@ -327,11 +345,13 @@ export const initMobilePrimaryNavigation = ({ sectionNav, suggestionsLink } = {}
   handle.addEventListener("pointercancel", finishHandleDrag);
   document.addEventListener("keydown", onDocumentKeydown);
   media.addEventListener("change", syncLayout);
+  window.addEventListener("hashchange", syncLayout);
   syncLayout();
 
   return () => {
     setOpen(false);
     media.removeEventListener("change", syncLayout);
+    window.removeEventListener("hashchange", syncLayout);
     toggle.removeEventListener("click", onToggleClick);
     sectionNav.removeEventListener("click", onSectionClick);
     backdrop.removeEventListener("click", onBackdropClick);
@@ -345,7 +365,8 @@ export const initMobilePrimaryNavigation = ({ sectionNav, suggestionsLink } = {}
     document.removeEventListener("keydown", onDocumentKeydown);
     document.documentElement.classList.remove(
       "has-mobile-primary-nav",
-      "mobile-primary-nav-open"
+      "mobile-primary-nav-open",
+      "mobile-primary-nav-information-view"
     );
     sectionNav.replaceChildren(...originalSectionLinks);
     placeholder.parentNode?.insertBefore(sectionNav, placeholder.nextSibling);

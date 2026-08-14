@@ -1,5 +1,13 @@
+import { mountNfcMinimalPageNav } from "/static/js/nfc/minimalPageNav.js";
+
 const mount = document.getElementById("dashboard-mount");
 const lang = document.documentElement.lang === "en" ? "en" : "es";
+
+mountNfcMinimalPageNav({
+  backLabel: lang === "en" ? "Back" : "Volver",
+  topLabel: lang === "en" ? "Top" : "Arriba",
+  hideBackOnDashboard: true
+});
 
 const text = {
   es: {
