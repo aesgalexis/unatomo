@@ -51,7 +51,7 @@
   html.has-mobile-primary-nav .mobile-primary-nav-toggle[aria-expanded="true"] {
     border-color: color-mix(in srgb, var(--fg) 30%, transparent);
     background: var(--bg);
-    transform: translateX(-50%) translateY(-0.18rem);
+    transform: translateX(-50%);
   }
 
   html.has-mobile-primary-nav .mobile-primary-nav-logo {
@@ -187,9 +187,14 @@
     margin-left: 0;
   }
 
+  html.has-mobile-primary-nav .dashboard-section-icon-todo {
+    width: 1.7rem;
+    height: 1.7rem;
+  }
+
   html.has-mobile-primary-nav .dashboard-section-badge {
-    top: 0.28rem;
-    left: calc(50% + 0.72rem);
+    top: 0.12rem;
+    left: calc(50% + 1.55rem);
   }
 
   @media (prefers-reduced-motion: reduce) {
