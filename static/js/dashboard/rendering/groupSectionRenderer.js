@@ -1,3 +1,8 @@
+import {
+  GROUP_FOLDER_CLOSED_ICON,
+  GROUP_FOLDER_OPEN_ICON
+} from "./groupFolderIcons.js";
+
 export const createGroupSectionRenderer = (dependencies) => {
   const {
     canDashboardGroupHaveChildren,
@@ -157,7 +162,10 @@ export const createGroupSectionRenderer = (dependencies) => {
     header.draggable = true;
     const caret = document.createElement("span");
     caret.className = "machine-group-caret";
-    caret.textContent = group.collapsed ? "+" : "−";
+    caret.setAttribute("aria-hidden", "true");
+    caret.innerHTML =
+      `<span class="machine-group-caret-symbol">${group.collapsed ? "+" : "−"}</span>` +
+      `<span class="machine-group-folder-icon">${group.collapsed ? GROUP_FOLDER_CLOSED_ICON : GROUP_FOLDER_OPEN_ICON}</span>`;
     const title = document.createElement("span");
     title.className = "machine-group-title machine-group-menu-hover-zone";
     title.textContent = group.title || t("dashboard.groupUntitled", "Grupo");

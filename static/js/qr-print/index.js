@@ -45,13 +45,13 @@ import {
 import {
   createMobileHeadingGroup,
   createQrIconButton,
+  createQrOptionsMenu,
   createQrPrintText,
   GRID_GAP_BY_STEP,
   PRINT_COLUMNS_BY_STEP,
   PRINT_ICON,
   PRINT_ROWS_BY_STEP,
   QR_SIZE_STEPS,
-  RELOAD_ICON,
   ZOOM_ICON
 } from "./qrPrintUi.js";
 import { getFocusedQrMachineId, requestQrPrint } from "./qrPrintService.js";
@@ -458,52 +458,19 @@ const renderQrGrid = (machines, options = {}) => {
   sizeControl.appendChild(sizeLabel);
   sizeControl.appendChild(sizeInput);
 
-  const frameControl = document.createElement("label");
-  frameControl.className = "qr-print-frame-toggle";
-  const frameInput = document.createElement("input");
-  frameInput.type = "checkbox";
-  frameInput.checked = useFrame;
-  const frameLabel = document.createElement("span");
-  frameLabel.textContent = text.frame;
-  frameInput.addEventListener("change", () => {
-    useFrame = frameInput.checked;
-    wrap.classList.toggle("qr-print--framed", useFrame);
-  });
-  frameControl.appendChild(frameInput);
-  frameControl.appendChild(frameLabel);
-
-  const backControl = document.createElement("label");
-  backControl.className = "qr-print-back-toggle";
-  const backInput = document.createElement("input");
-  backInput.type = "checkbox";
-  backInput.checked = printBackNames;
-  const backLabel = document.createElement("span");
-  backLabel.textContent = text.backNames;
-  backInput.addEventListener("change", () => {
-    printBackNames = backInput.checked;
-    renderQrGrid(currentMachines, { preserveList: true });
-  });
-  backControl.appendChild(backInput);
-  backControl.appendChild(backLabel);
-
-  const reloadBtn = createQrIconButton("qr-print-icon-button--reload", text.reload, RELOAD_ICON);
-  reloadBtn.addEventListener("click", () => {
-    if (!auth.currentUser?.uid) return;
-    searchQuery = "";
-    selectedTreeGroupId = "";
-    selectedTreeMachineId = "";
-    setLoadingState();
-    fetchQrAccessibleMachines(auth.currentUser.uid)
-      .then(async (sourceMachines) => {
-        const nextSourceMachines = await buildQrMachineState(sourceMachines, lang);
-        const nextQrMachines = nextSourceMachines.filter((machine) => machine.tagQrUrl);
-        renderQrGrid(nextQrMachines, {
-          sourceMachines: nextSourceMachines,
-          totalCount: nextQrMachines.length,
-          accessibleMachineCount: nextSourceMachines.length
-        });
-      })
-      .catch(() => setState(text.error, "error"));
+  const optionsMenu = createQrOptionsMenu({
+    text,
+    frameEnabled: useFrame,
+    backNamesEnabled: printBackNames,
+    onFrameChange: (enabled) => {
+      useFrame = enabled;
+      wrap.classList.toggle("qr-print--framed", useFrame);
+      renderQrGrid(currentMachines, { preserveList: true });
+    },
+    onBackNamesChange: (enabled) => {
+      printBackNames = enabled;
+      renderQrGrid(currentMachines, { preserveList: true });
+    }
   });
 
   const printBtn = createQrIconButton("qr-print-icon-button--print", text.print, PRINT_ICON);
@@ -534,11 +501,9 @@ const renderQrGrid = (machines, options = {}) => {
   });
 
   printOptions.appendChild(sizeControl);
-  printOptions.appendChild(frameControl);
-  printOptions.appendChild(backControl);
 
   toolbar.appendChild(printBtn);
-  toolbar.appendChild(reloadBtn);
+  toolbar.appendChild(optionsMenu);
   toolbar.appendChild(searchInput);
   const desktopMenus = window.matchMedia("(min-width: 769px)").matches;
   const headerActions = document.createElement("div");
@@ -681,8 +646,15 @@ const setLoadingState = () => {
   searchInput.placeholder = text.searchPlaceholder;
   searchInput.setAttribute("aria-label", text.search);
   searchInput.disabled = true;
-  const reloadBtn = createQrIconButton("qr-print-icon-button--reload", text.reload, RELOAD_ICON);
-  reloadBtn.disabled = true;
+  const optionsMenu = createQrOptionsMenu({
+    text,
+    frameEnabled: useFrame,
+    backNamesEnabled: printBackNames,
+    onFrameChange: () => {},
+    onBackNamesChange: () => {}
+  });
+  optionsMenu.querySelector("button").disabled = true;
+  toolbar.append(printBtn, optionsMenu, searchInput);
 
   const loading = document.createElement("div");
   loading.className = "dashboard-loading qr-print-loading";

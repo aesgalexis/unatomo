@@ -779,7 +779,7 @@ body.page .topbar {
   box-sizing: border-box;
   border: 1px solid var(--border-subtle);
   border-radius: 0.5rem;
-  background: color-mix(in srgb, var(--bg) 96%, transparent);
+  background: var(--bg);
   box-shadow: 0 12px 28px color-mix(in srgb, #000 16%, transparent);
   padding: 0.25rem;
 }

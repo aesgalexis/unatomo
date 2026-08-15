@@ -176,19 +176,34 @@ export const initMobilePrimaryNavigation = ({ sectionNav, suggestionsLink } = {}
   pagesTrack.className = "mobile-primary-nav-pages-track";
   const primaryPage = document.createElement("div");
   primaryPage.className = "mobile-primary-nav-page mobile-primary-nav-page--primary";
-  originalSectionLinks.forEach((link) => primaryPage.appendChild(link));
-  primaryPage.append(scanButton, moreButton);
   const morePage = document.createElement("div");
   morePage.className = "mobile-primary-nav-page mobile-primary-nav-page--more";
-  morePage.append(backButton, newsLink);
-  if (suggestionsLink) morePage.appendChild(suggestionsLink);
-  morePage.append(tagsLink, contactLink, privacyLink, creditsButton);
   const creditsPage = document.createElement("div");
   creditsPage.className = "mobile-primary-nav-page mobile-primary-nav-page--credits";
-  creditsPage.appendChild(creditsPanel);
-  pagesTrack.append(primaryPage, morePage, creditsPage);
-  pagesWindow.appendChild(pagesTrack);
-  sectionNav.replaceChildren(handle, pagesWindow);
+
+  const mountMobileLayout = () => {
+    originalSectionLinks.forEach((link) => primaryPage.appendChild(link));
+    primaryPage.append(scanButton, moreButton);
+    morePage.replaceChildren(backButton, newsLink);
+    if (suggestionsLink) morePage.appendChild(suggestionsLink);
+    morePage.append(tagsLink, contactLink, privacyLink, creditsButton);
+    creditsPage.replaceChildren(creditsPanel);
+    pagesTrack.replaceChildren(primaryPage, morePage, creditsPage);
+    pagesWindow.replaceChildren(pagesTrack);
+    sectionNav.replaceChildren(handle, pagesWindow);
+    suggestionsLink?.classList.add(
+      "mobile-primary-nav-secondary-link",
+      "mobile-primary-nav-mobile-only"
+    );
+  };
+
+  const mountDesktopLayout = () => {
+    suggestionsLink?.classList.remove(
+      "mobile-primary-nav-secondary-link",
+      "mobile-primary-nav-mobile-only"
+    );
+    sectionNav.replaceChildren(...originalSectionLinks);
+  };
 
   let open = false;
   let lockedScrollY = 0;
@@ -264,11 +279,13 @@ export const initMobilePrimaryNavigation = ({ sectionNav, suggestionsLink } = {}
       media.matches && isInformationSection
     );
     if (media.matches) {
+      mountMobileLayout();
       document.body.appendChild(sectionNav);
       document.documentElement.classList.add("has-mobile-primary-nav");
       setOpen(false);
       return;
     }
+    mountDesktopLayout();
     placeholder.parentNode?.insertBefore(sectionNav, placeholder.nextSibling);
     document.documentElement.classList.remove("has-mobile-primary-nav");
     setOpen(false);
