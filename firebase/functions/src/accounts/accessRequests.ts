@@ -34,15 +34,15 @@ export const requestAccountAccess = onCall(async (request) => {
   const hourBucket = Math.floor(Date.now() / REQUEST_COOLDOWN_MS);
   const ipLimitRef = db.collection("email_request_limits")
     .doc(`access_${ipHash}_${hourBucket}`);
-  const accepted = await db.runTransaction(async (transaction) => {
+  const outcome = await db.runTransaction(async (transaction) => {
     const [snap, ipLimitSnap] = await Promise.all([
       transaction.get(requestRef),
       transaction.get(ipLimitRef),
     ]);
     const previous = snap.data() || {};
     const lastRequestedAt = previous.lastRequestedAt?.toMillis?.() || 0;
-    if (previous.status === "pending" ||
-        Date.now() - lastRequestedAt < REQUEST_COOLDOWN_MS) return false;
+    if (previous.status === "pending") return "already-pending";
+    if (Date.now() - lastRequestedAt < REQUEST_COOLDOWN_MS) return "cooldown";
     const ipCount = Number(ipLimitSnap.data()?.count || 0);
     if (ipCount >= MAX_REQUESTS_PER_IP_HOUR) {
       throw new HttpsError("resource-exhausted", "request-limit-reached");
@@ -68,9 +68,14 @@ export const requestAccountAccess = onCall(async (request) => {
       reviewedBy: admin.firestore.FieldValue.delete(),
       registrationCode: admin.firestore.FieldValue.delete(),
     }, {merge: true});
-    return true;
+    return "accepted";
   });
-  return {ok: true, accepted};
+  return {
+    ok: true,
+    accepted: outcome === "accepted",
+    alreadyPending: outcome === "already-pending",
+    cooldown: outcome === "cooldown",
+  };
 });
 
 export const listControlPanelAccessRequests = onCall(async (request) => {
@@ -86,6 +91,8 @@ export const listControlPanelAccessRequests = onCall(async (request) => {
       reason: data.reason || "",
       language: data.language === "en" ? "en" : "es",
       status: data.status || "pending",
+      requestCount: Number(data.requestCount || 0),
+      createdAt: data.createdAt?.toDate?.().toISOString() || "",
       registrationCode: data.registrationCode || "",
       lastRequestedAt: data.lastRequestedAt?.toDate?.().toISOString() || "",
       reviewedAt: data.reviewedAt?.toDate?.().toISOString() || "",

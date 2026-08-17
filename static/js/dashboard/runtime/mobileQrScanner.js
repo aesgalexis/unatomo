@@ -1,14 +1,4 @@
-const CANONICAL_ORIGIN = "https://unatomo.com";
-
-const getSafeQrUrl = (value) => {
-  try {
-    const url = new URL(value);
-    const allowedOrigin = url.origin === window.location.origin || url.origin === CANONICAL_ORIGIN;
-    return allowedOrigin && url.pathname.startsWith("/nfc/") ? url : null;
-  } catch {
-    return null;
-  }
-};
+import {getSafeMobileQrUrl} from "./mobileQrUrl.mjs";
 
 export const createMobileQrScanner = ({ isEnglish = false } = {}) => {
   const cameraInput = document.createElement("input");
@@ -66,7 +56,7 @@ export const createMobileQrScanner = ({ isEnglish = false } = {}) => {
         const codes = await detector.detect(video);
         const value = codes.find((code) => code.rawValue)?.rawValue;
         if (value) {
-          const url = getSafeQrUrl(value);
+          const url = getSafeMobileQrUrl(value, window.location.origin);
           if (url) {
             stopCamera();
             window.location.assign(url.href);

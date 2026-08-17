@@ -263,7 +263,8 @@ const dashboardCssImports = [
   "/static/css/dashboard/machine-stats.css",
   "/static/css/dashboard/global-statistics.css",
   "/static/css/dashboard/machine-login.css",
-  "/static/css/dashboard/responsive.css"
+  "/static/css/dashboard/responsive.css",
+  "/static/css/components/mobile-primary-navigation.css"
 ];
 const actualDashboardCssImports = Array.from(
   dashboardCssManifest.matchAll(/@import\s+["']([^"']+)["'];/g),
@@ -599,9 +600,17 @@ addCheck(
 );
 addCheck(
   accessRequests.includes("alreadyRegistered: true") &&
+    accessRequests.includes('alreadyPending: outcome === "already-pending"') &&
+    registrationUi.includes("requestAccessPending") &&
     accessRequests.includes("emailLower: requestedEmail") &&
     registration.includes("registration-email-mismatch"),
-  "access requests reject existing accounts and bind codes to approved email"
+  "access requests report repeats, reject accounts, and bind approved email"
+);
+addCheck(
+  controlPanelUsers.includes("usersSearch") &&
+    controlPanelUsers.includes("item.inAuthentication") &&
+    controlPanelUsers.includes("item.creationTime"),
+  "control panel makes Authentication-only accounts searchable and identifiable"
 );
 addCheck(
   accessRequests.includes("`access_approved_${requestId}_${code}`") &&

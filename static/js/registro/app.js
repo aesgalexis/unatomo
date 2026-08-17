@@ -103,6 +103,8 @@ const text = {
   requestAccessSend: isEn ? "Send request" : "Enviar solicitud",
   requestAccessSending: isEn ? "Sending request..." : "Enviando solicitud...",
   requestAccessSent: isEn ? "Request received. We will email you after reviewing it." : "Solicitud recibida. Te enviaremos un correo después de revisarla.",
+  requestAccessPending: isEn ? "There is already a pending request for this email." : "Ya existe una solicitud pendiente para este correo.",
+  requestAccessCooldown: isEn ? "A recent request already exists for this email. Please try again later." : "Ya existe una solicitud reciente para este correo. Inténtalo de nuevo más tarde.",
   requestAccessExisting: isEn ? "This email already has an account. Redirecting to sign in..." : "Este correo ya tiene una cuenta. Te llevamos al inicio de sesión...",
   requestAccessError: isEn ? "Unable to send the request." : "No se ha podido enviar la solicitud.",
   registerFailed: isEn ? "Could not complete registration." : "No se pudo completar el registro.",
@@ -387,6 +389,14 @@ function initSetupRegisterCode() {
         if (result.alreadyRegistered) {
           requestStatus.textContent = text.requestAccessExisting;
           setTimeout(() => (window.location.href = paths.login), 900);
+          return;
+        }
+        if (result.alreadyPending) {
+          requestStatus.textContent = text.requestAccessPending;
+          return;
+        }
+        if (result.cooldown || result.accepted === false) {
+          requestStatus.textContent = text.requestAccessCooldown;
           return;
         }
         requestStatus.textContent = text.requestAccessSent;

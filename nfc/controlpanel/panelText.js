@@ -278,6 +278,14 @@ export const createPanelText = (isEn) => {
     usersHint: isEn
       ? "Accounts detected through Unatomo sign-in flows."
       : "Cuentas detectadas a través de los flujos de acceso de Unatomo.",
+    usersSearch: isEn ? "Search by name, email or UID" : "Buscar por nombre, correo o UID",
+    usersNoMatches: isEn ? "No matching accounts." : "No hay cuentas que coincidan.",
+    userAuthentication: "Authentication",
+    userProfile: isEn ? "Profile" : "Perfil",
+    userDirectory: isEn ? "Directory" : "Directorio",
+    userIncomplete: isEn ? "Incomplete account" : "Cuenta incompleta",
+    userCreated: isEn ? "Created" : "Creada",
+    userLastAccess: isEn ? "Last sign-in" : "Último acceso",
     userCollaborator: isEn ? "Collaborator" : "Colaborador",
     emailVerified: isEn ? "Verified email" : "Correo verificado",
     emailVerificationPending: isEn ? "Verification pending" : "Verificación pendiente",
@@ -307,6 +315,9 @@ export const createPanelText = (isEn) => {
     accessRequestApprove: isEn ? "Approve and send" : "Aprobar y enviar",
     accessRequestReject: isEn ? "Reject" : "Rechazar",
     accessRequestCode: isEn ? "Code" : "Código",
+    accessRequestAttempts: isEn ? "Attempts" : "Intentos",
+    accessRequestCreated: isEn ? "Created" : "Creada",
+    accessRequestLastSent: isEn ? "Last request" : "Última solicitud",
     accessRequestStatus: (status) => ({ pending: isEn ? "Pending" : "Pendiente", approved: isEn ? "Approved" : "Aprobada", rejected: isEn ? "Rejected" : "Rechazada" }[status] || status),
     codesLoading: isEn
       ? "Loading active registration codes..."

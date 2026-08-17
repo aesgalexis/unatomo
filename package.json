@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "npm run test:nfc && npm run test:functions && npm run lint:links && npm run scan:secrets",
-    "test:nfc": "npm run check:nfc:architecture && npm run check:nfc:group-hierarchy && npm run check:nfc:sorting && npm run check:nfc:autosave && npm run check:nfc:status-incident && npm run check:nfc:statistics && npm run check:nfc:task-assignment && npm run check:machine-lab",
+    "test:nfc": "npm run check:nfc:architecture && npm run check:nfc:group-hierarchy && npm run check:nfc:sorting && npm run check:nfc:autosave && npm run check:nfc:status-incident && npm run check:nfc:statistics && npm run check:nfc:task-assignment && npm run check:nfc:mobile-qr && npm run check:machine-lab",
     "test:functions": "npm --prefix firebase/functions run lint && npm --prefix firebase/functions run test:task-visibility && npm --prefix firebase/functions run test:machine-policy && npm --prefix firebase/functions run test:machine-status && npm --prefix firebase/functions run test:email-templates",
     "predev": "node scripts/generate-config.mjs",
     "predev:static": "node scripts/generate-config.mjs",
@@ -37,6 +37,7 @@
     "check:nfc:status-incident": "node scripts/test-dashboard-status-incident.mjs",
     "check:nfc:statistics": "node scripts/test-dashboard-statistics.mjs",
     "check:nfc:task-assignment": "node scripts/test-dashboard-task-assignment.mjs",
+    "check:nfc:mobile-qr": "node scripts/test-mobile-navigation-qr.mjs",
     "check:machine-lab": "node scripts/check-machine-lab.mjs",
     "check:nfc:architecture": "node scripts/check-nfc-architecture.mjs"
   },

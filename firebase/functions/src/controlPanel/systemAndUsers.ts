@@ -345,6 +345,9 @@ export const listControlPanelUsers = onCall(async (request) => {
       email: string;
       displayName: string;
       emailVerified: boolean;
+      creationTime: string;
+      lastSignInTime: string;
+      providers: string[];
     }> = [];
     let pageToken: string | undefined;
     do {
@@ -355,6 +358,9 @@ export const listControlPanelUsers = onCall(async (request) => {
           email: user.email || "",
           displayName: user.displayName || "",
           emailVerified: user.emailVerified,
+          creationTime: user.metadata.creationTime || "",
+          lastSignInTime: user.metadata.lastSignInTime || "",
+          providers: user.providerData.map((provider) => provider.providerId),
         });
       });
       pageToken = page.pageToken;
@@ -382,6 +388,12 @@ export const listControlPanelUsers = onCall(async (request) => {
     accountHandle: string;
     suggestionsCollaborator: boolean;
     emailVerified: boolean;
+    inAuthentication: boolean;
+    hasProfile: boolean;
+    inDirectory: boolean;
+    creationTime: string;
+    lastSignInTime: string;
+    providers: string[];
   }>();
 
   const upsertItem = (
@@ -393,6 +405,12 @@ export const listControlPanelUsers = onCall(async (request) => {
       accountHandle?: unknown;
       suggestionsCollaborator?: unknown;
       emailVerified?: unknown;
+      inAuthentication?: unknown;
+      hasProfile?: unknown;
+      inDirectory?: unknown;
+      creationTime?: unknown;
+      lastSignInTime?: unknown;
+      providers?: unknown;
     },
   ) => {
     const uid = (raw.uid || "").toString().trim();
@@ -416,19 +434,30 @@ export const listControlPanelUsers = onCall(async (request) => {
       emailVerified:
         typeof raw.emailVerified === "boolean" ?
           raw.emailVerified : !!current?.emailVerified,
+      inAuthentication:
+        raw.inAuthentication === true || !!current?.inAuthentication,
+      hasProfile: raw.hasProfile === true || !!current?.hasProfile,
+      inDirectory: raw.inDirectory === true || !!current?.inDirectory,
+      creationTime:
+        (raw.creationTime || current?.creationTime || "").toString(),
+      lastSignInTime:
+        (raw.lastSignInTime || current?.lastSignInTime || "").toString(),
+      providers: Array.isArray(raw.providers) ?
+        raw.providers.map((value) => value.toString()) :
+        (current?.providers || []),
     });
   };
 
   directorySnap.forEach((docSnap) => {
-    upsertItem(docSnap.data() || {});
+    upsertItem({...docSnap.data(), inDirectory: true});
   });
 
   usersSnap.forEach((docSnap) => {
-    upsertItem(docSnap.data() || {});
+    upsertItem({...docSnap.data(), uid: docSnap.id, hasProfile: true});
   });
 
   authUsers.forEach((user) => {
-    upsertItem(user);
+    upsertItem({...user, inAuthentication: true});
   });
 
   const items = Array.from(map.values()).sort((a, b) => {

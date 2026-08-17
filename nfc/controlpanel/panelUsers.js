@@ -30,18 +30,43 @@ export const createUsersRenderer = ({ text }) => {
       return;
     }
 
+    const search = document.createElement("input");
+    search.type = "search";
+    search.className = "controlpanel-input";
+    search.placeholder = text.usersSearch;
+    search.setAttribute("aria-label", text.usersSearch);
+    body.appendChild(search);
+
     const list = document.createElement("ul");
     list.className = "controlpanel-list";
-    items.forEach((item) => {
-      const row = document.createElement("li");
-      row.className = "controlpanel-user controlpanel-user--action";
+    body.appendChild(list);
 
-      const identity = document.createElement("div");
-      identity.className = "controlpanel-user-copy";
+    const renderList = () => {
+      const query = search.value.trim().toLocaleLowerCase();
+      const visibleItems = items.filter((item) => !query || [
+        item.displayName, item.email, item.uid, item.accountHandle, item.company
+      ].some((value) => (value || "")
+        .toString()
+        .toLocaleLowerCase()
+        .includes(query)));
+      list.innerHTML = "";
+      if (!visibleItems.length) {
+        const empty = document.createElement("li");
+        empty.className = "controlpanel-state";
+        empty.textContent = text.usersNoMatches;
+        list.appendChild(empty);
+        return;
+      }
+      visibleItems.forEach((item) => {
+        const row = document.createElement("li");
+        row.className = "controlpanel-user controlpanel-user--action";
 
-      const name = document.createElement("div");
-      name.className = "controlpanel-user-name";
-      name.textContent = item.displayName || text.noName;
+        const identity = document.createElement("div");
+        identity.className = "controlpanel-user-copy";
+
+        const name = document.createElement("div");
+        name.className = "controlpanel-user-name";
+        name.textContent = item.displayName || text.noName;
 
       const meta = document.createElement("div");
       meta.className = "controlpanel-user-meta";
@@ -52,8 +77,27 @@ export const createUsersRenderer = ({ text }) => {
         item.emailVerified ? text.emailVerified : text.emailVerificationPending
       ].filter(Boolean).join(" · ");
 
+      const source = document.createElement("div");
+      source.className = "controlpanel-user-meta";
+      const origins = [
+        item.inAuthentication ? text.userAuthentication : "",
+        item.hasProfile ? text.userProfile : "",
+        item.inDirectory ? text.userDirectory : ""
+      ].filter(Boolean);
+      const incomplete = item.inAuthentication && (!item.hasProfile || !item.inDirectory);
+      const formatDate = (value) => value ? new Date(value).toLocaleString() : "";
+      source.textContent = [
+        incomplete ? text.userIncomplete : "",
+        origins.join(" + "),
+        item.providers?.length ? item.providers.join(", ") : "",
+        item.creationTime ? `${text.userCreated}: ${formatDate(item.creationTime)}` : "",
+        item.lastSignInTime ? `${text.userLastAccess}: ${formatDate(item.lastSignInTime)}` : "",
+        item.uid ? `UID: ${item.uid}` : ""
+      ].filter(Boolean).join(" · ");
+
       identity.appendChild(name);
       identity.appendChild(meta);
+      identity.appendChild(source);
       row.appendChild(identity);
 
       const collaboratorLabel = document.createElement("label");
@@ -83,8 +127,10 @@ export const createUsersRenderer = ({ text }) => {
       row.appendChild(collaboratorLabel);
       row.appendChild(remove);
       list.appendChild(row);
-    });
-    body.appendChild(list);
+      });
+    };
+    search.addEventListener("input", renderList);
+    renderList();
   };
 
   return { renderUsers };

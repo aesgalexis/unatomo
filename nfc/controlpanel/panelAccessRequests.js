@@ -26,6 +26,9 @@ export const createAccessRequestsRenderer = ({ text }) => ({
       detail.textContent = [
         text.accessRequestStatus(item.status),
         item.language?.toUpperCase(),
+        `${text.accessRequestAttempts}: ${Number(item.requestCount || 0)}`,
+        item.createdAt ? `${text.accessRequestCreated}: ${new Date(item.createdAt).toLocaleString()}` : "",
+        item.lastRequestedAt ? `${text.accessRequestLastSent}: ${new Date(item.lastRequestedAt).toLocaleString()}` : "",
         item.reason,
         item.registrationCode ? `${text.accessRequestCode}: ${item.registrationCode}` : ""
       ].filter(Boolean).join(" · ");
