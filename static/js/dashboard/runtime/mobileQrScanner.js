@@ -11,6 +11,14 @@ const getSafeQrUrl = (value) => {
 };
 
 export const createMobileQrScanner = ({ isEnglish = false } = {}) => {
+  const cameraInput = document.createElement("input");
+  cameraInput.type = "file";
+  cameraInput.accept = "image/*";
+  cameraInput.setAttribute("capture", "environment");
+  cameraInput.hidden = true;
+  cameraInput.setAttribute("aria-hidden", "true");
+  document.body.appendChild(cameraInput);
+
   const overlay = document.createElement("div");
   overlay.className = "mobile-qr-scanner";
   overlay.hidden = true;
@@ -79,16 +87,14 @@ export const createMobileQrScanner = ({ isEnglish = false } = {}) => {
   };
 
   const open = async () => {
+    if (!("BarcodeDetector" in window)) {
+      cameraInput.value = "";
+      cameraInput.click();
+      return;
+    }
     overlay.hidden = false;
     setStatus("Apunta la cámara al código QR.", "Point the camera at the QR code.");
     closeButton.focus();
-    if (!("BarcodeDetector" in window)) {
-      setStatus(
-        "Este navegador no admite el escáner QR nativo.",
-        "This browser does not support native QR scanning."
-      );
-      return;
-    }
     try {
       const formats = await window.BarcodeDetector.getSupportedFormats?.();
       if (formats && !formats.includes("qr_code")) throw new Error("qr_not_supported");
@@ -118,6 +124,7 @@ export const createMobileQrScanner = ({ isEnglish = false } = {}) => {
     destroy: () => {
       closeButton.removeEventListener("click", close);
       close();
+      cameraInput.remove();
       overlay.remove();
     }
   };

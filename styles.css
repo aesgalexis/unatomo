@@ -1536,6 +1536,16 @@ body.nfc-public-page .contact-form-card .form-status[hidden] {
   display:none !important;
 }
 
+@media (max-width: 768px){
+  #session-menu #session-menu-dashboard{
+    display:none;
+  }
+
+  #session-menu #session-menu-dashboard + .session-menu-link{
+    margin-top:0;
+  }
+}
+
 #session-menu .session-menu-submenu[hidden],
 #session-menu .session-menu-submenu-wrap[hidden]{
   display:none !important;

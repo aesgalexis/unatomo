@@ -45,7 +45,7 @@
   }
 
   html.nfc-dashboard-page .topbar {
-    height: 58px;
+    height: 54px;
     background: color-mix(in srgb, var(--bg) 82%, transparent);
   }
 
@@ -114,7 +114,7 @@
   }
 
   html.nfc-dashboard-page .page-shell {
-    padding-top: 86px;
+    padding-top: 82px;
   }
 
   html.has-mobile-primary-nav .dashboard-section-nav {
@@ -453,13 +453,6 @@
     background: color-mix(in srgb, var(--fg) 8%, var(--bg));
     color: var(--fg);
     outline: none;
-  }
-
-  html.has-mobile-primary-nav .mobile-primary-nav-menu-button:not(.is-active),
-  html.has-mobile-primary-nav .mobile-primary-nav-menu-button:not(.is-active):hover,
-  html.has-mobile-primary-nav .mobile-primary-nav-menu-button:not(.is-active):focus,
-  html.has-mobile-primary-nav .mobile-primary-nav-menu-button:not(.is-active):focus-visible {
-    background: transparent;
   }
 
   html.has-mobile-primary-nav .dashboard-section-link:focus-visible {

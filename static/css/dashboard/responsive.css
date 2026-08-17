@@ -4,7 +4,7 @@
   }
 
   html.nfc-dashboard-page .topbar {
-    height: 58px;
+    height: 54px;
     background: color-mix(in srgb, var(--bg) 82%, transparent);
   }
 
@@ -64,12 +64,12 @@
   }
 
   html.nfc-dashboard-page .page-shell {
-    padding-top: 86px;
+    padding-top: 82px;
   }
 
   html.nfc-dashboard-page .dashboard-fixed-menus,
   html.nfc-dashboard-page #dashboard-mount.has-stable-dashboard-menus .dashboard-fixed-menus {
-    top: 79px;
+    top: 60px;
   }
 
   html.has-mobile-primary-nav .dashboard-section-nav {
