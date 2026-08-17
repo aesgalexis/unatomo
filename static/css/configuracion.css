@@ -255,12 +255,6 @@
   display: none;
 }
 
-.profile-card-body > .profile-row:nth-child(5) {
-  margin-top: 0.4rem;
-  padding-top: 1.25rem;
-  border-top: 1px solid color-mix(in srgb, var(--fg) 18%, transparent);
-}
-
 /* Account is a compact, single-column form: label first, value underneath. */
 .profile-card-body:has(#profile-name) {
   width: 100%;

@@ -6,6 +6,7 @@
     "test:task-visibility": "npm run build && node test/taskVisibility.test.cjs",
     "test:machine-policy": "npm run build && node test/machinePolicy.test.cjs",
     "test:machine-status": "npm run build && node test/machineStatusTransitions.test.cjs",
+    "test:machine-notifications": "npm run build && node test/machineStatusRecipients.test.cjs",
     "test:email-templates": "npm run build && node test/emailTemplates.test.cjs",
     "build:watch": "tsc --watch",
     "serve": "npm run build && firebase emulators:start --only functions",

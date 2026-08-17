@@ -81,11 +81,20 @@ service cloud.firestore {
         && request.auth.uid == uid
         && request.resource.data.keys()
           .hasOnly(["email", "schemaVersion", "updatedAt"])
-        && request.resource.data.schemaVersion == 1
+        && request.resource.data.schemaVersion in [1, 2]
         && request.resource.data.updatedAt is timestamp
         && request.resource.data.email is map
-        && request.resource.data.email.keys().hasOnly(["enabled", "events"])
+        && request.resource.data.email.keys().hasOnly([
+          "enabled", "events", "receiveOwnedMachines",
+          "notifyAdministrators", "receiveAdministeredMachines"
+        ])
         && request.resource.data.email.enabled is bool
+        && (!request.resource.data.email.keys().hasAny(["receiveOwnedMachines"])
+          || request.resource.data.email.receiveOwnedMachines is bool)
+        && (!request.resource.data.email.keys().hasAny(["notifyAdministrators"])
+          || request.resource.data.email.notifyAdministrators is bool)
+        && (!request.resource.data.email.keys().hasAny(["receiveAdministeredMachines"])
+          || request.resource.data.email.receiveAdministeredMachines is bool)
         && request.resource.data.email.events is map
         && request.resource.data.email.events.keys().hasOnly([
           "machineOutOfService", "machineOperationalAgain"

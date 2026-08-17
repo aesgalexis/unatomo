@@ -538,6 +538,12 @@ const controlPanelHtml = read("nfc/controlpanel/index.html");
 const controlPanelCss = read("nfc/controlpanel/panel.css");
 const accountSecurity = read("firebase/functions/src/accounts/security.ts");
 const accountSettings = read("static/js/configuracion/index.js");
+const notificationPreferencesRepo = read(
+  "static/js/configuracion/notificationPreferencesRepo.js"
+);
+const machineStatusNotifications = read(
+  "firebase/functions/src/notifications/machineStatus.ts"
+);
 const accessRequests = read("firebase/functions/src/accounts/accessRequests.ts");
 const registration = read("firebase/functions/src/accounts/registration.ts");
 const onboarding = read("firebase/functions/src/accounts/onboarding.ts");
@@ -597,6 +603,31 @@ addCheck(
     accountSettings.includes("reauthenticateWithPopup") &&
     accountSettings.includes("finalizeAccountEmailChange"),
   "settings reauthenticates provider accounts and finalizes verified email changes"
+);
+addCheck(
+  accountSettings.includes("let notificationsReady = false") &&
+    accountSettings.includes("let notificationsSaving = false") &&
+    accountSettings.includes("notificationEmailEnabled.disabled = !notificationsReady") &&
+    accountSettings.includes("notificationsReady = true"),
+  "notification switches wait for loaded state and lock while saving"
+);
+addCheck(
+  accountSettings.includes("receiveOwnedNotifications") &&
+    accountSettings.includes("notifyEquipmentAdmins") &&
+    accountSettings.includes("receiveAdministeredNotifications") &&
+    !accountSettings.includes("notification-prototype:") &&
+    notificationPreferencesRepo.includes("receiveOwnedMachines") &&
+    notificationPreferencesRepo.includes("notifyAdministrators") &&
+    notificationPreferencesRepo.includes("receiveAdministeredMachines") &&
+    notificationPreferencesRepo.includes("schemaVersion: 2"),
+  "notification ownership and administration scopes persist in Firestore"
+);
+addCheck(
+  machineStatusNotifications.includes('=== "accepted"') &&
+    machineStatusNotifications.includes("shouldNotifyAdministrator") &&
+    machineStatusNotifications.includes("recipientUid}") &&
+    machineStatusNotifications.includes("idempotencyKey"),
+  "machine notifications require accepted links and use per-recipient idempotency"
 );
 addCheck(
   accessRequests.includes("alreadyRegistered: true") &&

@@ -39,7 +39,7 @@ Read this before changing data flows, callable functions, machine ownership, adm
 - `admin_invites`: pending/accepted admin invitations.
 - `machine_transfer_invites`: pending/accepted/rejected machine ownership transfer requests.
 - `dashboard_layout/{uid}`: per-user dashboard grouping/layout preferences. Groups may include `parentGroupId` for one-level subgroups; `dashboardTitle` stores the user's editable dashboard topbar title; `registrySeenAt` stores the last time the user left the global registry view after seeing current activity; `machineViewMode` and `machineSortMode` store dashboard display preferences.
-- `user_notification_preferences/{uid}`: account-wide operational notification preferences. Version 1 stores the `email` channel and its explicit `machineOutOfService` and `machineOperationalAgain` events. It is owned and writable only by that user; it never stores a recipient address, because delivery resolves the authenticated account address server-side. Machine-level overrides are intentionally not implemented yet.
+- `user_notification_preferences/{uid}`: account-wide operational notification preferences. Version 2 stores the `email` channel, its explicit `machineOutOfService` and `machineOperationalAgain` events, and the scopes `receiveOwnedMachines`, `notifyAdministrators` and `receiveAdministeredMachines`. It is owned and writable only by that user; it never stores a recipient address, because delivery resolves the authenticated account address server-side. Legacy documents keep owner delivery enabled by default, while both administrator-routing choices default to disabled.
 - `machine_domain_events`: server-only canonical lifecycle events. Version 1
   records `machine_out_of_service` and `machine_operational_again` with the
   machine, owner, actor, status cycle and restoration-task identifiers.
@@ -212,9 +212,11 @@ frontend wrappers live under `static/js/dashboard/`.
   ownership-transfer events are connected.
 - `notifyMachineStatusTransition`: existing private `machines` update trigger.
   It follows `lastStatusEventId` to consume the canonical event instead of
-  reinterpreting status fields,
-  reads the owner's `user_notification_preferences/{uid}`, and creates an
-  event-addressed email outbox record. It never sends for `desconectada` or
+  reinterpreting status fields. It can create one event-addressed outbox record
+  for the owner and one for each accepted administrator. Owner delivery follows
+  the owner's personal scope; administrator delivery requires both the owner's
+  `notifyAdministrators` permission and the administrator's
+  `receiveAdministeredMachines` opt-in. It never sends for `desconectada` or
   generic status changes.
 - `listControlPanelEmailTemplates`: superadmin-only catalogue of the account,
   security, access, invitation, and transfer templates. It returns ES/EN sample

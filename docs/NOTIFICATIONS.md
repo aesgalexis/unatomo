@@ -26,10 +26,11 @@ email actions, notification preferences, or the control-panel email view.
 - Important-activity email is reserved for security-relevant events; do not
   duplicate a more specific notification.
 - Operational notification preferences are separate from account/security email.
-  They live in `user_notification_preferences/{uid}` and currently control
-  only the global email channel. Missing preferences keep operational email
-  disabled, while preserving the two explicit lifecycle event defaults for a
-  later opt-in.
+  They live in `user_notification_preferences/{uid}` and control
+  the global email channel, lifecycle events, owner delivery, owner-authorized
+  administrator routing and acceptance of administered-equipment alerts.
+  Missing preferences keep operational email disabled, preserve the two event
+  defaults and owner delivery, and leave both administrator-routing choices off.
 
 ## Architecture
 
@@ -90,9 +91,14 @@ in an outbox record.
   directory. Existing accounts without it receive Spanish until they update
   their preference or a migration is explicitly approved.
 - Settings save `user_notification_preferences/{uid}` with the extensible
-  shape `email.enabled` and `email.events`. Turning off the channel retains
-  the individual event choices, disables them in the UI, and prevents all
-  operational email delivery. The current events are deliberately explicit:
+  shape `email.enabled`, `email.events`, `email.receiveOwnedMachines`,
+  `email.notifyAdministrators` and `email.receiveAdministeredMachines`.
+  Turning off the channel retains the individual choices and prevents personal
+  delivery, but does not revoke an owner's permission to notify administrators.
+  An administrator receives an alert only when the machine link is accepted,
+  the owner permits administrator alerts, and that administrator has enabled
+  email, the matching event and administered-equipment delivery. The current
+  events are deliberately explicit:
   `machineOutOfService` and `machineOperationalAgain`; there is no generic
   `statusChanged` notification and `desconectada` is not mailed.
 - Machine configuration no longer stores or edits recipient addresses or

@@ -11,6 +11,9 @@ const preferencesDoc = (uid) => doc(db, "user_notification_preferences", uid);
 export const DEFAULT_NOTIFICATION_PREFERENCES = Object.freeze({
   email: Object.freeze({
     enabled: false,
+    receiveOwnedMachines: true,
+    notifyAdministrators: false,
+    receiveAdministeredMachines: false,
     events: Object.freeze({
       machineOutOfService: true,
       machineOperationalAgain: true
@@ -21,6 +24,9 @@ export const DEFAULT_NOTIFICATION_PREFERENCES = Object.freeze({
 export const normalizeNotificationPreferences = (value) => ({
   email: {
     enabled: value?.email?.enabled === true,
+    receiveOwnedMachines: value?.email?.receiveOwnedMachines !== false,
+    notifyAdministrators: value?.email?.notifyAdministrators === true,
+    receiveAdministeredMachines: value?.email?.receiveAdministeredMachines === true,
     events: {
       machineOutOfService: value?.email?.events?.machineOutOfService !== false,
       machineOperationalAgain: value?.email?.events?.machineOperationalAgain !== false
@@ -38,7 +44,7 @@ export const saveNotificationPreferences = async (uid, preferences) => {
   if (!uid) return;
   await setDoc(preferencesDoc(uid), {
     ...normalizeNotificationPreferences(preferences),
-    schemaVersion: 1,
+    schemaVersion: 2,
     updatedAt: serverTimestamp()
   }, { merge: true });
 };
