@@ -1,6 +1,13 @@
 import { formatMaybeDate } from "./panelShared.js";
 
 export const createTagsRenderer = ({ text, isEn }) => {
+  const appendTextCell = (row, value) => {
+    const cell = document.createElement("td");
+    cell.textContent = value;
+    row.appendChild(cell);
+    return cell;
+  };
+
   const renderTags = (body, items) => {
     body.innerHTML = "";
     const note = document.createElement("p");
@@ -23,43 +30,44 @@ export const createTagsRenderer = ({ text, isEn }) => {
     table.className = "controlpanel-table";
 
     const head = document.createElement("thead");
-    head.innerHTML = `
-      <tr>
-        <th>${text.tagIdLabel}</th>
-        <th>${text.tagMachineLabel}</th>
-        <th>${text.tagUrlLabel}</th>
-        <th>${text.tagOwnerLabel}</th>
-        <th>${text.tagCreatedByLabel}</th>
-        <th>${text.tagAssignedByLabel}</th>
-        <th>${text.tagStateLabel}</th>
-        <th>${text.tagCreatedAtLabel}</th>
-        <th>${text.tagAssignedAtLabel}</th>
-      </tr>
-    `;
+    const headRow = document.createElement("tr");
+    [
+      text.tagIdLabel,
+      text.tagMachineLabel,
+      text.tagUrlLabel,
+      text.tagOwnerLabel,
+      text.tagCreatedByLabel,
+      text.tagAssignedByLabel,
+      text.tagStateLabel,
+      text.tagCreatedAtLabel,
+      text.tagAssignedAtLabel
+    ].forEach((label) => {
+      const cell = document.createElement("th");
+      cell.textContent = label;
+      headRow.appendChild(cell);
+    });
+    head.appendChild(headRow);
     table.appendChild(head);
 
     const tbody = document.createElement("tbody");
     items.forEach((item) => {
       const row = document.createElement("tr");
       const tagUrl = `${window.location.origin}${item.urlPath || ""}`;
-      row.innerHTML = `
-        <td>${item.tagId || text.noData}</td>
-        <td>${item.machineTitle || text.noMachine}</td>
-        <td></td>
-        <td>${item.tenantDisplayName || item.tenantEmail || text.noData}</td>
-        <td>${item.createdByDisplayName || item.createdByEmail || text.noData}</td>
-        <td>${item.assignedByDisplayName || item.assignedByEmail || text.noData}</td>
-        <td>${item.state || text.noData}</td>
-        <td>${formatMaybeDate(item.createdAt, isEn, text.noData)}</td>
-        <td>${formatMaybeDate(item.assignedAt, isEn, text.noData)}</td>
-      `;
-      const linkCell = row.children[2];
+      appendTextCell(row, item.tagId || text.noData);
+      appendTextCell(row, item.machineTitle || text.noMachine);
+      const linkCell = appendTextCell(row, "");
       const link = document.createElement("a");
       link.href = tagUrl;
       link.target = "_blank";
       link.rel = "noreferrer";
       link.textContent = tagUrl;
       linkCell.appendChild(link);
+      appendTextCell(row, item.tenantDisplayName || item.tenantEmail || text.noData);
+      appendTextCell(row, item.createdByDisplayName || item.createdByEmail || text.noData);
+      appendTextCell(row, item.assignedByDisplayName || item.assignedByEmail || text.noData);
+      appendTextCell(row, item.state || text.noData);
+      appendTextCell(row, formatMaybeDate(item.createdAt, isEn, text.noData));
+      appendTextCell(row, formatMaybeDate(item.assignedAt, isEn, text.noData));
       tbody.appendChild(row);
     });
     table.appendChild(tbody);

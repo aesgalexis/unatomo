@@ -33,6 +33,7 @@ const openPreview = (item, text) => {
   const frame = document.createElement("iframe");
   frame.className = "controlpanel-email-preview-frame";
   frame.title = text.emailTemplatesPreviewTitle(item.name || item.id);
+  frame.setAttribute("sandbox", "");
   frame.srcdoc = item.preview?.html || "";
   const plain = document.createElement("pre");
   plain.className = "controlpanel-email-preview-text";

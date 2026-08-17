@@ -8,6 +8,8 @@ deployment instructions live in [DEPLOY_NOTES.md](DEPLOY_NOTES.md).
 - Node.js 22.12.0 (recommended; 20.19+ supported)
 - npm 11.0.0
 - Firebase project credentials for live backend flows
+- JDK 21 or newer for the Firestore and Storage emulator rules tests. The test
+  runner also detects a portable JDK extracted under `.tools/jdk21/`.
 
 Use `npm.cmd` in Windows PowerShell if the execution policy blocks `npm`.
 
@@ -42,6 +44,7 @@ Choose checks proportionally to the change:
 
 ```powershell
 npm.cmd test
+npm.cmd run test:rules
 node scripts\syntax-scan.mjs static\js
 npm.cmd run build
 npm.cmd run lint:links
@@ -50,7 +53,9 @@ npm.cmd run check:nfc:architecture
 ```
 
 `npm.cmd test` runs the NFC architecture and behavior checks, the Firebase
-Functions lint and policy tests, link validation, and the secret scan. The
+Functions lint and policy tests, Firestore and Storage emulator rules tests,
+link validation, and the secret scan. `npm.cmd run test:rules` runs the rules
+contract independently against the local Firebase emulators. The
 layout-backup integrity check remains a separate production-data diagnostic:
 `npm.cmd run check:nfc:layout`.
 
