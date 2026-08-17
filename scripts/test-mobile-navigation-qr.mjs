@@ -55,6 +55,10 @@ assert.match(printService, /window\.removeEventListener\("afterprint", cleanup\)
 assert.match(printService, /window\.setTimeout\(cleanup, 1000\)/);
 assert.match(printService, /new URLSearchParams\(window\.location\.search\)/);
 assert.match(qrPrint, /getFocusedQrMachineId\(\)/);
+assert.match(
+  qrPrint,
+  /currentSizeIndex = window\.matchMedia\("\(max-width: 768px\)"\)\.matches \? 0 : 1/
+);
 assert.match(qrPrint, /selectedTreeMachineId = machines\.some/);
 assert.match(qrPrint, /window\.location\.href = text\.login/);
 assert.match(printCss, /body\.qr-print-include-back \.qr-print-front-grid/);
