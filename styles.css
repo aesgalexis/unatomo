@@ -901,6 +901,14 @@ body.page li {
   color: color-mix(in srgb, var(--fg) 70%, transparent);
 }
 
+.topbar-status[data-state="error"] {
+  color: var(--danger, #d33);
+}
+
+.topbar-status[data-state="ok"] {
+  color: #2c974b;
+}
+
 .page-section {
   flex: 1 0 auto;
   margin-bottom: 2.5rem;

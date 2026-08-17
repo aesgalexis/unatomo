@@ -101,14 +101,26 @@
   }
 
   html.nfc-dashboard-page .topbar-title-wrap {
-    height: auto;
+    height: 2.5rem;
     min-width: 0;
     justify-content: center;
   }
 
   html.nfc-dashboard-page .topbar-title {
-    overflow: visible;
+    flex-shrink: 0;
+    margin: 0;
+    line-height: 1.15;
+    overflow: hidden;
     font-size: 1.05rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  html.nfc-dashboard-page .topbar-status {
+    height: 0.9rem;
+    min-height: 0.9rem;
+    line-height: 0.9rem;
+    overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }

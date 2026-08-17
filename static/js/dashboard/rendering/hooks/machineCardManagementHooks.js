@@ -2,6 +2,7 @@ import {
   buildMachineHistoryRows,
   downloadHistoryRows,
 } from "../../history/historyExport.js";
+import { setTopbarLogoLoading } from "/static/js/topbar/loading-logo.js";
 
 export const installMachineCardManagementHooks = (dependencies) => {
   const {
@@ -145,6 +146,7 @@ export const installMachineCardManagementHooks = (dependencies) => {
             if (state.nextScrollRestoreY === restoreY) state.nextScrollRestoreY = null;
             if (state.nextScrollAnchor?.id === id) state.nextScrollAnchor = null;
           }, 3000);
+          setTopbarLogoLoading(`admin-invite-${id}`, true);
           try {
             await createAdminInvite(id, nextEmail);
           } catch {
@@ -152,6 +154,8 @@ export const installMachineCardManagementHooks = (dependencies) => {
             state.nextScrollAnchor = null;
             notifyTopbar(t("dashboard.adminAssignNoPermission", "No tienes permisos para asignar administrador"));
             return false;
+          } finally {
+            setTopbarLogoLoading(`admin-invite-${id}`, false);
           }
           if (!state.selectedTabById) state.selectedTabById = {};
           state.selectedTabById[id] = "configuracion";

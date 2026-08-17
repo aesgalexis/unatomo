@@ -1,4 +1,17 @@
 @media (max-width: 768px) {
+  .admin-invite-banner {
+    margin-bottom: 3rem;
+  }
+
+  .invite-row--admin > .invite-actions {
+    width: 100%;
+  }
+
+  .invite-machine-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
   html.has-mobile-primary-nav body.page {
     padding-bottom: calc(5.75rem + env(safe-area-inset-bottom));
   }
@@ -51,14 +64,26 @@
   }
 
   html.nfc-dashboard-page .topbar-title-wrap {
-    height: auto;
+    height: 2.5rem;
     min-width: 0;
     justify-content: center;
   }
 
   html.nfc-dashboard-page .topbar-title {
+    flex-shrink: 0;
+    margin: 0;
+    line-height: 1.15;
     overflow: hidden;
     font-size: 1.05rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  html.nfc-dashboard-page .topbar-status {
+    height: 0.9rem;
+    min-height: 0.9rem;
+    line-height: 0.9rem;
+    overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }

@@ -236,31 +236,6 @@ if (mount) {
     setProgress: setLoadingProgress,
     resetProgress: resetLoadingProgress
   } = createDashboardLoading();
-  const loadingTextEl = loadingEl.querySelector(".dashboard-loading-text");
-  const inlineStatusEl = document.createElement("div");
-  inlineStatusEl.className = "dashboard-inline-status";
-  inlineStatusEl.hidden = true;
-  loadingEl.appendChild(inlineStatusEl);
-  let inlineStatusTimer = null;
-  const setDashboardInlineStatus = (message = "", stateName = "") => {
-    if (inlineStatusTimer) {
-      clearTimeout(inlineStatusTimer);
-      inlineStatusTimer = null;
-    }
-    if (loadingTextEl) loadingTextEl.hidden = true;
-    inlineStatusEl.hidden = false;
-    inlineStatusEl.textContent = message;
-    loadingEl.dataset.state = stateName || "";
-    loadingEl.style.display = "";
-    inlineStatusTimer = setTimeout(() => {
-      inlineStatusTimer = null;
-      loadingEl.removeAttribute("data-state");
-      inlineStatusEl.hidden = true;
-      inlineStatusEl.textContent = "";
-      if (loadingTextEl) loadingTextEl.hidden = false;
-      if (!state.loading) loadingEl.style.display = "none";
-    }, 2200);
-  };
 
   const addBtn = document.createElement("button");
   addBtn.type = "button";
@@ -641,7 +616,7 @@ if (mount) {
     dashboardViewHeaderSlot,
     addBar,
     loadingEl,
-    setInlineStatus: setDashboardInlineStatus,
+    setInlineStatus: (message, stateName) => setTopbarSaveStatus(message, stateName),
     mount,
     groupTree,
     renderGroupTree,

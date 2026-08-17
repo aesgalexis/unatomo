@@ -515,6 +515,15 @@ const TEXT = {
       showingResults: (visible, total) => `Mostrando ${visible}/${total} Equipos`,
       inviteManage: (ownerLabel, count) =>
         `${ownerLabel} quiere que administres ${count} ${count === 1 ? "Equipo" : "Equipos"}`,
+      inviteManageMachine: (ownerLabel, machineTitle) =>
+        `${ownerLabel} quiere que administres “${machineTitle}”`,
+      inviteMoreMachines: (count) => `+${count} más`,
+      showInviteMachines: (count) => `Ver equipos (${count})`,
+      hideInviteMachines: "Ocultar equipos",
+      acceptAll: (count) => `Aceptar todos (${count})`,
+      rejectAll: "Rechazar todos",
+      accepting: "Aceptando...",
+      rejecting: "Rechazando...",
       verifyEmailNotice: "Verifica tu correo para proteger tu cuenta y habilitar las acciones de seguridad.",
       resendVerification: "Reenviar correo",
       emailAlreadyVerified: "El correo ya está verificado",
@@ -1106,6 +1115,15 @@ const TEXT = {
       showingResults: (visible, total) => `Showing ${visible}/${total} machines`,
       inviteManage: (ownerLabel, count) =>
         `${ownerLabel} wants you to manage ${count} ${count === 1 ? "machine" : "machines"}`,
+      inviteManageMachine: (ownerLabel, machineTitle) =>
+        `${ownerLabel} wants you to manage “${machineTitle}”`,
+      inviteMoreMachines: (count) => `+${count} more`,
+      showInviteMachines: (count) => `View machines (${count})`,
+      hideInviteMachines: "Hide machines",
+      acceptAll: (count) => `Accept all (${count})`,
+      rejectAll: "Reject all",
+      accepting: "Accepting...",
+      rejecting: "Rejecting...",
       verifyEmailNotice: "Verify your email to protect your account and enable security actions.",
       resendVerification: "Resend email",
       emailAlreadyVerified: "The email is already verified",

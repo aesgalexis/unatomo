@@ -333,7 +333,7 @@ body.page .topbar {
     .gallery-header,
     .machine-tasks-header,
     .dashboard-users-head
-  ) :is(.dashboard-loading-text, .dashboard-inline-status) {
+  ) .dashboard-loading-text {
     color: color-mix(in srgb, var(--fg) 62%, transparent);
     font-size: 0.78rem;
   }
@@ -601,10 +601,7 @@ body.page .topbar {
     white-space: nowrap;
   }
 
-  .dashboard-fixed-menus .dashboard-view-header-slot :is(
-    .dashboard-loading-text,
-    .dashboard-inline-status
-  ) {
+  .dashboard-fixed-menus .dashboard-view-header-slot .dashboard-loading-text {
     color: color-mix(in srgb, var(--fg) 62%, transparent);
     font-size: 0.75rem;
     line-height: 1;

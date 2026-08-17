@@ -157,14 +157,15 @@ export const createDashboardTopbarController = (dependencies) => {
       });
     }
     const invites = Array.isArray(state.pendingInvites) ? state.pendingInvites : [];
-    const formatInviteText = (ownerLabel, count) =>
-      t("dashboard.inviteManage", (value, total) => `${value} wants you to manage ${total} machines`)(
-        ownerLabel,
-        count
-      );
     invites.forEach((invite) => {
       items.push({
-        text: formatInviteText(invite.ownerEmail || t("dashboard.anonymousUser", "Un usuario"), 1),
+        text: t(
+          "dashboard.inviteManageMachine",
+          (owner, machine) => `${owner} quiere que administres “${machine}”`
+        )(
+          invite.ownerEmail || t("dashboard.anonymousUser", "Un usuario"),
+          invite.machineTitle || t("machine.machine", "Equipo")
+        ),
         actions: [
           { label: t("card.accept", "Aceptar"), className: "mc-location-accept", onClick: () => handleInviteDecision(invite, "accepted") },
           { label: t("dashboard.reject", "Rechazar"), className: "mc-location-cancel", onClick: () => handleInviteDecision(invite, "rejected") }
