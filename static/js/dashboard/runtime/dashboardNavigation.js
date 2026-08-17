@@ -2,6 +2,7 @@ export const getPublicSectionFromHash = () =>
   (window.location.hash || "")
     .replace(/^#/, "")
     .replace(/^\/+/, "")
+    .split("?", 1)[0]
     .trim()
     .toLowerCase();
 
@@ -18,8 +19,9 @@ export const getDashboardInternalView = () => {
     statistics: "estadisticas",
     notifications: "notificaciones",
     privacy: "privacidad",
+    help: "ayuda",
   }[section] || section;
-  return ["registro", "galeria", "estadisticas", "usuarios", "sugerencias", "todo", "notificaciones", "privacidad"].includes(normalizedSection)
+  return ["registro", "galeria", "estadisticas", "usuarios", "sugerencias", "todo", "notificaciones", "privacidad", "ayuda"].includes(normalizedSection)
     ? normalizedSection
     : "dashboard";
 };

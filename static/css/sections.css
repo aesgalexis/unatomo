@@ -67,6 +67,10 @@
   display: none;
 }
 
+.add-bar.is-help-view {
+  display: none;
+}
+
 .dashboard-privacy-back {
   display: inline-flex;
   margin: 0 0 1rem;
@@ -107,4 +111,207 @@
 
 .dashboard-privacy-status.is-error {
   color: #b91c1c;
+}
+
+.dashboard-help-view {
+  --help-tree-width: 15.5rem;
+  display: grid;
+  grid-template-columns: var(--help-tree-width) minmax(0, 52rem);
+  justify-content: center;
+  gap: clamp(2rem, 4vw, 4.5rem);
+  width: 100%;
+  padding-bottom: 5rem;
+}
+
+.dashboard-help-standalone-shell {
+  width: min(100% - 2rem, 76rem);
+  max-width: none;
+}
+
+.dashboard-help-tree {
+  position: sticky;
+  top: 7.5rem;
+  align-self: start;
+  display: grid;
+  max-height: calc(100vh - 9rem);
+  overflow-y: auto;
+  padding: 0.35rem 1rem 0.75rem 0;
+  border-right: 1px solid color-mix(in srgb, var(--fg) 11%, transparent);
+}
+
+.dashboard-help-tree strong {
+  margin: 0 0 0.65rem;
+  color: color-mix(in srgb, var(--fg) 48%, transparent);
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.dashboard-help-tree a {
+  padding: 0.42rem 0.65rem;
+  border-radius: 0.5rem;
+  color: color-mix(in srgb, var(--fg) 68%, transparent);
+  font-size: 0.82rem;
+  font-weight: 590;
+  line-height: 1.28;
+  text-decoration: none;
+}
+
+.dashboard-help-tree a:hover,
+.dashboard-help-tree a:focus-visible {
+  background: color-mix(in srgb, var(--fg) 6%, transparent);
+  color: var(--fg);
+}
+
+.dashboard-help-content {
+  min-width: 0;
+}
+
+.dashboard-help-hero {
+  padding: clamp(1rem, 3vw, 2.5rem) 0 2rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--fg) 12%, transparent);
+}
+
+.dashboard-help-eyebrow {
+  margin: 0 0 0.55rem;
+  color: var(--accent, #2563eb);
+  font-size: 0.74rem;
+  font-weight: 780;
+  letter-spacing: 0.12em;
+}
+
+.dashboard-help-hero h1 {
+  margin: 0;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 610;
+  letter-spacing: -0.045em;
+  line-height: 1.02;
+}
+
+.dashboard-help-hero > p:last-child {
+  max-width: 42rem;
+  margin: 1rem 0 0;
+  color: color-mix(in srgb, var(--fg) 70%, transparent);
+  font-size: clamp(1rem, 2vw, 1.15rem);
+  line-height: 1.55;
+}
+
+.dashboard-help-section {
+  scroll-margin-top: 7.5rem;
+  padding: clamp(2.25rem, 5vw, 3.75rem) 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--fg) 10%, transparent);
+  outline: none;
+}
+
+.dashboard-help-section h2 {
+  margin: 0 0 0.75rem;
+  font-size: clamp(1.35rem, 3vw, 1.8rem);
+  font-weight: 620;
+  letter-spacing: -0.025em;
+}
+
+.dashboard-help-intro {
+  max-width: 46rem;
+  margin: 0 0 1.35rem;
+  color: color-mix(in srgb, var(--fg) 70%, transparent);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.dashboard-help-section ul,
+.dashboard-help-steps {
+  display: grid;
+  gap: 0.72rem;
+  margin: 0;
+  padding-left: 1.35rem;
+}
+
+.dashboard-help-section li {
+  padding-left: 0.25rem;
+  line-height: 1.55;
+}
+
+.dashboard-help-definitions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
+  margin: 0;
+}
+
+.dashboard-help-definitions > div {
+  padding: 1rem;
+  border: 1px solid color-mix(in srgb, var(--fg) 10%, transparent);
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--fg) 4%, transparent);
+}
+
+.dashboard-help-definitions dt {
+  margin-bottom: 0.35rem;
+  font-weight: 680;
+}
+
+.dashboard-help-definitions dd {
+  margin: 0;
+  color: color-mix(in srgb, var(--fg) 70%, transparent);
+  font-size: 0.9rem;
+  line-height: 1.52;
+}
+
+.dashboard-help-note {
+  margin-top: 1.25rem;
+  padding: 0.9rem 1rem;
+  border-left: 3px solid var(--accent, #2563eb);
+  background: color-mix(in srgb, var(--accent, #2563eb) 7%, transparent);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.dashboard-help-jump {
+  display: none;
+}
+
+@media (max-width: 1279px) {
+  .dashboard-help-view {
+    display: block;
+    width: min(100%, 52rem);
+    margin: 0 auto;
+  }
+
+  .dashboard-help-tree {
+    display: none;
+  }
+
+  .dashboard-help-jump {
+    display: grid;
+    gap: 0.42rem;
+    margin: 1.25rem 0 0;
+  }
+
+  .dashboard-help-jump span {
+    color: color-mix(in srgb, var(--fg) 62%, transparent);
+    font-size: 0.78rem;
+    font-weight: 650;
+  }
+
+  .dashboard-help-jump select {
+    width: 100%;
+    min-height: 2.75rem;
+    padding: 0 0.8rem;
+    border: 1px solid color-mix(in srgb, var(--fg) 16%, transparent);
+    border-radius: 0.65rem;
+    background: color-mix(in srgb, var(--fg) 4%, transparent);
+    color: var(--fg);
+    font: inherit;
+  }
+}
+
+@media (max-width: 620px) {
+  .dashboard-help-definitions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dashboard-help-hero {
+    padding-top: 0.5rem;
+  }
 }

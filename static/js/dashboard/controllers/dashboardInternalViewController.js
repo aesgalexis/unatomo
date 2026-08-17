@@ -52,6 +52,7 @@ import {
 } from "../views/users/usersModel.js";
 import { renderUsersTree } from "../views/users/usersTree.js";
 import { renderPrivacyDashboardView } from "../views/privacy/privacyView.js";
+import { renderHelpDashboardView } from "../views/help/helpView.js";
 import { openTaskCreateModal } from "../components/taskCreateModal/taskCreateModal.js";
 import { openOperationalReturnModal } from "../components/operationalReturnModal/operationalReturnModal.js";
 import { openUserCreateModal } from "../components/userCreateModal/userCreateModal.js";
@@ -103,7 +104,8 @@ export const createDashboardInternalViewController = ({
       "has-static-tasks-header",
       "has-static-users-header",
       "has-static-notifications-header",
-      "has-static-privacy-header"
+      "has-static-privacy-header",
+      "has-static-help-header"
     );
   };
   const getFixedViewHeaderContainer = (always = false) =>
@@ -848,6 +850,18 @@ export const createDashboardInternalViewController = ({
     return finish();
   };
 
+  const renderHelp = () => {
+    prepare();
+    const headerContainer = getFixedViewHeaderContainer(true);
+    renderHelpDashboardView(list, {
+      headerContainer,
+      loadingElement: headerContainer ? loadingEl : null,
+      isEnglish: document.documentElement.lang?.toLowerCase().startsWith("en")
+    });
+    showFixedViewHeader("help");
+    return finish();
+  };
+
   const renderNotifications = () => {
     prepare();
     const headerContainer = getFixedViewHeaderContainer(true);
@@ -875,6 +889,7 @@ export const createDashboardInternalViewController = ({
     if (view === "todo") return renderTodo(viewOptions);
     if (view === "notificaciones") return renderNotifications();
     if (view === "privacidad") return renderPrivacy();
+    if (view === "ayuda") return renderHelp();
     const headerContainer = getFixedViewHeaderContainer(true);
     if (headerContainer) {
       const header = document.createElement("div");

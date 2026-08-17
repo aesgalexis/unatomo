@@ -84,7 +84,7 @@ export const createDashboardLoadController = (dependencies) => {
     loadingEl.style.display = "";
     resetLoadingProgress();
     syncDashboardViewChrome();
-    if (["dashboard", "registro", "galeria", "estadisticas", "todo", "usuarios", "privacidad"].includes(state.activeView)) {
+    if (["dashboard", "registro", "galeria", "estadisticas", "todo", "usuarios", "privacidad", "ayuda"].includes(state.activeView)) {
       renderCards({ preserveScroll: false });
     }
   };

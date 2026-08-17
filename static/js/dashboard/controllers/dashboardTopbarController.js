@@ -34,10 +34,11 @@ export const createDashboardTopbarController = (dependencies) => {
     const isUsers = state.activeView === "usuarios";
     const isNotifications = state.activeView === "notificaciones";
     const isPrivacy = state.activeView === "privacidad";
+    const isHelp = state.activeView === "ayuda";
     const useGallerySizeMenu = isGallery && window.matchMedia("(max-width: 768px)").matches;
     viewMenu.setGalleryMode(useGallerySizeMenu);
     viewMenu.setStatisticsMode(isStatistics, { period: state.statisticsPeriod });
-    dashboardLink.classList.toggle("is-active", !isRegistry && !isGallery && !isStatistics && !isSuggestions && !isTodo && !isUsers && !isNotifications && !isPrivacy);
+    dashboardLink.classList.toggle("is-active", !isRegistry && !isGallery && !isStatistics && !isSuggestions && !isTodo && !isUsers && !isNotifications && !isPrivacy && !isHelp);
     registryLink.classList.toggle("is-active", isRegistry);
     galleryLink.classList.toggle("is-active", isGallery);
     statisticsLink.classList.toggle("is-active", isStatistics);
@@ -92,7 +93,7 @@ export const createDashboardTopbarController = (dependencies) => {
       suggestionsLink.removeAttribute("aria-current");
       todoLink.removeAttribute("aria-current");
       usersLink.setAttribute("aria-current", "page");
-    } else if (isNotifications || isPrivacy) {
+    } else if (isNotifications || isPrivacy || isHelp) {
       dashboardLink.removeAttribute("aria-current");
       registryLink.removeAttribute("aria-current");
       galleryLink.removeAttribute("aria-current");
@@ -115,6 +116,7 @@ export const createDashboardTopbarController = (dependencies) => {
     addBar.classList.toggle("is-todo-view", isTodo);
     addBar.classList.toggle("is-suggestions-view", isSuggestions);
     addBar.classList.toggle("is-privacy-view", isPrivacy);
+    addBar.classList.toggle("is-help-view", isHelp);
     addBar.classList.toggle("is-notifications-view", isNotifications);
     if (inviteBanner) {
       const showInviteBanner = state.activeView === "dashboard" && state.pendingInvites?.length;
@@ -136,10 +138,10 @@ export const createDashboardTopbarController = (dependencies) => {
             : isNotifications
               ? t("dashboard.notificationsSearchPlaceholder", "Buscar notificaciones...")
               : t("dashboard.searchPlaceholder", "Buscar por nombre o ubicaci\u00f3n...");
-    const addDisabled = state.loading || isRegistry || isStatistics || isNotifications || isPrivacy;
+    const addDisabled = state.loading || isRegistry || isStatistics || isNotifications || isPrivacy || isHelp;
     const viewMenuDisabled = state.loading || isRegistry ||
-      (isGallery && !useGallerySizeMenu) || isSuggestions || isUsers || isNotifications || isPrivacy;
-    const searchDisabled = state.loading || isNotifications || isPrivacy;
+      (isGallery && !useGallerySizeMenu) || isSuggestions || isUsers || isNotifications || isPrivacy || isHelp;
+    const searchDisabled = state.loading || isNotifications || isPrivacy || isHelp;
     addBtn.disabled = addDisabled;
     searchInput.disabled = searchDisabled;
     viewMenu.button.disabled = viewMenuDisabled;

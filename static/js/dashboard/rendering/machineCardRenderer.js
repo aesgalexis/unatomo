@@ -211,6 +211,7 @@ export const renderMachineCards = (dependencies) => {
         installMachineCardManagementHooks({
           autoSave,
           cancelMachineTransferInvite,
+          clearMobileDetailState,
           createAdminInvite,
           createMachineTransferInvite,
           deleteMachine,

@@ -8,6 +8,7 @@ export const installMachineCardManagementHooks = (dependencies) => {
   const {
     autoSave,
     cancelMachineTransferInvite,
+    clearMobileDetailState,
     createAdminInvite,
     createMachineTransferInvite,
     deleteMachine,
@@ -69,11 +70,17 @@ export const installMachineCardManagementHooks = (dependencies) => {
 
         hooks.onLeaveAdmin = (machineData) => {
           if (isOwnerMachine(machineData)) return;
-          const title = (machineData && machineData.title) || "este equipo";
           const ok = window.confirm(
-            `\u00bfSeguro que quieres dejar de administrar ${title}?`
+            t(
+              "config.confirmLeaveAdmin",
+              "¿Seguro que quieres dejar de administrar este equipo?"
+            )
           );
           if (!ok) return;
+          state.expandedById = (state.expandedById || []).filter(
+            (id) => id !== machineData.id
+          );
+          clearMobileDetailState();
           removeMachineFromState(machineData.id);
           renderCards();
           leaveAdminRole(machineData.id).catch(() => {});
@@ -167,6 +174,7 @@ export const installMachineCardManagementHooks = (dependencies) => {
         hooks.onRemoveAdmin = async (id) => {
           const current = getDraftById(id);
           if (!current) return;
+          if (!isOwnerMachine(current)) return;
           updateMachine(id, { adminEmail: "", adminStatus: "" });
           if (!state.selectedTabById) state.selectedTabById = {};
           state.selectedTabById[id] = "configuracion";

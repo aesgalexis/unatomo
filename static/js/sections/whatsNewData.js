@@ -1,5 +1,10 @@
 export const whatsNewEntries = [
   {
+    date: "2026-08-17",
+    es: "El nuevo centro de notificaciones reúne invitaciones, cambios de acceso y avisos importantes de la cuenta en una bandeja común.",
+    en: "The new notification centre brings invitations, access changes, and important account notices together in one inbox.",
+  },
+  {
     date: "2026-08-11",
     es: "La nueva secci\u00f3n de estad\u00edsticas muestra el estado y rendimiento de los equipos, con comparativas descargables por periodo.",
     en: "The new statistics section shows equipment status and performance, with downloadable comparisons by period.",

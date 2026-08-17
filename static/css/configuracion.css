@@ -605,10 +605,14 @@
   justify-self: start;
 }
 
+.profile-action-review-actions {
+  padding-top: 1rem;
+}
+
 .profile-action-review {
   display: grid;
   gap: 0.75rem;
-  margin-top: 0.35rem;
+  margin-top: 1.25rem;
   padding: 1rem;
   border: 1px solid var(--border-subtle);
   border-radius: 12px;

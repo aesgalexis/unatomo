@@ -657,6 +657,8 @@ if (mount) {
           <span>${textMap.allOwnedEquipment}</span>
           <strong id="profile-global-admin-count">${textMap.affectedEquipment(0)}</strong>
         </div>
+      </div>
+      <div class="profile-form-actions profile-action-review-actions">
         <button class="profile-save-btn profile-action-review-btn" id="profile-global-admin-review" type="button" disabled>${textMap.prepareAssignment}</button>
       </div>
       <div class="profile-action-review" id="profile-global-admin-review-panel" hidden>

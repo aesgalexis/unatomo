@@ -388,6 +388,10 @@
     display: none !important;
   }
 
+  [data-mobile-detail="true"] .dashboard-fixed-menus {
+    grid-template-rows: auto 2.55rem auto auto;
+  }
+
   [data-mobile-detail="true"] .dashboard-fixed-menus-space {
     margin-bottom: 0;
   }

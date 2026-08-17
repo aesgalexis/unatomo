@@ -143,7 +143,7 @@ export const render = (panel, machine, hooks, options = {}) => {
     line.appendChild(email);
     line.appendChild(rolePlaceholder);
     line.appendChild(pinWrap);
-    line.appendChild(remove);
+    if (!isAdminView) line.appendChild(remove);
     line.appendChild(pinActions);
     adminRow.appendChild(line);
 
