@@ -5,6 +5,7 @@ const STABLE_MENU_VIEWS = new Set([
   "estadisticas",
   "galeria",
   "usuarios",
+  "notificaciones",
   "privacidad"
 ]);
 

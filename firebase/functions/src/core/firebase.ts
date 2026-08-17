@@ -27,6 +27,8 @@ export const accountHandlesCol = () => db.collection("account_handles");
 export const accountHandleHistoryCol = () =>
   db.collection("account_handle_history");
 export const emailOutboxCol = () => db.collection("email_outbox");
+export const adminInviteEmailBatchesCol = () =>
+  db.collection("admin_invite_email_batches");
 export const machineDomainEventsCol = () =>
   db.collection("machine_domain_events");
 export const userNotificationsCol = () => db.collection("user_notifications");

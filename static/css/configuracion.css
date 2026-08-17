@@ -555,6 +555,89 @@
   text-decoration: underline;
 }
 
+.profile-action-intro {
+  padding: 0.2rem 0 1.1rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--fg) 8%, transparent);
+}
+
+.profile-action-kicker {
+  color: color-mix(in srgb, var(--fg) 58%, transparent);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.profile-action-intro h2 {
+  margin: 0.35rem 0 0.45rem;
+  color: var(--fg);
+  font-size: 1.15rem;
+}
+
+.profile-action-intro p,
+.profile-action-review p {
+  margin: 0;
+  color: color-mix(in srgb, var(--fg) 66%, transparent);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.profile-action-scope {
+  width: 100%;
+  max-width: 32rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  box-sizing: border-box;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  color: var(--fg);
+  font-size: 13px;
+}
+
+.profile-action-scope strong {
+  white-space: nowrap;
+}
+
+.profile-action-review-btn {
+  justify-self: start;
+}
+
+.profile-action-review {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.35rem;
+  padding: 1rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--fg) 4%, transparent);
+}
+
+.profile-action-review[hidden] {
+  display: none;
+}
+
+.profile-action-note {
+  padding-top: 0.7rem;
+  border-top: 1px solid color-mix(in srgb, var(--fg) 8%, transparent);
+}
+
+.profile-action-confirm {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  color: var(--fg);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.profile-action-confirm input {
+  margin-top: 0.15rem;
+  accent-color: var(--fg);
+}
+
 @media (min-width: 1280px) {
   .profile-settings-page .page-shell {
     max-width: 800px;
@@ -671,5 +754,11 @@
   .profile-storage-head,
   .profile-storage-meta {
     align-items: flex-start;
+  }
+
+  .profile-action-scope {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.35rem;
   }
 }

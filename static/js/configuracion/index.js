@@ -75,6 +75,32 @@ const textMap = {
   notifications: isEn ? "Notifications" : "Notificaciones",
   activity: isEn ? "Activity" : "Actividad",
   security: isEn ? "Security" : "Seguridad",
+  actions: isEn ? "Actions" : "Acciones",
+  globalAdministrator: isEn ? "Administrator for all equipment" : "Administrador para todos los equipos",
+  globalAdministratorHint: isEn
+    ? "Invite one account to administer all equipment you currently own."
+    : "Invita a una cuenta a administrar todos los equipos que tienes actualmente.",
+  administratorAccount: isEn ? "Administrator account" : "Cuenta administradora",
+  administratorAccountPlaceholder: isEn ? "Email or @username" : "Correo o @usuario",
+  prepareAssignment: isEn ? "Review assignment" : "Revisar asignación",
+  assignmentScope: isEn ? "Assignment scope" : "Alcance de la asignación",
+  allOwnedEquipment: isEn ? "All owned equipment" : "Todos los equipos propios",
+  affectedEquipment: isEn
+    ? (count) => `${count} ${count === 1 ? "piece of equipment" : "pieces of equipment"}`
+    : (count) => `${count} ${count === 1 ? "equipo" : "equipos"}`,
+  globalAdministratorReview: isEn
+    ? (account, count) => `${account} will receive invitations for ${count} ${count === 1 ? "piece of equipment" : "pieces of equipment"}.`
+    : (account, count) => `${account} recibirá invitaciones para ${count} ${count === 1 ? "equipo" : "equipos"}.`,
+  globalAdministratorNotice: isEn
+    ? "The account must accept the invitations. Future equipment will not be included automatically."
+    : "La cuenta deberá aceptar las invitaciones. Los equipos que crees en el futuro no se incluirán automáticamente.",
+  confirmGlobalAdministrator: isEn
+    ? "I have reviewed the account and the affected equipment"
+    : "He revisado la cuenta y los equipos afectados",
+  assignGlobalAdministrator: isEn ? "Send invitations" : "Enviar invitaciones",
+  bulkActionNotConnected: isEn
+    ? "The bulk assignment backend is not connected yet."
+    : "La asignación masiva todavía no está conectada al backend.",
   name: isEn ? "Name" : "Nombre",
   accountHandle: isEn ? "Username" : "Nombre de usuario",
   accountHandleClaim: isEn ? "Confirm" : "Confirmar",
@@ -238,6 +264,11 @@ const sectionDefinitions = [
     icon: '<svg viewBox="0 0 24 24"><path d="M4 12h3l2-5 3.2 10 2.2-5H20"/></svg>'
   },
   {
+    id: "actions",
+    label: textMap.actions,
+    icon: '<svg viewBox="0 0 24 24"><path d="M5 12h11"/><path d="m13 8 4 4-4 4"/><path d="M19 5v14"/></svg>'
+  },
+  {
     id: "security",
     label: textMap.security,
     icon: '<svg viewBox="0 0 24 24"><path d="M12 3.5 19 6v5.2c0 4.2-2.8 7.7-7 9.3-4.2-1.6-7-5.1-7-9.3V6z"/><path d="m9 12 2 2 4-4"/></svg>'
@@ -304,6 +335,7 @@ if (mount) {
   const notificationsCard = createCard(textMap.notifications, sectionIconById.get("notifications"));
   const storageCard = createCard(textMap.storage, sectionIconById.get("storage"));
   const activityCard = createCard(textMap.activity, sectionIconById.get("activity"));
+  const actionsCard = createCard(textMap.actions, sectionIconById.get("actions"));
   const securityCard = createCard(textMap.security, sectionIconById.get("security"));
 
   wrap.appendChild(accountCard);
@@ -311,6 +343,7 @@ if (mount) {
   wrap.appendChild(notificationsCard);
   wrap.appendChild(storageCard);
   wrap.appendChild(activityCard);
+  wrap.appendChild(actionsCard);
   wrap.appendChild(securityCard);
 
   const sectionCards = new Map([
@@ -319,6 +352,7 @@ if (mount) {
     ["notifications", notificationsCard],
     ["storage", storageCard],
     ["activity", activityCard],
+    ["actions", actionsCard],
     ["security", securityCard]
   ]);
   const settingsLayout = document.createElement("div");
@@ -343,7 +377,7 @@ if (mount) {
 
   const sectionTreeButtons = new Map();
   let activeSectionId = "account";
-  const selectSection = (sectionId) => {
+  const selectSection = (sectionId, {updateHash = true} = {}) => {
     if (!sectionCards.has(sectionId)) return;
     activeSectionId = sectionId;
     sectionTreeButtons.forEach((button, id) => {
@@ -366,6 +400,11 @@ if (mount) {
       const cardBody = card.querySelector(".profile-card-body");
       if (cardBody) cardBody.hidden = !isActive;
     });
+    if (updateHash) {
+      const localizedId = sectionId === "actions" ?
+        (isEn ? "actions" : "acciones") : sectionId;
+      window.history.replaceState(null, "", `#/${localizedId}`);
+    }
   };
 
   sectionDefinitions.forEach(({id, label, icon}) => {
@@ -393,13 +432,16 @@ if (mount) {
     sectionTreeList.appendChild(row);
     sectionTreeButtons.set(id, button);
   });
-  selectSection(activeSectionId);
+  const initialSection = window.location.hash.replace(/^#\//, "") ===
+    (isEn ? "actions" : "acciones") ? "actions" : "account";
+  selectSection(initialSection, {updateHash: false});
 
   const accountBody = accountCard.querySelector(".profile-card-body");
   const storageBody = storageCard.querySelector(".profile-card-body");
   const prefsBody = preferencesCard.querySelector(".profile-card-body");
   const notificationsBody = notificationsCard.querySelector(".profile-card-body");
   const activityBody = activityCard.querySelector(".profile-card-body");
+  const actionsBody = actionsCard.querySelector(".profile-card-body");
   const securityBody = securityCard.querySelector(".profile-card-body");
 
   if (accountBody) {
@@ -601,6 +643,38 @@ if (mount) {
     `;
   }
 
+  if (actionsBody) {
+    actionsBody.innerHTML = `
+      <div class="profile-action-intro">
+        <span class="profile-action-kicker">${textMap.assignmentScope}</span>
+        <h2>${textMap.globalAdministrator}</h2>
+        <p>${textMap.globalAdministratorHint}</p>
+      </div>
+      <div class="profile-row profile-row-stack">
+        <label class="profile-label" for="profile-global-admin-account">${textMap.administratorAccount}</label>
+        <input class="profile-input" id="profile-global-admin-account" type="text" maxlength="320" autocomplete="off" placeholder="${textMap.administratorAccountPlaceholder}" />
+        <div class="profile-action-scope">
+          <span>${textMap.allOwnedEquipment}</span>
+          <strong id="profile-global-admin-count">${textMap.affectedEquipment(0)}</strong>
+        </div>
+        <button class="profile-save-btn profile-action-review-btn" id="profile-global-admin-review" type="button" disabled>${textMap.prepareAssignment}</button>
+      </div>
+      <div class="profile-action-review" id="profile-global-admin-review-panel" hidden>
+        <strong>${textMap.globalAdministrator}</strong>
+        <p id="profile-global-admin-review-copy"></p>
+        <p class="profile-action-note">${textMap.globalAdministratorNotice}</p>
+        <label class="profile-action-confirm">
+          <input id="profile-global-admin-confirm" type="checkbox" />
+          <span>${textMap.confirmGlobalAdministrator}</span>
+        </label>
+        <div class="profile-form-actions">
+          <button class="profile-save-btn" id="profile-global-admin-submit" type="button" disabled>${textMap.assignGlobalAdministrator}</button>
+          <span class="profile-save-status" id="profile-global-admin-status" aria-live="polite"></span>
+        </div>
+      </div>
+    `;
+  }
+
   if (securityBody) {
     securityBody.innerHTML = `
       <div class="profile-row profile-row-stack profile-password-row" id="profile-password-row" hidden>
@@ -640,6 +714,14 @@ if (mount) {
   const uidEl = accountBody?.querySelector("#profile-uid");
   const ownerCountEl = activityBody?.querySelector("#profile-owner-count");
   const adminCountEl = activityBody?.querySelector("#profile-admin-count");
+  const globalAdminAccount = actionsBody?.querySelector("#profile-global-admin-account");
+  const globalAdminCount = actionsBody?.querySelector("#profile-global-admin-count");
+  const globalAdminReview = actionsBody?.querySelector("#profile-global-admin-review");
+  const globalAdminReviewPanel = actionsBody?.querySelector("#profile-global-admin-review-panel");
+  const globalAdminReviewCopy = actionsBody?.querySelector("#profile-global-admin-review-copy");
+  const globalAdminConfirm = actionsBody?.querySelector("#profile-global-admin-confirm");
+  const globalAdminSubmit = actionsBody?.querySelector("#profile-global-admin-submit");
+  const globalAdminStatus = actionsBody?.querySelector("#profile-global-admin-status");
   const storageTotalEl = storageBody?.querySelector("#profile-storage-total");
   const storageFillEl = storageBody?.querySelector("#profile-storage-fill");
   const storagePercentEl = storageBody?.querySelector("#profile-storage-percent");
@@ -753,12 +835,50 @@ if (mount) {
     el.textContent = value;
   };
 
+  let ownedMachineCount = 0;
+  const refreshGlobalAdministratorAction = () => {
+    const account = (globalAdminAccount?.value || "").trim();
+    setText(globalAdminCount, textMap.affectedEquipment(ownedMachineCount));
+    if (globalAdminReview) {
+      globalAdminReview.disabled = !account || ownedMachineCount < 1;
+    }
+    if (globalAdminReviewPanel && !globalAdminReviewPanel.hidden) {
+      setText(
+        globalAdminReviewCopy,
+        textMap.globalAdministratorReview(account, ownedMachineCount)
+      );
+    }
+  };
+
+  globalAdminAccount?.addEventListener("input", () => {
+    if (globalAdminReviewPanel) globalAdminReviewPanel.hidden = true;
+    if (globalAdminConfirm) globalAdminConfirm.checked = false;
+    if (globalAdminSubmit) globalAdminSubmit.disabled = true;
+    setText(globalAdminStatus, "");
+    refreshGlobalAdministratorAction();
+  });
+  globalAdminReview?.addEventListener("click", () => {
+    if (!globalAdminReviewPanel) return;
+    globalAdminReviewPanel.hidden = false;
+    if (globalAdminConfirm) globalAdminConfirm.checked = false;
+    if (globalAdminSubmit) globalAdminSubmit.disabled = true;
+    refreshGlobalAdministratorAction();
+  });
+  globalAdminConfirm?.addEventListener("change", () => {
+    if (globalAdminSubmit) globalAdminSubmit.disabled = !globalAdminConfirm.checked;
+  });
+  globalAdminSubmit?.addEventListener("click", () => {
+    setText(globalAdminStatus, textMap.bulkActionNotConnected);
+  });
+
   const loadCounts = async (uid) => {
     setTopbarLogoLoading("settings-counts", true);
     try {
       const snap = await getDocs(collection(db, `tenants/${uid}/machines`));
+      ownedMachineCount = snap.size;
       setText(ownerCountEl, String(snap.size));
     } catch {
+      ownedMachineCount = 0;
       setText(ownerCountEl, "0");
     }
 
@@ -768,6 +888,7 @@ if (mount) {
     } catch {
       setText(adminCountEl, "0");
     } finally {
+      refreshGlobalAdministratorAction();
       setTopbarLogoLoading("settings-counts", false);
     }
   };

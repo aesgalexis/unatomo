@@ -45,6 +45,10 @@ Read this before changing data flows, callable functions, machine ownership, adm
   code creates notifications before access relationships disappear; clients
   may read their own documents and update only `readAt`. Machine operational
   status transitions are deliberately excluded from this inbox.
+- `admin_invite_email_batches`: server-only five-minute sliding batches for
+  administrator-invitation email. Batches are scoped by owner and recipient,
+  deduplicate machines, and produce one bilingual `email_outbox` message when
+  the window expires. Browser reads and writes are denied.
 - `machine_domain_events`: server-only canonical lifecycle events. Version 1
   records `machine_out_of_service` and `machine_operational_again` with the
   machine, owner, actor, status cycle and restoration-task identifiers.
@@ -215,6 +219,10 @@ frontend wrappers live under `static/js/dashboard/`.
   them through Resend with an idempotency key. Browser access to the outbox is
   denied. Welcome, verification, password reset, administrator invitation and
   ownership-transfer events are connected.
+- `flushAdminInviteEmailBatches`: minutely scheduled worker that atomically
+  closes due administrator-invitation batches and queues one idempotent email.
+  The message remains informational and links to the dashboard; invitation
+  acceptance continues inside the authenticated app.
 - `notifyMachineStatusTransition`: existing private `machines` update trigger.
   It follows `lastStatusEventId` to consume the canonical event instead of
   reinterpreting status fields. It can create one event-addressed outbox record

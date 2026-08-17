@@ -31,6 +31,10 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    match /admin_invite_email_batches/{batchId} {
+      allow read, write: if false;
+    }
+
     match /access_requests/{requestId} {
       allow read, write: if false;
     }

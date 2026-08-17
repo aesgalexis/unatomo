@@ -29,6 +29,8 @@ export type EmailTemplateInput = {
   expiresText?: string;
   actorName?: string;
   machineName?: string;
+  machineCount?: number;
+  machineNames?: string[];
   oldEmail?: string;
   newEmail?: string;
   activityTitle?: string;
@@ -147,8 +149,16 @@ export const renderEmailTemplate = (
     return build(subject, shell({title: en ? "Confirm your new email" : "Confirma tu nuevo correo", preheader: subject, paragraphs: [en ? `Confirm ${escapeHtml(clean(input.newEmail, "new@example.com"))} to complete the change.` : `Confirma ${escapeHtml(clean(input.newEmail, "nuevo@ejemplo.com"))} para completar el cambio.`, en ? `This link is valid for ${expires}.` : `Este enlace es válido durante ${expires}.`], button: {label: en ? "Confirm new email" : "Confirmar correo nuevo", url}}), `${greeting}\n\n${subject}\n${url}`);
   }
   case "admin_invite": {
-    const subject = en ? `${actor} invited you to manage ${machine}` : `${actor} te invita a administrar ${machine}`;
-    return build(subject, shell({title: en ? "Administrator invitation" : "Invitación de administrador", preheader: subject, paragraphs: [en ? `${actor} invited you to manage ${machine} in UNATOMO/NFC.` : `${actor} te ha invitado a administrar ${machine} en UNATOMO/NFC.`, en ? "Review the invitation and its access before accepting." : "Revisa la invitación y sus accesos antes de aceptarla."], button: {label: en ? "Review invitation" : "Revisar invitación", url}}), `${greeting}\n\n${subject}\n${url}`);
+    const count = Math.max(1, Number(input.machineCount || 1));
+    const names = (Array.isArray(input.machineNames) ? input.machineNames : [])
+      .map((value) => escapeHtml(clean(value))).filter(Boolean);
+    const shownNames = names.join(", ");
+    const remaining = Math.max(0, count - names.length);
+    const equipment = count === 1 ? machine :
+      (en ? `${count} pieces of equipment` : `${count} equipos`);
+    const subject = en ? `${actor} invited you to manage ${equipment}` : `${actor} te invita a administrar ${equipment}`;
+    const listText = shownNames ? `${shownNames}${remaining ? (en ? ` and ${remaining} more` : ` y ${remaining} más`) : ""}.` : "";
+    return build(subject, shell({title: en ? "Administrator invitation" : "Invitación de administrador", preheader: subject, paragraphs: [en ? `${actor} invited you to manage ${equipment} in UNATOMO/NFC.` : `${actor} te ha invitado a administrar ${equipment} en UNATOMO/NFC.`, ...(listText ? [listText] : []), en ? "Open your dashboard to review the invitations." : "Abre tu dashboard para revisar las invitaciones."], button: {label: en ? "Open my dashboard" : "Abrir mi dashboard", url}}), `${greeting}\n\n${subject}\n${listText ? `${listText}\n` : ""}${url}`);
   }
   case "machine_transfer_requested": {
     const subject = en ? `Ownership transfer for ${machine}` : `Transferencia de propiedad de ${machine}`;

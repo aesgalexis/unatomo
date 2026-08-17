@@ -280,8 +280,22 @@ body.page .topbar {
   }
 
   .dashboard-fixed-menus.has-static-dashboard-header .dashboard-home-header,
-  .dashboard-fixed-menus.has-static-registry-header .global-registry-header {
+  .dashboard-fixed-menus.has-static-registry-header .global-registry-header,
+  .dashboard-fixed-menus.has-static-notifications-header .notifications-header {
     display: contents;
+  }
+
+  .dashboard-fixed-menus.has-static-notifications-header
+    .dashboard-view-header-slot {
+    display: contents;
+  }
+
+  .dashboard-fixed-menus.has-static-notifications-header
+    .notifications-header h3 {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: end;
+    white-space: nowrap;
   }
 
   .dashboard-fixed-menus:is(
@@ -338,7 +352,8 @@ body.page .topbar {
     font-size: 0.78rem;
   }
 
-  .dashboard-fixed-menus.has-static-registry-header .global-registry-header .dashboard-view-header-actions {
+  .dashboard-fixed-menus.has-static-registry-header .global-registry-header .dashboard-view-header-actions,
+  .dashboard-fixed-menus.has-static-notifications-header .notifications-header .dashboard-view-header-actions {
     position: absolute;
     right: 0;
     bottom: 6px;
@@ -554,6 +569,9 @@ body.page .topbar {
 
   .dashboard-fixed-menus.has-static-registry-header
     .global-registry-header
+    .dashboard-view-header-actions,
+  .dashboard-fixed-menus.has-static-notifications-header
+    .notifications-header
     .dashboard-view-header-actions {
     position: absolute;
     right: 0;

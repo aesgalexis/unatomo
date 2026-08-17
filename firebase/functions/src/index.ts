@@ -26,6 +26,7 @@ export {
 export {deliverEmailOutbox} from "./email/resend";
 export {notifyMachineStatusTransition} from "./notifications/machineStatus";
 export {notifyAccountTaskAssignment} from "./notifications/taskAssignments";
+export {flushAdminInviteEmailBatches} from "./notifications/adminInviteEmails";
 export {listControlPanelEmailTemplates} from "./controlPanel/emailTemplates";
 export {
   listControlPanelEmailDeliveries,

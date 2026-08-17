@@ -35,6 +35,19 @@ const approvedSpanish = renderEmailTemplate("registration_code_approved", {
 assert.match(approvedSpanish.html, /los próximos 7 días/);
 assert.doesNotMatch(approvedSpanish.html, /las próximas 7 días/);
 
+const groupedAdminInvites = renderEmailTemplate("admin_invite", {
+  displayName: "Mónica",
+  actorName: "Alex",
+  machineName: "Lavadora 1",
+  machineCount: 7,
+  machineNames: ["Lavadora 1", "Lavadora 2", "Secadora 1", "Secadora 2", "Calandra"],
+  actionUrl: "https://unatomo.com/nfc/es/index.html#/notificaciones",
+}, "es");
+assert.match(groupedAdminInvites.subject, /7 equipos/);
+assert.match(groupedAdminInvites.html, /y 2 más/);
+assert.match(groupedAdminInvites.html, /Abrir mi dashboard/);
+assert.doesNotMatch(groupedAdminInvites.html, /Aceptar/);
+
 assert.equal(EMAIL_TEMPLATE_DEFINITIONS.length, 13);
 assert.equal(
   EMAIL_TEMPLATE_DEFINITIONS.filter((item) => item.integration === "active").length,

@@ -102,6 +102,7 @@ export const createDashboardInternalViewController = ({
       "has-static-gallery-header",
       "has-static-tasks-header",
       "has-static-users-header",
+      "has-static-notifications-header",
       "has-static-privacy-header"
     );
   };
@@ -856,7 +857,7 @@ export const createDashboardInternalViewController = ({
       isEnglish: document.documentElement.lang?.toLowerCase().startsWith("en")
     });
     markNotificationsRead?.();
-    showFixedViewHeader("registry");
+    showFixedViewHeader("notifications");
     return finish();
   };
 

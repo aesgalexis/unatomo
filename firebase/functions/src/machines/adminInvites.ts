@@ -8,13 +8,12 @@ import {assertVerifiedEmail, normalizeEmail} from "../core/auth";
 import {
   accountDirectoryCol,
   accountHandlesCol,
-  emailOutboxCol,
   invitesCol,
   linksCol,
   machinesCol,
 } from "../core/firebase";
-import {buildEmailOutbox} from "../email/outbox";
-import {dashboardUrl, getEmailRecipient} from "../email/recipients";
+import {getEmailRecipient} from "../email/recipients";
+import {queueAdminInviteEmail} from "../notifications/adminInviteEmails";
 import {writeUserNotification} from "../notifications/userNotifications";
 
 const resolveInviteeIdentity = async (value: string) => {
@@ -124,21 +123,16 @@ export const createAdminInvite = onCall(async (request) => {
     invitee.adminEmail,
     invitee.adminUid,
   );
-  const notificationId = Date.now().toString(36);
-  await emailOutboxCol().doc(`admin_invite_${inviteId}_${notificationId}`).set(
-    buildEmailOutbox({
-      type: "admin_invite",
-      to: recipient.email,
-      language: recipient.language,
-      data: {
-        displayName: recipient.displayName,
-        actorName: (auth.token.name || ownerEmail).toString(),
-        machineName: (machine.title || "").toString(),
-        actionUrl: dashboardUrl(recipient.language),
-      },
-      idempotencyKey: `admin-invite/${inviteId}/${notificationId}`,
-    }),
-  );
+  await queueAdminInviteEmail({
+    ownerUid: auth.uid,
+    actorName: (auth.token.name || ownerEmail).toString(),
+    recipientEmail: recipient.email,
+    recipientLanguage: recipient.language,
+    recipientDisplayName: recipient.displayName,
+    machineId,
+    machineName: (machine.title || "").toString(),
+    inviteId,
+  });
 
   return {ok: true, inviteId};
 });
