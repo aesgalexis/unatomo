@@ -29,4 +29,5 @@ export const accountHandleHistoryCol = () =>
 export const emailOutboxCol = () => db.collection("email_outbox");
 export const machineDomainEventsCol = () =>
   db.collection("machine_domain_events");
+export const userNotificationsCol = () => db.collection("user_notifications");
 export const accessRequestsCol = () => db.collection("access_requests");

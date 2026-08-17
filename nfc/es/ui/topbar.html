@@ -16,6 +16,16 @@
     </div>
 
     <div class="topbar-actions" aria-label="Sesión">
+      <div id="notif-menu-wrap" hidden>
+        <button id="notif-menu-btn" type="button" aria-label="Notificaciones" aria-haspopup="true" aria-expanded="false">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg>
+        </button>
+        <div id="notif-menu" hidden>
+          <div id="notif-menu-label">No hay notificaciones pendientes</div>
+          <div id="notif-menu-list"></div>
+          <a class="notif-view-all" href="/nfc/es/index.html#/notificaciones">Ver todas las notificaciones</a>
+        </div>
+      </div>
       <div id="session-menu-wrap">
         <button
           id="session-menu-btn"

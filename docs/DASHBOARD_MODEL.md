@@ -175,6 +175,12 @@ The main dashboard page has internal hash views:
 - `#/privacidad` (Spanish) / `#/privacy` (English): authenticated dashboard
   presentation of the localized canonical privacy policy. It reuses the legal
   sections from `nfc/{lang}/privacidad.html` instead of duplicating their text.
+- `#/notificaciones` (Spanish) / `#/notifications` (English): transversal
+  actionable inbox opened from the topbar bell. The bell and inbox share the
+  same live items: email verification, storage exhaustion, administrator
+  invitations, and ownership-transfer invitations. These are canonical pending
+  states, not a second persisted history or a copy of machine logs; an item
+  disappears when its underlying condition is resolved.
 - At desktop tree width, `Registro`, `Tareas`, and `Galería` reuse the side
   group tree in its complete form, including group creation, contextual group actions,
   visibility controls, counters, and machine-scope filtering. Selecting a group

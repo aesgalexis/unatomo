@@ -61,6 +61,7 @@ export const createDashboardState = ({
   showTreeTaskCounts: true,
   pendingInvites: [],
   pendingTransferInvites: [],
+  persistentNotifications: [],
   mobileFocusedMachineId: "",
   mobileDetailJustEntered: false,
   loading: true,

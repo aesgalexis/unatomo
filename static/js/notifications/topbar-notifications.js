@@ -5,6 +5,8 @@ let labelEl = null;
 let listEl = null;
 let badgeEl = null;
 let buttonEl = null;
+let wrapEl = null;
+let currentItems = [];
 const isEn = getCurrentLang() === "en";
 const text = {
   pendingCount: (count) =>
@@ -24,6 +26,7 @@ export function initTopbarNotifications() {
   const menuId = "notif";
 
   menuEl = menu;
+  wrapEl = wrap;
   buttonEl = btn;
   badgeEl = btn.querySelector(".notif-badge");
   if (!badgeEl) {
@@ -49,6 +52,9 @@ export function initTopbarNotifications() {
     menu.hidden = true;
     btn.setAttribute("aria-expanded", "false");
   };
+
+  menu.querySelector(".notif-view-all")?.addEventListener("click", closeMenu);
+  window.addEventListener("hashchange", closeMenu);
 
   const openMenu = () => {
     window.dispatchEvent(
@@ -79,10 +85,14 @@ export function initTopbarNotifications() {
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") closeMenu();
   });
+
+  renderNotifications();
 }
 
-export function setTopbarNotifications(items = []) {
+const renderNotifications = () => {
   if (!menuEl || !labelEl || !listEl) return;
+  if (wrapEl) wrapEl.hidden = false;
+  const items = currentItems;
   const hasItems = Array.isArray(items) && items.length > 0;
   if (buttonEl) buttonEl.classList.toggle("has-notifications", hasItems);
   if (badgeEl) {
@@ -98,13 +108,13 @@ export function setTopbarNotifications(items = []) {
     : text.noNotifications;
   listEl.innerHTML = "";
   if (!hasItems) return;
-  items.forEach((item) => {
+  items.slice(0, 5).forEach((item) => {
     const row = document.createElement("div");
     row.className = "notif-item";
 
-    const text = document.createElement("div");
-    text.className = "notif-text";
-    text.textContent = item.text || "";
+    const copyEl = document.createElement("div");
+    copyEl.className = "notif-text";
+    copyEl.textContent = item.text || "";
 
     const actions = document.createElement("div");
     actions.className = "notif-actions";
@@ -122,8 +132,13 @@ export function setTopbarNotifications(items = []) {
       actions.appendChild(btn);
     });
 
-    row.appendChild(text);
+    row.appendChild(copyEl);
     row.appendChild(actions);
     listEl.appendChild(row);
   });
+};
+
+export function setTopbarNotifications(items = []) {
+  currentItems = Array.isArray(items) ? items : [];
+  renderNotifications();
 }

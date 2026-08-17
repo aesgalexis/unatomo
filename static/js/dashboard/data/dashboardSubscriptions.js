@@ -7,6 +7,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 import { db } from "/static/js/firebase/firebaseApp.js";
 import { normalizeMachine } from "../machineStore.js";
+import { subscribeUserNotifications } from "/static/js/notifications/notificationInboxRepo.js";
 import {
   markAdminLoadFailure,
   markAdminLoadSuccess,
@@ -27,6 +28,7 @@ export const createDashboardSubscriptions = ({
   let adminLinksUnsub = null;
   let inviteUnsub = null;
   let transferInviteUnsub = null;
+  let notificationUnsub = null;
   const adminMachineUnsubs = new Map();
 
   const cleanup = () => {
@@ -34,10 +36,12 @@ export const createDashboardSubscriptions = ({
     if (adminLinksUnsub) adminLinksUnsub();
     if (inviteUnsub) inviteUnsub();
     if (transferInviteUnsub) transferInviteUnsub();
+    if (notificationUnsub) notificationUnsub();
     ownerUnsub = null;
     adminLinksUnsub = null;
     inviteUnsub = null;
     transferInviteUnsub = null;
+    notificationUnsub = null;
     adminMachineUnsubs.forEach((unsub) => unsub?.());
     adminMachineUnsubs.clear();
   };
@@ -172,10 +176,14 @@ export const createDashboardSubscriptions = ({
     inviteUnsub = onSnapshot(
       q,
       (snap) => {
-        state.pendingInvites = snap.docs.map((docSnap) => ({
+        const invites = snap.docs.map((docSnap) => ({
           id: docSnap.id,
           ...docSnap.data()
         }));
+        state.pendingInvites = Array.from(new Map(invites.map((invite) => [
+          `${invite.ownerUid || invite.ownerEmail || ""}|${invite.machineId || invite.machineTitle || invite.id}`,
+          invite
+        ])).values());
         renderInviteBanner();
       },
       (error) => {
@@ -215,11 +223,29 @@ export const createDashboardSubscriptions = ({
     );
   };
 
+  const subscribeNotifications = (uid) => {
+    if (notificationUnsub) notificationUnsub();
+    if (!uid) {
+      state.persistentNotifications = [];
+      renderTopbarNotifications();
+      return;
+    }
+    notificationUnsub = subscribeUserNotifications(uid, (items) => {
+      state.persistentNotifications = items;
+      renderTopbarNotifications();
+    }, (error) => {
+      console.warn("Dashboard notifications subscription failed", error);
+      state.persistentNotifications = [];
+      renderTopbarNotifications();
+    });
+  };
+
   return {
     cleanup,
     subscribeAdminLinks,
     subscribeOwnerMachines,
     subscribePendingInvites,
-    subscribePendingTransferInvites
+    subscribePendingTransferInvites,
+    subscribeNotifications
   };
 };

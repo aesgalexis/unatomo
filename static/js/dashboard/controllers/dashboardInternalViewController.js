@@ -5,6 +5,7 @@ import {
   SUGGESTIONS_PAGE_SIZE,
   renderRegistryDashboardView,
   renderGalleryDashboardView,
+  renderNotificationsDashboardView,
   renderStatisticsDashboardView,
   renderSuggestionsDashboardView,
   renderTodoDashboardView,
@@ -84,7 +85,9 @@ export const createDashboardInternalViewController = ({
   isLargeDashboardViewport,
   autoSave,
   getDraftById,
-  updateMachine
+  updateMachine,
+  getNotifications,
+  markNotificationsRead
 }) => {
   const clearFixedViewHeader = () => {
     if (loadingEl && dashboardViewHeaderSlot?.contains(loadingEl)) {
@@ -605,7 +608,7 @@ export const createDashboardInternalViewController = ({
         }
       }
     });
-    showFixedViewHeader();
+    showFixedViewHeader("registry");
     return finish();
   };
   const renderTodo = (viewOptions = {}) => {
@@ -844,6 +847,19 @@ export const createDashboardInternalViewController = ({
     return finish();
   };
 
+  const renderNotifications = () => {
+    prepare();
+    const headerContainer = getFixedViewHeaderContainer(true);
+    renderNotificationsDashboardView(list, {
+      headerContainer,
+      items: getNotifications?.({ includeRead: true }) || [],
+      isEnglish: document.documentElement.lang?.toLowerCase().startsWith("en")
+    });
+    markNotificationsRead?.();
+    showFixedViewHeader("registry");
+    return finish();
+  };
+
   const render = (view, machines, viewOptions = {}) => {
     clearFixedViewHeader();
     if (view === "sugerencias" && !state.canSuggest && !state.isSuperadmin) {
@@ -856,6 +872,7 @@ export const createDashboardInternalViewController = ({
     if (view === "usuarios") return renderUsers(machines);
     if (view === "sugerencias") return renderSuggestions();
     if (view === "todo") return renderTodo(viewOptions);
+    if (view === "notificaciones") return renderNotifications();
     if (view === "privacidad") return renderPrivacy();
     const headerContainer = getFixedViewHeaderContainer(true);
     if (headerContainer) {

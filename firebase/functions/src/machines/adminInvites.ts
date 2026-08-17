@@ -15,6 +15,7 @@ import {
 } from "../core/firebase";
 import {buildEmailOutbox} from "../email/outbox";
 import {dashboardUrl, getEmailRecipient} from "../email/recipients";
+import {writeUserNotification} from "../notifications/userNotifications";
 
 const resolveInviteeIdentity = async (value: string) => {
   const raw = (value || "").toString().trim();
@@ -224,6 +225,20 @@ export const respondAdminInvite = onCall(async (request) => {
     );
   }
 
+  await writeUserNotification({
+    recipientUid: (invite.ownerUid || "").toString(),
+    type: decision === "accepted" ?
+      "admin_invite_accepted" : "admin_invite_rejected",
+    machineId: (invite.machineId || "").toString(),
+    machineTitle: (invite.machineTitle || "").toString(),
+    actorUid: auth.uid,
+    actorLabel: (
+      auth.token.name || auth.token.email || invite.adminEmail || ""
+    ).toString(),
+    actionUrl: "/nfc/es/index.html#/usuarios",
+    dedupeKey: `admin-invite-response_${inviteId}_${decision}`,
+  });
+
   return {ok: true};
 });
 
@@ -275,6 +290,18 @@ export const leaveAdminRole = onCall(async (request) => {
       },
       {merge: true},
     );
+    await writeUserNotification({
+      recipientUid: (link.ownerUid || "").toString(),
+      type: "admin_left_machine",
+      machineId: (link.machineId || "").toString(),
+      machineTitle: (link.machineTitle || "").toString(),
+      actorUid: auth.uid,
+      actorLabel: (
+        auth.token.name || auth.token.email || link.adminEmail || ""
+      ).toString(),
+      actionUrl: "/nfc/es/index.html#/usuarios",
+      dedupeKey: `admin-left_${linkId}_${Date.now()}`,
+    });
   }
 
   return {ok: true};
@@ -321,8 +348,9 @@ export const revokeAdminInvite = onCall(async (request) => {
     .where("machineId", "==", machineId)
     .where("ownerUid", "==", auth.uid)
     .get();
-  linkQuery.forEach((docSnap) => {
-    docSnap.ref.set(
+  await Promise.all(linkQuery.docs.map(async (docSnap) => {
+    const link = docSnap.data() || {};
+    await docSnap.ref.set(
       {
         status: "left",
         respondedAt: now,
@@ -330,7 +358,21 @@ export const revokeAdminInvite = onCall(async (request) => {
       },
       {merge: true},
     );
-  });
+    if (link.status === "accepted" && link.adminUid) {
+      await writeUserNotification({
+        recipientUid: (link.adminUid || "").toString(),
+        type: "admin_access_removed",
+        machineId,
+        machineTitle: (machine.title || link.machineTitle || "").toString(),
+        actorUid: auth.uid,
+        actorLabel: (
+          auth.token.name || auth.token.email || machine.ownerEmail || ""
+        ).toString(),
+        actionUrl: "/nfc/es/index.html#/notificaciones",
+        dedupeKey: `admin-removed_${machineId}_${docSnap.id}_${Date.now()}`,
+      });
+    }
+  }));
 
   await machineRef.set(
     {

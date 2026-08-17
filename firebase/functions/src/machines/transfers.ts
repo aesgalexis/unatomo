@@ -22,6 +22,7 @@ import {
 } from "../core/storageQuota";
 import {buildEmailOutbox} from "../email/outbox";
 import {dashboardUrl, getEmailRecipient} from "../email/recipients";
+import {writeUserNotification} from "../notifications/userNotifications";
 
 export const createMachineTransferInvite = onCall(async (request) => {
   const auth = request.auth;
@@ -174,6 +175,16 @@ export const respondMachineTransferInvite = onCall(async (request) => {
         {merge: true},
       ),
     ]);
+    await writeUserNotification({
+      recipientUid: fromOwnerUid,
+      type: "transfer_rejected",
+      machineId,
+      machineTitle: (machine.title || invite.machineTitle || "").toString(),
+      actorUid: auth.uid,
+      actorLabel: (auth.token.name || toOwnerEmail).toString(),
+      actionUrl: "/nfc/es/index.html#/notificaciones",
+      dedupeKey: `transfer-response_${inviteId}_rejected`,
+    });
     return {ok: true};
   }
 
@@ -345,6 +356,19 @@ export const respondMachineTransferInvite = onCall(async (request) => {
         {merge: true},
       ),
     );
+    const priorLink = docSnap.data() || {};
+    if (priorLink.status === "accepted" && priorLink.adminUid) {
+      writes.push(writeUserNotification({
+        recipientUid: (priorLink.adminUid || "").toString(),
+        type: "admin_access_removed",
+        machineId,
+        machineTitle: transferredMachineName,
+        actorUid: auth.uid,
+        actorLabel: (auth.token.name || toOwnerEmail).toString(),
+        actionUrl: "/nfc/es/index.html#/notificaciones",
+        dedupeKey: `transfer-admin-removed_${inviteId}_${docSnap.id}`,
+      }));
+    }
   });
   usernamesSnap.forEach((docSnap) => {
     const usernameData = docSnap.data() || {};
@@ -369,6 +393,17 @@ export const respondMachineTransferInvite = onCall(async (request) => {
   });
 
   await Promise.all(writes);
+
+  await writeUserNotification({
+    recipientUid: fromOwnerUid,
+    type: "transfer_accepted",
+    machineId,
+    machineTitle: transferredMachineName,
+    actorUid: auth.uid,
+    actorLabel: (auth.token.name || toOwnerEmail).toString(),
+    actionUrl: "/nfc/es/index.html#/notificaciones",
+    dedupeKey: `transfer-response_${inviteId}_accepted`,
+  });
 
   await Promise.allSettled(
     Array.from(copiedPaths.values()).map((path) =>
@@ -428,6 +463,18 @@ export const cancelMachineTransferInvite = onCall(async (request) => {
           {merge: true},
         ),
       );
+      updates.push(writeUserNotification({
+        recipientUid: targetUid,
+        type: "transfer_canceled",
+        machineId,
+        machineTitle: (machine.title || "").toString(),
+        actorUid: auth.uid,
+        actorLabel: (
+          auth.token.name || auth.token.email || machine.ownerEmail || ""
+        ).toString(),
+        actionUrl: "/nfc/es/index.html#/notificaciones",
+        dedupeKey: `transfer-canceled_${machineId}_${targetUid}_${Date.now()}`,
+      }));
     }
   }
 

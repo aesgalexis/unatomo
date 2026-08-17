@@ -76,6 +76,12 @@ async function seedFirestore() {
       }),
       setDoc(doc(adminDb, "registration_codes", "secret-code"), {
         active: true
+      }),
+      setDoc(doc(adminDb, "user_notifications", "owner-notification"), {
+        recipientUid: OWNER_UID,
+        type: "admin_left_machine",
+        readAt: null,
+        createdAt: Timestamp.now()
       })
     ]);
   });
@@ -169,6 +175,33 @@ describe("Firestore rules", () => {
     ));
     await assertFails(getDocs(collection(db(OWNER_UID), "user_notification_preferences")));
     await assertFails(deleteDoc(doc(db(OWNER_UID), "user_notification_preferences", OWNER_UID)));
+  });
+
+  test("isolate inbox notifications and allow only read state updates", async () => {
+    const notification = doc(
+      db(OWNER_UID),
+      "user_notifications",
+      "owner-notification"
+    );
+    await assertSucceeds(getDoc(notification));
+    await assertFails(getDoc(doc(
+      db(OUTSIDER_UID),
+      "user_notifications",
+      "owner-notification"
+    )));
+    await assertSucceeds(updateDoc(notification, {readAt: Timestamp.now()}));
+    await assertFails(updateDoc(notification, {type: "tampered"}));
+    await assertFails(setDoc(doc(
+      db(OWNER_UID),
+      "user_notifications",
+      "client-created"
+    ), {
+      recipientUid: OWNER_UID,
+      type: "admin_left_machine",
+      readAt: null,
+      createdAt: Timestamp.now()
+    }));
+    await assertFails(deleteDoc(notification));
   });
 
   test("allow machine access only to owner and accepted administrator", async () => {

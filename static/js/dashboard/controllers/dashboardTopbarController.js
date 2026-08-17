@@ -9,7 +9,9 @@ export const createDashboardTopbarController = (dependencies) => {
     statisticsLink,
     getStorageFullText,
     handleInviteDecision,
+    resendVerificationEmail,
     handleTransferDecision,
+    inviteBanner,
     notifyTopbar,
     registryLink,
     searchInput,
@@ -30,11 +32,12 @@ export const createDashboardTopbarController = (dependencies) => {
     const isSuggestions = state.activeView === "sugerencias";
     const isTodo = state.activeView === "todo";
     const isUsers = state.activeView === "usuarios";
+    const isNotifications = state.activeView === "notificaciones";
     const isPrivacy = state.activeView === "privacidad";
     const useGallerySizeMenu = isGallery && window.matchMedia("(max-width: 768px)").matches;
     viewMenu.setGalleryMode(useGallerySizeMenu);
     viewMenu.setStatisticsMode(isStatistics, { period: state.statisticsPeriod });
-    dashboardLink.classList.toggle("is-active", !isRegistry && !isGallery && !isStatistics && !isSuggestions && !isTodo && !isUsers && !isPrivacy);
+    dashboardLink.classList.toggle("is-active", !isRegistry && !isGallery && !isStatistics && !isSuggestions && !isTodo && !isUsers && !isNotifications && !isPrivacy);
     registryLink.classList.toggle("is-active", isRegistry);
     galleryLink.classList.toggle("is-active", isGallery);
     statisticsLink.classList.toggle("is-active", isStatistics);
@@ -89,7 +92,7 @@ export const createDashboardTopbarController = (dependencies) => {
       suggestionsLink.removeAttribute("aria-current");
       todoLink.removeAttribute("aria-current");
       usersLink.setAttribute("aria-current", "page");
-    } else if (isPrivacy) {
+    } else if (isNotifications || isPrivacy) {
       dashboardLink.removeAttribute("aria-current");
       registryLink.removeAttribute("aria-current");
       galleryLink.removeAttribute("aria-current");
@@ -112,6 +115,12 @@ export const createDashboardTopbarController = (dependencies) => {
     addBar.classList.toggle("is-todo-view", isTodo);
     addBar.classList.toggle("is-suggestions-view", isSuggestions);
     addBar.classList.toggle("is-privacy-view", isPrivacy);
+    addBar.classList.toggle("is-notifications-view", isNotifications);
+    if (inviteBanner) {
+      const showInviteBanner = state.activeView === "dashboard" && state.pendingInvites?.length;
+      inviteBanner.hidden = !showInviteBanner;
+      inviteBanner.style.display = showInviteBanner ? "flex" : "none";
+    }
     searchInput.placeholder = isRegistry
       ? t("dashboard.registrySearchPlaceholder", "Buscar en registro...")
       : isGallery
@@ -124,11 +133,13 @@ export const createDashboardTopbarController = (dependencies) => {
             ? t("dashboard.todoSearchPlaceholder", "Buscar tareas...")
             : isUsers
               ? t("dashboard.usersSearchPlaceholder", "Buscar usuarios...")
-            : t("dashboard.searchPlaceholder", "Buscar por nombre o ubicaci\u00f3n...");
-    const addDisabled = state.loading || isRegistry || isStatistics || isPrivacy;
+            : isNotifications
+              ? t("dashboard.notificationsSearchPlaceholder", "Buscar notificaciones...")
+              : t("dashboard.searchPlaceholder", "Buscar por nombre o ubicaci\u00f3n...");
+    const addDisabled = state.loading || isRegistry || isStatistics || isNotifications || isPrivacy;
     const viewMenuDisabled = state.loading || isRegistry ||
-      (isGallery && !useGallerySizeMenu) || isSuggestions || isUsers || isPrivacy;
-    const searchDisabled = state.loading || isPrivacy;
+      (isGallery && !useGallerySizeMenu) || isSuggestions || isUsers || isNotifications || isPrivacy;
+    const searchDisabled = state.loading || isNotifications || isPrivacy;
     addBtn.disabled = addDisabled;
     searchInput.disabled = searchDisabled;
     viewMenu.button.disabled = viewMenuDisabled;
@@ -147,29 +158,59 @@ export const createDashboardTopbarController = (dependencies) => {
     );
   };
 
-  const renderTopbarNotifications = () => {
+  const getNotifications = ({includeRead = false} = {}) => {
     const items = [];
+    if (state.emailVerified === false) {
+      items.push({
+        id: "verify-email",
+        kind: "account",
+        persistent: true,
+        text: t("dashboard.verifyEmailNotice", "Verifica tu correo para proteger tu cuenta y habilitar las acciones de seguridad."),
+        actions: [{
+          label: t("dashboard.resendVerification", "Reenviar correo"),
+          className: "mc-location-accept",
+          onClick: () => resendVerificationEmail()
+        }]
+      });
+    }
     if (state.storageFull) {
       items.push({
         id: "storage-full",
+        kind: "system",
         persistent: true,
         text: getStorageFullText()
       });
     }
     const invites = Array.isArray(state.pendingInvites) ? state.pendingInvites : [];
+    const inviteGroups = new Map();
     invites.forEach((invite) => {
+      const owner = invite.ownerEmail || t("dashboard.anonymousUser", "Un usuario");
+      const key = invite.ownerUid || owner;
+      if (!inviteGroups.has(key)) inviteGroups.set(key, { owner, invites: [] });
+      inviteGroups.get(key).invites.push(invite);
+    });
+    inviteGroups.forEach(({ owner, invites: groupInvites }, groupKey) => {
+      const resolveAll = async (decision) => {
+        for (const invite of groupInvites) await handleInviteDecision(invite, decision);
+      };
       items.push({
-        text: t(
-          "dashboard.inviteManageMachine",
-          (owner, machine) => `${owner} quiere que administres “${machine}”`
-        )(
-          invite.ownerEmail || t("dashboard.anonymousUser", "Un usuario"),
-          invite.machineTitle || t("machine.machine", "Equipo")
-        ),
+        id: `admin-invites-${groupKey}`,
+        kind: "access",
+        text: groupInvites.length === 1
+          ? t("dashboard.inviteManageMachine", (value, machine) => `${value} quiere que administres “${machine}”`)(owner, groupInvites[0].machineTitle || t("machine.machine", "Equipo"))
+          : t("dashboard.inviteManage", (value, total) => `${value} quiere que administres ${total} equipos`)(owner, groupInvites.length),
         actions: [
-          { label: t("card.accept", "Aceptar"), className: "mc-location-accept", onClick: () => handleInviteDecision(invite, "accepted") },
-          { label: t("dashboard.reject", "Rechazar"), className: "mc-location-cancel", onClick: () => handleInviteDecision(invite, "rejected") }
-        ]
+          { label: groupInvites.length > 1 ? t("dashboard.acceptAll", (count) => `Aceptar todos (${count})`)(groupInvites.length) : t("card.accept", "Aceptar"), className: "mc-location-accept", onClick: () => resolveAll("accepted") },
+          { label: groupInvites.length > 1 ? t("dashboard.rejectAll", "Rechazar todos") : t("dashboard.reject", "Rechazar"), className: "mc-location-cancel", onClick: () => resolveAll("rejected") }
+        ],
+        children: groupInvites.length > 1 ? groupInvites.map((invite) => ({
+          id: invite.id,
+          text: invite.machineTitle || t("machine.machine", "Equipo"),
+          actions: [
+            { label: t("card.accept", "Aceptar"), className: "mc-location-accept", onClick: () => handleInviteDecision(invite, "accepted") },
+            { label: t("dashboard.reject", "Rechazar"), className: "mc-location-cancel", onClick: () => handleInviteDecision(invite, "rejected") }
+          ]
+        })) : []
       });
     });
     const transferInvites = Array.isArray(state.pendingTransferInvites) ? state.pendingTransferInvites : [];
@@ -177,6 +218,8 @@ export const createDashboardTopbarController = (dependencies) => {
       const ownerLabel = invite.fromOwnerEmail || t("dashboard.anonymousUser", "Un usuario");
       const machineTitle = invite.machineTitle || t("machine.machine", "Equipo");
       items.push({
+        id: `transfer-invite-${invite.id}`,
+        kind: "access",
         text: t(
           "dashboard.transferReceive",
           (owner, machine) => `${owner} quiere transferirte ${machine}`
@@ -187,7 +230,45 @@ export const createDashboardTopbarController = (dependencies) => {
         ]
       });
     });
-    setTopbarNotifications(items);
+    const persistent = Array.isArray(state.persistentNotifications)
+      ? state.persistentNotifications
+      : [];
+    persistent
+      .filter((notification) => includeRead || !notification.readAt)
+      .forEach((notification) => {
+        const actor = notification.actorLabel || t("dashboard.anonymousUser", "Un usuario");
+        const machine = notification.machineTitle || t("machine.machine", "Equipo");
+        const messages = {
+          admin_invite_accepted: t("dashboard.notificationAdminAccepted", (value, equipment) => `${value} ha aceptado administrar “${equipment}”`)(actor, machine),
+          admin_invite_rejected: t("dashboard.notificationAdminRejected", (value, equipment) => `${value} ha rechazado administrar “${equipment}”`)(actor, machine),
+          admin_access_removed: t("dashboard.notificationAdminRemoved", (equipment) => `Ya no administras “${equipment}”`)(machine),
+          admin_left_machine: t("dashboard.notificationAdminLeft", (value, equipment) => `${value} ha dejado de administrar “${equipment}”`)(actor, machine),
+          transfer_accepted: t("dashboard.notificationTransferAccepted", (value, equipment) => `${value} ha aceptado la transferencia de “${equipment}”`)(actor, machine),
+          transfer_rejected: t("dashboard.notificationTransferRejected", (value, equipment) => `${value} ha rechazado la transferencia de “${equipment}”`)(actor, machine),
+          transfer_canceled: t("dashboard.notificationTransferCanceled", (equipment) => `Se ha cancelado la transferencia de “${equipment}”`)(machine),
+          task_assigned: t("dashboard.notificationTaskAssigned", (task, equipment) => `Se te ha asignado “${task}” en “${equipment}”`)(notification.taskTitle || t("tasks.task", "Tarea"), machine)
+        };
+        const message = messages[notification.type];
+        if (!message) return;
+        items.push({
+          id: notification.id,
+          kind: notification.type === "task_assigned" ? "task" : "access",
+          text: message,
+          read: !!notification.readAt,
+          createdAt: notification.createdAt,
+          actions: notification.type === "task_assigned" ? [{
+            label: t("dashboard.notificationOpenTasks", "Ver tareas"),
+            className: "mc-location-accept",
+            onClick: () => { window.location.hash = document.documentElement.lang === "en" ? "#/tasks" : "#/tareas"; }
+          }] : []
+        });
+      });
+    return items;
+  };
+
+  const renderTopbarNotifications = () => {
+    setTopbarNotifications(getNotifications());
+    window.dispatchEvent(new CustomEvent("unatomo:notifications-changed"));
   };
 
   const refreshStorageFullState = async (uid = state.uid) => {
@@ -219,6 +300,7 @@ export const createDashboardTopbarController = (dependencies) => {
   return {
     assertStorageAvailable,
     refreshStorageFullState,
+    getNotifications,
     renderTopbarNotifications,
     syncDashboardViewChrome
   };

@@ -1202,6 +1202,10 @@ body.nfc-public-page .contact-form-card .form-status[hidden] {
   display:inline-flex;
 }
 
+#notif-menu-wrap[hidden]{
+  display:none;
+}
+
 #notif-menu-btn,
 #session-menu-btn{
   margin-top:0;
@@ -1239,18 +1243,34 @@ body.nfc-public-page .contact-form-card .form-status[hidden] {
 }
 
 #notif-menu-btn.has-notifications{
-  border-color:var(--fg);
+  border-color:var(--border-subtle);
 }
 
 .notif-badge{
   position:absolute;
-  top:-2px;
-  right:2px;
-  padding:0;
-  color:var(--fg);
-  font-size:0.7rem;
-  font-weight:700;
+  top:-0.45rem;
+  right:auto;
+  left:-0.45rem;
+  min-width:1.15rem;
+  height:1.15rem;
+  box-sizing:border-box;
+  padding:0 0.32rem;
+  border-radius:999px;
+  background:var(--fg);
+  color:var(--bg);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-size:0.68rem;
+  font-weight:500;
+  font-variant-numeric:tabular-nums;
   line-height:1;
+  text-align:center;
+  text-indent:-0.04rem;
+}
+
+.notif-badge[hidden]{
+  display:none;
 }
 
 #session-menu-btn{
@@ -1261,7 +1281,7 @@ body.nfc-public-page .contact-form-card .form-status[hidden] {
 }
 
 #notif-menu-btn.has-notifications .notif-badge{
-  color:var(--fg);
+  color:var(--bg);
 }
 
 #notif-menu{
@@ -1483,6 +1503,22 @@ body.nfc-public-page .contact-form-card .form-status[hidden] {
   padding-bottom:6px;
   overflow:visible;
   line-height:normal;
+}
+
+.notif-view-all{
+  display:block;
+  margin-top:6px;
+  padding:9px 8px 4px;
+  border-top:1px solid var(--border-subtle);
+  color:var(--fg);
+  font-weight:600;
+  text-align:center;
+  text-decoration:none;
+}
+
+.notif-view-all:hover,
+.notif-view-all:focus-visible{
+  text-decoration:underline;
 }
 
 #session-menu-language-options .session-menu-option-check{

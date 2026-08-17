@@ -16,6 +16,7 @@ import {
 import { MAX_TODO_LENGTH, TODO_PAGE_SIZE } from "./todo/todoView.js";
 import { renderUsersView } from "./users/usersView.js";
 import { renderGlobalStatisticsView } from "./statistics/globalStatisticsView.js";
+import { renderNotificationsView } from "./notifications/notificationsView.js";
 
 export {
   GLOBAL_REGISTRY_PAGE_SIZE,
@@ -53,6 +54,10 @@ export const renderStatisticsDashboardView = (container, machines = [], options 
 
 export const renderUsersDashboardView = (container, machines = [], options = {}) => {
   renderUsersView(container, machines, options);
+};
+
+export const renderNotificationsDashboardView = (container, options = {}) => {
+  renderNotificationsView(container, options);
 };
 
 export const renderTodoDashboardView = (container, machines = [], options = {}) => {

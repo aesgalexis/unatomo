@@ -40,6 +40,11 @@ Read this before changing data flows, callable functions, machine ownership, adm
 - `machine_transfer_invites`: pending/accepted/rejected machine ownership transfer requests.
 - `dashboard_layout/{uid}`: per-user dashboard grouping/layout preferences. Groups may include `parentGroupId` for one-level subgroups; `dashboardTitle` stores the user's editable dashboard topbar title; `registrySeenAt` stores the last time the user left the global registry view after seeing current activity; `machineViewMode` and `machineSortMode` store dashboard display preferences.
 - `user_notification_preferences/{uid}`: account-wide operational notification preferences. Version 2 stores the `email` channel, its explicit `machineOutOfService` and `machineOperationalAgain` events, and the scopes `receiveOwnedMachines`, `notifyAdministrators` and `receiveAdministeredMachines`. It is owned and writable only by that user; it never stores a recipient address, because delivery resolves the authenticated account address server-side. Legacy documents keep owner delivery enabled by default, while both administrator-routing choices default to disabled.
+- `user_notifications`: private persistent account inbox for access changes,
+  invitation/transfer outcomes, and account-linked task assignments. Backend
+  code creates notifications before access relationships disappear; clients
+  may read their own documents and update only `readAt`. Machine operational
+  status transitions are deliberately excluded from this inbox.
 - `machine_domain_events`: server-only canonical lifecycle events. Version 1
   records `machine_out_of_service` and `machine_operational_again` with the
   machine, owner, actor, status cycle and restoration-task identifiers.

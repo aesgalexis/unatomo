@@ -96,6 +96,7 @@ export const createDashboardSession = (dependencies) => {
     subscriptions.subscribeAdminLinks(uid);
     subscriptions.subscribePendingInvites(emailLower);
     subscriptions.subscribePendingTransferInvites(uid);
+    subscriptions.subscribeNotifications(uid);
     dependencies.renderInviteBanner();
     applyDashboardTitle();
     initDashboardTitleEditor();

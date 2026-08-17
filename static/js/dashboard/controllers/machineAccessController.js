@@ -15,10 +15,24 @@ export const createMachineAccessController = ({
 }) => {
   const expandedInviteGroups = new Set();
 
+  const resendVerificationEmail = async () => {
+    try {
+      const result = await resendAccountEmailVerification();
+      notifyTopbar(result.alreadyVerified
+        ? t("dashboard.emailAlreadyVerified", "El correo ya está verificado")
+        : t("dashboard.verificationResent", "Correo de verificación enviado"));
+      return true;
+    } catch {
+      notifyTopbar(t("dashboard.verificationResendError", "No se pudo reenviar el correo"));
+      return false;
+    }
+  };
+
   const renderInviteBanner = () => {
     const invites = Array.isArray(state.pendingInvites) ? state.pendingInvites : [];
-    const needsEmailVerification = state.emailVerified === false;
-    if (!invites.length && !needsEmailVerification) {
+    const showBanner = state.activeView === "dashboard";
+    inviteBanner.hidden = !showBanner;
+    if (!invites.length) {
       inviteBanner.innerHTML = "";
       inviteBanner.style.display = "none";
       renderTopbarNotifications();
@@ -31,35 +45,7 @@ export const createMachineAccessController = ({
       );
 
     inviteBanner.innerHTML = "";
-    inviteBanner.style.display = "flex";
-    if (needsEmailVerification) {
-      const row = document.createElement("div");
-      row.className = "invite-row";
-      const copy = document.createElement("div");
-      copy.className = "invite-text";
-      copy.textContent = t("dashboard.verifyEmailNotice", "Verifica tu correo para proteger tu cuenta y habilitar las acciones de seguridad.");
-      const actions = document.createElement("div");
-      actions.className = "invite-actions";
-      const resend = document.createElement("button");
-      resend.type = "button";
-      resend.className = "mc-location-accept";
-      resend.textContent = t("dashboard.resendVerification", "Reenviar correo");
-      resend.addEventListener("click", async () => {
-        resend.disabled = true;
-        try {
-          const result = await resendAccountEmailVerification();
-          notifyTopbar(result.alreadyVerified ? t("dashboard.emailAlreadyVerified", "El correo ya está verificado") : t("dashboard.verificationResent", "Correo de verificación enviado"));
-        } catch {
-          notifyTopbar(t("dashboard.verificationResendError", "No se pudo reenviar el correo"));
-        } finally {
-          resend.disabled = false;
-        }
-      });
-      actions.appendChild(resend);
-      row.appendChild(copy);
-      row.appendChild(actions);
-      inviteBanner.appendChild(row);
-    }
+    inviteBanner.style.display = showBanner ? "flex" : "none";
     const grouped = new Map();
     invites.forEach((invite) => {
       const ownerLabel = invite.ownerEmail || t("dashboard.anonymousUser", "Un usuario");
@@ -262,5 +248,5 @@ export const createMachineAccessController = ({
     }
   });
 
-  return { handleInviteDecision, handleTransferDecision, renderInviteBanner };
+  return { handleInviteDecision, handleTransferDecision, renderInviteBanner, resendVerificationEmail };
 };

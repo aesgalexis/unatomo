@@ -81,6 +81,7 @@ import {
   setTopbarLogoLoading
 } from "/static/js/topbar/loading-logo.js";
 import { setTopbarNotifications } from "/static/js/notifications/topbar-notifications.js";
+import { markUserNotificationsRead } from "/static/js/notifications/notificationInboxRepo.js";
 import { calculateStorageUsage, STORAGE_LIMIT_BYTES } from "/static/js/configuracion/storageUsage.js";
 import { getAppBasePrefix, getCurrentLang, setSavedLang } from "/static/js/site/locale.js";
 import { t } from "./i18n.js";
@@ -384,7 +385,9 @@ if (mount) {
     statisticsLink,
     getStorageFullText: () => getStorageFullText(),
     handleInviteDecision: (...args) => handleInviteDecision(...args),
+    resendVerificationEmail: (...args) => resendVerificationEmail(...args),
     handleTransferDecision: (...args) => handleTransferDecision(...args),
+    inviteBanner,
     notifyTopbar,
     registryLink,
     searchInput,
@@ -398,10 +401,22 @@ if (mount) {
   });
   const {
     assertStorageAvailable,
+    getNotifications,
     refreshStorageFullState,
     renderTopbarNotifications,
     syncDashboardViewChrome
   } = dashboardTopbar;
+  const markNotificationsRead = () => {
+    if (state.notificationsMarkReadPending) return;
+    state.notificationsMarkReadPending = true;
+    markUserNotificationsRead(state.persistentNotifications)
+      .finally(() => { state.notificationsMarkReadPending = false; });
+  };
+  window.addEventListener("unatomo:notifications-changed", () => {
+    if (state.activeView === "notificaciones") {
+      window.requestAnimationFrame(() => renderCards({ preserveScroll: true }));
+    }
+  });
 
   const clearDashboardTimer = () => {
     if (state.loadingGuardTimer) {
@@ -483,7 +498,8 @@ if (mount) {
   const {
     handleInviteDecision,
     handleTransferDecision,
-    renderInviteBanner
+    renderInviteBanner,
+    resendVerificationEmail
   } = machineAccessController;
 
   const dashboardData = createDashboardDataController({
@@ -617,6 +633,8 @@ if (mount) {
     addBar,
     loadingEl,
     setInlineStatus: (message, stateName) => setTopbarSaveStatus(message, stateName),
+    getNotifications,
+    markNotificationsRead,
     mount,
     groupTree,
     renderGroupTree,

@@ -255,6 +255,7 @@ const dashboardCssImports = [
   "/static/css/dashboard/suggestions.css",
   "/static/css/dashboard/todo.css",
   "/static/css/dashboard/users.css",
+  "/static/css/dashboard/notifications.css",
   "/static/css/dashboard/loading.css",
   "/static/css/dashboard/machine-base.css",
   "/static/css/dashboard/machine-documents.css",
@@ -457,8 +458,8 @@ const callableExports = Array.from(
   .map((name) => name.trim())
   .filter(Boolean);
 addCheck(
-  callableExports.length === 68 && new Set(callableExports).size === 68,
-  "Functions index.ts preserves 68 unique function exports"
+  callableExports.length === 69 && new Set(callableExports).size === 69,
+  "Functions index.ts preserves 69 unique function exports"
 );
 
 [

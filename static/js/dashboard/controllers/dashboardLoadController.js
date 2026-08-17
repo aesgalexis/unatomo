@@ -45,6 +45,7 @@ export const createDashboardLoadController = (dependencies) => {
     state.draftMachines = [];
     state.pendingInvites = [];
     state.pendingTransferInvites = [];
+    state.persistentNotifications = [];
     state.suggestions = [];
     state.suggestionsReady = false;
     state.suggestionsCreateOpen = true;

@@ -25,6 +25,7 @@ export {
 } from "./accounts/accessRequests";
 export {deliverEmailOutbox} from "./email/resend";
 export {notifyMachineStatusTransition} from "./notifications/machineStatus";
+export {notifyAccountTaskAssignment} from "./notifications/taskAssignments";
 export {listControlPanelEmailTemplates} from "./controlPanel/emailTemplates";
 export {
   listControlPanelEmailDeliveries,

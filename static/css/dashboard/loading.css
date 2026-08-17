@@ -61,6 +61,10 @@
   gap: 0.6rem;
 }
 
+.admin-invite-banner[hidden] {
+  display: none !important;
+}
+
 .invite-row {
   display: flex;
   align-items: center;
