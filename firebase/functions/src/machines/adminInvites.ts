@@ -8,6 +8,7 @@ import {assertVerifiedEmail, normalizeEmail} from "../core/auth";
 import {
   accountDirectoryCol,
   accountHandlesCol,
+  db,
   invitesCol,
   linksCol,
   machinesCol,
@@ -91,6 +92,19 @@ export const createAdminInvite = onCall(async (request) => {
     );
   }
 
+  const existingLinks = await linksCol()
+    .where("machineId", "==", machineId)
+    .get();
+  const alreadyAdmin = existingLinks.docs.some((docSnap) => {
+    const link = docSnap.data() || {};
+    return link.status === "accepted" &&
+      normalizeEmail(link.adminEmailLower || link.adminEmail || "") ===
+        adminEmailLower;
+  });
+  if (alreadyAdmin) {
+    throw new HttpsError("failed-precondition", "admin-already-assigned");
+  }
+
   const inviteId = `${machineId}_${adminEmailLower}`;
   const now = admin.firestore.FieldValue.serverTimestamp();
   const ownerEmail = (auth.token.email || machine.ownerEmail || "").toString();
@@ -151,73 +165,96 @@ export const respondAdminInvite = onCall(async (request) => {
   if (!inviteId) throw new HttpsError("invalid-argument", "inviteId-required");
 
   const inviteRef = invitesCol().doc(inviteId);
-  const inviteSnap = await inviteRef.get();
-  if (!inviteSnap.exists) {
-    throw new HttpsError("not-found", "invite-not-found");
-  }
-  const invite = inviteSnap.data() || {};
-  if (
-    !invite.adminEmailLower ||
-    normalizeEmail(invite.adminEmailLower) !== emailLower
-  ) {
-    throw new HttpsError("permission-denied", "not-invitee");
-  }
-  if (invite.status !== "pending") {
-    throw new HttpsError("failed-precondition", "invite-not-pending");
-  }
+  const invite = await db.runTransaction(async (transaction) => {
+    const inviteSnap = await transaction.get(inviteRef);
+    if (!inviteSnap.exists) {
+      throw new HttpsError("not-found", "invite-not-found");
+    }
+    const currentInvite = inviteSnap.data() || {};
+    if (
+      !currentInvite.adminEmailLower ||
+      normalizeEmail(currentInvite.adminEmailLower) !== emailLower
+    ) {
+      throw new HttpsError("permission-denied", "not-invitee");
+    }
+    if (currentInvite.status !== "pending") {
+      throw new HttpsError("failed-precondition", "invite-not-pending");
+    }
 
-  const now = admin.firestore.FieldValue.serverTimestamp();
-  const machineRef = machinesCol().doc(invite.machineId);
-  if (decision === "accepted") {
-    const linkId = `${invite.machineId}_${auth.uid}`;
-    await linksCol().doc(linkId).set(
-      {
-        ownerUid: invite.ownerUid,
-        ownerEmail: invite.ownerEmail || "",
-        machineId: invite.machineId,
-        machineTitle: invite.machineTitle || "",
-        adminUid: auth.uid,
-        adminEmail: invite.adminEmail || "",
-        adminEmailLower: invite.adminEmailLower,
-        status: "accepted",
-        createdAt: now,
-        updatedAt: now,
-      },
-      {merge: true},
-    );
-    await inviteRef.set(
-      {
-        status: "accepted",
-        adminUid: auth.uid,
-        respondedAt: now,
-        updatedAt: now,
-      },
-      {merge: true},
-    );
-    await machineRef.set(
-      {
-        adminEmail: invite.adminEmail || "",
-        adminStatus: `Administrado por ${invite.adminEmail || ""}`,
-      },
-      {merge: true},
-    );
-  } else {
-    await inviteRef.set(
-      {
-        status: "rejected",
-        respondedAt: now,
-        updatedAt: now,
-      },
-      {merge: true},
-    );
-    await machineRef.set(
-      {
-        adminEmail: "",
-        adminStatus: `Invitación rechazada por ${invite.adminEmail || ""}`,
-      },
-      {merge: true},
-    );
-  }
+    const now = admin.firestore.FieldValue.serverTimestamp();
+    const machineRef = machinesCol().doc(currentInvite.machineId);
+    const linkId = `${currentInvite.machineId}_${auth.uid}`;
+    const linkRef = linksCol().doc(linkId);
+    const linkSnap = await transaction.get(linkRef);
+
+    if (decision === "accepted") {
+      transaction.set(
+        linkRef,
+        {
+          ownerUid: currentInvite.ownerUid,
+          ownerEmail: currentInvite.ownerEmail || "",
+          machineId: currentInvite.machineId,
+          machineTitle: currentInvite.machineTitle || "",
+          adminUid: auth.uid,
+          adminEmail: currentInvite.adminEmail || "",
+          adminEmailLower: currentInvite.adminEmailLower,
+          status: "accepted",
+          createdAt: now,
+          updatedAt: now,
+        },
+        {merge: true},
+      );
+      transaction.set(
+        inviteRef,
+        {
+          status: "accepted",
+          adminUid: auth.uid,
+          respondedAt: now,
+          updatedAt: now,
+        },
+        {merge: true},
+      );
+      transaction.set(
+        machineRef,
+        {
+          adminEmail: currentInvite.adminEmail || "",
+          adminStatus: `Administrado por ${currentInvite.adminEmail || ""}`,
+        },
+        {merge: true},
+      );
+    } else {
+      transaction.set(
+        inviteRef,
+        {
+          status: "rejected",
+          respondedAt: now,
+          updatedAt: now,
+        },
+        {merge: true},
+      );
+      transaction.set(
+        machineRef,
+        {
+          adminEmail: "",
+          adminStatus:
+            `Invitación rechazada por ${currentInvite.adminEmail || ""}`,
+        },
+        {merge: true},
+      );
+      if (linkSnap.exists) {
+        transaction.set(
+          linkRef,
+          {
+            status: "rejected",
+            respondedAt: now,
+            updatedAt: now,
+          },
+          {merge: true},
+        );
+      }
+    }
+    return currentInvite;
+  });
 
   await writeUserNotification({
     recipientUid: (invite.ownerUid || "").toString(),

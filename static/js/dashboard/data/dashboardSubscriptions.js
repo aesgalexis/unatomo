@@ -86,7 +86,7 @@ export const createDashboardSubscriptions = ({
     const nextIds = new Set();
     (links || []).forEach((link) => {
       if (!link || !link.machineId || !link.ownerUid) return;
-      if (link.status && link.status !== "accepted") return;
+      if (link.status !== "accepted") return;
       nextIds.add(link.machineId);
       if (adminMachineUnsubs.has(link.machineId)) return;
       const ref = doc(db, "machines", link.machineId);
@@ -147,8 +147,7 @@ export const createDashboardSubscriptions = ({
         updateLoading();
         const links = snap.docs.map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }));
         state.adminLinks = links;
-        const activeLinks = links
-          .filter((link) => link.status !== "left" && link.status !== "rejected");
+        const activeLinks = links.filter((link) => link.status === "accepted");
         syncAdminMachineListeners(activeLinks);
         scheduleRebuild({ preserveScroll: true });
       },
