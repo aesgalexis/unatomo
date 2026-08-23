@@ -2,6 +2,11 @@ import {
   GROUP_FOLDER_CLOSED_ICON,
   GROUP_FOLDER_OPEN_ICON
 } from "./groupFolderIcons.js";
+import {
+  MOBILE_ACTION_ICONS,
+  createMobileActionSheet,
+  decorateMobileAction
+} from "/static/js/dashboard/components/mobileActionSheet/mobileActionSheet.js";
 
 export const createGroupSectionRenderer = (dependencies) => {
   const {
@@ -192,16 +197,19 @@ export const createGroupSectionRenderer = (dependencies) => {
     menuPanel.className = "machine-group-menu-panel";
     menuPanel.setAttribute("role", "menu");
     menuPanel.hidden = true;
+    let actionSheet = null;
     const closeMenu = () => {
       menuPanel.hidden = true;
       menuToggle.setAttribute("aria-expanded", "false");
+      actionSheet?.close();
     };
-    const addMenuAction = (label, onClick) => {
+    actionSheet = createMobileActionSheet({ container: menu, panel: menuPanel, onRequestClose: closeMenu });
+    const addMenuAction = (label, onClick, icon) => {
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "machine-group-menu-action";
       btn.setAttribute("role", "menuitem");
-      btn.textContent = label;
+      decorateMobileAction(btn, icon, label);
       btn.addEventListener("click", (event) => {
         event.preventDefault();
         event.stopPropagation();
@@ -213,18 +221,32 @@ export const createGroupSectionRenderer = (dependencies) => {
     if (canWrapGroupWithParent(state.dashboardLayout, group.id)) {
       addMenuAction(
         t("dashboard.groupAddParent", "Añadir grupo superior"),
-        () => handleAddParentGroup(group)
+        () => handleAddParentGroup(group),
+        MOBILE_ACTION_ICONS.add
       );
     }
     if (depth < MAX_DASHBOARD_GROUP_DEPTH) {
-      addMenuAction(t("dashboard.groupAddChild", "Añadir grupo"), () => handleAddChildGroup(group));
+      addMenuAction(
+        t("dashboard.groupAddChild", "Añadir grupo"),
+        () => handleAddChildGroup(group),
+        MOBILE_ACTION_ICONS.add
+      );
     }
-    addMenuAction(t("dashboard.groupRename", "Renombrar"), () => handleRenameGroup(group));
-    addMenuAction(t("dashboard.groupDelete", "Eliminar"), () => handleDeleteGroup(group));
+    addMenuAction(
+      t("dashboard.groupRename", "Renombrar"),
+      () => handleRenameGroup(group),
+      MOBILE_ACTION_ICONS.edit
+    );
+    addMenuAction(
+      t("dashboard.groupDelete", "Eliminar"),
+      () => handleDeleteGroup(group),
+      MOBILE_ACTION_ICONS.delete
+    );
     menuToggle.addEventListener("click", (event) => {
       event.preventDefault();
       event.stopPropagation();
       const nextOpen = menuPanel.hidden;
+      if (nextOpen) actionSheet.open();
       menuPanel.hidden = !nextOpen;
       menuToggle.setAttribute("aria-expanded", nextOpen ? "true" : "false");
     });

@@ -1,4 +1,9 @@
 import { t } from "/static/js/dashboard/i18n.js";
+import {
+  MOBILE_ACTION_ICONS,
+  createMobileActionSheet,
+  decorateMobileAction
+} from "/static/js/dashboard/components/mobileActionSheet/mobileActionSheet.js";
 
 export const TODO_PAGE_SIZE = 50;
 export const MAX_TODO_LENGTH = 1024;
@@ -502,15 +507,22 @@ export const renderTodoView = (container, options = {}) => {
       menuPanel.className = "todo-item-menu-panel";
       menuPanel.setAttribute("role", "menu");
       menuPanel.hidden = true;
+      let actionSheet = null;
       const closeMenu = () => {
         menuPanel.hidden = true;
         menuToggle.setAttribute("aria-expanded", "false");
+        actionSheet?.close();
       };
+      actionSheet = createMobileActionSheet({ container: menu, panel: menuPanel, onRequestClose: closeMenu });
       const remove = document.createElement("button");
       remove.type = "button";
       remove.className = "todo-item-menu-action todo-item-delete";
       remove.setAttribute("role", "menuitem");
-      remove.textContent = t("dashboard.todoDelete", "Eliminar");
+      decorateMobileAction(
+        remove,
+        MOBILE_ACTION_ICONS.delete,
+        t("dashboard.todoDelete", "Eliminar")
+      );
       remove.addEventListener("click", (event) => {
         event.preventDefault();
         event.stopPropagation();
@@ -521,6 +533,7 @@ export const renderTodoView = (container, options = {}) => {
         event.preventDefault();
         event.stopPropagation();
         const nextOpen = menuPanel.hidden;
+        if (nextOpen) actionSheet.open();
         menuPanel.hidden = !nextOpen;
         menuToggle.setAttribute("aria-expanded", nextOpen ? "true" : "false");
       });

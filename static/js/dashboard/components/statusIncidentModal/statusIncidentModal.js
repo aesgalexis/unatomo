@@ -108,7 +108,7 @@ export const openStatusIncidentModal = ({
     taskTitle.type = "text";
     taskTitle.maxLength = 64;
     taskTitle.value =
-      defaultTitle || t("tasks.restoreOperation", "Volver a poner la máquina en operatividad");
+      defaultTitle || t("tasks.restoreOperation", "Volver a poner el equipo en operatividad");
     taskTitle.setAttribute(
       "aria-label",
       t("dashboard.incidentTaskTitle", "Título de la tarea")

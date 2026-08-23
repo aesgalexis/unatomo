@@ -136,7 +136,7 @@ export const buildMachineStatusTransition = (
       statusCycleId || `status_${clean(input.machineId, 100)}_${operationId}`;
     const title = clean(
       input.restoreTitle || existing?.title ||
-        (language === "en" ? "Return equipment to operation" : "Volver a poner la máquina en operatividad"),
+        (language === "en" ? "Return equipment to operation" : "Volver a poner el equipo en operatividad"),
       64,
     );
     const description = clean(

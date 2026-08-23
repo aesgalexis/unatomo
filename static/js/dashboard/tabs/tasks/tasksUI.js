@@ -225,13 +225,34 @@ const createCustomControls = (task = {}) => {
   return { wrap, amount, unit };
 };
 
+const TASK_MENU_ICONS = {
+  complete: '<path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm-1.4 14.2-4.1-4.1 1.4-1.4 2.7 2.7 5.5-5.5 1.4 1.4-6.9 6.9Z"></path>',
+  note: '<path d="M4 3h16a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H9l-5 4v-4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm7 4v3H8v2h3v3h2v-3h3v-2h-3V7h-2Z"></path>',
+  images: '<path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2ZM8.5 7A2.5 2.5 0 1 1 6 9.5 2.5 2.5 0 0 1 8.5 7ZM5 19l4.5-6 3.5 4.5 2.5-3L19 19H5Z"></path>',
+  edit: '<path d="m17.7 2.3 4 4a1 1 0 0 1 0 1.4L9.4 20H4v-5.4L16.3 2.3a1 1 0 0 1 1.4 0ZM6 15.4V18h2.6l9.9-9.9-2.6-2.6L6 15.4Z"></path>',
+  remove: '<path d="M8 3h8l1 2h5v2H2V5h5l1-2Zm-3 6h14l-1 13H6L5 9Zm4 2v8h2v-8H9Zm4 0v8h2v-8h-2Z"></path>'
+};
+
+const setTaskMenuActionContent = (button, icon, label) => {
+  const iconElement = document.createElement("span");
+  iconElement.className = "task-menu-action-icon";
+  iconElement.setAttribute("aria-hidden", "true");
+  iconElement.innerHTML = `<svg viewBox="0 0 24 24" focusable="false">${icon}</svg>`;
+  const labelElement = document.createElement("span");
+  labelElement.className = "task-menu-action-label";
+  labelElement.textContent = label;
+  button.replaceChildren(iconElement, labelElement);
+};
+
 const createTaskMenu = ({
   machine,
   task,
   hooks,
+  completeTask,
   openNoteForm,
   openImagePicker,
   openEditForm,
+  canCompleteTask,
   canAddNotes,
   canUploadImages,
   canEditTask,
@@ -253,11 +274,25 @@ const createTaskMenu = ({
   panel.setAttribute("role", "menu");
   panel.hidden = true;
 
+  const backdrop = document.createElement("div");
+  backdrop.className = "task-menu-backdrop";
+  backdrop.setAttribute("aria-hidden", "true");
+
   let documentClickHandler = null;
+  const mobileMenuQuery = window.matchMedia("(max-width: 768px)");
+
+  const restorePanel = () => {
+    panel.classList.remove("is-mobile-sheet");
+    backdrop.classList.remove("is-visible");
+    backdrop.remove();
+    document.documentElement.classList.remove("task-action-sheet-open");
+    menu.appendChild(panel);
+  };
 
   const closeMenu = () => {
     panel.hidden = true;
     dots.setAttribute("aria-expanded", "false");
+    restorePanel();
     if (documentClickHandler) {
       document.removeEventListener("click", documentClickHandler, true);
       documentClickHandler = null;
@@ -265,11 +300,18 @@ const createTaskMenu = ({
   };
 
   const openMenu = () => {
+    if (mobileMenuQuery.matches) {
+      panel.classList.add("is-mobile-sheet");
+      document.documentElement.classList.add("task-action-sheet-open");
+      document.body.appendChild(backdrop);
+      document.body.appendChild(panel);
+      requestAnimationFrame(() => backdrop.classList.add("is-visible"));
+    }
     panel.hidden = false;
     dots.setAttribute("aria-expanded", "true");
     if (documentClickHandler) return;
     documentClickHandler = (event) => {
-      if (menu.contains(event.target)) return;
+      if (menu.contains(event.target) || panel.contains(event.target)) return;
       closeMenu();
     };
     document.addEventListener("click", documentClickHandler, true);
@@ -283,11 +325,27 @@ const createTaskMenu = ({
     else closeMenu();
   });
 
+  const complete = document.createElement("button");
+  complete.type = "button";
+  complete.className = "task-menu-action";
+  complete.setAttribute("role", "menuitem");
+  setTaskMenuActionContent(
+    complete,
+    TASK_MENU_ICONS.complete,
+    t("dashboard.taskCompletionModalConfirm", "Completar tarea")
+  );
+  complete.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    closeMenu();
+    completeTask();
+  });
+
   const note = document.createElement("button");
   note.type = "button";
   note.className = "task-menu-action";
   note.setAttribute("role", "menuitem");
-  note.textContent = t("tasks.addNote", "Añadir nota");
+  setTaskMenuActionContent(note, TASK_MENU_ICONS.note, t("tasks.addNote", "Añadir nota"));
   note.addEventListener("click", (event) => {
     event.preventDefault();
     event.stopPropagation();
@@ -299,7 +357,7 @@ const createTaskMenu = ({
   images.type = "button";
   images.className = "task-menu-action";
   images.setAttribute("role", "menuitem");
-  images.textContent = t("tasks.addImages", "Añadir imágenes");
+  setTaskMenuActionContent(images, TASK_MENU_ICONS.images, t("tasks.addImages", "Añadir imágenes"));
   images.addEventListener("click", (event) => {
     event.preventDefault();
     event.stopPropagation();
@@ -311,7 +369,7 @@ const createTaskMenu = ({
   edit.type = "button";
   edit.className = "task-menu-action";
   edit.setAttribute("role", "menuitem");
-  edit.textContent = t("general.edit", "Editar");
+  setTaskMenuActionContent(edit, TASK_MENU_ICONS.edit, t("general.edit", "Editar"));
   edit.addEventListener("click", (event) => {
     event.preventDefault();
     event.stopPropagation();
@@ -323,7 +381,7 @@ const createTaskMenu = ({
   remove.type = "button";
   remove.className = "task-menu-action task-menu-delete";
   remove.setAttribute("role", "menuitem");
-  remove.textContent = t("tasks.remove", "Eliminar");
+  setTaskMenuActionContent(remove, TASK_MENU_ICONS.remove, t("tasks.remove", "Eliminar"));
   remove.addEventListener("click", (event) => {
     event.preventDefault();
     event.stopPropagation();
@@ -333,6 +391,7 @@ const createTaskMenu = ({
 
   menu.addEventListener("click", (event) => event.stopPropagation());
   menu.appendChild(dots);
+  if (canCompleteTask) panel.appendChild(complete);
   if (canAddNotes) panel.appendChild(note);
   if (canUploadImages) panel.appendChild(images);
   if (canEditTask) panel.appendChild(edit);
@@ -454,7 +513,12 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
 
       const title = document.createElement("strong");
       title.className = "task-title";
-      title.textContent = task.title || t("tasks.task", "Tarea");
+      const isLegacyRestoreTitle =
+        task.source === RESTORE_OPERATION_TASK_SOURCE &&
+        task.title === "Volver a poner la máquina en operatividad";
+      title.textContent = isLegacyRestoreTitle
+        ? t("tasks.restoreOperation", "Volver a poner el equipo en operatividad")
+        : task.title || t("tasks.task", "Tarea");
 
       const meta = document.createElement("div");
       meta.className = "task-meta";
@@ -489,8 +553,9 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
         meta.appendChild(pending);
       }
 
+      let completeBtn = null;
       if (canCompleteTasks) {
-        const completeBtn = document.createElement("button");
+        completeBtn = document.createElement("button");
         completeBtn.type = "button";
         completeBtn.className = "task-complete-btn";
         completeBtn.setAttribute("role", "checkbox");
@@ -640,7 +705,7 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
       const titleWrap = document.createElement("div");
       titleWrap.className = "task-title-wrap";
       titleWrap.appendChild(title);
-      if (canAddTaskNotes || canUploadTaskImages || canEditTasks || canDeleteTasks) {
+      if (canCompleteTasks || canAddTaskNotes || canUploadTaskImages || canEditTasks || canDeleteTasks) {
         const openImagePicker = () => {
           const input = document.createElement("input");
           input.type = "file";
@@ -661,9 +726,11 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
           machine,
           task,
           hooks,
+          completeTask: () => completeBtn?.click(),
           openNoteForm,
           openImagePicker,
           openEditForm,
+          canCompleteTask: canCompleteTasks,
           canAddNotes: canAddTaskNotes,
           canUploadImages: canUploadTaskImages,
           canEditTask: canEditTasks,

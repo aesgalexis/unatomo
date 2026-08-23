@@ -82,7 +82,7 @@ export const installMachineCardCoreHooks = (dependencies) => {
           const user = state.adminLabel || t("dashboard.admin", "Administrador");
           const defaultRestoreTitle = t(
             "tasks.restoreOperation",
-            "Volver a poner la máquina en operatividad"
+            "Volver a poner el equipo en operatividad"
           );
           const pendingRestoreTask = (current.tasks || []).find(
             (task) =>

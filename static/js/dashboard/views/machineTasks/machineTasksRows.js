@@ -1,5 +1,10 @@
 import { t } from "/static/js/dashboard/i18n.js";
 import {
+  MOBILE_ACTION_ICONS,
+  createMobileActionSheet,
+  decorateMobileAction
+} from "/static/js/dashboard/components/mobileActionSheet/mobileActionSheet.js";
+import {
   getTaskRelatedItems,
   machineLabel
 } from "./machineTasksData.js";
@@ -100,19 +105,22 @@ export const createTaskActionsMenu = ({ machine, task, forms, options }) => {
   panel.setAttribute("role", "menu");
   panel.hidden = true;
   let documentClickHandler = null;
+  let actionSheet = null;
   const close = () => {
     panel.hidden = true;
     toggle.setAttribute("aria-expanded", "false");
+    actionSheet?.close();
     if (documentClickHandler) {
       document.removeEventListener("click", documentClickHandler, true);
       documentClickHandler = null;
     }
   };
   const open = () => {
+    actionSheet?.open();
     panel.hidden = false;
     toggle.setAttribute("aria-expanded", "true");
     documentClickHandler = (event) => {
-      if (!menu.contains(event.target)) close();
+      if (!menu.contains(event.target) && !panel.contains(event.target)) close();
     };
     document.addEventListener("click", documentClickHandler, true);
   };
@@ -122,12 +130,13 @@ export const createTaskActionsMenu = ({ machine, task, forms, options }) => {
     if (panel.hidden) open();
     else close();
   });
-  const action = (label, handler, className = "") => {
+  actionSheet = createMobileActionSheet({ container: menu, panel, onRequestClose: close });
+  const action = (label, handler, className = "", icon = MOBILE_ACTION_ICONS.edit) => {
     const button = document.createElement("button");
     button.type = "button";
     button.className = `todo-item-menu-action ${className}`.trim();
     button.setAttribute("role", "menuitem");
-    button.textContent = label;
+    decorateMobileAction(button, icon, label);
     button.addEventListener("click", (event) => {
       event.preventDefault();
       event.stopPropagation();
@@ -166,7 +175,7 @@ export const createTaskActionsMenu = ({ machine, task, forms, options }) => {
     form.append(textarea, save, cancel);
     forms.appendChild(form);
     textarea.focus();
-  });
+  }, "", MOBILE_ACTION_ICONS.note);
   action(t("tasks.addImages", "Añadir imágenes"), () => {
     const input = document.createElement("input");
     input.type = "file";
@@ -180,10 +189,10 @@ export const createTaskActionsMenu = ({ machine, task, forms, options }) => {
     });
     document.body.appendChild(input);
     input.click();
-  });
+  }, "", MOBILE_ACTION_ICONS.images);
   action(t("tasks.deleteTask", "Eliminar tarea"), () => {
     options.onRemoveTask?.(machine.id, task.id);
-  }, "todo-item-delete");
+  }, "todo-item-delete", MOBILE_ACTION_ICONS.delete);
   menu.append(toggle, panel);
   return menu;
 };

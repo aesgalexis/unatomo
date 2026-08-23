@@ -1,5 +1,10 @@
 import { t } from "/static/js/dashboard/i18n.js";
 import {
+  MOBILE_ACTION_ICONS,
+  createMobileActionSheet,
+  decorateMobileAction
+} from "/static/js/dashboard/components/mobileActionSheet/mobileActionSheet.js";
+import {
   validateManualPdf,
   validateOtherDocumentBatch
 } from "../../documents/machineDocumentsRepo.js";
@@ -19,8 +24,9 @@ export const render = (panel, machine, hooks, options = {}) => {
       menu.classList.remove("is-open");
       const dots = menu.querySelector(".mc-doc-menu-dots");
       if (dots) dots.setAttribute("aria-expanded", "false");
-      const menuPanel = menu.querySelector(".mc-doc-menu-panel");
+      const menuPanel = menu.__menuPanel || menu.querySelector(".mc-doc-menu-panel");
       if (menuPanel) menuPanel.hidden = true;
+      menu.__mobileActionSheet?.close();
     });
   };
 
@@ -43,6 +49,13 @@ export const render = (panel, machine, hooks, options = {}) => {
 
   const setupDocMenu = (menu, dots) => {
     const menuPanel = menu.querySelector(".mc-doc-menu-panel");
+    const actionSheet = createMobileActionSheet({
+      container: menu,
+      panel: menuPanel,
+      onRequestClose: closeDocMenus
+    });
+    menu.__menuPanel = menuPanel;
+    menu.__mobileActionSheet = actionSheet;
     dots.setAttribute("aria-expanded", "false");
     dots.setAttribute("aria-haspopup", "menu");
     if (menuPanel) menuPanel.hidden = true;
@@ -54,7 +67,10 @@ export const render = (panel, machine, hooks, options = {}) => {
       if (!isOpen) {
         menu.classList.add("is-open");
         dots.setAttribute("aria-expanded", "true");
-        if (menuPanel) menuPanel.hidden = false;
+        if (menuPanel) {
+          actionSheet.open();
+          menuPanel.hidden = false;
+        }
       } else {
         try {
           dots.blur({ preventScroll: true });
@@ -204,7 +220,7 @@ export const render = (panel, machine, hooks, options = {}) => {
       rename.type = "button";
       rename.className = "mc-doc-menu-action mc-other-doc-rename";
       rename.setAttribute("role", "menuitem");
-      rename.textContent = t("general.rename", "Renombrar");
+      decorateMobileAction(rename, MOBILE_ACTION_ICONS.edit, t("general.rename", "Renombrar"));
       rename.addEventListener("click", async (event) => {
         event.preventDefault();
         event.stopPropagation();
@@ -226,7 +242,7 @@ export const render = (panel, machine, hooks, options = {}) => {
       remove.type = "button";
       remove.className = "mc-doc-menu-action mc-doc-menu-delete mc-other-doc-remove";
       remove.setAttribute("role", "menuitem");
-      remove.textContent = t("general.delete", "Eliminar");
+      decorateMobileAction(remove, MOBILE_ACTION_ICONS.delete, t("general.delete", "Eliminar"));
       remove.addEventListener("click", async (event) => {
         event.preventDefault();
         event.stopPropagation();
@@ -596,7 +612,7 @@ export const render = (panel, machine, hooks, options = {}) => {
         changeLink.type = "button";
         changeLink.className = "mc-doc-menu-action";
         changeLink.setAttribute("role", "menuitem");
-        changeLink.textContent = t("general.change", "Cambiar");
+        decorateMobileAction(changeLink, MOBILE_ACTION_ICONS.file, t("general.change", "Cambiar"));
         changeLink.addEventListener("click", (event) => {
           event.preventDefault();
           event.stopPropagation();
@@ -611,7 +627,7 @@ export const render = (panel, machine, hooks, options = {}) => {
         deleteLink.type = "button";
         deleteLink.className = "mc-doc-menu-action mc-doc-menu-delete";
         deleteLink.setAttribute("role", "menuitem");
-        deleteLink.textContent = t("general.delete", "Eliminar");
+        decorateMobileAction(deleteLink, MOBILE_ACTION_ICONS.delete, t("general.delete", "Eliminar"));
         deleteLink.addEventListener("click", async (event) => {
           event.preventDefault();
           event.stopPropagation();

@@ -210,6 +210,10 @@
     margin-top: -2rem;
   }
 
+  .filter-info[style*="display: block"] + #machineList:not([data-mobile-detail="true"]) {
+    margin-top: 0;
+  }
+
   .global-registry-view {
     max-width: 100%;
     overflow: visible;

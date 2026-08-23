@@ -555,7 +555,7 @@ const renderMachine = () => {
           nextStatus,
           user,
           {
-            restoreTitle: t("tasks.restoreOperation", "Volver a poner la máquina en operatividad")
+            restoreTitle: t("tasks.restoreOperation", "Volver a poner el equipo en operatividad")
           }
         );
         state.draft = {
@@ -574,7 +574,7 @@ const renderMachine = () => {
       status: nextStatus,
       statusTransition: {
         language: document.documentElement.lang === "en" ? "en" : "es",
-        restoreTitle: t("tasks.restoreOperation", "Volver a poner la máquina en operatividad")
+        restoreTitle: t("tasks.restoreOperation", "Volver a poner el equipo en operatividad")
       }
     };
     renderMachine();

@@ -127,7 +127,7 @@ const TEXT = {
       deleteTask: "Eliminar tarea",
       emptyList: "No hay tareas que mostrar, crea una tarea para comenzar",
       sidebarFilterEmpty: "No hay tareas en las máquinas visibles. Muestra más máquinas en la barra lateral para ver sus tareas.",
-      restoreOperation: "Volver a poner la m\u00e1quina en operatividad",
+      restoreOperation: "Volver a poner el equipo en operatividad",
       remove: "Eliminar",
       description: "Descripci\u00f3n",
       frequency: "Frecuencia",

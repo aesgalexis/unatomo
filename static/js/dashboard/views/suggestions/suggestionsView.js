@@ -1,4 +1,9 @@
 import { t } from "/static/js/dashboard/i18n.js";
+import {
+  MOBILE_ACTION_ICONS,
+  createMobileActionSheet,
+  decorateMobileAction
+} from "/static/js/dashboard/components/mobileActionSheet/mobileActionSheet.js";
 
 export const SUGGESTIONS_PAGE_SIZE = 254;
 export const MAX_SUGGESTION_LENGTH = 1024;
@@ -201,16 +206,19 @@ export const renderSuggestionsView = (container, options = {}) => {
     panel.className = "todo-item-menu-panel";
     panel.setAttribute("role", "menu");
     panel.hidden = true;
+    let actionSheet = null;
     const closeMenu = () => {
       panel.hidden = true;
       toggle.setAttribute("aria-expanded", "false");
+      actionSheet?.close();
     };
-    const createAction = (label, handler, extraClass = "") => {
+    actionSheet = createMobileActionSheet({ container: menu, panel, onRequestClose: closeMenu });
+    const createAction = (label, handler, extraClass = "", icon = MOBILE_ACTION_ICONS.edit) => {
       const button = document.createElement("button");
       button.type = "button";
       button.className = `todo-item-menu-action ${extraClass}`.trim();
       button.setAttribute("role", "menuitem");
-      button.textContent = label;
+      decorateMobileAction(button, icon, label);
       button.addEventListener("click", (event) => {
         event.preventDefault();
         event.stopPropagation();
@@ -228,7 +236,9 @@ export const renderSuggestionsView = (container, options = {}) => {
             createdAt: item.createdAt,
           });
         }
-      }
+      },
+      "",
+      MOBILE_ACTION_ICONS.reply
     );
     const completedAction = createAction(
       item.resolved
@@ -236,19 +246,23 @@ export const renderSuggestionsView = (container, options = {}) => {
         : t("dashboard.suggestionsComplete", "Completada"),
       () => {
         if (options.onResolve) options.onResolve(item.id, !item.resolved);
-      }
+      },
+      "",
+      item.resolved ? MOBILE_ACTION_ICONS.reply : MOBILE_ACTION_ICONS.complete
     );
     const deleteAction = createAction(
       t("dashboard.suggestionsDelete", "Eliminar"),
       () => {
         if (options.onDelete) options.onDelete(item.id);
       },
-      "todo-item-delete"
+      "todo-item-delete",
+      MOBILE_ACTION_ICONS.delete
     );
     toggle.addEventListener("click", (event) => {
       event.preventDefault();
       event.stopPropagation();
       const nextOpen = panel.hidden;
+      if (nextOpen) actionSheet.open();
       panel.hidden = !nextOpen;
       toggle.setAttribute("aria-expanded", nextOpen ? "true" : "false");
     });

@@ -450,6 +450,13 @@ a:hover {
   }
 }
 
+@media (max-width: 768px) {
+  .legal-footer.footer-disclosure,
+  .footer-link {
+    display: none !important;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .page-shell > .legal-footer.footer-disclosure,
   .footer-disclosure-control,
