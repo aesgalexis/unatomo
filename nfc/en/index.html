@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" class="styles-loading nfc-dashboard-page">
+<html lang="en" class="styles-loading dashboard-loading-page nfc-dashboard-page">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -35,6 +35,8 @@
     html.styles-loading.styles-error body::after {
       content: "Unable to load styles";
     }
+    html.dashboard-loading-page .legal-footer,
+    html.dashboard-loading-page .footer-link { visibility: hidden !important; }
   </style>
   <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="/static/css/dashboard.css">

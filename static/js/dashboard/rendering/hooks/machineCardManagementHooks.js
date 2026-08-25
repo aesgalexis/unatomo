@@ -47,6 +47,9 @@ export const installMachineCardManagementHooks = (dependencies) => {
           const title = (machineData && machineData.title) || "este equipo";
           const ok = window.confirm(`\u00bfSeguro que quieres eliminar ${title}?, Esta acci\u00f3n no se puede deshacer.`);
           if (!ok) return;
+          expandedById.delete(machineData.id);
+          state.expandedById = Array.from(expandedById);
+          clearMobileDetailState();
           removeMachineFromState(machineData.id);
           renderCards();
           autoSave.saveNow(machineData.id, "delete", async () => {

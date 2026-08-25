@@ -75,6 +75,7 @@ export const createDashboardLoadController = (dependencies) => {
     state.statisticsPeriod = loadStatisticsPeriod(uid);
     clearMobileDetailState();
     resetDashboardLoadState(state);
+    document.documentElement.classList.add("dashboard-loading-page");
     setTopbarLogoLoading("dashboard", true);
     state.initialGroupPriorityOrder = {};
     state.initialGroupPriorityReady = false;
@@ -100,6 +101,7 @@ export const createDashboardLoadController = (dependencies) => {
       if (loadingCycle !== completedCycle || !state.loading) return;
       if (!getDashboardLoadProgress(state).complete) return;
       state.loading = false;
+      document.documentElement.classList.remove("dashboard-loading-page");
       setTopbarLogoLoading("dashboard", false);
       if (state.loadingGuardTimer) {
         clearTimeout(state.loadingGuardTimer);
