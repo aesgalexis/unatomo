@@ -217,7 +217,7 @@ const row = (label: string, value: unknown) => `
   "border-bottom:1px solid #e5e7eb;color:#334155;width:190px\">" +
   `${escapeHtml(label)}</th>
     <td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;` +
-  `color:#0f172a">${escapeHtml(value || "—")}</td>
+  `color:#0f172a">${escapeHtml(value || "-")}</td>
   </tr>`;
 
 export const renderLaundrySpareEmail = (request: SpareRequest) => {
@@ -271,12 +271,12 @@ export const renderLaundrySpareEmail = (request: SpareRequest) => {
       `Tipo de máquina: ${request.category}`,
       `Modelo / familia: ${model}`,
       `Recambio: ${request.spareName}`,
-      `Referencia: ${request.partReference || "—"}`,
+      `Referencia: ${request.partReference || "-"}`,
       `Cantidad: ${request.quantity}`,
-      `Detalles: ${request.description || "—"}`,
+      `Detalles: ${request.description || "-"}`,
       `Contacto: ${request.contactName}`,
       `Correo: ${request.email}`,
-      `Teléfono: ${request.phone || "—"}`,
+      `Teléfono: ${request.phone || "-"}`,
       `Razón social: ${request.legalName}`,
       `CIF / NIF / VAT: ${request.taxId}`,
       `Dirección fiscal: ${address}`,
