@@ -77,6 +77,12 @@ const translations = {
     images_payload_too_large: "Las imágenes ocupan demasiado. Prueba con fotos de menor resolución.",
     sending: "Enviando solicitud…",
     success: "Solicitud enviada correctamente. Referencia: {reference}. Revisaremos la información y contactaremos contigo.",
+    success_reference: "Solicitud {reference}",
+    success_title: "Hemos recibido tu solicitud",
+    success_body: "Revisaremos la información y las fotografías de la placa para identificar correctamente el recambio.",
+    success_email_notice: "También te hemos enviado un correo de confirmación con la referencia de la solicitud.",
+    success_home: "Volver a Laundry Services",
+    success_another: "Solicitar otro recambio",
     send_error: "No hemos podido enviar la solicitud. Inténtalo de nuevo dentro de unos minutos.",
     summary_manufacturer: "Fabricante",
     summary_brand: "Marca",
@@ -164,6 +170,12 @@ const translations = {
     images_payload_too_large: "The images are too large. Try photos with a lower resolution.",
     sending: "Sending request…",
     success: "Request sent successfully. Reference: {reference}. We will review the information and contact you.",
+    success_reference: "Request {reference}",
+    success_title: "We have received your request",
+    success_body: "We will review the information and the data-plate photographs to identify the correct spare part.",
+    success_email_notice: "We have also sent you a confirmation email containing the request reference.",
+    success_home: "Back to Laundry Services",
+    success_another: "Request another spare part",
     send_error: "We could not send the request. Please try again in a few minutes.",
     summary_manufacturer: "Manufacturer",
     summary_brand: "Brand",
@@ -190,6 +202,7 @@ const nextButton = document.querySelector("#next-button");
 const backButton = document.querySelector("#back-button");
 const submitButton = document.querySelector("#submit-button");
 const statusElement = form.querySelector(".form-status");
+const successPanel = document.querySelector("#success-panel");
 
 let catalog = { manufacturers: [], categories: [], models: [] };
 let language = normalizeLanguage(window.unatomoI18n?.getLanguage?.() || document.documentElement.lang);
@@ -518,6 +531,19 @@ function buildSubmission(images) {
   };
 }
 
+function showSuccess(requestId) {
+  const reference = requestId || submissionId.slice(0, 8).toUpperCase();
+  document.querySelector(".spares-hero").hidden = true;
+  document.querySelector(".spares-progress").hidden = true;
+  form.hidden = true;
+  statusElement.hidden = true;
+  successPanel.hidden = false;
+  document.body.classList.add("request-complete");
+  document.querySelector("#success-reference").textContent = t("success_reference").replace("{reference}", reference);
+  document.querySelector("#success-title").focus({ preventScroll: true });
+  successPanel.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
 function updateSummary() {
   const list = document.querySelector("#request-summary-list");
   const manufacturer = catalog.manufacturers.find((item) => item.id === selectedManufacturer);
@@ -612,9 +638,7 @@ form.addEventListener("submit", async (event) => {
     const response = await submitSpareRequest(buildSubmission(images));
     if (!response?.data?.ok) throw new Error("submission-rejected");
     statusElement.dataset.state = "success";
-    statusElement.textContent = t("success").replace("{reference}", response.data.requestId || submissionId.slice(0, 8).toUpperCase());
-    form.classList.add("is-sent");
-    form.scrollIntoView({ behavior: "smooth", block: "center" });
+    showSuccess(response.data.requestId);
   } catch (error) {
     console.error(error);
     statusElement.dataset.state = "error";

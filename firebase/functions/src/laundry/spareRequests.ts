@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import {createHash} from "node:crypto";
 import {logger} from "firebase-functions";
 import {HttpsError, onCall} from "firebase-functions/v2/https";
@@ -11,6 +12,10 @@ const MAX_IMAGE_BYTES = 2.5 * 1024 * 1024;
 const MAX_TOTAL_IMAGE_BYTES = 8 * 1024 * 1024;
 const REQUEST_DESTINATION = "info@unatomo.com";
 const VERIFIED_SENDER = "Unatomo <cuenta@correo.unatomo.com>";
+const LAUNDRY_URL = "https://unatomo.com/laundryservices/";
+const LAUNDRY_LOGO_URL =
+  "https://unatomo.com/static/img/logo-unatomo-round-v1.0.png";
+const LAUNDRY_BLUE = "#2563eb";
 const ALLOWED_IMAGE_TYPES = new Set([
   "image/jpeg",
   "image/png",
@@ -46,6 +51,23 @@ type SpareRequest = {
   province: string;
   privacyAccepted: boolean;
   images: ImageInput[];
+};
+
+type RenderedEmail = {
+  subject: string;
+  html: string;
+  text: string;
+};
+
+type ResendPayload = {
+  from: string;
+  reply_to: string;
+  to: string[];
+  subject: string;
+  html: string;
+  text: string;
+  attachments?: Array<{filename: string; content: string}>;
+  tags: Array<{name: string; value: string}>;
 };
 
 const clean = (value: unknown, max: number) =>
@@ -263,6 +285,131 @@ export const renderLaundrySpareEmail = (request: SpareRequest) => {
   };
 };
 
+export const renderLaundrySpareConfirmation = (
+  request: SpareRequest,
+): RenderedEmail => {
+  const en = request.language === "en";
+  const reference = request.submissionId.slice(0, 8).toUpperCase();
+  const name = escapeHtml(request.contactName);
+  const machine = [
+    request.manufacturer,
+    request.allianceBrand,
+    request.model,
+  ].filter(Boolean).join(" · ");
+  const subject = en ?
+    `We received your spare-part request · ${reference}` :
+    `Hemos recibido tu solicitud de recambio · ${reference}`;
+  const title = en ?
+    "We have received your request" :
+    "Hemos recibido tu solicitud";
+  const greeting = en ? `Hello ${name},` : `Hola ${name},`;
+  const firstParagraph = en ?
+    "Thank you for contacting UNATOMO Laundry Services. Your request has " +
+      "been registered successfully." :
+    "Gracias por contactar con UNATOMO Laundry Services. Tu solicitud se " +
+      "ha registrado correctamente.";
+  const secondParagraph = en ?
+    "Our team will review the data-plate photographs and the information " +
+      "provided. We will contact you if we need any clarification." :
+    "Nuestro equipo revisará las fotografías de la placa y la información " +
+      "facilitada. Contactaremos contigo si necesitamos alguna aclaración.";
+  const referenceLabel = en ? "Request reference" : "Referencia de solicitud";
+  const machineLabel = en ? "Machine" : "Máquina";
+  const spareLabel = en ? "Requested spare part" : "Recambio solicitado";
+  const quantityLabel = en ? "Quantity" : "Cantidad";
+  const buttonLabel = en ?
+    "Visit Laundry Services" :
+    "Ir a Laundry Services";
+  const footer = en ?
+    "This email confirms receipt of your request. You can reply if you " +
+      "need to add any information." :
+    "Este correo confirma la recepción de tu solicitud. Puedes responder " +
+      "si necesitas añadir información.";
+  const summaryRow = (label: string, value: unknown) =>
+    `<tr><td style="padding:7px 0;color:#64748b;font-size:14px;vertical-align:top">${escapeHtml(label)}</td>` +
+    `<td style="padding:7px 0 7px 18px;color:#17201d;font-size:14px;font-weight:600;text-align:right">${escapeHtml(value)}</td></tr>`;
+  const summary = [
+    summaryRow(machineLabel, machine),
+    summaryRow(spareLabel, request.spareName),
+    summaryRow(quantityLabel, request.quantity),
+  ].join("");
+
+  const html = `<!doctype html>
+<html lang="${request.language}"><body style="margin:0;background:#f5f7f6;color:#17201d;font-family:Arial,sans-serif">
+<div style="display:none;max-height:0;overflow:hidden">${escapeHtml(subject)}</div>
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f5f7f6;padding:32px 12px"><tr><td align="center">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:600px;background:#ffffff;border:1px solid #e1e7e4;border-radius:16px;overflow:hidden">
+<tr><td style="padding:28px 36px 12px"><table role="presentation" cellspacing="0" cellpadding="0"><tr>
+<td><img src="${LAUNDRY_LOGO_URL}" width="54" height="54" alt="Unatomo" style="display:block;border:0"></td>
+<td style="padding-left:16px;color:#4b5563;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase">UNATOMO <span style="color:#9ca3af">/</span> Laundry Services</td>
+</tr></table></td></tr>
+<tr><td style="padding:12px 36px 36px">
+<p style="margin:0 0 8px;color:${LAUNDRY_BLUE};font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase">${referenceLabel} ${reference}</p>
+<h1 style="margin:0 0 22px;font-size:28px;line-height:1.2;color:#17201d">${title}</h1>
+<p style="margin:0 0 16px;font-size:16px;line-height:1.6">${greeting}</p>
+<p style="margin:0 0 16px;font-size:16px;line-height:1.6">${firstParagraph}</p>
+<p style="margin:0 0 20px;font-size:16px;line-height:1.6">${secondParagraph}</p>
+<div style="margin:22px 0;padding:10px 18px;border-radius:10px;background:#f1f5f9">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0">${summary}</table>
+</div>
+<table role="presentation" cellspacing="0" cellpadding="0" style="margin:22px 0 6px"><tr><td style="border-radius:9px;background:${LAUNDRY_BLUE}">
+<a href="${LAUNDRY_URL}" style="display:inline-block;padding:11px 19px;color:#ffffff;text-decoration:none;font-size:15px;font-weight:700;line-height:1.2">${buttonLabel}</a>
+</td></tr></table>
+</td></tr>
+<tr><td style="padding:22px 36px;background:#eef3f1;color:#53615c;font-size:13px;line-height:1.5">${footer}<br>
+<a href="${LAUNDRY_URL}" style="color:${LAUNDRY_BLUE}">unatomo.com/laundryservices</a>
+</td></tr></table></td></tr></table></body></html>`;
+
+  const text = [
+    greeting,
+    "",
+    firstParagraph,
+    secondParagraph,
+    "",
+    `${referenceLabel}: ${reference}`,
+    `${machineLabel}: ${machine}`,
+    `${spareLabel}: ${request.spareName}`,
+    `${quantityLabel}: ${request.quantity}`,
+    "",
+    footer,
+    LAUNDRY_URL,
+  ].join("\n");
+  return {subject, html, text};
+};
+
+const sendResendEmail = async (
+  payload: ResendPayload,
+  idempotencyKey: string,
+  logLabel: string,
+) => {
+  let response: Response;
+  try {
+    response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${resendApiKey.value()}`,
+        "Content-Type": "application/json",
+        "Idempotency-Key": idempotencyKey,
+      },
+      body: JSON.stringify(payload),
+    });
+  } catch (error) {
+    logger.error(`${logLabel} network error`, {error});
+    throw new HttpsError("unavailable", "email-send-failed");
+  }
+  const body = await response.json().catch(() => ({})) as {
+    id?: unknown;
+    message?: unknown;
+  };
+  if (!response.ok) {
+    logger.error(`${logLabel} rejected by Resend`, {
+      status: response.status,
+      message: clean(body.message, 500),
+    });
+    throw new HttpsError("unavailable", "email-send-failed");
+  }
+};
+
 export const submitLaundrySpareRequest = onCall({
   enforceAppCheck: APP_CHECK_ENFORCED,
   secrets: [resendApiKey],
@@ -283,44 +430,32 @@ export const submitLaundrySpareRequest = onCall({
   await enforceRateLimit(ip);
 
   const rendered = renderLaundrySpareEmail(request);
-  let response: Response;
-  try {
-    response = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${resendApiKey.value()}`,
-        "Content-Type": "application/json",
-        "Idempotency-Key": `laundry-spare/${request.submissionId}`,
-      },
-      body: JSON.stringify({
-        from: VERIFIED_SENDER,
-        reply_to: request.email,
-        to: [REQUEST_DESTINATION],
-        subject: rendered.subject,
-        html: rendered.html,
-        text: rendered.text,
-        attachments: request.images.map((image) => ({
-          filename: image.name,
-          content: image.content,
-        })),
-        tags: [{name: "category", value: "laundry_spare_request"}],
-      }),
-    });
-  } catch (error) {
-    logger.error("Laundry spare email network error", {error});
-    throw new HttpsError("unavailable", "email-send-failed");
-  }
-  const body = await response.json().catch(() => ({})) as {
-    id?: unknown;
-    message?: unknown;
-  };
-  if (!response.ok) {
-    logger.error("Laundry spare email rejected by Resend", {
-      status: response.status,
-      message: clean(body.message, 500),
-    });
-    throw new HttpsError("unavailable", "email-send-failed");
-  }
+  await sendResendEmail({
+    from: VERIFIED_SENDER,
+    reply_to: request.email,
+    to: [REQUEST_DESTINATION],
+    subject: rendered.subject,
+    html: rendered.html,
+    text: rendered.text,
+    attachments: request.images.map((image) => ({
+      filename: image.name,
+      content: image.content,
+    })),
+    tags: [{name: "category", value: "laundry_spare_request"}],
+  }, `laundry-spare/internal/${request.submissionId}`,
+  "Laundry spare notification");
+
+  const confirmation = renderLaundrySpareConfirmation(request);
+  await sendResendEmail({
+    from: VERIFIED_SENDER,
+    reply_to: REQUEST_DESTINATION,
+    to: [request.email],
+    subject: confirmation.subject,
+    html: confirmation.html,
+    text: confirmation.text,
+    tags: [{name: "category", value: "laundry_spare_confirmation"}],
+  }, `laundry-spare/confirmation/${request.submissionId}`,
+  "Laundry spare confirmation");
   return {
     ok: true,
     accepted: true,
