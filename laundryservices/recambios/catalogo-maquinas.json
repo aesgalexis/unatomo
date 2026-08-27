@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "updatedAt": "2026-08-27",
+  "categories": [
+    { "id": "washer", "label": { "es": "Lavadora / lavacentrífuga", "en": "Washer / washer-extractor", "it": "Lavatrice / lavacentrifuga", "el": "Πλυντήριο / πλυντήριο-στυπτήριο" } },
+    { "id": "dryer", "label": { "es": "Secadora", "en": "Dryer", "it": "Essiccatoio", "el": "Στεγνωτήριο" } },
+    { "id": "tunnel", "label": { "es": "Túnel de lavado", "en": "Tunnel washer", "it": "Tunnel di lavaggio", "el": "Τούνελ πλύσης" } },
+    { "id": "press", "label": { "es": "Prensa / extracción", "en": "Press / extraction", "it": "Pressa / estrazione", "el": "Πρέσα / εξαγωγή" } },
+    { "id": "ironer", "label": { "es": "Calandra / planchado", "en": "Ironer / finishing", "it": "Calandra / stiro", "el": "Σιδερωτήριο / φινίρισμα" } },
+    { "id": "folder", "label": { "es": "Plegadora / apilador", "en": "Folder / stacker", "it": "Piegatrice / impilatore", "el": "Διπλωτική / στοίβαξη" } },
+    { "id": "handling", "label": { "es": "Transporte / clasificación", "en": "Handling / sorting", "it": "Trasporto / smistamento", "el": "Μεταφορά / διαλογή" } },
+    { "id": "other", "label": { "es": "Otro equipo", "en": "Other equipment", "it": "Altra macchina", "el": "Άλλος εξοπλισμός" } }
+  ],
+  "manufacturers": [
+    { "id": "girbau", "name": "Girbau", "aliases": [] },
+    { "id": "alliance", "name": "Alliance Laundry Systems", "aliases": ["Alliance", "ALS"], "brands": ["Speed Queen", "UniMac", "Huebsch", "Primus", "IPSO", "No lo sé"] },
+    { "id": "carbonell", "name": "Carbonell", "aliases": ["Carbonell Cía."] },
+    { "id": "jensen", "name": "JENSEN", "aliases": ["Jensen", "Senking", "L-TRON", "Futurail"] },
+    { "id": "kannegiesser", "name": "Kannegiesser", "aliases": ["Herbert Kannegiesser"] },
+    { "id": "imesa", "name": "IMESA", "aliases": ["Imesa"] },
+    { "id": "other", "name": "Otro / No lo sé", "aliases": [] }
+  ],
+  "models": [
+    { "manufacturerId": "girbau", "categoryId": "washer", "family": "Genius", "models": ["GS7009", "GS7013", "GS7018", "GS7024", "GS7028", "GS7032", "GS7040", "GS7057"] },
+    { "manufacturerId": "girbau", "categoryId": "washer", "family": "HS", "models": ["HS-6008", "HS-6013", "HS-6017", "HS-6024", "HS-6028", "HS-6032", "HS-6040", "HS-6057", "HS-6085", "HS-6110"] },
+    { "manufacturerId": "girbau", "categoryId": "washer", "family": "RM", "models": ["RM Series"] },
+    { "manufacturerId": "girbau", "categoryId": "dryer", "family": "ED", "models": ["ED260", "ED340", "ED460", "ED660", "ED900", "ED1250"] },
+    { "manufacturerId": "girbau", "categoryId": "dryer", "family": "EDD", "models": ["EDD300", "EDD420"] },
+    { "manufacturerId": "girbau", "categoryId": "tunnel", "family": "TBS", "models": ["TBS 50"] },
+    { "manufacturerId": "girbau", "categoryId": "press", "family": "SPR", "models": ["SPR-50"] },
+    { "manufacturerId": "girbau", "categoryId": "dryer", "family": "ST", "models": ["ST1302", "ST2700"] },
+    { "manufacturerId": "girbau", "categoryId": "ironer", "family": "PC", "models": ["PC12030", "Compact Pro", "PB Series"] },
+    { "manufacturerId": "girbau", "categoryId": "folder", "family": "Finishing", "models": ["DRF", "FR+", "FT-TOPFOLD"] },
+    { "manufacturerId": "girbau", "categoryId": "handling", "family": "Automation", "models": ["Sortech", "ICP4+", "CED+"] },
+
+    { "manufacturerId": "alliance", "brand": "UniMac", "categoryId": "washer", "family": "UW", "models": ["UW045", "UW065", "UW085", "UW105", "UW130", "UW160", "UW200"] },
+    { "manufacturerId": "alliance", "brand": "UniMac", "categoryId": "washer", "family": "Other", "models": ["UY Series", "UA Series", "UC Series", "SC70", "SC90"] },
+    { "manufacturerId": "alliance", "brand": "Primus", "categoryId": "washer", "family": "FX", "models": ["FX65", "FX80", "FX105", "FX135", "FX180", "FX240", "FX280", "FX350", "FX450", "FX600"] },
+    { "manufacturerId": "alliance", "brand": "Primus", "categoryId": "washer", "family": "FS", "models": ["FS800", "FS1000", "FS1200"] },
+    { "manufacturerId": "alliance", "brand": "Primus", "categoryId": "washer", "family": "RX / PC", "models": ["RX80", "RX105", "RX135", "RX180", "RX240", "RX280", "RX350", "RX520", "PC20", "PC30", "PC40", "PC60", "PC80", "PC100"] },
+    { "manufacturerId": "alliance", "brand": "Primus", "categoryId": "washer", "family": "Barrier", "models": ["FXB180", "FXB240", "FXB280", "MXB360", "MXB500", "MXB700", "MB90", "MB110", "MB140", "MB180"] },
+    { "manufacturerId": "alliance", "brand": "Primus", "categoryId": "dryer", "family": "TX", "models": ["TX9", "TX12", "TX14", "TX18", "TX14/14", "TX9HP", "TX12HP"] },
+    { "manufacturerId": "alliance", "brand": "IPSO", "categoryId": "washer", "family": "IY", "models": ["IY65-135", "IY180-280", "IY350-600", "IY800-1200"] },
+    { "manufacturerId": "alliance", "brand": "Speed Queen", "categoryId": "washer", "family": "SC / SW", "models": ["SCN020", "SCN030", "SCN040", "SCN060", "SWNLN21", "SWTT21"] },
+    { "manufacturerId": "alliance", "brand": "Speed Queen", "categoryId": "dryer", "family": "STT", "models": ["STT30", "STT45"] },
+    { "manufacturerId": "alliance", "brand": "Huebsch", "categoryId": "washer", "family": "Washer-extractors", "models": ["Softmount washer-extractor", "Hardmount washer-extractor"] },
+    { "manufacturerId": "alliance", "brand": "Huebsch", "categoryId": "dryer", "family": "Tumble dryers", "models": ["Single tumble dryer", "Stack tumble dryer"] },
+
+    { "manufacturerId": "carbonell", "categoryId": "tunnel", "family": "TL-60", "models": ["TL-60/2", "TL-60/3", "TL-60/4", "TL-60/5", "TL-60/6", "TL-60/7", "TL-60/8", "TL-60/9"] },
+    { "manufacturerId": "carbonell", "categoryId": "dryer", "family": "DI", "models": ["DI-225", "DI-325", "DI-475"] },
+    { "manufacturerId": "carbonell", "categoryId": "press", "family": "Prensas", "models": ["Prensa de una etapa para túnel de lavado"] },
+
+    { "manufacturerId": "jensen", "categoryId": "washer", "family": "Washer extractors", "models": ["JWE 270/600", "L-TRON Washer/Extractor", "JWE", "JBW"] },
+    { "manufacturerId": "jensen", "categoryId": "tunnel", "family": "Tunnel washers", "models": ["JENSEN UniQ", "Senking Universal CompactLine", "Senking Universal", "Senking Universal Mediline", "Senking Universal SL"] },
+    { "manufacturerId": "jensen", "categoryId": "press", "family": "Extraction", "models": ["JENSEN ExQ", "SEPPlus", "Z1200Plus", "Z1300Plus", "Z1400"] },
+    { "manufacturerId": "jensen", "categoryId": "dryer", "family": "Drying", "models": ["L-TRON DTX", "JTD", "XR", "DT Plus", "WR 60-120", "DT 60-240"] },
+    { "manufacturerId": "jensen", "categoryId": "ironer", "family": "Jenroll", "models": ["Jenroll EXPG", "Jenroll Series"] },
+    { "manufacturerId": "jensen", "categoryId": "handling", "family": "Futurail", "models": ["Futurail", "ContinuSort", "CombiSort", "MultiSort", "TransSort", "MobileSort", "DirectSort"] },
+    { "manufacturerId": "jensen", "categoryId": "other", "family": "Auxiliary", "models": ["CartWashPlus", "CakeBreaker", "VacuTrans"] },
+
+    { "manufacturerId": "kannegiesser", "categoryId": "tunnel", "family": "Washing", "models": ["PowerTrans Vario"] },
+    { "manufacturerId": "kannegiesser", "categoryId": "washer", "family": "Washer extractors", "models": ["PowerSwing", "Futura", "Favorit Vario"] },
+    { "manufacturerId": "kannegiesser", "categoryId": "press", "family": "Extraction", "models": ["PowerSpin", "PowerPress"] },
+    { "manufacturerId": "kannegiesser", "categoryId": "dryer", "family": "Drying", "models": ["PowerDry"] },
+    { "manufacturerId": "kannegiesser", "categoryId": "ironer", "family": "Ironing", "models": ["HPM", "SHM"] },
+    { "manufacturerId": "kannegiesser", "categoryId": "folder", "family": "Folding", "models": ["BlanketMaster", "XFM", "AFM", "BFS", "FSM", "TFM", "TFS II", "FA-X"] },
+    { "manufacturerId": "kannegiesser", "categoryId": "handling", "family": "Sorting / transport", "models": ["Supertrack", "Ergosort", "Rotasort", "Easisort", "X-Sort", "Transline", "Vectura", "Aero"] },
+    { "manufacturerId": "kannegiesser", "categoryId": "other", "family": "Finishing / auxiliary", "models": ["SMT", "XMT", "XStream", "CWD", "CD", "STS", "EMS", "QuanTex"] },
+
+    { "manufacturerId": "imesa", "categoryId": "washer", "family": "LM", "models": ["LM 8", "LM 11", "LM 14", "LM 18", "LM 23", "LM 26", "LM 32", "LM 40", "LM 55", "LM 70", "LM 85", "LM 100", "LM 125"] },
+    { "manufacturerId": "imesa", "categoryId": "washer", "family": "RC", "models": ["RC 11-85 kg"] },
+    { "manufacturerId": "imesa", "categoryId": "washer", "family": "D2W", "models": ["D2W 18", "D2W 23", "D2W 30", "D2W 55"] },
+    { "manufacturerId": "imesa", "categoryId": "washer", "family": "Tandem", "models": ["TDM 0808", "TDM 1111", "TDM 1818"] },
+    { "manufacturerId": "imesa", "categoryId": "dryer", "family": "ES", "models": ["ES 34", "ES 55", "ES 75"] },
+    { "manufacturerId": "imesa", "categoryId": "ironer", "family": "FI / MCM", "models": ["FI Series", "MCM Series"] }
+  ]
+}

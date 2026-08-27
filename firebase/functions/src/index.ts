@@ -102,6 +102,7 @@ export {
   getPublicNfcLandingStats,
   refreshPublicNfcLandingStats,
 } from "./publicSite/landingStats";
+export {submitLaundrySpareRequest} from "./laundry/spareRequests";
 
 // Firebase Admin initialization and global runtime options are centralized in
 // core/firebase.ts. Keep this file as the stable public export boundary while
