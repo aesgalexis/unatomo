@@ -310,9 +310,25 @@ service cloud.firestore {
 
     match /laundry_public_catalog/{catalogId} {
       function isValidPublicCatalogDocument() {
-        return request.resource.data.type in ["meta", "categories", "manufacturer"]
-          && request.resource.data.publishedAt is timestamp
-          && request.resource.data.publishedBy is string;
+        return request.resource.data.publishedAt is timestamp
+          && request.resource.data.publishedBy == request.auth.uid
+          && (
+            (catalogId == "meta"
+              && request.resource.data.type == "meta"
+              && request.resource.data.version is int
+              && request.resource.data.version > 0
+              && request.resource.data.updatedAt is string
+              && request.resource.data.activeManufacturerIds is list)
+            || (catalogId == "categories"
+              && request.resource.data.type == "categories"
+              && request.resource.data.items is list)
+            || (catalogId != "meta"
+              && catalogId != "categories"
+              && request.resource.data.type == "manufacturer"
+              && request.resource.data.manufacturer is map
+              && request.resource.data.modelGroups is list
+              && request.resource.data.spareParts is list)
+          );
       }
 
       allow read: if true;

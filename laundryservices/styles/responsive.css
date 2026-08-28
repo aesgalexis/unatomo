@@ -1,0 +1,225 @@
+/* Laundry Services: responsive. */
+
+@media (max-width: 900px) {
+  .hero {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-atom {
+    display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .ls-topbar-parent-name {
+    display: none;
+  }
+
+  .ls-upperfooter {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .ls-upperfooter-col {
+    padding: 0.95rem 0;
+  }
+
+  .ls-upperfooter-col + .ls-upperfooter-col {
+    border-top: 1px solid var(--border-subtle);
+  }
+
+  .ls-upperfooter-brand.is-logo-right {
+    justify-items: start;
+  }
+
+  .ls-upperfooter-logo-link {
+    position: static;
+  }
+
+  .page-shell {
+    padding: 92px 1.25rem 2.5rem;
+  }
+
+  .service-pillars {
+    margin-top: 4.5rem;
+  }
+
+  .service-pillars-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .service-pillar {
+    min-height: 0;
+    padding: 1.8rem 1.25rem 2rem;
+  }
+
+  .service-pillar:nth-child(odd) {
+    border-right: none;
+  }
+
+  .service-pillar:nth-child(-n + 4) {
+    border-bottom: none;
+  }
+
+  .service-pillar:not(:last-child) {
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .service-pillar-icon {
+    width: 90px;
+    height: 90px;
+    margin-bottom: 1.1rem;
+    opacity: 0.82;
+    transform: none;
+  }
+
+  .service-pillar:hover {
+    background: transparent;
+  }
+
+  .service-pillar:hover .service-pillar-icon {
+    opacity: 0.82;
+    transform: none;
+  }
+
+  .service-pillar:hover .service-pillar-title {
+    color: #0f172a;
+  }
+
+  .service-pillar--link:hover .service-pillar-link-arrow {
+    opacity: 0.55;
+    transform: none;
+  }
+
+  .service-pillar-link-arrow {
+    opacity: 0.55;
+  }
+
+  .service-card.is-collapsed {
+    height: 48px;
+  }
+
+  .service-card {
+    padding: 0.9rem 1rem;
+  }
+
+  .signals-list,
+  .method-grid,
+  .experience-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .audit-cta {
+    padding: 1.2rem;
+  }
+
+  .audit-cta .btn-pill {
+    width: fit-content;
+  }
+
+  .service-card[role="button"]::after {
+    top: 33px;
+  }
+
+  .ls-topbar-inner {
+    padding: 0 0.75rem;
+  }
+
+  .icon-button {
+    width: 42px;
+    height: 34px;
+  }
+
+  .table-wrap {
+    overflow-x: visible;
+  }
+
+  .ls-table {
+    min-width: 0;
+    table-layout: auto;
+    font-size: 0.84rem;
+  }
+
+  .ls-table thead {
+    display: none;
+  }
+
+  .ls-table,
+  .ls-table tbody,
+  .ls-table tr,
+  .ls-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .ls-table tbody tr[data-machine-id] {
+    padding: 0.75rem 0;
+    border-top: 1px solid var(--border-subtle);
+  }
+
+  .ls-table tbody tr[data-machine-id]:first-child {
+    border-top: none;
+  }
+
+  .ls-table td {
+    padding: 0.18rem 0;
+    border-top: none !important;
+    border-bottom: none !important;
+  }
+
+  .ls-table tbody tr[data-machine-id] td::before {
+    content: attr(data-label) ": ";
+    font-weight: 600;
+    color: var(--fg);
+  }
+
+  .ls-table-gallery-row td,
+  .ls-table-subrow td {
+    padding: 0.5rem 0 0;
+  }
+
+  .ls-table-subrow-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.6rem;
+  }
+
+  .ls-machine-gallery img {
+    width: 78px;
+    height: 58px;
+  }
+
+  .ls-table-gallery-row td {
+    padding-bottom: 1rem;
+  }
+
+  .ls-table-actions {
+    width: 100%;
+    justify-content: flex-start;
+    margin-bottom: 0.35rem;
+  }
+
+  .ls-mini-action,
+  .ls-filter-btn {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: none;
+    box-shadow: none;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .service-pillar,
+  .service-pillar-icon,
+  .service-pillar-title,
+  .service-pillar-link-arrow {
+    transition: none;
+  }
+
+  .service-pillar:hover .service-pillar-icon,
+  .service-pillar--link:focus-visible .service-pillar-icon {
+    transform: none;
+  }
+}
+

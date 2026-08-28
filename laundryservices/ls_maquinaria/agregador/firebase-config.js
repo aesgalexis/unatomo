@@ -1,6 +1,6 @@
 import { app, auth, db, loginWithGoogle } from "/static/js/registro/firebase-init.js";
-import { getIdTokenResult } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
-import { getStorage } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-storage.js";
+import { getIdTokenResult } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+import { getStorage } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-storage.js";
 
 const ADMIN_CLAIM = "laundryServicesAdmin";
 const adminClaimCache = new Map();

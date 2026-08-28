@@ -3,7 +3,7 @@ import {
   subscribeMachines,
 } from "/laundryservices/ls_maquinaria/agregador/ls_machine-store.js";
 import { isAdminUser } from "/laundryservices/ls_maquinaria/agregador/firebase-config.js";
-import { META, STATE_LABELS, TYPE_LABELS } from "/laundryservices/ls_maquinaria/ls_machine-copy.js";
+import { META, STATE_LABELS, TYPE_LABELS } from "/laundryservices/i18n/machinery.js";
 
 const LANGS = ["es", "en", "it", "el"];
 const PAGE_SIZE = 10;

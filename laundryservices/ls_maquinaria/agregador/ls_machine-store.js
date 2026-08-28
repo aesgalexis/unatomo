@@ -1,4 +1,4 @@
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 import {
   getDocs,
   getDoc,
@@ -10,8 +10,8 @@ import {
   serverTimestamp,
   setDoc,
   updateDoc,
-} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
-import { getDownloadURL, ref, uploadBytes } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-storage.js";
+} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+import { getDownloadURL, ref, uploadBytes } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-storage.js";
 import { auth, db, isAdminUser, resolveAdminUser, storage } from "./firebase-config.js";
 
 const MACHINES_COLLECTION = "agregador_maquinaria_LS";

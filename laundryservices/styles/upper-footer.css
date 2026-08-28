@@ -1,0 +1,128 @@
+/* Laundry Services: upper footer. */
+
+.ls-upperfooter {
+  margin-top: 1.6rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-subtle);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  align-items: start;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.ls-upperfooter * {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.ls-upperfooter img {
+  -webkit-user-drag: none;
+  user-drag: none;
+}
+
+.ls-upperfooter-col {
+  min-width: 0;
+}
+
+.ls-upperfooter-col-main {
+  padding-top: 0.7rem;
+}
+
+.ls-upperfooter-kicker {
+  margin: 0;
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--fg) 70%, transparent);
+}
+
+.ls-upperfooter-list {
+  margin: 0.55rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.ls-upperfooter-list li {
+  font-size: 0.9rem;
+  color: color-mix(in srgb, var(--fg) 88%, transparent);
+}
+
+.ls-upperfooter-contact .contact-info {
+  margin-top: 0;
+  display: grid;
+  row-gap: 0.65rem;
+}
+
+.ls-upperfooter-contact .contact-info-item {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  column-gap: 0.5rem;
+  align-items: start;
+}
+
+.ls-upperfooter-contact .contact-icon-link {
+  width: 18px;
+  height: 18px;
+  border-radius: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: color-mix(in srgb, var(--fg) 78%, transparent);
+  border: none;
+  text-decoration: none;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.ls-upperfooter-contact .contact-icon-link:hover,
+.ls-upperfooter-contact .contact-icon-link:focus-visible {
+  color: var(--fg);
+  border: none;
+}
+
+.ls-upperfooter-contact .contact-info-item p {
+  line-height: 1.35;
+}
+
+.ls-upperfooter-brand {
+  position: relative;
+  display: grid;
+  align-content: start;
+  justify-items: start;
+  width: 100%;
+  min-height: 150px;
+}
+
+.ls-upperfooter-brand.is-logo-right {
+  justify-items: end;
+}
+
+.ls-upperfooter-logo {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: auto;
+  display: block;
+  opacity: 0.95;
+}
+
+.ls-upperfooter-logo-link {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 150px;
+  max-width: 100%;
+  display: block;
+  border-radius: 0.35rem;
+}
+
+.ls-upperfooter-logo-link:focus-visible {
+  outline: 2px solid var(--fg);
+  outline-offset: 4px;
+}
+

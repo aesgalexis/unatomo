@@ -93,7 +93,9 @@ Read this before changing data flows, callable functions, machine ownership, adm
   `manufacturer_{id}` document contains one manufacturer with its model groups
   and spare-part records. Public clients may read this collection but cannot
   write it. Only accounts with the `laundryServicesAdmin` custom claim may
-  create or update documents; deletion is denied. The checked-in migration
+  create or update schema-valid documents; deletion is denied. Browser writes
+  record the authenticated UID in `publishedBy`. The private, noindex editor is
+  `/laundryservices/catalogo/`. The checked-in migration
   snapshot lives under `firebase/catalog/`, outside the public website, and is
   synchronized with the owner-run catalogue command.
 

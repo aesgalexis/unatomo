@@ -1,40 +1,235 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <script src="/static/js/config/runtime-config.js"></script>
-  <title>UNATOMO | En construcci&oacute;n</title>
-  <meta name="description" content="P&aacute;gina en construcci&oacute;n de Laundry Services." />
-  <meta name="robots" content="noindex, follow" />
+  <title>Maquinaria de ocasi&oacute;n | Laundry Services</title>
+  <meta name="description" content="Listado de maquinaria de ocasi&oacute;n de Laundry Services." />
+  <meta name="robots" content="index, follow" />
   <link rel="canonical" href="https://unatomo.com/laundryservices/maquinaria/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="UNATOMO">
-  <meta property="og:title" content="UNATOMO | En construcci&oacute;n">
-  <meta property="og:description" content="P&aacute;gina en construcci&oacute;n de Laundry Services.">
+  <meta property="og:title" content="Maquinaria de ocasión | Laundry Services">
+  <meta property="og:description" content="Listado de maquinaria de ocasión de Laundry Services.">
   <meta property="og:url" content="https://unatomo.com/laundryservices/maquinaria/">
   <meta property="og:image" content="https://unatomo.com/static/img/favicon/android-chrome-512x512.png">
   <meta property="og:image:width" content="512">
   <meta property="og:image:height" content="512">
   <meta property="og:image:alt" content="Logotipo de UNATOMO">
+  <script src="/static/js/config/runtime-config.js"></script>
   <link rel="stylesheet" href="/laundryservices/ls_styles.css">
+  <link rel="stylesheet" href="/laundryservices/ls_maquinaria/agregador/ls_machine-add.css">
   <link rel="icon" href="/static/img/favicon/favicon.svg" type="image/svg+xml">
 </head>
-<body class="page ls-coming-page">
+<body class="page ls-privacy-page ls-maquinaria-page" data-back-mode="history">
   <div id="ls-topbar-mount"></div>
 
-  <main class="page-shell">
-    <section class="ls-coming-content" aria-labelledby="coming-title">
-      <h1 id="coming-title">En construcci&oacute;n</h1>
-    </section>
+  <main class="page-shell legal-doc">
+    <article class="legal-copy" data-legal-lang="es">
+      <h1>Listado de maquinaria de ocasi&oacute;n</h1>
 
-    <section class="closing-claim">
-      <div class="closing-claim-head claim-loop-banner">
-        <h2 id="ls-claim-loop-text" class="claim-loop-text">Tu proceso, Nuestra visi&oacute;n</h2>
+      <section class="page-section">
+        <div class="ls-filterbar" aria-label="Filtro por tipo">
+          <select class="ls-filter-select" data-filter-select aria-label="Filtro por tipo">
+            <option value="all">Mostrar: Todo</option>
+            <option value="Plegadora">Mostrar: Plegadoras</option>
+            <option value="Lavadora">Mostrar: Lavadoras</option>
+            <option value="Tunel">Mostrar: Tuneles</option>
+            <option value="Secadora">Mostrar: Secadoras</option>
+            <option value="Calandra">Mostrar: Calandras</option>
+            <option value="Prensa">Mostrar: Prensas</option>
+            <option value="Empaquetadora">Mostrar: Empaquetadoras</option>
+            <option value="Otro">Mostrar: Otros</option>
+          </select>
+        </div>
+
+        <div class="card card--wide">
+          <div class="table-wrap">
+            <table class="ls-table">
+              <thead>
+                <tr>
+                  <th>Tipo</th>
+                  <th>Marca</th>
+                  <th>Modelo</th>
+                  <th>Capacidad</th>
+                  <th>A&ntilde;o</th>
+                  <th>Estado</th>
+                  <th>Ubicaci&oacute;n</th>
+                </tr>
+              </thead>
+              <tbody>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="ls-pagination" data-pagination>
+          <button type="button" class="ls-mini-action" data-page-prev>Anterior</button>
+          <span class="ls-pagination-status" data-page-status>Pagina 1 de 1</span>
+          <button type="button" class="ls-mini-action" data-page-next>Siguiente</button>
+        </div>
+      </section>
+
+      <div class="ls-note-block">
+        <p class="ls-note">* Solo Espa&ntilde;a: Impuestos no incluidos.</p>
+        <p class="ls-note">Toda la maquinaria est&aacute; lista para ser entregada en un plazo aproximado de 2 - 3 semanas, salvo que se indique expresamente lo contrario.</p>
+        <p class="ls-note">Cuando se indica que el env&iacute;o y la puesta en marcha est&aacute;n incluidos, solo aplica para Espa&ntilde;a (pen&iacute;nsula) y Baleares. Para el resto destinos finales, se aplicar&aacute; el coste extra de gastos log&iacute;sticos.</p>
       </div>
-    </section>
+    </article>
 
-    <div id="ls-upperfooter-mount"></div>
+    <article class="legal-copy" data-legal-lang="en" hidden>
+      <h1>Used machinery listing</h1>
+
+      <section class="page-section">
+        <div class="ls-filterbar" aria-label="Filter by type">
+          <select class="ls-filter-select" data-filter-select aria-label="Filter by type">
+            <option value="all">Show: All</option>
+            <option value="Folder">Show: Folders</option>
+            <option value="Washer">Show: Washers</option>
+            <option value="Tunnel">Show: Tunnels</option>
+            <option value="Dryer">Show: Dryers</option>
+            <option value="Ironer">Show: Ironers</option>
+            <option value="Press">Show: Presses</option>
+            <option value="Packer">Show: Packers</option>
+            <option value="Other">Show: Other</option>
+          </select>
+        </div>
+
+        <div class="card card--wide">
+          <div class="table-wrap">
+            <table class="ls-table">
+              <thead>
+                <tr>
+                  <th>Type</th>
+                  <th>Brand</th>
+                  <th>Model</th>
+                  <th>Capacity</th>
+                  <th>Year</th>
+                  <th>Status</th>
+                  <th>Location</th>
+                </tr>
+              </thead>
+              <tbody>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="ls-pagination" data-pagination>
+          <button type="button" class="ls-mini-action" data-page-prev>Previous</button>
+          <span class="ls-pagination-status" data-page-status>Page 1 of 1</span>
+          <button type="button" class="ls-mini-action" data-page-next>Next</button>
+        </div>
+      </section>
+
+      <div class="ls-note-block">
+        <p class="ls-note">* Spain only: Taxes not included.</p>
+        <p class="ls-note">All machinery is ready for delivery within an average lead time of 2 - 3 weeks, unless expressly stated otherwise.</p>
+        <p class="ls-note">When shipping and commissioning are indicated as included, this only applies to Spain (mainland) and the Balearic Islands. For all other final destinations, extra logistics costs will apply.</p>
+      </div>
+    </article>
+
+    <article class="legal-copy" data-legal-lang="it" hidden>
+      <h1>Elenco di macchinari usati</h1>
+
+      <section class="page-section">
+        <div class="ls-filterbar" aria-label="Filtro per tipo">
+          <select class="ls-filter-select" data-filter-select aria-label="Filtro per tipo">
+            <option value="all">Mostra: Tutto</option>
+            <option value="Piegatrice">Mostra: Piegatrici</option>
+            <option value="Lavatrice">Mostra: Lavatrici</option>
+            <option value="Tunnel">Mostra: Tunnel</option>
+            <option value="Essiccatore">Mostra: Essiccatori</option>
+            <option value="Calandra">Mostra: Calandre</option>
+            <option value="Pressa">Mostra: Presse</option>
+            <option value="Imballatrice">Mostra: Imballatrici</option>
+            <option value="Altro">Mostra: Altro</option>
+          </select>
+        </div>
+
+        <div class="card card--wide">
+          <div class="table-wrap">
+            <table class="ls-table">
+              <thead>
+                <tr>
+                  <th>Tipo</th>
+                  <th>Marca</th>
+                  <th>Modello</th>
+                  <th>Capacita</th>
+                  <th>Anno</th>
+                  <th>Stato</th>
+                  <th>Ubicazione</th>
+                </tr>
+              </thead>
+              <tbody>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="ls-pagination" data-pagination>
+          <button type="button" class="ls-mini-action" data-page-prev>Precedente</button>
+          <span class="ls-pagination-status" data-page-status>Pagina 1 di 1</span>
+          <button type="button" class="ls-mini-action" data-page-next>Successiva</button>
+        </div>
+      </section>
+
+      <div class="ls-note-block">
+        <p class="ls-note">* Solo Spagna: imposte non incluse.</p>
+        <p class="ls-note">Tutti i macchinari sono pronti per la consegna in un termine approssimativo di 2 - 3 settimane, salvo diversa indicazione espressa.</p>
+        <p class="ls-note">Quando si indica che spedizione e messa in servizio sono incluse, cio vale solo per la Spagna (penisola) e le Baleari. Per altre destinazioni finali si applichera un costo logistico aggiuntivo.</p>
+      </div>
+    </article>
+
+    <article class="legal-copy" data-legal-lang="el" hidden>
+      <h1>&#923;&#953;&#963;&#964;&#945; &#956;&#949;&#964;&#945;&#967;&#949;&#953;&#961;&#953;&#963;&#956;&#949;&#957;&#969;&#957; &#956;&#951;&#967;&#945;&#957;&#951;&#956;&#945;&#964;&#969;&#957;</h1>
+
+      <section class="page-section">
+        <div class="ls-filterbar" aria-label="&#934;&#953;&#955;&#964;&#961;&#959; &#954;&#945;&#964;&#945; &#964;&#965;&#960;&#959;">
+          <select class="ls-filter-select" data-filter-select aria-label="&#934;&#953;&#955;&#964;&#961;&#959; &#954;&#945;&#964;&#945; &#964;&#965;&#960;&#959;">
+            <option value="all">&#917;&#956;&#966;&#945;&#957;&#953;&#963;&#949;: &#927;&#955;&#945;</option>
+            <option value="&#916;&#953;&#960;&#955;&#969;&#964;&#953;&#954;&#959;">&#917;&#956;&#966;&#945;&#957;&#953;&#963;&#949;: &#916;&#953;&#960;&#955;&#969;&#964;&#953;&#954;&#945;</option>
+            <option value="&#928;&#955;&#965;&#957;&#964;&#951;&#961;&#953;&#959;">&#917;&#956;&#966;&#945;&#957;&#953;&#963;&#949;: &#928;&#955;&#965;&#957;&#964;&#951;&#961;&#953;&#945;</option>
+            <option value="&#932;&#959;&#965;&#957;&#949;&#955;">&#917;&#956;&#966;&#945;&#957;&#953;&#963;&#949;: &#932;&#959;&#965;&#957;&#949;&#955;</option>
+            <option value="&#931;&#964;&#949;&#947;&#957;&#969;&#964;&#951;&#961;&#953;&#959;">&#917;&#956;&#966;&#945;&#957;&#953;&#963;&#949;: &#931;&#964;&#949;&#947;&#957;&#969;&#964;&#951;&#961;&#953;&#945;</option>
+            <option value="&#922;&#945;&#955;&#945;&#957;&#948;&#961;&#945;">&#917;&#956;&#966;&#945;&#957;&#953;&#963;&#949;: &#922;&#945;&#955;&#945;&#957;&#948;&#961;&#949;&#962;</option>
+            <option value="&#928;&#961;&#949;&#963;&#945;">&#917;&#956;&#966;&#945;&#957;&#953;&#963;&#949;: &#928;&#961;&#949;&#963;&#949;&#962;</option>
+            <option value="&#931;&#965;&#963;&#954;&#949;&#965;&#945;&#963;&#964;&#953;&#954;&#959;">&#917;&#956;&#966;&#945;&#957;&#953;&#963;&#949;: &#931;&#965;&#963;&#954;&#949;&#965;&#945;&#963;&#964;&#953;&#954;&#945;</option>
+            <option value="&#913;&#955;&#955;&#959;">&#917;&#956;&#966;&#945;&#957;&#953;&#963;&#949;: &#913;&#955;&#955;&#945;</option>
+          </select>
+        </div>
+
+        <div class="card card--wide">
+          <div class="table-wrap">
+            <table class="ls-table">
+              <thead>
+                <tr>
+                  <th>&#932;&#965;&#960;&#959;&#962;</th>
+                  <th>&#924;&#945;&#961;&#954;&#945;</th>
+                  <th>&#924;&#959;&#957;&#964;&#949;&#955;&#959;</th>
+                  <th>&#921;&#954;&#945;&#957;&#959;&#964;&#951;&#964;&#945;</th>
+                  <th>&#917;&#964;&#959;&#962;</th>
+                  <th>&#922;&#945;&#964;&#945;&#963;&#964;&#945;&#963;&#951;</th>
+                  <th>&#932;&#959;&#960;&#959;&#952;&#949;&#963;&#953;&#945;</th>
+                </tr>
+              </thead>
+              <tbody>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="ls-pagination" data-pagination>
+          <button type="button" class="ls-mini-action" data-page-prev>&#928;&#961;&#959;&#951;&#947;&#959;&#965;&#956;&#949;&#957;&#951;</button>
+          <span class="ls-pagination-status" data-page-status>&#931;&#949;&#955;&#953;&#948;&#945; 1 &#945;&#960;&#959; 1</span>
+          <button type="button" class="ls-mini-action" data-page-next>&#917;&#960;&#959;&#956;&#949;&#957;&#951;</button>
+        </div>
+      </section>
+
+      <div class="ls-note-block">
+        <p class="ls-note">* &#924;&#959;&#957;&#959; &#921;&#963;&#960;&#945;&#957;&#953;&#945;: &#916;&#949;&#957; &#960;&#949;&#961;&#953;&#955;&#945;&#956;&#946;&#945;&#957;&#959;&#957;&#964;&#945;&#953; &#959;&#953; &#966;&#959;&#961;&#959;&#953;.</p>
+        <p class="ls-note">&#927;&#955;&#959;&#962; &#959; &#949;&#958;&#959;&#960;&#955;&#953;&#963;&#956;&#959;&#962; &#949;&#953;&#957;&#945;&#953; &#949;&#964;&#959;&#953;&#956;&#959;&#962; &#947;&#953;&#945; &#960;&#945;&#961;&#945;&#948;&#959;&#963;&#951; &#963;&#949; &#956;&#949;&#963;&#959; &#967;&#961;&#959;&#957;&#959; 2 - 3 &#949;&#946;&#948;&#959;&#956;&#945;&#948;&#969;&#957;, &#949;&#954;&#964;&#959;&#962; &#945;&#957; &#945;&#957;&#945;&#966;&#949;&#961;&#949;&#964;&#945;&#953; &#961;&#951;&#964;&#945; &#948;&#953;&#945;&#966;&#959;&#961;&#949;&#964;&#953;&#954;&#945;.</p>
+        <p class="ls-note">&#927;&#964;&#945;&#957; &#945;&#957;&#945;&#966;&#949;&#961;&#949;&#964;&#945;&#953; &#959;&#964;&#953; &#951; &#945;&#960;&#959;&#963;&#964;&#959;&#955;&#951; &#954;&#945;&#953; &#951; &#952;&#949;&#963;&#951; &#963;&#949; &#955;&#949;&#953;&#964;&#959;&#965;&#961;&#947;&#953;&#945; &#960;&#949;&#961;&#953;&#955;&#945;&#956;&#946;&#945;&#957;&#959;&#957;&#964;&#945;&#953;, &#945;&#965;&#964;&#959; &#953;&#963;&#967;&#965;&#949;&#953; &#956;&#959;&#957;&#959; &#947;&#953;&#945; &#921;&#963;&#960;&#945;&#957;&#953;&#945; (&#951;&#960;&#949;&#953;&#961;&#969;&#964;&#953;&#954;&#951; &#967;&#969;&#961;&#945;) &#954;&#945;&#953; &#914;&#945;&#955;&#949;&#945;&#961;&#953;&#948;&#949;&#962; &#925;&#951;&#963;&#959;&#965;&#962;. &#915;&#953;&#945; &#954;&#945;&#952;&#949; &#945;&#955;&#955;&#959; &#964;&#949;&#955;&#953;&#954;&#959; &#960;&#961;&#959;&#959;&#961;&#953;&#963;&#956;&#959; &#952;&#945; &#949;&#966;&#945;&#961;&#956;&#959;&#963;&#964;&#949;&#953; &#949;&#960;&#953;&#960;&#955;&#949;&#959;&#957; &#954;&#959;&#963;&#964;&#959;&#962; &#955;&#959;&#947;&#953;&#963;&#964;&#953;&#954;&#969;&#957;.</p>
+      </div>
+    </article>
+
+    <div id="page-nav-mount"></div>
     <div id="legal-footer" class="legal-footer"></div>
     <div class="footer-link">
       <a href="/laundryservices/ls_privacidad.html" data-i18n="privacy_link">Pol&iacute;tica de privacidad y cookies</a>
@@ -42,10 +237,12 @@
   </main>
 
   <script src="/laundryservices/ls_top-bar.js"></script>
-  <script src="/laundryservices/ls_i18n.js"></script>
+  <script src="/laundryservices/i18n/common.js"></script>
+  <script src="/laundryservices/ls_maquinaria/ls_machine-id.js"></script>
+  <script type="module" src="/laundryservices/ls_maquinaria.js"></script>
+  <script type="module" src="/laundryservices/ls_maquinaria/agregador/ls_machine-add.js"></script>
   <script src="/laundryservices/ls_page.js"></script>
-  <script src="/laundryservices/ls_claim-loop.js"></script>
-  <script src="/laundryservices/ls_upperfooter.js"></script>
   <script src="/laundryservices/ls_footer.js"></script>
+  <script type="module" src="/static/js/page-nav.js"></script>
 </body>
 </html>

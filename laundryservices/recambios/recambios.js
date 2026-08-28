@@ -1,7 +1,7 @@
 import { functions } from "/static/js/firebase/firebaseApp.js";
 import { httpsCallable } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-functions.js";
 import { loadLaundryCatalog } from "/laundryservices/recambios/catalog-repo.js";
-import { translations } from "/laundryservices/recambios/recambios-i18n.js";
+import { translations } from "/laundryservices/i18n/spare-parts.js";
 import { prepareImages, setupImageInput } from "/laundryservices/recambios/image-upload.js";
 
 const submitSpareRequest = httpsCallable(functions, "submitLaundrySpareRequest");
@@ -27,7 +27,8 @@ let selectedCategory = "";
 const submissionId = crypto.randomUUID();
 
 function normalizeLanguage(value) {
-  return String(value || "es").toLowerCase().startsWith("es") ? "es" : "en";
+  const normalized = String(value || "es").slice(0, 2).toLowerCase();
+  return ["es", "en", "it", "el"].includes(normalized) ? normalized : "es";
 }
 
 function t(key) {
@@ -293,7 +294,7 @@ function applyTranslations() {
   document.documentElement.querySelectorAll("[data-spares-i18n-aria]").forEach((element) => {
     element.setAttribute("aria-label", t(element.dataset.sparesI18nAria));
   });
-  document.title = language === "es" ? "Solicitar un recambio | UNATOMO · Laundry Services" : "Request a spare part | UNATOMO · Laundry Services";
+  document.title = t("page_title");
   document.querySelector("#language-value").value = language;
   renderManufacturers();
   renderCategories();

@@ -80,7 +80,7 @@ async function seedFirestore() {
         updatedAt: "2026-08-28",
         activeManufacturerIds: ["test"],
         publishedAt: Timestamp.now(),
-        publishedBy: "rules-test"
+        publishedBy: "laundry-admin"
       }),
       setDoc(doc(adminDb, "laundry_public_catalog", "manufacturer_test"), {
         type: "manufacturer",
@@ -88,7 +88,7 @@ async function seedFirestore() {
         modelGroups: [],
         spareParts: [],
         publishedAt: Timestamp.now(),
-        publishedBy: "rules-test"
+        publishedBy: "laundry-admin"
       }),
       setDoc(doc(adminDb, "registration_codes", "secret-code"), {
         active: true
@@ -285,6 +285,14 @@ describe("Firestore rules", () => {
     await assertSucceeds(updateDoc(
       doc(db("laundry-admin", { laundryServicesAdmin: true }), "laundry_public_catalog", "meta"),
       { updatedAt: "2026-08-29" }
+    ));
+    await assertFails(setDoc(
+      doc(db("laundry-admin", { laundryServicesAdmin: true }), "laundry_public_catalog", "categories"),
+      {
+        type: "manufacturer",
+        publishedAt: Timestamp.now(),
+        publishedBy: "laundry-admin"
+      }
     ));
     await assertFails(deleteDoc(
       doc(db("laundry-admin", { laundryServicesAdmin: true }), "laundry_public_catalog", "meta")

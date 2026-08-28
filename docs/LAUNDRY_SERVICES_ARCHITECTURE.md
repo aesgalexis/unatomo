@@ -11,25 +11,33 @@ must not be embedded in public JavaScript or JSON.
 
 - Shared shell: `ls_top-bar.js`, `ls_page.js`, `ls_footer.js`,
   `ls_upperfooter.js`, and `ls_claim-loop.js`.
-- Editorial pages: page HTML plus data-only `*-i18n.js` modules. Large
+- Editorial pages: page HTML plus data-only modules under `i18n/`. Large
   translation dictionaries are content stores, not executable monoliths.
 - Used machinery:
   - `ls_maquinaria.js`: public filtering, pagination and rendering.
-  - `ls_maquinaria/ls_machine-copy.js`: localized labels and metadata only.
+  - `i18n/machinery.js`: localized labels and metadata only.
   - `ls_maquinaria/agregador/ls_machine-store.js`: Firestore and Storage
     persistence.
   - `ls_maquinaria/agregador/ls_machine-add.js`: privileged editor UI.
 - Spare-part requests:
   - `recambios/recambios.js`: wizard state, validation and submission.
-  - `recambios/recambios-i18n.js`: localized copy only.
-  - `recambios/catalog-repo.js`: read-only Firestore catalogue access.
+  - `i18n/spare-parts.js`: localized copy only.
+  - `recambios/catalog-schema.js`: catalogue validation shared by the admin
+    editor and its repository.
+  - `recambios/catalog-repo.js`: Firestore catalogue reads and partitioned
+    admin publication.
   - `recambios/image-upload.js`: image validation and preparation.
-  - The callable Function owns request validation, rate limiting and email.
+  - The callable Function is split into request validation, rate limiting,
+    email templates, Resend delivery and a thin public orchestrator under
+    `firebase/functions/src/laundry/`.
+- Catalogue administration:
+  - `catalogo/catalog-admin.js`: authentication, claim checks and editor state.
+  - `catalogo/catalog-admin.css`: isolated private-editor presentation.
+  - The page is `noindex`; Firestore rules, not page visibility, enforce writes.
 
-`ls_styles.css` remains the shared compatibility stylesheet. New isolated
-features should use a page-specific stylesheet, as `recambios/recambios.css`
-already does, rather than adding another large feature block to the shared
-file.
+`ls_styles.css` is a stable import manifest. Shared CSS is divided by concern
+under `styles/`; isolated features use page-specific stylesheets such as
+`recambios/recambios.css` and `catalogo/catalog-admin.css`.
 
 ## Catalogue Data
 
@@ -49,7 +57,9 @@ The public site may read this collection. Only a user with the
 The `meta.activeManufacturerIds` list prevents obsolete documents from being
 shown without requiring destructive deletion. `firebase/catalog/laundry-public-catalog.json` is an
 owner-run migration/recovery snapshot outside the public build, not a browser
-fallback.
+fallback. Authorized maintainers use `/laundryservices/catalogo/`; each editor
+publication validates references, increments the catalogue version and records
+the authenticated Firebase UID.
 
 Used-machinery listings are separate records in
 `agregador_maquinaria_LS`. They are read from Firestore and edited through the

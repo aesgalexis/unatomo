@@ -38,6 +38,26 @@ npm.cmd run dev:machine-lab
 Use `dev:static` as the fallback if Vite fails. Run `npm.cmd run doctor` to
 diagnose dependency or Node-version problems.
 
+### Laundry Services catalogue
+
+The checked-in recovery snapshot is validated without credentials:
+
+```powershell
+npm.cmd run catalog:laundry:check
+```
+
+The initial or recovery publication uses the active Firebase CLI session; it
+does not require Google Cloud CLI or `gcloud`:
+
+```powershell
+firebase.cmd login
+npm.cmd run catalog:laundry:sync
+```
+
+After the first publication, users with the `laundryServicesAdmin` custom claim
+can maintain the same partitioned Firestore catalogue at
+`/laundryservices/catalogo/`.
+
 ## Validation
 
 Choose checks proportionally to the change:

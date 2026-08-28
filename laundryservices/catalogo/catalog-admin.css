@@ -1,0 +1,219 @@
+.catalog-admin-page {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.catalog-admin-shell {
+  max-width: 1080px;
+}
+
+.catalog-admin-hero {
+  max-width: 760px;
+  margin-bottom: 2rem;
+}
+
+.catalog-admin-hero > p:last-child {
+  color: color-mix(in srgb, var(--fg) 68%, transparent);
+  font-size: 1rem;
+}
+
+.catalog-admin-eyebrow {
+  margin-bottom: 0.65rem;
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 750;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.catalog-access-card,
+.catalog-editor {
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  background: var(--panel-bg);
+  box-shadow: 0 18px 48px color-mix(in srgb, var(--fg) 7%, transparent);
+}
+
+.catalog-access-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 1.4rem;
+}
+
+.catalog-access-card h2,
+.catalog-editor h2 {
+  margin-bottom: 0.3rem;
+}
+
+.catalog-access-card p,
+.catalog-editor-heading p:last-child,
+.catalog-help {
+  color: color-mix(in srgb, var(--fg) 62%, transparent);
+}
+
+.catalog-editor {
+  margin-top: 1.5rem;
+  padding: clamp(1.1rem, 3vw, 2rem);
+}
+
+.catalog-editor-heading,
+.catalog-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.catalog-warning {
+  display: flex;
+  gap: 0.45rem;
+  margin: 1.5rem 0;
+  padding: 0.9rem 1rem;
+  border: 1px solid #f4c96b;
+  border-radius: 10px;
+  background: #fff8e8;
+  color: #6b4d13;
+  line-height: 1.5;
+}
+
+.catalog-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.2rem;
+}
+
+.catalog-summary-item {
+  padding: 0.9rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--fg) 3%, var(--panel-bg));
+}
+
+.catalog-summary-item strong,
+.catalog-summary-item span {
+  display: block;
+}
+
+.catalog-summary-item strong {
+  color: var(--fg);
+  font-size: 1.3rem;
+}
+
+.catalog-summary-item span {
+  margin-top: 0.15rem;
+  color: color-mix(in srgb, var(--fg) 60%, transparent);
+  font-size: 0.78rem;
+}
+
+.catalog-json-label {
+  display: block;
+  margin-bottom: 0.45rem;
+  color: var(--fg);
+  font-weight: 700;
+}
+
+.catalog-json {
+  width: 100%;
+  min-height: 480px;
+  resize: vertical;
+  padding: 1rem;
+  border: 1px solid color-mix(in srgb, var(--fg) 20%, transparent);
+  border-radius: 10px;
+  background: #0f172a;
+  color: #e2e8f0;
+  font: 0.82rem/1.55 ui-monospace, SFMono-Regular, Consolas, monospace;
+  tab-size: 2;
+}
+
+.catalog-json:focus {
+  outline: 3px solid color-mix(in srgb, var(--accent) 24%, transparent);
+  border-color: var(--accent);
+}
+
+.catalog-help {
+  margin-top: 0.5rem;
+  font-size: 0.82rem;
+}
+
+.catalog-validation {
+  margin-top: 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  background: #ecfdf3;
+  color: #166534;
+  line-height: 1.5;
+}
+
+.catalog-validation.is-error {
+  background: #fff1f2;
+  color: #9f1239;
+}
+
+.catalog-validation ul {
+  margin: 0.5rem 0 0;
+  padding-left: 1.2rem;
+}
+
+.catalog-actions {
+  margin-top: 1.25rem;
+}
+
+.catalog-button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.catalog-button {
+  min-height: 42px;
+  padding: 0.6rem 0.95rem;
+  border: 1px solid color-mix(in srgb, var(--fg) 18%, transparent);
+  border-radius: 999px;
+  background: var(--panel-bg);
+  color: var(--fg);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.catalog-button:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.catalog-button--primary {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+}
+
+.catalog-button--primary:hover:not(:disabled) {
+  background: var(--accent-strong);
+  color: #fff;
+}
+
+.catalog-button:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+@media (max-width: 760px) {
+  .catalog-access-card,
+  .catalog-editor-heading,
+  .catalog-actions,
+  .catalog-warning {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .catalog-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .catalog-button--primary {
+    width: 100%;
+  }
+}

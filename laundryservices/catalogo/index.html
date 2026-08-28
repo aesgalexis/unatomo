@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="/static/js/config/runtime-config.js"></script>
+  <title>Editor del catálogo | UNATOMO · Laundry Services</title>
+  <meta name="description" content="Editor privado del catálogo de fabricantes, modelos y recambios de Laundry Services.">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="stylesheet" href="/laundryservices/ls_styles.css">
+  <link rel="stylesheet" href="/laundryservices/catalogo/catalog-admin.css">
+  <link rel="icon" href="/static/img/favicon/favicon.svg" type="image/svg+xml">
+</head>
+<body class="page catalog-admin-page">
+  <div id="ls-topbar-mount"></div>
+
+  <main class="page-shell catalog-admin-shell">
+    <header class="catalog-admin-hero">
+      <p class="catalog-admin-eyebrow">Administración · Laundry Services</p>
+      <h1>Catálogo de maquinaria y recambios</h1>
+      <p>Edita la fuente que utiliza el formulario público. Los cambios se validan y se publican directamente en la colección particionada de Firestore.</p>
+    </header>
+
+    <section class="catalog-access-card" id="access-panel" aria-live="polite">
+      <div>
+        <h2 id="access-title">Comprobando acceso</h2>
+        <p id="access-message">Esperando la sesión de Firebase…</p>
+      </div>
+      <div class="catalog-button-row">
+        <button class="catalog-button catalog-button--primary" id="login-button" type="button" hidden>Entrar con Google</button>
+        <button class="catalog-button" id="refresh-access-button" type="button" hidden>Actualizar permisos</button>
+        <button class="catalog-button" id="switch-account-button" type="button" hidden>Usar otra cuenta</button>
+      </div>
+    </section>
+
+    <section class="catalog-editor" id="editor-panel" hidden aria-labelledby="editor-title">
+      <div class="catalog-editor-heading">
+        <div>
+          <p class="catalog-admin-eyebrow">Sesión autorizada</p>
+          <h2 id="editor-title">Datos publicados</h2>
+          <p id="editor-user"></p>
+        </div>
+        <button class="catalog-button" id="reload-button" type="button">Recargar Firestore</button>
+      </div>
+
+      <aside class="catalog-warning">
+        <strong>Entorno de producción.</strong>
+        <span>Publicar incrementa automáticamente la versión y actualiza la fecha. Revisa el resumen antes de confirmar.</span>
+      </aside>
+
+      <div class="catalog-summary" id="catalog-summary" aria-live="polite"></div>
+
+      <label class="catalog-json-label" for="catalog-json">Catálogo JSON</label>
+      <textarea id="catalog-json" class="catalog-json" rows="28" spellcheck="false" autocomplete="off" aria-describedby="catalog-help"></textarea>
+      <p class="catalog-help" id="catalog-help">Estructura: categories, manufacturers, models y spareParts. Las categorías requieren etiquetas es, en, it y el.</p>
+
+      <div class="catalog-validation" id="validation-panel" role="status" aria-live="polite" hidden></div>
+
+      <div class="catalog-actions">
+        <div class="catalog-button-row">
+          <button class="catalog-button" id="format-button" type="button">Formatear JSON</button>
+          <button class="catalog-button" id="validate-button" type="button">Validar</button>
+        </div>
+        <button class="catalog-button catalog-button--primary" id="publish-button" type="button">Publicar en Firestore</button>
+      </div>
+    </section>
+
+    <div id="legal-footer" class="legal-footer"></div>
+    <div class="footer-link"><a href="/laundryservices/ls_privacidad.html" data-i18n="privacy_link">Política de privacidad y cookies</a></div>
+  </main>
+
+  <script src="/laundryservices/ls_top-bar.js"></script>
+  <script src="/laundryservices/i18n/common.js"></script>
+  <script src="/laundryservices/ls_page.js"></script>
+  <script type="module" src="/laundryservices/catalogo/catalog-admin.js"></script>
+  <script src="/laundryservices/ls_footer.js"></script>
+</body>
+</html>

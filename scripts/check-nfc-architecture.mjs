@@ -458,8 +458,8 @@ const callableExports = Array.from(
   .map((name) => name.trim())
   .filter(Boolean);
 addCheck(
-  callableExports.length === 70 && new Set(callableExports).size === 70,
-  "Functions index.ts preserves 70 unique function exports"
+  callableExports.length === 71 && new Set(callableExports).size === 71,
+  "Functions index.ts preserves 71 unique function exports"
 );
 
 [
