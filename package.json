@@ -4,7 +4,8 @@
   "description": "Machine-centered operational dashboard with QR/NFC access, history, tasks, documents, and Firebase backend.",
   "main": "index.js",
   "scripts": {
-    "test": "npm run test:nfc && npm run test:functions && npm run test:rules && npm run lint:links && npm run scan:secrets",
+    "test": "npm run test:nfc && npm run test:laundry && npm run test:functions && npm run test:rules && npm run lint:links && npm run scan:secrets",
+    "test:laundry": "npm run check:laundry:architecture && npm run catalog:laundry:check",
     "test:nfc": "npm run check:nfc:architecture && npm run check:nfc:group-hierarchy && npm run check:nfc:sorting && npm run check:nfc:autosave && npm run check:nfc:status-incident && npm run check:nfc:statistics && npm run check:nfc:task-assignment && npm run check:nfc:mobile-qr && npm run check:machine-lab",
     "test:functions": "npm --prefix firebase/functions run lint && npm --prefix firebase/functions run test:task-visibility && npm --prefix firebase/functions run test:machine-policy && npm --prefix firebase/functions run test:machine-status && npm --prefix firebase/functions run test:machine-notifications && npm --prefix firebase/functions run test:email-templates",
     "test:rules": "node scripts/run-firebase-rules-tests.mjs",
@@ -27,6 +28,8 @@
     "deploy:nfc:storage": "node scripts/firebase-clean.mjs deploy --only storage",
     "deploy:nfc:functions": "node scripts/firebase-clean.mjs deploy --only functions",
     "deploy:nfc:backend": "node scripts/firebase-clean.mjs deploy --only functions,firestore",
+    "catalog:laundry:check": "npm --prefix firebase/functions run catalog:check",
+    "catalog:laundry:sync": "npm --prefix firebase/functions run catalog:sync",
     "backup:nfc:firestore": "node scripts/backup-firestore-nfc.mjs",
     "backup:nfc:storage": "node scripts/backup-storage-inventory-nfc.mjs",
     "backup:nfc:auth": "node scripts/backup-auth-nfc.mjs",
@@ -40,7 +43,8 @@
     "check:nfc:task-assignment": "node scripts/test-dashboard-task-assignment.mjs",
     "check:nfc:mobile-qr": "node scripts/test-mobile-navigation-qr.mjs",
     "check:machine-lab": "node scripts/check-machine-lab.mjs",
-    "check:nfc:architecture": "node scripts/check-nfc-architecture.mjs"
+    "check:nfc:architecture": "node scripts/check-nfc-architecture.mjs",
+    "check:laundry:architecture": "node scripts/check-laundry-architecture.mjs"
   },
   "repository": {
     "type": "git",

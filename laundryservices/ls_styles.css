@@ -221,6 +221,13 @@ a:hover {
   cursor: grabbing;
 }
 
+.service-detail-hero-icon {
+  width: clamp(130px, 17vw, 190px);
+  height: auto;
+  justify-self: center;
+  filter: drop-shadow(0 16px 28px color-mix(in srgb, #000 14%, transparent));
+}
+
 .service-pillars {
   margin-top: 5.4rem;
   overflow: hidden;
@@ -520,7 +527,12 @@ body.ls-auditoria-page .hero-content h1,
 body.ls-auditoria-page .claim-loop-text,
 body.ls-auditoria-page .ls-upperfooter,
 body.ls-auditoria-page .ls-upperfooter *,
-body.ls-auditoria-page .service-card {
+body.ls-auditoria-page .service-card,
+body.ls-service-detail-page,
+body.ls-service-detail-page .hero-content h1,
+body.ls-service-detail-page .claim-loop-text,
+body.ls-service-detail-page .ls-upperfooter,
+body.ls-service-detail-page .ls-upperfooter * {
   user-select: text;
   -webkit-user-select: text;
 }

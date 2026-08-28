@@ -87,6 +87,15 @@ Read this before changing data flows, callable functions, machine ownership, adm
   The public client may read this one document, but cannot list the collection
   or write any metric. It contains only machine, registered-profile, linked-tag
   counts, a schema version, and the last backend update timestamp.
+- `laundry_public_catalog`: published Laundry Services catalogue used by the
+  public spare-parts form. `meta` identifies the active manufacturer documents,
+  `categories` stores localized machine categories, and each
+  `manufacturer_{id}` document contains one manufacturer with its model groups
+  and spare-part records. Public clients may read this collection but cannot
+  write it. Only accounts with the `laundryServicesAdmin` custom claim may
+  create or update documents; deletion is denied. The checked-in migration
+  snapshot lives under `firebase/catalog/`, outside the public website, and is
+  synchronized with the owner-run catalogue command.
 
 Machine documents are stored as metadata on `machines.documents`. The actual files live in Firebase Storage under:
 

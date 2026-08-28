@@ -74,6 +74,22 @@ async function seedFirestore() {
       setDoc(doc(adminDb, "agregador_maquinaria_LS", "legacy-machine"), {
         title: "Public legacy machine"
       }),
+      setDoc(doc(adminDb, "laundry_public_catalog", "meta"), {
+        type: "meta",
+        version: 1,
+        updatedAt: "2026-08-28",
+        activeManufacturerIds: ["test"],
+        publishedAt: Timestamp.now(),
+        publishedBy: "rules-test"
+      }),
+      setDoc(doc(adminDb, "laundry_public_catalog", "manufacturer_test"), {
+        type: "manufacturer",
+        manufacturer: {id: "test", name: "Test"},
+        modelGroups: [],
+        spareParts: [],
+        publishedAt: Timestamp.now(),
+        publishedBy: "rules-test"
+      }),
       setDoc(doc(adminDb, "registration_codes", "secret-code"), {
         active: true
       }),
@@ -255,6 +271,23 @@ describe("Firestore rules", () => {
     ));
     await assertFails(deleteDoc(
       doc(db("laundry-admin", { laundryServicesAdmin: true }), "agregador_maquinaria_LS", "legacy-machine")
+    ));
+  });
+
+  test("expose only the published laundry catalogue and restrict its writes", async () => {
+    const publicCatalog = doc(anonymousDb(), "laundry_public_catalog", "meta");
+    await assertSucceeds(getDoc(publicCatalog));
+    await assertSucceeds(getDocs(collection(anonymousDb(), "laundry_public_catalog")));
+    await assertFails(updateDoc(
+      doc(db(OUTSIDER_UID, { laundryServicesAdmin: false }), "laundry_public_catalog", "meta"),
+      { updatedAt: "forbidden" }
+    ));
+    await assertSucceeds(updateDoc(
+      doc(db("laundry-admin", { laundryServicesAdmin: true }), "laundry_public_catalog", "meta"),
+      { updatedAt: "2026-08-29" }
+    ));
+    await assertFails(deleteDoc(
+      doc(db("laundry-admin", { laundryServicesAdmin: true }), "laundry_public_catalog", "meta")
     ));
   });
 });

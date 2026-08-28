@@ -77,6 +77,8 @@ links, Tag ID, QR cleanup, callable Functions, or data permissions.
 - `docs/SUBAGENTS.md`: optional delegation playbook; read only when delegation
   is explicitly requested or clearly justified.
 - `docs/PROJECT_OVERVIEW.md`: what the product does and why it exists.
+- `docs/LAUNDRY_SERVICES_ARCHITECTURE.md`: Laundry Services module boundaries,
+  Firestore catalogue ownership, and monolith guardrails.
 - `docs/DEV.md`: authoritative local setup and development commands.
 - `docs/DASHBOARD_MODEL.md`: dashboard, cards, Tag ID, QR print, menu, and i18n.
 - `docs/FIREBASE_MODEL.md`: Firebase data flows and permission model.

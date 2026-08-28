@@ -2,7 +2,6 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/fi
 import {
   getDocs,
   getDoc,
-  writeBatch,
   collection,
   doc,
   onSnapshot,
@@ -18,83 +17,6 @@ import { auth, db, isAdminUser, resolveAdminUser, storage } from "./firebase-con
 const MACHINES_COLLECTION = "agregador_maquinaria_LS";
 const COUNTERS_COLLECTION = "maquinaria_counters";
 const PREFIX_ORDER = ["P", "T", "L", "S", "C", "R", "M"];
-let bootstrapAttempted = false;
-let bootstrapPromise = null;
-
-const INITIAL_MACHINES = [
-  {
-    id: "P001",
-    categoria: "Plegadora",
-    marca: "Jensen",
-    modelo: "Butterfly",
-    anio: 2007,
-    estado: "Bueno",
-    ubicacion: "Mallorca",
-    precioAmount: 18000,
-    precioTexto: "18.000 €",
-    envioIncluido: true,
-    puestaEnMarchaIncluida: true,
-    garantiaTexto: "",
-    garantiaPiezasAnos: null,
-    imagenes: [
-      { name: "IMG_2946.JPG", path: "", url: "/laundryservices/ls_maquinaria/imagenes/P001/IMG_2946.JPG" },
-      { name: "IMG_2947.JPG", path: "", url: "/laundryservices/ls_maquinaria/imagenes/P001/IMG_2947.JPG" },
-    ],
-  },
-  {
-    id: "L001",
-    categoria: "Lavadora",
-    marca: "Tolkar",
-    modelo: "55kg",
-    anio: 2022,
-    estado: "Excelente",
-    ubicacion: "Barcelona",
-    precioAmount: 17000,
-    precioTexto: "17.000 €",
-    envioIncluido: true,
-    puestaEnMarchaIncluida: true,
-    garantiaTexto: "1 año de garantía de piezas",
-    garantiaPiezasAnos: 1,
-    imagenes: [
-      { name: "unnamed.jpg", path: "", url: "/laundryservices/ls_maquinaria/imagenes/L001/unnamed.jpg" },
-    ],
-  },
-  {
-    id: "L002",
-    categoria: "Lavadora",
-    marca: "Unimac",
-    modelo: "110 kg",
-    anio: 2001,
-    estado: "Bueno",
-    ubicacion: "Mallorca",
-    precioAmount: 12500,
-    precioTexto: "12.500 €",
-    envioIncluido: false,
-    puestaEnMarchaIncluida: false,
-    garantiaTexto: "",
-    garantiaPiezasAnos: null,
-    imagenes: [],
-  },
-  {
-    id: "L003",
-    categoria: "Lavadora",
-    marca: "Tecnitramo",
-    modelo: "57kg",
-    anio: 2017,
-    estado: "Repasada",
-    ubicacion: "Barcelona",
-    precioAmount: 14500,
-    precioTexto: "14.500 €",
-    envioIncluido: true,
-    puestaEnMarchaIncluida: true,
-    garantiaTexto: "1 año de garantía de piezas",
-    garantiaPiezasAnos: 1,
-    imagenes: [
-      { name: "fd5fc6cb-3c21-4191-8bc1-eef1c099eb0a.JPG", path: "", url: "/laundryservices/ls_maquinaria/imagenes/L003/fd5fc6cb-3c21-4191-8bc1-eef1c099eb0a.JPG" },
-    ],
-  },
-];
-
 const normalizeTypeKey = (value) =>
   String(value || "")
     .trim()
@@ -186,8 +108,6 @@ export const observeMachineAdmin = (callback) =>
     if (user) await resolveAdminUser(user);
     callback(user);
   });
-export const ensureInitialMachinesBootstrapped = () => seedInitialMachines();
-
 const getNextSequenceForPrefix = async (prefix) => {
   const snapshot = await getDocs(collection(db, MACHINES_COLLECTION));
   let maxFromDocs = 0;
@@ -212,75 +132,10 @@ export const getSuggestedMachineId = async (categoria) => {
   return helper.buildMachineId(categoria, nextSequence);
 };
 
-const seedInitialMachines = async () => {
-  if (!isAdminUser(auth.currentUser)) {
-    return;
-  }
-  if (bootstrapAttempted) return;
-  if (bootstrapPromise) return bootstrapPromise;
-
-  bootstrapPromise = (async () => {
-    const snapshot = await getDocs(collection(db, MACHINES_COLLECTION));
-    const existingIds = new Set(snapshot.docs.map((item) => item.id));
-    const missingMachines = INITIAL_MACHINES.filter((machine) => !existingIds.has(machine.id));
-
-    const counterState = {};
-    INITIAL_MACHINES.forEach((machine) => {
-      const prefix = String(machine.id || "").charAt(0).toUpperCase() || "M";
-      const sequence = extractSequence(machine.id);
-      counterState[prefix] = Math.max(counterState[prefix] || 0, sequence);
-    });
-
-    if (!missingMachines.length && snapshot.docs.length >= INITIAL_MACHINES.length) {
-      bootstrapAttempted = true;
-      return;
-    }
-
-    const batch = writeBatch(db);
-
-    missingMachines.forEach((machine) => {
-      batch.set(doc(db, MACHINES_COLLECTION, machine.id), {
-        ...machine,
-        categoriaKey: normalizeTypeKey(machine.categoria),
-        visible: true,
-        createdBy: "bootstrap",
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      });
-    });
-
-    Object.entries(counterState).forEach(([prefix, lastSeq]) => {
-      batch.set(
-        doc(db, COUNTERS_COLLECTION, prefix),
-        {
-          prefix,
-          lastSeq,
-          updatedAt: serverTimestamp(),
-        },
-        { merge: true }
-      );
-    });
-
-    await batch.commit();
-    bootstrapAttempted = true;
-  })();
-
-  try {
-    await bootstrapPromise;
-  } finally {
-    bootstrapPromise = null;
-  }
-};
-
 export const subscribeMachines = (onData, onError) =>
   onSnapshot(
     query(collection(db, MACHINES_COLLECTION)),
-    async (snapshot) => {
-      if (snapshot.empty || snapshot.docs.length < INITIAL_MACHINES.length) {
-        try {
-          await seedInitialMachines();
-        } catch {}
-      }
+    (snapshot) => {
       const machines = snapshot.docs
         .map((item) => {
           const data = item.data() || {};

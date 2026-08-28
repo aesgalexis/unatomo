@@ -1,6 +1,5 @@
 import {
   createMachine,
-  ensureInitialMachinesBootstrapped,
   getSuggestedMachineId,
   observeMachineAdmin,
   updateMachine,
@@ -341,12 +340,6 @@ const openEditDialog = (machine) => {
 const syncAdminControls = async (user) => {
   currentUser = user || null;
   const isAdmin = isAdminUser(user);
-
-  if (isAdmin) {
-    try {
-      await ensureInitialMachinesBootstrapped();
-    } catch {}
-  }
 
   adminWraps.forEach((wrap) => {
     const addButton = wrap.querySelector('[data-machine-auth="add"]');
