@@ -1,7 +1,6 @@
 import { functions } from "/static/js/firebase/firebaseApp.js";
 import { httpsCallable } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-functions.js";
 import { loadLaundryCatalog } from "/laundryservices/recambios/catalog-repo.js";
-import { translations } from "/laundryservices/i18n/spare-parts.js";
 import { prepareImages, setupImageInput } from "/laundryservices/recambios/image-upload.js";
 
 const submitSpareRequest = httpsCallable(functions, "submitLaundrySpareRequest");
@@ -17,9 +16,11 @@ const backButton = document.querySelector("#back-button");
 const submitButton = document.querySelector("#submit-button");
 const statusElement = form.querySelector(".form-status");
 const successPanel = document.querySelector("#success-panel");
+const copyElement = document.querySelector("#laundry-spares-copy");
+const copy = copyElement ? JSON.parse(copyElement.textContent) : {};
 
 let catalog = { manufacturers: [], categories: [], models: [] };
-let language = normalizeLanguage(window.unatomoI18n?.getLanguage?.() || document.documentElement.lang);
+const language = normalizeLanguage(document.documentElement.lang);
 let currentStep = 1;
 let selectedManufacturer = "";
 let selectedAllianceBrand = "";
@@ -32,7 +33,7 @@ function normalizeLanguage(value) {
 }
 
 function t(key) {
-  return translations[language]?.[key] || translations.es[key] || key;
+  return copy[key] || key;
 }
 
 function getCategoryLabel(category) {
@@ -284,17 +285,7 @@ function updateSummary() {
   });
 }
 
-function applyTranslations() {
-  document.documentElement.querySelectorAll("[data-spares-i18n]").forEach((element) => {
-    element.textContent = t(element.dataset.sparesI18n);
-  });
-  document.documentElement.querySelectorAll("[data-spares-i18n-placeholder]").forEach((element) => {
-    element.placeholder = t(element.dataset.sparesI18nPlaceholder);
-  });
-  document.documentElement.querySelectorAll("[data-spares-i18n-aria]").forEach((element) => {
-    element.setAttribute("aria-label", t(element.dataset.sparesI18nAria));
-  });
-  document.title = t("page_title");
+function initializeLocalizedFields() {
   document.querySelector("#language-value").value = language;
   renderManufacturers();
   renderCategories();
@@ -353,11 +344,6 @@ form.addEventListener("submit", async (event) => {
   }
 });
 
-document.addEventListener("app:language-change", (event) => {
-  language = normalizeLanguage(event.detail?.lang);
-  applyTranslations();
-});
-
 setupImageInput({
   input: document.querySelector("#plate-images"),
   preview: document.querySelector("#plate-previews"),
@@ -379,7 +365,7 @@ async function initialize() {
 
   renderManufacturers();
   renderCategories();
-  applyTranslations();
+  initializeLocalizedFields();
   showStep(1, false);
 }
 

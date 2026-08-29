@@ -10,8 +10,15 @@ body.ls-spares-page .spares-shell {
 }
 
 .spares-hero {
-  max-width: 760px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 2rem;
   margin-bottom: 2.25rem;
+}
+
+.spares-hero-copy {
+  max-width: 760px;
 }
 
 .spares-eyebrow {
@@ -27,7 +34,7 @@ body.ls-spares-page .spares-shell {
   margin-bottom: 0.65rem;
 }
 
-.spares-hero > p:last-child {
+.spares-hero-copy > p:last-child {
   max-width: 690px;
   color: color-mix(in srgb, var(--fg) 68%, transparent);
   font-size: 1.02rem;
@@ -542,7 +549,12 @@ textarea.spares-input {
   }
 
   .spares-hero {
+    grid-template-columns: 1fr;
     margin-bottom: 1.5rem;
+  }
+
+  .spares-hero .service-detail-hero-icon {
+    width: 110px;
   }
 
   .spares-progress li b {

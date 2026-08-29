@@ -46,7 +46,7 @@ const normalizeTarget = (url) => {
 
 const rawMatches = [];
 const files = walk(root);
-const regex = /\/(?:static|es|en|nfc|controlpanel)\/[^\s"'<>)]*/g;
+const regex = /\/(?:laundryservices|static|es|en|nfc|controlpanel)\/[^\s"'<>)]*/g;
 
 for (const file of files) {
   const content = fs.readFileSync(file, "utf8");

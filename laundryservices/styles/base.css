@@ -227,6 +227,7 @@ a:hover {
   width: clamp(130px, 17vw, 190px);
   height: auto;
   justify-self: center;
-  filter: drop-shadow(0 16px 28px color-mix(in srgb, #000 14%, transparent));
+  filter: brightness(0) saturate(100%);
+  opacity: 0.68;
 }
 

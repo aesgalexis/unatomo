@@ -3,25 +3,32 @@
 ## Scope
 
 `laundryservices/` is a static, localized public site with two Firebase-backed
-product surfaces: used machinery and spare-part requests. Public page copy may
-live in HTML or dedicated localization modules. Operational catalogue records
-must not be embedded in public JavaScript or JSON.
+product surfaces: used machinery and spare-part requests. Public editorial copy
+lives in physical HTML pages under `es/`, `en/`, `it/` and `el/`; JavaScript is
+reserved for interaction and Firebase data. Operational catalogue records must
+not be embedded in public JavaScript or JSON.
 
 ## Frontend Boundaries
 
-- Shared shell: `ls_top-bar.js`, `ls_page.js`, `ls_footer.js`,
-  `ls_upperfooter.js`, and `ls_claim-loop.js`.
-- Editorial pages: page HTML plus data-only modules under `i18n/`. Large
-  translation dictionaries are content stores, not executable monoliths.
+- Localized routes: `/{language}/{translated-slug}/index.html`. Each page has
+  static localized navigation, content, canonical metadata, reciprocal
+  `hreflang` links and structured data. Language selection is normal navigation.
+- Shared shell behavior: `ls_top-bar.js`, `ls_page.js` and `ls_footer.js` only
+  control visibility, menus and disclosure. They do not inject or translate copy.
+- Legacy unlocalized URLs are small `noindex` compatibility redirects to the
+  equivalent Spanish route. `/laundryservices/catalogo/` remains a private,
+  Spanish-only administration surface.
 - Used machinery:
   - `ls_maquinaria.js`: public filtering, pagination and rendering.
-  - `i18n/machinery.js`: localized labels and metadata only.
+  - Each localized machinery HTML page contains one small JSON configuration
+    block for labels used while rendering live Firestore records.
   - `ls_maquinaria/agregador/ls_machine-store.js`: Firestore and Storage
     persistence.
   - `ls_maquinaria/agregador/ls_machine-add.js`: privileged editor UI.
 - Spare-part requests:
   - `recambios/recambios.js`: wizard state, validation and submission.
-  - `i18n/spare-parts.js`: localized copy only.
+  - Each localized spare-parts HTML page contains one small JSON configuration
+    block for dynamic form status and catalogue labels.
   - `recambios/catalog-schema.js`: catalogue validation shared by the admin
     editor and its repository.
   - `recambios/catalog-repo.js`: Firestore catalogue reads and partitioned
@@ -68,9 +75,9 @@ public page must never recreate operational data.
 
 ## Guardrails
 
-Run `npm run test:laundry`. The check rejects public catalogue files and caps
-executable Laundry Services modules at 500 lines and 22 KB. Data-only copy
-modules are excluded because their size does not increase runtime coupling.
+Run `npm run test:laundry`. The checks reject public catalogue files, legacy
+client-side translation modules and missing localized-route SEO relationships;
+they also cap executable Laundry Services modules at 500 lines and 22 KB.
 
 Publishing, Firestore rule deployment and catalogue synchronization remain
 owner-run production operations.

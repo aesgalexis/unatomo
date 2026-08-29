@@ -88,6 +88,27 @@
   overflow-x: auto;
 }
 
+.ls-maquinaria-page .card--wide {
+  border-radius: 0.85rem;
+  overflow: hidden;
+}
+
+.machinery-page-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1.5rem;
+  margin: 0.5rem 0 1.1rem;
+}
+
+.machinery-page-heading h1 {
+  margin: 0;
+}
+
+.machinery-page-heading .service-detail-hero-icon {
+  width: clamp(92px, 13vw, 145px);
+}
+
 .ls-table {
   width: 100%;
   border-collapse: collapse;

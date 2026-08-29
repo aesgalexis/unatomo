@@ -39,18 +39,38 @@
   <url>
     <loc>https://unatomo.com/nfc/en/novedades.html</loc>
   </url>
-  <url>
-    <loc>https://unatomo.com/laundryservices/</loc>
-  </url>
-  <url>
-    <loc>https://unatomo.com/laundryservices/ls_contacto.html</loc>
-  </url>
-  <url>
-    <loc>https://unatomo.com/laundryservices/maquinaria/</loc>
-  </url>
-  <url>
-    <loc>https://unatomo.com/laundryservices/ls_privacidad.html</loc>
-  </url>
+  <url><loc>https://unatomo.com/laundryservices/es/</loc></url>
+  <url><loc>https://unatomo.com/laundryservices/es/auditoria/</loc></url>
+  <url><loc>https://unatomo.com/laundryservices/es/inversiones/</loc></url>
+  <url><loc>https://unatomo.com/laundryservices/es/automatizacion/</loc></url>
+  <url><loc>https://unatomo.com/laundryservices/es/maquinaria-ocasion/</loc></url>
+  <url><loc>https://unatomo.com/laundryservices/es/recambios/</loc></url>
+  <url><loc>https://unatomo.com/laundryservices/es/contacto/</loc></url>
+  <url><loc>https://unatomo.com/laundryservices/es/privacidad/</loc></url>
+  <url><loc>https://unatomo.com/laundryservices/en/</loc></url>
+  <url><loc>https://unatomo.com/laundryservices/en/technical-audit/</loc></url>
+  <url><loc>https://unatomo.com/laundryservices/en/investments/</loc></url>
+  <url><loc>https://unatomo.com/laundryservices/en/automation/</loc></url>
+  <url><loc>https://unatomo.com/laundryservices/en/used-machinery/</loc></url>
+  <url><loc>https://unatomo.com/laundryservices/en/spare-parts/</loc></url>
+  <url><loc>https://unatomo.com/laundryservices/en/contact/</loc></url>
+  <url><loc>https://unatomo.com/laundryservices/en/privacy/</loc></url>
+  <url><loc>https://unatomo.com/laundryservices/it/</loc></url>
+  <url><loc>https://unatomo.com/laundryservices/it/audit-tecnico/</loc></url>
+  <url><loc>https://unatomo.com/laundryservices/it/investimenti/</loc></url>
+  <url><loc>https://unatomo.com/laundryservices/it/automazione/</loc></url>
+  <url><loc>https://unatomo.com/laundryservices/it/macchinari-usati/</loc></url>
+  <url><loc>https://unatomo.com/laundryservices/it/ricambi/</loc></url>
+  <url><loc>https://unatomo.com/laundryservices/it/contatto/</loc></url>
+  <url><loc>https://unatomo.com/laundryservices/it/privacy/</loc></url>
+  <url><loc>https://unatomo.com/laundryservices/el/</loc></url>
+  <url><loc>https://unatomo.com/laundryservices/el/technikos-elegchos/</loc></url>
+  <url><loc>https://unatomo.com/laundryservices/el/ependyseis/</loc></url>
+  <url><loc>https://unatomo.com/laundryservices/el/aftomatismoi/</loc></url>
+  <url><loc>https://unatomo.com/laundryservices/el/metacheirismena-michanimata/</loc></url>
+  <url><loc>https://unatomo.com/laundryservices/el/antallaktika/</loc></url>
+  <url><loc>https://unatomo.com/laundryservices/el/epikoinonia/</loc></url>
+  <url><loc>https://unatomo.com/laundryservices/el/aporrito/</loc></url>
   <url>
     <loc>https://unatomo.com/ssl-simulator.html</loc>
   </url>

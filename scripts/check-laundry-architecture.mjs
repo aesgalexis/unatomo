@@ -9,12 +9,16 @@ const MAX_BACKEND_LINES = 300;
 const MAX_BACKEND_BYTES = 16_000;
 const MAX_STYLESHEET_BYTES = 24_000;
 const FIREBASE_BROWSER_VERSION = "12.16.0";
-const DATA_MODULE_PATTERN = /(?:^|\/)i18n\/|(?:i18n|copy)\.js$/;
 const forbiddenPublicData = [
   "recambios/catalogo-maquinas.json",
   "ls_recambios/ls_brand-list.js",
 ];
 const forbiddenLegacyFiles = [
+  "i18n/common.js",
+  "i18n/home-audit.js",
+  "i18n/service-details.js",
+  "i18n/machinery.js",
+  "i18n/spare-parts.js",
   "ls_i18n.js",
   "ls_home-i18n.js",
   "ls_detail-i18n.js",
@@ -53,7 +57,6 @@ for (const file of files.filter((path) => path.endsWith(".js"))) {
       failures.push(`${relativePath}: Firebase ${version} differs from ${FIREBASE_BROWSER_VERSION}.`);
     }
   });
-  if (DATA_MODULE_PATTERN.test(relativePath)) continue;
   const lines = source.split(/\r?\n/).length;
   const bytes = (await stat(file)).size;
   if (lines > MAX_EXECUTABLE_LINES) {

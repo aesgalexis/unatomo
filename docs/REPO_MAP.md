@@ -21,6 +21,8 @@ relevant sections instead of loading the complete file by default.
 - `es/` and `en/`: localized public routes.
 - `nfc/es/` and `nfc/en/`: localized NFC/dashboard/auth/static pages,
   including account settings and the global access page.
+- `laundryservices/{es,en,it,el}/`: physical localized Laundry Services pages
+  with translated slugs; shared JavaScript provides behavior, not page copy.
 - `nfc/controlpanel/`: owner-only control panel UI. `panel.js` is the small
   entry/composition layer; `panelText.js`, `panelShared.js`,
   `panelSystemIntegrity.js`, `panelStatsBackup.js`, `panelLocalCards.js`,

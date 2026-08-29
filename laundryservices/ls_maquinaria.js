@@ -3,12 +3,20 @@ import {
   subscribeMachines,
 } from "/laundryservices/ls_maquinaria/agregador/ls_machine-store.js";
 import { isAdminUser } from "/laundryservices/ls_maquinaria/agregador/firebase-config.js";
-import { META, STATE_LABELS, TYPE_LABELS } from "/laundryservices/i18n/machinery.js";
 
 const LANGS = ["es", "en", "it", "el"];
 const PAGE_SIZE = 10;
+const normalizeLang = (value) => LANGS.includes(String(value || "").slice(0, 2).toLowerCase())
+  ? String(value).slice(0, 2).toLowerCase()
+  : "es";
+const lang = normalizeLang(document.documentElement.lang);
+const copyElement = document.querySelector("#laundry-machinery-copy");
+const localizedCopy = copyElement ? JSON.parse(copyElement.textContent) : {labels: {}, typeLabels: {}, stateLabels: {}};
+const META = {[lang]: localizedCopy};
+const TYPE_LABELS = Object.fromEntries(Object.entries(localizedCopy.typeLabels).map(([key, value]) => [key, {[lang]: value}]));
+const STATE_LABELS = Object.fromEntries(Object.entries(localizedCopy.stateLabels).map(([key, value]) => [key, {[lang]: value}]));
 
-const copies = Array.from(document.querySelectorAll("[data-legal-lang]"));
+const copies = Array.from(document.querySelectorAll("article.legal-copy"));
 let isMachineAdmin = false;
 let currentMachines = [];
 let machineryLoaded = false;
@@ -21,7 +29,6 @@ window.setTimeout(() => {
 }, 1800);
 
 if (copies.length) {
-  const normalizeLang = (lang) => (LANGS.includes(lang) ? lang : "es");
 
   const normalizeKey = (value) =>
     String(value || "")
@@ -68,25 +75,22 @@ if (copies.length) {
     const warrantyType = String(machine.garantiaTipo || "").trim();
     if (Number.isFinite(months) && months > 0) {
       if (warrantyType === "total") {
-        return labels.fullWarrantyMonths(months);
+        return labels.fullWarrantyMonths.replace("{n}", months);
       }
-      return labels.partsWarrantyMonths(months);
+      return labels.partsWarrantyMonths.replace("{n}", months);
     }
     if (Number.isFinite(years) && years > 0) {
       if (warrantyType === "total") {
-        return years === 1 ? labels.fullWarranty(years) : labels.fullWarrantyPlural(years);
+        return years === 1 ? labels.fullWarrantyOne : labels.fullWarrantyMany.replace("{n}", years);
       }
-      return years === 1 ? labels.partsWarranty(years) : labels.partsWarrantyPlural(years);
+      return years === 1 ? labels.partsWarrantyOne : labels.partsWarrantyMany.replace("{n}", years);
     }
     return machine.garantiaTexto || "";
   };
 
   const translateHeating = (value, lang) => {
     const normalized = normalizeKey(value);
-    if (normalized === "gas") return lang === "it" ? "Gas" : lang === "el" ? "\u0391\u03b5\u03c1\u03b9\u03bf" : "Gas";
-    if (normalized === "vapor") return lang === "en" ? "Steam" : lang === "it" ? "Vapore" : lang === "el" ? "\u0391\u03c4\u03bc\u03bf\u03c2" : "Vapor";
-    if (normalized === "aceite") return lang === "en" ? "Oil" : lang === "it" ? "Olio" : lang === "el" ? "\u039b\u03b1\u03b4\u03b9" : "Aceite";
-    return value || "";
+    return localizedCopy.heatingLabels?.[normalized] || value || "";
   };
 
   const getCapacityValue = (machine) => {
@@ -118,7 +122,7 @@ if (copies.length) {
       year: machine.anio != null ? String(machine.anio) : "",
       id: machine.id || "",
     });
-    return `/laundryservices/ls_contacto.html?${params.toString()}`;
+    return `${localizedCopy.contactPath}?${params.toString()}`;
   };
 
   const renderMachineRows = (machine, lang) => {
@@ -209,16 +213,15 @@ if (copies.length) {
   const getFilteredMachines = (copy, machines) => {
     const filter = copy.dataset.activeFilter || "all";
     if (filter === "all") return machines;
-    return machines.filter((machine) => translateType(machine.categoria, normalizeLang(copy.getAttribute("data-legal-lang"))) === filter);
+    return machines.filter((machine) => translateType(machine.categoria, lang) === filter);
   };
 
   const renderPagination = (copy, currentPage, totalPages) => {
-    const lang = normalizeLang(copy.getAttribute("data-legal-lang"));
     const labels = META[lang].labels;
     const status = copy.querySelector("[data-page-status]");
     const prev = copy.querySelector("[data-page-prev]");
     const next = copy.querySelector("[data-page-next]");
-    if (status) status.textContent = labels.page(currentPage, totalPages);
+    if (status) status.textContent = labels.page.replace("{current}", currentPage).replace("{total}", totalPages);
     if (prev) {
       prev.disabled = currentPage <= 1;
       prev.textContent = labels.prev;
@@ -229,8 +232,12 @@ if (copies.length) {
     }
   };
 
+  const scrollToPageStart = () => {
+    const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
+  };
+
   const renderMachinesForCopy = (copy, machines) => {
-    const lang = normalizeLang(copy.getAttribute("data-legal-lang"));
     const body = copy.querySelector(".ls-table tbody");
     if (!body) return;
     const filteredMachines = getFilteredMachines(copy, machines);
@@ -246,25 +253,6 @@ if (copies.length) {
     const pageMachines = filteredMachines.slice(start, start + PAGE_SIZE);
     body.innerHTML = pageMachines.map((machine) => renderMachineRows(machine, lang)).join("");
     renderPagination(copy, currentPage, totalPages);
-  };
-
-  const applyLanguage = (lang) => {
-    const active = normalizeLang(lang);
-    let visible = false;
-    copies.forEach((copy) => {
-      const match = copy.getAttribute("data-legal-lang") === active;
-      copy.hidden = !match;
-      if (match) visible = true;
-    });
-    if (!visible) {
-      const fallback = copies.find((copy) => copy.getAttribute("data-legal-lang") === "en");
-      if (fallback) fallback.hidden = false;
-    }
-
-    const meta = META[active] || META.es;
-    document.title = meta.title;
-    const desc = document.querySelector('meta[name="description"]');
-    if (desc) desc.setAttribute("content", meta.desc);
   };
 
   const applyFilter = (copy, filter) => {
@@ -292,6 +280,7 @@ if (copies.length) {
         if (currentPage <= 1) return;
         copy.dataset.activePage = String(currentPage - 1);
         renderMachinesForCopy(copy, currentMachines);
+        window.requestAnimationFrame(scrollToPageStart);
       });
     }
     if (next) {
@@ -299,6 +288,7 @@ if (copies.length) {
         const currentPage = Number.parseInt(copy.dataset.activePage || "1", 10) || 1;
         copy.dataset.activePage = String(currentPage + 1);
         renderMachinesForCopy(copy, currentMachines);
+        window.requestAnimationFrame(scrollToPageStart);
       });
     }
   });
@@ -335,13 +325,7 @@ if (copies.length) {
     }
   });
 
-  const initial =
-    (window.unatomoI18n && typeof window.unatomoI18n.getLanguage === "function"
-      ? window.unatomoI18n.getLanguage()
-      : document.documentElement.lang) || "es";
-
-  applyLanguage(initial);
-  copies.forEach((copy) => renderTableState(copy, META[normalizeLang(copy.getAttribute("data-legal-lang"))].loading));
+  copies.forEach((copy) => renderTableState(copy, META[lang].loading));
 
   subscribeMachines(
     (machines) => {
@@ -351,13 +335,9 @@ if (copies.length) {
     },
     () => {
       machineryLoaded = true;
-      copies.forEach((copy) => renderTableState(copy, META[normalizeLang(copy.getAttribute("data-legal-lang"))].error));
+      copies.forEach((copy) => renderTableState(copy, META[lang].error));
     }
   );
-
-  document.addEventListener("app:language-change", (event) => {
-    applyLanguage(event?.detail?.lang || "es");
-  });
 
   observeMachineAdmin((user) => {
     const nextAdmin = isAdminUser(user);

@@ -19,30 +19,14 @@
   const machineYear = (params.get("year") || "").trim();
   const machineId = (params.get("id") || "").trim();
 
-  const getLang = () => {
-    if (window.unatomoI18n && typeof window.unatomoI18n.getLanguage === "function") {
-      return window.unatomoI18n.getLanguage();
-    }
-    return (document.documentElement.lang || "es").slice(0, 2).toLowerCase();
-  };
-
   const buildMachineMessage = () => {
     if (!machineType || !machineBrand || !machineModel) return "";
     const parts = [machineType, machineBrand, machineModel];
     if (machineYear) parts.push(machineYear);
     if (machineId) parts.push(machineId);
     const machineLabel = parts.join(", ");
-    const lang = getLang();
-    if (lang === "en") {
-      return `I want to receive information about the following machine: ${machineLabel}`;
-    }
-    if (lang === "it") {
-      return `Voglio ricevere informazioni sulla seguente macchina: ${machineLabel}`;
-    }
-    if (lang === "el") {
-      return `Θέλω να λάβω πληροφορίες για το ακόλουθο μηχάνημα: ${machineLabel}`;
-    }
-    return `Quiero recibir información sobre la siguiente máquina: ${machineLabel}`;
+    const template = messageField?.dataset.machineMessageTemplate || "{machine}";
+    return template.replace("{machine}", machineLabel);
   };
 
   const applySubject = () => {
@@ -63,8 +47,4 @@
 
   applySubject();
   applyMessage();
-  document.addEventListener("app:language-change", () => {
-    applySubject();
-    applyMessage();
-  });
 })();
