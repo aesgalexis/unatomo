@@ -193,13 +193,19 @@ function showStep(step, shouldFocus = true) {
     const itemStep = Number(item.dataset.stepIndicator);
     item.classList.toggle("is-active", itemStep === currentStep);
     item.classList.toggle("is-complete", itemStep < currentStep);
+    if (itemStep === currentStep) item.setAttribute("aria-current", "step");
+    else item.removeAttribute("aria-current");
   });
   backButton.hidden = currentStep === 1;
   nextButton.hidden = currentStep === 4;
   submitButton.hidden = currentStep !== 4;
   if (currentStep === 4) updateSummary();
   if (shouldFocus) {
-    document.querySelector(`[data-step="${currentStep}"] h2`)?.focus?.({ preventScroll: true });
+    const heading = document.querySelector(`[data-step="${currentStep}"] h2`);
+    if (heading) {
+      heading.tabIndex = -1;
+      heading.focus({ preventScroll: true });
+    }
     form.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 }
@@ -238,7 +244,7 @@ function buildSubmission(images) {
   };
 }
 
-function showSuccess(requestId) {
+function showSuccess(requestId, confirmationSent = true) {
   const reference = requestId || submissionId.slice(0, 8).toUpperCase();
   document.querySelector(".spares-hero").hidden = true;
   document.querySelector(".spares-progress").hidden = true;
@@ -247,6 +253,8 @@ function showSuccess(requestId) {
   successPanel.hidden = false;
   document.body.classList.add("request-complete");
   document.querySelector("#success-reference").textContent = t("success_reference").replace("{reference}", reference);
+  const emailNotice = successPanel.querySelector(".spares-success-note");
+  if (emailNotice) emailNotice.hidden = !confirmationSent;
   document.querySelector("#success-title").focus({ preventScroll: true });
   successPanel.scrollIntoView({ behavior: "smooth", block: "center" });
 }
@@ -335,7 +343,7 @@ form.addEventListener("submit", async (event) => {
     const response = await submitSpareRequest(buildSubmission(images));
     if (!response?.data?.ok) throw new Error("submission-rejected");
     statusElement.dataset.state = "success";
-    showSuccess(response.data.requestId);
+    showSuccess(response.data.requestId, response.data.confirmationSent !== false);
   } catch (error) {
     console.error(error);
     statusElement.dataset.state = "error";

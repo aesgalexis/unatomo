@@ -88,7 +88,7 @@ service firebase.storage {
     match /maquinaria/{machineId}/{fileName} {
       allow read: if true;
       allow create, update: if isLaundryServicesAdmin() && isLaundryMachineImage();
-      allow delete: if false;
+      allow delete: if isLaundryServicesAdmin();
     }
 
     match /{allPaths=**} {

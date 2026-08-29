@@ -1,10 +1,9 @@
 import {
   createMachine,
   getSuggestedMachineId,
-  observeMachineAdmin,
   updateMachine,
 } from "./ls_machine-store.js";
-import { isAdminUser } from "./firebase-config.js";
+import { isAdminUser, observeMachineAdmin } from "./firebase-config.js";
 
 const TYPE_OPTIONS = ["Plegadora", "Lavadora", "Tunel", "Secadora", "Calandra", "Prensa", "Empaquetadora", "Otro"];
 const STATE_OPTIONS = ["Usada", "Bueno", "Muy Bueno", "Excelente", "Repasada"];
@@ -91,6 +90,7 @@ const createDialog = () => {
           <div class="ls-machine-inline">
             <label><input id="ls-add-shipping" type="checkbox" checked /> Envío incluido</label>
             <label><input id="ls-add-startup" type="checkbox" checked /> Puesta en marcha incluida</label>
+            <label><input id="ls-add-visible" type="checkbox" checked /> Publicada</label>
           </div>
         </div>
 
@@ -115,7 +115,7 @@ const createDialog = () => {
 
         <div class="form-field form-field--full">
           <label for="ls-add-images">Imágenes</label>
-          <input id="ls-add-images" class="field" type="file" multiple accept="image/*" />
+          <input id="ls-add-images" class="field" type="file" multiple accept="image/jpeg,image/png,image/webp" />
         </div>
 
         <div class="form-field form-field--full">
@@ -167,6 +167,7 @@ const heatingWrap = dialog.querySelector("#ls-add-heating-wrap");
 const heatingField = dialog.querySelector("#ls-add-heating");
 const shippingField = dialog.querySelector("#ls-add-shipping");
 const startupField = dialog.querySelector("#ls-add-startup");
+const visibleField = dialog.querySelector("#ls-add-visible");
 const warrantyTypeField = dialog.querySelector("#ls-add-warranty-type");
 const warrantyField = dialog.querySelector("#ls-add-warranty");
 const imagesField = dialog.querySelector("#ls-add-images");
@@ -221,7 +222,25 @@ const resetStatus = () => {
 
 const renderFiles = () => {
   const files = Array.from(imagesField.files || []);
-  filesEl.innerHTML = "";
+  const removedExistingImages = new Set(Array.from(
+    filesEl.querySelectorAll("[data-existing-image]:not(:checked)"),
+    (checkbox) => checkbox.dataset.existingImage
+  ));
+  filesEl.replaceChildren();
+
+  if (dialogMode === "edit" && Array.isArray(editingMachine?.imagenes)) {
+    editingMachine.imagenes.forEach((image, index) => {
+      const item = document.createElement("li");
+      const label = document.createElement("label");
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.dataset.existingImage = image.path || image.url || "";
+      checkbox.checked = !removedExistingImages.has(checkbox.dataset.existingImage);
+      label.append(checkbox, ` Conservar ${image.name || `imagen ${index + 1}`}`);
+      item.append(label);
+      filesEl.append(item);
+    });
+  }
 
   if (files.length) {
     files.forEach((file) => {
@@ -232,14 +251,11 @@ const renderFiles = () => {
     return;
   }
 
-  if (dialogMode === "edit" && Array.isArray(editingMachine?.imagenes) && editingMachine.imagenes.length) {
+  if (!filesEl.children.length) {
     const item = document.createElement("li");
-    item.textContent = `${editingMachine.imagenes.length} imagen(es) ya asociadas. Las nuevas se añadirán.`;
-    filesEl.appendChild(item);
-    return;
+    item.textContent = "Sin imágenes seleccionadas.";
+    filesEl.append(item);
   }
-
-  filesEl.innerHTML = "<li>Sin imágenes seleccionadas.</li>";
 };
 
 const renderDerivedState = async () => {
@@ -291,6 +307,7 @@ const clearForm = () => {
   stateField.value = STATE_OPTIONS[0];
   shippingField.checked = true;
   startupField.checked = true;
+  visibleField.checked = true;
   warrantyTypeField.value = "";
   heatingField.value = "";
   submitButton.textContent = "Preparar alta";
@@ -316,6 +333,7 @@ const fillFormForEdit = (machine) => {
   heatingField.value = machine.calefaccion || "";
   shippingField.checked = Boolean(machine.envioIncluido);
   startupField.checked = Boolean(machine.puestaEnMarchaIncluida);
+  visibleField.checked = machine.visible !== false;
   warrantyTypeField.value = machine.garantiaTipo || (machine.garantiaPiezasAnos ? "piezas" : machine.garantiaTexto ? "total" : "");
   warrantyField.value = getWarrantyMonthsFromMachine(machine);
   commentsField.value = machine.comentarios || "";
@@ -369,6 +387,7 @@ dialog.querySelector("#ls-add-cancel").addEventListener("click", () => dialog.cl
   heatingField,
   shippingField,
   startupField,
+  visibleField,
   warrantyTypeField,
   warrantyField,
   commentsField,
@@ -401,6 +420,11 @@ form.addEventListener("submit", async (event) => {
     calefaccion: heatingField.value,
     envioIncluido: shippingField.checked,
     puestaEnMarchaIncluida: startupField.checked,
+    visible: visibleField.checked,
+    keptImagePaths: Array.from(
+      filesEl.querySelectorAll("[data-existing-image]:checked"),
+      (checkbox) => checkbox.dataset.existingImage
+    ),
         garantiaTipo: warrantyTypeField.value,
         garantiaDetalle: warrantyField.value,
         comentarios: commentsField.value,
@@ -416,7 +440,9 @@ form.addEventListener("submit", async (event) => {
     statusEl.dataset.state = "ok";
     statusEl.textContent =
       dialogMode === "edit"
-        ? `Máquina ${saved.id} actualizada correctamente.`
+        ? saved.cleanupFailed
+          ? `Máquina ${saved.id} actualizada; ${saved.cleanupFailed} imagen(es) no pudieron limpiarse.`
+          : `Máquina ${saved.id} actualizada correctamente.`
         : `Máquina ${saved.id} guardada correctamente.`;
     dialog.close();
     clearForm();
@@ -445,5 +471,4 @@ document.querySelectorAll(".ls-filterbar").forEach((bar) => {
 });
 
 observeMachineAdmin(syncAdminControls);
-void renderDerivedState();
 renderFiles();

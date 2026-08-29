@@ -98,6 +98,11 @@ Read this before changing data flows, callable functions, machine ownership, adm
   `/laundryservices/catalogo/`. The checked-in migration
   snapshot lives under `firebase/catalog/`, outside the public website, and is
   synchronized with the owner-run catalogue command.
+- `agregador_maquinaria_LS`: public used-machinery records. Only accounts with
+  the `laundryServicesAdmin` claim may create or update them. Records are
+  unpublished with `visible: false` instead of deleted. Their public images live
+  under `maquinaria/{machineId}/`; only that claim may create, replace, or clean
+  those objects.
 
 Machine documents are stored as metadata on `machines.documents`. The actual files live in Firebase Storage under:
 
@@ -224,6 +229,11 @@ frontend wrappers live under `static/js/dashboard/`.
   aggregate does not exist yet. It creates that aggregate once and returns the
   same three counts, so a newly deployed landing does not wait for its first
   scheduled refresh. It follows the existing optional App Check enforcement.
+- `submitLaundrySpareRequest`: public, rate-limited spare-part request. It
+  validates image signatures and required fields before sending an idempotent
+  internal notification. Once that internal message is accepted, a failed
+  customer confirmation is logged but does not report the already-received
+  request as failed.
 - `deliverEmailOutbox`: private Firestore trigger for `email_outbox`. Account
   flows enqueue event-addressed messages from server code; the trigger renders
   repository-owned bilingual templates and sends

@@ -26,6 +26,9 @@ relevant sections instead of loading the complete file by default.
   including account settings and the global access page.
 - `laundryservices/{es,en,it,el}/`: physical localized Laundry Services pages
   with translated slugs; shared JavaScript provides behavior, not page copy.
+- `studio/{es,en,it,el}/`: physical localized UNATOMO Studio pages; shared CSS
+  and JavaScript provide the visual shell and behavior, while copy and SEO stay
+  in each localized HTML page.
 - `nfc/controlpanel/`: owner-only control panel UI. `panel.js` is the small
   entry/composition layer; `panelText.js`, `panelShared.js`,
   `panelSystemIntegrity.js`, `panelStatsBackup.js`, `panelLocalCards.js`,
@@ -38,7 +41,8 @@ relevant sections instead of loading the complete file by default.
 
 - `static/js/dashboard/`: dashboard bootstrap, runtime, rendering, data,
   machine cards, hooks, views, and tabs.
-- `static/js/firebase/`: Firebase client initialization.
+- `static/js/firebase/`: shared Firebase app/App Check initialization, the
+  read-only public Firestore entry, and the full authenticated client facade.
 - `static/js/qr-print/`: QR print page logic.
 - `static/js/registro/`: registration, login, reset, and session menu logic.
 - `nfc/controlpanel/panelAccessRequests.js`: superadmin review of public access

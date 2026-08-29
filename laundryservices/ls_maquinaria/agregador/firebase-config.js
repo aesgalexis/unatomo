@@ -1,5 +1,8 @@
 import { app, auth, db, loginWithGoogle } from "/static/js/registro/firebase-init.js";
-import { getIdTokenResult } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+import {
+  getIdTokenResult,
+  onAuthStateChanged,
+} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 import { getStorage } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-storage.js";
 
 const ADMIN_CLAIM = "laundryServicesAdmin";
@@ -26,3 +29,9 @@ export const resolveAdminUser = async (user, forceRefresh = false) => {
 };
 
 export const isAdminUser = (user) => adminClaimCache.get(user?.uid || "") === true;
+
+export const observeMachineAdmin = (callback) =>
+  onAuthStateChanged(auth, async (user) => {
+    if (user) await resolveAdminUser(user);
+    callback(user);
+  });

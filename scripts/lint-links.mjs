@@ -6,7 +6,8 @@ const exts = new Set([".html", ".js", ".mjs", ".css"]);
 const ignoreDirs = new Set(["node_modules", ".git", "dist"]);
 const ignorePaths = new Set([
   "firebase/functions/lib",
-  "scripts/check-nfc-architecture.mjs"
+  "scripts/check-nfc-architecture.mjs",
+  "scripts/check-studio-locales.mjs"
 ]);
 
 const toPosix = (value) => value.replaceAll("\\", "/");
@@ -46,7 +47,7 @@ const normalizeTarget = (url) => {
 
 const rawMatches = [];
 const files = walk(root);
-const regex = /\/(?:laundryservices|static|es|en|nfc|controlpanel)\/[^\s"'<>)]*/g;
+const regex = /\/(?:laundryservices|studio|static|es|en|nfc|controlpanel)\/[^\s"'<>)]*/g;
 
 for (const file of files) {
   const content = fs.readFileSync(file, "utf8");

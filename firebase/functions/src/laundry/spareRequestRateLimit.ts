@@ -1,8 +1,6 @@
 import {createHash} from "node:crypto";
-import {HttpsError} from "firebase-functions/v2/https";
 import {admin, db} from "../core/firebase";
-
-const MAX_REQUESTS_PER_IP_HOUR = 6;
+import {nextSpareRequestRateLimitCount} from "./spareRequestRateLimitPolicy";
 
 export const enforceSpareRequestRateLimit = async (ip: string) => {
   const ipHash = createHash("sha256").update(ip || "unknown").digest("hex");
@@ -11,13 +9,10 @@ export const enforceSpareRequestRateLimit = async (ip: string) => {
     .doc(`laundry_spare_${ipHash}_${hourBucket}`);
   await db.runTransaction(async (transaction) => {
     const snapshot = await transaction.get(ref);
-    const count = Number(snapshot.data()?.count || 0);
-    if (count >= MAX_REQUESTS_PER_IP_HOUR) {
-      throw new HttpsError("resource-exhausted", "request-limit-reached");
-    }
+    const nextCount = nextSpareRequestRateLimitCount(snapshot.data()?.count);
     transaction.set(ref, {
       type: "laundry_spare_request",
-      count: count + 1,
+      count: nextCount,
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     }, {merge: true});
   });

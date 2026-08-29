@@ -77,6 +77,23 @@ for (const lang of LANGS) {
     if (bodyNodes.some((node) => node.tagName === "script" && (attribute(node, "src") || "").includes("/nfc/"))) {
       failures.push(`${route}: page navigation must not depend on NFC code.`);
     }
+    const runtimeConfigScripts = headNodes.filter((node) =>
+      node.tagName === "script" && attribute(node, "src") === "/static/js/config/runtime-config.js");
+    const needsFirebase = page === "machinery" || page === "spares";
+    if (runtimeConfigScripts.length !== (needsFirebase ? 1 : 0)) {
+      failures.push(`${route}: Firebase runtime config must load only on data-backed public pages.`);
+    }
+    if (bodyNodes.some((node) => node.tagName === "script" &&
+      (attribute(node, "src") || "").includes("ls_machine-add.js"))) {
+      failures.push(`${route}: machinery admin editor must be loaded dynamically, not by public HTML.`);
+    }
+    const powered = bodyNodes.find((node) => node.tagName === "p" &&
+      (attribute(node, "class") || "").split(/\s+/u).includes("ls-footer-disclosure-powered"));
+    const poweredLink = powered ? findAll(powered, (node) => node.tagName === "a")[0] : null;
+    if (nodeText(powered).trim() !== "Powered by people who like machines." ||
+        attribute(poweredLink, "href") !== "/es/nosotros/") {
+      failures.push(`${route}: winged-shoe credit must remain untranslated and link to /es/nosotros/.`);
+    }
     const expectedBackHref = page === "home" ? "https://unatomo.com/" : routePath(lang, "home");
     if (attribute(body, "data-back-href") !== expectedBackHref) failures.push(`${route}: incorrect back destination.`);
     if (/â|Ã|Â|ï»¿|�/u.test(html)) failures.push(`${route}: possible mojibake detected.`);

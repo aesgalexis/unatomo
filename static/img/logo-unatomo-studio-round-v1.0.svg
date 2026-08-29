@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 384" role="img" aria-labelledby="studio-logo-title studio-logo-desc">
+  <title id="studio-logo-title">UNATOMO Studio</title>
+  <desc id="studio-logo-desc">Aro circular degradado con un corte y un punto.</desc>
+  <defs>
+    <linearGradient id="studio-gradient" x1="40" y1="344" x2="344" y2="40" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f29500"/>
+      <stop offset=".18" stop-color="#efa500"/>
+      <stop offset=".48" stop-color="#29a1e2"/>
+      <stop offset=".74" stop-color="#22b573"/>
+      <stop offset="1" stop-color="#223e73"/>
+    </linearGradient>
+  </defs>
+
+  <circle cx="192" cy="192" r="172.5" fill="none" stroke="url(#studio-gradient)" stroke-width="27" stroke-dasharray="1010 74" transform="rotate(-18 192 192)"/>
+  <circle cx="341.4" cy="105.75" r="13.5" fill="#168f7b"/>
+</svg>

@@ -3,6 +3,8 @@ import { join, relative, resolve, sep } from "node:path";
 
 const root = resolve("laundryservices");
 const backendRoot = resolve("firebase/functions/src/laundry");
+const machineryEntry = resolve("laundryservices/ls_maquinaria.js");
+const buildScript = resolve("scripts/build-static.mjs");
 const MAX_EXECUTABLE_LINES = 500;
 const MAX_EXECUTABLE_BYTES = 22_000;
 const MAX_BACKEND_LINES = 300;
@@ -86,6 +88,21 @@ for (const file of backendFiles.filter((path) => path.endsWith(".ts"))) {
       `functions/${relativePath}: ${lines} lines and ${bytes} bytes exceeds the Laundry backend module limit.`
     );
   }
+}
+
+const machinerySource = await readFile(machineryEntry, "utf8");
+if (!machinerySource.includes("ls_machine-public-store.js") ||
+    machinerySource.includes('from "/laundryservices/ls_maquinaria/agregador/ls_machine-store.js"') ||
+    machinerySource.includes('from "/laundryservices/ls_maquinaria/agregador/firebase-config.js"')) {
+  failures.push("ls_maquinaria.js: public entry must not statically import admin/auth/storage modules.");
+}
+
+const buildSource = await readFile(buildScript, "utf8");
+if (!buildSource.includes('"laundryservices/ls_maquinaria/imagenes/"')) {
+  failures.push("build-static.mjs: repository-only machinery image archive must stay out of dist.");
+}
+if (!buildSource.includes("bundleLaundryStyles")) {
+  failures.push("build-static.mjs: Laundry stylesheet imports must be bundled for production.");
 }
 
 if (failures.length) {

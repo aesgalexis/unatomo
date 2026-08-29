@@ -20,11 +20,15 @@ not be embedded in public JavaScript or JSON.
   Spanish-only administration surface.
 - Used machinery:
   - `ls_maquinaria.js`: public filtering, pagination and rendering.
+  - `ls_maquinaria/agregador/ls_machine-public-store.js`: read-only public
+    subscription. It does not import Authentication, Storage or write APIs.
   - Each localized machinery HTML page contains one small JSON configuration
     block for labels used while rendering live Firestore records.
   - `ls_maquinaria/agregador/ls_machine-store.js`: Firestore and Storage
     persistence.
   - `ls_maquinaria/agregador/ls_machine-add.js`: privileged editor UI.
+    It is loaded only when an authenticated maintainer opens a machinery route
+    with `?admin=1`; ordinary visitors do not download the admin bundle.
 - Spare-part requests:
   - `recambios/recambios.js`: wizard state, validation and submission.
   - Each localized spare-parts HTML page contains one small JSON configuration
@@ -70,14 +74,21 @@ the authenticated Firebase UID.
 
 Used-machinery listings are separate records in
 `agregador_maquinaria_LS`. They are read from Firestore and edited through the
-privileged UI. The old browser-side automatic seed has been removed: opening a
-public page must never recreate operational data.
+privileged UI. Editors can unpublish records and remove images. Storage cleanup
+is allowed only for the `laundryServicesAdmin` claim, and failed metadata writes
+compensate by removing newly uploaded objects. The old browser-side automatic
+seed has been removed: opening a public page must never recreate operational
+data.
 
 ## Guardrails
 
 Run `npm run test:laundry`. The checks reject public catalogue files, legacy
 client-side translation modules and missing localized-route SEO relationships;
 they also cap executable Laundry Services modules at 500 lines and 22 KB.
+
+The static build concatenates the split Laundry Services stylesheets into the
+published `ls_styles.css` and excludes the repository-only legacy machinery
+image archive. Source files remain split for maintenance and local development.
 
 Publishing, Firestore rule deployment and catalogue synchronization remain
 owner-run production operations.

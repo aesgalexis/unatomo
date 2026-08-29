@@ -1,22 +1,25 @@
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 import {
   getDocs,
   getDoc,
   collection,
   doc,
-  onSnapshot,
-  query,
   runTransaction,
   serverTimestamp,
   setDoc,
   updateDoc,
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
-import { getDownloadURL, ref, uploadBytes } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-storage.js";
-import { auth, db, isAdminUser, resolveAdminUser, storage } from "./firebase-config.js";
+import {
+  deleteObject,
+  getDownloadURL,
+  ref,
+  uploadBytes,
+} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-storage.js";
+import { db, isAdminUser, storage } from "./firebase-config.js";
 
 const MACHINES_COLLECTION = "agregador_maquinaria_LS";
 const COUNTERS_COLLECTION = "maquinaria_counters";
-const PREFIX_ORDER = ["P", "T", "L", "S", "C", "R", "M"];
+const MAX_IMAGE_BYTES = 12 * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 const normalizeTypeKey = (value) =>
   String(value || "")
     .trim()
@@ -90,24 +93,6 @@ const extractSequence = (id) => {
   return Number.parseInt(match[2], 10) || 0;
 };
 
-const getPrefixRank = (id) => {
-  const prefix = String(id || "").trim().charAt(0).toUpperCase();
-  const rank = PREFIX_ORDER.indexOf(prefix);
-  return rank === -1 ? PREFIX_ORDER.length : rank;
-};
-
-export const sortMachines = (machines) =>
-  [...machines].sort((a, b) => {
-    const rankDiff = getPrefixRank(a.id) - getPrefixRank(b.id);
-    if (rankDiff !== 0) return rankDiff;
-    return extractSequence(a.id) - extractSequence(b.id);
-  });
-
-export const observeMachineAdmin = (callback) =>
-  onAuthStateChanged(auth, async (user) => {
-    if (user) await resolveAdminUser(user);
-    callback(user);
-  });
 const getNextSequenceForPrefix = async (prefix) => {
   const snapshot = await getDocs(collection(db, MACHINES_COLLECTION));
   let maxFromDocs = 0;
@@ -131,55 +116,6 @@ export const getSuggestedMachineId = async (categoria) => {
   const nextSequence = await getNextSequenceForPrefix(prefix);
   return helper.buildMachineId(categoria, nextSequence);
 };
-
-export const subscribeMachines = (onData, onError) =>
-  onSnapshot(
-    query(collection(db, MACHINES_COLLECTION)),
-    (snapshot) => {
-      const machines = snapshot.docs
-        .map((item) => {
-          const data = item.data() || {};
-          return {
-            docId: item.id,
-            id: data.id || item.id,
-            categoria: data.categoria || "",
-            marca: data.marca || "",
-            modelo: data.modelo || "",
-            capacidad: data.capacidad || "",
-            anio: data.anio ?? null,
-            estado: data.estado || "",
-            ubicacion: data.ubicacion || "",
-            precioAmount: data.precioAmount ?? null,
-            precioTexto: data.precioTexto || "",
-            envioIncluido: data.envioIncluido !== false,
-            puestaEnMarchaIncluida: data.puestaEnMarchaIncluida !== false,
-            garantiaTexto: data.garantiaTexto || "",
-            garantiaPiezasAnos: data.garantiaPiezasAnos ?? null,
-            garantiaMeses: data.garantiaMeses ?? null,
-            garantiaTipo: data.garantiaTipo || "",
-            comentarios: data.comentarios || "",
-            calefaccion: data.calefaccion || "",
-            imagenes: Array.isArray(data.imagenes)
-              ? data.imagenes.map((image) => (typeof image === "string" ? { url: image, path: "", name: "" } : image))
-              : [],
-            visible: data.visible !== false,
-            createdAt: data.createdAt || null,
-            updatedAt: data.updatedAt || null,
-            createdBy: data.createdBy || "",
-          };
-        })
-        .filter((item) =>
-          item.visible !== false &&
-          item.id &&
-          item.categoria &&
-          item.marca &&
-          item.estado &&
-          item.ubicacion
-        );
-      onData(sortMachines(machines));
-    },
-    onError
-  );
 
 const reserveNextMachineId = async (categoria) => {
   const helper = getMachineIdHelper();
@@ -213,6 +149,11 @@ const uploadMachineImages = async (machineId, files) => {
   const selected = Array.from(files || []);
   if (!selected.length) return [];
 
+  if (selected.some((file) =>
+    !ALLOWED_IMAGE_TYPES.has(file.type) || file.size > MAX_IMAGE_BYTES)) {
+    throw new Error("Solo se admiten imágenes JPG, PNG o WEBP de hasta 12 MB.");
+  }
+
   const uploaded = [];
   for (let index = 0; index < selected.length; index += 1) {
     const file = selected[index];
@@ -227,6 +168,12 @@ const uploadMachineImages = async (machineId, files) => {
     });
   }
   return uploaded;
+};
+
+const cleanupImages = async (images) => {
+  const paths = images.map((image) => image?.path).filter(Boolean);
+  const results = await Promise.allSettled(paths.map((path) => deleteObject(ref(storage, path))));
+  return results.filter(({ status }) => status === "rejected").length;
 };
 
 const buildWarrantyData = (type, detail) => {
@@ -277,10 +224,10 @@ export const createMachine = async (draft, files, user) => {
     throw new Error("Missing required machine fields");
   }
 
-  const machineId = await reserveNextMachineId(categoria);
-  const images = await uploadMachineImages(machineId, files);
   const priceFields = buildPriceFields(draft?.precio);
   const warranty = buildWarrantyData(draft?.garantiaTipo, draft?.garantiaDetalle);
+  const machineId = await reserveNextMachineId(categoria);
+  const images = await uploadMachineImages(machineId, files);
 
   const payload = {
     id: machineId,
@@ -303,13 +250,18 @@ export const createMachine = async (draft, files, user) => {
     comentarios: String(draft?.comentarios || "").trim(),
     calefaccion: String(draft?.calefaccion || "").trim(),
     imagenes: images,
-    visible: true,
+    visible: draft?.visible !== false,
     createdBy: user.email || "",
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   };
 
-  await setDoc(doc(db, MACHINES_COLLECTION, machineId), payload);
+  try {
+    await setDoc(doc(db, MACHINES_COLLECTION, machineId), payload);
+  } catch (error) {
+    await cleanupImages(images);
+    throw error;
+  }
   return payload;
 };
 
@@ -340,11 +292,15 @@ export const updateMachine = async (machineId, draft, files, user, currentMachin
     throw new Error("Machine not found");
   }
 
-  const existingData = currentMachine || existingSnap.data() || {};
-  const newImages = await uploadMachineImages(normalizedId, files);
+  const existingData = existingSnap.data() || currentMachine || {};
   const existingImages = Array.isArray(existingData.imagenes) ? existingData.imagenes : [];
+  const keptPaths = new Set(Array.isArray(draft?.keptImagePaths) ? draft.keptImagePaths : []);
+  const keptImages = existingImages.filter((image) =>
+    image?.path ? keptPaths.has(image.path) : keptPaths.has(image?.url));
+  const removedImages = existingImages.filter((image) => !keptImages.includes(image));
   const warranty = buildWarrantyData(draft?.garantiaTipo, draft?.garantiaDetalle);
   const priceFields = buildPriceFields(draft?.precio);
+  const newImages = await uploadMachineImages(normalizedId, files);
 
   const payload = {
     id: normalizedId,
@@ -366,14 +322,21 @@ export const updateMachine = async (machineId, draft, files, user, currentMachin
     garantiaTipo: warranty.garantiaTipo,
     comentarios: String(draft?.comentarios || "").trim(),
     calefaccion: String(draft?.calefaccion || "").trim(),
-    imagenes: [...existingImages, ...newImages],
-    visible: true,
+    imagenes: [...keptImages, ...newImages],
+    visible: draft?.visible !== false,
     updatedAt: serverTimestamp(),
   };
 
-  await updateDoc(docRef, payload);
+  try {
+    await updateDoc(docRef, payload);
+  } catch (error) {
+    await cleanupImages(newImages);
+    throw error;
+  }
+  const cleanupFailed = await cleanupImages(removedImages);
   return {
     ...existingData,
     ...payload,
+    cleanupFailed,
   };
 };

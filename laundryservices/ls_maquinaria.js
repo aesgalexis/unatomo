@@ -1,8 +1,4 @@
-import {
-  observeMachineAdmin,
-  subscribeMachines,
-} from "/laundryservices/ls_maquinaria/agregador/ls_machine-store.js";
-import { isAdminUser } from "/laundryservices/ls_maquinaria/agregador/firebase-config.js";
+import { subscribeMachines } from "/laundryservices/ls_maquinaria/agregador/ls_machine-public-store.js";
 
 const LANGS = ["es", "en", "it", "el"];
 const PAGE_SIZE = 10;
@@ -142,6 +138,7 @@ if (copies.length) {
     const images = Array.isArray(machine.imagenes) ? machine.imagenes.filter((item) => item?.url) : [];
     const hasImages = images.length > 0;
     const extrasText = extras.length ? ` · ${extras.join(" · ")}` : "";
+    const visibilityText = isMachineAdmin && machine.visible === false ? " · Oculta" : "";
     const infoHref = buildInfoHref(machine, lang);
 
     return `
@@ -159,9 +156,9 @@ if (copies.length) {
           ${comments ? `<div class="ls-table-meta ls-table-comment">${comments}</div>` : ""}
           ${heating ? `<div class="ls-table-meta"><strong>${escapeHtml(labels.heating)}</strong> ${heating}</div>` : ""}
           <div class="ls-table-subrow-inner">
-            <div><strong>${escapeHtml(labels.price)}</strong> <span class="ls-price">${price}</span>${escapeHtml(extrasText)} | <strong>${escapeHtml(labels.id)}</strong> ${machineId}</div>
+            <div><strong>${escapeHtml(labels.price)}</strong> <span class="ls-price">${price}</span>${escapeHtml(extrasText)}${visibilityText} | <strong>${escapeHtml(labels.id)}</strong> ${machineId}</div>
             <div class="ls-table-actions">
-              ${hasImages ? `<button type="button" class="ls-mini-action ls-gallery-toggle" data-gallery-id="${machineId}"><span class="ls-mini-action-label">${escapeHtml(labels.photos)}</span></button>` : ""}
+              ${hasImages ? `<button type="button" class="ls-mini-action ls-gallery-toggle" data-gallery-id="${machineId}" aria-expanded="false" aria-controls="ls-gallery-${machineId}"><span class="ls-mini-action-label">${escapeHtml(labels.photos)}</span></button>` : ""}
               <a class="ls-mini-action" href="${escapeHtml(infoHref)}"><span class="ls-mini-action-label">${escapeHtml(labels.info)}</span></a>
               ${
                 isMachineAdmin
@@ -174,7 +171,7 @@ if (copies.length) {
       </tr>
       ${
         hasImages
-          ? `<tr class="ls-table-gallery-row" data-gallery-id="${machineId}" data-gallery-open="false" hidden>
+          ? `<tr id="ls-gallery-${machineId}" class="ls-table-gallery-row" data-gallery-id="${machineId}" data-gallery-open="false" hidden>
               <td colspan="7">
                 <div class="ls-machine-gallery" aria-label="${escapeHtml(`${labels.gallery} ${machine.id}`)}">
                   ${images
@@ -240,7 +237,10 @@ if (copies.length) {
   const renderMachinesForCopy = (copy, machines) => {
     const body = copy.querySelector(".ls-table tbody");
     if (!body) return;
-    const filteredMachines = getFilteredMachines(copy, machines);
+    const visibleMachines = isMachineAdmin
+      ? machines
+      : machines.filter((machine) => machine.visible !== false);
+    const filteredMachines = getFilteredMachines(copy, visibleMachines);
     if (!filteredMachines.length) {
       renderTableState(copy, machineryLoaded && allowEmptyState ? META[lang].empty : META[lang].loading);
       return;
@@ -320,6 +320,7 @@ if (copies.length) {
     const nextOpen = gallery.dataset.galleryOpen !== "true";
     gallery.dataset.galleryOpen = nextOpen ? "true" : "false";
     gallery.hidden = !nextOpen;
+    toggle.setAttribute("aria-expanded", String(nextOpen));
     if (priceRow && priceRow.classList.contains("ls-table-subrow")) {
       priceRow.classList.toggle("is-gallery-open", nextOpen);
     }
@@ -339,10 +340,18 @@ if (copies.length) {
     }
   );
 
-  observeMachineAdmin((user) => {
-    const nextAdmin = isAdminUser(user);
+  document.addEventListener("ls:machine-admin-change", (event) => {
+    const nextAdmin = event.detail?.isAdmin === true;
     if (nextAdmin === isMachineAdmin) return;
     isMachineAdmin = nextAdmin;
     copies.forEach((copy) => renderMachinesForCopy(copy, currentMachines));
   });
+
+  if (new URLSearchParams(window.location.search).get("admin") === "1") {
+    const stylesheet = document.createElement("link");
+    stylesheet.rel = "stylesheet";
+    stylesheet.href = "/laundryservices/ls_maquinaria/agregador/ls_machine-add.css";
+    document.head.append(stylesheet);
+    import("/laundryservices/ls_maquinaria/agregador/ls_machine-add.js");
+  }
 }

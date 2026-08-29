@@ -342,7 +342,7 @@ describe("Storage rules", () => {
     ));
   });
 
-  test("preserve public legacy images but restrict their writes", async () => {
+  test("preserve public machinery images and restrict their management", async () => {
     const legacyPath = "maquinaria/legacy-machine/photo.webp";
     await assertSucceeds(getBytes(ref(anonymousBucket(), legacyPath)));
     await assertFails(uploadBytes(
@@ -356,6 +356,9 @@ describe("Storage rules", () => {
       { contentType: "image/webp" }
     ));
     await assertFails(deleteObject(
+      ref(bucket(OUTSIDER_UID, { laundryServicesAdmin: false }), legacyPath)
+    ));
+    await assertSucceeds(deleteObject(
       ref(bucket("laundry-admin", { laundryServicesAdmin: true }), legacyPath)
     ));
   });
