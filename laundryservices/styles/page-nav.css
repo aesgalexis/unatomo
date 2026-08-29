@@ -1,0 +1,46 @@
+.ls-minimal-page-nav {
+  position: fixed;
+  right: max(1rem, env(safe-area-inset-right));
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  z-index: 55;
+  display: flex;
+  gap: 0.38rem;
+}
+
+.ls-minimal-page-nav-button {
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--fg) 24%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  color: color-mix(in srgb, var(--fg) 78%, transparent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0.18rem 0.65rem color-mix(in srgb, #000 12%, transparent);
+  cursor: pointer;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ls-minimal-page-nav-button[hidden] {
+  display: none;
+}
+
+.ls-minimal-page-nav-button svg {
+  width: 1.15rem;
+  height: 1.15rem;
+  fill: currentColor;
+}
+
+.ls-minimal-page-nav-button:hover {
+  border-color: color-mix(in srgb, var(--fg) 42%, transparent);
+  color: var(--fg);
+}
+
+.ls-minimal-page-nav-button:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--fg) 52%, transparent);
+  outline-offset: 2px;
+}

@@ -61,10 +61,11 @@
   const getCopy = () => COPY[document.documentElement.lang] || COPY.es;
 
   const getNormalizedPath = () => window.location.pathname.replace(/\/+$/, "") || "/";
+  const isLocalizedRoot = (path) => /^\/(?:es|en|it|el)(?:\/index\.html)?$/.test(path);
 
   const usesRootFooterLogo = () => {
     const path = getNormalizedPath();
-    return path === "/" || path === "/index.html" || path === "/landing" || path === "/landing/index.html";
+    return path === "/" || path === "/index.html" || path === "/landing" || path === "/landing/index.html" || isLocalizedRoot(path);
   };
 
   const usesContactFooter = () => {
@@ -74,8 +75,11 @@
       path === "/index.html" ||
       path === "/landing" ||
       path === "/landing/index.html" ||
+      isLocalizedRoot(path) ||
       path.startsWith("/landing/nosotros") ||
       path.startsWith("/landing/contacto") ||
+      /^\/(?:es\/nosotros|en\/about|it\/chi-siamo|el\/schetika-me-emas)(?:\/|$)/.test(path) ||
+      /^\/(?:es\/contacto|en\/contact|it\/contatto|el\/epikoinonia)(?:\/|$)/.test(path) ||
       path.startsWith("/ssl-simulator")
     );
   };
@@ -121,7 +125,7 @@
     if (rootFooterLogo) {
       company.classList.add("is-reserved-space");
       company.setAttribute("aria-hidden", "true");
-    } else if (getNormalizedPath().startsWith("/landing/nosotros")) {
+    } else if (document.body.classList.contains("landing-about-page")) {
       company.append("Powered by ");
       const ourselvesLink = document.createElement("a");
       ourselvesLink.href = "#landing-topbar-mount";
@@ -132,12 +136,13 @@
       });
       company.append(ourselvesLink, ".");
     } else if (
-      getNormalizedPath().startsWith("/landing/contacto") ||
+      document.body.classList.contains("landing-contact-page") ||
       getNormalizedPath().startsWith("/ssl-simulator")
     ) {
       company.append("Powered by ");
       const poweredByLink = document.createElement("a");
-      poweredByLink.href = "/landing/nosotros/";
+      const lang = (document.documentElement.lang || "es").slice(0, 2);
+      poweredByLink.href = ({es: "/es/nosotros/", en: "/en/about/", it: "/it/chi-siamo/", el: "/el/schetika-me-emas/"})[lang] || "/es/nosotros/";
       poweredByLink.textContent = "people who like machines";
       company.append(poweredByLink, ".");
     } else {

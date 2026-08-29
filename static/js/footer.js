@@ -97,7 +97,7 @@
   company.className = "footer-disclosure-company";
   company.append("Powered by ");
   const poweredByLink = document.createElement("a");
-  poweredByLink.href = "/landing/nosotros/";
+  poweredByLink.href = "/es/nosotros/";
   poweredByLink.textContent = "people who like machines";
   company.appendChild(poweredByLink);
   company.append(".");

@@ -23,23 +23,18 @@
     it: {
       sending: "Invio...",
       success: "Messaggio inviato correttamente.",
-      sendError: "Si e verificato un problema durante l'invio. Riprova piu tardi.",
-      networkError: "Si e verificato un problema di connessione. Riprova.",
+      sendError: "Si è verificato un problema durante l'invio. Riprova più tardi.",
+      networkError: "Si è verificato un problema di connessione. Riprova.",
     },
     el: {
-      sending: "Apostoli...",
-      success: "To minima stalike epitixos.",
-      sendError: "Ypirxe provlima kata tin apostoli. Dokimaste xana argotera.",
-      networkError: "Ypirxe provlima syndesis. Dokimaste xana.",
+      sending: "Αποστολή...",
+      success: "Το μήνυμα στάλθηκε επιτυχώς.",
+      sendError: "Παρουσιάστηκε πρόβλημα κατά την αποστολή. Δοκιμάστε ξανά αργότερα.",
+      networkError: "Παρουσιάστηκε πρόβλημα σύνδεσης. Δοκιμάστε ξανά.",
     },
   };
 
-  const getLang = () => {
-    if (window.unatomoI18n && typeof window.unatomoI18n.getLanguage === "function") {
-      return window.unatomoI18n.getLanguage();
-    }
-    return (document.documentElement.lang || "es").slice(0, 2).toLowerCase();
-  };
+  const getLang = () => (document.documentElement.lang || "es").slice(0, 2).toLowerCase();
 
   const setStatus = (message, state) => {
     if (!status) return;
@@ -59,8 +54,6 @@
   };
 
   applySubject();
-  document.addEventListener("app:language-change", applySubject);
-
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
 

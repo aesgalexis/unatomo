@@ -308,12 +308,15 @@ body.page .ls-topbar #lang-toggle {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+  text-decoration: none;
 }
 
 .lang-option-check { flex: 0 0 1em; visibility: hidden; font-size: 0.95rem; font-weight: 700; line-height: 1; text-align: center; }
+.lang-option[aria-current="page"] .lang-option-check,
 .lang-option[aria-checked="true"] .lang-option-check { visibility: visible; }
 
 .lang-option:hover {
   background: color-mix(in srgb, var(--fg) 8%, transparent);
+  text-decoration: none;
 }
 

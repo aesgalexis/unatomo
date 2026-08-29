@@ -173,8 +173,8 @@ body {
 .landing-lang-option {
   width: 100%;
   padding: 0.5rem 0.75rem;
-  border: 0;
-  border-radius: 0.55rem;
+  border: 1px solid transparent;
+  border-radius: 0.6rem;
   background: transparent;
   color: var(--fg);
   font: inherit;
@@ -185,13 +185,16 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+  text-decoration: none;
 }
 
 .landing-lang-check { flex: 0 0 1em; visibility: hidden; font-size: 0.95rem; font-weight: 700; line-height: 1; text-align: center; }
+.landing-lang-option[aria-current="page"] .landing-lang-check,
 .landing-lang-option[aria-checked="true"] .landing-lang-check { visibility: visible; }
 
 .landing-lang-option:hover {
   background: color-mix(in srgb, var(--fg) 8%, transparent);
+  text-decoration: none;
 }
 
 #landing-upperfooter-mount,

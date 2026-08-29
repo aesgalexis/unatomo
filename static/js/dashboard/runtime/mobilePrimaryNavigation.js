@@ -165,7 +165,7 @@ export const initMobilePrimaryNavigation = ({ sectionNav, suggestionsLink } = {}
       <p class="mobile-primary-nav-credits-note">${isEnglish
         ? "Developed using OpenAI Codex tools. Authentication, data, and storage on Google Firebase; code and publishing with GitHub."
         : "Desarrollado con herramientas de OpenAI Codex. Autenticación, datos y almacenamiento sobre Firebase de Google; código y publicación con GitHub."}</p>
-      <p class="mobile-primary-nav-credits-powered">Powered by <a href="/landing/nosotros/">people who like machines</a>.</p>
+      <p class="mobile-primary-nav-credits-powered">Powered by <a href="/es/nosotros/">people who like machines</a>.</p>
       <small>© ${new Date().getFullYear()} UNATOMO CORE SL · ${isEnglish ? "All rights reserved." : "Todos los derechos reservados."}</small>
     </div>
   `;

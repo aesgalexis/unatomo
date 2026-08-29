@@ -13,7 +13,7 @@
   ],
   "manufacturers": [
     { "id": "girbau", "name": "Girbau", "aliases": [] },
-    { "id": "alliance", "name": "Alliance Laundry Systems", "aliases": ["Alliance", "ALS"], "brands": ["Speed Queen", "UniMac", "Huebsch", "Primus", "IPSO", "LAVAMAC", "No lo sé"] },
+    { "id": "alliance", "name": "Alliance Laundry Systems", "aliases": ["Alliance", "ALS"], "brands": ["Speed Queen", "UniMac", "Huebsch", "Primus", "IPSO", "LAVAMAC"] },
     { "id": "carbonell", "name": "Carbonell", "aliases": ["Carbonell Cía."] },
     { "id": "jensen", "name": "JENSEN", "aliases": ["Jensen", "Senking", "L-TRON", "Futurail"] },
     { "id": "kannegiesser", "name": "Kannegiesser", "aliases": ["Herbert Kannegiesser"] },

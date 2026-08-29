@@ -18,7 +18,10 @@ relevant sections instead of loading the complete file by default.
 
 - `index.html`: public root page.
 - `landing/`: public landing pages and landing-specific scripts/styles.
-- `es/` and `en/`: localized public routes.
+- `es/`, `en/`, `it/` and `el/`: physical localized homepage, about, contact,
+  and privacy pages with translated slugs and reciprocal SEO metadata.
+  Existing direct utility routes such as `es/m.html` and `en/m.html` remain
+  alongside them; legacy `landing/` URLs are compatibility redirects.
 - `nfc/es/` and `nfc/en/`: localized NFC/dashboard/auth/static pages,
   including account settings and the global access page.
 - `laundryservices/{es,en,it,el}/`: physical localized Laundry Services pages

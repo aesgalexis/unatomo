@@ -72,6 +72,13 @@ for (const lang of LANGS) {
     if (page === "privacy" && !bodyNodes.some((node) => node.tagName === "article" && (attribute(node, "class") || "").split(/\s+/u).includes("legal-copy"))) {
       failures.push(`${route}: missing privacy article.`);
     }
+    const pageNavScripts = bodyNodes.filter((node) => node.tagName === "script" && attribute(node, "src") === "/laundryservices/ls_page-nav.js");
+    if (pageNavScripts.length !== 1) failures.push(`${route}: expected one Laundry Services page navigation script, found ${pageNavScripts.length}.`);
+    if (bodyNodes.some((node) => node.tagName === "script" && (attribute(node, "src") || "").includes("/nfc/"))) {
+      failures.push(`${route}: page navigation must not depend on NFC code.`);
+    }
+    const expectedBackHref = page === "home" ? "https://unatomo.com/" : routePath(lang, "home");
+    if (attribute(body, "data-back-href") !== expectedBackHref) failures.push(`${route}: incorrect back destination.`);
     if (/â|Ã|Â|ï»¿|�/u.test(html)) failures.push(`${route}: possible mojibake detected.`);
     if (/(?:data-(?:i18n|home-i18n|detail-i18n|spares-i18n)|\/laundryservices\/i18n\/|app:language-change|unatomoI18n)/u.test(html)) {
       failures.push(`${route}: contains legacy client-side translation code.`);

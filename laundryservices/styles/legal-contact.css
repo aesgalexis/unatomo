@@ -1,36 +1,5 @@
 /* Laundry Services: legal-contact. */
 
-.scroll-top-container {
-  margin-top: 2rem;
-  display: flex;
-  justify-content: center;
-  gap: 0.4rem;
-  text-align: center;
-}
-
-.scroll-top-button {
-  padding: 0.5rem 1.5rem;
-  border-radius: 0.75rem;
-  border: 1px solid color-mix(in srgb, var(--fg) 55%, transparent);
-  background: transparent;
-  color: var(--fg);
-  font: inherit;
-  font-size: 0.9rem;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.scroll-top-button[hidden] {
-  display: none !important;
-}
-
-.scroll-top-button:hover {
-  opacity: 0.9;
-}
-
 .legal-doc {
   max-width: 876px;
 }
@@ -96,10 +65,6 @@ body.ls-privacy-page .page-shell.legal-doc {
 
 body.ls-privacy-page .page-shell.legal-doc > .legal-copy:not([hidden]) {
   flex: 1 0 auto;
-}
-
-body.ls-privacy-page .page-shell.legal-doc > #page-nav-mount {
-  margin-top: auto;
 }
 
 .contact-info {

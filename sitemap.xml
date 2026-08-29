@@ -1,17 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://unatomo.com/</loc>
-  </url>
-  <url>
-    <loc>https://unatomo.com/landing/ld_privacidad.html</loc>
-  </url>
-  <url>
-    <loc>https://unatomo.com/landing/nosotros/</loc>
-  </url>
-  <url>
-    <loc>https://unatomo.com/landing/contacto/</loc>
-  </url>
+  <url><loc>https://unatomo.com/es/</loc></url>
+  <url><loc>https://unatomo.com/en/</loc></url>
+  <url><loc>https://unatomo.com/it/</loc></url>
+  <url><loc>https://unatomo.com/el/</loc></url>
+  <url><loc>https://unatomo.com/es/nosotros/</loc></url>
+  <url><loc>https://unatomo.com/en/about/</loc></url>
+  <url><loc>https://unatomo.com/it/chi-siamo/</loc></url>
+  <url><loc>https://unatomo.com/el/schetika-me-emas/</loc></url>
+  <url><loc>https://unatomo.com/es/contacto/</loc></url>
+  <url><loc>https://unatomo.com/en/contact/</loc></url>
+  <url><loc>https://unatomo.com/it/contatto/</loc></url>
+  <url><loc>https://unatomo.com/el/epikoinonia/</loc></url>
+  <url><loc>https://unatomo.com/es/privacidad/</loc></url>
+  <url><loc>https://unatomo.com/en/privacy/</loc></url>
+  <url><loc>https://unatomo.com/it/privacy/</loc></url>
+  <url><loc>https://unatomo.com/el/aporrito/</loc></url>
   <url>
     <loc>https://unatomo.com/nfc/</loc>
   </url>

@@ -4,7 +4,7 @@
   "description": "Machine-centered operational dashboard with QR/NFC access, history, tasks, documents, and Firebase backend.",
   "main": "index.js",
   "scripts": {
-    "test": "npm run test:nfc && npm run test:laundry && npm run test:functions && npm run test:rules && npm run lint:links && npm run scan:secrets",
+    "test": "npm run test:nfc && npm run check:landing:locales && npm run test:laundry && npm run test:functions && npm run test:rules && npm run lint:links && npm run scan:secrets",
     "test:laundry": "npm run check:laundry:architecture && npm run check:laundry:locales && npm run catalog:laundry:check",
     "test:nfc": "npm run check:nfc:architecture && npm run check:nfc:group-hierarchy && npm run check:nfc:sorting && npm run check:nfc:autosave && npm run check:nfc:status-incident && npm run check:nfc:statistics && npm run check:nfc:task-assignment && npm run check:nfc:mobile-qr && npm run check:machine-lab",
     "test:functions": "npm --prefix firebase/functions run lint && npm --prefix firebase/functions run test:task-visibility && npm --prefix firebase/functions run test:machine-policy && npm --prefix firebase/functions run test:machine-status && npm --prefix firebase/functions run test:machine-notifications && npm --prefix firebase/functions run test:email-templates && npm --prefix firebase/functions run test:laundry-spares",
@@ -45,7 +45,8 @@
     "check:machine-lab": "node scripts/check-machine-lab.mjs",
     "check:nfc:architecture": "node scripts/check-nfc-architecture.mjs",
     "check:laundry:architecture": "node scripts/check-laundry-architecture.mjs",
-    "check:laundry:locales": "node scripts/check-laundry-locales.mjs"
+    "check:laundry:locales": "node scripts/check-laundry-locales.mjs",
+    "check:landing:locales": "node scripts/check-landing-locales.mjs"
   },
   "repository": {
     "type": "git",
