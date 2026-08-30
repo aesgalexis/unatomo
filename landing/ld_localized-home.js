@@ -1,4 +1,10 @@
 (() => {
+  if (document.getElementById("landing-claim-text")) {
+    const claimLoopScript = document.createElement("script");
+    claimLoopScript.src = "/landing/ld_claim-loop.js";
+    document.head.appendChild(claimLoopScript);
+  }
+
   try {
     localStorage.setItem("lang", (document.documentElement.lang || "es").slice(0, 2).toLowerCase());
   } catch {}

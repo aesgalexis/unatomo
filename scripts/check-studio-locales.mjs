@@ -41,14 +41,25 @@ for (const lang of LANGS) {
   if (bodyNodes.some((node) => node.tagName === "footer")) failures.push(`${route}: visible footer must be replaced by the Studio winged shoe.`);
   if (!bodyNodes.some((node) => node.tagName === "aside" && (attribute(node, "class") || "").split(/\s+/u).includes("studio-shoe"))) failures.push(`${route}: missing Studio winged shoe.`);
   if (bodyNodes.some((node) => attribute(node, "id") === "theme-toggle")) failures.push(`${route}: theme toggle must not be present.`);
+  if (!bodyNodes.some((node) => attribute(node, "id") === "atom" && (attribute(node, "class") || "").split(/\s+/u).includes("studio-atom"))) failures.push(`${route}: missing Studio atom.`);
+  if (bodyNodes.some((node) => (attribute(node, "class") || "").split(/\s+/u).includes("studio-system"))) failures.push(`${route}: legacy system illustration must not be present.`);
   if (!headNodes.some((node) => node.tagName === "script" && attribute(node, "type") === "application/ld+json")) failures.push(`${route}: missing structured data.`);
   if (/(?:data-i18n|app:language-change|unatomoI18n)/u.test(source)) failures.push(`${route}: client-side translation found.`);
   if (/â|Ã|Â|ï»¿|�/u.test(source)) failures.push(`${route}: possible mojibake.`);
 }
 
 const redirect = await readFile("studio/index.html", "utf8");
-if (!redirect.includes('content="noindex,follow"') || !redirect.includes("url=/studio/es/")) {
+if (!redirect.includes('content="noindex,follow"') ||
+    !redirect.includes("url=/studio/es/") ||
+    !redirect.includes('location.replace("/studio/es/" + location.search + location.hash)')) {
   failures.push("/studio/: expected noindex redirect to /studio/es/.");
+}
+
+const viteConfig = await readFile("vite.config.mjs", "utf8");
+for (const route of ["/studio", "/studio/"]) {
+  if (!viteConfig.includes(`["${route}", "/studio/index.html"]`)) {
+    failures.push(`${route}: missing clean directory route in Vite.`);
+  }
 }
 
 if (failures.length) {

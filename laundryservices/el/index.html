@@ -35,7 +35,7 @@
         <h1>Ελεγχος, συμβουλευτικη και τεχνικη υποστηριξη για βιομηχανικα πλυντηρια</h1>
         <p class="hero-lead">Αναλύουμε τη μονάδα σε λειτουργία για να εντοπίσουμε πού χάνονται δυναμικότητα, σταθερότητα και αποδοτικότητα και μετατρέπουμε τη διάγνωση σε σαφές σχέδιο δράσης.</p>
       </div>
-      <div id="atom" class="hero-atom" aria-hidden="true"></div>
+      <img class="laundry-textile-hero" src="/laundryservices/assets/textile-hero-folds-v1.webp" alt="" width="1536" height="1024" aria-hidden="true" decoding="async" fetchpriority="high">
     </section>
 
     <section class="service-pillars">
@@ -117,52 +117,6 @@
 
 
   <script src="/laundryservices/ls_page.js"></script>
-
-  <script>
-    const atomContainer = document.getElementById("atom");
-    const smallScreenQuery = window.matchMedia("(max-width: 900px)");
-    let atomWidget = null;
-    let atomWidgetModule = null;
-
-    async function syncAtomWidget() {
-      if (!atomContainer) return;
-
-      if (smallScreenQuery.matches) {
-        if (atomWidget && typeof atomWidget.destroy === "function") {
-          atomWidget.destroy();
-          atomWidget = null;
-        }
-        return;
-      }
-
-      if (atomWidget) return;
-
-      atomWidgetModule =
-        atomWidgetModule || import("/laundryservices/ls_atom-widget/ls_atom-widget.js");
-      const { initAtomWidget } = await atomWidgetModule;
-      if (smallScreenQuery.matches) return;
-      if (atomWidget) return;
-
-      atomWidget = initAtomWidget({
-        container: atomContainer,
-        pixelRatioCap: 1.8,
-        atomScale: 0.8267,
-        renderMode: "floating",
-        interactionTarget: atomContainer,
-        canvasScale: 1.9,
-        enableZoom: true,
-        zoomMaxPercent: 100,
-        initialZoomLevel: 8,
-      });
-    }
-
-    syncAtomWidget();
-    if (smallScreenQuery.addEventListener) {
-      smallScreenQuery.addEventListener("change", syncAtomWidget);
-    } else if (smallScreenQuery.addListener) {
-      smallScreenQuery.addListener(syncAtomWidget);
-    }
-  </script>
 
   <script src="/laundryservices/ls_footer.js"></script>
 

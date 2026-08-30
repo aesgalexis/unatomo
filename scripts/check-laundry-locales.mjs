@@ -69,11 +69,16 @@ for (const lang of LANGS) {
     }
     const headings = bodyNodes.filter((node) => node.tagName === "h1");
     if (headings.length !== 1) failures.push(`${route}: expected one h1, found ${headings.length}.`);
+    if (page === "home" && (bodyNodes.some((node) => attribute(node, "id") === "atom") || html.includes("ls_atom-widget.js"))) {
+      failures.push(`${route}: Laundry Services home must not mount the animated atom.`);
+    }
     if (page === "privacy" && !bodyNodes.some((node) => node.tagName === "article" && (attribute(node, "class") || "").split(/\s+/u).includes("legal-copy"))) {
       failures.push(`${route}: missing privacy article.`);
     }
     const pageNavScripts = bodyNodes.filter((node) => node.tagName === "script" && attribute(node, "src") === "/laundryservices/ls_page-nav.js");
     if (pageNavScripts.length !== 1) failures.push(`${route}: expected one Laundry Services page navigation script, found ${pageNavScripts.length}.`);
+    const pageScripts = bodyNodes.filter((node) => node.tagName === "script" && attribute(node, "src") === "/laundryservices/ls_page.js");
+    if (pageScripts.length !== 1) failures.push(`${route}: expected one direct-navigation script, found ${pageScripts.length}.`);
     if (bodyNodes.some((node) => node.tagName === "script" && (attribute(node, "src") || "").includes("/nfc/"))) {
       failures.push(`${route}: page navigation must not depend on NFC code.`);
     }
@@ -101,6 +106,11 @@ for (const lang of LANGS) {
       failures.push(`${route}: contains legacy client-side translation code.`);
     }
   }
+}
+
+const pageSource = await readFile("laundryservices/ls_page.js", "utf8");
+for (const bridge of ["/", "/landing/", "/laundryservices/", "/studio/"]) {
+  if (!pageSource.includes(`["${bridge}",`)) failures.push(`ls_page.js: missing direct route for ${bridge}.`);
 }
 
 if (failures.length) {

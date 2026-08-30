@@ -111,6 +111,10 @@ a:hover {
   z-index: 1;
 }
 
+.ls-home-page {
+  overflow-x: clip;
+}
+
 .ls-topbar {
   position: fixed;
   top: 0;
@@ -174,6 +178,7 @@ a:hover {
 }
 
 .hero {
+  position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.8fr);
   gap: 2rem;
@@ -185,6 +190,20 @@ a:hover {
 .hero-content {
   position: relative;
   z-index: 2;
+}
+
+.laundry-textile-hero {
+  position: absolute;
+  top: -35px;
+  right: calc((100vw - 100%) / -2);
+  width: min(54vw, 680px);
+  height: clamp(390px, 44vw, 540px);
+  object-fit: cover;
+  object-position: 72% 42%;
+  opacity: 0.94;
+  pointer-events: none;
+  -webkit-mask-image: radial-gradient(ellipse 96% 94% at 100% 0%, #000 0 48%, rgba(0, 0, 0, 0.88) 64%, transparent 100%);
+  mask-image: radial-gradient(ellipse 96% 94% at 100% 0%, #000 0 48%, rgba(0, 0, 0, 0.88) 64%, transparent 100%);
 }
 
 .hero-lead {
@@ -204,23 +223,6 @@ a:hover {
 .lead {
   font-size: 1.05rem;
   max-width: 42ch;
-}
-
-.hero-atom {
-  width: 135px;
-  height: 135px;
-  justify-self: center;
-  align-self: center;
-  color: color-mix(in srgb, var(--fg) 85%, transparent);
-  cursor: grab;
-  position: relative;
-  z-index: 1;
-  border-radius: 50%;
-  overflow: visible;
-}
-
-.hero-atom:active {
-  cursor: grabbing;
 }
 
 .service-detail-hero-icon {

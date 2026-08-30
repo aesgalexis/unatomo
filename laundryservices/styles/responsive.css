@@ -5,9 +5,10 @@
     grid-template-columns: 1fr;
   }
 
-  .hero-atom {
+  .laundry-textile-hero {
     display: none;
   }
+
 }
 
 @media (max-width: 600px) {
