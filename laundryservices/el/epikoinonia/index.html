@@ -30,11 +30,10 @@
   </header></div>
 
   <main class="page-shell">
+    <h1 class="ls-contact-title--visually-hidden">Επικοινωνία</h1>
     <section class="page-section contacto" aria-label="Contacto">
       <section class="card contact-form-card" aria-label="Formulario de contacto">
-        <h1 class="contact-form-title">Φόρμα επικοινωνίας</h1>
-
-        <form class="contact-form" action="https://formspree.io/f/mkgqlvqj" method="POST" novalidate="">
+<form class="contact-form" action="https://formspree.io/f/mkgqlvqj" method="POST" novalidate="">
           <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" style="position:absolute; left:-5000px;" aria-hidden="true">
 
           <div class="form-grid">
@@ -83,7 +82,7 @@
             <div class="form-field form-field--full">
               <label for="mensaje"><span>Μήνυμα</span><span aria-hidden="true"> *</span></label>
               <textarea id="mensaje" name="mensaje" rows="6" required="" class="field" data-machine-message-template="Θέλω να λάβω πληροφορίες για το ακόλουθο μηχάνημα: {machine}"></textarea>
-            </div>
+            </div><div class="form-consent form-field--full"><label class="form-consent-label" for="privacy-consent"><input id="privacy-consent" name="privacy_consent" type="checkbox" value="accepted" required><span>Αποδέχομαι την <a href="/laundryservices/el/aporrito/">πολιτική απορρήτου και cookies</a><span aria-hidden="true"> *</span></span></label></div>
           </div>
 
           <p class="form-status" role="status" aria-live="polite" hidden=""></p>
@@ -123,11 +122,11 @@
   <script src="/laundryservices/ls_page.js"></script>
   <script src="/laundryservices/ls_footer.js"></script>
   <script src="/laundryservices/ls_contacto-prefill.js"></script>
-  <script src="/static/js/contacto.js"></script>
+  <script type="module" src="/static/js/contacto.js"></script>
 
 
 
 
 
 
-<script src="/laundryservices/ls_page-nav.js"></script></body></html>
+<script src="/laundryservices/ls_page-nav.js"></script><script type="module" src="/static/js/site-page-nav.js"></script></body></html>

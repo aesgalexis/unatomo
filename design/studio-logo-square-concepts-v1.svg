@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" role="img" aria-labelledby="title desc">
+  <title id="title">Exploraciones cuadradas para UNATOMO Studio</title>
+  <desc id="desc">Seis propuestas vectoriales basadas en cuadrados, módulos y paneles de dashboard.</desc>
+  <defs>
+    <linearGradient id="brand" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#f29500"/>
+      <stop offset=".18" stop-color="#efa500"/>
+      <stop offset=".48" stop-color="#29a1e2"/>
+      <stop offset=".74" stop-color="#22b573"/>
+      <stop offset="1" stop-color="#223e73"/>
+    </linearGradient>
+    <style>
+      .panel{fill:#11161c;stroke:#28313b;stroke-width:2}.mark{fill:none;stroke:url(#brand);stroke-width:18;stroke-linecap:round;stroke-linejoin:round}.tile{fill:none;stroke:url(#brand);stroke-width:18;stroke-linejoin:round}.dot{fill:#168f7b}.label{font-family:Arial,sans-serif;fill:#f1f4f7;font-size:25px;font-weight:700}.sub{font-family:Arial,sans-serif;fill:#8e9aa7;font-size:16px}.head{font-family:Arial,sans-serif;fill:#f1f4f7;font-size:34px;font-weight:700}.kicker{font-family:Arial,sans-serif;fill:#25b986;font-size:15px;font-weight:700;letter-spacing:2px}
+    </style>
+  </defs>
+  <rect width="1200" height="900" fill="#0b0f14"/>
+  <text class="kicker" x="55" y="55">UNATOMO / STUDIO</text>
+  <text class="head" x="55" y="95">Exploraciones cuadradas</text>
+
+  <g transform="translate(40 135)">
+    <rect class="panel" width="360" height="330" rx="24"/>
+    <g transform="translate(180 143)">
+      <rect class="mark" x="-94" y="-94" width="188" height="188" rx="29" stroke-dasharray="610 95" transform="rotate(-5)"/>
+      <rect class="mark" x="-62" y="-62" width="124" height="124" rx="20" stroke-dasharray="352 92" transform="rotate(4)"/>
+      <rect class="mark" x="-28" y="-28" width="56" height="56" rx="11"/>
+      <circle class="dot" cx="81" cy="-77" r="10"/>
+    </g>
+    <text class="label" x="28" y="282">A · Tres marcos</text>
+    <text class="sub" x="28" y="307">profundidad y sistema en capas</text>
+  </g>
+
+  <g transform="translate(420 135)">
+    <rect class="panel" width="360" height="330" rx="24"/>
+    <g transform="translate(180 143)">
+      <rect class="tile" x="-94" y="-94" width="111" height="111" rx="22"/>
+      <rect class="tile" x="35" y="-94" width="59" height="111" rx="18"/>
+      <rect class="tile" x="-94" y="35" width="188" height="59" rx="18"/>
+      <circle class="dot" cx="9" cy="9" r="10"/>
+    </g>
+    <text class="label" x="28" y="282">B · Dashboard 3</text>
+    <text class="sub" x="28" y="307">tres herramientas, un espacio</text>
+  </g>
+
+  <g transform="translate(800 135)">
+    <rect class="panel" width="360" height="330" rx="24"/>
+    <g transform="translate(180 143)">
+      <path class="mark" d="M-91 57V-65Q-91-91-65-91H61"/>
+      <path class="mark" d="M91-57V65Q91 91 65 91H-61"/>
+      <rect class="mark" x="-48" y="-48" width="96" height="96" rx="19"/>
+      <circle class="dot" cx="79" cy="-79" r="10"/>
+    </g>
+    <text class="label" x="28" y="282">C · Esquinas activas</text>
+    <text class="sub" x="28" y="307">un marco que sigue construyéndose</text>
+  </g>
+
+  <g transform="translate(40 490)">
+    <rect class="panel" width="360" height="330" rx="24"/>
+    <g transform="translate(180 143)">
+      <rect class="tile" x="-94" y="-94" width="82" height="82" rx="18"/>
+      <rect class="tile" x="12" y="-94" width="82" height="82" rx="18"/>
+      <rect class="tile" x="-94" y="12" width="82" height="82" rx="18"/>
+      <circle class="dot" cx="53" cy="53" r="14"/>
+    </g>
+    <text class="label" x="28" y="282">D · Módulo ausente</text>
+    <text class="sub" x="28" y="307">el punto completa el dashboard</text>
+  </g>
+
+  <g transform="translate(420 490)">
+    <rect class="panel" width="360" height="330" rx="24"/>
+    <g transform="translate(180 143)">
+      <rect class="mark" x="-91" y="-91" width="182" height="182" rx="31" transform="rotate(-9)"/>
+      <rect class="mark" x="-61" y="-61" width="122" height="122" rx="23" transform="rotate(7)"/>
+      <rect class="mark" x="-29" y="-29" width="58" height="58" rx="13" transform="rotate(-4)"/>
+      <circle class="dot" r="10"/>
+    </g>
+    <text class="label" x="28" y="282">E · Paneles orbitando</text>
+    <text class="sub" x="28" y="307">más dinámico, cercano al átomo</text>
+  </g>
+
+  <g transform="translate(800 490)">
+    <rect class="panel" width="360" height="330" rx="24"/>
+    <g transform="translate(180 143)">
+      <path class="mark" d="M-94 15V-67Q-94-94-67-94H15"/>
+      <path class="mark" d="M-15-94H67Q94-94 94-67V15"/>
+      <path class="mark" d="M94-15V67Q94 94 67 94H-15"/>
+      <circle class="dot" cx="-74" cy="74" r="13"/>
+    </g>
+    <text class="label" x="28" y="282">F · Marco modular</text>
+    <text class="sub" x="28" y="307">tres lados y un punto de entrada</text>
+  </g>
+</svg>

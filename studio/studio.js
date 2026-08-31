@@ -1,4 +1,5 @@
 import { initTopbarLogoMotion } from "/static/js/topbar/loading-logo.js";
+import { initContactForm } from "/static/js/contact-form-controller.js";
 
 initTopbarLogoMotion();
 
@@ -243,38 +244,5 @@ syncTopButton();
 
 const contactForm = document.querySelector(".studio-contact-form");
 if (contactForm) {
-  const contactStatus = contactForm.querySelector(".studio-form-status");
-  const contactSubmit = contactForm.querySelector('button[type="submit"]');
-  const contactMessages = {
-    es: { sending: "Enviando...", success: "Mensaje enviado correctamente.", error: "No se ha podido enviar. Inténtalo de nuevo." },
-    en: { sending: "Sending...", success: "Message sent successfully.", error: "The message could not be sent. Please try again." },
-    it: { sending: "Invio...", success: "Messaggio inviato correttamente.", error: "Impossibile inviare il messaggio. Riprova." },
-    el: { sending: "Αποστολή...", success: "Το μήνυμα στάλθηκε επιτυχώς.", error: "Δεν ήταν δυνατή η αποστολή. Δοκιμάστε ξανά." },
-  };
-
-  contactForm.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    if (!contactForm.checkValidity()) return contactForm.reportValidity();
-    const messages = contactMessages[pageLanguage] || contactMessages.es;
-    contactStatus.hidden = false;
-    contactStatus.textContent = messages.sending;
-    delete contactStatus.dataset.state;
-    contactSubmit.disabled = true;
-    try {
-      const response = await fetch(contactForm.action, {
-        method: "POST",
-        body: new FormData(contactForm),
-        headers: { Accept: "application/json" },
-      });
-      if (!response.ok) throw new Error("send-failed");
-      contactStatus.textContent = messages.success;
-      contactStatus.dataset.state = "success";
-      contactForm.reset();
-    } catch {
-      contactStatus.textContent = messages.error;
-      contactStatus.dataset.state = "error";
-    } finally {
-      contactSubmit.disabled = false;
-    }
-  });
+  initContactForm(contactForm, { statusSelector: ".studio-form-status" });
 }

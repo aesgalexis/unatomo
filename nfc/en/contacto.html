@@ -23,8 +23,7 @@
     <h1 class="public-page-title public-page-title--visually-hidden">Contact</h1>
     <section class="page-section contacto" aria-label="Contact">
       <section class="card contact-form-card" aria-label="Contact form">
-        <p>Contact form</p>
-        <form class="contact-form" action="https://formspree.io/f/mkgqlvqj" method="POST" novalidate>
+<form class="contact-form" action="https://formspree.io/f/mkgqlvqj" method="POST" novalidate>
           <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" style="position:absolute; left:-5000px;" aria-hidden="true">
           <div class="form-grid">
             <div class="form-field"><label for="nombre">Name<span aria-hidden="true"> *</span></label><input id="nombre" name="nombre" type="text" required class="field" autocomplete="name" /></div>
@@ -32,7 +31,7 @@
             <div class="form-field"><label for="email">Email<span aria-hidden="true"> *</span></label><input id="email" name="email" type="email" required class="field" autocomplete="email" /></div>
             <div class="form-field"><label for="telefono">Phone</label><input id="telefono" name="telefono" type="tel" class="field" autocomplete="tel" inputmode="tel" /></div>
             <div class="form-field form-field--full"><label for="asunto">Subject<span aria-hidden="true"> *</span></label><select id="asunto" name="asunto" required class="field"><option value="" disabled selected>Select a subject...</option><option>General enquiry</option><option>Registration</option><option>Other</option></select></div>
-            <div class="form-field form-field--full"><label for="mensaje">Message<span aria-hidden="true"> *</span></label><textarea id="mensaje" name="mensaje" rows="6" required class="field"></textarea></div>
+            <div class="form-field form-field--full"><label for="mensaje">Message<span aria-hidden="true"> *</span></label><textarea id="mensaje" name="mensaje" rows="6" required class="field"></textarea></div><div class="form-consent form-field--full"><label class="form-consent-label" for="privacy-consent"><input id="privacy-consent" name="privacy_consent" type="checkbox" value="accepted" required><span>I accept the <a href="/nfc/en/privacidad.html">privacy and cookie policy</a><span aria-hidden="true"> *</span></span></label></div>
           </div>
           <p class="form-status" role="status" aria-live="polite" hidden></p>
           <div class="form-actions"><button type="submit" class="btn-primary">Send</button></div>
@@ -45,7 +44,7 @@
     <div class="footer-link"><a href="/nfc/en/privacidad.html">Privacy and cookie policy</a></div>
   </main>
   <script src="/static/js/footer.js"></script>
-  <script src="/static/js/contacto.js"></script>
-</body>
+  <script type="module" src="/static/js/contacto.js"></script>
+<script type="module" src="/static/js/site-page-nav.js"></script></body>
 </html>
 

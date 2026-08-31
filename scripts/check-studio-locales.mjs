@@ -28,6 +28,7 @@ for (const lang of LANGS) {
 
   if (!document.childNodes.some((node) => node.nodeName === "#documentType")) failures.push(`${route}: missing doctype.`);
   if (attribute(html, "lang") !== lang) failures.push(`${route}: incorrect html lang.`);
+  if (!(attribute(body, "class") || "").split(/\s+/u).includes("studio-home-page")) failures.push(`${route}: missing Studio home theme hook.`);
   const canonical = headNodes.find((node) => node.tagName === "link" && attribute(node, "rel") === "canonical");
   if (attribute(canonical, "href") !== `${SITE}${route}`) failures.push(`${route}: incorrect canonical.`);
   for (const target of LANGS) {
@@ -60,6 +61,13 @@ for (const route of ["/studio", "/studio/"]) {
   if (!viteConfig.includes(`["${route}", "/studio/index.html"]`)) {
     failures.push(`${route}: missing clean directory route in Vite.`);
   }
+}
+
+const studioStyles = await readFile("studio/studio.css", "utf8");
+if (!studioStyles.includes("color-scheme: dark;") ||
+    studioStyles.includes("@media (prefers-color-scheme") ||
+    !studioStyles.includes("body.studio-home-page::before")) {
+  failures.push("Studio must use one fixed dark theme with its home-page light flare.");
 }
 
 if (failures.length) {

@@ -1,12 +1,13 @@
 ﻿const isEnglish = () => /^\/en(?:\/|$)/i.test(window.location.pathname);
 
+import { initContactForm } from "/static/js/contact-form-controller.js";
+
 export const render = (mount) => {
   const isEn = document.documentElement.lang.toLowerCase().startsWith("en") || isEnglish();
   const wrap = document.createElement("div");
   wrap.className = "section-block section-contacto";
   wrap.innerHTML = `
     <section class="card" aria-label="${isEn ? "Contact form" : "Formulario de contacto"}">
-      <p>${isEn ? "Contact form" : "Formulario de contacto"}</p>
       <form class="contact-form" action="https://formspree.io/f/mkgqlvqj" method="POST" novalidate>
         <input
           type="text"
@@ -46,7 +47,14 @@ export const render = (mount) => {
             <label for="section-mensaje">${isEn ? "Message" : "Mensaje"}<span aria-hidden="true"> *</span></label>
             <textarea id="section-mensaje" name="mensaje" rows="6" required class="field"></textarea>
           </div>
+          <div class="form-consent form-field--full">
+            <label class="form-consent-label" for="section-privacy-consent">
+              <input id="section-privacy-consent" name="privacy_consent" type="checkbox" value="accepted" required>
+              <span>${isEn ? "I accept the" : "Acepto la"} <a href="${isEn ? "/nfc/en/privacidad.html" : "/nfc/es/privacidad.html"}">${isEn ? "privacy and cookie policy" : "política de privacidad y cookies"}</a><span aria-hidden="true"> *</span></span>
+            </label>
+          </div>
         </div>
+        <p class="form-status" role="status" aria-live="polite" hidden></p>
         <div class="form-actions" style="display:flex; justify-content:center;">
           <button type="submit" class="btn-primary">${isEn ? "Send" : "Enviar"}</button>
         </div>
@@ -54,4 +62,5 @@ export const render = (mount) => {
     </section>
   `;
   mount.appendChild(wrap);
+  initContactForm(wrap.querySelector(".contact-form"));
 };

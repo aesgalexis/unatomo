@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 280" role="img" aria-label="Cuatro estados del símbolo modular de UNATOMO Studio">
+  <rect width="1000" height="280" fill="#0b0f14"/>
+  <style>.label{font-family:Arial,sans-serif;fill:#a5afb9;font-size:16px;text-anchor:middle}</style>
+  <image href="studio-logo-module-missing-v2.svg" x="35" y="20" width="200" height="200"/>
+  <image href="studio-logo-module-point-top-right.svg" x="280" y="20" width="200" height="200"/>
+  <image href="studio-logo-module-point-top-left.svg" x="525" y="20" width="200" height="200"/>
+  <image href="studio-logo-module-point-bottom-left.svg" x="770" y="20" width="200" height="200"/>
+  <text class="label" x="135" y="250">abajo derecha</text>
+  <text class="label" x="380" y="250">arriba derecha</text>
+  <text class="label" x="625" y="250">arriba izquierda</text>
+  <text class="label" x="870" y="250">abajo izquierda</text>
+</svg>

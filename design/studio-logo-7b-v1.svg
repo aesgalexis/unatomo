@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 384" role="img" aria-labelledby="title desc">
+  <title id="title">UNATOMO Studio — espiral de proceso</title>
+  <desc id="desc">Símbolo de espiral abierta con degradado UNATOMO y un punto separado del trazo.</desc>
+  <defs>
+    <linearGradient id="studio-gradient" x1="40" y1="344" x2="344" y2="40" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f29500"/>
+      <stop offset=".18" stop-color="#efa500"/>
+      <stop offset=".48" stop-color="#29a1e2"/>
+      <stop offset=".74" stop-color="#22b573"/>
+      <stop offset="1" stop-color="#223e73"/>
+    </linearGradient>
+  </defs>
+
+  <path
+    d="M82 302C26 213 67 91 171 55C269 21 354 89 350 184C346 276 259 335 176 301C111 274 85 202 124 151C155 110 216 108 253 144C282 172 282 218 259 246"
+    fill="none"
+    stroke="url(#studio-gradient)"
+    stroke-width="27"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <circle cx="192" cy="192" r="13.5" fill="#168f7b"/>
+</svg>

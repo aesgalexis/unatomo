@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" role="img" aria-labelledby="title desc">
+  <title id="title">Exploraciones de símbolo para UNATOMO Studio</title>
+  <desc id="desc">Seis propuestas vectoriales basadas en órbita abierta, átomo incompleto y trazo generativo.</desc>
+  <defs>
+    <linearGradient id="brand" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#f29500"/>
+      <stop offset=".2" stop-color="#efa500"/>
+      <stop offset=".5" stop-color="#29a1e2"/>
+      <stop offset=".76" stop-color="#22b573"/>
+      <stop offset="1" stop-color="#223e73"/>
+    </linearGradient>
+    <style>
+      .panel{fill:#11161c;stroke:#28313b;stroke-width:2}.mark{fill:none;stroke:url(#brand);stroke-width:18;stroke-linecap:round;stroke-linejoin:round}.ghost{fill:none;stroke:#68727e;stroke-width:3;opacity:.28}.dot{fill:#21a67a}.label{font-family:Arial,sans-serif;fill:#f1f4f7;font-size:26px;font-weight:700}.sub{font-family:Arial,sans-serif;fill:#8e9aa7;font-size:17px;letter-spacing:1px}.head{font-family:Arial,sans-serif;fill:#f1f4f7;font-size:34px;font-weight:700}.kicker{font-family:Arial,sans-serif;fill:#25b986;font-size:15px;font-weight:700;letter-spacing:2px}
+    </style>
+  </defs>
+  <rect width="1200" height="900" fill="#0b0f14"/>
+  <text class="kicker" x="55" y="55">UNATOMO / STUDIO</text>
+  <text class="head" x="55" y="95">Exploraciones de símbolo</text>
+
+  <g transform="translate(40 135)">
+    <rect class="panel" width="360" height="330" rx="24"/>
+    <g transform="translate(180 145)">
+      <circle class="mark" r="91" stroke-dasharray="455 118" transform="rotate(-24)"/>
+      <path class="mark" d="M72-58a93 93 0 0 1 18 38" transform="translate(18 -12)"/>
+      <circle class="dot" cx="107" cy="-45" r="10"/>
+    </g>
+    <text class="label" x="28" y="282">1A · Órbita desplazada</text>
+    <text class="sub" x="28" y="308">el punto reorganiza el aro</text>
+  </g>
+
+  <g transform="translate(420 135)">
+    <rect class="panel" width="360" height="330" rx="24"/>
+    <g transform="translate(180 145)">
+      <circle class="mark" r="92" stroke-dasharray="245 37 225 72" transform="rotate(32)"/>
+      <path class="mark" d="M-70 67a98 98 0 0 0 34 20" transform="translate(-8 5)"/>
+      <circle class="dot" cx="76" cy="-61" r="10"/>
+    </g>
+    <text class="label" x="28" y="282">1B · Aro modular</text>
+    <text class="sub" x="28" y="308">piezas abiertas en construcción</text>
+  </g>
+
+  <g transform="translate(800 135)">
+    <rect class="panel" width="360" height="330" rx="24"/>
+    <g transform="translate(180 145)">
+      <ellipse class="mark" rx="104" ry="57" stroke-dasharray="405 90" transform="rotate(27)"/>
+      <ellipse class="mark" rx="104" ry="57" stroke-dasharray="350 145" transform="rotate(-39)"/>
+      <circle class="dot" r="11"/>
+    </g>
+    <text class="label" x="28" y="282">2A · Cruce orbital</text>
+    <text class="sub" x="28" y="308">átomo reducido a dos gestos</text>
+  </g>
+
+  <g transform="translate(40 490)">
+    <rect class="panel" width="360" height="330" rx="24"/>
+    <g transform="translate(180 145)">
+      <path class="mark" d="M-83 28C-64-54 33-88 84-24C111 10 87 65 38 81"/>
+      <path class="mark" d="M-51 58C-5 83 59 48 62-2C64-35 36-59 3-53"/>
+      <circle class="dot" cx="-88" cy="43" r="10"/>
+    </g>
+    <text class="label" x="28" y="282">2B · Núcleo abierto</text>
+    <text class="sub" x="28" y="308">dos órbitas, una sola línea visual</text>
+  </g>
+
+  <g transform="translate(420 490)">
+    <rect class="panel" width="360" height="330" rx="24"/>
+    <g transform="translate(180 145)">
+      <circle class="ghost" r="92"/>
+      <path class="mark" d="M-81 43A92 92 0 0 1 72-57"/>
+      <path class="mark" d="M-52 43A67 67 0 0 0 39 52" opacity=".72"/>
+      <circle class="dot" cx="83" cy="-67" r="11"/>
+    </g>
+    <text class="label" x="28" y="282">7A · Punto generador</text>
+    <text class="sub" x="28" y="308">el recorrido dibuja el sistema</text>
+  </g>
+
+  <g transform="translate(800 490)">
+    <rect class="panel" width="360" height="330" rx="24"/>
+    <g transform="translate(180 145)">
+      <path class="mark" d="M-79 51C-119-13-62-92 13-91C82-91 113-18 81 40C53 90-19 92-50 49C-74 16-51-30-14-34C14-37 37-15 33 11"/>
+      <circle class="dot" cx="32" cy="17" r="11"/>
+    </g>
+    <text class="label" x="28" y="282">7B · Espiral de proceso</text>
+    <text class="sub" x="28" y="308">de idea a resultado, hacia dentro</text>
+  </g>
+</svg>

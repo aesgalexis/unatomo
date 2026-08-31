@@ -47,6 +47,18 @@ body.ls-contact-page .page-shell {
   max-width: 800px;
 }
 
+.ls-contact-title--visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 html:has(body.ls-privacy-page),
 body.ls-privacy-page {
   scrollbar-gutter: auto;
@@ -96,6 +108,10 @@ body.ls-privacy-page .page-shell.legal-doc > .legal-copy:not([hidden]) {
   margin-top: 1.5rem;
 }
 
+body.ls-contact-page .contact-form-card > .contact-form {
+  margin-top: 0;
+}
+
 .form-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -126,6 +142,10 @@ body.ls-privacy-page .page-shell.legal-doc > .legal-copy:not([hidden]) {
   -webkit-user-select: text;
 }
 
+.form-field :is(input.field, select.field) {
+  height: 2.75rem;
+}
+
 .field:focus {
   outline: none;
   border-color: var(--fg);
@@ -140,6 +160,61 @@ textarea.field {
 
 .form-field--full {
   grid-column: 1 / -1;
+}
+
+.form-consent {
+  grid-column: 1 / -1;
+  margin-top: 0.15rem;
+}
+
+.form-consent .form-consent-label {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1.1rem minmax(0, 1fr);
+  gap: 0.65rem;
+  align-items: start;
+  color: color-mix(in srgb, var(--fg) 78%, transparent);
+  font-size: 0.82rem;
+  font-weight: 400;
+  line-height: 1.45;
+  cursor: pointer;
+}
+
+.form-consent-label input {
+  width: 1rem;
+  height: 1rem;
+  margin: 0.12rem 0 0;
+  border: 1px solid color-mix(in srgb, var(--fg) 35%, transparent);
+  border-radius: 0.2rem;
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: var(--bg);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 0.7rem 0.7rem;
+  cursor: pointer;
+}
+
+.form-consent-label input:checked {
+  border-color: #16834b;
+  background-color: #16834b;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 10'%3E%3Cpath d='m1 5 3 3 7-7' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+.form-consent-label input:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--fg) 45%, transparent);
+  outline-offset: 2px;
+}
+
+.form-consent-label a {
+  color: var(--fg);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.16em;
+}
+
+.form-consent-label span[aria-hidden="true"] {
+  display: none;
 }
 
 .form-actions {

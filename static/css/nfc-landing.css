@@ -171,6 +171,10 @@ body.nfc-landing {
   padding-bottom: 0;
 }
 
+.nfc-public-page .contact-form-card > .contact-form {
+  margin-top: 0;
+}
+
 .nfc-public-page.auth-rounded-page .page-section > .card {
   border-radius: 0.85rem;
 }

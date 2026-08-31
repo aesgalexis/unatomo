@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 384" role="img" aria-label="UNATOMO Studio, punto arriba derecha">
+  <defs><linearGradient id="g" x1="52" y1="332" x2="332" y2="52" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#f29500"/><stop offset=".18" stop-color="#efa500"/><stop offset=".48" stop-color="#29a1e2"/><stop offset=".74" stop-color="#22b573"/><stop offset="1" stop-color="#223e73"/></linearGradient></defs>
+  <g fill="none" stroke="url(#g)" stroke-width="27" stroke-linejoin="round">
+    <rect x="61.5" y="61.5" width="108" height="108" rx="21"/>
+    <rect x="61.5" y="214.5" width="108" height="108" rx="21"/>
+    <rect x="214.5" y="214.5" width="108" height="108" rx="21"/>
+  </g>
+  <circle cx="268.5" cy="115.5" r="18" fill="url(#g)"/>
+</svg>
