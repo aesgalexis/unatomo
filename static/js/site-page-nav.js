@@ -2,8 +2,9 @@ import { mountNfcMinimalPageNav } from "/static/js/nfc/minimalPageNav.js";
 
 const pathname = window.location.pathname.replace(/\/{2,}/g, "/");
 const isAbsoluteRoot = pathname === "/" || pathname === "/index.html";
+const isLocalizedCorporateHome = /^\/(?:es|en|it|el)(?:\/index\.html)?\/?$/.test(pathname);
 
-if (!isAbsoluteRoot) {
+if (!isAbsoluteRoot && !isLocalizedCorporateHome) {
   const existingNav = document.querySelector(
     ".nfc-minimal-page-nav, .ls-minimal-page-nav, .studio-page-nav"
   );

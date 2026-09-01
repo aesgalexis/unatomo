@@ -2,8 +2,8 @@
 
 Status: draft 0.1  
 Contract: `docs/UNATOMO_UI_CONTRACT.md`  
-Current phase: static source inventory only  
-Runtime adoption: none
+Current phase: inventory with bounded runtime adoptions
+Runtime adoption: action color, contact submit/width and Core-dark theme
 
 ## Purpose and Method
 
@@ -28,7 +28,12 @@ the meanings defined in the UI contract. Nothing in this draft is Canonical.
 | NFC dashboard | `static/css/dashboard.css` | Dense operational application; protected surface |
 | Corporate | `landing/ld_styles.css`, `landing/ld_about.css` | Public landing, about, contact and legal pages |
 | Laundry Services | `laundryservices/ls_styles.css` | Public editorial and service pages |
-| Studio | `styles.css`, `studio/studio.css` | Dark product profile and Studio pages |
+| Studio | `styles.css`, `studio/studio.css` | Studio composition consuming the shared Core-dark theme |
+
+Core dark and Studio now source their semantic palette from
+`static/css/themes/unatomo-core-dark.css`. This aligns canvas, surfaces, text,
+borders, accent, status colors and topbar treatment without changing Studio's
+layout, typography, imagery or component geometry.
 
 The source scan finds 14 active localized contact routes in the four main
 families: four Corporate, four Laundry Services, four Studio and two NFC. The
@@ -43,15 +48,16 @@ because they contain fields.
 
 | Family | Localized routes | Form class | Maximum outer width | Maximum form/card width |
 | --- | ---: | --- | ---: | ---: |
-| Corporate | 4 | `.contact-form` | 800 px | 600 px |
-| NFC contact | 2 | `.contact-form` | 800 px base shell | 600 px |
-| Laundry Services | 4 | `.contact-form` | 800 px | 800 px available |
-| Studio | 4 | `.studio-contact-form` | 800 px | 800 px available |
+| Corporate | 4 | `.contact-form` | 800 px | 600 px canonical |
+| NFC contact | 2 | `.contact-form` | 800 px base shell | 600 px canonical |
+| Laundry Services | 4 | `.contact-form` | 800 px | 600 px canonical |
+| Studio | 4 | `.studio-contact-form` | 800 px | 600 px canonical |
+| NFC dashboard support | ES/EN shared rendering | `.contact-form` | dashboard section | 600 px canonical |
 
-The present width difference is structural, not caused by the fields:
-Corporate and NFC deliberately place a 600 px form inside a wider page shell;
-Laundry Services and Studio allow the card to use the 800 px container. This
-is the first meaningful decision for a future form-width contract.
+Before migration, Corporate and NFC used a 600 px card while Laundry Services
+and Studio allowed the card to use an 800 px container. The canonical
+`.ut-contact-form-container` now gives all 16 contact experiences a 600 px
+maximum while retaining their existing outer page shells.
 
 ### Shared field anatomy
 

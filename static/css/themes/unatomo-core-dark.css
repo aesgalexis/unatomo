@@ -1,0 +1,31 @@
+:root {
+  --ut-core-dark-canvas: #0b0b0c;
+  --ut-core-dark-surface: #000000;
+  --ut-core-dark-surface-elevated: #111214;
+  --ut-core-dark-text: #e5e7eb;
+  --ut-core-dark-text-muted: color-mix(in srgb, var(--ut-core-dark-text) 68%, transparent);
+  --ut-core-dark-border-subtle: color-mix(in srgb, var(--ut-core-dark-text) 18%, transparent);
+  --ut-core-dark-border-strong: color-mix(in srgb, var(--ut-core-dark-text) 46%, transparent);
+  --ut-core-dark-panel: color-mix(in srgb, var(--ut-core-dark-canvas) 80%, transparent);
+  --ut-core-dark-field: color-mix(in srgb, var(--ut-core-dark-canvas) 96%, transparent);
+  --ut-core-dark-accent: #60a5fa;
+  --ut-core-dark-accent-strong: #93c5fd;
+  --ut-core-dark-atmosphere-cyan: #38bdf8;
+  --ut-core-dark-atmosphere-violet: #8b5cf6;
+  --ut-core-dark-atmosphere-violet-deep: #6d28d9;
+  --ut-core-dark-atmosphere-deep: #07111f;
+  --ut-core-dark-atmosphere-deepest: #04070d;
+  --ut-core-dark-success: #16a34a;
+  --ut-core-dark-warning: #f0a63a;
+  --ut-core-dark-danger: #dc2626;
+  --ut-core-dark-focus: var(--ut-core-dark-text);
+  --ut-core-dark-topbar-background: rgba(4, 7, 13, 0.52);
+  --ut-core-dark-topbar-border: rgba(229, 231, 235, 0.16);
+  --ut-core-dark-topbar-shadow: 0 8px 32px rgba(0, 0, 0, 0.14);
+  --ut-core-dark-menu-shadow: 0 10px 30px rgba(0, 0, 0, 0.14);
+  --ut-core-dark-page-background:
+    radial-gradient(ellipse 90% 28rem at 50% 100%, color-mix(in srgb, var(--ut-core-dark-atmosphere-violet) 22%, transparent), color-mix(in srgb, var(--ut-core-dark-atmosphere-violet-deep) 9%, transparent) 38%, transparent 76%),
+    radial-gradient(circle at 85% 10%, color-mix(in srgb, var(--ut-core-dark-accent) 12%, transparent), transparent 45%),
+    radial-gradient(circle at 12% 18%, color-mix(in srgb, var(--ut-core-dark-atmosphere-cyan) 8%, transparent), transparent 40%),
+    linear-gradient(180deg, var(--ut-core-dark-atmosphere-deep) 0%, var(--ut-core-dark-atmosphere-deepest) 52%, var(--ut-core-dark-surface) 100%);
+}

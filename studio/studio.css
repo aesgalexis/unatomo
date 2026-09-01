@@ -1,15 +1,18 @@
+@import url("/static/css/themes/unatomo-core-dark.css");
+
 :root,
 :root[data-theme="light"],
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --bg: #0c0f13;
-  --fg: #f2f5f7;
-  --border-subtle: color-mix(in srgb, var(--fg) 14%, transparent);
+  --bg: var(--ut-core-dark-canvas);
+  --fg: var(--ut-core-dark-text);
+  --border-subtle: var(--ut-core-dark-border-subtle);
+  --panel-bg: var(--ut-core-dark-panel);
   --studio-width: 1120px;
   --studio-gutter: clamp(1.5rem, 4vw, 3rem);
-  --studio-muted: color-mix(in srgb, var(--fg) 66%, transparent);
-  --studio-soft: #151a20;
-  --studio-accent: #4fd1a1;
+  --studio-muted: var(--ut-core-dark-text-muted);
+  --studio-soft: var(--ut-core-dark-surface-elevated);
+  --studio-accent: var(--ut-core-dark-accent);
 }
 
 html { width: 100%; overflow-x: hidden; scroll-behavior: smooth; scroll-padding-top: 96px; background: var(--bg); }
@@ -26,7 +29,7 @@ body.studio-home-page::before {
   width: min(72vw, 980px);
   height: min(66vw, 760px);
   background:
-    radial-gradient(ellipse 82% 72% at 100% 0%, rgba(210, 235, 255, 0.25) 0%, rgba(116, 190, 255, 0.11) 27%, rgba(79, 209, 161, 0.035) 48%, transparent 72%);
+    radial-gradient(ellipse 82% 72% at 100% 0%, color-mix(in srgb, var(--ut-core-dark-accent-strong) 22%, transparent) 0%, color-mix(in srgb, var(--ut-core-dark-accent) 10%, transparent) 27%, color-mix(in srgb, var(--ut-core-dark-atmosphere-violet) 3.5%, transparent) 48%, transparent 72%);
   filter: blur(10px);
   mix-blend-mode: screen;
   pointer-events: none;
@@ -35,17 +38,17 @@ body.studio-home-page > main { position: relative; z-index: 1; }
 .studio-page a { color: inherit; }
 .studio-wrap { width: min(var(--studio-width), calc(100% - (2 * var(--studio-gutter)))); margin-inline: auto; }
 
-.studio-topbar { position: fixed; inset: 0 0 auto; z-index: 2000; height: 75px; border-bottom: 1px solid var(--border-subtle); background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(12px); }
+.studio-topbar { position: fixed; inset: 0 0 auto; z-index: 2000; height: 75px; border-bottom: 1px solid var(--ut-core-dark-topbar-border); background: var(--ut-core-dark-topbar-background); box-shadow: var(--ut-core-dark-topbar-shadow); backdrop-filter: blur(12px); }
 .studio-topbar-inner { height: 100%; padding: 0 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
-.studio-page .studio-topbar-brand { display: flex; align-items: center; gap: 1.25rem; color: color-mix(in srgb, var(--fg) 70%, transparent); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.12em; text-decoration: none; text-transform: uppercase; }
+.studio-page .studio-topbar-brand { display: flex; align-items: center; gap: 1.25rem; color: var(--fg); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.12em; text-decoration: none; text-transform: uppercase; }
 .studio-topbar-brand:hover { opacity: 0.9; }
 .studio-topbar-logo { width: auto; height: 52px; content: url("/static/img/logo-unatomo-studio-round-v1.0.svg"); opacity: 0.9; }
-.studio-topbar-name { display: inline-flex; align-items: center; gap: 0.34rem; color: color-mix(in srgb, var(--fg) 70%, transparent); white-space: nowrap; }
+.studio-topbar-name { display: inline-flex; align-items: center; gap: 0.34rem; color: var(--fg); white-space: nowrap; }
 .studio-topbar-parent-name { font-weight: inherit; }
 .studio-topbar-divider { color: color-mix(in srgb, var(--fg) 42%, transparent); }
 
 .utility-controls { height: 100%; display: flex; align-items: center; gap: 0.5rem; }
-.icon-button { width: 44px; height: 36px; margin: 0; padding: 0; border: 1px solid var(--border-subtle); border-radius: 0.75rem; display: inline-flex; align-items: center; justify-content: center; gap: 0.35rem; background: color-mix(in srgb, var(--bg) 84%, var(--fg) 6%); color: var(--fg); font: inherit; font-size: 0.9rem; line-height: 1; box-shadow: none; cursor: pointer; opacity: 0.9; appearance: none; backdrop-filter: blur(8px); }
+.icon-button { width: 44px; height: 36px; margin: 0; padding: 0; border: 1px solid var(--border-subtle); border-radius: 0.75rem; display: inline-flex; align-items: center; justify-content: center; gap: 0.35rem; background: color-mix(in srgb, var(--bg) 80%, transparent); color: var(--fg); font: inherit; font-size: 0.9rem; line-height: 1; box-shadow: none; cursor: pointer; opacity: 0.9; appearance: none; backdrop-filter: blur(8px); }
 #lang-toggle { width: auto; min-width: 66px; padding: 0 0.65rem; justify-content: space-between; gap: 0.5rem; }
 .icon-button:hover,
 .icon-button[aria-expanded="true"] { opacity: 1; border-color: color-mix(in srgb, var(--fg) 32%, transparent); }
@@ -53,7 +56,7 @@ body.studio-home-page > main { position: relative; z-index: 1; }
 .icon-button svg { width: 18px; height: 18px; display: block; fill: none; }
 .lang-picker { position: relative; height: 100%; margin: 0; display: flex; align-items: center; }
 .lang-label { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; }
-.lang-menu { position: absolute; top: calc(100% + 8px); right: 0; z-index: 1100; min-width: 160px; padding: 0.6rem; border: 1px solid var(--border-subtle); border-radius: 0.75rem; display: grid; gap: 0.4rem; background: #141a20; box-shadow: 0 16px 40px color-mix(in srgb, #000 48%, transparent); }
+.lang-menu { position: absolute; top: calc(100% + 8px); right: 0; z-index: 1100; min-width: 160px; padding: 0.6rem; border: 1px solid var(--border-subtle); border-radius: 0.75rem; display: grid; gap: 0.4rem; background: var(--bg); box-shadow: var(--ut-core-dark-menu-shadow); }
 .lang-menu[hidden] { display: none; }
 .lang-option { width: 100%; padding: 0.5rem 0.75rem; border: 1px solid transparent; border-radius: 0.6rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; background: transparent; color: var(--fg); font: inherit; font-size: 0.95rem; text-align: left; text-decoration: none; }
 .lang-option:hover { background: color-mix(in srgb, var(--fg) 8%, transparent); text-decoration: none; }
@@ -151,7 +154,7 @@ body.studio-home-page > main { position: relative; z-index: 1; }
 
 .studio-contact { width: min(800px, calc(100% - (2 * var(--studio-gutter)))); min-height: calc(100svh - 75px); margin: 75px auto 0; padding: clamp(2.5rem, 6vw, 4.5rem) 0; }
 .studio-contact-title--visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
-.studio-contact-card { padding: clamp(1.4rem, 3vw, 2rem); border: 1px solid var(--border-subtle); border-radius: 0.85rem; background: color-mix(in srgb, var(--bg) 92%, var(--fg) 3%); }
+.studio-contact-card { padding: clamp(1.4rem, 3vw, 2rem); border: 1px solid var(--border-subtle); border-radius: 0.85rem; background: var(--panel-bg); }
 .studio-contact-form { margin-top: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem 1.5rem; }
 .studio-form-field { display: grid; gap: 0.45rem; }
 .studio-form-field--full { grid-column: 1 / -1; }
@@ -164,14 +167,14 @@ body.studio-home-page > main { position: relative; z-index: 1; }
 .studio-form-consent span[aria-hidden="true"] { display: none; }
 .studio-form-field label { color: color-mix(in srgb, var(--fg) 90%, transparent); font-size: 0.85rem; font-weight: 500; }
 .studio-form-field input,
-.studio-form-field textarea { width: 100%; padding: 0.65rem 0.8rem; border: 1px solid var(--border-subtle); border-radius: 0.75rem; background: color-mix(in srgb, var(--bg) 92%, transparent); color: var(--fg); font: inherit; }
+.studio-form-field textarea { width: 100%; padding: 0.65rem 0.8rem; border: 1px solid var(--border-subtle); border-radius: 0.75rem; background: var(--ut-core-dark-field); color: var(--fg); font: inherit; }
 .studio-form-field input { height: 2.75rem; }
 .studio-form-field textarea { min-height: 160px; resize: vertical; line-height: 1.5; }
 .studio-form-field input:focus,
-.studio-form-field textarea:focus { border-color: color-mix(in srgb, var(--fg) 42%, transparent); outline: none; }
+.studio-form-field textarea:focus { border-color: var(--fg); background: var(--bg); outline: none; }
 .studio-form-status { grid-column: 1 / -1; margin: 0; color: var(--studio-muted); font-size: 0.85rem; }
-.studio-form-status[data-state="success"] { color: #65d9ae; }
-.studio-form-status[data-state="error"] { color: #ff8f8f; }
+.studio-form-status[data-state="success"] { color: var(--ut-core-dark-success); }
+.studio-form-status[data-state="error"] { color: var(--ut-core-dark-danger); }
 .studio-privacy { width: min(876px, calc(100% - (2 * var(--studio-gutter)))); min-height: calc(100vh - 75px); margin: 0 auto; padding: 110px 1.5rem 2.5rem; display: flex; flex-direction: column; }
 .studio-legal-copy { flex: 1 0 auto; }
 .studio-legal-copy h1 { margin: 0.5rem 0 1.1rem; color: var(--fg); font-size: clamp(2.2rem, 4.6vw, 3.2rem); font-weight: 600; letter-spacing: -0.03em; }

@@ -18,13 +18,16 @@ spacing rules, interaction states and accessibility behavior.
 
 ## Current Safety Boundary
 
-The contract remains documentary by default. Two runtime adoptions are now
+The contract remains documentary by default. Four runtime adoptions are now
 explicitly approved:
 
 1. the shared primary-action color token: `#2da44e` at rest, `#2c974b` on
    hover/focus and `#26863f` when active;
 2. the shared contact-submit component used by Corporate, NFC, Laundry
-   Services and Studio contact forms.
+   Services and Studio contact forms;
+3. the shared 600 px contact-form container used by those same contact
+   experiences;
+4. the Core-dark semantic theme consumed by Core dark and Studio.
 
 The contact-submit contract is intentionally narrow. It authorizes the shared
 button anatomy, states and action-row geometry for those forms only; it does
@@ -90,9 +93,14 @@ Purpose-based values instead of page-specific colors:
 - action, success, warning and danger;
 - focus ring and selected state.
 
-Themes may provide different values for these purposes. A dark Studio theme
-and a light Laundry Services theme can therefore share component anatomy
-without sharing colors.
+Themes may provide different values for these purposes. Studio now deliberately
+consumes the Core-dark values while preserving its own composition; Laundry
+Services remains a separate light profile.
+
+The canonical Core-dark values live in
+`static/css/themes/unatomo-core-dark.css`. Core dark and Studio must consume
+that source instead of maintaining parallel copies of canvas, surface, text,
+border, accent, semantic-state and topbar colors.
 
 ### 3. Components
 
@@ -116,6 +124,8 @@ The first canonical runtime component is the contact submit pair:
   400, shared action colors and common hover, focus, active and disabled states;
 - `.ut-form-actions`: full-width, centered action row with a `5.5rem` minimum
   height;
+- `.ut-contact-form-container`: centered contact card with a `37.5rem` (600 px)
+  maximum width;
 - `.ut-form-status[hidden]`: no reserved hidden status space before the action
   row.
 
@@ -127,14 +137,15 @@ submit presentation.
 
 NFC, Studio, Laundry Services and future products may define:
 
-- theme colors and imagery;
+- a deliberate shared or product-specific theme and its imagery;
 - information density;
 - page composition and grids;
 - product-specific components;
 - deliberate, documented exceptions.
 
 This layer should finish the product experience, not redefine ordinary buttons
-or fields from scratch.
+or fields from scratch. Studio selects Core dark and may compose that palette
+differently, but should not fork its semantic color values.
 
 ## Initial Inventory
 
@@ -172,8 +183,8 @@ The following are observations, not canonical rules:
 
 - the primary system font stack is repeated across core, public, Laundry
   Services and Studio;
-- `--bg`, `--fg` and `--border-subtle` recur, but their values and theme rules
-  differ;
+- `--bg`, `--fg` and `--border-subtle` recur; Studio and Core dark now map them
+  to one shared theme while other profiles retain their own values;
 - several topbars use a height of 75 px and a 52 px logo;
 - several utility and language controls use a height of 36 px;
 - multiple buttons use `0.6rem 1.25rem` padding;

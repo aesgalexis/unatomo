@@ -23,7 +23,7 @@
         <button type="button" data-profile-choice="core-light" aria-pressed="true">Core claro</button>
         <button type="button" data-profile-choice="core-dark" aria-pressed="false">Core oscuro</button>
         <button type="button" data-profile-choice="laundry" aria-pressed="false">Laundry</button>
-        <button type="button" data-profile-choice="studio" aria-pressed="false">Studio</button>
+        <button type="button" data-profile-choice="studio" aria-pressed="false">Studio · Core oscuro</button>
       </nav>
     </div>
   </header>
@@ -175,12 +175,12 @@
         <span class="section-index">03 / Formulario</span>
         <div class="section-title">
           <h2 id="form-title">El patrón más convergente del sitio.</h2>
-          <p>Campos de 44 px, radio de 12 px, textarea de 160 px y rejilla de 16 × 24 px. El contenido puede variar sin rehacer la geometría.</p>
+          <p>Contenedor canónico de 600 px, campos de 44 px, radio de 12 px, textarea de 160 px y rejilla de 16 × 24 px. El contenido puede variar sin rehacer la geometría.</p>
         </div>
       </div>
 
       <article class="demo-panel">
-        <form class="form-demo" data-demo-form>
+        <form class="form-demo ut-contact-form-container" data-demo-form>
           <div class="ut-field-group">
             <label class="ut-label" for="demo-name">Nombre</label>
             <input class="ut-field" id="demo-name" name="name" autocomplete="name" placeholder="Alexis Santana">
@@ -246,13 +246,16 @@
         <span class="section-index">05 / Tokens</span>
         <div class="section-title">
           <h2 id="tokens-title">Roles semánticos, no colores sueltos.</h2>
-          <p>Los componentes piden canvas, superficie, texto, acción o peligro. Cada perfil decide el valor visual concreto.</p>
+          <p>Los componentes piden canvas, superficie, texto, acción o peligro. Core oscuro y Studio comparten ya esos valores; Studio conserva su composición propia.</p>
         </div>
       </div>
 
       <div class="demo-grid">
         <article class="demo-panel demo-panel--wide">
-          <p class="sample-label">Color</p>
+          <div class="sample-heading">
+            <p class="sample-label">Color</p>
+            <span class="evidence-badge">Core oscuro = Studio · aplicado</span>
+          </div>
           <div class="token-grid">
             <div class="color-token" style="--token-color: var(--ut-color-canvas)"><div class="color-token-swatch"></div><div class="color-token-copy"><strong>Canvas</strong><code>--ut-color-canvas</code></div></div>
             <div class="color-token" style="--token-color: var(--ut-color-surface)"><div class="color-token-swatch"></div><div class="color-token-copy"><strong>Surface</strong><code>--ut-color-surface</code></div></div>

@@ -1,4 +1,5 @@
 @import url("/static/css/tokens/unatomo-action-colors.css");
+@import url("/static/css/themes/unatomo-core-dark.css");
 @import url("/static/css/components/unatomo-buttons.css");
 @import url("/static/css/components/unatomo-forms.css");
 
@@ -30,30 +31,26 @@ body {
 /* Nosotros borrows the atmospheric, dark treatment from Laundry Services. */
 .landing-about-root {
   color-scheme: dark;
-  background: #000000;
+  background: var(--ut-core-dark-surface);
 }
 
 body.landing-about-page {
   color-scheme: dark;
-  --bg: #0b0b0c;
-  --fg: #e5e7eb;
-  --border-subtle: color-mix(in srgb, var(--fg) 18%, transparent);
-  --panel-bg: color-mix(in srgb, var(--bg) 80%, transparent);
-  --accent: #60a5fa;
-  --accent-strong: #93c5fd;
+  --bg: var(--ut-core-dark-canvas);
+  --fg: var(--ut-core-dark-text);
+  --border-subtle: var(--ut-core-dark-border-subtle);
+  --panel-bg: var(--ut-core-dark-panel);
+  --accent: var(--ut-core-dark-accent);
+  --accent-strong: var(--ut-core-dark-accent-strong);
   --text: var(--fg);
-  --text-muted: color-mix(in srgb, var(--fg) 68%, transparent);
-  background:
-    radial-gradient(ellipse 90% 28rem at 50% 100%, rgba(139, 92, 246, 0.22), rgba(109, 40, 217, 0.09) 38%, transparent 76%),
-    radial-gradient(circle at 85% 10%, rgba(96, 165, 250, 0.12), transparent 45%),
-    radial-gradient(circle at 12% 18%, rgba(56, 189, 248, 0.08), transparent 40%),
-    linear-gradient(180deg, #07111f 0%, #04070d 52%, #000000 100%);
+  --text-muted: var(--ut-core-dark-text-muted);
+  background: var(--ut-core-dark-page-background);
 }
 
 body.landing-about-page .landing-topbar {
-  background: rgba(4, 7, 13, 0.52);
-  border-bottom-color: rgba(229, 231, 235, 0.16);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.14);
+  background: var(--ut-core-dark-topbar-background);
+  border-bottom-color: var(--ut-core-dark-topbar-border);
+  box-shadow: var(--ut-core-dark-topbar-shadow);
 }
 
 body {

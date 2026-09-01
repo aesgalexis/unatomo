@@ -8,7 +8,7 @@ const profiles = {
   "core-light": "Core · claro",
   "core-dark": "Core · oscuro",
   laundry: "Laundry Services",
-  studio: "Studio"
+  studio: "Studio · Core oscuro"
 };
 
 const applyProfile = (profile) => {
@@ -31,4 +31,3 @@ demoForm?.addEventListener("submit", (event) => {
 });
 
 applyProfile(root.dataset.profile || "core-light");
-

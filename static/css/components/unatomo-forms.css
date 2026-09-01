@@ -1,3 +1,9 @@
+.ut-contact-form-container {
+  box-sizing: border-box;
+  width: min(100%, 37.5rem);
+  margin-inline: auto;
+}
+
 .ut-form-actions {
   box-sizing: border-box;
   width: 100%;

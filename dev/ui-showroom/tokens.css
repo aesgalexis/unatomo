@@ -1,4 +1,5 @@
 @import url("/static/css/tokens/unatomo-action-colors.css");
+@import url("/static/css/themes/unatomo-core-dark.css");
 
 :root {
   color-scheme: light;
@@ -60,25 +61,26 @@
   --ut-topbar-background: color-mix(in srgb, var(--ut-color-surface) 82%, transparent);
 }
 
-:root[data-profile="core-dark"] {
+:root[data-profile="core-dark"],
+:root[data-profile="studio"] {
   color-scheme: dark;
-  --ut-color-canvas: #0b0b0c;
-  --ut-color-surface: #000000;
-  --ut-color-surface-elevated: #111214;
-  --ut-color-text: #e5e7eb;
-  --ut-color-text-muted: #a3a7ad;
-  --ut-color-border-subtle: color-mix(in srgb, var(--ut-color-text) 18%, transparent);
-  --ut-color-border-strong: color-mix(in srgb, var(--ut-color-text) 46%, transparent);
+  --ut-color-canvas: var(--ut-core-dark-canvas);
+  --ut-color-surface: var(--ut-core-dark-surface);
+  --ut-color-surface-elevated: var(--ut-core-dark-surface-elevated);
+  --ut-color-text: var(--ut-core-dark-text);
+  --ut-color-text-muted: var(--ut-core-dark-text-muted);
+  --ut-color-border-subtle: var(--ut-core-dark-border-subtle);
+  --ut-color-border-strong: var(--ut-core-dark-border-strong);
   --ut-color-action: var(--ut-action-primary);
   --ut-color-action-text: #ffffff;
   --ut-color-action-hover: var(--ut-action-primary-hover);
-  --ut-color-success: #22a662;
-  --ut-color-warning: #f0a63a;
-  --ut-color-danger: #ff6868;
-  --ut-color-focus: #e5e7eb;
-  --ut-color-accent: #60a5fa;
-  --ut-shadow-menu: 0 18px 44px rgb(0 0 0 / 38%);
-  --ut-topbar-background: color-mix(in srgb, #000 78%, transparent);
+  --ut-color-success: var(--ut-core-dark-success);
+  --ut-color-warning: var(--ut-core-dark-warning);
+  --ut-color-danger: var(--ut-core-dark-danger);
+  --ut-color-focus: var(--ut-core-dark-focus);
+  --ut-color-accent: var(--ut-core-dark-accent);
+  --ut-shadow-menu: var(--ut-core-dark-menu-shadow);
+  --ut-topbar-background: var(--ut-core-dark-topbar-background);
 }
 
 :root[data-profile="laundry"] {
@@ -100,25 +102,4 @@
   --ut-color-accent: #2563eb;
   --ut-shadow-menu: 0 16px 40px rgb(17 17 17 / 12%);
   --ut-topbar-background: rgb(255 255 255 / 82%);
-}
-
-:root[data-profile="studio"] {
-  color-scheme: dark;
-  --ut-color-canvas: #0c0f13;
-  --ut-color-surface: #151a20;
-  --ut-color-surface-elevated: #191f26;
-  --ut-color-text: #f2f5f7;
-  --ut-color-text-muted: #a5adb4;
-  --ut-color-border-subtle: color-mix(in srgb, var(--ut-color-text) 14%, transparent);
-  --ut-color-border-strong: color-mix(in srgb, var(--ut-color-text) 40%, transparent);
-  --ut-color-action: var(--ut-action-primary);
-  --ut-color-action-text: #ffffff;
-  --ut-color-action-hover: var(--ut-action-primary-hover);
-  --ut-color-success: #65d9ae;
-  --ut-color-warning: #f2b45b;
-  --ut-color-danger: #ff8f8f;
-  --ut-color-focus: #f2f5f7;
-  --ut-color-accent: #4fd1a1;
-  --ut-shadow-menu: 0 18px 46px rgb(0 0 0 / 42%);
-  --ut-topbar-background: rgb(12 15 19 / 86%);
 }

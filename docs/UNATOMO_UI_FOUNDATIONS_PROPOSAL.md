@@ -4,7 +4,7 @@ Status: proposed for review
 Based on: `docs/UNATOMO_UI_CONTRACT.md`,
 `docs/UNATOMO_UI_INVENTORY.md` and
 `docs/UNATOMO_UI_FOUNDATIONS_INVENTORY.md`  
-Runtime adoption: none
+Runtime adoption: action color, contact submit/width and Core-dark theme
 
 Review implementation: `dev/ui-showroom/`
 
@@ -31,7 +31,7 @@ parts of the site, while postponing expressive and high-risk decisions.
 | P-07 | Define a semantic subtle border with 1 px width | Approve |
 | P-08 | Define a structural spacing scale and keep optical spacing internal | Approve model |
 | P-09 | Name 600/800/876/1120 px container roles | Approve |
-| P-10 | Define semantic color roles through product profiles | Action role adopted; defer remaining raw colors |
+| P-10 | Define semantic color roles through product profiles | Action role and Core-dark theme adopted; defer other profiles |
 | P-11 | Define four motion duration roles | Review after visual baseline |
 | P-12 | Treat 768/769 as one conceptual responsive boundary | Approve concept; defer full breakpoint set |
 
@@ -208,9 +208,13 @@ The first approved raw role is shared across profiles:
 --ut-action-primary-active: #26863f;
 ```
 
-Core light, Core dark, Laundry light and Studio dark use these same values for
+Core light, Core dark, Laundry light and Studio use these same values for
 existing green actions. NFC consumes the same action role while retaining
 separate non-interactive operational success/status colors.
+
+Core dark and Studio additionally share the full semantic theme defined in
+`static/css/themes/unatomo-core-dark.css`. Studio remains a distinct product
+composition, not a separate color palette.
 
 Current names such as `--bg`, `--fg` and `--border-subtle` should remain in
 place until a surface is deliberately adapted. Violet `#7c3aed` remains
@@ -255,9 +259,9 @@ This packet does not choose:
 - heading/display scales;
 - card and modal geometry;
 - public control-height values and whether a `prominent` role is needed;
-- raw theme colors beyond the adopted primary-action role;
+- raw theme colors beyond the adopted primary-action role and Core-dark theme;
 - shadows and z-index numbers;
-- the universal contact width, because two legitimate recipes already exist;
+- widths for form families other than the adopted 600 px contact container;
 - a component implementation or package structure;
 - any migration target;
 - any NFC geometry, typography or density modification.
