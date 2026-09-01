@@ -194,6 +194,12 @@
   --mc-location-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23F3F4F6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 10c0 6-9 12-9 12S3 16 3 10a9 9 0 1 1 18 0z'/%3E%3Ccircle cx='12' cy='10' r='3'/%3E%3C/svg%3E");
 }
 
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) .mc-location-select.has-location {
+    --mc-location-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23F3F4F6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 10c0 6-9 12-9 12S3 16 3 10a9 9 0 1 1 18 0z'/%3E%3Ccircle cx='12' cy='10' r='3'/%3E%3C/svg%3E");
+  }
+}
+
 .mc-location-select::-ms-expand {
   display: none;
 }

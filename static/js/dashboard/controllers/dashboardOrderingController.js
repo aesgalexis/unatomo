@@ -372,7 +372,6 @@ export const createDashboardOrderingController = ({
         window.scrollTo({ top: 0, behavior: "smooth" });
       }
     });
-    autoSave.saveNow(machine.id, "create");
   });
 
   return {

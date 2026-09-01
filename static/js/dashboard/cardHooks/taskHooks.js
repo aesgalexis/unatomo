@@ -12,6 +12,7 @@ import {
   machineStatusResultPatch,
   transitionMachineStatus
 } from "/static/js/dashboard/machineStatusRepo.js";
+import { setTopbarLogoLoading } from "/static/js/topbar/loading-logo.js";
 
 const RESTORE_OPERATION_TASK_SOURCE = "status-out-of-service";
 
@@ -197,6 +198,8 @@ export const installTaskHooks = (hooks, deps = {}) => {
         }
       }
       if (isRestoreTask) {
+        const loadingSource = `machine-status-${id}`;
+        setTopbarLogoLoading(loadingSource, true);
         try {
           const result = await transitionMachineStatus(
             id,
@@ -221,6 +224,8 @@ export const installTaskHooks = (hooks, deps = {}) => {
         } catch {
           notifyTopbar(t("dashboard.saveError", "Error al guardar"));
           return false;
+        } finally {
+          setTopbarLogoLoading(loadingSource, false);
         }
       }
       if (uploadedAttachments.length) {

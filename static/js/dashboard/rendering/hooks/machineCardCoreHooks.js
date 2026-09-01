@@ -3,6 +3,7 @@ import {
   machineStatusResultPatch,
   transitionMachineStatus
 } from "../../machineStatusRepo.js";
+import { setTopbarLogoLoading } from "/static/js/topbar/loading-logo.js";
 
 export const installMachineCardCoreHooks = (dependencies) => {
   const {
@@ -131,6 +132,8 @@ export const installMachineCardCoreHooks = (dependencies) => {
             ? "desconectada"
             : nextStatus;
           let statusResult;
+          const loadingSource = `machine-status-${machine.id}`;
+          setTopbarLogoLoading(loadingSource, true);
           try {
             statusResult = await transitionMachineStatus(
               machine.id,
@@ -145,6 +148,8 @@ export const installMachineCardCoreHooks = (dependencies) => {
           } catch {
             notifyTopbar(t("dashboard.saveError", "Error al guardar"));
             return;
+          } finally {
+            setTopbarLogoLoading(loadingSource, false);
           }
           const statusUpdate = machineStatusResultPatch(statusResult);
           replaceMachine(machine.id, {
@@ -222,6 +227,7 @@ export const installMachineCardCoreHooks = (dependencies) => {
         };
 
         hooks.onTitleUpdate = (node, nextTitle) => {
+          const current = getDraftById(machine.id);
           const trimmed = (nextTitle || "").trim();
           const normalized = trimmed.toLowerCase();
           if (!normalized) return false;
@@ -233,7 +239,8 @@ export const installMachineCardCoreHooks = (dependencies) => {
             return false;
           }
           updateMachine(machine.id, { title: trimmed });
-          autoSave.scheduleSave(machine.id, "title");
+          if (current?.isNew) autoSave.saveNow(machine.id, "create");
+          else autoSave.scheduleSave(machine.id, "title");
           return true;
         };
 
