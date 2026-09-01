@@ -80,9 +80,7 @@ export const renderMachineCards = (dependencies) => {
         if ((machine.role || "owner") === "admin") {
           const nextAdminName = (state.adminLabel || "").trim();
           if (nextAdminName && machine.adminName !== nextAdminName) {
-            updateMachine(machine.id, { adminName: nextAdminName });
             machine.adminName = nextAdminName;
-            autoSave.scheduleSave(machine.id, "admin-name");
           }
         }
         const adminDisplayName = machine.adminName

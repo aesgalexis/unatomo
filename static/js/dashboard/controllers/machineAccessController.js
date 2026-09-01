@@ -1,4 +1,4 @@
-import { fetchMachine, upsertMachine } from "../firestoreRepo.js";
+import { fetchMachine } from "../firestoreRepo.js";
 import { resendAccountEmailVerification, respondAdminInvite, respondMachineTransferInvite } from "../admin/adminFunctionsRepo.js";
 import { normalizeEmail } from "../admin/accountDirectoryRepo.js";
 import { normalizeMachine } from "../machineStore.js";
@@ -186,30 +186,11 @@ export const createMachineAccessController = ({
     if (decision === "accepted") {
       const ownerMachine = await fetchMachine(null, invite.machineId);
       if (ownerMachine) {
-        const user = state.adminLabel || state.adminEmail || t("dashboard.admin", "Administrador");
-        const logs = [
-          ...(ownerMachine.logs || []),
-          {
-            ts: new Date().toISOString(),
-            type: "admin_accept",
-            admin: state.adminEmail || "",
-            user
-          }
-        ];
-        try {
-          await upsertMachine(invite.ownerUid, {
-            ...ownerMachine,
-            adminName: state.adminLabel || "",
-            logs,
-            tenantId: invite.ownerUid
-          });
-        } catch {
-          // ignore log failures
-        }
         const normalized = normalizeMachine(ownerMachine, state.draftMachines.length);
         normalized.tenantId = invite.ownerUid;
         normalized.role = "admin";
         normalized.ownerEmail = invite.ownerEmail || "";
+        normalized.adminName = state.adminLabel || normalized.adminName || "";
         state.draftMachines = [normalized, ...state.draftMachines];
         renderCards({ preserveScroll: true });
       }

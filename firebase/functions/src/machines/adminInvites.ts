@@ -280,6 +280,7 @@ export const respondAdminInvite = onCall(async (request) => {
     }
 
     const now = admin.firestore.FieldValue.serverTimestamp();
+    const adminName = (auth.token.name || "").toString().trim();
     const machineRef = machinesCol().doc(currentInvite.machineId);
     const linkId = `${currentInvite.machineId}_${auth.uid}`;
     const linkRef = linksCol().doc(linkId);
@@ -296,6 +297,7 @@ export const respondAdminInvite = onCall(async (request) => {
           adminUid: auth.uid,
           adminEmail: currentInvite.adminEmail || "",
           adminEmailLower: currentInvite.adminEmailLower,
+          adminName,
           status: "accepted",
           createdAt: now,
           updatedAt: now,
@@ -316,7 +318,14 @@ export const respondAdminInvite = onCall(async (request) => {
         machineRef,
         {
           adminEmail: currentInvite.adminEmail || "",
+          adminName,
           adminStatus: `Administrado por ${currentInvite.adminEmail || ""}`,
+          logs: admin.firestore.FieldValue.arrayUnion({
+            ts: new Date().toISOString(),
+            type: "admin_accept",
+            admin: currentInvite.adminEmail || "",
+            user: adminName || currentInvite.adminEmail || "",
+          }),
         },
         {merge: true},
       );
