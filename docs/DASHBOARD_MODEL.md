@@ -116,7 +116,9 @@ Current scope:
   the saved preference. Tree mode supports the shared group menu plus
   drag/drop from machine cards into groups or the ungrouped area, nesting
   groups inside other valid groups, and returning groups to the root through
-  `All machines`. Expanded branches also list their directly assigned machines;
+  `All machines`. Machines listed in expanded branches can also be dragged
+  directly to another group, `Ungrouped`, or `All machines`. Expanded branches
+  list their directly assigned machines;
   selecting a machine shows only that card through an internal tree selection,
   without populating the visible search field or changing group membership.
   Hierarchy depth and cycle rules remain enforced by the

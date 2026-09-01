@@ -106,6 +106,8 @@ export const createDashboardGroupTreeController = ({
 
   let dragSource = null;
   let dropTarget = null;
+  let draggedTreeRow = null;
+  let suppressMachineClickUntil = 0;
   const clearDropTarget = () => {
     dropTarget?.classList.remove("is-drop-target");
     dropTarget = null;
@@ -127,15 +129,26 @@ export const createDashboardGroupTreeController = ({
 
   document.addEventListener("dragstart", (event) => {
     if (!isTreeActive()) return;
-    const treeRow = event.target.closest?.(".dashboard-group-tree-row[data-group-id]");
-    if (treeRow && container.contains(treeRow)) {
+    const machineTreeRow = event.target.closest?.(
+      ".dashboard-group-tree-row.is-machine[data-machine-id]"
+    );
+    const groupTreeRow = event.target.closest?.(
+      ".dashboard-group-tree-row[data-group-id]"
+    );
+    if (machineTreeRow && container.contains(machineTreeRow)) {
+      dragSource = {type: "machine", id: machineTreeRow.dataset.machineId || ""};
+      draggedTreeRow = machineTreeRow;
+      draggedTreeRow.classList.add("is-dragging");
+    } else if (groupTreeRow && container.contains(groupTreeRow)) {
       if (event.target.closest(
         ".dashboard-group-tree-toggle, .dashboard-group-tree-visibility-toggle, .dashboard-group-tree-menu-toggle"
       )) {
         event.preventDefault();
         return;
       }
-      dragSource = {type: "group", id: treeRow.dataset.groupId || ""};
+      dragSource = {type: "group", id: groupTreeRow.dataset.groupId || ""};
+      draggedTreeRow = groupTreeRow;
+      draggedTreeRow.classList.add("is-dragging");
     } else {
       const card = event.target.closest?.(".machine-card");
       if (!card) return;
@@ -153,6 +166,11 @@ export const createDashboardGroupTreeController = ({
     document.body.classList.add("is-dashboard-tree-dragging");
   });
   document.addEventListener("dragend", () => {
+    if (draggedTreeRow?.classList.contains("is-machine")) {
+      suppressMachineClickUntil = performance.now() + 250;
+    }
+    draggedTreeRow?.classList.remove("is-dragging");
+    draggedTreeRow = null;
     dragSource = null;
     clearDropTarget();
     document.body.classList.remove("is-dashboard-tree-dragging");
@@ -174,16 +192,33 @@ export const createDashboardGroupTreeController = ({
   container.addEventListener("dragleave", (event) => {
     if (!container.contains(event.relatedTarget)) clearDropTarget();
   });
+  container.addEventListener("click", (event) => {
+    if (performance.now() > suppressMachineClickUntil) return;
+    if (!event.target.closest(".dashboard-group-tree-row.is-machine")) return;
+    event.preventDefault();
+    event.stopPropagation();
+  }, true);
   container.addEventListener("drop", (event) => {
     const row = event.target.closest(".dashboard-group-tree-row[data-tree-drop-type]");
     if (!canDropOn(row)) return;
     event.preventDefault();
     const source = dragSource;
     const target = getDropDetails(row);
+    if (source.type === "machine" && draggedTreeRow?.classList.contains("is-machine")) {
+      suppressMachineClickUntil = performance.now() + 250;
+    }
+    draggedTreeRow?.classList.remove("is-dragging");
+    draggedTreeRow = null;
     dragSource = null;
     clearDropTarget();
     document.body.classList.remove("is-dashboard-tree-dragging");
     if (source.type === "machine") {
+      if (target.type === "group") {
+        state.expandedTreeGroupIds = Array.from(new Set([
+          ...(state.expandedTreeGroupIds || []),
+          target.groupId
+        ]));
+      }
       state.selectedTreeGroupId = target.type === "group"
         ? target.groupId
         : target.type === "ungrouped"

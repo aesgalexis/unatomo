@@ -472,6 +472,7 @@ export const createDashboardGroupTreeRenderer = ({
         const row = document.createElement("div");
         row.className = "dashboard-group-tree-row is-machine";
         row.dataset.machineId = machine.id;
+        if (!filterOnly) row.draggable = true;
         row.dataset.depth = String(depth);
         row.classList.toggle("is-selected", selectedMachineId === machine.id);
         row.style.setProperty(
@@ -487,6 +488,7 @@ export const createDashboardGroupTreeRenderer = ({
         button.type = "button";
         button.className = "dashboard-group-tree-node dashboard-group-tree-machine";
         button.dataset.machineId = machine.id;
+        if (!filterOnly) button.draggable = true;
         button.setAttribute("role", "treeitem");
         button.setAttribute("aria-level", String(depth + 1));
         button.setAttribute(

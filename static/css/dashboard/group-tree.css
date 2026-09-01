@@ -275,6 +275,10 @@
   color: var(--fg);
 }
 
+.dashboard-group-tree-row.is-dragging .dashboard-group-tree-node {
+  opacity: 0.62;
+}
+
 .is-dashboard-tree-dragging .dashboard-group-tree-row[data-tree-drop-type] {
   cursor: move;
 }
