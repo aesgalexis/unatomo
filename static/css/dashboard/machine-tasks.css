@@ -168,7 +168,7 @@
 
 .task-complete-btn.is-completing,
 .task-complete-btn.is-completion-feedback {
-  color: #16a34a;
+  color: var(--ut-action-primary);
 }
 
 .task-complete-btn.is-one-off-completing svg circle,
@@ -183,7 +183,7 @@
 }
 
 .task-complete-btn:hover {
-  color: #16a34a;
+  color: var(--ut-action-primary);
 }
 
 .task-complete-btn:hover svg path,
@@ -194,7 +194,7 @@
 .task-complete-btn:focus-visible {
   outline: none;
   background: transparent;
-  color: #16a34a;
+  color: var(--ut-action-primary);
 }
 
 @keyframes task-completion-ring {
@@ -668,14 +668,14 @@
 }
 
 .task-create-submit {
-  background: linear-gradient(135deg, #2da44e, #2c974b);
-  border-color: #2c974b;
+  background: linear-gradient(135deg, var(--ut-action-primary), var(--ut-action-primary-hover));
+  border-color: var(--ut-action-primary-hover);
   color: #fff;
 }
 
 .mc-expand .task-create-submit {
-  background: linear-gradient(135deg, #2da44e, #2c974b);
-  border-color: #2c974b;
+  background: linear-gradient(135deg, var(--ut-action-primary), var(--ut-action-primary-hover));
+  border-color: var(--ut-action-primary-hover);
   color: #fff;
 }
 

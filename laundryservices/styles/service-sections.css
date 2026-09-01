@@ -317,15 +317,15 @@ body.ls-service-detail-page .ls-upperfooter * {
   display: flex;
   width: fit-content;
   margin: 1.35rem auto 0;
-  background: #16834b;
-  border-color: #16834b;
+  background: var(--ut-action-primary);
+  border-color: var(--ut-action-primary);
   color: #ffffff;
 }
 
 .audit-cta .btn-pill:hover,
 .audit-cta .btn-pill:focus-visible {
-  background: #116a3d;
-  border-color: #116a3d;
+  background: var(--ut-action-primary-hover);
+  border-color: var(--ut-action-primary-hover);
   color: #ffffff;
 }
 

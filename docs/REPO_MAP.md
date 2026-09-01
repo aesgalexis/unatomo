@@ -39,6 +39,8 @@ relevant sections instead of loading the complete file by default.
 
 ## Frontend Source
 
+- `dev/ui-showroom/`: isolated, noindex UI-foundations showroom. It is not
+  linked from production pages and is excluded from the static production build.
 - `static/js/dashboard/`: dashboard bootstrap, runtime, rendering, data,
   machine cards, hooks, views, and tabs.
 - `static/js/firebase/`: shared Firebase app/App Check initialization, the
@@ -86,6 +88,14 @@ links, Tag ID, QR cleanup, callable Functions, or data permissions.
 - `docs/SUBAGENTS.md`: optional delegation playbook; read only when delegation
   is explicitly requested or clearly justified.
 - `docs/PROJECT_OVERVIEW.md`: what the product does and why it exists.
+- `docs/UNATOMO_UI_CONTRACT.md`: evolving cross-product visual foundations,
+  component contracts, safety boundaries, and standardization roadmap.
+- `docs/UNATOMO_UI_INVENTORY.md`: documentary measurements and comparison
+  matrix for current cross-product UI patterns; it has no runtime effect.
+- `docs/UNATOMO_UI_FOUNDATIONS_INVENTORY.md`: typography, spacing, geometry,
+  responsive, color, elevation, motion, and focus inventory for the UI contract.
+- `docs/UNATOMO_UI_FOUNDATIONS_PROPOSAL.md`: first review packet for namespaced
+  tokens, control sizes, containers, spacing, colors, motion, and responsive roles.
 - `docs/LAUNDRY_SERVICES_ARCHITECTURE.md`: Laundry Services module boundaries,
   Firestore catalogue ownership, and monolith guardrails.
 - `docs/DEV.md`: authoritative local setup and development commands.

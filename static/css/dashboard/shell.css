@@ -867,7 +867,7 @@ body.page .topbar {
 }
 
 .dashboard-view-menu-check {
-  color: #2c974b;
+  color: var(--ut-action-primary-hover);
   font-weight: 700;
   text-align: center;
 }
@@ -890,8 +890,8 @@ body.page .topbar {
 }
 
 .btn-add {
-  background: linear-gradient(135deg, #2da44e, #2c974b);
-  border: 1px solid #2c974b;
+  background: linear-gradient(135deg, var(--ut-action-primary), var(--ut-action-primary-hover));
+  border: 1px solid var(--ut-action-primary-hover);
   color: #fff;
   width: 40px;
   height: 40px;

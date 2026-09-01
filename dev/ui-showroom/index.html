@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="es" data-profile="core-light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>UNATOMO UI · Current-state Showroom</title>
+  <meta name="description" content="Showroom aislado del estado actual de los fundamentos visuales de UNATOMO.">
+  <link rel="icon" href="/static/img/favicon/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./showroom.css">
+</head>
+<body>
+  <header class="showroom-topbar">
+    <div class="showroom-topbar-inner">
+      <a class="showroom-brand" href="#top" aria-label="UNATOMO UI Showroom">
+        <img src="/static/img/logo-unatomo-round-v1.0.svg" alt="">
+        <span class="showroom-brand-copy">
+          <span class="showroom-brand-name">UNATOMO / UI</span>
+          <span class="showroom-brand-state">Inventario 01 · aislado</span>
+        </span>
+      </a>
+      <nav class="profile-switcher" aria-label="Perfil visual">
+        <button type="button" data-profile-choice="core-light" aria-pressed="true">Core claro</button>
+        <button type="button" data-profile-choice="core-dark" aria-pressed="false">Core oscuro</button>
+        <button type="button" data-profile-choice="laundry" aria-pressed="false">Laundry</button>
+        <button type="button" data-profile-choice="studio" aria-pressed="false">Studio</button>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top" class="showroom-main">
+    <section class="showroom-intro" aria-labelledby="showroom-title">
+      <p class="showroom-kicker">Current-state showroom · <span data-current-profile>Core · claro</span></p>
+      <h1 id="showroom-title">Así es hoy. Sin normalizarlo.</h1>
+      <p class="showroom-lead">Este showroom reúne patrones existentes y conserva sus diferencias. Primero documentamos qué hay, dónde vive y cuánto se repite; más adelante decidiremos qué pertenece al contrato común de UNATOMO.</p>
+      <div class="showroom-summary" aria-label="Resumen del inventario">
+        <span class="summary-chip"><strong>32–50 px</strong> alturas observadas</span>
+        <span class="summary-chip"><strong>2</strong> escalas Aceptar / Cancelar</span>
+        <span class="summary-chip"><strong>1</strong> verde de acción</span>
+        <span class="summary-chip"><strong>1</strong> navegación compartida</span>
+        <span class="summary-chip"><strong>0</strong> páginas conectadas</span>
+      </div>
+    </section>
+
+    <section class="showroom-section" aria-labelledby="controls-title">
+      <div class="section-heading">
+        <span class="section-index">01 / Inventario de controles</span>
+        <div class="section-title">
+          <h2 id="controls-title">Primero, las medidas que ya existen.</h2>
+          <p>No son una escala propuesta. Son seis contextos actuales que conviene poder comparar antes de agruparlos o declarar excepciones.</p>
+        </div>
+      </div>
+
+      <div class="demo-grid">
+        <article class="demo-panel demo-panel--wide">
+          <div class="sample-heading">
+            <p class="sample-label">Alturas observadas</p>
+            <span class="evidence-badge">Actual · varias superficies</span>
+          </div>
+          <div class="size-atlas">
+            <div class="control-example">
+              <button class="observed-control observed-control--32" type="button">Acceder</button>
+              <small><strong>32 px</strong><span>NFC público · topbar</span></small>
+            </div>
+            <div class="control-example">
+              <button class="observed-control observed-control--36" type="button">Idioma</button>
+              <small><strong>36 px</strong><span>Core / LS / Studio · utilidad</span></small>
+            </div>
+            <div class="control-example">
+              <button class="observed-control observed-control--40" type="button">Añadir</button>
+              <small><strong>40 px</strong><span>NFC dashboard · acción</span></small>
+            </div>
+            <div class="control-example">
+              <button class="observed-control observed-control--42" type="button">Descubrir NFC</button>
+              <small><strong>42 px</strong><span>NFC público · landing</span></small>
+            </div>
+            <div class="control-example">
+              <input class="observed-field observed-control--44" aria-label="Campo de contacto de ejemplo" value="Campo de contacto" readonly>
+              <small><strong>44 px</strong><span>Formularios · campo convergente</span></small>
+            </div>
+            <div class="control-example">
+              <button class="observed-control observed-control--50 observed-control--inverse" type="button">Crear espacio</button>
+              <small><strong>50 px</strong><span>NFC · sólo onboarding</span></small>
+            </div>
+          </div>
+        </article>
+
+        <article class="demo-panel">
+          <div class="sample-heading">
+            <p class="sample-label">Aceptar / Cancelar pequeño</p>
+            <span class="evidence-badge">Actual · NFC dashboard</span>
+          </div>
+          <div class="compact-action-demo">
+            <label class="compact-input-label">Ubicación <input value="Lavandería norte" readonly></label>
+            <div class="compact-actions">
+              <button class="nfc-compact-action" type="button">Aceptar</button>
+              <button class="nfc-compact-action" type="button">Cancelar</button>
+            </div>
+          </div>
+          <p class="sample-note">No tienen altura explícita. Comparten borde, fondo y color; sólo usan radio de 8 px y padding de 2.4 × 6.4 px.</p>
+        </article>
+
+        <article class="demo-panel">
+          <div class="sample-heading">
+            <p class="sample-label">Cancelar / Confirmar en modal</p>
+            <span class="evidence-badge">Actual · NFC dashboard</span>
+          </div>
+          <div class="modal-action-demo">
+            <button class="nfc-modal-action nfc-modal-action--cancel" type="button">Cancelar</button>
+            <button class="nfc-modal-action nfc-modal-action--confirm" type="button">Confirmar</button>
+          </div>
+          <p class="sample-note">Aquí la base sí fija un mínimo de 2.35 rem (≈ 38 px). El color de confirmar cambia según la operación: rojo, gris o verde.</p>
+        </article>
+
+        <article id="action-color" class="demo-panel demo-panel--wide">
+          <div class="sample-heading">
+            <p class="sample-label">Verde de acción compartido</p>
+            <span class="evidence-badge">Canónico · aplicado</span>
+          </div>
+          <div class="green-family-grid">
+            <div class="green-family">
+              <button class="ut-button ut-button--primary" type="button">Enviar</button>
+              <code>Core</code>
+              <small>Mismo componente compartido, sin variante local.</small>
+            </div>
+            <div class="green-family">
+              <button class="ut-button ut-button--primary" type="button">Enviar</button>
+              <code>NFC</code>
+              <small>Misma forma, altura, peso y estados.</small>
+            </div>
+            <div class="green-family">
+              <button class="ut-button ut-button--primary" type="button">Enviar</button>
+              <code>Laundry</code>
+              <small>Misma implementación canónica en sus cuatro idiomas.</small>
+            </div>
+            <div class="green-family">
+              <button class="ut-button ut-button--primary" type="button">Enviar</button>
+              <code>Studio</code>
+              <small>El mismo componente funciona sobre el fondo oscuro.</small>
+            </div>
+          </div>
+          <p class="sample-note sample-note--decision"><strong>Contrato aplicado a los 16 formularios:</strong> 40 px de alto, píldora, 0.95 rem, peso 400 y zona de acciones centrada de 5.5 rem. <strong>#2da44e</strong> normal · <strong>#2c974b</strong> hover/focus · <strong>#26863f</strong> active.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="showroom-section" aria-labelledby="navigation-title">
+      <div class="section-heading">
+        <span class="section-index">02 / Navegación compartida</span>
+        <div class="section-title">
+          <h2 id="navigation-title">Volver y Arriba ya son un patrón común.</h2>
+          <p>Se muestran aparte porque son navegación circular con icono, no una variante del botón de texto. La implementación compartida mide 40 × 40 px.</p>
+        </div>
+      </div>
+
+      <article class="demo-panel navigation-demo-panel">
+        <div class="minimal-nav-demo" aria-label="Ejemplo de controles Volver y Arriba">
+          <button class="minimal-nav-button" type="button" aria-label="Volver">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.7 5.3-1.4-1.4L5.2 12l8.1 8.1 1.4-1.4L9 13h10v-2H9l5.7-5.7Z"></path></svg>
+          </button>
+          <button class="minimal-nav-button" type="button" aria-label="Arriba">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 4-8.1 8.1 1.4 1.4 5.7-5.7V20h2V7.8l5.7 5.7 1.4-1.4L12 4Z"></path></svg>
+          </button>
+        </div>
+        <div class="navigation-evidence">
+          <span class="evidence-badge">Actual · compartido</span>
+          <p>Fijo abajo a la derecha, radio circular, fondo translúcido, blur y sombra suave. El botón Arriba aparece al superar 24 px de scroll.</p>
+          <code>static/css/components/nfc-minimal-page-nav.css</code>
+        </div>
+      </article>
+    </section>
+
+    <section class="showroom-section" aria-labelledby="form-title">
+      <div class="section-heading">
+        <span class="section-index">03 / Formulario</span>
+        <div class="section-title">
+          <h2 id="form-title">El patrón más convergente del sitio.</h2>
+          <p>Campos de 44 px, radio de 12 px, textarea de 160 px y rejilla de 16 × 24 px. El contenido puede variar sin rehacer la geometría.</p>
+        </div>
+      </div>
+
+      <article class="demo-panel">
+        <form class="form-demo" data-demo-form>
+          <div class="ut-field-group">
+            <label class="ut-label" for="demo-name">Nombre</label>
+            <input class="ut-field" id="demo-name" name="name" autocomplete="name" placeholder="Alexis Santana">
+          </div>
+          <div class="ut-field-group">
+            <label class="ut-label" for="demo-company">Empresa</label>
+            <input class="ut-field" id="demo-company" name="company" autocomplete="organization" placeholder="UNATOMO CORE SL">
+          </div>
+          <div class="ut-field-group">
+            <label class="ut-label" for="demo-email">Correo electrónico</label>
+            <input class="ut-field" id="demo-email" name="email" type="email" autocomplete="email" placeholder="nombre@empresa.com">
+          </div>
+          <div class="ut-field-group">
+            <label class="ut-label" for="demo-area">Área</label>
+            <select class="ut-select" id="demo-area" name="area">
+              <option>UNATOMO / NFC</option>
+              <option>Laundry Services</option>
+              <option>UNATOMO Studio</option>
+            </select>
+          </div>
+          <div class="ut-field-group ut-field-group--full">
+            <label class="ut-label" for="demo-message">Mensaje</label>
+            <textarea class="ut-textarea" id="demo-message" name="message" placeholder="Cuéntanos qué trabajo debería ser más sencillo."></textarea>
+          </div>
+          <label class="form-consent">
+            <input type="checkbox" required>
+            <span>Acepto la política de privacidad y el uso de estos datos para responder a esta demostración.</span>
+          </label>
+          <p class="form-message" data-form-message aria-live="polite"></p>
+          <div class="ut-form-actions">
+            <button class="ut-button ut-button--primary" type="submit">Enviar ejemplo</button>
+          </div>
+        </form>
+      </article>
+    </section>
+
+    <section class="showroom-section" aria-labelledby="type-title">
+      <div class="section-heading">
+        <span class="section-index">04 / Tipografía</span>
+        <div class="section-title">
+          <h2 id="type-title">UI estable, expresión flexible.</h2>
+          <p>Los roles de interfaz permanecen comunes; las escalas display pueden adaptarse a una landing, un producto editorial o una herramienta operativa.</p>
+        </div>
+      </div>
+
+      <div class="demo-grid">
+        <article class="demo-panel">
+          <p class="sample-label">Roles expresivos</p>
+          <div class="type-sample"><p class="type-display">Tecnología que resuelve.</p></div>
+          <div class="type-sample"><p class="type-section">Máquinas, personas y procesos conectados.</p></div>
+        </article>
+        <article class="demo-panel">
+          <p class="sample-label">Roles de interfaz</p>
+          <div class="type-sample"><p class="type-body">Texto de lectura cómodo para páginas públicas y contenido editorial. Mantiene una línea abierta y respirable.</p></div>
+          <div class="type-sample"><p class="type-ui">Texto UI de 0.95rem para formularios, menús, tarjetas y herramientas internas.</p></div>
+          <div class="type-sample"><p class="type-caption">Estado · Actualizado ahora</p></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="showroom-section" aria-labelledby="tokens-title">
+      <div class="section-heading">
+        <span class="section-index">05 / Tokens</span>
+        <div class="section-title">
+          <h2 id="tokens-title">Roles semánticos, no colores sueltos.</h2>
+          <p>Los componentes piden canvas, superficie, texto, acción o peligro. Cada perfil decide el valor visual concreto.</p>
+        </div>
+      </div>
+
+      <div class="demo-grid">
+        <article class="demo-panel demo-panel--wide">
+          <p class="sample-label">Color</p>
+          <div class="token-grid">
+            <div class="color-token" style="--token-color: var(--ut-color-canvas)"><div class="color-token-swatch"></div><div class="color-token-copy"><strong>Canvas</strong><code>--ut-color-canvas</code></div></div>
+            <div class="color-token" style="--token-color: var(--ut-color-surface)"><div class="color-token-swatch"></div><div class="color-token-copy"><strong>Surface</strong><code>--ut-color-surface</code></div></div>
+            <div class="color-token" style="--token-color: var(--ut-color-action)"><div class="color-token-swatch"></div><div class="color-token-copy"><strong>Action</strong><code>--ut-color-action</code></div></div>
+            <div class="color-token" style="--token-color: var(--ut-color-accent)"><div class="color-token-swatch"></div><div class="color-token-copy"><strong>Accent</strong><code>--ut-color-accent</code></div></div>
+          </div>
+        </article>
+        <article class="demo-panel">
+          <p class="sample-label">Espaciado estructural</p>
+          <div class="spacing-row"><span class="spacing-name">space-1</span><span class="spacing-bar" style="--space-width: 0.25rem"></span><span class="spacing-value">4 px</span></div>
+          <div class="spacing-row"><span class="spacing-name">space-2</span><span class="spacing-bar" style="--space-width: 0.5rem"></span><span class="spacing-value">8 px</span></div>
+          <div class="spacing-row"><span class="spacing-name">space-3</span><span class="spacing-bar" style="--space-width: 0.75rem"></span><span class="spacing-value">12 px</span></div>
+          <div class="spacing-row"><span class="spacing-name">space-4</span><span class="spacing-bar" style="--space-width: 1rem"></span><span class="spacing-value">16 px</span></div>
+          <div class="spacing-row"><span class="spacing-name">space-6</span><span class="spacing-bar" style="--space-width: 1.5rem"></span><span class="spacing-value">24 px</span></div>
+          <div class="spacing-row"><span class="spacing-name">space-8</span><span class="spacing-bar" style="--space-width: 2rem"></span><span class="spacing-value">32 px</span></div>
+        </article>
+        <article class="demo-panel">
+          <p class="sample-label">Semántica</p>
+          <div class="state-row">
+            <div class="state-sample state-sample--success"><span>Success</span><strong>Operativo</strong></div>
+            <div class="state-sample state-sample--warning"><span>Warning</span><strong>Revisar</strong></div>
+            <div class="state-sample state-sample--danger"><span>Danger</span><strong>Incidencia</strong></div>
+            <div class="state-sample state-sample--accent"><span>Accent</span><strong>Perfil</strong></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <footer class="showroom-footer">
+      <p>Superficie de desarrollo aislada. No se incluye en el build estático, no modifica ninguna página existente y no constituye todavía el sistema canónico.</p>
+    </footer>
+  </main>
+
+  <script type="module" src="./showroom.js"></script>
+</body>
+</html>

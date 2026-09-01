@@ -271,8 +271,8 @@
 }
 
 .status-return-confirm {
-  border-color: #15803d;
-  background: linear-gradient(135deg, #16a34a, #15803d);
+  border-color: var(--ut-action-primary-hover);
+  background: linear-gradient(135deg, var(--ut-action-primary), var(--ut-action-primary-hover));
 }
 
 .gallery-upload-icon {
@@ -347,8 +347,8 @@
 
 .task-create-dialog .status-incident-confirm,
 .user-create-dialog .status-incident-confirm {
-  border-color: #15803d;
-  background: linear-gradient(135deg, #16a34a, #15803d);
+  border-color: var(--ut-action-primary-hover);
+  background: linear-gradient(135deg, var(--ut-action-primary), var(--ut-action-primary-hover));
 }
 
 .task-create-dialog .status-incident-confirm:disabled,
@@ -444,8 +444,8 @@
   }
 
   .gallery-upload-dialog.is-inline .gallery-upload-confirm {
-    border-color: #16a34a;
-    background: #16a34a;
+    border-color: var(--ut-action-primary);
+    background: var(--ut-action-primary);
   }
 }
 

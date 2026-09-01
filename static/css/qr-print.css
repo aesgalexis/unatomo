@@ -508,8 +508,8 @@ body.page .topbar {
 }
 
 .qr-print-icon-button--print {
-  border: 1px solid #2c974b;
-  background: linear-gradient(135deg, #2da44e, #2c974b);
+  border: 1px solid var(--ut-action-primary-hover);
+  background: linear-gradient(135deg, var(--ut-action-primary), var(--ut-action-primary-hover));
   color: #fff;
 }
 
@@ -586,7 +586,7 @@ body.page .topbar {
 }
 
 .qr-print-options-menu-check {
-  color: #2c974b;
+  color: var(--ut-action-primary-hover);
   font-weight: 700;
   text-align: center;
 }

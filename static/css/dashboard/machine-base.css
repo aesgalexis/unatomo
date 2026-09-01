@@ -384,8 +384,8 @@
 }
 
 .mc-status[data-status="operativa"] {
-  border-color: #16a34a;
-  color: #16a34a;
+  border-color: var(--ut-action-primary);
+  color: var(--ut-action-primary);
 }
 
 .mc-status[data-status="fuera_de_servicio"] {

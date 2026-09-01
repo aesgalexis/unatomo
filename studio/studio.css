@@ -172,10 +172,6 @@ body.studio-home-page > main { position: relative; z-index: 1; }
 .studio-form-status { grid-column: 1 / -1; margin: 0; color: var(--studio-muted); font-size: 0.85rem; }
 .studio-form-status[data-state="success"] { color: #65d9ae; }
 .studio-form-status[data-state="error"] { color: #ff8f8f; }
-.studio-contact-form .studio-button { grid-column: 1 / -1; justify-self: center; margin-top: 0.35rem; background: #16834b; color: #fff !important; border-color: #16834b; }
-.studio-contact-form .studio-button:hover,
-.studio-contact-form .studio-button:focus-visible { background: #116a3d; color: #fff !important; border-color: #116a3d; }
-
 .studio-privacy { width: min(876px, calc(100% - (2 * var(--studio-gutter)))); min-height: calc(100vh - 75px); margin: 0 auto; padding: 110px 1.5rem 2.5rem; display: flex; flex-direction: column; }
 .studio-legal-copy { flex: 1 0 auto; }
 .studio-legal-copy h1 { margin: 0.5rem 0 1.1rem; color: var(--fg); font-size: clamp(2.2rem, 4.6vw, 3.2rem); font-weight: 600; letter-spacing: -0.03em; }

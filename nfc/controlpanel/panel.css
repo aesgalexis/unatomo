@@ -715,8 +715,8 @@
 }
 
 .controlpanel-email-total.is-active {
-  border-color: #16a34a;
-  background: color-mix(in srgb, #16a34a 8%, var(--panel-bg));
+  border-color: var(--ut-action-primary);
+  background: color-mix(in srgb, var(--ut-action-primary) 8%, var(--panel-bg));
 }
 
 .controlpanel-email-total strong { font-size: 18px; }
@@ -730,9 +730,9 @@
 }
 
 .controlpanel-btn.is-active {
-  border-color: #16a34a;
-  color: #0f7a3e;
-  background: color-mix(in srgb, #16a34a 10%, var(--panel-bg));
+  border-color: var(--ut-action-primary);
+  color: var(--ut-action-primary-active);
+  background: color-mix(in srgb, var(--ut-action-primary) 10%, var(--panel-bg));
 }
 
 .controlpanel-email-table td:first-child {

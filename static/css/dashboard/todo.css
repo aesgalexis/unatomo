@@ -146,8 +146,8 @@
   align-items: center;
   justify-content: center;
   margin: 0;
-  background: #16a34a;
-  border-color: #16a34a;
+  background: var(--ut-action-primary);
+  border-color: var(--ut-action-primary);
   color: #fff;
 }
 .machine-task-create-actions {
@@ -158,7 +158,7 @@
 .machine-task-create-cancel {
   min-width: 0;
 }
-.todo-submit.machine-task-create-submit:hover:not(:disabled) { background: #15803d; border-color: #15803d; }
+.todo-submit.machine-task-create-submit:hover:not(:disabled) { background: var(--ut-action-primary-hover); border-color: var(--ut-action-primary-hover); }
 .todo-submit.machine-task-create-submit:disabled { opacity: 0.42; cursor: not-allowed; }
 .machine-task-create-fields > .machine-task-create-control:nth-child(-n + 5) {
   min-width: 0;

@@ -143,19 +143,6 @@ button.btn-pill-solid {
   border-color: var(--fg);
 }
 
-.contact-form button[type="submit"] {
-  background: #16834b;
-  color: #ffffff;
-  border-color: #16834b;
-}
-
-.contact-form button[type="submit"]:hover,
-.contact-form button[type="submit"]:focus-visible {
-  background: #116a3d;
-  color: #ffffff;
-  border-color: #116a3d;
-}
-
 a.btn-pill-outline,
 button.btn-pill-outline {
   background: transparent;

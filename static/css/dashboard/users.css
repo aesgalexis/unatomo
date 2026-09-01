@@ -142,8 +142,8 @@
 }
 
 .dashboard-users-primary {
-  border-color: #16a34a;
-  background: #16a34a;
+  border-color: var(--ut-action-primary);
+  background: var(--ut-action-primary);
   color: white;
 }
 

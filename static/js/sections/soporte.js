@@ -54,9 +54,9 @@ export const render = (mount) => {
             </label>
           </div>
         </div>
-        <p class="form-status" role="status" aria-live="polite" hidden></p>
-        <div class="form-actions" style="display:flex; justify-content:center;">
-          <button type="submit" class="btn-primary">${isEn ? "Send" : "Enviar"}</button>
+        <p class="form-status ut-form-status" role="status" aria-live="polite" hidden></p>
+        <div class="ut-form-actions">
+          <button type="submit" class="ut-button ut-button--primary">${isEn ? "Send" : "Enviar"}</button>
         </div>
       </form>
     </section>
