@@ -96,6 +96,12 @@
   cursor: pointer;
 }
 
+.dashboard-users-create input {
+  box-sizing: border-box;
+  height: var(--ut-textbox-height);
+  min-height: var(--ut-textbox-height);
+}
+
 .dashboard-users-context {
   min-width: 120px;
   min-height: 0;

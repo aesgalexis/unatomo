@@ -15,7 +15,7 @@ body.onboarding-page { min-height: 100svh; margin: 0; background: color-mix(in s
 .onboarding-field { min-width: 0; margin: 0; padding: 0; border: 0; }
 .onboarding-field > label, .onboarding-field > legend { display: block; margin-bottom: .55rem; font-size: .83rem; font-weight: 650; }
 .onboarding-optional { color: var(--onboarding-muted); font-weight: 450; }
-.onboarding-field > input { width: 100%; height: 40px; padding: 0 .8rem; box-sizing: border-box; border: 1px solid var(--border-subtle); border-radius: .65rem; background: color-mix(in srgb, var(--bg) 97%, var(--fg) 3%); color: var(--fg); font: inherit; outline: none; }
+.onboarding-field > input { width: 100%; height: var(--ut-textbox-height); padding: 0 .8rem; box-sizing: border-box; border: 1px solid var(--border-subtle); border-radius: .65rem; background: color-mix(in srgb, var(--bg) 97%, var(--fg) 3%); color: var(--fg); font: inherit; outline: none; }
 .onboarding-field > input:focus { border-color: color-mix(in srgb, var(--fg) 55%, transparent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--fg) 8%, transparent); }
 .onboarding-hint { margin: .45rem 0 0; color: var(--onboarding-muted); font-size: .74rem; line-height: 1.45; }
 .onboarding-equipment { padding-top: .15rem; }
@@ -29,8 +29,8 @@ body.onboarding-page { min-height: 100svh; margin: 0; background: color-mix(in s
 .equipment-control { margin-top: .75rem; display: grid; grid-template-columns: 40px 1fr 40px; gap: .55rem; align-items: center; }
 .equipment-button { width: 40px; height: 40px; padding: 0; border: 1px solid var(--border-subtle); border-radius: .65rem; display: grid; place-items: center; background: transparent; color: var(--fg); font: inherit; font-size: 1.05rem; line-height: 1; cursor: pointer; }
 .equipment-button:hover, .equipment-button:focus-visible { background: color-mix(in srgb, var(--fg) 7%, transparent); }
-.equipment-value { height: 40px; padding: 0 .75rem; box-sizing: border-box; border: 1px solid var(--border-subtle); border-radius: .65rem; display: flex; align-items: center; justify-content: center; gap: .45rem; background: color-mix(in srgb, var(--bg) 97%, var(--fg) 3%); }
-.equipment-value input { width: 3ch; height: 100%; padding: 0; border: 0; outline: 0; background: transparent; color: var(--fg); font: inherit; font-size: 1.05rem; line-height: 40px; font-weight: 620; text-align: right; appearance: textfield; }
+.equipment-value { height: var(--ut-textbox-height); padding: 0 .75rem; box-sizing: border-box; border: 1px solid var(--border-subtle); border-radius: .65rem; display: flex; align-items: center; justify-content: center; gap: .45rem; background: color-mix(in srgb, var(--bg) 97%, var(--fg) 3%); }
+.equipment-value input { width: 3ch; height: 100%; padding: 0; border: 0; outline: 0; background: transparent; color: var(--fg); font: inherit; font-size: 1.05rem; line-height: var(--ut-textbox-height); font-weight: 620; text-align: right; appearance: textfield; }
 .equipment-value input::-webkit-inner-spin-button { appearance: none; }
 .equipment-value span { color: var(--onboarding-muted); font-size: .78rem; }
 .equipment-range-labels { margin-top: 1rem; display: flex; justify-content: space-between; color: var(--onboarding-muted); font-size: .66rem; }

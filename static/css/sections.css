@@ -296,7 +296,9 @@
 
   .dashboard-help-jump select {
     width: 100%;
-    min-height: 2.75rem;
+    box-sizing: border-box;
+    height: var(--ut-select-height);
+    min-height: var(--ut-select-height);
     padding: 0 0.8rem;
     border: 1px solid color-mix(in srgb, var(--fg) 16%, transparent);
     border-radius: 0.65rem;

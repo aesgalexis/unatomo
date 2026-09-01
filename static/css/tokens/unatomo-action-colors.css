@@ -2,4 +2,5 @@
   --ut-action-primary: #2da44e;
   --ut-action-primary-hover: #2c974b;
   --ut-action-primary-active: #26863f;
+  --ut-checkbox-accent: var(--ut-action-primary);
 }

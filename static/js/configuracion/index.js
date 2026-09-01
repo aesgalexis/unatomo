@@ -10,8 +10,10 @@ import {
   collection,
   doc,
   getDocs,
+  query,
   serverTimestamp,
-  setDoc
+  setDoc,
+  where
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 import {
   deleteObject,
@@ -876,7 +878,9 @@ if (mount) {
   const loadCounts = async (uid) => {
     setTopbarLogoLoading("settings-counts", true);
     try {
-      const snap = await getDocs(collection(db, `tenants/${uid}/machines`));
+      const snap = await getDocs(
+        query(collection(db, "machines"), where("ownerUid", "==", uid))
+      );
       ownedMachineCount = snap.size;
       setText(ownerCountEl, String(snap.size));
     } catch {

@@ -18,7 +18,7 @@ spacing rules, interaction states and accessibility behavior.
 
 ## Current Safety Boundary
 
-The contract remains documentary by default. Four runtime adoptions are now
+The contract remains documentary by default. Five runtime adoptions are now
 explicitly approved:
 
 1. the shared primary-action color token: `#2da44e` at rest, `#2c974b` on
@@ -27,11 +27,20 @@ explicitly approved:
    Services and Studio contact forms;
 3. the shared 600 px contact-form container used by those same contact
    experiences;
-4. the Core-dark semantic theme consumed by Core dark and Studio.
+4. the Core-dark semantic theme consumed by Core dark and Studio;
+5. the 40 px single-line textbox height defined by
+   `--ut-textbox-height`, with documented compact and protected exceptions.
 
 The contact-submit contract is intentionally narrow. It authorizes the shared
 button anatomy, states and action-row geometry for those forms only; it does
 not authorize broad normalization of unrelated buttons or form fields.
+
+The textbox adoption is equally narrow: it standardizes only the external
+height of eligible single-line text, email, password, telephone, number,
+search and URL inputs. It does not standardize their widths, colors, padding,
+typography or radius, and it excludes selects, textareas, file/range/choice
+controls, NFC machine-card fields, the main dashboard machine search and the
+approved compact editing recipe.
 
 In particular, UNATOMO/NFC is a protected surface. Its layouts and controls
 have been adjusted individually and must not be normalized by a broad CSS
@@ -132,6 +141,12 @@ The first canonical runtime component is the contact submit pair:
 Its source lives in `static/css/tokens/` and `static/css/components/`. Product
 styles may place the component but must not redefine this ordinary contact
 submit presentation.
+
+The first canonical control measurement is
+`--ut-textbox-height: 2.5rem` (40 px at the normal root size). Its source is
+`static/css/tokens/unatomo-control-sizes.css`; product styles consume it through
+explicit compatibility selectors so protected or compact inputs are never
+captured by a global `input` rule.
 
 ### 4. Product and page styles
 

@@ -1,4 +1,5 @@
 @import url("/static/css/themes/unatomo-core-dark.css");
+@import url("/static/css/tokens/unatomo-control-sizes.css");
 
 :root,
 :root[data-theme="light"],
@@ -160,15 +161,14 @@ body.studio-home-page > main { position: relative; z-index: 1; }
 .studio-form-field--full { grid-column: 1 / -1; }
 .studio-form-consent { grid-column: 1 / -1; margin-top: 0.15rem; }
 .studio-form-consent label { margin: 0; display: grid; grid-template-columns: 1.1rem minmax(0, 1fr); gap: 0.65rem; align-items: start; color: color-mix(in srgb, var(--fg) 78%, transparent); font-size: 0.82rem; font-weight: 400; line-height: 1.45; cursor: pointer; }
-.studio-form-consent input { width: 1rem; height: 1rem; margin: 0.12rem 0 0; border: 1px solid color-mix(in srgb, var(--fg) 35%, transparent); border-radius: 0.2rem; appearance: none; -webkit-appearance: none; background-color: var(--bg); background-position: center; background-repeat: no-repeat; background-size: 0.7rem 0.7rem; cursor: pointer; }
-.studio-form-consent input:checked { border-color: #16834b; background-color: #16834b; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 10'%3E%3Cpath d='m1 5 3 3 7-7' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+.studio-form-consent input { width: 1rem; height: 1rem; margin: 0.12rem 0 0; accent-color: var(--ut-checkbox-accent); cursor: pointer; }
 .studio-form-consent input:focus-visible { outline: 2px solid color-mix(in srgb, var(--fg) 45%, transparent); outline-offset: 2px; }
 .studio-form-consent a { color: var(--fg); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.16em; }
 .studio-form-consent span[aria-hidden="true"] { display: none; }
 .studio-form-field label { color: color-mix(in srgb, var(--fg) 90%, transparent); font-size: 0.85rem; font-weight: 500; }
 .studio-form-field input,
 .studio-form-field textarea { width: 100%; padding: 0.65rem 0.8rem; border: 1px solid var(--border-subtle); border-radius: 0.75rem; background: var(--ut-core-dark-field); color: var(--fg); font: inherit; }
-.studio-form-field input { height: 2.75rem; }
+.studio-form-field input { box-sizing: border-box; height: var(--ut-textbox-height); }
 .studio-form-field textarea { min-height: 160px; resize: vertical; line-height: 1.5; }
 .studio-form-field input:focus,
 .studio-form-field textarea:focus { border-color: var(--fg); background: var(--bg); outline: none; }

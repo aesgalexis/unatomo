@@ -194,6 +194,10 @@
   accent-color: #7c3aed;
 }
 
+.controlpanel-input.controlpanel-agent-role-select {
+  height: var(--ut-select-height);
+}
+
 .controlpanel-agent-row {
   display: grid;
   grid-template-columns: minmax(110px, 0.42fr) 1fr;
@@ -527,6 +531,8 @@
 .controlpanel-input {
   flex: 1 1 220px;
   min-width: 180px;
+  box-sizing: border-box;
+  height: var(--ut-textbox-height);
   border: 1px solid var(--border-subtle);
   background: color-mix(in srgb, var(--bg) 96%, transparent);
   color: var(--fg);
@@ -599,7 +605,7 @@
 .controlpanel-check input {
   width: 15px;
   height: 15px;
-  accent-color: #7c3aed;
+  accent-color: var(--ut-checkbox-accent);
 }
 
 .controlpanel-link-danger {

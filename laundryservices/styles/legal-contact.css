@@ -142,8 +142,12 @@ body.ls-contact-page .contact-form-card > .contact-form {
   -webkit-user-select: text;
 }
 
-.form-field :is(input.field, select.field) {
-  height: 2.75rem;
+.form-field input.field {
+  height: var(--ut-textbox-height);
+}
+
+.form-field select.field {
+  height: var(--ut-select-height);
 }
 
 .field:focus {
@@ -184,21 +188,8 @@ textarea.field {
   width: 1rem;
   height: 1rem;
   margin: 0.12rem 0 0;
-  border: 1px solid color-mix(in srgb, var(--fg) 35%, transparent);
-  border-radius: 0.2rem;
-  appearance: none;
-  -webkit-appearance: none;
-  background-color: var(--bg);
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 0.7rem 0.7rem;
+  accent-color: var(--ut-checkbox-accent);
   cursor: pointer;
-}
-
-.form-consent-label input:checked {
-  border-color: #16834b;
-  background-color: #16834b;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 10'%3E%3Cpath d='m1 5 3 3 7-7' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
 }
 
 .form-consent-label input:focus-visible {

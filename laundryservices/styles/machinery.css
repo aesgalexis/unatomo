@@ -37,7 +37,7 @@
   background-size: 0.85rem;
   color: var(--fg);
   border-radius: 999px;
-  height: 32px;
+  height: var(--ut-select-height);
   padding: 0 2.1rem 0 0.9rem;
   cursor: pointer;
   font: inherit;

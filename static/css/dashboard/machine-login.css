@@ -61,6 +61,8 @@
 
 .machine-login-input {
   width: 100%;
+  box-sizing: border-box;
+  height: var(--ut-textbox-height);
   margin-top: 0.5rem;
   padding: 0.6rem 0.75rem;
   border-radius: 0.75rem;

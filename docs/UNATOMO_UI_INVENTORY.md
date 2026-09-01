@@ -97,6 +97,77 @@ common widths but are not equivalent. A canonical form grid should define the
 intended responsive behavior, not merely select whichever declaration appears
 most often.
 
+## Single-line Textbox Inventory
+
+Scope includes visible `text`, `email`, `password`, `tel`, `number` and
+`search` inputs. Checkboxes, radios, ranges, file inputs, hidden honeypots,
+selects and multiline textareas are outside this measurement. Per the current
+review boundary, inputs inside NFC dashboard machine cards and the main
+dashboard machine-search control are also excluded.
+
+| Authored recipe | Current contexts | Before | Current state |
+| --- | --- | ---: | --- |
+| `.field` and Studio contact fields | Corporate, NFC and Laundry contact; NFC auth/access; dashboard support; Studio contact; LS machine admin | mostly 44 px | 40 px canonical |
+| `.spares-input` | Four localized Laundry Services spare-parts flows | 48 px minimum | 40 px canonical for inputs; textarea unchanged |
+| `.onboarding-field > input` | NFC onboarding in ES/EN | 40 px | 40 px canonical through token |
+| `.profile-input` | NFC account/profile settings | 40 px minimum | 40 px canonical through token |
+| Dashboard standard dialog/create controls | User creation, task modal and QR search | 40.8 px (`2.55rem`) | 40 px canonical for inputs |
+| Simulator numeric inputs | Self-service laundry simulator | 32 px minimum on desktop | 40 px canonical at every viewport |
+| Dashboard compact editing | User-card credentials and compact task controls outside machine cards | approximately 24–26 px | Exception retained |
+| Content-driven controls | Control panel, public machine-access overlay and incident modal | approximately 34–40 px | 40 px canonical for inputs |
+
+Eligible single-line textboxes now consume
+`--ut-textbox-height: 2.5rem` from
+`static/css/tokens/unatomo-control-sizes.css`. The approximately 26 px compact
+recipe remains an explicit exception. Selects and multiline controls retain
+their previous measurements for separate review.
+
+## Native Select Inventory
+
+Scope includes native `<select>` controls authored in HTML and constructed from
+JavaScript. All controls inside NFC dashboard machine cards are deliberately
+excluded, including their hidden role placeholders. The inventory counts
+authoring points rather than simultaneous DOM nodes: one per-user role recipe
+can render more than once at runtime.
+
+| Authored recipe | Current contexts | Before | Current state |
+| --- | --- | ---: | --- |
+| Dashboard compact selects | User context/create/edit roles, gallery upload, and user-create modal | approximately 26 px | Exception retained |
+| `.ls-filter-select` | Laundry used-machinery filters in four languages | 32 px | 40 px canonical |
+| Control-panel role | NFC control-panel agent role | 40 px | 40 px canonical through token |
+| Global task modal | Dashboard global task creation | approximately 41 px | 40 px canonical |
+| `.form-field select.field` and help navigation | Contact, LS machine administrator, support and mobile help | 44 px | 40 px canonical |
+| `.spares-select` | Laundry spare-parts manufacturer, category and model selectors | 48 px | 40 px canonical |
+
+Total in scope: **44 authoring points** — 26 static HTML instances and 18
+JavaScript constructions. Standard selects now consume `--ut-select-height`,
+an alias of the shared 40 px `--ut-control-height-standard` token. The compact
+approximately 26 px recipe remains unchanged, as do all selectors inside NFC
+dashboard machine cards. The isolated showroom represents the resulting two
+approved heights.
+
+## Checkbox Inventory
+
+Scope includes native `input[type="checkbox"]` controls and interactive
+elements that expose `role="checkbox"`. Counts describe authoring points, not
+simultaneous DOM instances: permissions, machine assignments, images and task
+rows can render each recipe repeatedly.
+
+| Current recipe | Authored points | Current contexts |
+| --- | ---: | --- |
+| Native 16 px with canonical action-green accent | 20 | Contact and support consent, Laundry spare-parts privacy and incident disconnection |
+| Browser-native size and appearance | 7 | Laundry machine administrator, retained images, dashboard users and profile confirmation |
+| 15 px or browser-native with canonical action-green accent | 2 | Control-panel collaborator and global todo completion |
+| Custom 2.4 rem × 1.35 rem switch | 6 | Dashboard email-notification preferences |
+| 2.75 rem × 2.75 rem button with `role="checkbox"` | 2 | Machine-card and global task completion |
+
+Total in source: **37 authoring points** — 35 native checkboxes and 2 semantic
+checkbox buttons. Twenty-two native checkboxes now consume
+`--ut-checkbox-accent`, an alias of the same `--ut-action-primary` green used by
+submit buttons. Seven browser-default checkboxes remain untouched. Switches and
+semantic task-completion buttons retain their distinct functional forms. The
+resulting five families are represented in the isolated showroom.
+
 ## Buttons
 
 ### Ordinary action buttons

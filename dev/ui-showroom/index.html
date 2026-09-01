@@ -35,6 +35,9 @@
       <p class="showroom-lead">Este showroom reúne patrones existentes y conserva sus diferencias. Primero documentamos qué hay, dónde vive y cuánto se repite; más adelante decidiremos qué pertenece al contrato común de UNATOMO.</p>
       <div class="showroom-summary" aria-label="Resumen del inventario">
         <span class="summary-chip"><strong>32–50 px</strong> alturas observadas</span>
+        <span class="summary-chip"><strong>26 / 40 px</strong> textboxes actuales</span>
+        <span class="summary-chip"><strong>26 / 40 px</strong> selects actuales</span>
+        <span class="summary-chip"><strong>5</strong> familias de checkbox</span>
         <span class="summary-chip"><strong>2</strong> escalas Aceptar / Cancelar</span>
         <span class="summary-chip"><strong>1</strong> verde de acción</span>
         <span class="summary-chip"><strong>1</strong> navegación compartida</span>
@@ -75,8 +78,8 @@
               <small><strong>42 px</strong><span>NFC público · landing</span></small>
             </div>
             <div class="control-example">
-              <input class="observed-field observed-control--44" aria-label="Campo de contacto de ejemplo" value="Campo de contacto" readonly>
-              <small><strong>44 px</strong><span>Formularios · campo convergente</span></small>
+              <input class="observed-field observed-control--40" aria-label="Campo de contacto de ejemplo" value="Campo de contacto" readonly>
+              <small><strong>40 px</strong><span>Textboxes · estándar canónico</span></small>
             </div>
             <div class="control-example">
               <button class="observed-control observed-control--50 observed-control--inverse" type="button">Crear espacio</button>
@@ -175,9 +178,91 @@
         <span class="section-index">03 / Formulario</span>
         <div class="section-title">
           <h2 id="form-title">El patrón más convergente del sitio.</h2>
-          <p>Contenedor canónico de 600 px, campos de 44 px, radio de 12 px, textarea de 160 px y rejilla de 16 × 24 px. El contenido puede variar sin rehacer la geometría.</p>
+          <p>Contenedor canónico de 600 px, textboxes de 40 px, radio de 12 px, textarea de 160 px y rejilla de 16 × 24 px. El contenido puede variar sin rehacer la geometría.</p>
         </div>
       </div>
+
+      <article class="demo-panel demo-panel--wide textbox-atlas-panel">
+        <div class="sample-heading">
+          <p class="sample-label">Textboxes de una línea</p>
+          <span class="evidence-badge">40 px · canónico y aplicado</span>
+        </div>
+        <div class="size-atlas textbox-atlas">
+          <div class="control-example">
+            <input class="observed-field observed-field--compact" value="Edición compacta" readonly aria-label="Textbox compacto de dashboard">
+            <small><strong>≈ 26 px</strong><span>Dashboard · usuarios y edición operativa compacta</span></small>
+          </div>
+          <div class="control-example">
+            <input class="observed-field observed-control--40" value="nombre@empresa.com" readonly aria-label="Textbox estándar de 40 píxeles">
+            <small><strong>40 px</strong><span>Contacto, autenticación, onboarding, perfil, recambios, herramientas y modales</span></small>
+          </div>
+        </div>
+        <p class="sample-note"><strong>Excepción conservada:</strong> edición compacta de aproximadamente 26 px. También quedan fuera los campos internos de las tarjetas de máquinas, el buscador principal del dashboard y los controles multilínea. Los selects se inventarían a continuación.</p>
+      </article>
+
+      <article class="demo-panel demo-panel--wide select-atlas-panel">
+        <div class="sample-heading">
+          <p class="sample-label">Selectores nativos</p>
+          <span class="evidence-badge">40 px · canónico y aplicado</span>
+        </div>
+        <div class="size-atlas select-atlas">
+          <div class="control-example">
+            <select class="observed-select observed-select--26" aria-label="Selector compacto de dashboard"><option>Operario</option></select>
+            <small><strong>≈ 26 px</strong><span>Dashboard · excepción compacta conservada</span></small>
+          </div>
+          <div class="control-example">
+            <select class="observed-select observed-select--40" aria-label="Selector estándar de UNATOMO"><option>Tipo de máquina</option></select>
+            <small><strong>40 px</strong><span>Contacto, Laundry, soporte, tareas, ayuda y control panel</span></small>
+          </div>
+        </div>
+        <p class="sample-note sample-note--decision"><strong>Contrato aplicado:</strong> todos los selects inventariados consumen <code>--ut-select-height</code> de 40 px. La edición compacta de aproximadamente 26 px permanece intacta y sigue fuera del contrato estándar. Las tarjetas de máquinas del dashboard continúan fuera de alcance.</p>
+      </article>
+
+      <article class="demo-panel demo-panel--wide checkbox-atlas-panel">
+        <div class="sample-heading">
+          <p class="sample-label">Checkboxes y equivalentes semánticos</p>
+          <span class="evidence-badge">Inventario · sin normalizar</span>
+        </div>
+        <div class="checkbox-inventory-grid">
+          <div class="checkbox-example">
+            <div class="checkbox-sample">
+              <input class="observed-checkbox observed-checkbox--consent" type="checkbox" checked aria-label="Consentimiento aceptado">
+            </div>
+            <small><strong>16 px · verde canónico</strong><span>20 puntos · contacto, soporte, recambios e incidencias</span></small>
+          </div>
+          <div class="checkbox-example">
+            <div class="checkbox-sample checkbox-sample--pair">
+              <input class="observed-checkbox observed-checkbox--native" type="checkbox" checked aria-label="Opción nativa activa">
+              <input class="observed-checkbox observed-checkbox--native" type="checkbox" aria-label="Opción nativa inactiva">
+            </div>
+            <small><strong>Nativo · tamaño del navegador</strong><span>7 puntos · administrador LS, usuarios y confirmación de perfil</span></small>
+          </div>
+          <div class="checkbox-example">
+            <div class="checkbox-sample">
+              <input class="observed-checkbox observed-checkbox--compact" type="checkbox" checked aria-label="Opción operativa activa">
+            </div>
+            <small><strong>15 px / nativo · verde canónico</strong><span>2 puntos · colaborador y tareas operativas</span></small>
+          </div>
+          <div class="checkbox-example">
+            <div class="checkbox-sample">
+              <label class="observed-switch">
+                <input type="checkbox" checked aria-label="Notificaciones activadas">
+                <span aria-hidden="true"></span>
+              </label>
+            </div>
+            <small><strong>38 × 22 px · switch</strong><span>6 puntos · preferencias de notificación</span></small>
+          </div>
+          <div class="checkbox-example">
+            <div class="checkbox-sample">
+              <button class="semantic-checkbox-button" type="button" role="checkbox" aria-checked="true" aria-label="Tarea completada">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="m8 12 2.6 2.6L16.5 9"></path></svg>
+              </button>
+            </div>
+            <small><strong>44 × 44 px · botón semántico</strong><span>2 puntos · completar tareas globales y de máquina</span></small>
+          </div>
+        </div>
+        <p class="sample-note sample-note--decision"><strong>Contrato de color aplicado:</strong> 22 checkboxes nativos consumen <code>--ut-checkbox-accent</code>, alias exacto del verde <code>--ut-action-primary</code> usado por Enviar. Los 7 controles deliberadamente nativos conservan el color del sistema; switches y botones semánticos mantienen su forma propia.</p>
+      </article>
 
       <article class="demo-panel">
         <form class="form-demo ut-contact-form-container" data-demo-form>
@@ -206,7 +291,7 @@
             <textarea class="ut-textarea" id="demo-message" name="message" placeholder="Cuéntanos qué trabajo debería ser más sencillo."></textarea>
           </div>
           <label class="form-consent">
-            <input type="checkbox" required>
+            <input class="observed-checkbox observed-checkbox--consent" type="checkbox" required>
             <span>Acepto la política de privacidad y el uso de estos datos para responder a esta demostración.</span>
           </label>
           <p class="form-message" data-form-message aria-live="polite"></p>

@@ -1,0 +1,5 @@
+:root {
+  --ut-control-height-standard: 2.5rem;
+  --ut-textbox-height: var(--ut-control-height-standard);
+  --ut-select-height: var(--ut-control-height-standard);
+}

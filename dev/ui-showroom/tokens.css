@@ -1,4 +1,5 @@
 @import url("/static/css/tokens/unatomo-action-colors.css");
+@import url("/static/css/tokens/unatomo-control-sizes.css");
 @import url("/static/css/themes/unatomo-core-dark.css");
 
 :root {
@@ -21,7 +22,6 @@
   --ut-space-8: 2rem;
 
   --ut-control-height-compact: 2.25rem;
-  --ut-control-height-standard: 2.75rem;
   --ut-icon-size-standard: 1.125rem;
 
   --ut-radius-control: 0.75rem;

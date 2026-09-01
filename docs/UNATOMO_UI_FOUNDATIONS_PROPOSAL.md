@@ -4,7 +4,7 @@ Status: proposed for review
 Based on: `docs/UNATOMO_UI_CONTRACT.md`,
 `docs/UNATOMO_UI_INVENTORY.md` and
 `docs/UNATOMO_UI_FOUNDATIONS_INVENTORY.md`  
-Runtime adoption: action color, contact submit/width and Core-dark theme
+Runtime adoption: action color, contact submit/width, Core-dark theme and 40 px textboxes
 
 Review implementation: `dev/ui-showroom/`
 
@@ -25,7 +25,7 @@ parts of the site, while postponing expressive and high-risk decisions.
 | P-01 | Use the `ut` namespace for public design-system tokens and components | Approve |
 | P-02 | Adopt the existing system font stack | Approve |
 | P-03 | Separate ordinary UI text from comfortable body and display text | Approve model; review exact use |
-| P-04 | Name a compact/standard/prominent control scale | Hold: inventory contexts before choosing values |
+| P-04 | Name a compact/standard/prominent control scale | 40 px single-line textbox adopted; broader scale remains on hold |
 | P-05 | Define 18 px as the ordinary icon size | Approve |
 | P-06 | Define 12 px as the ordinary control radius and retain pill as a shape | Approve |
 | P-07 | Define a semantic subtle border with 1 px width | Approve |
@@ -81,9 +81,19 @@ Studio may keep different hero sizes while sharing role names and font family.
 
 ## P-04 — Control Heights
 
-The earlier 36/44/50 px proposal is not ready to become a default. The visual
-inventory shows that these values describe particular contexts, not yet three
-general roles:
+One bounded measurement is now Canonical:
+
+```css
+--ut-textbox-height: 2.5rem; /* 40px */
+```
+
+It applies only to the approved single-line input scope. Compact dashboard
+editing remains an exception, and selects, textareas and other control types
+remain separate decisions.
+
+Before the textbox adoption, the visual inventory showed that the earlier
+36/44/50 px proposal described particular contexts rather than three general
+roles:
 
 - 32 px: NFC public topbar and dense controls;
 - 36 px: Corporate, Laundry and Studio utility controls;
@@ -99,10 +109,9 @@ NFC also contains text action pairs at two additional densities: compact
 `2.35rem` minimum height. These are distinct workflow contexts and should be
 recorded before deciding whether either maps to a public size role.
 
-The next safe step is to give existing contexts internal descriptive aliases
-that preserve their pixels exactly. A smaller public scale can be proposed only
-after the aliases reveal which values are truly equivalent. Multiline controls,
-checkboxes, switches and icon-only touch targets remain component-specific.
+The broader control scale remains unresolved. The textbox decision does not
+normalize buttons, selects, multiline controls, checkboxes, switches or
+icon-only touch targets; those remain component-specific until reviewed.
 
 ## P-05 to P-07 — Icon, Radius and Border
 
@@ -258,7 +267,8 @@ This packet does not choose:
 - compact label and metadata typography;
 - heading/display scales;
 - card and modal geometry;
-- public control-height values and whether a `prominent` role is needed;
+- public control-height values beyond the adopted 40 px textbox measurement
+  and whether a `prominent` role is needed;
 - raw theme colors beyond the adopted primary-action role and Core-dark theme;
 - shadows and z-index numbers;
 - widths for form families other than the adopted 600 px contact container;

@@ -144,7 +144,8 @@
   min-width: 0;
   width: 100%;
   max-width: 320px;
-  min-height: 2.5rem;
+  height: var(--ut-textbox-height);
+  min-height: var(--ut-textbox-height);
   box-sizing: border-box;
   justify-self: start;
   border: 1px solid var(--border-subtle);
@@ -289,7 +290,7 @@
   justify-self: start;
   grid-template-columns: auto minmax(0, 1fr);
   gap: 0.35rem;
-  min-height: 2.5rem;
+  min-height: var(--ut-textbox-height);
   box-sizing: border-box;
   padding-inline: 0.75rem;
   border: 1px solid var(--border-subtle);

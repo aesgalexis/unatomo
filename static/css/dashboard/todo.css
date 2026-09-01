@@ -268,7 +268,16 @@
   line-height: 1.35;
 }
 
+.task-create-dialog input.machine-task-create-control {
+  box-sizing: border-box;
+  height: var(--ut-textbox-height);
+  min-height: var(--ut-textbox-height);
+}
+
 .task-create-dialog .machine-task-create-control:is(select) {
+  box-sizing: border-box;
+  height: var(--ut-select-height);
+  min-height: var(--ut-select-height);
   padding-right: 1.8rem;
 }
 
@@ -534,7 +543,7 @@
 
 .todo-check {
   margin-top: 0.2rem;
-  accent-color: #7c3aed;
+  accent-color: var(--ut-checkbox-accent);
 }
 
 .todo-body {

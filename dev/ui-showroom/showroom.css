@@ -368,11 +368,162 @@ textarea {
 .observed-control--36 { height: 36px; }
 .observed-control--40 { height: 40px; }
 .observed-control--42 { height: 42px; }
-.observed-control--44 { height: 44px; }
 .observed-control--50 { height: 50px; }
 
-.observed-control--40,
-.observed-control--50 {
+.observed-field--compact {
+  height: 26px;
+  padding-inline: 8px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.observed-select {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  border: 1px solid var(--ut-color-border-subtle);
+  border-radius: 0.75rem;
+  padding: 0 2rem 0 0.8rem;
+  appearance: none;
+  color: var(--ut-color-text);
+  background-color: var(--ut-color-surface);
+  background-image:
+    linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position:
+    calc(100% - 14px) 50%,
+    calc(100% - 10px) 50%;
+  background-size: 4px 4px, 4px 4px;
+  background-repeat: no-repeat;
+}
+
+.observed-select--26 { height: 26px; border-radius: 8px; font-size: 12px; }
+.observed-select--40 { height: 40px; }
+
+.textbox-atlas-panel,
+.select-atlas-panel,
+.checkbox-atlas-panel {
+  margin-bottom: var(--ut-space-4);
+}
+
+.checkbox-inventory-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--ut-space-5) var(--ut-space-4);
+}
+
+.checkbox-example {
+  min-width: 0;
+  display: grid;
+  gap: var(--ut-space-2);
+}
+
+.checkbox-sample {
+  min-height: 3rem;
+  display: flex;
+  align-items: center;
+}
+
+.checkbox-sample--pair {
+  gap: var(--ut-space-3);
+}
+
+.checkbox-example small {
+  display: grid;
+  gap: 0.18rem;
+  color: var(--ut-color-text-muted);
+  font-size: var(--ut-text-caption);
+  line-height: 1.4;
+}
+
+.checkbox-example small strong {
+  color: var(--ut-color-text);
+  font-weight: 650;
+}
+
+.observed-checkbox {
+  flex: none;
+  margin: 0;
+}
+
+.observed-checkbox--consent {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--ut-checkbox-accent);
+}
+
+.observed-checkbox--compact {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--ut-checkbox-accent);
+}
+
+.observed-switch {
+  position: relative;
+  display: inline-flex;
+  cursor: pointer;
+}
+
+.observed-switch input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.observed-switch span {
+  width: 2.4rem;
+  height: 1.35rem;
+  border: 1px solid var(--ut-color-border-subtle);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ut-color-text) 12%, transparent);
+}
+
+.observed-switch span::after {
+  content: "";
+  display: block;
+  width: 1rem;
+  height: 1rem;
+  margin: 0.12rem;
+  border-radius: 50%;
+  background: var(--ut-color-surface);
+  box-shadow: 0 1px 3px color-mix(in srgb, #000 25%, transparent);
+}
+
+.observed-switch input:checked + span {
+  border-color: var(--ut-color-text);
+  background: var(--ut-color-text);
+}
+
+.observed-switch input:checked + span::after {
+  transform: translateX(1.05rem);
+}
+
+.semantic-checkbox-button {
+  width: 2.75rem;
+  min-width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  border: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: var(--ut-color-action);
+}
+
+.semantic-checkbox-button svg {
+  width: 1.35rem;
+  height: 1.35rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.observed-control.observed-control--40,
+.observed-control.observed-control--50 {
   border-color: var(--ut-color-action);
   background: var(--ut-color-action);
   color: var(--ut-color-action-text);
@@ -614,9 +765,13 @@ textarea {
     background-color var(--ut-motion-fast) var(--ut-ease-standard);
 }
 
-.ut-field,
+.ut-field {
+  height: var(--ut-textbox-height);
+  padding: 0 0.8rem;
+}
+
 .ut-select {
-  height: var(--ut-control-height-standard);
+  height: var(--ut-select-height);
   padding: 0 0.8rem;
 }
 
@@ -683,7 +838,7 @@ textarea {
   width: 1rem;
   height: 1rem;
   margin: 0.12rem 0 0;
-  accent-color: var(--ut-color-action);
+  accent-color: var(--ut-checkbox-accent);
 }
 
 .form-message {
@@ -875,6 +1030,10 @@ textarea {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .checkbox-inventory-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .demo-panel--wide {
     grid-column: auto;
   }
@@ -893,6 +1052,7 @@ textarea {
   .token-grid,
   .size-atlas,
   .green-family-grid,
+  .checkbox-inventory-grid,
   .form-demo {
     grid-template-columns: 1fr;
   }
