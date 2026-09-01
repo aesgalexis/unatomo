@@ -4,6 +4,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-functions.js";
 
 const createInviteCallable = httpsCallable(functions, "createAdminInvite");
+const createGlobalInvitesCallable = httpsCallable(functions, "createGlobalAdminInvites");
 const respondInviteCallable = httpsCallable(functions, "respondAdminInvite");
 const leaveAdminCallable = httpsCallable(functions, "leaveAdminRole");
 const revokeAdminCallable = httpsCallable(functions, "revokeAdminInvite");
@@ -15,6 +16,11 @@ const cancelTransferCallable = httpsCallable(functions, "cancelMachineTransferIn
 
 export const createAdminInvite = async (machineId, adminEmail) => {
   const res = await createInviteCallable({ machineId, adminEmail });
+  return res.data || null;
+};
+
+export const createGlobalAdminInvites = async (adminEmail) => {
+  const res = await createGlobalInvitesCallable({ adminEmail });
   return res.data || null;
 };
 

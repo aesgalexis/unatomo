@@ -60,6 +60,7 @@ export {
 } from "./controlPanel/registrationCodes";
 export {
   createAdminInvite,
+  createGlobalAdminInvites,
   ensureAdminLink,
   leaveAdminRole,
   respondAdminInvite,

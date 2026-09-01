@@ -168,6 +168,10 @@ frontend wrappers live under `static/js/dashboard/`.
   enforces the 64-owned-machine limit, with the control-panel `superadmin`
   exemption. The `provisionMachineTagOnCreate` Firestore trigger then assigns a
   generated Tag ID, creates `machine_access`, and stores the corresponding QR.
+- `createGlobalAdminInvites`: authenticated owner bulk invitation for every
+  currently owned machine. It resolves email or account handle once, skips
+  accepted administrators and pending duplicates, and reports machines blocked
+  by an ownership transfer. Future machines are intentionally not included.
 - `transitionMachineStatus`: authenticated owner/accepted-admin transition.
   It atomically updates the canonical machine and its `machine_access`
   projection, creates/reuses/completes the restoration task, appends history,

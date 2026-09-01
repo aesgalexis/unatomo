@@ -29,6 +29,7 @@ import {
   isAccountOnboardingRequired
 } from "/static/js/firebase/firebaseApp.js";
 import { fetchLinksForAdmin } from "/static/js/dashboard/admin/adminLinksRepo.js";
+import { createGlobalAdminInvites } from "/static/js/dashboard/admin/adminFunctionsRepo.js";
 import { upsertAccountDirectory } from "/static/js/dashboard/admin/accountDirectoryRepo.js";
 import { fetchDashboardLayout, upsertDashboardLayout } from "/static/js/dashboard/firestoreRepo.js";
 import { setTopbarNotifications } from "/static/js/notifications/topbar-notifications.js";
@@ -100,9 +101,15 @@ const textMap = {
     ? "I have reviewed the account and the affected equipment"
     : "He revisado la cuenta y los equipos afectados",
   assignGlobalAdministrator: isEn ? "Send invitations" : "Enviar invitaciones",
-  bulkActionNotConnected: isEn
-    ? "The bulk assignment backend is not connected yet."
-    : "La asignación masiva todavía no está conectada al backend.",
+  globalAdministratorSaving: isEn ? "Sending invitations…" : "Enviando invitaciones…",
+  globalAdministratorResult: isEn
+    ? ({ invited, alreadyAdmin, alreadyPending, blockedTransfer }) =>
+      `${invited} sent · ${alreadyAdmin} already assigned · ${alreadyPending} already pending${blockedTransfer ? ` · ${blockedTransfer} blocked by ownership transfer` : ""}`
+    : ({ invited, alreadyAdmin, alreadyPending, blockedTransfer }) =>
+      `${invited} enviadas · ${alreadyAdmin} ya asignados · ${alreadyPending} ya pendientes${blockedTransfer ? ` · ${blockedTransfer} bloqueados por transferencia de propiedad` : ""}`,
+  globalAdministratorError: isEn
+    ? "Invitations could not be sent. Check the account and try again."
+    : "No se pudieron enviar las invitaciones. Comprueba la cuenta e inténtalo de nuevo.",
   name: isEn ? "Name" : "Nombre",
   accountHandle: isEn ? "Username" : "Nombre de usuario",
   accountHandleClaim: isEn ? "Confirm" : "Confirmar",
@@ -871,8 +878,23 @@ if (mount) {
   globalAdminConfirm?.addEventListener("change", () => {
     if (globalAdminSubmit) globalAdminSubmit.disabled = !globalAdminConfirm.checked;
   });
-  globalAdminSubmit?.addEventListener("click", () => {
-    setText(globalAdminStatus, textMap.bulkActionNotConnected);
+  globalAdminSubmit?.addEventListener("click", async () => {
+    const account = (globalAdminAccount?.value || "").trim();
+    if (!account || !globalAdminConfirm?.checked) return;
+    globalAdminSubmit.disabled = true;
+    if (globalAdminAccount) globalAdminAccount.disabled = true;
+    setText(globalAdminStatus, textMap.globalAdministratorSaving);
+    try {
+      const result = await createGlobalAdminInvites(account);
+      setText(globalAdminStatus, textMap.globalAdministratorResult(result || {}));
+      if (globalAdminConfirm) globalAdminConfirm.checked = false;
+    } catch (error) {
+      console.error("Global administrator invitations failed", error);
+      setText(globalAdminStatus, textMap.globalAdministratorError);
+      globalAdminSubmit.disabled = false;
+    } finally {
+      if (globalAdminAccount) globalAdminAccount.disabled = false;
+    }
   });
 
   const loadCounts = async (uid) => {
