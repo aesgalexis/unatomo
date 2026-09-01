@@ -2,4 +2,10 @@
   --ut-control-height-standard: 2.5rem;
   --ut-textbox-height: var(--ut-control-height-standard);
   --ut-select-height: var(--ut-control-height-standard);
+  --ut-checkbox-size: 1rem;
+  --ut-switch-width: 2rem;
+  --ut-switch-height: 1.125rem;
+  --ut-switch-thumb-size: 0.875rem;
+  --ut-switch-thumb-inset: 0.0625rem;
+  --ut-switch-thumb-travel: 0.875rem;
 }

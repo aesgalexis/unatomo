@@ -37,7 +37,7 @@
         <span class="summary-chip"><strong>32–50 px</strong> alturas observadas</span>
         <span class="summary-chip"><strong>26 / 40 px</strong> textboxes actuales</span>
         <span class="summary-chip"><strong>26 / 40 px</strong> selects actuales</span>
-        <span class="summary-chip"><strong>5</strong> familias de checkbox</span>
+        <span class="summary-chip"><strong>4</strong> familias de checkbox</span>
         <span class="summary-chip"><strong>2</strong> escalas Aceptar / Cancelar</span>
         <span class="summary-chip"><strong>1</strong> verde de acción</span>
         <span class="summary-chip"><strong>1</strong> navegación compartida</span>
@@ -228,20 +228,14 @@
             <div class="checkbox-sample">
               <input class="observed-checkbox observed-checkbox--consent" type="checkbox" checked aria-label="Consentimiento aceptado">
             </div>
-            <small><strong>16 px · verde canónico</strong><span>20 puntos · contacto, soporte, recambios e incidencias</span></small>
+            <small><strong>16 px · token · verde canónico</strong><span>21 puntos · contacto, soporte, recambios, incidencias y colaborador</span></small>
           </div>
           <div class="checkbox-example">
             <div class="checkbox-sample checkbox-sample--pair">
-              <input class="observed-checkbox observed-checkbox--native" type="checkbox" checked aria-label="Opción nativa activa">
-              <input class="observed-checkbox observed-checkbox--native" type="checkbox" aria-label="Opción nativa inactiva">
+              <input class="observed-checkbox observed-checkbox--native-green" type="checkbox" checked aria-label="Opción nativa verde activa">
+              <input class="observed-checkbox observed-checkbox--native-green" type="checkbox" aria-label="Opción nativa verde inactiva">
             </div>
-            <small><strong>Nativo · tamaño del navegador</strong><span>7 puntos · administrador LS, usuarios y confirmación de perfil</span></small>
-          </div>
-          <div class="checkbox-example">
-            <div class="checkbox-sample">
-              <input class="observed-checkbox observed-checkbox--compact" type="checkbox" checked aria-label="Opción operativa activa">
-            </div>
-            <small><strong>15 px / nativo · verde canónico</strong><span>2 puntos · colaborador y tareas operativas</span></small>
+            <small><strong>Nativo · verde canónico</strong><span>8 puntos · administrador LS, usuarios, perfil y tareas operativas</span></small>
           </div>
           <div class="checkbox-example">
             <div class="checkbox-sample">
@@ -250,7 +244,7 @@
                 <span aria-hidden="true"></span>
               </label>
             </div>
-            <small><strong>38 × 22 px · switch</strong><span>6 puntos · preferencias de notificación</span></small>
+            <small><strong>32 × 18 px · switch tokenizado</strong><span>6 puntos · preferencias de notificación</span></small>
           </div>
           <div class="checkbox-example">
             <div class="checkbox-sample">
@@ -261,7 +255,7 @@
             <small><strong>44 × 44 px · botón semántico</strong><span>2 puntos · completar tareas globales y de máquina</span></small>
           </div>
         </div>
-        <p class="sample-note sample-note--decision"><strong>Contrato de color aplicado:</strong> 22 checkboxes nativos consumen <code>--ut-checkbox-accent</code>, alias exacto del verde <code>--ut-action-primary</code> usado por Enviar. Los 7 controles deliberadamente nativos conservan el color del sistema; switches y botones semánticos mantienen su forma propia.</p>
+        <p class="sample-note sample-note--decision"><strong>Contrato aplicado:</strong> 21 checkboxes consumen los tokens de 16 px y verde canónico. Otros 8 conservan la geometría nativa del navegador, pero comparten el mismo verde canónico. El switch predeterminado conserva su función, con pista de 32 × 18 px y thumb de 14 px mediante tokens compartidos.</p>
       </article>
 
       <article class="demo-panel">

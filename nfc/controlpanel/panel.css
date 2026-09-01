@@ -603,8 +603,8 @@
 }
 
 .controlpanel-check input {
-  width: 15px;
-  height: 15px;
+  width: var(--ut-checkbox-size);
+  height: var(--ut-checkbox-size);
   accent-color: var(--ut-checkbox-accent);
 }
 

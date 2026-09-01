@@ -1087,8 +1087,8 @@ textarea.field {
 }
 
 .form-consent-label input {
-  width: 1rem;
-  height: 1rem;
+  width: var(--ut-checkbox-size);
+  height: var(--ut-checkbox-size);
   margin: 0.12rem 0 0;
   accent-color: var(--ut-checkbox-accent);
   cursor: pointer;

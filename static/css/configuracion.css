@@ -417,8 +417,9 @@
 }
 
 .profile-toggle > span {
-  width: 2.4rem;
-  height: 1.35rem;
+  box-sizing: border-box;
+  width: var(--ut-switch-width);
+  height: var(--ut-switch-height);
   border: 1px solid var(--border-subtle);
   border-radius: 999px;
   background: color-mix(in srgb, var(--fg) 12%, transparent);
@@ -428,9 +429,10 @@
 .profile-toggle > span::after {
   content: "";
   display: block;
-  width: 1rem;
-  height: 1rem;
-  margin: 0.12rem;
+  box-sizing: border-box;
+  width: var(--ut-switch-thumb-size);
+  height: var(--ut-switch-thumb-size);
+  margin: var(--ut-switch-thumb-inset);
   border-radius: 50%;
   background: var(--bg);
   box-shadow: 0 1px 3px color-mix(in srgb, #000 25%, transparent);
@@ -443,7 +445,7 @@
 }
 
 .profile-toggle input:checked + span::after {
-  transform: translateX(1.05rem);
+  transform: translateX(var(--ut-switch-thumb-travel));
 }
 
 .profile-toggle input:focus-visible + span {
@@ -640,7 +642,7 @@
 
 .profile-action-confirm input {
   margin-top: 0.15rem;
-  accent-color: var(--fg);
+  accent-color: var(--ut-checkbox-accent);
 }
 
 @media (min-width: 1280px) {

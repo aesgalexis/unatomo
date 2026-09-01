@@ -95,6 +95,11 @@
   gap: 0.45rem;
 }
 
+.ls-machine-inline input[type="checkbox"],
+.ls-machine-file-list input[type="checkbox"] {
+  accent-color: var(--ut-checkbox-accent);
+}
+
 .ls-machine-add-meta {
   padding: 0.9rem 1rem;
   border: 1px solid var(--border-subtle);

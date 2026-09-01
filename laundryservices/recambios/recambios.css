@@ -414,8 +414,8 @@ textarea.spares-input {
 }
 
 .privacy-check input {
-  width: 1rem;
-  height: 1rem;
+  width: var(--ut-checkbox-size);
+  height: var(--ut-checkbox-size);
   margin-top: 0.15rem;
   accent-color: var(--ut-checkbox-accent);
 }

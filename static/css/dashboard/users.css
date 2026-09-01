@@ -290,6 +290,11 @@
   font-size: 0.86rem;
 }
 
+.dashboard-user-machine input,
+.dashboard-users-permission input {
+  accent-color: var(--ut-checkbox-accent);
+}
+
 .dashboard-user-actions {
   grid-column: 1 / -1;
   justify-content: flex-end;

@@ -155,18 +155,21 @@ rows can render each recipe repeatedly.
 
 | Current recipe | Authored points | Current contexts |
 | --- | ---: | --- |
-| Native 16 px with canonical action-green accent | 20 | Contact and support consent, Laundry spare-parts privacy and incident disconnection |
-| Browser-native size and appearance | 7 | Laundry machine administrator, retained images, dashboard users and profile confirmation |
-| 15 px or browser-native with canonical action-green accent | 2 | Control-panel collaborator and global todo completion |
-| Custom 2.4 rem × 1.35 rem switch | 6 | Dashboard email-notification preferences |
+| Native 16 px token with canonical action-green accent | 21 | Contact and support consent, Laundry spare-parts privacy, incident disconnection and control-panel collaborator |
+| Browser-native size with canonical action-green accent | 8 | Laundry machine administrator, retained images, dashboard users, profile confirmation and global todo completion |
+| Tokenized 2 rem × 1.125 rem switch with 0.875 rem thumb | 6 | Dashboard email-notification preferences |
 | 2.75 rem × 2.75 rem button with `role="checkbox"` | 2 | Machine-card and global task completion |
 
 Total in source: **37 authoring points** — 35 native checkboxes and 2 semantic
-checkbox buttons. Twenty-two native checkboxes now consume
-`--ut-checkbox-accent`, an alias of the same `--ut-action-primary` green used by
-submit buttons. Seven browser-default checkboxes remain untouched. Switches and
-semantic task-completion buttons retain their distinct functional forms. The
-resulting five families are represented in the isolated showroom.
+checkbox buttons. Twenty-one native checkboxes now consume both the 16 px
+`--ut-checkbox-size` token and `--ut-checkbox-accent`, an alias of the same
+`--ut-action-primary` green used by submit buttons. Another eight keep their
+browser-native size while sharing the canonical green; disabled permission
+states retain their attenuated gray treatment. Switches and semantic
+task-completion buttons retain their distinct functional forms. The default
+switch now consumes shared 32 × 18 px track, 14 px thumb, inset and travel
+tokens so its scale sits closer to the 16 px checkbox. The resulting four
+families are represented in the isolated showroom.
 
 ## Buttons
 
