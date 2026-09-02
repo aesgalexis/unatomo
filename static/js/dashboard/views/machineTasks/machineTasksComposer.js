@@ -108,7 +108,8 @@ export const renderMachineTaskComposer = (
     ["hours", "hours", "horas"],
     ["days", "days", "días"],
     ["weeks", "weeks", "semanas"],
-    ["months", "months", "meses"]
+    ["months", "months", "meses"],
+    ["years", "years", "años"]
   ];
   commandUnits.forEach(([value, key, fallback]) => {
     const option = document.createElement("option");
@@ -214,7 +215,8 @@ export const renderMachineTaskComposer = (
   const frequencyToken = () => {
     if (!draft.frequency) return "";
     if (draft.frequency !== "custom") return `/${draft.frequency}`;
-    const unitLabel = commandUnits.find(([value]) => value === draft.customDueUnit)?.[2] || "días";
+    const unit = commandUnits.find(([value]) => value === draft.customDueUnit);
+    const unitLabel = unit ? t(`tasks.${unit[1]}`, unit[2]) : t("tasks.days", "días");
     return `/cada ${draft.customDueAmount || 1} ${unitLabel}`;
   };
   const setCaretAtEnd = () => {
@@ -288,14 +290,22 @@ export const renderMachineTaskComposer = (
     let frequency = "";
     let customDueAmount = "1";
     let customDueUnit = "days";
-    const customMatch = remainder.match(/\/cada\s+(\d{1,3})\s+(horas?|d[ií]as?|semanas?|meses?)/i);
+    const customMatch = remainder.match(
+      /\/cada\s+(\d{1,3})\s+(horas?|hours?|d[ií]as?|days?|semanas?|weeks?|meses?|months?|a[nñ]os?|years?)/i
+    );
     if (customMatch) {
       frequency = "custom";
       customDueAmount = customMatch[1];
       const normalizedUnit = normalizeCommandText(customMatch[2]);
-      customDueUnit = normalizedUnit.startsWith("hora") ? "hours"
-        : normalizedUnit.startsWith("semana") ? "weeks"
-          : normalizedUnit.startsWith("mes") ? "months" : "days";
+      customDueUnit = normalizedUnit.startsWith("hora") || normalizedUnit.startsWith("hour")
+        ? "hours"
+        : normalizedUnit.startsWith("semana") || normalizedUnit.startsWith("week")
+          ? "weeks"
+          : normalizedUnit.startsWith("mes") || normalizedUnit.startsWith("month")
+            ? "months"
+            : normalizedUnit.startsWith("ano") || normalizedUnit.startsWith("year")
+              ? "years"
+              : "days";
       remainder = removeOnce(remainder, customMatch[0]);
     } else {
       const frequencyMatch = remainder.match(/\/(puntual|diaria|semanal|mensual|trimestral|semestral|anual)\b/i);

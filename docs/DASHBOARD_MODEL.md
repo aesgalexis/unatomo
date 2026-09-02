@@ -260,6 +260,14 @@ Dashboard Tasks scope:
   broadens machine access or queries hidden machines.
 - New tasks require a target machine and reuse the canonical per-machine task
   model, history mutation, permissions, and autosave flow.
+- Per-machine recurring-task creation exposes an initial-cycle progress slider.
+  Zero starts a fresh cycle on the creation date and is the default; the maximum
+  places the first due date at creation time, with intermediate values consuming
+  a proportional part of the first cycle. The UI uses hours, days, months, or the
+  custom frequency unit as appropriate. Custom frequencies support hours, days,
+  weeks, months, and years; a year follows the existing fixed-duration convention
+  of 365 days. This never writes a synthetic completion
+  or history entry. Existing tasks without `initialCycleProgress` start fresh.
 - The global task composer is bidirectional with the structured create fields.
   It recognizes `#Machine`, `**Title**`, `/frequency`, and `@assignee`; typing
   commands updates the controls, while control changes rebuild the formatted

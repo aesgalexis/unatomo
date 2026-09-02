@@ -1,9 +1,15 @@
 const MAX_TITLE = 64;
 const MAX_DESCRIPTION = 1024;
 const MAX_NOTE = 512;
-const CUSTOM_UNITS = ["hours", "days", "weeks", "months"];
+const CUSTOM_UNITS = ["hours", "days", "weeks", "months", "years"];
 const ASSIGNABLE_ROLES = ["operator", "technician"];
 export const RESTORE_OPERATION_TASK_SOURCE = "status-out-of-service";
+
+const normalizeInitialCycleProgress = (raw) => {
+  const value = Number(raw?.initialCycleProgress);
+  if (Number.isFinite(value)) return Math.max(0, Math.min(1, value));
+  return raw?.initialCycleState === "overdue" ? 1 : 0;
+};
 
 const toIso = (value) => {
   const date = value ? new Date(value) : null;
@@ -38,6 +44,7 @@ export const normalizeTaskAssignee = (raw) => {
 
 export const normalizeTask = (raw) => {
   if (!raw || typeof raw !== "object") return null;
+  const frequency = raw.frequency || "diaria";
   const description =
     typeof raw.description === "string"
       ? raw.description.slice(0, MAX_DESCRIPTION)
@@ -78,9 +85,11 @@ export const normalizeTask = (raw) => {
     id: raw.id || `t_${Math.random().toString(36).slice(2, 8)}`,
     title,
     description,
-    frequency: raw.frequency || "diaria",
-    customDueAmount: raw.frequency === "custom" ? customAmount : null,
-    customDueUnit: raw.frequency === "custom" ? customUnit : null,
+    frequency,
+    customDueAmount: frequency === "custom" ? customAmount : null,
+    customDueUnit: frequency === "custom" ? customUnit : null,
+    initialCycleProgress:
+      frequency === "puntual" ? 0 : normalizeInitialCycleProgress(raw),
     notes,
     attachments,
     createdAt: toIso(raw.createdAt),
@@ -115,6 +124,7 @@ export const createTask = ({
   frequency,
   customDueAmount,
   customDueUnit,
+  initialCycleProgress,
   createdBy,
   assignedTo
 }) => {
@@ -127,20 +137,25 @@ export const createTask = ({
   const baseTitle = cleanTitle || "Tarea";
   const trimmed =
     baseTitle.length > MAX_TITLE ? baseTitle.slice(0, MAX_TITLE) : baseTitle;
+  const normalizedFrequency = frequency || "puntual";
   return {
     task: {
       id: (window.crypto.randomUUID && window.crypto.randomUUID()) || `t_${Date.now()}`,
       title: trimmed,
       description: trimmedDesc,
-      frequency: frequency || "puntual",
+      frequency: normalizedFrequency,
       customDueAmount:
-        frequency === "custom"
+        normalizedFrequency === "custom"
           ? Math.max(1, Math.min(999, Number(customDueAmount || 1) || 1))
           : null,
       customDueUnit:
-        frequency === "custom" && CUSTOM_UNITS.includes(customDueUnit)
+        normalizedFrequency === "custom" && CUSTOM_UNITS.includes(customDueUnit)
           ? customDueUnit
           : null,
+      initialCycleProgress:
+        normalizedFrequency === "puntual"
+          ? 0
+          : Math.max(0, Math.min(1, Number(initialCycleProgress) || 0)),
       notes: [],
       attachments: [],
       createdAt: new Date().toISOString(),

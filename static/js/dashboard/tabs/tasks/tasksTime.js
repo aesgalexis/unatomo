@@ -18,6 +18,7 @@ const customDurationMs = (task) => {
   if (unit === "hours") return amount * 60 * 60 * 1000;
   if (unit === "weeks") return amount * 7 * DAY;
   if (unit === "months") return amount * 30 * DAY;
+  if (unit === "years") return amount * 365 * DAY;
   return amount * DAY;
 };
 
@@ -27,9 +28,40 @@ const toMs = (value) => {
   return date.getTime();
 };
 
+const taskDurationMs = (task) =>
+  task.frequency === "custom"
+    ? customDurationMs(task)
+    : (durationDays[task.frequency] || 1) * DAY;
+
+const initialCycleProgress = (task) =>
+  Math.max(0, Math.min(1, Number(task.initialCycleProgress) || 0));
+
+const cycleBaseMs = (task) => {
+  if (task.lastCompletedAt) return toMs(task.lastCompletedAt);
+  return toMs(task.createdAt) - taskDurationMs(task) * initialCycleProgress(task);
+};
+
 const unitLabel = (key, count) => t(`tasks.${count === 1 ? key : `${key}s`}`, key);
 
 const formatCount = (count, unitKey) => `${count} ${unitLabel(unitKey, count)}`;
+
+const formatElapsedDuration = (ms) => {
+  const diff = Math.max(0, ms);
+  if (diff < HOUR) {
+    return formatCount(Math.max(1, Math.ceil(diff / MINUTE)), "minute");
+  }
+  if (diff < DAY) {
+    return formatCount(Math.max(1, Math.ceil(diff / HOUR)), "hour");
+  }
+  const dayCount = Math.max(1, Math.ceil(diff / DAY));
+  if (dayCount >= 30) {
+    return formatCount(Math.ceil(dayCount / 30), "month");
+  }
+  if (dayCount >= 7) {
+    return formatCount(Math.ceil(dayCount / 7), "week");
+  }
+  return formatCount(dayCount, "day");
+};
 
 const formatRemaining = (ms, frequency) => {
   if (frequency === "puntual") {
@@ -76,46 +108,14 @@ const formatOverdue = (ms) => {
 };
 
 export const getOverdueDuration = (task, nowMs = Date.now()) => {
-  const baseMs = toMs(task.lastCompletedAt || task.createdAt);
-  const nextDue =
-    task.frequency === "custom"
-      ? baseMs + customDurationMs(task)
-      : baseMs + (durationDays[task.frequency] || 1) * DAY;
+  const nextDue = cycleBaseMs(task) + taskDurationMs(task);
   const diff = nowMs - nextDue;
   if (diff <= 0) return "";
-  const dayCount = Math.max(1, Math.ceil(diff / DAY));
-  if (dayCount >= 30) {
-    const months = Math.ceil(dayCount / 30);
-    return formatCount(months, "month");
-  }
-  if (dayCount >= 7) {
-    const weeks = Math.ceil(dayCount / 7);
-    return formatCount(weeks, "week");
-  }
-  return formatCount(dayCount, "day");
+  return formatElapsedDuration(diff);
 };
 
 export const getCompletionDuration = (task, nowMs = Date.now()) => {
-  const baseMs = toMs(task.createdAt);
-  const diff = Math.max(0, nowMs - baseMs);
-  if (diff < HOUR) {
-    const minutes = Math.max(1, Math.ceil(diff / MINUTE));
-    return formatCount(minutes, "minute");
-  }
-  if (diff < DAY) {
-    const hours = Math.max(1, Math.ceil(diff / HOUR));
-    return formatCount(hours, "hour");
-  }
-  const dayCount = Math.max(1, Math.ceil(diff / DAY));
-  if (dayCount >= 30) {
-    const months = Math.ceil(dayCount / 30);
-    return formatCount(months, "month");
-  }
-  if (dayCount >= 7) {
-    const weeks = Math.ceil(dayCount / 7);
-    return formatCount(weeks, "week");
-  }
-  return formatCount(dayCount, "day");
+  return formatElapsedDuration(nowMs - toMs(task.createdAt));
 };
 
 export const getTaskTiming = (task, nowMs = Date.now()) => {
@@ -126,17 +126,16 @@ export const getTaskTiming = (task, nowMs = Date.now()) => {
       label: t("tasks.oneOff", "Tarea puntual"),
     };
   }
-  const baseMs = toMs(task.lastCompletedAt || task.createdAt);
-  const nextDue =
-    task.frequency === "custom"
-      ? baseMs + customDurationMs(task)
-      : baseMs + (durationDays[task.frequency] || 1) * DAY;
+  const nextDue = cycleBaseMs(task) + taskDurationMs(task);
   const remaining = nextDue - nowMs;
   if (remaining <= 0) {
     return {
       nextDue,
       pending: true,
-      label: formatOverdue(Math.abs(remaining)),
+      label:
+        !task.lastCompletedAt && initialCycleProgress(task) === 1 && Math.abs(remaining) < HOUR
+          ? t("tasks.overdueNow", "Vencida ahora")
+          : formatOverdue(Math.abs(remaining)),
     };
   }
   return {

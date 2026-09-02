@@ -25,6 +25,7 @@ const taskActionsSource = readFileSync(
 
 globalThis.window = { crypto: webcrypto };
 const { createTask, normalizeTask } = await import(asDataUrl(tasksModelSource));
+const { getOverdueDuration, getTaskTiming } = await import(asDataUrl(tasksTimeSource));
 const {
   buildAddTaskNoteUpdate,
   buildCompleteTaskUpdate,
@@ -44,6 +45,12 @@ assert.equal(normalizeTask({
   frequency: "puntual",
   createdAt
 }).assignedTo, null);
+assert.equal(normalizeTask({
+  id: "legacy-recurring",
+  title: "Tarea periódica antigua",
+  frequency: "semanal",
+  createdAt
+}).initialCycleProgress, 0);
 
 const { task } = createTask({
   title: "Limpiar filtro",
@@ -54,6 +61,63 @@ const { task } = createTask({
 });
 task.createdAt = createdAt;
 assert.deepEqual(task.assignedTo, assignee);
+assert.equal(task.initialCycleProgress, 0);
+assert.equal(
+  getTaskTiming(task, new Date("2026-07-30T09:00:00.000Z").getTime()).pending,
+  false
+);
+
+const { task: overdueTask } = createTask({
+  title: "Revisión vencida",
+  frequency: "semanal",
+  initialCycleProgress: 1,
+  createdBy: "Owner"
+});
+overdueTask.createdAt = createdAt;
+const overdueAt = new Date("2026-07-30T08:05:00.000Z").getTime();
+assert.equal(overdueTask.lastCompletedAt, null);
+assert.equal(getTaskTiming(overdueTask, overdueAt).pending, true);
+assert.equal(getTaskTiming(overdueTask, overdueAt).label, "Vencida ahora");
+assert.equal(getOverdueDuration(overdueTask, overdueAt), "5 minute");
+assert.equal(
+  getOverdueDuration(overdueTask, new Date("2026-08-01T08:00:00.000Z").getTime()),
+  "2 day"
+);
+
+const { task: halfAnnualTask } = createTask({
+  title: "Revisión anual avanzada",
+  frequency: "anual",
+  initialCycleProgress: 0.5,
+  createdBy: "Owner"
+});
+halfAnnualTask.createdAt = createdAt;
+assert.equal(
+  getTaskTiming(halfAnnualTask, new Date("2027-01-28T08:00:00.000Z").getTime()).pending,
+  false
+);
+assert.equal(
+  getTaskTiming(halfAnnualTask, new Date("2027-01-30T08:00:00.000Z").getTime()).pending,
+  true
+);
+
+const { task: customYearsTask } = createTask({
+  title: "Revisión cada dos años",
+  frequency: "custom",
+  customDueAmount: 2,
+  customDueUnit: "years",
+  initialCycleProgress: 0.5,
+  createdBy: "Owner"
+});
+customYearsTask.createdAt = createdAt;
+assert.equal(customYearsTask.customDueUnit, "years");
+assert.equal(
+  getTaskTiming(customYearsTask, new Date("2027-07-29T08:00:00.000Z").getTime()).pending,
+  false
+);
+assert.equal(
+  getTaskTiming(customYearsTask, new Date("2027-07-31T08:00:00.000Z").getTime()).pending,
+  true
+);
 
 const reassignedAt = "2026-07-30T09:00:00.000Z";
 const assignmentUpdate = buildEditTaskUpdate(

@@ -648,6 +648,45 @@
   order: 2;
 }
 
+.task-initial-cycle {
+  flex: 1 0 100%;
+  order: 3;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.task-initial-cycle[hidden] {
+  display: none;
+}
+
+.task-initial-cycle-header,
+.task-initial-cycle-endpoints {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.task-initial-cycle-label,
+.task-initial-cycle-value,
+.task-initial-cycle-endpoints {
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1.2;
+}
+
+.task-initial-cycle-value {
+  color: var(--fg);
+  text-align: right;
+}
+
+.task-initial-cycle-range {
+  width: 100%;
+  margin: 0;
+  accent-color: var(--fg);
+  cursor: pointer;
+}
+
 .task-custom-unit {
   min-width: 110px;
 }

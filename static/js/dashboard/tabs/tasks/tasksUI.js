@@ -74,6 +74,7 @@ const unitLabel = (key) =>
     days: t("tasks.days", "días"),
     weeks: t("tasks.weeks", "semanas"),
     months: t("tasks.months", "meses"),
+    years: t("tasks.years", "años"),
   })[key] || key;
 
 const frequencyKeys = [
@@ -223,6 +224,102 @@ const createCustomControls = (task = {}) => {
   wrap.appendChild(amount);
   wrap.appendChild(unit);
   return { wrap, amount, unit };
+};
+
+const INITIAL_CYCLE_SCALES = {
+  diaria: { max: 24, unit: "hour" },
+  semanal: { max: 7, unit: "day" },
+  mensual: { max: 30, unit: "day" },
+  trimestral: { max: 3, unit: "month" },
+  semestral: { max: 6, unit: "month" },
+  anual: { max: 12, unit: "month" }
+};
+
+const createInitialCycleControl = (custom) => {
+  const wrap = document.createElement("div");
+  wrap.className = "task-initial-cycle";
+  wrap.hidden = true;
+  wrap.addEventListener("click", (event) => event.stopPropagation());
+
+  const header = document.createElement("div");
+  header.className = "task-initial-cycle-header";
+  const title = document.createElement("span");
+  title.className = "task-initial-cycle-label";
+  title.textContent = t("tasks.initialCycle", "Avance inicial");
+  const output = document.createElement("output");
+  output.className = "task-initial-cycle-value";
+  header.append(title, output);
+
+  const input = document.createElement("input");
+  input.className = "task-initial-cycle-range";
+  input.type = "range";
+  input.min = "0";
+  input.step = "1";
+  input.value = "0";
+  input.setAttribute("aria-label", title.textContent);
+
+  const endpoints = document.createElement("div");
+  endpoints.className = "task-initial-cycle-endpoints";
+  const fresh = document.createElement("span");
+  fresh.textContent = t("tasks.freshCycle", "Ciclo nuevo");
+  const due = document.createElement("span");
+  due.textContent = t("tasks.dueNow", "Vence ahora");
+  endpoints.append(fresh, due);
+
+  let frequency = "";
+  let scale = { max: 1, unit: "day" };
+  const getScale = () => {
+    if (frequency !== "custom") return INITIAL_CYCLE_SCALES[frequency] || scale;
+    return {
+      max: Math.max(1, Math.min(999, Number(custom.amount.value) || 1)),
+      unit: custom.unit.value?.replace(/s$/, "") || "day"
+    };
+  };
+  const updateOutput = () => {
+    const value = Math.max(0, Number(input.value) || 0);
+    if (!value) {
+      output.textContent = t("tasks.freshCycle", "Ciclo nuevo");
+      return;
+    }
+    const unit = t(
+      `tasks.${value === 1 ? scale.unit : `${scale.unit}s`}`,
+      scale.unit
+    );
+    const elapsed = t(
+      "tasks.cycleElapsed",
+      (amount, label) => `${amount} ${label} transcurridos`
+    )(value, unit);
+    output.textContent = value >= scale.max
+      ? `${elapsed} · ${t("tasks.dueNow", "Vence ahora")}`
+      : elapsed;
+  };
+  const syncScale = ({ reset = false } = {}) => {
+    scale = getScale();
+    input.max = String(scale.max);
+    input.value = reset
+      ? "0"
+      : String(Math.min(scale.max, Math.max(0, Number(input.value) || 0)));
+    updateOutput();
+  };
+  input.addEventListener("input", updateOutput);
+  custom.amount.addEventListener("input", () => syncScale());
+  custom.unit.addEventListener("change", () => syncScale());
+  wrap.append(header, input, endpoints);
+
+  return {
+    wrap,
+    getProgress: () => Math.max(0, Math.min(1, (Number(input.value) || 0) / scale.max)),
+    reset: () => {
+      input.value = "0";
+      updateOutput();
+    },
+    setFrequency: (nextFrequency) => {
+      const changed = frequency !== nextFrequency;
+      frequency = nextFrequency;
+      wrap.hidden = !frequency || frequency === "puntual";
+      if (!wrap.hidden) syncScale({ reset: changed });
+    }
+  };
 };
 
 const TASK_MENU_ICONS = {
@@ -801,9 +898,11 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
     const freqSelect = createFrequencySelect("");
     const assigneeSelect = createAssigneeSelect(machine);
     const custom = createCustomControls();
+    const initialCycle = createInitialCycleControl(custom);
     custom.wrap.hidden = true;
     freqSelect.addEventListener("change", () => {
       custom.wrap.hidden = freqSelect.value !== "custom";
+      initialCycle.setFrequency(freqSelect.value);
       if (hooks.onContentResize) {
         requestAnimationFrame(() => hooks.onContentResize());
       }
@@ -821,6 +920,7 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
         frequency: freqSelect.value,
         customDueAmount: custom.amount.value,
         customDueUnit: custom.unit.value,
+        initialCycleProgress: initialCycle.getProgress(),
         createdBy: context.createdBy || null,
         assignedTo: readAssigneeSelect(assigneeSelect),
       });
@@ -835,6 +935,7 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
       descInput.value = "";
       custom.amount.value = "1";
       custom.unit.value = "days";
+      initialCycle.reset();
       assigneeSelect.value = "";
     });
 
@@ -843,6 +944,7 @@ export const renderTasksPanel = (panel, machine, hooks, options = {}, context = 
     formRow.appendChild(freqSelect);
     formRow.appendChild(assigneeSelect);
     formRow.appendChild(custom.wrap);
+    formRow.appendChild(initialCycle.wrap);
     formRow.appendChild(createBtn);
 
     panel.appendChild(formRow);
