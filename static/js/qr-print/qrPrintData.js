@@ -9,23 +9,6 @@ import {
 import { db } from "/static/js/firebase/firebaseApp.js";
 import { normalizeDashboardTitle } from "/static/js/dashboard/layout/dashboardLayoutModel.mjs";
 
-const DASHBOARD_TITLE_CACHE_KEY = "unatomo_dashboard_title_v1";
-
-const getCachedDashboardTitle = () => {
-  try {
-    return normalizeDashboardTitle(localStorage.getItem(DASHBOARD_TITLE_CACHE_KEY) || "");
-  } catch {
-    return "";
-  }
-};
-
-const cacheDashboardTitle = (title) => {
-  try {
-    const normalized = normalizeDashboardTitle(title);
-    if (normalized) localStorage.setItem(DASHBOARD_TITLE_CACHE_KEY, normalized);
-  } catch {}
-};
-
 export const applyQrDashboardTopbarTitle = async (uid) => {
   const setTitle = (value, attempts = 0) => {
     const titleEl = document.getElementById("topbar-title");
@@ -35,20 +18,24 @@ export const applyQrDashboardTopbarTitle = async (uid) => {
     }
     if (attempts < 20) window.setTimeout(() => setTitle(value, attempts + 1), 50);
   };
-  let title = getCachedDashboardTitle() || "Dashboard";
-  const initialTitle = title;
+  let title = "Dashboard";
   setTitle(title);
   try {
-    const snap = await getDoc(doc(db, "dashboard_layout", uid));
-    const remoteTitle = normalizeDashboardTitle(
-      snap.exists() ? snap.data()?.dashboardTitle : ""
+    const [profileSnap, layoutSnap] = await Promise.all([
+      getDoc(doc(db, "users", uid)),
+      getDoc(doc(db, "dashboard_layout", uid))
+    ]);
+    const companyTitle = normalizeDashboardTitle(
+      profileSnap.exists()
+        ? profileSnap.data()?.company || profileSnap.data()?.companyName
+        : ""
     );
-    if (remoteTitle) {
-      title = remoteTitle;
-      cacheDashboardTitle(remoteTitle);
-    }
+    const layoutTitle = normalizeDashboardTitle(
+      layoutSnap.exists() ? layoutSnap.data()?.dashboardTitle : ""
+    );
+    title = companyTitle || layoutTitle || title;
   } catch {}
-  if (title !== initialTitle) setTitle(title);
+  setTitle(title);
 };
 
 const normalizeMachine = (raw) => ({

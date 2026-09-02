@@ -361,7 +361,7 @@
 }
 
 .mc-share-icon.is-pending {
-  color: #f97316;
+  color: var(--ut-status-warning);
 }
 
 .mc-tooltip {
@@ -414,10 +414,10 @@
 
 .mc-pending {
   margin-left: 0;
-  border: 2px solid #f97316;
+  border: 2px solid var(--ut-status-warning);
   border-radius: 999px;
   background: transparent;
-  color: #f97316;
+  color: var(--ut-status-warning);
   font: inherit;
   font-size: 0.8rem;
   font-weight: 600;
@@ -845,7 +845,7 @@
 }
 
 .machine-group-pending-count {
-  background: #f97316;
+  background: var(--ut-status-warning);
   color: #fff;
 }
 

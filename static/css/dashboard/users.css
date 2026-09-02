@@ -111,7 +111,7 @@
 }
 
 .dashboard-user-field .dashboard-users-select {
-  padding-right: 1.7rem;
+  padding-right: var(--ut-select-padding-inline-end);
 }
 
 .dashboard-users-select {
@@ -121,12 +121,12 @@
   min-height: 0;
   border: 1px solid var(--border-subtle);
   border-radius: 8px;
-  padding: 5px 1.8rem 5px 8px;
+  padding: 5px var(--ut-select-padding-inline-end) 5px 8px;
   background-color: var(--bg);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%239CA3AF' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 7 5 5 5-5'/%3E%3C/svg%3E") !important;
+  background-image: var(--ut-select-indicator-image) !important;
   background-repeat: no-repeat !important;
-  background-position: right 0.65rem center !important;
-  background-size: 0.85rem 0.85rem !important;
+  background-position: right var(--ut-select-indicator-offset) center !important;
+  background-size: var(--ut-select-indicator-size) !important;
   color: var(--fg);
   font: inherit;
   font-size: 12px;
@@ -264,7 +264,7 @@
 }
 
 .dashboard-user-field .dashboard-users-select {
-  padding-right: 1.7rem;
+  padding-right: var(--ut-select-padding-inline-end);
 }
 
 .dashboard-user-assignments {
@@ -342,7 +342,7 @@
 }
 
 .dashboard-users-create .dashboard-users-select {
-  padding-right: 1.7rem;
+  padding-right: var(--ut-select-padding-inline-end);
 }
 
 .dashboard-users-create-actions .dashboard-users-primary:disabled {

@@ -31,14 +31,15 @@
   <main id="top" class="showroom-main">
     <section class="showroom-intro" aria-labelledby="showroom-title">
       <p class="showroom-kicker">Current-state showroom · <span data-current-profile>Core · claro</span></p>
-      <h1 id="showroom-title">Así es hoy. Sin normalizarlo.</h1>
-      <p class="showroom-lead">Este showroom reúne patrones existentes y conserva sus diferencias. Primero documentamos qué hay, dónde vive y cuánto se repite; más adelante decidiremos qué pertenece al contrato común de UNATOMO.</p>
+      <h1 id="showroom-title">Así es hoy. Inventariado y migrándose.</h1>
+      <p class="showroom-lead">Este showroom reúne el estado real del sitio: conserva las excepciones pendientes y señala los contratos que ya están aplicados. Cada migración común queda visible aquí antes de seguir con la siguiente familia.</p>
       <div class="showroom-summary" aria-label="Resumen del inventario">
-        <span class="summary-chip"><strong>32–50 px</strong> alturas observadas</span>
+        <span class="summary-chip"><strong>32 / 36 / 40 px</strong> alturas de botón</span>
         <span class="summary-chip"><strong>26 / 40 px</strong> textboxes actuales</span>
         <span class="summary-chip"><strong>26 / 40 px</strong> selects actuales</span>
         <span class="summary-chip"><strong>4</strong> familias de checkbox</span>
         <span class="summary-chip"><strong>2</strong> escalas Aceptar / Cancelar</span>
+        <span class="summary-chip"><strong>12 → 2</strong> composiciones de botón</span>
         <span class="summary-chip"><strong>1</strong> verde de acción</span>
         <span class="summary-chip"><strong>1</strong> navegación compartida</span>
         <span class="summary-chip"><strong>0</strong> páginas conectadas</span>
@@ -58,7 +59,7 @@
         <article class="demo-panel demo-panel--wide">
           <div class="sample-heading">
             <p class="sample-label">Alturas observadas</p>
-            <span class="evidence-badge">Actual · varias superficies</span>
+            <span class="evidence-badge">Canónico · tres alturas</span>
           </div>
           <div class="size-atlas">
             <div class="control-example">
@@ -70,28 +71,91 @@
               <small><strong>36 px</strong><span>Core / LS / Studio · utilidad</span></small>
             </div>
             <div class="control-example">
-              <button class="observed-control observed-control--40" type="button">Añadir</button>
-              <small><strong>40 px</strong><span>NFC dashboard · acción</span></small>
+              <button class="observed-control observed-control--40 observed-control--primary" type="button">Añadir</button>
+              <small><strong>40 px · verde</strong><span>Acción principal</span></small>
             </div>
             <div class="control-example">
-              <button class="observed-control observed-control--42" type="button">Descubrir NFC</button>
-              <small><strong>42 px</strong><span>NFC público · landing</span></small>
-            </div>
-            <div class="control-example">
-              <input class="observed-field observed-control--40" aria-label="Campo de contacto de ejemplo" value="Campo de contacto" readonly>
-              <small><strong>40 px</strong><span>Textboxes · estándar canónico</span></small>
-            </div>
-            <div class="control-example">
-              <button class="observed-control observed-control--50 observed-control--inverse" type="button">Crear espacio</button>
-              <small><strong>50 px</strong><span>NFC · sólo onboarding</span></small>
+              <button class="observed-control observed-control--40" type="button">Descubrir NFC</button>
+              <small><strong>40 px · transparente</strong><span>Acción secundaria</span></small>
             </div>
           </div>
+          <p class="sample-note sample-note--decision"><strong>Contrato aplicado:</strong> la escala de botones queda en 32, 36 y 40 px. Las cuatro recetas de 42 px y el submit de onboarding de 50 px pasan a 40 mediante <code>--ut-button-height-standard</code>; conservan su color, forma y jerarquía.</p>
+        </article>
+
+        <article id="ordinary-buttons" class="demo-panel demo-panel--wide">
+          <div class="sample-heading">
+            <p class="sample-label">Botones ordinarios · cobertura completa</p>
+            <span class="evidence-badge">12 recetas · dos radios con criterio</span>
+          </div>
+          <div class="ordinary-button-grid">
+            <div class="ordinary-button-example">
+              <button class="ut-button ut-button--primary" type="button">Enviar</button>
+              <code>Shared · .ut-button</code>
+              <small>Formularios de contacto</small>
+            </div>
+            <div class="ordinary-button-example">
+              <button class="ut-button ordinary-button--solid" type="button">Descubrir NFC</button>
+              <code>Core · .btn-pill</code>
+              <small>Landing principal</small>
+            </div>
+            <div class="ordinary-button-example">
+              <button class="ut-button ut-button--primary ordinary-button--inline" type="button">Continuar</button>
+              <code>Core / Auth · .btn-primary</code>
+              <small>Acceso y registro NFC</small>
+            </div>
+            <div class="ordinary-button-example">
+              <button class="ut-button ordinary-button--solid" type="button">Contactar</button>
+              <code>Corporate · .btn-pill</code>
+              <small>Páginas localizadas</small>
+            </div>
+            <div class="ordinary-button-example">
+              <button class="ut-button ordinary-button--solid" type="button">Más información</button>
+              <code>Laundry · .btn-pill</code>
+              <small>Servicios y recambios</small>
+            </div>
+            <div class="ordinary-button-example">
+              <button class="ut-button ordinary-button--solid" type="button">Hablemos</button>
+              <code>Studio · .studio-button</code>
+              <small>Core oscuro</small>
+            </div>
+            <div class="ordinary-button-example">
+              <button class="ut-button ordinary-button--secondary" type="button">Registrarse</button>
+              <code>NFC público · .landing-button</code>
+              <small>Primario y secundario</small>
+            </div>
+            <div class="ordinary-button-example">
+              <button class="ut-button ordinary-button--solid ordinary-button--inline" type="button">Crear mi dashboard</button>
+              <code>NFC · .onboarding-submit</code>
+              <small>Onboarding</small>
+            </div>
+            <div class="ordinary-button-example">
+              <button class="ut-button ut-button--primary ordinary-button--inline" type="button">Validar</button>
+              <code>Laundry · .catalog-button</code>
+              <small>Administración de catálogo</small>
+            </div>
+            <div class="ordinary-button-example">
+              <button class="ut-button ordinary-button--secondary" type="button">Añadir imágenes</button>
+              <code>Laundry · .upload-button</code>
+              <small>Solicitud de recambios</small>
+            </div>
+            <div class="ordinary-button-example">
+              <button class="ut-button ordinary-button--solid ordinary-button--inline" type="button">Guardar</button>
+              <code>NFC · .profile-save-btn</code>
+              <small>Configuración de perfil</small>
+            </div>
+            <div class="ordinary-button-example">
+              <button class="ut-button ut-button--primary ordinary-button--inline" type="button">Enviar sugerencia</button>
+              <code>NFC · .btn-save</code>
+              <small>Vistas del dashboard</small>
+            </div>
+          </div>
+          <p class="sample-note sample-note--decision"><strong>Contrato aplicado:</strong> las doce recetas ordinarias comparten 40 px de alto mínimo, padding horizontal de 1.25 rem, texto de 0.95 rem, peso 400 y line-height normal. La píldora queda para CTA pública o solitaria; el radio de 12 px se usa dentro de la app, junto a campos o en grupos. Validar y Enviar sugerencia usan el verde canónico; Añadir imágenes y Registrarse son transparentes. Registrarse conserva provisionalmente la píldora por ser una acción pública y solitaria.</p>
         </article>
 
         <article class="demo-panel">
           <div class="sample-heading">
             <p class="sample-label">Aceptar / Cancelar pequeño</p>
-            <span class="evidence-badge">Actual · NFC dashboard</span>
+            <span class="evidence-badge">40 px · canónico</span>
           </div>
           <div class="compact-action-demo">
             <label class="compact-input-label">Ubicación <input value="Lavandería norte" readonly></label>
@@ -112,7 +176,7 @@
             <button class="nfc-modal-action nfc-modal-action--cancel" type="button">Cancelar</button>
             <button class="nfc-modal-action nfc-modal-action--confirm" type="button">Confirmar</button>
           </div>
-          <p class="sample-note">Aquí la base sí fija un mínimo de 2.35 rem (≈ 38 px). El color de confirmar cambia según la operación: rojo, gris o verde.</p>
+          <p class="sample-note sample-note--decision"><strong>Contrato aplicado:</strong> Cancelar y Confirmar consumen el mismo token estándar de 40 px que textboxes, selects y botones ordinarios. El color de Confirmar sigue dependiendo de la operación: rojo, gris o verde.</p>
         </article>
 
         <article id="action-color" class="demo-panel demo-panel--wide">
@@ -215,7 +279,7 @@
             <small><strong>40 px</strong><span>Contacto, Laundry, soporte, tareas, ayuda y control panel</span></small>
           </div>
         </div>
-        <p class="sample-note sample-note--decision"><strong>Contrato aplicado:</strong> todos los selects inventariados consumen <code>--ut-select-height</code> de 40 px. La edición compacta de aproximadamente 26 px permanece intacta y sigue fuera del contrato estándar. Las tarjetas de máquinas del dashboard continúan fuera de alcance.</p>
+        <p class="sample-note sample-note--decision"><strong>Contrato aplicado:</strong> los 44 selects inventariados comparten un triángulo relleno de 10 × 6 px, centrado y situado a 12 px del borde derecho. Los selects estándar consumen <code>--ut-select-height</code> de 40 px; la edición compacta de aproximadamente 26 px conserva su altura. Las tarjetas de máquinas del dashboard continúan fuera de alcance.</p>
       </article>
 
       <article class="demo-panel demo-panel--wide checkbox-atlas-panel">
@@ -359,6 +423,7 @@
             <div class="state-sample state-sample--danger"><span>Danger</span><strong>Incidencia</strong></div>
             <div class="state-sample state-sample--accent"><span>Accent</span><strong>Perfil</strong></div>
           </div>
+          <p class="sample-note sample-note--decision"><strong>Contrato aplicado:</strong> Warning / Revisar usa <code>--ut-status-warning</code>, el mismo naranja <code>#f97316</code> de los indicadores de incidencia del dashboard.</p>
         </article>
       </div>
     </section>

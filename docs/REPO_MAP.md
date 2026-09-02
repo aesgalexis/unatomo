@@ -53,7 +53,9 @@ relevant sections instead of loading the complete file by default.
 - `static/css/dashboard.css`: dashboard stylesheet manifest.
 - `static/css/dashboard/`: split dashboard styles by feature.
 - `static/css/tokens/unatomo-control-sizes.css`: canonical shared measurements,
-  currently the 40 px single-line textbox height.
+  including control heights, select indicators, checkboxes and switches.
+- `static/css/tokens/unatomo-semantic-colors.css`: cross-profile semantic status
+  colors, beginning with the canonical orange warning/incident role.
 - `static/css/themes/unatomo-core-dark.css`: shared semantic dark palette used
   by Core dark and Studio without coupling their layouts.
 - `static/css/qr-print.css`: QR print layout and print CSS.

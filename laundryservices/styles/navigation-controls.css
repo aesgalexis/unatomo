@@ -120,12 +120,16 @@
 
 a.btn-pill,
 button.btn-pill {
+  box-sizing: border-box;
+  min-height: var(--ut-button-height-standard);
   margin-top: 0;
-  padding: 0.6rem 1.25rem;
-  border-radius: 999px;
+  padding: 0 var(--ut-button-padding-inline);
+  border-radius: var(--ut-button-radius-standard);
   border: 1px solid transparent;
   font: inherit;
-  font-size: 0.95rem;
+  font-size: var(--ut-button-font-size-standard);
+  font-weight: var(--ut-button-font-weight-standard);
+  line-height: var(--ut-button-line-height-standard);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -183,7 +187,7 @@ button.btn-pill:focus-visible,
 .icon-button {
   margin: 0;
   width: 44px;
-  height: 36px;
+  height: var(--ut-button-height-utility);
   padding: 0;
   border-radius: 0.75rem;
   border: 1px solid var(--border-subtle);

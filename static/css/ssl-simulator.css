@@ -956,7 +956,7 @@ input[type="range"] {
   .unused-machines-toggle {
     display: block;
     width: 100%;
-    min-height: 42px;
+    min-height: var(--ut-button-height-standard);
     margin: -4px 0 12px;
     border: 1px dashed #b8c8dc;
     border-radius: 8px;

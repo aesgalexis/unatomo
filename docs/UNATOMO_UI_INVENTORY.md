@@ -143,8 +143,10 @@ Total in scope: **44 authoring points** — 26 static HTML instances and 18
 JavaScript constructions. Standard selects now consume `--ut-select-height`,
 an alias of the shared 40 px `--ut-control-height-standard` token. The compact
 approximately 26 px recipe remains unchanged, as do all selectors inside NFC
-dashboard machine cards. The isolated showroom represents the resulting two
-approved heights.
+dashboard machine cards. All 44 in-scope selects now share the same filled
+10 × 6 px triangle, vertically centered at 12 px from the right edge through
+the shared indicator, size, offset and padding tokens. The isolated showroom
+represents the resulting two approved heights and their common indicator.
 
 ## Checkbox Inventory
 
@@ -175,32 +177,52 @@ families are represented in the isolated showroom.
 
 ### Ordinary action buttons
 
-| Family/pattern | Authored geometry | Shape | Typography | Notes |
-| --- | --- | --- | --- | --- |
-| Core `.btn-pill` | padding `0.6rem 1.25rem` | pill | `0.95rem`, inherited weight | No explicit external height |
-| Core `.btn-primary` | padding `0.6rem 1.25rem` | `0.75rem` radius | `0.95rem` | Green action variant |
-| Corporate `.btn-pill` | padding `0.6rem 1.25rem` | pill | `0.95rem` | Legacy class retained; contact submit migrated |
-| Laundry `.btn-pill` | padding `0.6rem 1.25rem` | pill | `0.95rem` | Legacy class retained; contact submit migrated |
-| Studio `.studio-button` | padding `0.6rem 1.25rem` | pill | `0.95rem` | Legacy class retained; contact submit migrated |
-| NFC public `.landing-button` | min-height 42 px, padding `0.68rem 1.1rem` | `0.75rem` radius | `0.95rem`, weight 650 | Landing-specific action density |
-| NFC onboarding submit | min-height 50 px, padding `0.75rem 1rem` | `0.8rem` radius | `0.9rem`, weight 680 | Large workflow action |
+Ordinary text actions now share one authored base through tokens in
+`static/css/tokens/unatomo-control-sizes.css`: 40 px minimum height,
+`1.25rem` inline padding, `0.95rem` type, weight 400 and normal line-height.
+Shape has two contextual tokens: a pill for public or standalone calls to
+action, and a 12 px radius for actions inside the app, beside a field or grouped
+with another button. Color and interaction states remain semantic or
+product-specific.
 
-The 16 localized contact experiences now use the same canonical submit
+| Authored recipe | Covered context | Geometry status |
+| --- | --- | --- |
+| Shared `.ut-button` | Contact submits | Canonical |
+| Core `.btn-pill` in `styles.css` | Main landing actions | Tokenized |
+| Core `.btn-primary` / `.btn-secondary` | NFC auth and public detail action | Contextual radius tokenized |
+| Corporate `.btn-pill` in `landing/ld_about.css` | Localized corporate pages | Tokenized |
+| Laundry `.btn-pill` | Service and spare-parts flows | Pill standalone; 12 px in grouped flows |
+| Studio `.studio-button` | Studio landing calls to action | Tokenized |
+| NFC public `.landing-button` | Registration and access flows | Pill standalone; 12 px beside fields |
+| NFC `.onboarding-submit` | Dashboard onboarding | 12 px app action |
+| Laundry `.catalog-button` | Catalog administration | 12 px grouped/admin action |
+| Laundry `.upload-button` | Spare-parts image upload | Transparent standalone pill |
+| NFC `.profile-save-btn` | Profile and owner settings | 12 px app action |
+| NFC dashboard `.btn-save` | Todo and suggestions submits | 12 px app action |
+
+The 16 localized contact experiences use the same canonical submit
 component: `.ut-button.ut-button--primary` inside `.ut-form-actions`. There are
 14 public contact routes plus the shared NFC dashboard support form rendered
 in Spanish and English. The authored contract is 40 px high, pill-shaped,
 `0.95rem`, weight 400 and centered inside a `5.5rem` action row.
 
-The remaining rows describe legacy or non-contact button families. Their
-repeated `0.6rem 1.25rem` and `0.95rem` values remain evidence for a future
-ordinary-button migration, but they are not implicitly covered by the contact
-submit contract.
+The ordinary-button scope deliberately excludes icon-only controls, navigation,
+menus, option rows, disclosure toggles, dense utilities, segmented controls and
+the separate NFC decision-action families. In particular, the SSL simulator's
+mobile unused-machine toggle is a disclosure control, not an ordinary action.
 
-Color is a theme or semantic role decision and is separated from size. Green
+The canonical button-height scale is now 32, 36 and 40 px through compact,
+utility and standard tokens. Four authored 42 px recipes and the sole 50 px
+submit recipe now consume the 40 px standard token. Geometry roles remain
+separate from color: at 40 px the current system supports canonical green
+primary actions and neutral light or transparent secondary actions.
+
+Color is a theme or semantic role decision and remains separated from geometry. Green
 action buttons share `--ut-action-primary`, `--ut-action-primary-hover` and
 `--ut-action-primary-active` across Core, NFC, Laundry and Studio. All contact
-submits consume that family; non-interactive success/status greens remain
-separate.
+submits, catalog validation and suggestion submission consume that family;
+non-interactive success/status greens remain separate. Spare-parts image upload
+and public NFC registration are transparent secondary actions.
 
 ### NFC dashboard decision actions
 
@@ -210,12 +232,12 @@ families:
 | Context | Classes | Authored geometry | Semantic treatment |
 | --- | --- | --- | --- |
 | Dense inline editing | `.mc-location-accept`, `.mc-location-cancel` | automatic height, `0.15rem 0.4rem` padding, `0.5rem` radius | both visually neutral |
-| Modal decisions | `.status-incident-cancel`, `.status-incident-confirm` | `2.35rem` minimum height, `0.45rem 0.85rem` padding, `0.65rem` radius | cancel neutral; confirm red, gray or green by operation |
+| Modal decisions | `.status-incident-cancel`, `.status-incident-confirm` | 40 px minimum through the standard token, `0.45rem 0.85rem` padding, `0.65rem` radius | cancel neutral; confirm red, gray or green by operation |
 
 The dense pair is reused beyond location editing for user, PIN, transfer and
 invitation workflows. Its small size is therefore a real dashboard pattern,
-not a one-off typo. Neither family should be normalized until its layout and
-touch-context constraints have been reviewed in place.
+not a one-off typo. Modal decisions now join the 40 px standard control family;
+the dense inline pair remains separate until reviewed in place.
 
 ### Shared back and top controls
 
@@ -284,22 +306,21 @@ These should not become one universal `--container-width`. A likely future
 contract will name them by purpose, for example narrow form, standard content
 and editorial content. Names and values remain open until visual review.
 
-## Protected NFC Notes
+## NFC Density Notes
 
-This inventory does not propose changing NFC. NFC contains several legitimate
-density contexts even before the dashboard is considered:
+NFC retains several legitimate density contexts even after the current
+standardization:
 
 - 32 px public-header controls;
 - 40 px onboarding fields and steppers;
-- 42 px public landing actions;
-- 44 px general `.field` controls;
-- 50 px onboarding submit action;
+- 40 px public landing actions;
+- 40 px standard `.field` controls;
+- 40 px onboarding submit action;
 - dense dashboard controls adjusted within feature layouts.
 
-A single global control height would erase these distinctions. The deeper
-standard should instead define a small, named size scale and document which
-contexts use each size. Existing NFC measurements can later be mapped to that
-scale through compatibility aliases without changing their pixels.
+The standard therefore uses a small named size scale rather than forcing every
+control into one height. Dense dashboard actions and icon-only controls remain
+separate review contexts.
 
 ## Candidate Decisions for Review
 
@@ -313,16 +334,14 @@ These are the best-supported first decisions, but they remain Candidate:
    default.
 5. Define shared label, consent and form-gap tokens from the already converged
    contact implementations.
-6. Separate button geometry from semantic color and product theme.
-7. Define named narrow, standard and editorial container roles instead of one
+6. Define named narrow, standard and editorial container roles instead of one
    universal maximum width.
-8. Model control sizing as several named densities, not one forced height.
+7. Model control sizing as several named densities, not one forced height.
 
 ## Decisions Still Requiring Visual Evidence
 
 - whether the standard contact form should be 600 px or 800 px;
 - whether contact forms should use auto-fit or an explicit two-column layout;
-- the exact rendered height and line-height of the ordinary button;
 - compact versus ordinary utility-control heights;
 - the canonical focus treatment across light and dark profiles;
 - whether foreground-colored contact submits should eventually join the green
@@ -331,11 +350,31 @@ These are the best-supported first decisions, but they remain Candidate:
 - which values are genuine NFC exceptions versus candidates for future
   compatibility mapping.
 
+## Current Standardization Backlog
+
+This is the living list for reducing the remaining style debt:
+
+- [x] Ordinary action buttons: one shared base across all 12 authored recipes,
+  with pill and 12 px radii selected by composition; semantic color remains
+  contextual.
+- [ ] Dense NFC `Aceptar` / `Cancelar`: decide whether to retain or promote to
+  a named compact decision family, and correct its showroom evidence badge.
+- [ ] Checkbox taxonomy: reduce the remaining native, standard and semantic
+  families without erasing meaningful behavior.
+- [ ] Textareas, labels and internal form spacing: inventory, choose and migrate
+  common contracts.
+- [ ] Typography and spacing: move the documented scale from showroom evidence
+  into shared production tokens where repetition supports it.
+- [ ] Semantic colors: continue sharing success, danger, accent, canvas and
+  surface roles across products.
+- [ ] Explicit exceptions: document the 26 px compact controls and the dense
+  machine-card/dashboard controls that should not inherit ordinary sizing.
+
 ## Next Inventory Slice
 
 The foundations pass is complete in
 `docs/UNATOMO_UI_FOUNDATIONS_INVENTORY.md`. It covers typography, spacing,
 shape, controls, containers, responsive boundaries, color, elevation, motion
-and focus behavior. The next step is candidate review rather than another
-global measurement pass. No tokens should be implemented until selected
-candidates are approved.
+and focus behavior. Continue through the backlog one bounded component family
+at a time, applying shared tokens only after its scope and exceptions are
+agreed.

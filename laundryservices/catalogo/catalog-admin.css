@@ -168,14 +168,17 @@
 }
 
 .catalog-button {
-  min-height: 42px;
-  padding: 0.6rem 0.95rem;
+  box-sizing: border-box;
+  min-height: var(--ut-button-height-standard);
+  padding: 0 var(--ut-button-padding-inline);
   border: 1px solid color-mix(in srgb, var(--fg) 18%, transparent);
-  border-radius: 999px;
+  border-radius: var(--ut-button-radius-inline);
   background: var(--panel-bg);
   color: var(--fg);
   font: inherit;
-  font-weight: 700;
+  font-size: var(--ut-button-font-size-standard);
+  font-weight: var(--ut-button-font-weight-standard);
+  line-height: var(--ut-button-line-height-standard);
   cursor: pointer;
 }
 
@@ -193,6 +196,24 @@
 .catalog-button--primary:hover:not(:disabled) {
   background: var(--accent-strong);
   color: #fff;
+}
+
+#validate-button {
+  border-color: var(--ut-action-primary);
+  background: var(--ut-action-primary);
+  color: #fff;
+}
+
+#validate-button:hover:not(:disabled),
+#validate-button:focus-visible {
+  border-color: var(--ut-action-primary-hover);
+  background: var(--ut-action-primary-hover);
+  color: #fff;
+}
+
+#validate-button:active:not(:disabled) {
+  border-color: var(--ut-action-primary-active);
+  background: var(--ut-action-primary-active);
 }
 
 .catalog-button:disabled {

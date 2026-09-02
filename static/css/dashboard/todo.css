@@ -135,11 +135,11 @@
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
-  padding-right: 1.7rem;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%239CA3AF' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 7 5 5 5-5'/%3E%3C/svg%3E");
+  padding-right: var(--ut-select-padding-inline-end);
+  background-image: var(--ut-select-indicator-image);
   background-repeat: no-repeat;
-  background-position: right 0.65rem center;
-  background-size: 0.85rem 0.85rem;
+  background-position: right var(--ut-select-indicator-offset) center;
+  background-size: var(--ut-select-indicator-size);
 }
 .todo-submit.machine-task-create-submit {
   display: inline-flex;
@@ -278,7 +278,13 @@
   box-sizing: border-box;
   height: var(--ut-select-height);
   min-height: var(--ut-select-height);
-  padding-right: 1.8rem;
+  padding-right: var(--ut-select-padding-inline-end);
+  background-image: var(--ut-select-indicator-image);
+  background-position: right var(--ut-select-indicator-offset) center;
+  background-repeat: no-repeat;
+  background-size: var(--ut-select-indicator-size);
+  appearance: none;
+  -webkit-appearance: none;
 }
 
 .task-create-dialog .machine-task-create-submit {

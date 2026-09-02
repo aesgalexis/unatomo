@@ -1,5 +1,6 @@
 @import url("/static/css/tokens/unatomo-action-colors.css");
 @import url("/static/css/tokens/unatomo-control-sizes.css");
+@import url("/static/css/tokens/unatomo-semantic-colors.css");
 @import url("/static/css/themes/unatomo-core-dark.css");
 
 :root {
@@ -53,7 +54,7 @@
   --ut-color-action-text: #ffffff;
   --ut-color-action-hover: var(--ut-action-primary-hover);
   --ut-color-success: #16834b;
-  --ut-color-warning: #b86a00;
+  --ut-color-warning: var(--ut-status-warning);
   --ut-color-danger: #dc2626;
   --ut-color-focus: #111111;
   --ut-color-accent: #2563eb;
@@ -75,7 +76,7 @@
   --ut-color-action-text: #ffffff;
   --ut-color-action-hover: var(--ut-action-primary-hover);
   --ut-color-success: var(--ut-core-dark-success);
-  --ut-color-warning: var(--ut-core-dark-warning);
+  --ut-color-warning: var(--ut-status-warning);
   --ut-color-danger: var(--ut-core-dark-danger);
   --ut-color-focus: var(--ut-core-dark-focus);
   --ut-color-accent: var(--ut-core-dark-accent);
@@ -96,7 +97,7 @@
   --ut-color-action-text: #ffffff;
   --ut-color-action-hover: var(--ut-action-primary-hover);
   --ut-color-success: #16834b;
-  --ut-color-warning: #b86a00;
+  --ut-color-warning: var(--ut-status-warning);
   --ut-color-danger: #dc2626;
   --ut-color-focus: #111111;
   --ut-color-accent: #2563eb;

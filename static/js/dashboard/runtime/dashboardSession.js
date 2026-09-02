@@ -1,3 +1,5 @@
+import { normalizeDashboardTitle } from "../layout/dashboardLayoutModel.mjs";
+
 export const createDashboardSession = (dependencies) => {
   const {
     applyDashboardTitle,
@@ -12,7 +14,6 @@ export const createDashboardSession = (dependencies) => {
     getActiveDashboardUid,
     getDashboardSessionVersion,
     getDashboardSubscriptions,
-    initDashboardTitleEditor,
     loadSuggestions,
     loadTodoCollaborators,
     loadTodos,
@@ -37,7 +38,7 @@ export const createDashboardSession = (dependencies) => {
     upsertDashboardLayout,
     withTimeout,
   } = dependencies;
-  const initDashboard = async (uid, user, sessionVersion) => {
+  const initDashboard = async (uid, user, sessionVersion, profile = null) => {
     const isActiveSession = () =>
       getActiveDashboardUid() === uid &&
       getDashboardSessionVersion() === sessionVersion;
@@ -79,6 +80,13 @@ export const createDashboardSession = (dependencies) => {
       };
     }
     if (!isActiveSession()) return;
+    const companyTitle = normalizeDashboardTitle(
+      profile?.company || profile?.companyName || ""
+    );
+    if (state.dashboardLayout.dashboardTitle !== companyTitle) {
+      state.dashboardLayout.dashboardTitle = companyTitle;
+      upsertDashboardLayout(uid, { dashboardTitle: companyTitle }).catch(() => {});
+    }
     if (!state.dashboardLayout.registrySeenAt) {
       state.dashboardLayout.registrySeenAt = new Date().toISOString();
       upsertDashboardLayout(uid, {
@@ -99,7 +107,6 @@ export const createDashboardSession = (dependencies) => {
     subscriptions.subscribeNotifications(uid);
     dependencies.renderInviteBanner();
     applyDashboardTitle();
-    initDashboardTitleEditor();
     loadSuggestions({ preserveScroll: false });
     loadTodos({ preserveScroll: false });
     loadTodoCollaborators();

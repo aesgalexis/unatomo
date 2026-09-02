@@ -49,7 +49,7 @@ body.studio-home-page > main { position: relative; z-index: 1; }
 .studio-topbar-divider { color: color-mix(in srgb, var(--fg) 42%, transparent); }
 
 .utility-controls { height: 100%; display: flex; align-items: center; gap: 0.5rem; }
-.icon-button { width: 44px; height: 36px; margin: 0; padding: 0; border: 1px solid var(--border-subtle); border-radius: 0.75rem; display: inline-flex; align-items: center; justify-content: center; gap: 0.35rem; background: color-mix(in srgb, var(--bg) 80%, transparent); color: var(--fg); font: inherit; font-size: 0.9rem; line-height: 1; box-shadow: none; cursor: pointer; opacity: 0.9; appearance: none; backdrop-filter: blur(8px); }
+.icon-button { width: 44px; height: var(--ut-button-height-utility); margin: 0; padding: 0; border: 1px solid var(--border-subtle); border-radius: 0.75rem; display: inline-flex; align-items: center; justify-content: center; gap: 0.35rem; background: color-mix(in srgb, var(--bg) 80%, transparent); color: var(--fg); font: inherit; font-size: 0.9rem; line-height: 1; box-shadow: none; cursor: pointer; opacity: 0.9; appearance: none; backdrop-filter: blur(8px); }
 #lang-toggle { width: auto; min-width: 66px; padding: 0 0.65rem; justify-content: space-between; gap: 0.5rem; }
 .icon-button:hover,
 .icon-button[aria-expanded="true"] { opacity: 1; border-color: color-mix(in srgb, var(--fg) 32%, transparent); }
@@ -72,7 +72,7 @@ body.studio-home-page > main { position: relative; z-index: 1; }
 .studio-hero h1 { max-width: 760px; margin: 0; color: var(--fg); font-size: clamp(2.75rem, 5.2vw, 4.9rem); font-weight: 560; line-height: 1; letter-spacing: -0.05em; text-wrap: balance; }
 .studio-hero-lead { max-width: 610px; margin: 2rem 0 0; color: var(--studio-muted); font-size: clamp(1.03rem, 1.7vw, 1.22rem); line-height: 1.65; }
 .studio-actions { margin-top: 2rem; display: flex; flex-wrap: wrap; gap: 0.7rem; }
-.studio-button { margin-top: 0; padding: 0.6rem 1.25rem; border: 1px solid var(--fg); border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem; background: var(--fg); color: var(--bg) !important; font: inherit; font-size: 0.95rem; line-height: normal; text-decoration: none; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: transform 0.15s ease, opacity 0.15s ease, background 0.15s ease; }
+.studio-button { box-sizing: border-box; min-height: var(--ut-button-height-standard); margin-top: 0; padding: 0 var(--ut-button-padding-inline); border: 1px solid var(--fg); border-radius: var(--ut-button-radius-standard); display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem; background: var(--fg); color: var(--bg) !important; font: inherit; font-size: var(--ut-button-font-size-standard); font-weight: var(--ut-button-font-weight-standard); line-height: var(--ut-button-line-height-standard); text-decoration: none; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: transform 0.15s ease, opacity 0.15s ease, background 0.15s ease; }
 .studio-button:hover { opacity: 0.92; filter: none; }
 .studio-button:active { transform: translateY(1px); }
 .studio-button:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }

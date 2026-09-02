@@ -59,9 +59,20 @@
   justify-self: center;
   margin-top: 0.25rem;
   min-width: 5.5rem;
-  background: linear-gradient(135deg, var(--ut-action-primary), var(--ut-action-primary-hover));
-  border-color: var(--ut-action-primary-hover);
+  background: var(--ut-action-primary);
+  border-color: var(--ut-action-primary);
   color: #fff;
+}
+
+.suggestions-submit:hover:not(:disabled),
+.suggestions-submit:focus-visible {
+  background: var(--ut-action-primary-hover);
+  border-color: var(--ut-action-primary-hover);
+}
+
+.suggestions-submit:active:not(:disabled) {
+  background: var(--ut-action-primary-active);
+  border-color: var(--ut-action-primary-active);
 }
 
 .suggestions-status {

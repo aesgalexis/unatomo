@@ -76,7 +76,7 @@
 
 .mc-stat-metric.is-success strong { color: #16a34a; }
 .mc-stat-metric.is-danger strong { color: #dc2626; }
-.mc-stat-metric.is-warning strong { color: #f97316; }
+.mc-stat-metric.is-warning strong { color: var(--ut-status-warning); }
 
 .mc-stat-status-bar {
   display: flex;

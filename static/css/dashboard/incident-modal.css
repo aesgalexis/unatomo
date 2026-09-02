@@ -232,8 +232,8 @@
 
 .status-incident-cancel,
 .status-incident-confirm {
-  min-height: 2.35rem;
-  border-radius: 0.65rem;
+  min-height: var(--ut-button-height-standard);
+  border-radius: var(--ut-button-radius-inline);
   padding: 0.45rem 0.85rem;
   font: inherit;
   cursor: pointer;
@@ -296,13 +296,13 @@
   height: auto;
   border-radius: 8px;
   background-color: var(--bg);
-  padding: 5px 1.7rem 5px 0.85rem;
+  padding: 5px var(--ut-select-padding-inline-end) 5px 0.85rem;
   font-size: 12px;
   line-height: 1.2;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%239CA3AF' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 7 5 5 5-5'/%3E%3C/svg%3E");
+  background-image: var(--ut-select-indicator-image);
   background-repeat: no-repeat;
-  background-position: right 0.65rem center;
-  background-size: 0.85rem 0.85rem;
+  background-position: right var(--ut-select-indicator-offset) center;
+  background-size: var(--ut-select-indicator-size);
 }
 
 .gallery-upload-file-box.is-disabled {
@@ -409,7 +409,7 @@
     min-height: 0;
     border-radius: 8px;
     background-color: var(--bg);
-    padding: 5px 1.7rem 5px 0.85rem;
+    padding: 5px var(--ut-select-padding-inline-end) 5px 0.85rem;
     font-size: 12px;
     line-height: 1.2;
   }

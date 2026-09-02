@@ -1,4 +1,5 @@
 @import "/static/css/tokens/unatomo-control-sizes.css";
+@import "/static/css/tokens/unatomo-semantic-colors.css";
 @import "/static/css/effects/inactive_sections/inactive.css";
 @import "/static/css/components/dashboard-section-nav.css";
 @import "/static/css/dashboard/shell.css";

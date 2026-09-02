@@ -84,8 +84,8 @@ body.nfc-landing {
 
 .landing-header-login {
   box-sizing: border-box;
-  height: 32px;
-  min-height: 32px;
+  height: var(--ut-button-height-compact);
+  min-height: var(--ut-button-height-compact);
   padding: 0.45rem 0.75rem;
   border: 1px solid var(--border-subtle);
   border-radius: 0.75rem;
@@ -103,7 +103,7 @@ body.nfc-landing {
 
 .landing-control {
   width: 40px;
-  height: 32px;
+  height: var(--ut-button-height-compact);
   padding: 0;
   border: 1px solid var(--border-subtle);
   border-radius: 0.75rem;
@@ -244,9 +244,11 @@ body.nfc-landing {
 .landing-stat strong { display: block; color: var(--fg); font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 570; line-height: 1; letter-spacing: -0.045em; }
 .landing-stat span { display: block; margin-top: 0.55rem; color: var(--landing-muted); font-size: 0.76rem; line-height: 1.45; }
 .landing-stats-action { min-width: 176px; padding-left: clamp(1rem, 3vw, 1.75rem); border-left: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: flex-end; }
-.landing-button { min-height: 42px; padding: 0.68rem 1.1rem; border: 1px solid transparent; border-radius: 0.75rem; display: inline-flex; align-items: center; justify-content: center; font: inherit; font-size: 0.95rem; font-weight: 650; line-height: 1; text-decoration: none; cursor: pointer; }
+.landing-button { box-sizing: border-box; min-height: var(--ut-button-height-standard); padding: 0 var(--ut-button-padding-inline); border: 1px solid transparent; border-radius: var(--ut-button-radius-standard); display: inline-flex; align-items: center; justify-content: center; font: inherit; font-size: var(--ut-button-font-size-standard); font-weight: var(--ut-button-font-weight-standard); line-height: var(--ut-button-line-height-standard); text-decoration: none; cursor: pointer; }
 .landing-button-primary { border-color: var(--fg); background: var(--fg); color: var(--bg) !important; }
 .landing-button-secondary { border-color: var(--border-subtle); background: transparent; color: var(--fg); }
+#landing-details-toggle { border-radius: var(--ut-button-radius-standalone); }
+.inline-field-row .landing-button { border-radius: var(--ut-button-radius-inline); }
 .landing-details { display: grid; grid-template-rows: 0fr; overflow: hidden; transition: grid-template-rows 240ms ease; }
 .landing-details[hidden] { display: none; }
 .landing-details.is-open { grid-template-rows: 1fr; }

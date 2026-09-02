@@ -442,10 +442,9 @@
 }
 
 .dashboard-group-tree-row:not(.is-machine) .dashboard-group-tree-label {
-  height: 1.05rem;
-  display: flex;
-  align-items: center;
-  line-height: 1.05rem;
+  min-height: 1.2rem;
+  line-height: 1.2rem;
+  padding-bottom: 0.05rem;
 }
 
 .dashboard-group-tree-icon {
@@ -560,7 +559,7 @@
 }
 
 .dashboard-group-tree-badge.is-pending {
-  background: #f97316;
+  background: var(--ut-status-warning);
   color: #fff;
 }
 

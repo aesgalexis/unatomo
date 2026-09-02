@@ -196,6 +196,13 @@
 
 .controlpanel-input.controlpanel-agent-role-select {
   height: var(--ut-select-height);
+  padding-right: var(--ut-select-padding-inline-end);
+  background-image: var(--ut-select-indicator-image);
+  background-position: right var(--ut-select-indicator-offset) center;
+  background-repeat: no-repeat;
+  background-size: var(--ut-select-indicator-size);
+  appearance: none;
+  -webkit-appearance: none;
 }
 
 .controlpanel-agent-row {

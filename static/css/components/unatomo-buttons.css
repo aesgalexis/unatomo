@@ -1,19 +1,19 @@
 .ut-button {
   box-sizing: border-box;
-  height: 2.5rem;
+  height: var(--ut-button-height-standard);
   margin: 0;
-  padding: 0 1.25rem;
+  padding: 0 var(--ut-button-padding-inline);
   border: 1px solid transparent;
-  border-radius: 999px;
+  border-radius: var(--ut-button-radius-standard);
   appearance: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.4rem;
   font: inherit;
-  font-size: 0.95rem;
-  font-weight: 400;
-  line-height: normal;
+  font-size: var(--ut-button-font-size-standard);
+  font-weight: var(--ut-button-font-weight-standard);
+  line-height: var(--ut-button-line-height-standard);
   text-decoration: none;
   white-space: nowrap;
   cursor: pointer;

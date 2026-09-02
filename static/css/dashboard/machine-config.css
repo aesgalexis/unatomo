@@ -479,7 +479,7 @@
 }
 
 .mc-admin-status {
-  color: #f97316;
+  color: var(--ut-status-warning);
   min-height: 1.15rem;
   margin-top: -0.05rem;
 }
@@ -489,7 +489,7 @@
 }
 
 .mc-admin-status[data-state="pending"] {
-  color: #f97316;
+  color: var(--ut-status-warning);
 }
 
 .mc-admin-status[data-state="accepted"] {

@@ -59,6 +59,73 @@ const resolveInviteeIdentity = async (value: string) => {
   };
 };
 
+const getAdminAssignmentState = async (
+  machineId: string,
+  inviteId: string,
+  adminEmailLower: string,
+) => {
+  const [linksSnapshot, invitesSnapshot] = await Promise.all([
+    linksCol().where("machineId", "==", machineId).get(),
+    invitesCol().where("machineId", "==", machineId).get(),
+  ]);
+  const acceptedLinks = linksSnapshot.docs.filter((snapshot) =>
+    snapshot.data()?.status === "accepted",
+  );
+  return {
+    acceptedByTarget: acceptedLinks.some((snapshot) => {
+      const link = snapshot.data() || {};
+      return normalizeEmail(link.adminEmailLower || link.adminEmail || "") ===
+        adminEmailLower;
+    }),
+    hasAcceptedAdministrator: acceptedLinks.length > 0,
+    matchingPending: invitesSnapshot.docs.some((snapshot) =>
+      snapshot.id === inviteId && snapshot.data()?.status === "pending",
+    ),
+    hasOtherPending: invitesSnapshot.docs.some((snapshot) =>
+      snapshot.id !== inviteId && snapshot.data()?.status === "pending",
+    ),
+  };
+};
+
+const persistPendingAdminInvite = async (
+  machineRef: FirebaseFirestore.DocumentReference,
+  inviteRef: FirebaseFirestore.DocumentReference,
+  inviteData: FirebaseFirestore.DocumentData | null,
+  adminEmail: string,
+  adminEmailLower: string,
+  ownerUid: string,
+) => db.runTransaction(async (transaction) => {
+  const currentMachineSnap = await transaction.get(machineRef);
+  if (!currentMachineSnap.exists) {
+    throw new HttpsError("not-found", "machine-not-found");
+  }
+  const currentMachine = currentMachineSnap.data() || {};
+  if (currentMachine.ownerUid !== ownerUid) {
+    throw new HttpsError("permission-denied", "not-owner");
+  }
+  const transferStatus = (currentMachine.ownershipTransferStatus || "")
+    .toString()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+  if (transferStatus.startsWith("pendiente")) {
+    throw new HttpsError("failed-precondition", "ownership-transfer-pending");
+  }
+  const currentAdminEmail = normalizeEmail(currentMachine.adminEmail || "");
+  if (currentAdminEmail && currentAdminEmail !== adminEmailLower) {
+    return false;
+  }
+
+  if (inviteData) {
+    transaction.set(inviteRef, inviteData, {merge: true});
+  }
+  transaction.set(machineRef, {
+    adminEmail,
+    adminStatus: "Pendiente aceptación",
+  }, {merge: true});
+  return true;
+});
+
 export const createAdminInvite = onCall(async (request) => {
   const auth = request.auth;
   if (!auth) throw new HttpsError("unauthenticated", "auth-required");
@@ -92,24 +159,25 @@ export const createAdminInvite = onCall(async (request) => {
     );
   }
 
-  const existingLinks = await linksCol()
-    .where("machineId", "==", machineId)
-    .get();
-  const alreadyAdmin = existingLinks.docs.some((docSnap) => {
-    const link = docSnap.data() || {};
-    return link.status === "accepted" &&
-      normalizeEmail(link.adminEmailLower || link.adminEmail || "") ===
-        adminEmailLower;
-  });
-  if (alreadyAdmin) {
+  const inviteId = `${machineId}_${adminEmailLower}`;
+  const assignment = await getAdminAssignmentState(
+    machineId,
+    inviteId,
+    adminEmailLower,
+  );
+  if (assignment.hasAcceptedAdministrator) {
     throw new HttpsError("failed-precondition", "admin-already-assigned");
   }
+  if (assignment.hasOtherPending) {
+    throw new HttpsError("failed-precondition", "admin-invite-pending");
+  }
 
-  const inviteId = `${machineId}_${adminEmailLower}`;
   const now = admin.firestore.FieldValue.serverTimestamp();
   const ownerEmail = (auth.token.email || machine.ownerEmail || "").toString();
-  await invitesCol().doc(inviteId).set(
-    {
+  const persisted = await persistPendingAdminInvite(
+    machineRef,
+    invitesCol().doc(inviteId),
+    assignment.matchingPending ? null : {
       ownerUid: auth.uid,
       ownerEmail,
       machineId,
@@ -122,16 +190,13 @@ export const createAdminInvite = onCall(async (request) => {
       createdAt: now,
       updatedAt: now,
     },
-    {merge: true},
+    invitee.adminEmail,
+    adminEmailLower,
+    auth.uid,
   );
-
-  await machineRef.set(
-    {
-      adminEmail: invitee.adminEmail,
-      adminStatus: "Pendiente aceptación",
-    },
-    {merge: true},
-  );
+  if (!persisted) {
+    throw new HttpsError("failed-precondition", "admin-invite-pending");
+  }
 
   const recipient = await getEmailRecipient(
     invitee.adminEmail,
@@ -148,7 +213,7 @@ export const createAdminInvite = onCall(async (request) => {
     inviteId,
   });
 
-  return {ok: true, inviteId};
+  return {ok: true, inviteId, alreadyPending: assignment.matchingPending};
 });
 
 export const createGlobalAdminInvites = onCall(async (request) => {
@@ -176,77 +241,88 @@ export const createGlobalAdminInvites = onCall(async (request) => {
     invited: 0,
     alreadyAdmin: 0,
     alreadyPending: 0,
+    blockedAdmin: 0,
     blockedTransfer: 0,
+    failed: 0,
   };
 
   for (const machineSnap of machinesSnap.docs) {
-    const machineId = machineSnap.id;
-    const machine = machineSnap.data() || {};
-    const transferStatus = (machine.ownershipTransferStatus || "")
-      .toString()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase();
-    if (transferStatus.startsWith("pendiente")) {
-      result.blockedTransfer += 1;
-      continue;
+    try {
+      const machineId = machineSnap.id;
+      const machine = machineSnap.data() || {};
+      const transferStatus = (machine.ownershipTransferStatus || "")
+        .toString()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase();
+      if (transferStatus.startsWith("pendiente")) {
+        result.blockedTransfer += 1;
+        continue;
+      }
+
+      const inviteId = `${machineId}_${invitee.adminEmailLower}`;
+      const assignment = await getAdminAssignmentState(
+        machineId,
+        inviteId,
+        invitee.adminEmailLower,
+      );
+      if (assignment.acceptedByTarget) {
+        result.alreadyAdmin += 1;
+        continue;
+      }
+      if (assignment.hasAcceptedAdministrator || assignment.hasOtherPending) {
+        result.blockedAdmin += 1;
+        continue;
+      }
+
+      const now = admin.firestore.FieldValue.serverTimestamp();
+      const persisted = await persistPendingAdminInvite(
+        machineSnap.ref,
+        invitesCol().doc(inviteId),
+        assignment.matchingPending ? null : {
+          ownerUid: auth.uid,
+          ownerEmail: ownerEmail || (machine.ownerEmail || "").toString(),
+          machineId,
+          machineTitle: (machine.title || "").toString(),
+          adminEmail: invitee.adminEmail,
+          adminEmailLower: invitee.adminEmailLower,
+          adminUid: invitee.adminUid,
+          adminHandle: invitee.adminHandle,
+          status: "pending",
+          createdAt: now,
+          updatedAt: now,
+        },
+        invitee.adminEmail,
+        invitee.adminEmailLower,
+        auth.uid,
+      );
+      if (!persisted) {
+        result.blockedAdmin += 1;
+        continue;
+      }
+
+      await queueAdminInviteEmail({
+        ownerUid: auth.uid,
+        actorName: (auth.token.name || ownerEmail).toString(),
+        recipientEmail: recipient.email,
+        recipientLanguage: recipient.language,
+        recipientDisplayName: recipient.displayName,
+        machineId,
+        machineName: (machine.title || "").toString(),
+        inviteId,
+      });
+      if (assignment.matchingPending) result.alreadyPending += 1;
+      else result.invited += 1;
+    } catch (error) {
+      console.error("Global administrator invite failed for machine", {
+        machineId: machineSnap.id,
+        error,
+      });
+      result.failed += 1;
     }
-
-    const existingLinks = await linksCol()
-      .where("machineId", "==", machineId)
-      .get();
-    const alreadyAdmin = existingLinks.docs.some((docSnap) => {
-      const link = docSnap.data() || {};
-      return link.status === "accepted" &&
-        normalizeEmail(link.adminEmailLower || link.adminEmail || "") ===
-          invitee.adminEmailLower;
-    });
-    if (alreadyAdmin) {
-      result.alreadyAdmin += 1;
-      continue;
-    }
-
-    const inviteId = `${machineId}_${invitee.adminEmailLower}`;
-    const inviteRef = invitesCol().doc(inviteId);
-    const inviteSnap = await inviteRef.get();
-    if (inviteSnap.data()?.status === "pending") {
-      result.alreadyPending += 1;
-      continue;
-    }
-
-    const now = admin.firestore.FieldValue.serverTimestamp();
-    await inviteRef.set({
-      ownerUid: auth.uid,
-      ownerEmail: ownerEmail || (machine.ownerEmail || "").toString(),
-      machineId,
-      machineTitle: (machine.title || "").toString(),
-      adminEmail: invitee.adminEmail,
-      adminEmailLower: invitee.adminEmailLower,
-      adminUid: invitee.adminUid,
-      adminHandle: invitee.adminHandle,
-      status: "pending",
-      createdAt: now,
-      updatedAt: now,
-    }, {merge: true});
-    await machineSnap.ref.set({
-      adminEmail: invitee.adminEmail,
-      adminStatus: "Pendiente aceptación",
-    }, {merge: true});
-
-    await queueAdminInviteEmail({
-      ownerUid: auth.uid,
-      actorName: (auth.token.name || ownerEmail).toString(),
-      recipientEmail: recipient.email,
-      recipientLanguage: recipient.language,
-      recipientDisplayName: recipient.displayName,
-      machineId,
-      machineName: (machine.title || "").toString(),
-      inviteId,
-    });
-    result.invited += 1;
   }
 
-  return {ok: true, ...result};
+  return {ok: result.failed === 0, ...result};
 });
 
 export const respondAdminInvite = onCall(async (request) => {

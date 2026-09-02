@@ -63,7 +63,7 @@ Current implemented scope:
 
 ## Dashboard Groups
 
-Groups, the editable topbar dashboard title, and the global machine-card tab order are user dashboard layout preferences, not machine data. The layout is stored in Firestore at:
+Groups, the company-derived topbar dashboard title, and the global machine-card tab order are user dashboard layout preferences, not machine data. The layout is stored in Firestore at:
 
 ```text
 dashboard_layout/{uid}
@@ -80,9 +80,10 @@ Current scope:
 - Group headers expose a hover menu for renaming, deleting the group without
   deleting machines, adding a child below levels 0 and 1, and adding a superior
   group when the existing subtree still fits within the depth limit.
-- Side-tree mode exposes a direct `+` action beside `Groups` / `Grupos` for
-  creating a new root group. Child groups continue to be created from each
-  group's contextual menu.
+- Side-tree mode exposes a direct `+` action beside `Groups` / `Grupos`. It
+  creates a child inside the currently selected group when hierarchy depth
+  permits; with no group selected, `All`, or `Ungrouped`, it creates a new root
+  group. Child groups can also be created from each group's contextual menu.
 - Side-tree group rows expose a visibility control on hover or keyboard focus.
   Hiding a group hides the machines assigned to that group and recursively
   applies the same state to its current descendants; mixed descendant states
@@ -104,7 +105,7 @@ Current scope:
   `saveDashboardGroupLayout` callable. Direct client changes to `groups` or
   `placements` are intentionally denied by Firestore rules; this protects the
   hierarchy from tabs running an older dashboard bundle.
-- `dashboardTitle` stores the user's editable dashboard topbar title, capped at 32 characters. Empty value falls back to `Dashboard`.
+- `dashboardTitle` mirrors the account company name for fast dashboard and QR rendering, capped at 32 characters. Accounts without a company use `Dashboard`; account settings are the only editing surface.
 - `tabOrder` stores the global order for machine-card tabs and applies to all machines. It is edited from the Settings/Configuración page preferences card.
 - `machineViewMode` stores whether the dashboard renders saved groups (`grouped`, default) or a flat machine list (`flat`). Flat view never changes group membership or creates groups.
 - `groupPresentationMode` stores how grouped machines are presented. `tree` is

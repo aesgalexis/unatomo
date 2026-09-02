@@ -16,7 +16,7 @@
   --ut-core-dark-atmosphere-deep: #07111f;
   --ut-core-dark-atmosphere-deepest: #04070d;
   --ut-core-dark-success: #16a34a;
-  --ut-core-dark-warning: #f0a63a;
+  --ut-core-dark-warning: var(--ut-status-warning, #f97316);
   --ut-core-dark-danger: #dc2626;
   --ut-core-dark-focus: var(--ut-core-dark-text);
   --ut-core-dark-topbar-background: rgba(4, 7, 13, 0.52);

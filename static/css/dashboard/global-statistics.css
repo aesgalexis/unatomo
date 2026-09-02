@@ -79,7 +79,7 @@
 
 .global-statistics-metric.is-success strong { color: #16a34a; }
 .global-statistics-metric.is-danger strong { color: #dc2626; }
-.global-statistics-metric.is-warning strong { color: #f97316; }
+.global-statistics-metric.is-warning strong { color: var(--ut-status-warning); }
 
 .global-statistics-attention-list {
   display: grid;

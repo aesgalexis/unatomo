@@ -341,15 +341,17 @@
 }
 
 .profile-save-btn {
-  min-height: 2.35rem;
-  padding: 0.45rem 1rem;
+  box-sizing: border-box;
+  min-height: var(--ut-button-height-standard);
+  padding: 0 var(--ut-button-padding-inline);
   border: 1px solid var(--border-subtle);
-  border-radius: 9px;
+  border-radius: var(--ut-button-radius-inline);
   background: var(--fg);
   color: var(--bg);
   font: inherit;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--ut-button-font-size-standard);
+  font-weight: var(--ut-button-font-weight-standard);
+  line-height: var(--ut-button-line-height-standard);
   cursor: pointer;
 }
 

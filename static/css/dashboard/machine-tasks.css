@@ -126,7 +126,7 @@
 }
 
 .task-pending {
-  color: #f97316;
+  color: var(--ut-status-warning);
   font-weight: 600;
   font-size: 0.85rem;
 }

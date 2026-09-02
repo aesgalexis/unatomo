@@ -59,14 +59,14 @@ export const createGroupSectionRenderer = (dependencies) => {
     renderCards({ preserveScroll: true });
   }
 
-  function handleAddChildGroup(group) {
+  function handleAddChildGroup(group, options = {}) {
     if (
       !group?.id ||
       !canDashboardGroupHaveChildren(state.dashboardLayout?.groups || [], group.id)
-    ) return;
+    ) return "";
     const suggestedTitle = getNextGroupTitle();
     const title = window.prompt(t("dashboard.addGroupPrompt", "Nombre del grupo"), suggestedTitle);
-    if (title === null) return;
+    if (title === null) return "";
     const cleanTitle = (title || "").trim() || suggestedTitle;
     const newGroupId = createDashboardGroupId();
     state.dashboardLayout = normalizeDashboardLayout(state.dashboardLayout);
@@ -75,8 +75,17 @@ export const createGroupSectionRenderer = (dependencies) => {
       title: cleanTitle
     }).layout;
     locallyVisibleEmptyGroupIds.add(newGroupId);
+    if (options.selectNew === true) {
+      state.expandedTreeGroupIds = Array.from(new Set([
+        ...(state.expandedTreeGroupIds || []),
+        group.id
+      ]));
+      state.selectedTreeGroupId = newGroupId;
+      state.selectedTreeMachineId = "";
+    }
     saveDashboardLayout();
     renderCards({ preserveScroll: true });
+    return newGroupId;
   }
 
   function handleAddRootGroup() {
@@ -93,6 +102,29 @@ export const createGroupSectionRenderer = (dependencies) => {
     locallyVisibleEmptyGroupIds.add(newGroupId);
     saveDashboardLayout();
     renderCards({ preserveScroll: true });
+  }
+
+  function handleTreeCreateGroup() {
+    const selectedGroup = (state.dashboardLayout?.groups || []).find(
+      (group) =>
+        !state.selectedTreeMachineId &&
+        group.id === state.selectedTreeGroupId
+    );
+    if (!selectedGroup) {
+      handleAddRootGroup();
+      return;
+    }
+    if (!canDashboardGroupHaveChildren(
+      state.dashboardLayout?.groups || [],
+      selectedGroup.id
+    )) {
+      window.alert(t(
+        "dashboard.groupMaxDepth",
+        "Este grupo ya ha alcanzado la profundidad máxima."
+      ));
+      return;
+    }
+    handleAddChildGroup(selectedGroup, { selectNew: true });
   }
 
   function handleAddParentGroup(group) {
@@ -309,5 +341,10 @@ export const createGroupSectionRenderer = (dependencies) => {
     return { section, body };
   };
 
-  return { createGroupSection, getGroupMenuActions, handleAddRootGroup };
+  return {
+    createGroupSection,
+    getGroupMenuActions,
+    handleAddRootGroup,
+    handleTreeCreateGroup
+  };
 };

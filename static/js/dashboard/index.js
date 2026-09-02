@@ -150,15 +150,9 @@ if (mount) {
   const statusLabels = createDashboardStatusLabels(t);
   const dashboardTitleController = createDashboardTitleController({
     state,
-    t,
-    attachTooltip: attachDashboardTooltip,
-    normalizeLayout: (layout) => normalizeDashboardLayout(layout),
-    persistTitle: (uid, dashboardTitle) =>
-      upsertDashboardLayout(uid, { dashboardTitle }),
-    updateSaveState: (message) => updateSaveState(message)
+    t
   });
   const applyDashboardTitle = dashboardTitleController.apply;
-  const initDashboardTitleEditor = dashboardTitleController.initEditor;
 
 
   const normalizeLocation = (value) =>
@@ -556,7 +550,11 @@ if (mount) {
     updateMachine,
     updateTagStatusUI
   } = dashboardMachines;
-  const { createGroupSection, getGroupMenuActions, handleAddRootGroup } = createGroupSectionRenderer({
+  const {
+    createGroupSection,
+    getGroupMenuActions,
+    handleTreeCreateGroup
+  } = createGroupSectionRenderer({
     canDashboardGroupHaveChildren,
     canWrapGroupWithParent,
     clearInitialGroupPriorityOrder,
@@ -602,7 +600,7 @@ if (mount) {
     moveGroupToRoot: (draggedGroupId) => moveGroupToRootLevel(draggedGroupId),
     moveMachineToGroup: (machineId, groupId) => moveMachineToGroup(machineId, groupId),
     normalizeStatus,
-    onCreateGroup: handleAddRootGroup,
+    onCreateGroup: handleTreeCreateGroup,
     onScopeChange: () => {
       if (state.activeView === "registro") {
         state.registryVisibleCount = GLOBAL_REGISTRY_PAGE_SIZE;
@@ -816,7 +814,6 @@ if (mount) {
     fetchLegacyMachines,
     fetchMachines,
     getDashboardSubscriptions,
-    initDashboardTitleEditor,
     loadSuggestions,
     loadTodoCollaborators,
     loadTodos,

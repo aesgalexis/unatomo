@@ -85,11 +85,16 @@ One bounded measurement is now Canonical:
 
 ```css
 --ut-textbox-height: 2.5rem; /* 40px */
+--ut-select-height: 2.5rem; /* 40px */
+--ut-button-height-compact: 2rem; /* 32px */
+--ut-button-height-utility: 2.25rem; /* 36px */
+--ut-button-height-standard: 2.5rem; /* 40px */
 ```
 
-It applies only to the approved single-line input scope. Compact dashboard
-editing remains an exception, and selects, textareas and other control types
-remain separate decisions.
+The 40 px field measurement applies to the approved single-line input and
+standard-select scopes. Compact dashboard editing remains an exception.
+Buttons now have a separate three-step 32/36/40 px height scale; textareas and
+other multiline controls remain separate decisions.
 
 Before the textbox adoption, the visual inventory showed that the earlier
 36/44/50 px proposal described particular contexts rather than three general
@@ -97,21 +102,21 @@ roles:
 
 - 32 px: NFC public topbar and dense controls;
 - 36 px: Corporate, Laundry and Studio utility controls;
-- 40 px: NFC dashboard actions, onboarding fields and the shared circular
-  `Volver` / `Arriba` navigation;
-- 42 px: NFC public landing actions;
+- 40 px: NFC dashboard actions, onboarding fields and submits, public landing
+  actions, standard text actions and the shared circular `Volver` / `Arriba`
+  navigation;
 - 44 px: the strongest converged contact-field height;
-- 50 px: the NFC onboarding submit action, with no current evidence that it
-  should become a site-wide `prominent` button.
+- the former 42 px landing and 50 px onboarding actions now map to the 40 px
+  standard button token without changing their semantic styling.
 
-NFC also contains text action pairs at two additional densities: compact
-`Aceptar` / `Cancelar` controls with automatic height and modal actions with a
-`2.35rem` minimum height. These are distinct workflow contexts and should be
-recorded before deciding whether either maps to a public size role.
+NFC still contains compact `Aceptar` / `Cancelar` controls with automatic
+height. Modal `Cancelar` / `Confirmar` actions now consume the shared 40 px
+standard button token; only the dense inline pair remains a separate workflow
+context for later review.
 
-The broader control scale remains unresolved. The textbox decision does not
-normalize buttons, selects, multiline controls, checkboxes, switches or
-icon-only touch targets; those remain component-specific until reviewed.
+The broader control scale remains intentionally component-aware. Textareas,
+compact decision pairs and icon-only touch targets remain component-specific
+until reviewed.
 
 ## P-05 to P-07 — Icon, Radius and Border
 
@@ -209,17 +214,20 @@ Recommended first role vocabulary:
 --ut-color-focus
 ```
 
-The first approved raw role is shared across profiles:
+The approved raw action and warning roles are shared across profiles:
 
 ```css
 --ut-action-primary: #2da44e;
 --ut-action-primary-hover: #2c974b;
 --ut-action-primary-active: #26863f;
+--ut-status-warning: #f97316;
 ```
 
 Core light, Core dark, Laundry light and Studio use these same values for
 existing green actions. NFC consumes the same action role while retaining
-separate non-interactive operational success/status colors.
+separate non-interactive operational success/status colors. Warning / Revisar
+now uses the same orange as the dashboard incident indicators in every visual
+profile.
 
 Core dark and Studio additionally share the full semantic theme defined in
 `static/css/themes/unatomo-core-dark.css`. Studio remains a distinct product

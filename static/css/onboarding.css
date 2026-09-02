@@ -41,7 +41,7 @@ body.onboarding-page { min-height: 100svh; margin: 0; background: color-mix(in s
 .equipment-range::-moz-range-thumb { width: 12px; height: 12px; border: 0; border-radius: 50%; background: var(--fg); box-shadow: none; }
 .onboarding-equipment[hidden] { display: none; }
 .onboarding-status { min-height: 1.2em; margin: -.2rem 0 0; color: #b42318; font-size: .78rem; }
-.onboarding-submit { min-height: 50px; padding: .75rem 1rem; border: 1px solid var(--fg); border-radius: .8rem; display: flex; align-items: center; justify-content: center; gap: .65rem; background: var(--fg); color: var(--bg); font: inherit; font-size: .9rem; font-weight: 680; cursor: pointer; }
+.onboarding-submit { box-sizing: border-box; min-height: var(--ut-button-height-standard); padding: 0 var(--ut-button-padding-inline); border: 1px solid var(--fg); border-radius: var(--ut-button-radius-inline); display: flex; align-items: center; justify-content: center; gap: .65rem; background: var(--fg); color: var(--bg); font: inherit; font-size: var(--ut-button-font-size-standard); font-weight: var(--ut-button-font-weight-standard); line-height: var(--ut-button-line-height-standard); cursor: pointer; }
 .onboarding-submit:hover { opacity: .88; }
 .onboarding-submit:disabled { opacity: .45; cursor: wait; }
 .onboarding-creating { padding: 0 2rem 2.4rem; text-align: center; }

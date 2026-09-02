@@ -32,6 +32,7 @@ import { fetchLinksForAdmin } from "/static/js/dashboard/admin/adminLinksRepo.js
 import { createGlobalAdminInvites } from "/static/js/dashboard/admin/adminFunctionsRepo.js";
 import { upsertAccountDirectory } from "/static/js/dashboard/admin/accountDirectoryRepo.js";
 import { fetchDashboardLayout, upsertDashboardLayout } from "/static/js/dashboard/firestoreRepo.js";
+import { normalizeDashboardTitle } from "/static/js/dashboard/layout/dashboardLayoutModel.mjs";
 import { setTopbarNotifications } from "/static/js/notifications/topbar-notifications.js";
 import {
   fetchNotificationPreferences,
@@ -42,6 +43,7 @@ import {
   setTopbarLogoLoading
 } from "/static/js/topbar/loading-logo.js";
 import { setTopbarSaveStatus } from "/static/js/topbar/save-status.js";
+import { getCurrentTheme, setTheme } from "/static/js/theme/theme-toggle.js";
 import { isControlPanelUser } from "/nfc/controlpanel/access.js";
 import { calculateStorageUsage, formatBytes, STORAGE_LIMIT_BYTES } from "./storageUsage.js";
 import {
@@ -103,10 +105,10 @@ const textMap = {
   assignGlobalAdministrator: isEn ? "Send invitations" : "Enviar invitaciones",
   globalAdministratorSaving: isEn ? "Sending invitations…" : "Enviando invitaciones…",
   globalAdministratorResult: isEn
-    ? ({ invited, alreadyAdmin, alreadyPending, blockedTransfer }) =>
-      `${invited} sent · ${alreadyAdmin} already assigned · ${alreadyPending} already pending${blockedTransfer ? ` · ${blockedTransfer} blocked by ownership transfer` : ""}`
-    : ({ invited, alreadyAdmin, alreadyPending, blockedTransfer }) =>
-      `${invited} enviadas · ${alreadyAdmin} ya asignados · ${alreadyPending} ya pendientes${blockedTransfer ? ` · ${blockedTransfer} bloqueados por transferencia de propiedad` : ""}`,
+    ? ({ invited = 0, alreadyAdmin = 0, alreadyPending = 0, blockedAdmin = 0, blockedTransfer = 0, failed = 0 }) =>
+      `${invited} sent · ${alreadyAdmin} already assigned · ${alreadyPending} pending requeued${blockedAdmin ? ` · ${blockedAdmin} blocked by another administrator` : ""}${blockedTransfer ? ` · ${blockedTransfer} blocked by ownership transfer` : ""}${failed ? ` · ${failed} failed` : ""}`
+    : ({ invited = 0, alreadyAdmin = 0, alreadyPending = 0, blockedAdmin = 0, blockedTransfer = 0, failed = 0 }) =>
+      `${invited} enviadas · ${alreadyAdmin} ya asignados · ${alreadyPending} pendientes reencoladas${blockedAdmin ? ` · ${blockedAdmin} bloqueados por otro administrador` : ""}${blockedTransfer ? ` · ${blockedTransfer} bloqueados por transferencia de propiedad` : ""}${failed ? ` · ${failed} fallidos` : ""}`,
   globalAdministratorError: isEn
     ? "Invitations could not be sent. Check the account and try again."
     : "No se pudieron enviar las invitaciones. Comprueba la cuenta e inténtalo de nuevo.",
@@ -1205,7 +1207,7 @@ if (mount) {
         refreshAccountSave();
       };
       handleInput.addEventListener("input", () => {
-        handleTouched = true;
+        if (document.activeElement === handleInput) handleTouched = true;
         handleInput.value = normalizeAccountHandle(handleInput.value)
           .replace(/[^a-z0-9._-]/g, "")
           .slice(0, 30);
@@ -1238,6 +1240,7 @@ if (mount) {
         accountSave.disabled = true;
         setTopbarSaveStatus(textMap.saving);
         if (accountSaveStatus) accountSaveStatus.textContent = "";
+        let companySaved = false;
         try {
           if (nextName !== savedName) {
             await updateProfile(user, { displayName: nextName });
@@ -1249,8 +1252,13 @@ if (mount) {
               { company: nextCompany, updatedAt: serverTimestamp() },
               { merge: true }
             );
+            const dashboardTitle = normalizeDashboardTitle(nextCompany);
+            await upsertDashboardLayout(user.uid, { dashboardTitle }).catch((error) => {
+              console.warn("Dashboard title sync failed after company save", error);
+            });
             profile = { ...profile, company: nextCompany };
             savedCompany = nextCompany;
+            companySaved = true;
           }
           if (handleChanged) {
             setHandleStatus(textMap.accountHandleSaving);
@@ -1263,7 +1271,9 @@ if (mount) {
             handleTouched = false;
             setHandleStatus("");
           }
-          await upsertAccountDirectory({ ...user, company: nextCompany });
+          await upsertAccountDirectory({ ...user, company: nextCompany }).catch((error) => {
+            console.warn("Account directory sync failed after profile save", error);
+          });
           if (accountSaveStatus) accountSaveStatus.textContent = textMap.saved;
         } catch (error) {
           const message = (error?.message || "").toString();
@@ -1273,8 +1283,13 @@ if (mount) {
             setHandleStatus(textMap.accountHandleReserved, "error");
           } else if (message.includes("handle-change-cooldown")) {
             setHandleStatus(textMap.accountHandleCooldown, "error");
+          } else if (handleChanged) {
+            setHandleStatus(textMap.accountHandleError, "error");
           } else {
             if (accountSaveStatus) accountSaveStatus.textContent = textMap.saveError;
+          }
+          if (companySaved && accountSaveStatus) {
+            accountSaveStatus.textContent = textMap.saved;
           }
           isAvailable = false;
           checkedHandle = "";
@@ -1459,17 +1474,7 @@ if (mount) {
     );
     if (themeInputs && themeInputs.length) {
       const root = document.documentElement;
-      const prefersDark =
-        window.matchMedia &&
-        window.matchMedia("(prefers-color-scheme: dark)").matches;
-      let saved = null;
-      try {
-        saved = localStorage.getItem("theme");
-      } catch {}
-      const current =
-        root.getAttribute("data-theme") ||
-        saved ||
-        (prefersDark ? "dark" : "light");
+      const current = getCurrentTheme();
       themeInputs.forEach((input) => {
         input.checked = input.value === current;
         input.addEventListener("change", () => {
@@ -1489,16 +1494,15 @@ if (mount) {
         setTopbarSaveStatus(textMap.saving);
         if (preferencesSaveStatus) preferencesSaveStatus.textContent = "";
         try {
-          await saveTabOrderPreference();
-          markTabOrderSaved();
           const selectedTheme = prefsBody?.querySelector(
             'input[name="profile-theme"]:checked'
           )?.value;
           if (selectedTheme) {
-            try {
-              localStorage.setItem("theme", selectedTheme);
-            } catch {}
-            savedPreferenceTheme = selectedTheme;
+            savedPreferenceTheme = setTheme(selectedTheme);
+          }
+          if (hasTabOrderChanges()) {
+            await saveTabOrderPreference();
+            markTabOrderSaved();
           }
           const selectedLanguage = prefsBody?.querySelector(
             'input[name="profile-language"]:checked'

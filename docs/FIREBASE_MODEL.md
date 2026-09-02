@@ -38,7 +38,7 @@ Read this before changing data flows, callable functions, machine ownership, adm
 - `admin_machine_links`: accepted admin access links.
 - `admin_invites`: pending/accepted admin invitations.
 - `machine_transfer_invites`: pending/accepted/rejected machine ownership transfer requests.
-- `dashboard_layout/{uid}`: per-user dashboard grouping/layout preferences. Groups may include `parentGroupId` for one-level subgroups; `dashboardTitle` stores the user's editable dashboard topbar title; `registrySeenAt` stores the last time the user left the global registry view after seeing current activity; `machineViewMode` and `machineSortMode` store dashboard display preferences.
+- `dashboard_layout/{uid}`: per-user dashboard grouping/layout preferences. Groups may include `parentGroupId` for nesting through depth 2; `dashboardTitle` mirrors the normalized account company name and falls back to `Dashboard` when empty; `registrySeenAt` stores the last time the user left the global registry view after seeing current activity; `machineViewMode` and `machineSortMode` store dashboard display preferences.
 - `user_notification_preferences/{uid}`: account-wide operational notification preferences. Version 2 stores the `email` channel, its explicit `machineOutOfService` and `machineOperationalAgain` events, and the scopes `receiveOwnedMachines`, `notifyAdministrators` and `receiveAdministeredMachines`. It is owned and writable only by that user; it never stores a recipient address, because delivery resolves the authenticated account address server-side. Legacy documents keep owner delivery enabled by default, while both administrator-routing choices default to disabled.
 - `user_notifications`: private persistent account inbox for access changes,
   invitation/transfer outcomes, and account-linked task assignments. Backend
@@ -170,8 +170,11 @@ frontend wrappers live under `static/js/dashboard/`.
   generated Tag ID, creates `machine_access`, and stores the corresponding QR.
 - `createGlobalAdminInvites`: authenticated owner bulk invitation for every
   currently owned machine. It resolves email or account handle once, skips
-  accepted administrators and pending duplicates, and reports machines blocked
-  by an ownership transfer. Future machines are intentionally not included.
+  accepted administrators, blocks machines already assigned or pending for a
+  different administrator, requeues email for matching pending invitations,
+  continues past isolated machine failures, and reports every outcome. The
+  invitation and machine projection are committed atomically. Future machines
+  are intentionally not included.
 - `transitionMachineStatus`: authenticated owner/accepted-admin transition.
   It atomically updates the canonical machine and its `machine_access`
   projection, creates/reuses/completes the restoration task, appends history,

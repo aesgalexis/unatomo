@@ -536,14 +536,17 @@ p {
 
 a.btn-pill,
 button.btn-pill {
+  box-sizing: border-box;
+  min-height: var(--ut-button-height-standard);
   margin-top: 0;
-
-  padding: 0.6rem 1.25rem;
-  border-radius: 999px;
+  padding: 0 var(--ut-button-padding-inline);
+  border-radius: var(--ut-button-radius-standard);
 
   border: 1px solid transparent;
   font: inherit;
-  font-size: 0.95rem;
+  font-size: var(--ut-button-font-size-standard);
+  font-weight: var(--ut-button-font-weight-standard);
+  line-height: var(--ut-button-line-height-standard);
 
   cursor: pointer;
   display: inline-flex;
@@ -598,17 +601,21 @@ a.btn-primary,
 a.btn-secondary,
 button.btn-primary,
 button.btn-secondary{
+  box-sizing: border-box;
+  min-height: var(--ut-button-height-standard);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.4rem;
 
-  padding: 0.6rem 1.25rem;
-  border-radius: 0.75rem;
+  padding: 0 var(--ut-button-padding-inline);
+  border-radius: var(--ut-button-radius-inline);
   border: 1px solid transparent;
 
   font: inherit;
-  font-size: 0.95rem;
+  font-size: var(--ut-button-font-size-standard);
+  font-weight: var(--ut-button-font-weight-standard);
+  line-height: var(--ut-button-line-height-standard);
   cursor: pointer;
   text-decoration: none;
   -webkit-tap-highlight-color: transparent;
@@ -1020,6 +1027,11 @@ body.page li {
 .form-field select.field {
   box-sizing: border-box;
   height: var(--ut-select-height);
+  padding-right: var(--ut-select-padding-inline-end);
+  background-image: var(--ut-select-indicator-image);
+  background-position: right var(--ut-select-indicator-offset) center;
+  background-repeat: no-repeat;
+  background-size: var(--ut-select-indicator-size);
 }
 
 .field[type="number"] {
@@ -1035,7 +1047,7 @@ body.page li {
 .field:focus {
   outline: none;
   border-color: var(--fg);
-  background: var(--bg);
+  background-color: var(--bg);
 }
 
 .field::placeholder {

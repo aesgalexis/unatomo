@@ -1,4 +1,5 @@
 @import url("/static/css/tokens/unatomo-action-colors.css");
+@import url("/static/css/tokens/unatomo-control-sizes.css");
 @import url("/static/css/themes/unatomo-core-dark.css");
 @import url("/static/css/components/unatomo-buttons.css");
 @import url("/static/css/components/unatomo-forms.css");
@@ -617,12 +618,16 @@ body.landing-contact-page .form-actions {
 }
 
 .btn-pill {
+  box-sizing: border-box;
+  min-height: var(--ut-button-height-standard);
   margin-top: 0;
-  padding: 0.6rem 1.25rem;
-  border-radius: 999px;
+  padding: 0 var(--ut-button-padding-inline);
+  border-radius: var(--ut-button-radius-standard);
   border: 1px solid transparent;
   font: inherit;
-  font-size: 0.95rem;
+  font-size: var(--ut-button-font-size-standard);
+  font-weight: var(--ut-button-font-weight-standard);
+  line-height: var(--ut-button-line-height-standard);
   cursor: pointer;
   display: inline-flex;
   align-items: center;

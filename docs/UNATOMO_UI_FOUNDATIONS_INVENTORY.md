@@ -179,10 +179,10 @@ than ad hoc color values.
 
 ## Control Geometry
 
-The component inventory identifies established context sizes of 32, 36, 40,
-42, 44, 48 and 50 px. Across the whole source, 32 px is especially frequent in
-dense controls, while 44 px (`2.75rem`) is the converged ordinary contact-field
-height.
+The initial component inventory identified context sizes of 32, 36, 40, 42,
+44, 48 and 50 px. The adopted button contract now consolidates button heights
+to 32, 36 and 40 px; former 42 and 50 px button recipes map to 40 px. Historical
+44 and 48 px observations belonged chiefly to fields reviewed separately.
 
 The future size scale should name functional densities, for example compact,
 standard and prominent, without assuming that every numeric value survives as
@@ -364,7 +364,7 @@ The inventory now supports the following review candidates:
 | F-04 | Structural and optical spacing sets | Broad rhythm plus dense adjustments | Candidate |
 | F-05 | Ordinary control radius at current `0.75rem` | 43 declarations and contact convergence | Candidate |
 | F-06 | Semantic subtle border at 1 px | 201 declarations | Candidate |
-| F-07 | Named compact/standard/prominent control sizes | Existing 32–50 px contexts | Candidate |
+| F-07 | Button height scale at 32/36/40 px | Adopted compact, utility and standard button tokens | Canonical |
 | F-08 | 18 px ordinary icon role | Strong cross-family recurrence | Candidate |
 | F-09 | Narrow, standard, editorial and wide containers | Repeated 600/800/876/1120 px roles | Candidate |
 | F-10 | Conceptual responsive boundaries | Strong 768/769 and secondary clusters | Candidate |

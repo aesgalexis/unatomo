@@ -245,6 +245,8 @@ const machineTasksRows = read("static/js/dashboard/views/machineTasks/machineTas
 const functionsIndex = read("firebase/functions/src/index.ts");
 const dashboardCssManifest = read("static/css/dashboard.css");
 const dashboardCssImports = [
+  "/static/css/tokens/unatomo-control-sizes.css",
+  "/static/css/tokens/unatomo-semantic-colors.css",
   "/static/css/effects/inactive_sections/inactive.css",
   "/static/css/components/dashboard-section-nav.css",
   "/static/css/dashboard/shell.css",
@@ -458,8 +460,8 @@ const callableExports = Array.from(
   .map((name) => name.trim())
   .filter(Boolean);
 addCheck(
-  callableExports.length === 71 && new Set(callableExports).size === 71,
-  "Functions index.ts preserves 71 unique function exports"
+  callableExports.length === 72 && new Set(callableExports).size === 72,
+  "Functions index.ts preserves 72 unique function exports"
 );
 
 [

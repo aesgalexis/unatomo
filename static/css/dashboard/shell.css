@@ -158,27 +158,6 @@ body.page .topbar {
   animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.topbar-title-editable {
-  display: block;
-  max-width: min(50vw, 32ch);
-  min-height: 1.2em;
-  line-height: 1.15;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  cursor: text;
-  border-radius: 4px;
-}
-
-.topbar-title-wrap:has(.topbar-title-editable) {
-  pointer-events: auto;
-}
-
-.topbar-title-editable:focus {
-  outline: 1px solid color-mix(in srgb, var(--fg) 42%, transparent);
-  outline-offset: 3px;
-}
-
 .add-bar {
   margin: 0.5rem 0 2.1875rem;
   display: flex;
@@ -919,13 +898,17 @@ body.page .topbar {
 }
 
 .btn-save {
+  box-sizing: border-box;
+  min-height: var(--ut-button-height-standard);
   background: color-mix(in srgb, var(--bg) 90%, transparent);
   border: 1px solid var(--border-subtle);
   color: var(--fg);
-  padding: 0.55rem 1.2rem;
-  border-radius: 0.75rem;
+  padding: 0 var(--ut-button-padding-inline);
+  border-radius: var(--ut-button-radius-inline);
   font: inherit;
-  font-size: 0.95rem;
+  font-size: var(--ut-button-font-size-standard);
+  font-weight: var(--ut-button-font-weight-standard);
+  line-height: var(--ut-button-line-height-standard);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }

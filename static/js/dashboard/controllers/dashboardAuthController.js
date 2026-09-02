@@ -33,6 +33,7 @@ export const installDashboardAuthController = ({
       redirectToEntry();
       return;
     }
+    let profile = null;
     try {
       const registration = await getUserRegistrationState(user);
       if (!registration.allowed) {
@@ -43,6 +44,7 @@ export const installDashboardAuthController = ({
         window.location.replace(onboardingUrl);
         return;
       }
+      profile = registration.profile || null;
       state.canSuggest = true;
       state.isSuperadmin = await isControlPanelUser(user);
     } catch {
@@ -59,7 +61,7 @@ export const installDashboardAuthController = ({
 
     runtime.activeUid = user.uid;
     const sessionVersion = ++runtime.version;
-    runtime.initPromise = initDashboard(user.uid, user, sessionVersion)
+    runtime.initPromise = initDashboard(user.uid, user, sessionVersion, profile)
       .then(() => {
         if (runtime.version === sessionVersion && state.activeView === "sugerencias") {
           scrollSuggestionsViewToTop();
