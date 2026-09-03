@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+  <title id="title">UNATOMO ESP32 sensor platform — direction A refinements</title>
+  <desc id="desc">Four refined versions of the central ESP32 module connected to three external sensors.</desc>
+  <defs>
+    <linearGradient id="brand" x1="40" y1="344" x2="344" y2="40" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f29500"/>
+      <stop offset=".18" stop-color="#efa500"/>
+      <stop offset=".48" stop-color="#29a1e2"/>
+      <stop offset=".74" stop-color="#22b573"/>
+      <stop offset="1" stop-color="#223e73"/>
+    </linearGradient>
+    <style>
+      .tile { fill: #fff; stroke: #e8edf2; stroke-width: 2; }
+      .mark { fill: none; stroke: url(#brand); stroke-width: 27; stroke-linecap: round; stroke-linejoin: round; }
+      .fine { fill: none; stroke: url(#brand); stroke-width: 18; stroke-linecap: round; stroke-linejoin: round; }
+      .node { fill: url(#brand); }
+      .label { fill: #223e73; font: 600 22px Arial, sans-serif; text-anchor: middle; letter-spacing: 1px; }
+      .caption { fill: #6b7785; font: 16px Arial, sans-serif; text-anchor: middle; }
+    </style>
+  </defs>
+  <rect width="1200" height="800" fill="#f7f9fb"/>
+
+  <!-- A1: faithful, geometrically balanced -->
+  <g transform="translate(40 40)">
+    <rect class="tile" width="540" height="340" rx="28"/>
+    <g transform="translate(126 -10) scale(.75)">
+      <rect class="mark" x="107" y="112" width="170" height="124" rx="34"/>
+      <path class="mark" d="M107 164H61M277 135l42-42M192 236v49"/>
+      <circle class="mark" cx="38" cy="164" r="20"/>
+      <circle class="mark" cx="337" cy="75" r="20"/>
+      <circle class="mark" cx="192" cy="308" r="20"/>
+      <circle class="node" cx="148" cy="174" r="15"/>
+      <circle class="node" cx="220" cy="151" r="15"/>
+      <circle class="node" cx="208" cy="205" r="11"/>
+    </g>
+    <text class="label" x="270" y="288">A1 · EQUILIBRIO</text>
+    <text class="caption" x="270" y="316">el croquis depurado</text>
+  </g>
+
+  <!-- A2: cleaner board, inspired by B -->
+  <g transform="translate(620 40)">
+    <rect class="tile" width="540" height="340" rx="28"/>
+    <g transform="translate(126 -10) scale(.75)">
+      <rect class="mark" x="112" y="107" width="160" height="134" rx="28"/>
+      <path class="mark" d="M112 155H62M272 137l46-44M192 241v44"/>
+      <circle class="mark" cx="39" cy="155" r="20"/>
+      <circle class="mark" cx="336" cy="75" r="20"/>
+      <circle class="mark" cx="192" cy="308" r="20"/>
+      <path class="fine" d="M145 143h94M145 177h62M145 211h94"/>
+      <circle class="node" cx="232" cy="177" r="11"/>
+    </g>
+    <text class="label" x="270" y="288">A2 · PLACA</text>
+    <text class="caption" x="270" y="316">más técnico, con algo de B</text>
+  </g>
+
+  <!-- A3: sensor links integrated into the board -->
+  <g transform="translate(40 420)">
+    <rect class="tile" width="540" height="340" rx="28"/>
+    <g transform="translate(126 -10) scale(.75)">
+      <rect class="mark" x="102" y="107" width="180" height="134" rx="38"/>
+      <path class="mark" d="M102 160H59M282 143l40-42M192 241v45"/>
+      <circle class="mark" cx="36" cy="160" r="20"/>
+      <circle class="mark" cx="340" cy="83" r="20"/>
+      <circle class="mark" cx="192" cy="309" r="20"/>
+      <path class="fine" d="M102 160h54l30 30h52l44-47M192 241v-29"/>
+      <circle class="node" cx="156" cy="160" r="12"/>
+      <circle class="node" cx="238" cy="190" r="12"/>
+      <circle class="node" cx="192" cy="212" r="12"/>
+    </g>
+    <text class="label" x="270" y="288">A3 · CIRCUITO</text>
+    <text class="caption" x="270" y="316">conexiones que atraviesan el núcleo</text>
+  </g>
+
+  <!-- A4: soft compact symbol -->
+  <g transform="translate(620 420)">
+    <rect class="tile" width="540" height="340" rx="28"/>
+    <g transform="translate(126 -10) scale(.75)">
+      <rect class="mark" x="112" y="105" width="160" height="140" rx="48"/>
+      <path class="mark" d="M112 160H61M272 140l45-45M192 245v40"/>
+      <circle class="node" cx="38" cy="160" r="23"/>
+      <circle class="node" cx="335" cy="77" r="23"/>
+      <circle class="node" cx="192" cy="308" r="23"/>
+      <circle class="fine" cx="192" cy="175" r="42"/>
+      <circle class="node" cx="192" cy="175" r="13"/>
+    </g>
+    <text class="label" x="270" y="288">A4 · SEÑAL</text>
+    <text class="caption" x="270" y="316">más amable y reconocible pequeña</text>
+  </g>
+</svg>
