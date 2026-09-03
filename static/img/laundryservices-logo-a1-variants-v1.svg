@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+  <title id="title">UNATOMO Laundry Services — A1 refinements</title>
+  <desc id="desc">Six close refinements of the circular drum, water wave, and atom dot concept.</desc>
+  <defs>
+    <linearGradient id="brand" x1="52" y1="332" x2="332" y2="52" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f29500"/>
+      <stop offset=".18" stop-color="#efa500"/>
+      <stop offset=".48" stop-color="#29a1e2"/>
+      <stop offset=".74" stop-color="#22b573"/>
+      <stop offset="1" stop-color="#223e73"/>
+    </linearGradient>
+    <clipPath id="drum"><circle cx="192" cy="174" r="91.5"/></clipPath>
+    <style>
+      .tile { fill: #fff; stroke: #e8edf2; stroke-width: 2; }
+      .mark { fill: none; stroke: url(#brand); stroke-width: 27; stroke-linecap: round; stroke-linejoin: round; }
+      .fine { fill: none; stroke: url(#brand); stroke-width: 18; stroke-linecap: round; stroke-linejoin: round; }
+      .water { fill: url(#brand); opacity: .14; }
+      .dot { fill: url(#brand); }
+      .label { fill: #223e73; font: 600 22px Arial, sans-serif; text-anchor: middle; letter-spacing: 1px; }
+      .caption { fill: #6b7785; font: 16px Arial, sans-serif; text-anchor: middle; }
+    </style>
+  </defs>
+  <rect width="1200" height="800" fill="#f7f9fb"/>
+
+  <!-- A1.1: reference balance -->
+  <g transform="translate(40 40)">
+    <rect class="tile" width="346" height="340" rx="28"/>
+    <g transform="translate(-19 -22)">
+      <circle class="mark" cx="192" cy="174" r="105"/>
+      <path class="mark" d="M105 184c28-34 58 29 91-2s61 30 91-5"/>
+      <circle class="dot" cx="265" cy="101" r="18"/>
+    </g>
+    <text class="label" x="173" y="288">A1.1 · BASE</text>
+    <text class="caption" x="173" y="316">ritmo equilibrado</text>
+  </g>
+
+  <!-- A1.2: calmer single wave -->
+  <g transform="translate(427 40)">
+    <rect class="tile" width="346" height="340" rx="28"/>
+    <g transform="translate(-19 -22)">
+      <circle class="mark" cx="192" cy="174" r="105"/>
+      <path class="mark" d="M101 187c31-27 58 24 91-2s61 24 93-2"/>
+      <circle class="dot" cx="265" cy="101" r="18"/>
+    </g>
+    <text class="label" x="173" y="288">A1.2 · SERENA</text>
+    <text class="caption" x="173" y="316">más estable y premium</text>
+  </g>
+
+  <!-- A1.3: compact central wave -->
+  <g transform="translate(814 40)">
+    <rect class="tile" width="346" height="340" rx="28"/>
+    <g transform="translate(-19 -22)">
+      <circle class="mark" cx="192" cy="174" r="105"/>
+      <path class="mark" d="M119 184c24-29 48 25 73-2s49 26 74-3"/>
+      <circle class="dot" cx="265" cy="101" r="18"/>
+    </g>
+    <text class="label" x="173" y="288">A1.3 · COMPACTA</text>
+    <text class="caption" x="173" y="316">más aire alrededor</text>
+  </g>
+
+  <!-- A1.4: lower water and centered dot -->
+  <g transform="translate(40 420)">
+    <rect class="tile" width="346" height="340" rx="28"/>
+    <g transform="translate(-19 -22)">
+      <circle class="mark" cx="192" cy="174" r="105"/>
+      <path class="mark" d="M104 199c29-30 58 27 88-2s59 27 88-2"/>
+      <circle class="dot" cx="192" cy="113" r="18"/>
+    </g>
+    <text class="label" x="173" y="288">A1.4 · AXIAL</text>
+    <text class="caption" x="173" y="316">simétrica y muy legible</text>
+  </g>
+
+  <!-- A1.5: filled water field -->
+  <g transform="translate(427 420)">
+    <rect class="tile" width="346" height="340" rx="28"/>
+    <g transform="translate(-19 -22)">
+      <circle class="mark" cx="192" cy="174" r="105"/>
+      <g clip-path="url(#drum)">
+        <path class="water" d="M84 191c34-31 67 27 108-2s72 27 108-4v112H84Z"/>
+      </g>
+      <path class="mark" d="M101 191c34-31 64 27 91-2s60 27 91-4"/>
+      <circle class="dot" cx="265" cy="101" r="18"/>
+    </g>
+    <text class="label" x="173" y="288">A1.5 · LLENA</text>
+    <text class="caption" x="173" y="316">más agua, más presencia</text>
+  </g>
+
+  <!-- A1.6: dot follows the wave -->
+  <g transform="translate(814 420)">
+    <rect class="tile" width="346" height="340" rx="28"/>
+    <g transform="translate(-19 -22)">
+      <circle class="mark" cx="192" cy="174" r="105"/>
+      <path class="mark" d="M105 184c28-34 58 29 91-2s61 30 91-5"/>
+      <circle class="dot" cx="233" cy="144" r="18"/>
+    </g>
+    <text class="label" x="173" y="288">A1.6 · GOTA</text>
+    <text class="caption" x="173" y="316">punto integrado en el lavado</text>
+  </g>
+</svg>

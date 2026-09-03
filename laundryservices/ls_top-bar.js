@@ -1,6 +1,16 @@
 (() => {
   const topbar = document.querySelector("#ls-topbar-mount .ls-topbar");
   if (!topbar) return;
+  const laundryLogo = "/static/img/logo-unatomo-laundryservices-round-v1.0.svg";
+  const logo = topbar.querySelector(".ls-topbar-logo");
+  if (logo) {
+    logo.src = laundryLogo;
+    logo.alt = "UNATOMO Laundry Services";
+  }
+  document.querySelectorAll('link[rel~="icon"]').forEach((icon) => {
+    icon.href = laundryLogo;
+    icon.type = "image/svg+xml";
+  });
   let lastY = Math.max(window.scrollY || 0, 0);
   let ticking = false;
   const syncVisibility = () => {

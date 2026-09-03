@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+  <title id="title">UNATOMO Laundry Services — six logo directions</title>
+  <desc id="desc">Six geometric logo concepts sharing the UNATOMO Studio gradient and 27 pixel stroke language.</desc>
+  <defs>
+    <linearGradient id="brand" x1="52" y1="332" x2="332" y2="52" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f29500"/>
+      <stop offset=".18" stop-color="#efa500"/>
+      <stop offset=".48" stop-color="#29a1e2"/>
+      <stop offset=".74" stop-color="#22b573"/>
+      <stop offset="1" stop-color="#223e73"/>
+    </linearGradient>
+    <style>
+      .tile { fill: #fff; stroke: #e8edf2; stroke-width: 2; }
+      .mark { fill: none; stroke: url(#brand); stroke-width: 27; stroke-linecap: round; stroke-linejoin: round; }
+      .dot { fill: url(#brand); }
+      .label { fill: #223e73; font: 600 22px Arial, sans-serif; text-anchor: middle; letter-spacing: 1px; }
+      .caption { fill: #6b7785; font: 16px Arial, sans-serif; text-anchor: middle; }
+    </style>
+  </defs>
+
+  <rect width="1200" height="800" fill="#f7f9fb"/>
+
+  <!-- A: washer drum + atom dot -->
+  <g transform="translate(40 40)">
+    <rect class="tile" width="346" height="340" rx="28"/>
+    <g transform="translate(-19 -22)">
+      <circle class="mark" cx="192" cy="174" r="105"/>
+      <path class="mark" d="M105 184c28-34 58 29 91-2s61 30 91-5"/>
+      <circle class="dot" cx="265" cy="101" r="18"/>
+    </g>
+    <text class="label" x="173" y="288">A · TAMBOR</text>
+    <text class="caption" x="173" y="316">lavado + átomo</text>
+  </g>
+
+  <!-- B: circular water flow -->
+  <g transform="translate(427 40)">
+    <rect class="tile" width="346" height="340" rx="28"/>
+    <g transform="translate(-19 -22)">
+      <circle class="mark" cx="192" cy="174" r="105"/>
+      <path class="mark" d="M92 183c31 0 31-31 62-31s31 31 62 31 31-31 62-31"/>
+      <circle class="dot" cx="192" cy="221" r="18"/>
+    </g>
+    <text class="label" x="173" y="288">B · CICLO</text>
+    <text class="caption" x="173" y="316">agua + continuidad</text>
+  </g>
+
+  <!-- C: folded linen -->
+  <g transform="translate(814 40)">
+    <rect class="tile" width="346" height="340" rx="28"/>
+    <g transform="translate(-19 -22)">
+      <rect class="mark" x="87" y="69" width="210" height="210" rx="32"/>
+      <path class="mark" d="M92 211h200M136 164h112"/>
+      <circle class="dot" cx="192" cy="115" r="18"/>
+    </g>
+    <text class="label" x="173" y="288">C · PLIEGUE</text>
+    <text class="caption" x="173" y="316">ropa limpia + orden</text>
+  </g>
+
+  <!-- D: laundry basket -->
+  <g transform="translate(40 420)">
+    <rect class="tile" width="346" height="340" rx="28"/>
+    <g transform="translate(-19 -22)">
+      <path class="mark" d="M92 139h200l-24 140H116L92 139Z"/>
+      <path class="mark" d="M139 139c8-47 98-47 106 0M148 190v42M192 190v42M236 190v42"/>
+      <circle class="dot" cx="268" cy="104" r="18"/>
+    </g>
+    <text class="label" x="173" y="288">D · CESTA</text>
+    <text class="caption" x="173" y="316">servicio + recogida</text>
+  </g>
+
+  <!-- E: hanger -->
+  <g transform="translate(427 420)">
+    <rect class="tile" width="346" height="340" rx="28"/>
+    <g transform="translate(-19 -22)">
+      <path class="mark" d="M192 125c0-35 47-35 47 0 0 20-19 27-47 45L87 247h210L192 170"/>
+      <circle class="dot" cx="192" cy="87" r="18"/>
+    </g>
+    <text class="label" x="173" y="288">E · PERCHA</text>
+    <text class="caption" x="173" y="316">cuidado textil</text>
+  </g>
+
+  <!-- F: modular washer/dryer -->
+  <g transform="translate(814 420)">
+    <rect class="tile" width="346" height="340" rx="28"/>
+    <g transform="translate(-19 -22)">
+      <rect class="mark" x="67" y="79" width="118" height="190" rx="22"/>
+      <rect class="mark" x="199" y="79" width="118" height="190" rx="22"/>
+      <circle class="mark" cx="126" cy="190" r="38"/>
+      <circle class="mark" cx="258" cy="190" r="38"/>
+      <circle class="dot" cx="258" cy="119" r="13"/>
+    </g>
+    <text class="label" x="173" y="288">F · MÓDULOS</text>
+    <text class="caption" x="173" y="316">lavadora + secadora</text>
+  </g>
+</svg>

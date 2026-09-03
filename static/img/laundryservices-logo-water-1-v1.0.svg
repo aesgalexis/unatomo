@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 384" role="img" aria-labelledby="title">
+  <title id="title">UNATOMO Laundry Services — agua 1</title>
+  <defs><linearGradient id="brand" x1="40" y1="344" x2="344" y2="40" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#f29500"/><stop offset=".18" stop-color="#efa500"/><stop offset=".48" stop-color="#29a1e2"/><stop offset=".74" stop-color="#22b573"/><stop offset="1" stop-color="#223e73"/></linearGradient></defs>
+  <path d="M58 202c42-48 83 41 130-4s88 42 138-7" fill="none" stroke="url(#brand)" stroke-width="27" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

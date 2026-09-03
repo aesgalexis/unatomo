@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+  <title id="title">UNATOMO ESP32 sensor platform — logo concepts</title>
+  <desc id="desc">Four geometric logo directions based on a central ESP32 module connected to external sensors.</desc>
+  <defs>
+    <linearGradient id="brand" x1="40" y1="344" x2="344" y2="40" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f29500"/>
+      <stop offset=".18" stop-color="#efa500"/>
+      <stop offset=".48" stop-color="#29a1e2"/>
+      <stop offset=".74" stop-color="#22b573"/>
+      <stop offset="1" stop-color="#223e73"/>
+    </linearGradient>
+    <style>
+      .tile { fill: #fff; stroke: #e8edf2; stroke-width: 2; }
+      .mark { fill: none; stroke: url(#brand); stroke-width: 27; stroke-linecap: round; stroke-linejoin: round; }
+      .fine { fill: none; stroke: url(#brand); stroke-width: 18; stroke-linecap: round; stroke-linejoin: round; }
+      .node { fill: url(#brand); }
+      .label { fill: #223e73; font: 600 22px Arial, sans-serif; text-anchor: middle; letter-spacing: 1px; }
+      .caption { fill: #6b7785; font: 16px Arial, sans-serif; text-anchor: middle; }
+    </style>
+  </defs>
+  <rect width="1200" height="800" fill="#f7f9fb"/>
+
+  <!-- A: faithful translation of the sketch -->
+  <g transform="translate(40 40)">
+    <rect class="tile" width="540" height="340" rx="28"/>
+    <g transform="translate(126 -10) scale(.75)">
+      <rect class="mark" x="107" y="112" width="170" height="124" rx="34"/>
+      <path class="mark" d="M107 164H61M277 135l42-42M192 236v49"/>
+      <circle class="mark" cx="38" cy="164" r="20"/>
+      <circle class="mark" cx="337" cy="75" r="20"/>
+      <circle class="mark" cx="192" cy="308" r="20"/>
+      <circle class="node" cx="148" cy="174" r="15"/>
+      <circle class="node" cx="220" cy="151" r="15"/>
+      <circle class="node" cx="208" cy="205" r="11"/>
+    </g>
+    <text class="label" x="270" y="288">A · NÚCLEO</text>
+    <text class="caption" x="270" y="316">fiel al dibujo original</text>
+  </g>
+
+  <!-- B: compact chip with three sensor ports -->
+  <g transform="translate(620 40)">
+    <rect class="tile" width="540" height="340" rx="28"/>
+    <g transform="translate(126 -10) scale(.75)">
+      <rect class="mark" x="122" y="107" width="140" height="140" rx="28"/>
+      <path class="fine" d="M122 139H88M122 177H70M122 215H88M262 139h34M262 177h52M262 215h34"/>
+      <circle class="mark" cx="46" cy="177" r="20"/>
+      <circle class="mark" cx="338" cy="177" r="20"/>
+      <path class="mark" d="M192 247v38"/>
+      <circle class="mark" cx="192" cy="308" r="20"/>
+      <circle class="node" cx="192" cy="177" r="20"/>
+    </g>
+    <text class="label" x="270" y="288">B · CHIP</text>
+    <text class="caption" x="270" y="316">compacto y técnico</text>
+  </g>
+
+  <!-- C: radial system -->
+  <g transform="translate(40 420)">
+    <rect class="tile" width="540" height="340" rx="28"/>
+    <g transform="translate(126 -10) scale(.75)">
+      <circle class="mark" cx="192" cy="177" r="67"/>
+      <rect class="fine" x="158" y="143" width="68" height="68" rx="16"/>
+      <path class="mark" d="M138 137 91 96M192 244v48M246 137l47-41"/>
+      <circle class="mark" cx="72" cy="77" r="20"/>
+      <circle class="mark" cx="192" cy="315" r="20"/>
+      <circle class="mark" cx="312" cy="77" r="20"/>
+      <circle class="node" cx="192" cy="177" r="12"/>
+    </g>
+    <text class="label" x="270" y="288">C · RADIAL</text>
+    <text class="caption" x="270" y="316">sensores alrededor del núcleo</text>
+  </g>
+
+  <!-- D: modular grid, closest to Studio family -->
+  <g transform="translate(620 420)">
+    <rect class="tile" width="540" height="340" rx="28"/>
+    <g transform="translate(126 -10) scale(.75)">
+      <rect class="mark" x="115" y="100" width="154" height="154" rx="32"/>
+      <path class="fine" d="M146 137h92M146 177h92M146 217h52"/>
+      <path class="mark" d="M115 139H65M269 139h50M192 254v38"/>
+      <rect class="mark" x="28" y="102" width="48" height="48" rx="15"/>
+      <rect class="mark" x="308" y="102" width="48" height="48" rx="15"/>
+      <rect class="mark" x="168" y="291" width="48" height="48" rx="15"/>
+      <circle class="node" cx="226" cy="217" r="12"/>
+    </g>
+    <text class="label" x="270" y="288">D · MÓDULOS</text>
+    <text class="caption" x="270" y="316">más cercano a UNATOMO Studio</text>
+  </g>
+</svg>

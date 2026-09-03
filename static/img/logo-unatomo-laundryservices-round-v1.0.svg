@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 384" role="img" aria-labelledby="title desc">
+  <title id="title">UNATOMO Laundry Services</title>
+  <desc id="desc">Aro giratorio y cuatro estados de agua animados con el degradado de marca de UNATOMO NFC.</desc>
+  <defs>
+    <linearGradient id="laundry-gradient" x1="40" y1="344" x2="344" y2="40" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f29500"/>
+      <stop offset=".18" stop-color="#efa500"/>
+      <stop offset=".48" stop-color="#29a1e2"/>
+      <stop offset=".74" stop-color="#22b573"/>
+      <stop offset="1" stop-color="#223e73"/>
+      <animateTransform
+        attributeName="gradientTransform"
+        type="rotate"
+        dur="15s"
+        repeatCount="indefinite"
+        calcMode="spline"
+        values="0 192 192;0 192 192;540 192 192;540 192 192;540 192 192;0 192 192;0 192 192"
+        keyTimes="0;.0666;.2666;.4;.6;.8;1"
+        keySplines=".4 0 .18 1;.4 0 .18 1;.22 .72 .28 1;0 0 1 1;.4 0 .18 1;.22 .72 .28 1"/>
+    </linearGradient>
+    <linearGradient id="water-fill-gradient" x1="33" y1="192" x2="351" y2="192" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#29a1e2"/>
+      <stop offset=".58" stop-color="#0092cc"/>
+      <stop offset="1" stop-color="#22b573"/>
+    </linearGradient>
+    <clipPath id="inside-ring"><circle cx="192" cy="192" r="159"/></clipPath>
+    <style>
+      .water-line, .water-fill { transform-box: view-box; transform-origin: 192px 192px; }
+      .water-line { animation: water-line-cycle 15s linear infinite; }
+      .water-fill { animation: water-fill-cycle 15s linear infinite; }
+      @keyframes water-line-cycle {
+        0%, 6.66%, 40%, 60%, 94%, 100% { d: path("M34 200c50 0 96 0 154 0s105 0 162 0"); transform: translateY(0) rotate(0deg); animation-timing-function: cubic-bezier(.45, 0, .55, 1); }
+        16% { d: path("M34 194c50-38 96 48 154 2s105 33 162-2"); transform: translateY(3px) rotate(-2.2deg); animation-timing-function: cubic-bezier(.45, 0, .55, 1); }
+        26.66% { d: path("M34 198c54 42 99-42 156 3s103-44 160-3"); transform: translateY(-2px) rotate(2.6deg); animation-timing-function: cubic-bezier(.22, .72, .28, 1); }
+        70% { d: path("M34 207c52 31 98-48 154-1s106-35 162-5"); transform: translateY(3px) rotate(2.2deg); animation-timing-function: cubic-bezier(.45, 0, .55, 1); }
+        80% { d: path("M34 198c54 42 99-42 156 3s103-44 160-3"); transform: translateY(-2px) rotate(-2.6deg); animation-timing-function: cubic-bezier(.22, .72, .28, 1); }
+        88% { d: path("M34 194c50-24 96 30 154 1s105 21 162-1"); transform: translateY(1px) rotate(.8deg); animation-timing-function: cubic-bezier(.22, .72, .28, 1); }
+      }
+      @keyframes water-fill-cycle {
+        0%, 6.66%, 40%, 60%, 94%, 100% { d: path("M34 200c50 0 96 0 154 0s105 0 162 0L350 360H34Z"); transform: translateY(0) rotate(0deg); animation-timing-function: cubic-bezier(.45, 0, .55, 1); }
+        16% { d: path("M34 194c50-38 96 48 154 2s105 33 162-2L350 360H34Z"); transform: translateY(3px) rotate(-2.2deg); animation-timing-function: cubic-bezier(.45, 0, .55, 1); }
+        26.66% { d: path("M34 198c54 42 99-42 156 3s103-44 160-3L350 360H34Z"); transform: translateY(-2px) rotate(2.6deg); animation-timing-function: cubic-bezier(.22, .72, .28, 1); }
+        70% { d: path("M34 207c52 31 98-48 154-1s106-35 162-5L350 360H34Z"); transform: translateY(3px) rotate(2.2deg); animation-timing-function: cubic-bezier(.45, 0, .55, 1); }
+        80% { d: path("M34 198c54 42 99-42 156 3s103-44 160-3L350 360H34Z"); transform: translateY(-2px) rotate(-2.6deg); animation-timing-function: cubic-bezier(.22, .72, .28, 1); }
+        88% { d: path("M34 194c50-24 96 30 154 1s105 21 162-1L350 360H34Z"); transform: translateY(1px) rotate(.8deg); animation-timing-function: cubic-bezier(.22, .72, .28, 1); }
+      }
+      @media (prefers-reduced-motion: reduce) { .water-line, .water-fill { animation: none; } }
+    </style>
+  </defs>
+  <path class="water-fill" d="M34 200c50 0 96 0 154 0s105 0 162 0L350 360H34Z" fill="url(#water-fill-gradient)" fill-opacity=".32" clip-path="url(#inside-ring)"/>
+  <circle class="ring" cx="192" cy="192" r="172.5" fill="none" stroke="url(#laundry-gradient)" stroke-width="27"/>
+  <path class="water-line" d="M34 200c50 0 96 0 154 0s105 0 162 0" fill="none" stroke="url(#laundry-gradient)" stroke-width="27" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+  <title id="title">UNATOMO Laundry Services — direction A variants</title>
+  <desc id="desc">Six washer-drum logo variants using the UNATOMO brand gradient and 27 pixel stroke.</desc>
+  <defs>
+    <linearGradient id="brand" x1="52" y1="332" x2="332" y2="52" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f29500"/>
+      <stop offset=".18" stop-color="#efa500"/>
+      <stop offset=".48" stop-color="#29a1e2"/>
+      <stop offset=".74" stop-color="#22b573"/>
+      <stop offset="1" stop-color="#223e73"/>
+    </linearGradient>
+    <style>
+      .tile { fill: #fff; stroke: #e8edf2; stroke-width: 2; }
+      .mark { fill: none; stroke: url(#brand); stroke-width: 27; stroke-linecap: round; stroke-linejoin: round; }
+      .fine { fill: none; stroke: url(#brand); stroke-width: 18; stroke-linecap: round; stroke-linejoin: round; }
+      .dot { fill: url(#brand); }
+      .label { fill: #223e73; font: 600 22px Arial, sans-serif; text-anchor: middle; letter-spacing: 1px; }
+      .caption { fill: #6b7785; font: 16px Arial, sans-serif; text-anchor: middle; }
+    </style>
+  </defs>
+
+  <rect width="1200" height="800" fill="#f7f9fb"/>
+
+  <!-- A1: original, balanced -->
+  <g transform="translate(40 40)">
+    <rect class="tile" width="346" height="340" rx="28"/>
+    <g transform="translate(-19 -22)">
+      <circle class="mark" cx="192" cy="174" r="105"/>
+      <path class="mark" d="M105 184c28-34 58 29 91-2s61 30 91-5"/>
+      <circle class="dot" cx="265" cy="101" r="18"/>
+    </g>
+    <text class="label" x="173" y="288">A1 · ÁTOMO</text>
+    <text class="caption" x="173" y="316">equilibrada y reconocible</text>
+  </g>
+
+  <!-- A2: minimal porthole -->
+  <g transform="translate(427 40)">
+    <rect class="tile" width="346" height="340" rx="28"/>
+    <g transform="translate(-19 -22)">
+      <circle class="mark" cx="192" cy="174" r="105"/>
+      <circle class="mark" cx="192" cy="174" r="58"/>
+      <circle class="dot" cx="262" cy="104" r="18"/>
+    </g>
+    <text class="label" x="173" y="288">A2 · PORTILLA</text>
+    <text class="caption" x="173" y="316">mínima y corporativa</text>
+  </g>
+
+  <!-- A3: low water line -->
+  <g transform="translate(814 40)">
+    <rect class="tile" width="346" height="340" rx="28"/>
+    <g transform="translate(-19 -22)">
+      <circle class="mark" cx="192" cy="174" r="105"/>
+      <path class="mark" d="M99 196c31-25 58 25 91 0s61 25 94-2"/>
+      <circle class="dot" cx="192" cy="126" r="18"/>
+    </g>
+    <text class="label" x="173" y="288">A3 · AGUA</text>
+    <text class="caption" x="173" y="316">limpia y calmada</text>
+  </g>
+
+  <!-- A4: rotation / cycle -->
+  <g transform="translate(40 420)">
+    <rect class="tile" width="346" height="340" rx="28"/>
+    <g transform="translate(-19 -22)">
+      <circle class="mark" cx="192" cy="174" r="105"/>
+      <path class="mark" d="M129 200a68 68 0 0 0 116 12"/>
+      <path class="mark" d="m246 212-5-38 35 15"/>
+      <circle class="dot" cx="143" cy="130" r="18"/>
+    </g>
+    <text class="label" x="173" y="288">A4 · CICLO</text>
+    <text class="caption" x="173" y="316">movimiento y proceso</text>
+  </g>
+
+  <!-- A5: bubbles -->
+  <g transform="translate(427 420)">
+    <rect class="tile" width="346" height="340" rx="28"/>
+    <g transform="translate(-19 -22)">
+      <circle class="mark" cx="192" cy="174" r="105"/>
+      <circle class="fine" cx="153" cy="198" r="28"/>
+      <circle class="fine" cx="211" cy="176" r="35"/>
+      <circle class="dot" cx="245" cy="125" r="18"/>
+    </g>
+    <text class="label" x="173" y="288">A5 · BURBUJAS</text>
+    <text class="caption" x="173" y="316">amable y doméstica</text>
+  </g>
+
+  <!-- A6: atom orbit inside drum -->
+  <g transform="translate(814 420)">
+    <rect class="tile" width="346" height="340" rx="28"/>
+    <g transform="translate(-19 -22)">
+      <circle class="mark" cx="192" cy="174" r="105"/>
+      <ellipse class="fine" cx="192" cy="174" rx="65" ry="31" transform="rotate(-28 192 174)"/>
+      <ellipse class="fine" cx="192" cy="174" rx="65" ry="31" transform="rotate(32 192 174)"/>
+      <circle class="dot" cx="192" cy="174" r="15"/>
+    </g>
+    <text class="label" x="173" y="288">A6 · ÓRBITA</text>
+    <text class="caption" x="173" y="316">más Unátomo, más tecnológica</text>
+  </g>
+</svg>

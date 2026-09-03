@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 384" role="img" aria-labelledby="title desc">
+  <title id="title">UNATOMO Laundry Services — aro</title>
+  <desc id="desc">Aro exterior independiente con el degradado de UNATOMO NFC.</desc>
+  <defs>
+    <linearGradient id="brand" x1="40" y1="344" x2="344" y2="40" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f29500"/>
+      <stop offset=".18" stop-color="#efa500"/>
+      <stop offset=".48" stop-color="#29a1e2"/>
+      <stop offset=".74" stop-color="#22b573"/>
+      <stop offset="1" stop-color="#223e73"/>
+    </linearGradient>
+  </defs>
+  <circle cx="192" cy="192" r="172.5" fill="none" stroke="url(#brand)" stroke-width="27"/>
+</svg>
