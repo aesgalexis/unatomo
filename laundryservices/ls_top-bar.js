@@ -7,10 +7,6 @@
     logo.src = laundryLogo;
     logo.alt = "UNATOMO Laundry Services";
   }
-  document.querySelectorAll('link[rel~="icon"]').forEach((icon) => {
-    icon.href = laundryLogo;
-    icon.type = "image/svg+xml";
-  });
   let lastY = Math.max(window.scrollY || 0, 0);
   let ticking = false;
   const syncVisibility = () => {
