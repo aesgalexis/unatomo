@@ -53,10 +53,16 @@ const shouldCopy = (filePath) => {
 const bundleLaundryStyles = async () => {
   const manifestPath = path.join(ROOT, "laundryservices", "ls_styles.css");
   const manifest = await readFile(manifestPath, "utf8");
-  const imports = [...manifest.matchAll(/@import url\("\.\/styles\/([^\"]+)"\);/g)]
+  const imports = [...manifest.matchAll(/@import url\("([^\"]+)"\);/g)]
     .map((match) => match[1]);
-  const sources = await Promise.all(imports.map(async (file) =>
-    `/* ${file} */\n${await readFile(path.join(ROOT, "laundryservices", "styles", file), "utf8")}`));
+  // Resolve site-root imports as well as relative imports, in manifest order.
+  // Shared tokens/components must precede the Laundry Services overrides.
+  const sources = await Promise.all(imports.map(async (file) => {
+    const sourcePath = file.startsWith("/")
+      ? path.join(ROOT, file.slice(1))
+      : path.resolve(path.dirname(manifestPath), file);
+    return `/* ${file} */\n${await readFile(sourcePath, "utf8")}`;
+  }));
   const bundled = await transform(sources.join("\n"), {
     loader: "css",
     minify: true,

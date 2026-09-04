@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 384" role="img" aria-labelledby="title desc">
+  <title id="title">UNATOMO Sense</title>
+  <desc id="desc">Microcontrolador central conectado a tres sensores exteriores, con tres nodos interiores alineados.</desc>
+  <defs>
+    <linearGradient id="sense-gradient" x1="40" y1="344" x2="344" y2="40" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f29500"/>
+      <stop offset=".18" stop-color="#efa500"/>
+      <stop offset=".48" stop-color="#29a1e2"/>
+      <stop offset=".74" stop-color="#22b573"/>
+      <stop offset="1" stop-color="#223e73"/>
+    </linearGradient>
+  </defs>
+
+  <g fill="none" stroke="url(#sense-gradient)" stroke-width="27" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="107" y="112" width="170" height="124" rx="34"/>
+    <path d="M107 164H61M277 135l42-42M192 236v49"/>
+    <circle cx="38" cy="164" r="20"/>
+    <circle cx="337" cy="75" r="20"/>
+    <circle cx="192" cy="308" r="20"/>
+  </g>
+
+  <g fill="url(#sense-gradient)">
+    <circle cx="145" cy="164" r="15"/>
+    <circle cx="239" cy="173" r="15"/>
+    <circle cx="192" cy="198" r="15"/>
+  </g>
+</svg>

@@ -29,9 +29,9 @@
       <circle class="mark" cx="38" cy="164" r="20"/>
       <circle class="mark" cx="337" cy="75" r="20"/>
       <circle class="mark" cx="192" cy="308" r="20"/>
-      <circle class="node" cx="148" cy="174" r="15"/>
-      <circle class="node" cx="220" cy="151" r="15"/>
-      <circle class="node" cx="208" cy="205" r="11"/>
+      <circle class="node" cx="145" cy="164" r="15"/>
+      <circle class="node" cx="239" cy="173" r="15"/>
+      <circle class="node" cx="192" cy="198" r="15"/>
     </g>
     <text class="label" x="270" y="288">A1 · EQUILIBRIO</text>
     <text class="caption" x="270" y="316">el croquis depurado</text>
