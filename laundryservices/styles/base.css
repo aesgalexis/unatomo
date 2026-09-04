@@ -145,6 +145,7 @@ a:hover {
 }
 
 .ls-topbar-brand {
+  -webkit-tap-highlight-color: transparent;
   display: flex;
   align-items: center;
   gap: 1.25rem;

@@ -27,6 +27,7 @@ const PUBLIC_DIRECTORIES = [
   "laundryservices",
   "nfc",
   "studio",
+  "sense",
   "static"
 ];
 

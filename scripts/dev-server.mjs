@@ -5,6 +5,7 @@ import { extname, join, normalize } from "node:path";
 const root = process.cwd();
 const port = Number(process.env.PORT || 5174);
 const cleanDirectoryRoutes = new Map([
+  ["/sense", "/sense/index.html"],
   ["/ssl-simulator", "/ssl-simulator.html"],
   ["/ssl-simulator/", "/ssl-simulator.html"]
 ]);

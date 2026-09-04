@@ -1,4 +1,6 @@
 const cleanDirectoryRoutes = new Map([
+  ["/sense", "/sense/index.html"],
+  ["/sense/", "/sense/index.html"],
   ["/laundryservices", "/laundryservices/index.html"],
   ["/laundryservices/", "/laundryservices/index.html"],
   ["/studio", "/studio/index.html"],

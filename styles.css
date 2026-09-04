@@ -885,6 +885,7 @@ body.page li {
 }
 
 .topbar-logo-link {
+  -webkit-tap-highlight-color: transparent;
   display: flex;
   align-items: center;
   text-decoration: none;

@@ -42,6 +42,7 @@ body.studio-home-page > main { position: relative; z-index: 1; }
 .studio-topbar { position: fixed; inset: 0 0 auto; z-index: 2000; height: 75px; border-bottom: 1px solid var(--ut-core-dark-topbar-border); background: var(--ut-core-dark-topbar-background); box-shadow: var(--ut-core-dark-topbar-shadow); backdrop-filter: blur(12px); }
 .studio-topbar-inner { height: 100%; padding: 0 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
 .studio-page .studio-topbar-brand { display: flex; align-items: center; gap: 1.25rem; color: var(--fg); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.12em; text-decoration: none; text-transform: uppercase; }
+.studio-topbar-brand { -webkit-tap-highlight-color: transparent; }
 .studio-topbar-brand:hover { opacity: 0.9; }
 .studio-topbar-logo { width: auto; height: 52px; content: url("/static/img/logo-unatomo-studio-round-v1.0.svg"); opacity: 0.9; }
 .studio-topbar-name { display: inline-flex; align-items: center; gap: 0.34rem; color: var(--fg); white-space: nowrap; }

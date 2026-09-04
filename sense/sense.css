@@ -1,0 +1,48 @@
+/* Sense uses the Studio topbar, controls and Laundry Services footer shell. */
+.sense-page { --studio-accent: #29a1e2; }
+.sense-page .studio-topbar-logo { content: normal; width: 52px; height: 52px; }
+.sense-page .studio-topbar { border-bottom-color: #263640; }
+.sense-page main { background: radial-gradient(ellipse at 90% 10%, #15343d66, transparent 48%); }
+.sense-hero { display: grid; grid-template-columns: 1.2fr 1fr; align-items: center; gap: clamp(2rem, 5vw, 5rem); padding-block: clamp(4rem, 7vw, 7rem); }
+.sense-hero h1 { margin: 0; max-width: 700px; font-size: clamp(2.8rem, 5.2vw, 4.8rem); font-weight: 560; line-height: 1.04; letter-spacing: -0.055em; text-wrap: balance; }
+.sense-page .studio-eyebrow { color: #77c8d8; }
+.sense-install { margin: 1.3rem 0 0; color: var(--studio-muted); font-size: 0.8rem; line-height: 1.6; }
+.sense-signal { min-width: 0; margin: 0; text-align: center; }
+.sense-signal > img { display: block; width: min(78%, 280px); height: auto; margin: 0 auto 1.75rem; }
+.sense-signal figcaption { font-size: 0.8rem; color: var(--fg); }
+.sense-cycle { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; margin-top: 1.4rem; padding-block: 1.2rem; border-block: 1px solid var(--border-subtle); }
+.sense-phase { min-width: 0; color: #94a5af; }
+.sense-phase:nth-child(2) { color: #29a1e2; }
+.sense-phase:nth-child(3) { color: #42c58f; }
+.sense-phase svg { display: block; width: 100%; height: 46px; margin-bottom: 0.75rem; }
+.sense-phase span { font-size: 0.74rem; }
+.sense-example-note { color: var(--studio-muted); font-size: 0.68rem; line-height: 1.6; }
+.sense-how { border-block: 1px solid var(--border-subtle); padding-block: clamp(3rem, 5vw, 4.5rem); }
+.sense-how h2, .sense-cta h2 { margin: 0; font-size: clamp(1.8rem, 3vw, 2.65rem); font-weight: 560; letter-spacing: -0.04em; line-height: 1.15; text-wrap: balance; }
+.sense-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3rem; margin-top: 2.5rem; }
+.sense-step-number { color: #77c8d8; font-size: 0.72rem; letter-spacing: 0.1em; }
+.sense-steps h3 { font-size: 1.25rem; margin: 0.8rem 0; font-weight: 550; }
+.sense-steps p, .sense-cta p { margin: 0; color: var(--studio-muted); font-size: 0.95rem; line-height: 1.7; }
+.sense-cta { display: flex; align-items: center; justify-content: space-between; gap: 3rem; padding-block: 4rem; }
+.sense-cta p { max-width: 600px; margin-top: 1rem; }
+.sense-cta .studio-button { flex-shrink: 0; }
+.sense-page .ls-footer-disclosure-contact-list a { color: var(--studio-muted); font-size: 0.8rem; }
+.sense-page-nav { position: fixed; right: 1rem; bottom: 1rem; display: flex; gap: 0.4rem; z-index: 55; }
+.sense-page-nav a { display: grid; place-items: center; width: 40px; height: 40px; border: 1px solid var(--border-subtle); border-radius: 50%; background: var(--bg); text-decoration: none; }
+.sense-page a:focus-visible, .sense-page button:focus-visible { outline: 2px solid #77c8d8; outline-offset: 4px; }
+@media (max-width: 900px) {
+  .sense-hero { grid-template-columns: 1fr; gap: 3rem; }
+  .sense-signal { width: min(100%, 460px); justify-self: center; }
+  .sense-signal > img { width: 160px; }
+  .sense-cta { align-items: start; flex-direction: column; gap: 1.5rem; }
+}
+@media (max-width: 680px) {
+  .sense-steps { grid-template-columns: 1fr; gap: 2rem; }
+  .sense-hero { padding-block: 3rem; }
+  .sense-page .studio-topbar-inner { padding-inline: 1rem; }
+  .sense-page .studio-topbar-brand { gap: 0.75rem; }
+  .sense-page .ls-footer-disclosure { padding-bottom: 5rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sense-page *, .sense-page *::before { scroll-behavior: auto; transition: none !important; }
+}

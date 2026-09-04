@@ -48,6 +48,8 @@ body.nfc-landing {
 
 .nfc-landing > main { max-width: none; padding: 75px 0 0; }
 
+.landing-brand { -webkit-tap-highlight-color: transparent; }
+
 .landing-brand,
 .footer-identity {
   display: inline-flex;

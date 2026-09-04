@@ -29,6 +29,9 @@ relevant sections instead of loading the complete file by default.
 - `studio/{es,en,it,el}/`: physical localized UNATOMO Studio pages; shared CSS
   and JavaScript provide the visual shell and behavior, while copy and SEO stay
   in each localized HTML page.
+- `sense/{es,en,it,el}/`: physical localized Sense pages for non-invasive machine
+  sensing. Uses the Studio visual shell, its prepared Sense logo and HTML footer
+  copy; `sense.js` handles disclosures only, without runtime translations.
 - `nfc/controlpanel/`: owner-only control panel UI. `panel.js` is the small
   entry/composition layer; `panelText.js`, `panelShared.js`,
   `panelSystemIntegrity.js`, `panelStatsBackup.js`, `panelLocalCards.js`,
